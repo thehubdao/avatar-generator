@@ -21,7 +21,7 @@ export default class Home extends Component<HomeProps, HomeState> {
           <link rel="icon" href="/favicon.ico"/>
         </Head>
 
-        <main className={styles.main}>
+        <main className={`${styles.main} text-red-500 font-bold bg-lime-400`}>
           <h1 className={styles.title}>
             Welcome to <a href="https://nextjs.org">Next.js!</a>
           </h1>
