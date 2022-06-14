@@ -8,12 +8,12 @@ export function GetBaseScene(): Scene {
 
 export function GetBaseCamera(): PerspectiveCamera {
   let camera = new PerspectiveCamera(
-    75,
+    90,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
   );
-  camera.position.z = 5;
+  camera.position.set(0, 5, 5);
   
   return camera;
 }
@@ -27,6 +27,7 @@ export function GetBaseRenderer(): WebGLRenderer {
 
 export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTMLCanvasElement) {
   let controls = new OrbitControls(camera, domElement);
+  controls.target.set(0, 4, 0);
+  
   return controls;
 }
-
