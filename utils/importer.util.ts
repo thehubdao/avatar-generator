@@ -45,7 +45,7 @@ async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
 
 export async function GetAssetsListByType(bodyPartType: BodyPartTypeEnum) {
   const jsonObject: BodyPartLocationApi[] = 
-    await fetch('https://res.cloudinary.com/freak/raw/upload/v1655180998/api.json')
+    await fetch('https://res.cloudinary.com/freak/raw/upload/v1655399752/api.json')
       .then(res => res.json());
   
   return jsonObject.filter(x => x.type === bodyPartType);
