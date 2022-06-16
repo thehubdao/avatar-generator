@@ -1,7 +1,7 @@
 ﻿import {Component} from "react";
 import {AnimationMixer, Clock, PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
 import {GetBaseCamera, GetBaseCameraControls, GetBaseRenderer, GetBaseScene} from "../utils/scene.util";
-import {GetTestLights} from "../utils/test-scene.util";
+import {GetTestAxis, GetTestLights} from "../utils/test-scene.util";
 import {GetAssetsListByType, ImporterUtil} from "../utils/importer.util";
 import Head from "next/head";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
@@ -10,6 +10,7 @@ import {BodyPartTypeEnum} from "../enums/common.enum";
 import {BodyPartLocationApi} from "../interfaces/api.interface";
 import {GetOptions} from "../utils/common.util";
 import {ReplaceModelPartOnly} from "../utils/model.util";
+import {ExporterUtil} from "../utils/exporter.util";
 
 interface ExampleState {
   rotateCamera: boolean;
@@ -92,7 +93,7 @@ export default class Example extends Component<undefined, ExampleState> {
       this.scene.add(l);
     }
 
-    this.baseModel = await ImporterUtil.LoadGltfModel('/resources/human-03-anim.glb');
+    this.baseModel = await ImporterUtil.LoadGltfModel('/resources/human-03.glb');
 
     this.mixer = new AnimationMixer(this.baseModel.scene);
 
@@ -175,6 +176,10 @@ export default class Example extends Component<undefined, ExampleState> {
     await ReplaceModelPartOnly(this.baseModel!, replaceModel, this.state.selectedPart);
   }
   
+  async exportModel() {
+    await ExporterUtil.ExportModelGlb(this.baseModel!);
+  }
+  
   optionList() {
     return this.state.selectList.map((x) => {
       const _value = BodyPartTypeEnum[x as any];
@@ -235,6 +240,15 @@ export default class Example extends Component<undefined, ExampleState> {
           </div>
           <div className="mb-2 bg-slate-400">
             {this.partList()}
+          </div>
+          <div className="mb-2 bg-slate-400">
+            <div className="flex justify-center py-2">
+              <button
+                className="font-bold py-2 px-4 mx-2 w-full rounded bg-emerald-600 text-white"
+                onClick={() => this.exportModel()}>
+                Export Model
+              </button>
+            </div>
           </div>
         </div>
         <div>
