@@ -1,6 +1,7 @@
 ﻿export enum BodyPartTypeEnum {
-  Chest = 1,
-  Feet = 2,
-  Head = 3,
-  Legs = 4,
+  Head = 1,
+  Chest = 2,
+  Hands = 3,
+  Feet = 4,
+  Legs = 5,
 }

@@ -89,7 +89,7 @@ export default class Example extends Component<undefined, ExampleState> {
       this.scene.add(l);
     }
 
-    this.baseModel = await ImporterUtil.LoadGltfModel('/resources/human-03-anim.glb');
+    this.baseModel = await ImporterUtil.LoadGltfModel('/resources/001_BASE_MESH.glb');
 
     this.mixer = new AnimationMixer(this.baseModel.scene);
 
