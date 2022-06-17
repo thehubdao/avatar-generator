@@ -6,6 +6,12 @@ export function GetBaseScene(): Scene {
   return scene;
 }
 
+export function FrustumCulledFalse(scene: Scene) {
+  scene.traverse((object) => {
+    object.frustumCulled = false;
+  });
+}
+
 export function GetBaseCamera(): PerspectiveCamera {
   let camera = new PerspectiveCamera(
     90,

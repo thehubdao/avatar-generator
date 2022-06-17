@@ -1,6 +1,12 @@
 ﻿import {Component} from "react";
 import {AnimationMixer, Clock, PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
-import {GetBaseCamera, GetBaseCameraControls, GetBaseRenderer, GetBaseScene} from "../utils/scene.util";
+import {
+  FrustumCulledFalse,
+  GetBaseCamera,
+  GetBaseCameraControls,
+  GetBaseRenderer,
+  GetBaseScene
+} from "../utils/scene.util";
 import {GetTestAxis, GetTestLights} from "../utils/test-scene.util";
 import {GetAssetsListByType, ImporterUtil} from "../utils/importer.util";
 import Head from "next/head";
@@ -96,8 +102,7 @@ export default class Example extends Component<undefined, ExampleState> {
     }
 
     this.baseModel = await ImporterUtil.FetchGltfModel(baseModelUrl);
-      
-
+    
     this.mixer = new AnimationMixer(this.baseModel.scene);
 
     this.baseModel.animations.forEach((clip) => {
@@ -111,6 +116,8 @@ export default class Example extends Component<undefined, ExampleState> {
     this.windowHeight = window.innerHeight;
 
     window.addEventListener( 'resize', this.onWindowResize, false );
+    
+    FrustumCulledFalse(this.scene);
 
     this.Animate();
   }
@@ -183,8 +190,6 @@ export default class Example extends Component<undefined, ExampleState> {
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });
     }
-    console.log(this.state.savedModels);
-    console.log(replaceModel);
     
     await ReplaceModelPartOnly(this.baseModel!, replaceModel, this.state.selectedPart);
   }
