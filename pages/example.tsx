@@ -11,6 +11,7 @@ import {BodyPartLocationApi} from "../interfaces/api.interface";
 import {GetOptions} from "../utils/common.util";
 import {ReplaceModelPartOnly} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
+import {baseModelUrl} from "../utils/globals.util";
 
 interface ExampleState {
   rotateCamera: boolean;
@@ -19,6 +20,7 @@ interface ExampleState {
   partList: BodyPartLocationApi[];
   selectList: string[];
   cameraPos: Vector3;
+  cameraLookAt: Vector3;
   savedModels: Record<number, GLTF>;
 }
 
@@ -48,7 +50,8 @@ export default class Example extends Component<undefined, ExampleState> {
       selectedPart: BodyPartTypeEnum.Chest,
       partList: [],
       selectList: [],
-      cameraPos: new Vector3(), 
+      cameraPos: new Vector3(),
+      cameraLookAt: new Vector3(),
       savedModels: {},
     };
   }
@@ -79,6 +82,9 @@ export default class Example extends Component<undefined, ExampleState> {
 
     // camera controls
     this.controls = GetBaseCameraControls(this.camera, this.renderer.domElement);
+    this.setState({
+      cameraLookAt: this.controls.target.clone()
+    });
 
     // Add test assets
     // this.scene.add(GetTestCube());
@@ -89,7 +95,8 @@ export default class Example extends Component<undefined, ExampleState> {
       this.scene.add(l);
     }
 
-    this.baseModel = await ImporterUtil.LoadGltfModel('/resources/001_BASE_MESH.glb');
+    this.baseModel = await ImporterUtil.FetchGltfModel(baseModelUrl);
+      
 
     this.mixer = new AnimationMixer(this.baseModel.scene);
 
@@ -147,6 +154,10 @@ export default class Example extends Component<undefined, ExampleState> {
     this.cameraTargetPosition = this.state.cameraPos.clone();
   }
   
+  onClickChangeLookAtPosition = () => {
+    this.controls!.target = this.state.cameraLookAt.clone();
+  }
+  
   updateCameraAutoRotate = (checked: boolean) => {
     this.setState({ rotateCamera: checked });
     this.controls!.autoRotate = checked;
@@ -172,6 +183,8 @@ export default class Example extends Component<undefined, ExampleState> {
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });
     }
+    console.log(this.state.savedModels);
+    console.log(replaceModel);
     
     await ReplaceModelPartOnly(this.baseModel!, replaceModel, this.state.selectedPart);
   }
@@ -207,13 +220,13 @@ export default class Example extends Component<undefined, ExampleState> {
         <Head>
           <title>ThreeJs Example</title>
         </Head>
-        <div className="fixed left-0 top-0 w-2/6 h-screen bg-slate-600 bg-opacity-50 p-2">
+        <div className="fixed left-0 top-0 w-1/6 h-screen bg-slate-600 bg-opacity-50 p-2">
           <div className="mb-2 flex bg-slate-400">
             <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.rotateCamera} onChange={e => this.updateCameraAutoRotate(e.target.checked)} />
             <p>Rotate camera</p>
           </div>
           <div className="mb-2 flex bg-slate-400">
-            <input className="m+t-1.5 mx-2" type="checkbox" checked={this.state.doAnimation} onChange={e => this.updateDoAnimation(e.target.checked)} />
+            <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.doAnimation} onChange={e => this.updateDoAnimation(e.target.checked)} />
             <p>Do Animation</p>
           </div>
           <div className="mb-2 w-full bg-slate-400">
@@ -233,6 +246,25 @@ export default class Example extends Component<undefined, ExampleState> {
             </div>
             <div className="flex justify-center pb-2">
               <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white" onClick={() => this.onClickChangeCamPosition()}>Change CamPosition</button>
+            </div>
+          </div>
+          <div className="mb-2 w-full bg-slate-400">
+            <div className="flex pt-2 mb-2 justify-evenly">
+              <div className="flex justify-center">
+                <p>X:</p>
+                <input className="ml-1 w-1/3 rounded pl-1" type="number" value={this.state.cameraLookAt.x} onChange={(e) => this.setState({cameraLookAt: new Vector3(Number(e.target.value), this.state.cameraLookAt.y, this.state.cameraLookAt.z)})} />
+              </div>
+              <div className="flex justify-center">
+                <p>Y:</p>
+                <input className="ml-1 w-1/3 rounded pl-1" type="number" value={this.state.cameraLookAt.y} onChange={(e) => this.setState({cameraLookAt: new Vector3(this.state.cameraLookAt.x, Number(e.target.value), this.state.cameraLookAt.z)})} />
+              </div>
+              <div className="flex justify-center">
+                <p>Z:</p>
+                <input className="ml-1 w-1/3 rounded pl-1" type="number" value={this.state.cameraLookAt.z} onChange={(e) => this.setState({cameraLookAt: new Vector3(this.state.cameraLookAt.x, this.state.cameraLookAt.y, Number(e.target.value))})} />
+              </div>
+            </div>
+            <div className="flex justify-center pb-2">
+              <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white" onClick={() => this.onClickChangeLookAtPosition()}>Change CamLookAt</button>
             </div>
           </div>
           <div className="mb-2 bg-slate-400">

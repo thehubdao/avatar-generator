@@ -1,0 +1,2 @@
+﻿export const apiUrl = 'https://res.cloudinary.com/freak/raw/upload/v1655426849/api.json';
+export const baseModelUrl = 'https://res.cloudinary.com/freak/image/upload/v1655425836/001_BASE_MESH_m8c3vc.glb';

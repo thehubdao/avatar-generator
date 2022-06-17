@@ -1,6 +1,7 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {BodyPartTypeEnum} from "../enums/common.enum";
 import {BodyPartLocationApi} from "../interfaces/api.interface";
+import {apiUrl} from "./globals.util";
 
 export class ImporterUtil {
   private static gltfLoader: GLTFLoader;
@@ -45,7 +46,7 @@ async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
 
 export async function GetAssetsListByType(bodyPartType: BodyPartTypeEnum) {
   const jsonObject: BodyPartLocationApi[] = 
-    await fetch('https://res.cloudinary.com/freak/raw/upload/v1655399752/api.json')
+    await fetch(apiUrl)
       .then(res => res.json());
   
   return jsonObject.filter(x => x.type === bodyPartType);
