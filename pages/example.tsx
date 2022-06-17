@@ -274,7 +274,7 @@ export default class Example extends Component<undefined, ExampleState> {
           </div>
           <div className="mb-2 bg-slate-400">
             <div className="m-2">
-              <select defaultValue={this.state.selectedPart} className="w-full my-2" onChange={(e) => this.onCategoryChange(Number(e.target.value))}>
+              <select value={this.state.selectedPart} className="w-full my-2" onChange={(e) => this.onCategoryChange(Number(e.target.value))}>
                 {this.optionList()}
               </select>
             </div>
