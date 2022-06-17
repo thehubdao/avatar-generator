@@ -14,7 +14,7 @@ export function FrustumCulledFalse(scene: Scene) {
 
 export function GetBaseCamera(): PerspectiveCamera {
   let camera = new PerspectiveCamera(
-    90,
+    50,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
