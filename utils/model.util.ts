@@ -19,7 +19,7 @@ export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partInd
 
 export async function ReplaceModelPartOnly(baseModel: GLTF, replaceModel: GLTF, partIndex: BodyPartTypeEnum) {
   // @ts-ignore
-  const chest = SkeletonUtils.clone(replaceModel.scene.children[0]) as Mesh;
+  const chest = SkeletonUtils.clone(replaceModel.scene.children[0].children[1]) as Mesh;
   const oldModel = baseModel.scene.children[0].children[partIndex] as SkinnedMesh;
   
   console.log('base', baseModel);
