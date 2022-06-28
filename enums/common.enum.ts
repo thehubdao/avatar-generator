@@ -5,3 +5,11 @@
   Legs = 4,
   Feet = 5,
 }
+
+export enum AccessoryPartTypeEnum {
+  Head = 'Head',
+  Face = 'Face',
+  LeftHand = 'LHand',
+  RightHand = 'RHand',
+  Hips = 'Hips',
+}

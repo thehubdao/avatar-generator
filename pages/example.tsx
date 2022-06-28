@@ -7,8 +7,8 @@ import {
   GetBaseRenderer,
   GetBaseScene
 } from "../utils/scene.util";
-import {GetTestAxis, GetTestLights} from "../utils/test-scene.util";
-import {GetAssetsListByType, ImporterUtil} from "../utils/importer.util";
+import {GetTestAxis, GetTestCube, GetTestLights} from "../utils/test-scene.util";
+import {GetAccessoryBones, GetAssetsListByType, ImporterUtil} from "../utils/importer.util";
 import Head from "next/head";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
@@ -18,6 +18,7 @@ import {GetOptions} from "../utils/common.util";
 import {ReplaceModelPartOnly} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
 import {baseModelUrl} from "../utils/globals.util";
+import {AccessoryInfoInterface} from "../interfaces/accessory-parts.interface";
 
 interface ExampleState {
   rotateCamera: boolean;
@@ -31,10 +32,11 @@ interface ExampleState {
 }
 
 export default class Example extends Component<undefined, ExampleState> {
-  mount: HTMLDivElement | null = null;
-  clock: Clock = new Clock();
+  mount: HTMLDivElement | null;
+  clock: Clock;
   
   scene?: Scene;
+  baseModel?: GLTF;
   camera?: PerspectiveCamera;
   renderer?: WebGLRenderer;
   mixer?: AnimationMixer;
@@ -43,7 +45,7 @@ export default class Example extends Component<undefined, ExampleState> {
   doCameraMovement: boolean = false;
   cameraTargetPosition?: Vector3;
   
-  baseModel?: GLTF;
+  accessoryBonesData?: Record<string, AccessoryInfoInterface>;
   
   tanFOV?: number;
   windowHeight?: number;
@@ -60,17 +62,25 @@ export default class Example extends Component<undefined, ExampleState> {
       cameraLookAt: new Vector3(),
       savedModels: {},
     };
+    
+    this.mount = null;
+    this.clock = new Clock();
   }
   
   async componentDidMount() {
     await this.avatarScene();
     await this.getPartList();
+    await this.getAccessoryBones();
   }
   
   async getPartList() {
     const _selectList = GetOptions(BodyPartTypeEnum);
     const _partList = await GetAssetsListByType(this.state.selectedPart); 
     this.setState({ partList: _partList, selectList: _selectList });
+  }
+  
+  async getAccessoryBones() {
+    this.accessoryBonesData = GetAccessoryBones(this.baseModel!.scene);
   }
   
   async avatarScene() {
@@ -102,6 +112,7 @@ export default class Example extends Component<undefined, ExampleState> {
     }
 
     this.baseModel = await ImporterUtil.FetchGltfModel(baseModelUrl);
+    console.log('base', this.baseModel);
     
     this.mixer = new AnimationMixer(this.baseModel.scene);
 

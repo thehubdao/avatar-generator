@@ -1,6 +1,7 @@
 import Head from 'next/head'
 import styles from './../styles/home.module.scss'
 import {Component} from "react";
+import Link from "next/link";
 
 export default class Home extends Component {  
   render() {
@@ -16,6 +17,7 @@ export default class Home extends Component {
           <h1 className={styles.title}>
             Welcome
           </h1>
+          <Link href={'/example'}>Go To Example</Link>
         </main>
       </div>
     );

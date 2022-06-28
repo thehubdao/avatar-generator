@@ -1,7 +1,9 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {BodyPartTypeEnum} from "../enums/common.enum";
 import {BodyPartLocationApi} from "../interfaces/api.interface";
-import {apiUrl} from "./globals.util";
+import {accessoryBones, apiUrl} from "./globals.util";
+import {Group} from "three";
+import {AccessoryInfoInterface} from "../interfaces/accessory-parts.interface";
 
 export class ImporterUtil {
   private static gltfLoader: GLTFLoader;
@@ -39,15 +41,25 @@ export class ImporterUtil {
 
 }
 
+export function GetAccessoryBones(baseModel: Group): Record<string, AccessoryInfoInterface> {
+  const bones = baseModel.children[0].children[0];
+  let result: Record<string, AccessoryInfoInterface> = {};
+  
+  bones.traverse((bone) => {
+    if(accessoryBones.some(x => x.boneName === bone.name)) {
+      const foundBone = accessoryBones.find(x => x.boneName === bone.name);
+      result[foundBone!.partType] = { bone: bone };
+    }
+  });
+  
+  return result;
+}
+
 async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
-  const fetchData = await fetch(url);
-  return fetchData.arrayBuffer();
+  return fetch(url).then(data => data.arrayBuffer());
 }
 
 export async function GetAssetsListByType(bodyPartType: BodyPartTypeEnum) {
-  const jsonObject: BodyPartLocationApi[] = 
-    await fetch(apiUrl)
-      .then(res => res.json());
-  
+  const jsonObject: BodyPartLocationApi[] = await fetch(apiUrl).then(res => res.json());
   return jsonObject.filter(x => x.type === bodyPartType);
 }

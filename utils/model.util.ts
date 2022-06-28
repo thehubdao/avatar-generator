@@ -1,14 +1,16 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {ImporterUtil} from "./importer.util";
-import {clone, getBones} from "three/examples/jsm/utils/SkeletonUtils";
-import {Mesh, SkinnedMesh} from "three";
-import {BodyPartTypeEnum} from "../enums/common.enum";
+import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
+import {Mesh, Object3D, SkinnedMesh} from "three";
+import {AccessoryPartTypeEnum, BodyPartTypeEnum} from "../enums/common.enum";
 
 export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partIndex: number) {
   const partModel = await ImporterUtil.LoadGltfModel(partUrl);
   
-  const chest = clone(partModel.scene.children[0].children[partIndex]) as SkinnedMesh;
-  const oldSkeleton = getBones((baseModel.scene.children[0].children[partIndex] as SkinnedMesh).skeleton);
+  // @ts-ignore
+  const chest = SkeletonUtils.clone(partModel.scene.children[0].children[partIndex]) as SkinnedMesh;
+  // @ts-ignore
+  const oldSkeleton = SkeletonUtils.getBones((baseModel.scene.children[0].children[partIndex] as SkinnedMesh).skeleton);
 
   chest.skeleton.bones = oldSkeleton;
 
@@ -16,7 +18,8 @@ export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partInd
 }
 
 export async function ReplaceModelPartOnly(baseModel: GLTF, replaceModel: GLTF, partIndex: BodyPartTypeEnum) {
-  const chest = clone(replaceModel.scene.children[0].children[1]) as Mesh;
+  // @ts-ignore
+  const chest = SkeletonUtils.clone(replaceModel.scene.children[0]) as Mesh;
   const oldModel = baseModel.scene.children[0].children[partIndex] as SkinnedMesh;
   
   console.log('base', baseModel);

@@ -1,7 +1,7 @@
 ﻿import {AxesHelper, BoxGeometry, DoubleSide, Mesh, MeshPhongMaterial, PointLight} from "three";
 
 export function GetTestCube(): Mesh {
-  let geometry = new BoxGeometry(2, 2, 2);
+  let geometry = new BoxGeometry(2, 16, 2);
   let material = new MeshPhongMaterial( {
     color: 0x156289,
     emissive: 0x072534,
@@ -10,7 +10,7 @@ export function GetTestCube(): Mesh {
   } );
 
   let cube = new Mesh(geometry, material);
-  cube.position.set(1, 1, 1);
+  cube.position.set(1, 8, 1);
   return cube;
 }
 
