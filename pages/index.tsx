@@ -3,7 +3,7 @@ import styles from './../styles/home.module.scss'
 import {Component} from "react";
 import Link from "next/link";
 
-export default class Home extends Component {  
+export default class Home extends Component {
   render() {
     return (
       <div className={styles.container}>
