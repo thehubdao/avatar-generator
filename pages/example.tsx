@@ -117,7 +117,7 @@ export default class Example extends Component<undefined, ExampleState> {
       this.scene.add(l);
     }
 
-    this.baseModel = await ImporterUtil.FetchGltfModel(baseModelPath);
+    this.baseModel = await ImporterUtil.FirebaseGltfModel(baseModelPath);
     console.log('base', this.baseModel);
     
     this.mixer = new AnimationMixer(this.baseModel.scene);

@@ -36,7 +36,11 @@ export class ImporterUtil {
   }
   
   static async FetchGltfModel(url: string): Promise<GLTF> {
-    //const arrayBuffer = await FetchArrayBuffer(url);
+    const arrayBuffer = await FetchArrayBuffer(url);
+    return this.parseAsync(arrayBuffer);
+  }
+
+  static async FirebaseGltfModel(url: string): Promise<GLTF> {
     const arrayBuffer = await FirebaseUtil.Instance().GetFile(url);
     return this.parseAsync(arrayBuffer);
   }
