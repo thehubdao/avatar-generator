@@ -1,9 +1,10 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {BodyPartTypeEnum} from "../enums/common.enum";
 import {BodyPartLocationApi} from "../interfaces/api.interface";
-import {accessoryBones, apiUrl} from "./globals.util";
+import {accessoryBones} from "./globals.util";
 import {Group} from "three";
 import {AccessoryInfoInterface} from "../interfaces/accessory-parts.interface";
+import {FirebaseUtil} from "./firebase.util";
 
 export class ImporterUtil {
   private static gltfLoader: GLTFLoader;
@@ -35,7 +36,8 @@ export class ImporterUtil {
   }
   
   static async FetchGltfModel(url: string): Promise<GLTF> {
-    const arrayBuffer = await FetchArrayBuffer(url);
+    //const arrayBuffer = await FetchArrayBuffer(url);
+    const arrayBuffer = await FirebaseUtil.Instance().GetFile(url);
     return this.parseAsync(arrayBuffer);
   }
 
@@ -59,7 +61,7 @@ async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
   return fetch(url).then(data => data.arrayBuffer());
 }
 
-export async function GetAssetsListByType(bodyPartType: BodyPartTypeEnum) {
-  const jsonObject: BodyPartLocationApi[] = await fetch(apiUrl).then(res => res.json());
-  return jsonObject.filter(x => x.type === bodyPartType);
+export async function GetAssetsListByCampaign(campaign?: string) {
+  const jsonObject: BodyPartLocationApi[] = await fetch('api/getParts' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  return jsonObject;
 }

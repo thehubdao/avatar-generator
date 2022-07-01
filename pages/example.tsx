@@ -8,7 +8,7 @@ import {
   GetBaseScene
 } from "../utils/scene.util";
 import {GetTestAxis, GetTestCube, GetTestLights} from "../utils/test-scene.util";
-import {GetAccessoryBones, GetAssetsListByType, ImporterUtil} from "../utils/importer.util";
+import {GetAccessoryBones, GetAssetsListByCampaign, ImporterUtil} from "../utils/importer.util";
 import Head from "next/head";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
@@ -17,7 +17,7 @@ import {BodyPartLocationApi} from "../interfaces/api.interface";
 import {GetOptions} from "../utils/common.util";
 import {ReplaceModelPartOnly} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
-import {baseModelUrl} from "../utils/globals.util";
+import {baseModelPath} from "../utils/globals.util";
 import {AccessoryInfoInterface} from "../interfaces/accessory-parts.interface";
 
 interface ExampleState {
@@ -28,7 +28,7 @@ interface ExampleState {
   selectList: string[];
   cameraPos: Vector3;
   cameraLookAt: Vector3;
-  savedModels: Record<number, GLTF>;
+  savedModels: Record<string, GLTF>;
 }
 
 export default class Example extends Component<undefined, ExampleState> {
@@ -46,6 +46,7 @@ export default class Example extends Component<undefined, ExampleState> {
   cameraTargetPosition?: Vector3;
   
   accessoryBonesData?: Record<string, AccessoryInfoInterface>;
+  partList?: BodyPartLocationApi[];
   
   tanFOV?: number;
   windowHeight?: number;
@@ -75,8 +76,13 @@ export default class Example extends Component<undefined, ExampleState> {
   
   async getPartList() {
     const _selectList = GetOptions(BodyPartTypeEnum);
-    const _partList = await GetAssetsListByType(this.state.selectedPart); 
+    this.partList = await GetAssetsListByCampaign();
+    const _partList = this.filterListByBodyPart(this.state.selectedPart);
     this.setState({ partList: _partList, selectList: _selectList });
+  }
+
+  filterListByBodyPart(bodyPartType: BodyPartTypeEnum) {
+    return this.partList!.filter(x => x.type === bodyPartType);
   }
   
   async getAccessoryBones() {
@@ -111,7 +117,7 @@ export default class Example extends Component<undefined, ExampleState> {
       this.scene.add(l);
     }
 
-    this.baseModel = await ImporterUtil.FetchGltfModel(baseModelUrl);
+    this.baseModel = await ImporterUtil.FetchGltfModel(baseModelPath);
     console.log('base', this.baseModel);
     
     this.mixer = new AnimationMixer(this.baseModel.scene);
@@ -187,11 +193,11 @@ export default class Example extends Component<undefined, ExampleState> {
   
   async onCategoryChange(value: number) {
     const enumValue = value as BodyPartTypeEnum;
-    const _partList = await GetAssetsListByType(enumValue);
+    const _partList = this.filterListByBodyPart(enumValue);
     this.setState({ partList: _partList, selectedPart: enumValue });
   }
   
-  async changePart(id: number, partUrl: string) {
+  async changePart(id: string, partUrl: string) {
     let replaceModel: GLTF;
     if(this.state.savedModels[id]) {
       replaceModel = this.state.savedModels[id];
@@ -216,7 +222,7 @@ export default class Example extends Component<undefined, ExampleState> {
     });
   }
   
-  partList() {
+  partSelectList() {
     return this.state.partList.map((x) => {
       return (
           <div className="flex justify-center py-2" key={x.id}>
@@ -291,7 +297,7 @@ export default class Example extends Component<undefined, ExampleState> {
             </div>
           </div>
           <div className="mb-2 bg-slate-400">
-            {this.partList()}
+            {this.partSelectList()}
           </div>
           <div className="mb-2 bg-slate-400">
             <div className="flex justify-center py-2">

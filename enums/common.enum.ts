@@ -13,3 +13,11 @@ export enum AccessoryPartTypeEnum {
   RightHand = 'RHand',
   Hips = 'Hips',
 }
+
+export enum FirestoreValues {
+  Parts = 'parts',
+  Accessories = 'accessories',
+  Campaign = 'campaign',
+  Type = 'type',
+  Name = 'name',
+}
