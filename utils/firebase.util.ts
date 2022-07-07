@@ -1,7 +1,7 @@
 import {FirebaseApp, FirebaseOptions, initializeApp} from "@firebase/app";
 import {addDoc, collection, Firestore, getDocs, getFirestore, query, QueryConstraint, where, orderBy} from "@firebase/firestore";
 import {FirestoreValues} from "../enums/common.enum";
-import {BodyPartLocationApi} from "../interfaces/api.interface";
+import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {FirebaseStorage, getBlob, getStorage, getStream, ref} from "@firebase/storage";
 import {baseModelPath} from "./globals.util";
 
@@ -65,13 +65,35 @@ export class FirebaseUtil {
     
     constraints.push(orderBy(FirestoreValues.Name, "asc"));
     
-    const myQuery = query(collection(this.DB(), FirestoreValues.Parts), ... constraints);
+    const myQuery = query(collection(this.DB(), FirestoreValues.Parts), ...constraints);
     const querySnapshot = await getDocs(myQuery);
     
     querySnapshot.forEach(snap => {
       result.push({ ...snap.data() as BodyPartLocationApi, id: snap.id });
     })
     
+    return result;
+  }
+
+  public async GetAccessories(campaign?: string, type?: string) {
+    const constraints: QueryConstraint[] = [];
+    const result: AccLocationApi[] = [];
+
+    if(campaign)
+      constraints.push(where(FirestoreValues.Campaign, "array-contains", campaign));
+
+    if(type)
+      constraints.push(where(FirestoreValues.Type, "==", type));
+
+    constraints.push(orderBy(FirestoreValues.Name, "asc"));
+
+    const myQuery = query(collection(this.DB(), FirestoreValues.Accessories), ...constraints);
+    const querySnapshot = await getDocs(myQuery);
+
+    querySnapshot.forEach(snap => {
+      result.push({ ...snap.data() as AccLocationApi, id: snap.id });
+    })
+
     return result;
   }
 

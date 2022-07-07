@@ -7,25 +7,34 @@ import {
   GetBaseRenderer,
   GetBaseScene
 } from "../utils/scene.util";
-import {GetTestAxis, GetTestCube, GetTestLights} from "../utils/test-scene.util";
-import {GetAccessoryBones, GetAssetsListByCampaign, ImporterUtil} from "../utils/importer.util";
+import {GetTestLights} from "../utils/test-scene.util";
+import {
+  GetAccessoryBones,
+  GetAccessoryListByCampaign,
+  GetAssetsListByCampaign,
+  ImporterUtil
+} from "../utils/importer.util";
 import Head from "next/head";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {BodyPartTypeEnum} from "../enums/common.enum";
-import {BodyPartLocationApi} from "../interfaces/api.interface";
+import {AccessoryPartTypeEnum, BodyPartTypeEnum} from "../enums/common.enum";
+import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {GetOptions} from "../utils/common.util";
-import {ReplaceModelPartOnly} from "../utils/model.util";
+import {ReplaceModelAccessory, ReplaceModelPartOnly} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
 import {baseModelPath} from "../utils/globals.util";
 import {AccessoryInfoInterface} from "../interfaces/accessory-parts.interface";
+import {GetServerSideProps, GetStaticPaths } from "next";
 
 interface ExampleState {
   rotateCamera: boolean;
   doAnimation: boolean;
   selectedPart: BodyPartTypeEnum;
+  selectedAcc: AccessoryPartTypeEnum;
   partList: BodyPartLocationApi[];
+  accessoryList: AccLocationApi[];
   selectList: string[];
+  aSelectList: string[];
   cameraPos: Vector3;
   cameraLookAt: Vector3;
   savedModels: Record<string, GLTF>;
@@ -47,6 +56,7 @@ export default class Example extends Component<undefined, ExampleState> {
   
   accessoryBonesData?: Record<string, AccessoryInfoInterface>;
   partList?: BodyPartLocationApi[];
+  accessoryList?: AccLocationApi[];
   
   tanFOV?: number;
   windowHeight?: number;
@@ -57,8 +67,11 @@ export default class Example extends Component<undefined, ExampleState> {
       doAnimation: false,
       rotateCamera: false,
       selectedPart: BodyPartTypeEnum.Chest,
+      selectedAcc: AccessoryPartTypeEnum.Head,
       partList: [],
+      accessoryList: [],
       selectList: [],
+      aSelectList: [],
       cameraPos: new Vector3(),
       cameraLookAt: new Vector3(),
       savedModels: {},
@@ -71,6 +84,7 @@ export default class Example extends Component<undefined, ExampleState> {
   async componentDidMount() {
     await this.avatarScene();
     await this.getPartList();
+    await this.getAccessoryList();
     await this.getAccessoryBones();
   }
   
@@ -81,8 +95,19 @@ export default class Example extends Component<undefined, ExampleState> {
     this.setState({ partList: _partList, selectList: _selectList });
   }
 
+  async getAccessoryList() {
+    const _selectList = GetOptions(AccessoryPartTypeEnum);
+    this.accessoryList = await GetAccessoryListByCampaign();
+    const _accessoryList = this.filterListByAccessory(this.state.selectedAcc);
+    this.setState({ accessoryList: _accessoryList, aSelectList: _selectList });
+  }
+
   filterListByBodyPart(bodyPartType: BodyPartTypeEnum) {
     return this.partList!.filter(x => x.type === bodyPartType);
+  }
+
+  filterListByAccessory(accessoryPartType: AccessoryPartTypeEnum) {
+    return this.accessoryList!.filter(x => x.type === accessoryPartType);
   }
   
   async getAccessoryBones() {
@@ -197,6 +222,12 @@ export default class Example extends Component<undefined, ExampleState> {
     this.setState({ partList: _partList, selectedPart: enumValue });
   }
   
+  async onAccessoryChange(value: string) {
+    const enumValue = value as AccessoryPartTypeEnum;
+    const _accessoryList = this.filterListByAccessory(enumValue);
+    this.setState({ accessoryList: _accessoryList, selectedAcc: enumValue });
+  }
+  
   async changePart(id: string, partUrl: string) {
     let replaceModel: GLTF;
     if(this.state.savedModels[id]) {
@@ -210,6 +241,20 @@ export default class Example extends Component<undefined, ExampleState> {
     
     await ReplaceModelPartOnly(this.baseModel!, replaceModel, this.state.selectedPart);
   }
+
+  async changeAccessory(id: string, path: string) {
+    let replaceModel: GLTF;
+    if(this.state.savedModels[id]) {
+      replaceModel = this.state.savedModels[id];
+    } else {
+      replaceModel = await ImporterUtil.FirebaseGltfModel(path);
+      const _savedModels = {...this.state.savedModels};
+      _savedModels[id] = replaceModel;
+      this.setState({ savedModels: _savedModels });
+    }
+
+    await ReplaceModelAccessory(this.accessoryBonesData![this.state.selectedAcc], replaceModel);
+  }
   
   async exportModel() {
     await ExporterUtil.ExportModelGlb(this.baseModel!);
@@ -218,6 +263,14 @@ export default class Example extends Component<undefined, ExampleState> {
   optionList() {
     return this.state.selectList.map((x) => {
       const _value = BodyPartTypeEnum[x as any];
+      return <option value={_value} key={_value}>{x}</option>
+    });
+  }
+
+  optionListAccessories() {
+    return this.state.aSelectList.map((x) => {
+      // @ts-ignore
+      const _value = AccessoryPartTypeEnum[x];
       return <option value={_value} key={_value}>{x}</option>
     });
   }
@@ -232,6 +285,20 @@ export default class Example extends Component<undefined, ExampleState> {
               {x.name}
             </button>
           </div>
+      );
+    });
+  }
+
+  accessorySelectList() {
+    return this.state.accessoryList.map((x) => {
+      return (
+        <div className="flex justify-center py-2" key={x.id}>
+          <button
+            className="font-bold py-2 px-4 mx-2 w-full rounded bg-orange-400 text-white"
+            onClick={() => this.changeAccessory(x.id, x.path)}>
+            {x.name}
+          </button>
+        </div>
       );
     });
   }
@@ -300,6 +367,16 @@ export default class Example extends Component<undefined, ExampleState> {
             {this.partSelectList()}
           </div>
           <div className="mb-2 bg-slate-400">
+            <div className="m-2">
+              <select value={this.state.selectedAcc} className="w-full my-2" onChange={(e) => this.onAccessoryChange(e.target.value)}>
+                {this.optionListAccessories()}
+              </select>
+            </div>
+          </div>
+          <div className="mb-2 bg-slate-400">
+            {this.accessorySelectList()}
+          </div>
+          <div className="mb-2 bg-slate-400">
             <div className="flex justify-center py-2">
               <button
                 className="font-bold py-2 px-4 mx-2 w-full rounded bg-emerald-600 text-white"
@@ -315,4 +392,13 @@ export default class Example extends Component<undefined, ExampleState> {
       </>
     );
   }
+}
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  // Get subdomain
+  return {
+    props: {
+      name: 'something'
+    }
+  };
 }

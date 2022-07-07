@@ -1,6 +1,6 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {BodyPartTypeEnum} from "../enums/common.enum";
-import {BodyPartLocationApi} from "../interfaces/api.interface";
+import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {accessoryBones} from "./globals.util";
 import {Group} from "three";
 import {AccessoryInfoInterface} from "../interfaces/accessory-parts.interface";
@@ -40,8 +40,8 @@ export class ImporterUtil {
     return this.parseAsync(arrayBuffer);
   }
 
-  static async FirebaseGltfModel(url: string): Promise<GLTF> {
-    const arrayBuffer = await FirebaseUtil.Instance().GetFile(url);
+  static async FirebaseGltfModel(path: string): Promise<GLTF> {
+    const arrayBuffer = await FirebaseUtil.Instance().GetFile(path);
     return this.parseAsync(arrayBuffer);
   }
 
@@ -53,8 +53,10 @@ export function GetAccessoryBones(baseModel: Group): Record<string, AccessoryInf
   
   bones.traverse((bone) => {
     if(accessoryBones.some(x => x.boneName === bone.name)) {
-      const foundBone = accessoryBones.find(x => x.boneName === bone.name);
-      result[foundBone!.partType] = { bone: bone };
+      const foundBone = accessoryBones.filter(x => x.boneName === bone.name);
+      foundBone.forEach(fb => {
+        result[fb.partType] = { bone: bone };
+      })
     }
   });
   
@@ -67,5 +69,10 @@ async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
 
 export async function GetAssetsListByCampaign(campaign?: string) {
   const jsonObject: BodyPartLocationApi[] = await fetch('api/getParts' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  return jsonObject;
+}
+
+export async function GetAccessoryListByCampaign(campaign?: string) {
+  const jsonObject: AccLocationApi[] = await fetch('api/getAccessories' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
