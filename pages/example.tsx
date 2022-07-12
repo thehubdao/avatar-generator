@@ -423,7 +423,13 @@ export default class Example extends Component<ExampleProps, ExampleState> {
 
 export const getServerSideProps: GetServerSideProps<ExampleProps> = async (context) => {
   // Get subdomain
-  const subdomain = context.req.headers.host?.split(".")[0];
+  let subdomain: string | undefined;
+  const { campaign } = context.query;
+  if(campaign)
+    subdomain = campaign as string;
+  else
+    subdomain = context.req.headers.host?.split(".")[0];
+  
   const campaigns = await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns) as string[];
   const isCampaign = campaigns.some(c => c === subdomain);
   
