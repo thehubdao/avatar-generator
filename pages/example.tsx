@@ -68,6 +68,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   
   tanFOV?: number;
   windowHeight?: number;
+  hasAnimation?: boolean;
   
   constructor(props: ExampleProps) {
     super(props);
@@ -163,9 +164,12 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.mixer = new AnimationMixer(this.baseModel.scene);
 
     this.baseModel.animations.forEach((clip) => {
-      if(this.mixer) this.mixer.clipAction(clip).play();
+      if(this.mixer) {
+        this.mixer.clipAction(clip).play();
+        this.hasAnimation = true;
+      }
     });
-
+    
     this.scene.add(this.baseModel.scene);
 
     // remember these initial values
@@ -328,10 +332,15 @@ export default class Example extends Component<ExampleProps, ExampleState> {
             <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.rotateCamera} onChange={e => this.updateCameraAutoRotate(e.target.checked)} />
             <p>Rotate camera</p>
           </div>
-          <div className="mb-2 flex bg-slate-400">
-            <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.doAnimation} onChange={e => this.updateDoAnimation(e.target.checked)} />
-            <p>Do Animation</p>
-          </div>
+          {
+            this.hasAnimation ?
+            <div className="mb-2 flex bg-slate-400">
+              <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.doAnimation}
+                     onChange={e => this.updateDoAnimation(e.target.checked)}/>
+              <p>Do Animation</p>
+            </div>
+            : ''
+          }
           <div className="mb-2 w-full bg-slate-400">
             <div className="flex pt-2 mb-2 justify-evenly">
               <div className="flex justify-center">
@@ -370,25 +379,35 @@ export default class Example extends Component<ExampleProps, ExampleState> {
               <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white" onClick={() => this.onClickChangeLookAtPosition()}>Change CamLookAt</button>
             </div>
           </div>
-          <div className="mb-2 bg-slate-400">
-            <div className="m-2">
-              <p className="font-bold text-purple-900">Feature</p>
-              <select value={this.state.selectedPart} className="w-full my-2" onChange={(e) => this.onCategoryChange(e.target.value)}>
-                {this.optionList()}
-              </select>
+          {
+            this.partList && this.partList.length > 0 ?
+            <div className="mb-2 bg-slate-400">
+              <div className="m-2">
+                <p className="font-bold text-purple-900">Feature</p>
+                <select value={this.state.selectedPart} className="w-full my-2"
+                        onChange={(e) => this.onCategoryChange(e.target.value)}>
+                  {this.optionList()}
+                </select>
+              </div>
             </div>
-          </div>
+            : ''
+          }
           <div className="mb-2 bg-slate-400">
             {this.partSelectList()}
           </div>
-          <div className="mb-2 bg-slate-400">
-            <div className="m-2">
-              <p className="font-bold text-cyan-900">Accessories</p>
-              <select value={this.state.selectedAcc} className="w-full my-2" onChange={(e) => this.onAccessoryChange(e.target.value)}>
-                {this.optionListAccessories()}
-              </select>
+          {
+            this.accessoryList && this.accessoryList?.length > 0 ?
+            <div className="mb-2 bg-slate-400">
+              <div className="m-2">
+                <p className="font-bold text-cyan-900">Accessories</p>
+                <select value={this.state.selectedAcc} className="w-full my-2"
+                        onChange={(e) => this.onAccessoryChange(e.target.value)}>
+                  {this.optionListAccessories()}
+                </select>
+              </div>
             </div>
-          </div>
+            : ''
+          }
           <div className="mb-2 bg-slate-400">
             {this.accessorySelectList()}
           </div>
