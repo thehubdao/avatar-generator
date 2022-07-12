@@ -1,5 +1,5 @@
 ﻿import {Component} from "react";
-import {AnimationMixer, Clock, PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
+import {AnimationMixer, Clock, PerspectiveCamera, Scene, Vector3, WebGLInfo, WebGLRenderer} from "three";
 import {
   FrustumCulledFalse,
   GetBaseCamera,
@@ -11,36 +11,43 @@ import {GetTestLights} from "../utils/test-scene.util";
 import {
   GetAccessoryBones,
   GetAccessoryListByCampaign,
-  GetAssetsListByCampaign,
+  GetAssetsListByCampaign, GetPartsData,
   ImporterUtil
 } from "../utils/importer.util";
 import Head from "next/head";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {AccessoryPartTypeEnum, BodyPartTypeEnum} from "../enums/common.enum";
+import {FirestoreParameters} from "../enums/common.enum";
 import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
-import {GetOptions} from "../utils/common.util";
 import {ReplaceModelAccessory, ReplaceModelPartOnly} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
-import {baseModelPath} from "../utils/globals.util";
-import {AccessoryInfoInterface} from "../interfaces/accessory-parts.interface";
-import {GetServerSideProps, GetStaticPaths } from "next";
+import {GetServerSideProps} from "next";
+import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
+import {FirebaseUtil} from "../utils/firebase.util";
+
+interface ExampleProps {
+  campaign?: string | null;
+  baseMeshPath: string;
+  selectListBodyParts: BasicData[];
+  selectListAccessories: BasicData[];
+}
 
 interface ExampleState {
   rotateCamera: boolean;
   doAnimation: boolean;
-  selectedPart: BodyPartTypeEnum;
-  selectedAcc: AccessoryPartTypeEnum;
+  selectedPart: string;
+  selectedAcc: string;
   partList: BodyPartLocationApi[];
   accessoryList: AccLocationApi[];
-  selectList: string[];
-  aSelectList: string[];
+  selectList: BasicData[];
+  aSelectList: BasicData[];
   cameraPos: Vector3;
   cameraLookAt: Vector3;
   savedModels: Record<string, GLTF>;
+  logs?: WebGLInfo;
 }
 
-export default class Example extends Component<undefined, ExampleState> {
+export default class Example extends Component<ExampleProps, ExampleState> {
   mount: HTMLDivElement | null;
   clock: Clock;
   
@@ -55,23 +62,24 @@ export default class Example extends Component<undefined, ExampleState> {
   cameraTargetPosition?: Vector3;
   
   accessoryBonesData?: Record<string, AccessoryInfoInterface>;
+  partListData?: Record<string, PartInfoInterface>;
   partList?: BodyPartLocationApi[];
   accessoryList?: AccLocationApi[];
   
   tanFOV?: number;
   windowHeight?: number;
   
-  constructor() {
-    super(undefined);
+  constructor(props: ExampleProps) {
+    super(props);
     this.state = {
       doAnimation: false,
       rotateCamera: false,
-      selectedPart: BodyPartTypeEnum.Chest,
-      selectedAcc: AccessoryPartTypeEnum.Head,
+      selectedPart: props.selectListBodyParts[0].id,
+      selectedAcc: props.selectListAccessories[0].id,
       partList: [],
       accessoryList: [],
-      selectList: [],
-      aSelectList: [],
+      selectList: props.selectListBodyParts,
+      aSelectList: props.selectListAccessories,
       cameraPos: new Vector3(),
       cameraLookAt: new Vector3(),
       savedModels: {},
@@ -86,32 +94,39 @@ export default class Example extends Component<undefined, ExampleState> {
     await this.getPartList();
     await this.getAccessoryList();
     await this.getAccessoryBones();
+    await this.getPartsData();
   }
   
   async getPartList() {
-    const _selectList = GetOptions(BodyPartTypeEnum);
-    this.partList = await GetAssetsListByCampaign();
+    this.partList = await GetAssetsListByCampaign(this.props.campaign);
     const _partList = this.filterListByBodyPart(this.state.selectedPart);
-    this.setState({ partList: _partList, selectList: _selectList });
+    // console.log('result', this.partList);
+    this.setState({ partList: _partList });
   }
 
   async getAccessoryList() {
-    const _selectList = GetOptions(AccessoryPartTypeEnum);
-    this.accessoryList = await GetAccessoryListByCampaign();
+    this.accessoryList = await GetAccessoryListByCampaign(this.props.campaign);
     const _accessoryList = this.filterListByAccessory(this.state.selectedAcc);
-    this.setState({ accessoryList: _accessoryList, aSelectList: _selectList });
+    this.setState({ accessoryList: _accessoryList });
   }
 
-  filterListByBodyPart(bodyPartType: BodyPartTypeEnum) {
+  filterListByBodyPart(bodyPartType: string) {
+    // console.log('input', this.partList);
+    // console.log('filterBy', bodyPartType);
     return this.partList!.filter(x => x.type === bodyPartType);
   }
 
-  filterListByAccessory(accessoryPartType: AccessoryPartTypeEnum) {
+  filterListByAccessory(accessoryPartType: string) {
     return this.accessoryList!.filter(x => x.type === accessoryPartType);
   }
   
+  async getPartsData() {
+    this.partListData = GetPartsData(this.baseModel!.scene, this.state.selectList);
+    console.log(this.partListData);
+  }
+  
   async getAccessoryBones() {
-    this.accessoryBonesData = GetAccessoryBones(this.baseModel!.scene);
+    this.accessoryBonesData = GetAccessoryBones(this.baseModel!.scene, this.state.aSelectList);
   }
   
   async avatarScene() {
@@ -142,7 +157,7 @@ export default class Example extends Component<undefined, ExampleState> {
       this.scene.add(l);
     }
 
-    this.baseModel = await ImporterUtil.FirebaseGltfModel(baseModelPath);
+    this.baseModel = await ImporterUtil.FirebaseGltfModel(this.props.baseMeshPath);
     console.log('base', this.baseModel);
     
     this.mixer = new AnimationMixer(this.baseModel.scene);
@@ -194,6 +209,8 @@ export default class Example extends Component<undefined, ExampleState> {
     if(this.doCameraMovement)
       this.camera!.position.lerp(this.cameraTargetPosition!, delta);
 
+    this.setState({ logs: this.renderer!.info})
+    
     this.renderer!.render(this.scene!, this.camera!);
   }
   
@@ -216,30 +233,30 @@ export default class Example extends Component<undefined, ExampleState> {
     this.setState({ doAnimation: checked });
   }
   
-  async onCategoryChange(value: number) {
-    const enumValue = value as BodyPartTypeEnum;
-    const _partList = this.filterListByBodyPart(enumValue);
-    this.setState({ partList: _partList, selectedPart: enumValue });
+  async onCategoryChange(value: string) {
+    const _partList = this.filterListByBodyPart(value);
+    this.setState({ partList: _partList, selectedPart: value });
   }
   
   async onAccessoryChange(value: string) {
-    const enumValue = value as AccessoryPartTypeEnum;
-    const _accessoryList = this.filterListByAccessory(enumValue);
-    this.setState({ accessoryList: _accessoryList, selectedAcc: enumValue });
+    const _accessoryList = this.filterListByAccessory(value);
+    this.setState({ accessoryList: _accessoryList, selectedAcc: value });
   }
   
-  async changePart(id: string, partUrl: string) {
+  async changePart(id: string, partPath: string) {
     let replaceModel: GLTF;
     if(this.state.savedModels[id]) {
       replaceModel = this.state.savedModels[id];
     } else {
-      replaceModel = await ImporterUtil.FetchGltfModel(partUrl);
+      replaceModel = await ImporterUtil.FirebaseGltfModel(partPath);
       const _savedModels = {...this.state.savedModels};
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });
     }
     
-    await ReplaceModelPartOnly(this.baseModel!, replaceModel, this.state.selectedPart);
+    await ReplaceModelPartOnly(this.baseModel!.scene.children[0], replaceModel, this.partListData![this.state.selectedPart], this.state.selectList.find(sl => sl.id === this.state.selectedPart));
+    await this.getPartsData();
+    FrustumCulledFalse(this.scene!);
   }
 
   async changeAccessory(id: string, path: string) {
@@ -262,16 +279,13 @@ export default class Example extends Component<undefined, ExampleState> {
   
   optionList() {
     return this.state.selectList.map((x) => {
-      const _value = BodyPartTypeEnum[x as any];
-      return <option value={_value} key={_value}>{x}</option>
+      return <option value={x.id} key={x.id}>{x.id}</option>
     });
   }
 
   optionListAccessories() {
     return this.state.aSelectList.map((x) => {
-      // @ts-ignore
-      const _value = AccessoryPartTypeEnum[x];
-      return <option value={_value} key={_value}>{x}</option>
+      return <option value={x.id} key={x.id}>{x.id}</option>
     });
   }
   
@@ -281,7 +295,7 @@ export default class Example extends Component<undefined, ExampleState> {
           <div className="flex justify-center py-2" key={x.id}>
             <button
               className="font-bold py-2 px-4 mx-2 w-full rounded bg-orange-400 text-white"
-              onClick={() => this.changePart(x.id, x.url)}>
+              onClick={() => this.changePart(x.id, x.path)}>
               {x.name}
             </button>
           </div>
@@ -358,7 +372,8 @@ export default class Example extends Component<undefined, ExampleState> {
           </div>
           <div className="mb-2 bg-slate-400">
             <div className="m-2">
-              <select value={this.state.selectedPart} className="w-full my-2" onChange={(e) => this.onCategoryChange(Number(e.target.value))}>
+              <p className="font-bold text-purple-900">Feature</p>
+              <select value={this.state.selectedPart} className="w-full my-2" onChange={(e) => this.onCategoryChange(e.target.value)}>
                 {this.optionList()}
               </select>
             </div>
@@ -368,6 +383,7 @@ export default class Example extends Component<undefined, ExampleState> {
           </div>
           <div className="mb-2 bg-slate-400">
             <div className="m-2">
+              <p className="font-bold text-cyan-900">Accessories</p>
               <select value={this.state.selectedAcc} className="w-full my-2" onChange={(e) => this.onAccessoryChange(e.target.value)}>
                 {this.optionListAccessories()}
               </select>
@@ -386,6 +402,17 @@ export default class Example extends Component<undefined, ExampleState> {
             </div>
           </div>
         </div>
+        <div className="fixed right-0 top-0 w-1/6 bg-slate-600 bg-opacity-50 p-2">
+          <p className="text-white">Logs</p>
+          { this.state.logs ?
+            <>
+              <p className="text-white">Scene polycount: <span className="text-yellow-300">{this.state.logs.render.triangles}</span></p>
+              <p className="text-white">Active Drawcalls: <span className="text-yellow-300">{this.state.logs.render.calls}</span></p>
+              <p className="text-white">Textures in Memory: <span className="text-yellow-300">{this.state.logs.memory.textures}</span></p>
+              <p className="text-white">Geometries in Memory: <span className="text-yellow-300">{this.state.logs.memory.geometries}</span></p>
+            </>
+            : ''}
+        </div>
         <div>
           <div ref={ref => this.mount = ref} />
         </div>
@@ -394,11 +421,35 @@ export default class Example extends Component<undefined, ExampleState> {
   }
 }
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps<ExampleProps> = async (context) => {
   // Get subdomain
+  const subdomain = context.req.headers.host?.split(".")[0];
+  const campaigns = await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns) as string[];
+  const isCampaign = campaigns.some(c => c === subdomain);
+  
+  let _baseMeshPath: string;
+  let _selectListBodyParts: BasicData[];
+  let _selectListAccessories: BasicData[];
+  
+  if(isCampaign) {
+    _baseMeshPath = `base_mesh/${subdomain}.glb`;
+    const result = await FirebaseUtil.Instance().GetParameters<BasicData[]>(subdomain!, `${subdomain!}Accessories`) as BasicData[][];
+    _selectListBodyParts = result[0];
+    _selectListAccessories = result[1];
+  }
+  else {
+    _baseMeshPath = 'base_mesh/base.glb';
+    const result = await FirebaseUtil.Instance().GetParameters<BasicData[]>('base', 'baseAccessories') as BasicData[][];
+    _selectListBodyParts = result[0];
+    _selectListAccessories = result[1];
+  }
+  
   return {
     props: {
-      name: 'something'
+      campaign: isCampaign ? subdomain : null,
+      baseMeshPath: _baseMeshPath,
+      selectListBodyParts: _selectListBodyParts,
+      selectListAccessories: _selectListAccessories,
     }
   };
 }

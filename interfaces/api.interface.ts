@@ -1,10 +1,8 @@
-﻿import {AccessoryPartTypeEnum, BodyPartTypeEnum} from "../enums/common.enum";
-
-export interface BodyPartLocationApi {
+﻿export interface BodyPartLocationApi {
   id: string;
   name: string;
-  type: BodyPartTypeEnum;
-  url: string;
+  type: string;
+  path: string;
   thumb: string;
   campaign: string[];
 }
@@ -12,7 +10,7 @@ export interface BodyPartLocationApi {
 export interface AccLocationApi {
   id: string;
   name: string;
-  type: AccessoryPartTypeEnum;
+  type: string;
   path: string;
   thumb: string;
   campaign: string[];

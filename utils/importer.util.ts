@@ -1,10 +1,8 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
-import {BodyPartTypeEnum} from "../enums/common.enum";
 import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
-import {accessoryBones} from "./globals.util";
-import {Group} from "three";
-import {AccessoryInfoInterface} from "../interfaces/accessory-parts.interface";
+import {Group, SkinnedMesh} from "three";
 import {FirebaseUtil} from "./firebase.util";
+import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
 
 export class ImporterUtil {
   private static gltfLoader: GLTFLoader;
@@ -47,15 +45,15 @@ export class ImporterUtil {
 
 }
 
-export function GetAccessoryBones(baseModel: Group): Record<string, AccessoryInfoInterface> {
-  const bones = baseModel.children[0].children[0];
+export function GetAccessoryBones(baseModel: Group, accessoryBonesList: BasicData[]): Record<string, AccessoryInfoInterface> {
+  const bones = baseModel.children[0];
   let result: Record<string, AccessoryInfoInterface> = {};
   
   bones.traverse((bone) => {
-    if(accessoryBones.some(x => x.boneName === bone.name)) {
-      const foundBone = accessoryBones.filter(x => x.boneName === bone.name);
+    if(accessoryBonesList.some(x => x.value === bone.name)) {
+      const foundBone = accessoryBonesList.filter(x => x.value === bone.name);
       foundBone.forEach(fb => {
-        result[fb.partType] = { bone: bone };
+        result[fb.id] = { bone: bone };
       })
     }
   });
@@ -63,16 +61,30 @@ export function GetAccessoryBones(baseModel: Group): Record<string, AccessoryInf
   return result;
 }
 
+export function GetPartsData(baseModel: Group, partList: BasicData[], update: boolean = false): Record<string, PartInfoInterface> {
+  const baseParts = baseModel.children[0];
+  let result: Record<string, PartInfoInterface> = {};
+  
+  baseParts.children.forEach((part, index) => {
+    if(partList.some(x => x.value === part.name)) {
+      const foundPart = partList.find(x => x.value === part.name);
+      result[foundPart!.id] = { partIndex: index, featureBase: update ? result[foundPart!.id].featureBase : part.clone() };
+    }
+  });
+
+  return result;
+}
+
 async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
   return fetch(url).then(data => data.arrayBuffer());
 }
 
-export async function GetAssetsListByCampaign(campaign?: string) {
+export async function GetAssetsListByCampaign(campaign?: string | null) {
   const jsonObject: BodyPartLocationApi[] = await fetch('api/getParts' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
 
-export async function GetAccessoryListByCampaign(campaign?: string) {
+export async function GetAccessoryListByCampaign(campaign?: string | null) {
   const jsonObject: AccLocationApi[] = await fetch('api/getAccessories' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }

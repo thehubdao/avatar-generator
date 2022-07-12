@@ -1,9 +1,19 @@
 import {FirebaseApp, FirebaseOptions, initializeApp} from "@firebase/app";
-import {addDoc, collection, Firestore, getDocs, getFirestore, query, QueryConstraint, where, orderBy} from "@firebase/firestore";
-import {FirestoreValues} from "../enums/common.enum";
+import {
+  addDoc,
+  collection,
+  Firestore,
+  getDocs,
+  getFirestore,
+  query,
+  QueryConstraint,
+  where,
+  orderBy,
+  getDoc, doc
+} from "@firebase/firestore";
+import {FirestoreParameters, FirestoreValues} from "../enums/common.enum";
 import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {FirebaseStorage, getBlob, getStorage, getStream, ref} from "@firebase/storage";
-import {baseModelPath} from "./globals.util";
 
 export class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -114,8 +124,22 @@ export class FirebaseUtil {
   }
 
   async DoSomeStorage() {
-    const baseMeshRef = ref(this.Storage(), baseModelPath);
+    const baseMeshRef = ref(this.Storage(), 'base_mesh/base.glb');
     const stream = await getBlob(baseMeshRef);
     console.log(stream);
+  }
+
+  async GetParameters<T>(...parameters: string[]): Promise<T | T[]> {
+    const docRef = doc(this.DB(), FirestoreParameters.BasePath);
+    const leDoc = await getDoc(docRef);
+    
+    if(parameters.length === 1) return leDoc.get(parameters[0]);
+
+    const result = [];
+    for (const parameter of parameters) {
+      result.push(leDoc.get(parameter));
+    }
+    
+    return result;
   }
 }
