@@ -60,18 +60,23 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
 }
 
 
-export function ReplaceModelAccessory(bone: AccessoryInfoInterface, accessory: GLTF) {
+export function ReplaceModelAccessory(accessoriesInfo: Record<string, AccessoryInfoInterface>, selectedAcc: string, accessory: GLTF) {
+  const bone = accessoriesInfo[selectedAcc];
   const accessoryMesh = accessory.scene.children[0].clone() as Mesh;
-  accessoryMesh.scale.set(0.8, 0.8, 0.8);
-  
+  accessoryMesh.scale.set(0.1, 0.1, 0.1);
+
   if(bone.hasIt) {
     bone.bone.children.splice(bone.accessoryIndex!, 1);
-    // bone.bone.children[bone.accessoryIndex!] = accessoryMesh;
+    if(bone.accessoryIndex! < bone.bone.children.length) {
+      for (const key in accessoriesInfo) {
+        if (key !== selectedAcc && accessoriesInfo[key].bone.name === bone.bone.name && accessoriesInfo[key].accessoryIndex != undefined) {
+          accessoriesInfo[key].accessoryIndex! -= 1;
+        }
+      }
+    }
   }
   
   bone.accessoryIndex = bone.bone.children.length;
   bone.hasIt = true;
   bone.bone.add(accessoryMesh);
-  
-  console.log(bone);
 }
