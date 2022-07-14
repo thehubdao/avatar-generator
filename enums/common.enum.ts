@@ -10,3 +10,8 @@ export enum FirestoreParameters {
   BasePath = 'general/parameters',
   Campaigns = 'campaign'
 }
+
+export enum ViewModuleState {
+  SwitchingModule,
+  OnModule
+}

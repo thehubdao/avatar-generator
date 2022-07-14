@@ -1,5 +1,15 @@
 ﻿import {Component} from "react";
-import {AnimationMixer, Clock, PerspectiveCamera, Scene, Vector3, WebGLInfo, WebGLRenderer} from "three";
+import {
+  AnimationMixer,
+  Clock,
+  MeshStandardMaterial,
+  PerspectiveCamera,
+  Scene,
+  SkinnedMesh,
+  Vector3,
+  WebGLInfo,
+  WebGLRenderer
+} from "three";
 import {
   FrustumCulledFalse,
   GetBaseCamera,
@@ -11,13 +21,14 @@ import {GetTestLights} from "../utils/test-scene.util";
 import {
   GetAccessoryBones,
   GetAccessoryListByCampaign,
-  GetAssetsListByCampaign, GetPartsData,
+  GetAssetsListByCampaign,
+  GetPartsData,
   ImporterUtil
 } from "../utils/importer.util";
 import Head from "next/head";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {FirestoreParameters} from "../enums/common.enum";
+import {FirestoreParameters, ViewModuleState} from "../enums/common.enum";
 import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {ReplaceModelAccessory, ReplaceModelPartOnly} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
@@ -45,6 +56,9 @@ interface ExampleState {
   cameraLookAt: Vector3;
   savedModels: Record<string, GLTF>;
   logs?: WebGLInfo;
+  skinColor: string;
+  editModeSelected: boolean;
+  currentModule: ViewModuleState
 }
 
 export default class Example extends Component<ExampleProps, ExampleState> {
@@ -84,6 +98,9 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       cameraPos: new Vector3(),
       cameraLookAt: new Vector3(),
       savedModels: {},
+      skinColor: '',
+      editModeSelected: true,
+      currentModule: ViewModuleState.OnModule
     };
     
     this.mount = null;
@@ -128,6 +145,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   
   async getAccessoryBones() {
     this.accessoryBonesData = GetAccessoryBones(this.baseModel!.scene, this.state.aSelectList);
+    console.log('base', this.accessoryBonesData);
   }
   
   async avatarScene() {
@@ -227,6 +245,15 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   onClickChangeLookAtPosition = () => {
     this.controls!.target = this.state.cameraLookAt.clone();
   }
+
+  onClickChangeSkinColor = () => {
+    this.baseModel!.scene.traverse((object) => {
+      const objectRef = object as SkinnedMesh;
+      if(objectRef.isSkinnedMesh && (objectRef.material as MeshStandardMaterial).name === 'AvatarSkin_MAT') {
+        (objectRef.material as MeshStandardMaterial).color.set(`#${this.state.skinColor}`);
+      }
+    });
+  }
   
   updateCameraAutoRotate = (checked: boolean) => {
     this.setState({ rotateCamera: checked });
@@ -273,8 +300,8 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });
     }
-
-    await ReplaceModelAccessory(this.accessoryBonesData![this.state.selectedAcc], replaceModel);
+    
+    await ReplaceModelAccessory(this.accessoryBonesData!, this.state.selectedAcc, replaceModel);
   }
   
   async exportModel() {
@@ -324,6 +351,18 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   render() {
     return (
       <>
+        {
+          this.state.editModeSelected ?
+            this.renderEditMode() :
+            this.renderViewMode()
+        }
+      </>
+    );
+  }
+    
+  private renderEditMode() {
+    return (
+      <>
         <Head>
           <title>ThreeJs Example</title>
         </Head>
@@ -334,12 +373,12 @@ export default class Example extends Component<ExampleProps, ExampleState> {
           </div>
           {
             this.hasAnimation ?
-            <div className="mb-2 flex bg-slate-400">
-              <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.doAnimation}
-                     onChange={e => this.updateDoAnimation(e.target.checked)}/>
-              <p>Do Animation</p>
-            </div>
-            : ''
+              <div className="mb-2 flex bg-slate-400">
+                <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.doAnimation}
+                       onChange={e => this.updateDoAnimation(e.target.checked)}/>
+                <p>Do Animation</p>
+              </div>
+              : ''
           }
           <div className="mb-2 w-full bg-slate-400">
             <div className="flex pt-2 mb-2 justify-evenly">
@@ -381,42 +420,67 @@ export default class Example extends Component<ExampleProps, ExampleState> {
           </div>
           {
             this.partList && this.partList.length > 0 ?
-            <div className="mb-2 bg-slate-400">
-              <div className="m-2">
-                <p className="font-bold text-purple-900">Feature</p>
-                <select value={this.state.selectedPart} className="w-full my-2"
-                        onChange={(e) => this.onCategoryChange(e.target.value)}>
-                  {this.optionList()}
-                </select>
+              <div className="mb-2 bg-slate-400">
+                <div className="m-2">
+                  <p className="font-bold text-purple-900">Feature</p>
+                  <select value={this.state.selectedPart} className="w-full my-2"
+                          onChange={(e) => this.onCategoryChange(e.target.value)}>
+                    {this.optionList()}
+                  </select>
+                </div>
               </div>
-            </div>
-            : ''
+              : ''
           }
           <div className="mb-2 bg-slate-400">
             {this.partSelectList()}
           </div>
           {
             this.accessoryList && this.accessoryList?.length > 0 ?
-            <div className="mb-2 bg-slate-400">
-              <div className="m-2">
-                <p className="font-bold text-cyan-900">Accessories</p>
-                <select value={this.state.selectedAcc} className="w-full my-2"
-                        onChange={(e) => this.onAccessoryChange(e.target.value)}>
-                  {this.optionListAccessories()}
-                </select>
+              <div className="mb-2 bg-slate-400">
+                <div className="m-2">
+                  <p className="font-bold text-cyan-900">Accessories</p>
+                  <select value={this.state.selectedAcc} className="w-full my-2"
+                          onChange={(e) => this.onAccessoryChange(e.target.value)}>
+                    {this.optionListAccessories()}
+                  </select>
+                </div>
               </div>
-            </div>
-            : ''
+              : ''
           }
           <div className="mb-2 bg-slate-400">
             {this.accessorySelectList()}
           </div>
+          {
+            this.props.campaign === 'decentraland' ?
+              <div className="mb-2 w-full bg-slate-400">
+                <div className="flex justify-center py-2">
+                  <p>#</p>
+                  <input className="ml-0.5 w-3/6 rounded pl-0.5" type="text" value={this.state.skinColor}
+                         onChange={(e) => this.setState({skinColor: e.target.value})}/>
+                </div>
+                <div className="flex justify-center pb-2">
+                  <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white"
+                          onClick={() => this.onClickChangeSkinColor()}>Change SkinColor
+                  </button>
+                </div>
+              </div>
+              : ''
+          }
           <div className="mb-2 bg-slate-400">
             <div className="flex justify-center py-2">
               <button
                 className="font-bold py-2 px-4 mx-2 w-full rounded bg-emerald-600 text-white"
                 onClick={() => this.exportModel()}>
                 Export Model
+              </button>
+            </div>
+          </div>
+          <div className="mb-2 bg-slate-400">
+            <div className="flex justify-center py-2">
+              <button
+                className="font-bold py-2 px-4 mx-2 w-full rounded bg-indigo-400 text-white"
+                onClick={() => this.setState({editModeSelected: false, currentModule: ViewModuleState.SwitchingModule})}>
+                Goto ViewMode
               </button>
             </div>
           </div>
@@ -438,6 +502,31 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       </>
     );
   }
+  
+  componentDidUpdate(prevProps: Readonly<ExampleProps>, prevState: Readonly<ExampleState>, snapshot?: any) {
+    if(this.mount && this.state.currentModule !== ViewModuleState.OnModule) {
+      this.mount!.appendChild(this.renderer!.domElement);
+      this.setState({currentModule: ViewModuleState.OnModule});
+    }
+  }
+
+  private renderViewMode() {
+    return (
+      <>
+        <h1>
+          Welcome to View Mode! :D
+        </h1>
+        <button
+          className="font-bold py-2 px-4 rounded bg-blue-500 text-white"
+          onClick={() => this.setState({editModeSelected: true, currentModule: ViewModuleState.SwitchingModule})}>
+          Goto EditMode
+        </button>
+        <div>
+          <div ref={ref => this.mount = ref} />
+        </div>
+      </>
+    );
+  }
 }
 
 export const getServerSideProps: GetServerSideProps<ExampleProps> = async (context) => {
@@ -449,7 +538,7 @@ export const getServerSideProps: GetServerSideProps<ExampleProps> = async (conte
   else
     subdomain = context.req.headers.host?.split(".")[0];
   
-  const campaigns = await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns) as string[];
+  const campaigns = await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns);
   const isCampaign = campaigns.some(c => c === subdomain);
   
   let _baseMeshPath: string;
