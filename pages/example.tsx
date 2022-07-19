@@ -28,12 +28,12 @@ import {
 import Head from "next/head";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {FirestoreParameters, ViewModuleState} from "../enums/common.enum";
+import {AttributeValues, FirestoreParameters, GlobalValues, ViewModuleState} from "../enums/common.enum";
 import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {ReplaceModelAccessory, ReplaceModelPartOnly} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
 import {GetServerSideProps} from "next";
-import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
+import {AccessoryInfoInterface, BasicData, ExportInterface, PartInfoInterface} from "../interfaces/common.interface";
 import {FirebaseUtil} from "../utils/firebase.util";
 
 interface ExampleProps {
@@ -41,6 +41,7 @@ interface ExampleProps {
   baseMeshPath: string;
   selectListBodyParts: BasicData[];
   selectListAccessories: BasicData[];
+  attributeConfig: BasicData[] | null;
 }
 
 interface ExampleState {
@@ -79,6 +80,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   partListData?: Record<string, PartInfoInterface>;
   partList?: BodyPartLocationApi[];
   accessoryList?: AccLocationApi[];
+  exportData?: ExportInterface;
   
   tanFOV?: number;
   windowHeight?: number;
@@ -105,6 +107,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     
     this.mount = null;
     this.clock = new Clock();
+    this.exportData = {attributes: []};
   }
   
   async componentDidMount() {
@@ -113,6 +116,30 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     await this.getAccessoryList();
     await this.getAccessoryBones();
     await this.getPartsData();
+    await this.loadPreData();
+  }
+  
+  async loadPreData() {
+    if(this.props.campaign && this.props.campaign !== GlobalValues.BaseCampaign) {
+      this.exportData?.attributes.push({id: AttributeValues.Campaign, value: this.props.campaign!});
+    }
+
+    if(this.props.attributeConfig) {
+      for (const attribute of this.props.attributeConfig) {
+        // Is a part
+        if(this.state.selectList.some(pl => pl.id === attribute.id)) {
+          const newPart = this.partList!.find(p => p.name === attribute.value);
+          if(newPart)
+            await this.changePart(newPart.id, newPart.path, newPart.name, attribute.id);
+        }
+        // Is an accessory
+        else if(this.state.aSelectList.some(pl => pl.id === attribute.id)) {
+          const newAcc = this.accessoryList!.find(p => p.name === attribute.value);
+          if(newAcc)
+            await this.changeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
+        }
+      }
+    }
   }
   
   async getPartList() {
@@ -274,7 +301,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.setState({ accessoryList: _accessoryList, selectedAcc: value });
   }
   
-  async changePart(id: string, partPath: string) {
+  async changePart(id: string, partPath: string, name: string, selectedPart: string = this.state.selectedPart) {
     let replaceModel: GLTF;
     if(this.state.savedModels[id]) {
       replaceModel = this.state.savedModels[id];
@@ -285,12 +312,13 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       this.setState({ savedModels: _savedModels });
     }
     
-    await ReplaceModelPartOnly(this.baseModel!.scene.children[0], replaceModel, this.partListData![this.state.selectedPart], this.state.selectList.find(sl => sl.id === this.state.selectedPart));
+    await ReplaceModelPartOnly(this.baseModel!.scene.children[0], replaceModel, this.partListData![selectedPart], this.state.selectList.find(sl => sl.id === selectedPart));
     await this.getPartsData();
     FrustumCulledFalse(this.scene!);
+    this.addReplaceAttribute(selectedPart, name);
   }
 
-  async changeAccessory(id: string, path: string) {
+  async changeAccessory(id: string, path: string, name: string, selectedAcc: string = this.state.selectedAcc) {
     let replaceModel: GLTF;
     if(this.state.savedModels[id]) {
       replaceModel = this.state.savedModels[id];
@@ -301,11 +329,24 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       this.setState({ savedModels: _savedModels });
     }
     
-    await ReplaceModelAccessory(this.accessoryBonesData!, this.state.selectedAcc, replaceModel);
+    await ReplaceModelAccessory(this.accessoryBonesData!, selectedAcc, replaceModel);
+    this.addReplaceAttribute(selectedAcc, name);
+  }
+  
+  addReplaceAttribute(addId: string, addValue: string) {
+    if(this.exportData?.attributes.some(x => x.id === addId)) {
+      const oldAttribute = this.exportData!.attributes.find(x => x.id === addId);
+      oldAttribute!.value = addValue;
+      return;
+    }
+    
+    this.exportData?.attributes.push({id: addId, value: addValue});
   }
   
   async exportModel() {
-    await ExporterUtil.ExportModelGlb(this.baseModel!);
+    this.exportData!.attributesBase64 = window.btoa(JSON.stringify(this.exportData?.attributes));
+    this.exportData!.model = await ExporterUtil.ExportModelGlb(this.baseModel!);
+    console.log(this.exportData);
   }
   
   optionList() {
@@ -326,7 +367,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
           <div className="flex justify-center py-2" key={x.id}>
             <button
               className="font-bold py-2 px-4 mx-2 w-full rounded bg-orange-400 text-white"
-              onClick={() => this.changePart(x.id, x.path)}>
+              onClick={() => this.changePart(x.id, x.path, x.name)}>
               {x.name}
             </button>
           </div>
@@ -340,7 +381,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
         <div className="flex justify-center py-2" key={x.id}>
           <button
             className="font-bold py-2 px-4 mx-2 w-full rounded bg-orange-400 text-white"
-            onClick={() => this.changeAccessory(x.id, x.path)}>
+            onClick={() => this.changeAccessory(x.id, x.path, x.name)}>
             {x.name}
           </button>
         </div>
@@ -366,7 +407,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
         <Head>
           <title>ThreeJs Example</title>
         </Head>
-        <div className="fixed left-0 top-0 w-1/6 h-screen bg-slate-600 bg-opacity-50 p-2">
+        <div className="fixed left-0 top-0 w-1/6 h-screen bg-slate-600 bg-opacity-50 p-2 hover:overflow-y-auto">
           <div className="mb-2 flex bg-slate-400">
             <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.rotateCamera} onChange={e => this.updateCameraAutoRotate(e.target.checked)} />
             <p>Rotate camera</p>
@@ -532,11 +573,20 @@ export default class Example extends Component<ExampleProps, ExampleState> {
 export const getServerSideProps: GetServerSideProps<ExampleProps> = async (context) => {
   // Get subdomain
   let subdomain: string | undefined;
-  const { campaign } = context.query;
+  let parsedConfig: BasicData[] | null = null;
+  const { campaign, config } = context.query;
   if(campaign)
     subdomain = campaign as string;
   else
     subdomain = context.req.headers.host?.split(".")[0];
+  
+  if(config) {
+    parsedConfig = JSON.parse(Buffer.from(config as string, 'base64').toString('ascii'));
+    if(parsedConfig?.some(x => x.id === AttributeValues.Campaign)) {
+      const configCampaign = parsedConfig?.find(x => x.id === AttributeValues.Campaign);
+      subdomain = configCampaign!.value;
+    }
+  }
   
   const campaigns = await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns);
   const isCampaign = campaigns.some(c => c === subdomain);
@@ -564,6 +614,7 @@ export const getServerSideProps: GetServerSideProps<ExampleProps> = async (conte
       baseMeshPath: _baseMeshPath,
       selectListBodyParts: _selectListBodyParts,
       selectListAccessories: _selectListAccessories,
+      attributeConfig: parsedConfig
     }
   };
 }

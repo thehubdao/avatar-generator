@@ -1,4 +1,12 @@
-﻿export enum FirestoreValues {
+﻿export enum GlobalValues {
+  BaseCampaign = 'base',
+}
+
+export enum AttributeValues {
+  Campaign = 'campaign',
+}
+
+export enum FirestoreValues {
   Parts = 'parts',
   Accessories = 'accessories',
   Campaign = 'campaign',

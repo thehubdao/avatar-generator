@@ -1,8 +1,8 @@
 ﻿import {BufferGeometry, Object3D, SkinnedMesh} from "three";
 
 export interface BasicData {
-  id: string,
-  value: string,
+  id: string;
+  value: string;
 }
 
 export interface PartInfoInterface {
@@ -15,4 +15,10 @@ export interface AccessoryInfoInterface {
   hasIt?: boolean;
   accessoryRef?: Object3D;
   accessoryIndex?: number;
+}
+
+export interface ExportInterface {
+  attributes: BasicData[];
+  attributesBase64?: string;
+  model?: ArrayBuffer;
 }

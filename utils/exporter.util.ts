@@ -18,7 +18,8 @@ export class ExporterUtil {
       binary: true,
     });
     
-    SaveArrayBuffer(out as ArrayBuffer, `exported.glb`);
+    return out as ArrayBuffer;
+    // SaveArrayBuffer(out as ArrayBuffer, `exported.glb`);
   }
 
   static async ExportModelGltf(model: GLTF) {
