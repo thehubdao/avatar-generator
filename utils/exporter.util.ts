@@ -18,7 +18,8 @@ export class ExporterUtil {
       binary: true,
     });
     
-    return out as ArrayBuffer;
+    const blob = new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
+    return blob;
     // SaveArrayBuffer(out as ArrayBuffer, `exported.glb`);
   }
 

@@ -20,5 +20,5 @@ export interface AccessoryInfoInterface {
 export interface ExportInterface {
   attributes: BasicData[];
   attributesBase64?: string;
-  model?: ArrayBuffer;
+  model?: Blob;
 }

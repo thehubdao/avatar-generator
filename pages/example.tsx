@@ -85,6 +85,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   tanFOV?: number;
   windowHeight?: number;
   hasAnimation?: boolean;
+  private onIFrame: boolean;
   
   constructor(props: ExampleProps) {
     super(props);
@@ -108,6 +109,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.mount = null;
     this.clock = new Clock();
     this.exportData = {attributes: []};
+    this.onIFrame = false;
   }
   
   async componentDidMount() {
@@ -117,6 +119,18 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     await this.getAccessoryBones();
     await this.getPartsData();
     await this.loadPreData();
+    
+    // IFrame impl
+    this.tellParentIAmReady();
+  }
+
+  tellParentIAmReady() {
+    window.parent.postMessage({source: "avatar-generator", eventName: 'ready'}, '*');
+    window.addEventListener("message", ({data, source}) => {
+      const parentData: {target: string, type: string} = JSON.parse(data);
+      if(parentData.target === 'avatar-generator' && parentData.type === 'subscribe')
+        this.onIFrame = true;
+    });
   }
   
   async loadPreData() {
@@ -347,6 +361,8 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.exportData!.attributesBase64 = window.btoa(JSON.stringify(this.exportData?.attributes));
     this.exportData!.model = await ExporterUtil.ExportModelGlb(this.baseModel!);
     console.log(this.exportData);
+    if(this.onIFrame)
+      window.parent.postMessage({source: 'avatar-generator', eventName: 'exported', data: this.exportData }, '*');
   }
   
   optionList() {
