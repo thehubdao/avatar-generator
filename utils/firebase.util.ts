@@ -9,11 +9,11 @@ import {
   QueryConstraint,
   where,
   orderBy,
-  getDoc, doc
+  getDoc, doc, setDoc
 } from "@firebase/firestore";
-import {FirestoreParameters, FirestoreValues} from "../enums/common.enum";
+import {FirestoreFilterValues, FirestoreParameters, FirestoreValues, StorageValues} from "../enums/common.enum";
 import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
-import {FirebaseStorage, getBlob, getStorage, getStream, ref} from "@firebase/storage";
+import {FirebaseStorage, getBlob, getStorage, getStream, ref, uploadBytes} from "@firebase/storage";
 
 export class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -68,12 +68,12 @@ export class FirebaseUtil {
     const result: BodyPartLocationApi[] = [];
     
     if(campaign)
-      constraints.push(where(FirestoreValues.Campaign, "array-contains", campaign));
+      constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
     
     if(type)
-      constraints.push(where(FirestoreValues.Type, "==", type));
+      constraints.push(where(FirestoreFilterValues.Type, "==", type));
     
-    constraints.push(orderBy(FirestoreValues.Name, "asc"));
+    constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
     
     const myQuery = query(collection(this.DB(), FirestoreValues.Parts), ...constraints);
     const querySnapshot = await getDocs(myQuery);
@@ -90,12 +90,12 @@ export class FirebaseUtil {
     const result: AccLocationApi[] = [];
 
     if(campaign)
-      constraints.push(where(FirestoreValues.Campaign, "array-contains", campaign));
+      constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
 
     if(type)
-      constraints.push(where(FirestoreValues.Type, "==", type));
+      constraints.push(where(FirestoreFilterValues.Type, "==", type));
 
-    constraints.push(orderBy(FirestoreValues.Name, "asc"));
+    constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
 
     const myQuery = query(collection(this.DB(), FirestoreValues.Accessories), ...constraints);
     const querySnapshot = await getDocs(myQuery);
@@ -107,8 +107,8 @@ export class FirebaseUtil {
     return result;
   }
 
-  async InsertDB(jsonData: string) {
-    const newDoc = await addDoc(collection(this.DB(), FirestoreValues.Parts), JSON.parse(jsonData));
+  async InsertDB(location: string = FirestoreValues.Parts, jsonData: string) {
+    const newDoc = await addDoc(collection(this.DB(), location), JSON.parse(jsonData));
     console.log('New Doc: ', newDoc.id);
   }
   
@@ -129,11 +129,9 @@ export class FirebaseUtil {
     console.log(stream);
   }
 
-  async GetParameters<T>(...parameters: string[]): Promise<T | T[]> {
+  async GetParameters<T>(...parameters: string[]): Promise<T[]> {
     const docRef = doc(this.DB(), FirestoreParameters.BasePath);
     const leDoc = await getDoc(docRef);
-    
-    if(parameters.length === 1) return leDoc.get(parameters[0]);
 
     const result = [];
     for (const parameter of parameters) {
@@ -141,5 +139,17 @@ export class FirebaseUtil {
     }
     
     return result;
+  }
+
+  async UploadFile(file: File, fileType: StorageValues) {
+    const fileRef = ref(this.Storage(), `${fileType}/${file.name}`);
+    const log = await uploadBytes(fileRef, file);
+
+    return log.metadata.fullPath;
+  }
+
+  async UpdateDB(location: FirestoreValues, jsonData: string) {
+    const docRef = doc(this.DB(), location);
+    return await setDoc(docRef, JSON.parse(jsonData), { merge: true });
   }
 }

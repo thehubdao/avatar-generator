@@ -9,9 +9,7 @@ export enum AttributeValues {
 export enum FirestoreValues {
   Parts = 'parts',
   Accessories = 'accessories',
-  Campaign = 'campaign',
-  Type = 'type',
-  Name = 'name',
+  Parameters = 'general/parameters',
 }
 
 export enum FirestoreParameters {
@@ -22,4 +20,17 @@ export enum FirestoreParameters {
 export enum ViewModuleState {
   SwitchingModule,
   OnModule
+}
+
+export enum StorageValues {
+  Accessory = 'accessory',
+  BaseMesh = 'base_mesh',
+  Part = 'section',
+  Thumbnail = 'thumb',
+}
+
+export enum FirestoreFilterValues {
+  Type = 'type',
+  Name = 'name',
+  Campaign = 'campaign',
 }
