@@ -38,6 +38,7 @@ import {AccessoryInfoInterface, BasicData, ExportInterface, PartInfoInterface} f
 import {FirebaseUtil} from "../utils/firebase.util";
 import {CampaignConfig} from "../enums/campaign.enum";
 import AGLoading from "../components/AG-Loading";
+import {RandomArrayElement} from "../utils/common.util";
 
 interface ExampleProps {
   campaign?: string | null;
@@ -164,6 +165,20 @@ export default class Example extends Component<ExampleProps, ExampleState> {
           if(newAcc)
             await this.changeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
         }
+      }
+    }
+    else {
+      // Load random features
+      for(const partType of this.state.selectList) {
+        const randomPart = RandomArrayElement(this.partList!.filter(p => p.type === partType.id));
+        if (randomPart)
+          await this.changePart(randomPart.id, randomPart.path, randomPart.name, partType.id);
+      }
+      
+      for(const accType of this.state.aSelectList) {
+        const randomAcc = RandomArrayElement(this.accessoryList!.filter(a => a.type === accType.id));
+        if(randomAcc)
+          await this.changeAccessory(randomAcc.id, randomAcc.path, randomAcc.name, accType.id);
       }
     }
   }
