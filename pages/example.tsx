@@ -28,17 +28,21 @@ import {
 import Head from "next/head";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {AttributeValues, FirestoreParameters, GlobalValues, ViewModuleState} from "../enums/common.enum";
+import {AttributeValues, GlobalValues, ViewModuleState} from "../enums/common.enum";
+import {FirestoreParameters} from "../enums/firebase.enum";
 import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {ReplaceModelAccessory, ReplaceModelPartOnly} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
 import {GetServerSideProps} from "next";
 import {AccessoryInfoInterface, BasicData, ExportInterface, PartInfoInterface} from "../interfaces/common.interface";
 import {FirebaseUtil} from "../utils/firebase.util";
+import {CampaignConfig} from "../enums/campaign.enum";
+import AGLoading from "../components/AG-Loading";
 
 interface ExampleProps {
   campaign?: string | null;
   baseMeshPath: string;
+  campaignConfig: CampaignConfig[];
   selectListBodyParts: BasicData[];
   selectListAccessories: BasicData[];
   attributeConfig: BasicData[] | null;
@@ -59,7 +63,8 @@ interface ExampleState {
   logs?: WebGLInfo;
   skinColor: string;
   editModeSelected: boolean;
-  currentModule: ViewModuleState
+  currentModule: ViewModuleState;
+  loading: boolean;
 }
 
 export default class Example extends Component<ExampleProps, ExampleState> {
@@ -103,7 +108,8 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       savedModels: {},
       skinColor: '',
       editModeSelected: true,
-      currentModule: ViewModuleState.OnModule
+      currentModule: ViewModuleState.OnModule,
+      loading: false,
     };
     
     this.mount = null;
@@ -113,15 +119,21 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
   
   async componentDidMount() {
+    this.setLoading();
     await this.avatarScene();
     await this.getPartList();
     await this.getAccessoryList();
     await this.getAccessoryBones();
     await this.getPartsData();
     await this.loadPreData();
+    this.setLoading(false);
     
     // IFrame impl
     this.tellParentIAmReady();
+  }
+  
+  setLoading(newState: boolean = true) {
+    this.setState({loading: newState});
   }
 
   tellParentIAmReady() {
@@ -556,6 +568,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
         <div>
           <div ref={ref => this.mount = ref} />
         </div>
+        <AGLoading loading={this.state.loading} />
       </>
     );
   }
@@ -587,6 +600,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
 }
 
 export const getServerSideProps: GetServerSideProps<ExampleProps> = async (context) => {
+  const GV = GlobalValues;
   // Get subdomain
   let subdomain: string | undefined;
   let parsedConfig: BasicData[] | null = null;
@@ -608,26 +622,30 @@ export const getServerSideProps: GetServerSideProps<ExampleProps> = async (conte
   const isCampaign = campaigns.some(c => c === subdomain);
   
   let _baseMeshPath: string;
+  let _campaignConfig: CampaignConfig[];
   let _selectListBodyParts: BasicData[];
   let _selectListAccessories: BasicData[];
   
   if(isCampaign) {
     _baseMeshPath = `base_mesh/${subdomain}.glb`;
-    const result = await FirebaseUtil.Instance().GetParameters<BasicData[]>(subdomain!, `${subdomain!}Accessories`) as BasicData[][];
-    _selectListBodyParts = result[0];
-    _selectListAccessories = result[1];
+    const result = await FirebaseUtil.Instance().GetParameters(subdomain!, subdomain! + GV.Acc, subdomain! + GV.Config);
+    _selectListBodyParts = result[0] as BasicData[];
+    _selectListAccessories = result[1] as BasicData[];
+    _campaignConfig = result[2] as CampaignConfig[];
   }
   else {
-    _baseMeshPath = 'base_mesh/base.glb';
-    const result = await FirebaseUtil.Instance().GetParameters<BasicData[]>('base', 'baseAccessories') as BasicData[][];
-    _selectListBodyParts = result[0];
-    _selectListAccessories = result[1];
+    _baseMeshPath = `base_mesh/${GV.BaseCampaign}.glb`;
+    const result = await FirebaseUtil.Instance().GetParameters(GV.BaseCampaign, GV.BaseCampaign + GV.Acc, GV.BaseCampaign + GV.Config);
+    _selectListBodyParts = result[0] as BasicData[];
+    _selectListAccessories = result[1] as BasicData[];
+    _campaignConfig = result[2] as CampaignConfig[];
   }
   
   return {
     props: {
       campaign: isCampaign ? subdomain : null,
       baseMeshPath: _baseMeshPath,
+      campaignConfig: _campaignConfig ?? [],
       selectListBodyParts: _selectListBodyParts,
       selectListAccessories: _selectListAccessories,
       attributeConfig: parsedConfig
