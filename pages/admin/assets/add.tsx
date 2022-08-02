@@ -146,7 +146,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
     
     return (
       <div className='flex justify-center'>
-        <div className='w-1/2'>
+        <div className='w-2/3'>
           <h1 className="ml-5 font-bold">Insert Into DB</h1>
           <div className="flex my-2">
             <p className="mx-2">Db location:</p>

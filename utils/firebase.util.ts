@@ -9,11 +9,12 @@ import {
   QueryConstraint,
   where,
   orderBy,
-  getDoc, doc, setDoc
+  getDoc, doc, setDoc, deleteDoc
 } from "@firebase/firestore";
 import {FirestoreFilterValues, FirestoreParameters, FirestoreValues, StorageValues} from "../enums/common.enum";
 import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {FirebaseStorage, getBlob, getStorage, getStream, ref, uploadBytes} from "@firebase/storage";
+import {AGQueryConstraints} from "../interfaces/firebase.interface";
 
 export class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -63,51 +64,73 @@ export class FirebaseUtil {
     return this._storage;
   }
   
-  public async GetParts(campaign?: string, type?: number) {
-    const constraints: QueryConstraint[] = [];
-    const result: BodyPartLocationApi[] = [];
+  public async GetInfoDB<T>(dbLocation: FirestoreValues | string, constraintsValues?: AGQueryConstraints, doConstraints: boolean = true) {
+    let constraints: QueryConstraint[] = [];
+    const result: T[] = [];
     
-    if(campaign)
-      constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
-    
-    if(type)
-      constraints.push(where(FirestoreFilterValues.Type, "==", type));
-    
-    constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
-    
-    const myQuery = query(collection(this.DB(), FirestoreValues.Parts), ...constraints);
-    const querySnapshot = await getDocs(myQuery);
-    
-    querySnapshot.forEach(snap => {
-      result.push({ ...snap.data() as BodyPartLocationApi, id: snap.id });
-    })
-    
-    return result;
-  }
+    if(dbLocation.split('/').length % 2 === 0) {
+      const docRef = doc(this.DB(), dbLocation);
+      const leDoc = await getDoc(docRef);
+      
+      result.push(leDoc.data() as T);
+    }
+    else {
+      if (doConstraints && constraintsValues)
+        constraints = this.getConstraints(dbLocation, constraintsValues);
 
-  public async GetAccessories(campaign?: string, type?: string) {
-    const constraints: QueryConstraint[] = [];
-    const result: AccLocationApi[] = [];
+      const myQuery = query(collection(this.DB(), dbLocation), ...constraints);
+      const querySnapshot = await getDocs(myQuery);
 
-    if(campaign)
-      constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
-
-    if(type)
-      constraints.push(where(FirestoreFilterValues.Type, "==", type));
-
-    constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
-
-    const myQuery = query(collection(this.DB(), FirestoreValues.Accessories), ...constraints);
-    const querySnapshot = await getDocs(myQuery);
-
-    querySnapshot.forEach(snap => {
-      result.push({ ...snap.data() as AccLocationApi, id: snap.id });
-    })
+      querySnapshot.forEach(snap => {
+        result.push({...snap.data() as T, id: snap.id});
+      })
+    }
 
     return result;
   }
 
-  async InsertDB(location: string = FirestoreValues.Parts, jsonData: string) {
+  private getConstraints(dbLocation: FirestoreValues | string, constraintsValues: AGQueryConstraints) {
+    switch (dbLocation) {
+      case FirestoreValues.Parts:
+        return this.PartConstraints(constraintsValues);
+      case FirestoreValues.Accessories:
+        return this.AccessoryConstraints(constraintsValues);
+      default:
+        return [];
+    }
+  }
+  
+  private PartConstraints(constraintsValues: AGQueryConstraints) {
+    const constraints: QueryConstraint[] = [];
+    const { type, campaign } = constraintsValues;
+    
+    if(campaign)
+      constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
+
+    if(type)
+      constraints.push(where(FirestoreFilterValues.Type, "==", type));
+
+    constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
+    
+    return constraints;
+  }
+
+  private AccessoryConstraints(constraintsValues: AGQueryConstraints) {
+    const constraints: QueryConstraint[] = [];
+    const { type, campaign } = constraintsValues;
+
+    if(campaign)
+      constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
+
+    if(type)
+      constraints.push(where(FirestoreFilterValues.Type, "==", type));
+
+    constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
+
+    return constraints;
+  }
+
+  async InsertDB(jsonData: string, location: string = FirestoreValues.Parts) {
     const newDoc = await addDoc(collection(this.DB(), location), JSON.parse(jsonData));
     console.log('New Doc: ', newDoc.id);
   }
@@ -151,5 +174,10 @@ export class FirebaseUtil {
   async UpdateDB(location: FirestoreValues, jsonData: string) {
     const docRef = doc(this.DB(), location);
     return await setDoc(docRef, JSON.parse(jsonData), { merge: true });
+  }
+
+  async DeleteDoc(dbLocation: FirestoreValues, docId: string) {
+    await deleteDoc(doc(this.DB(), `${dbLocation}/${docId}`))
+    return docId;
   }
 }
