@@ -1,6 +1,7 @@
 ﻿import {NextApiRequest, NextApiResponse} from "next";
 import {FirebaseUtil} from "../../utils/firebase.util";
-import {FirestoreValues, GlobalValues} from "../../enums/common.enum";
+import {GlobalValues} from "../../enums/common.enum";
+import {FirestoreValues} from "../../enums/firebase.enum";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if(req.method === 'GET') {

@@ -1,6 +1,6 @@
 ﻿import {Component} from "react";
 import {FirebaseUtil} from "../../../utils/firebase.util";
-import {FirestoreParameters, FirestoreValues, StorageValues} from "../../../enums/common.enum";
+import {FirestoreParameters, FirestoreValues, StorageValues} from "../../../enums/firebase.enum";
 import AGButton from "../../../components/AG-Button";
 import {FeatureLocationApi} from "../../../interfaces/api.interface";
 import {BasicData} from "../../../interfaces/common.interface";
@@ -170,7 +170,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
               <textarea required className="w-full border-2 border-amber-600 rounded" rows={5}
                         value={this.state.jsonData} onChange={(e) => this.setState({jsonData: e.target.value})}/>
             </div>
-            <AGButton type='primary' form onClickEvent={() => this.insertDB()}>Insert json</AGButton>
+            <AGButton type='primary' onClickEvent={() => this.insertDB()}>Insert json</AGButton>
           </form>
 
           <form>
@@ -191,7 +191,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
                        onChange={e => this.setState({loneFile: e.target.files ? e.target.files[0] : undefined})}/>
               </div>
             </div>
-            <AGButton type='alert' form onClickEvent={() => this.insertFile()}>Insert File</AGButton>
+            <AGButton type='alert' onClickEvent={() => this.insertFile()}>Insert File</AGButton>
           </form>
         </div>
       </div>

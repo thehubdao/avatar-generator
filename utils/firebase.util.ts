@@ -11,7 +11,7 @@ import {
   orderBy,
   getDoc, doc, setDoc, deleteDoc, updateDoc
 } from "@firebase/firestore";
-import { FirestoreFilterValues, FirestoreParameters, FirestoreValues, StorageValues } from "../enums/common.enum";
+import { FirestoreFilterValues, FirestoreParameters, FirestoreValues, StorageValues } from "../enums/firebase.enum";
 import { FirebaseStorage, getBlob, getStorage, ref, uploadBytes } from "@firebase/storage";
 import { AGQueryConstraints } from "../interfaces/firebase.interface";
 
@@ -158,7 +158,7 @@ export class FirebaseUtil {
     const docRef = doc(this.DB(), FirestoreParameters.BasePath);
     const leDoc = await getDoc(docRef);
 
-    const result = [];
+    const result: T[] = [];
     for (const parameter of parameters) {
       result.push(leDoc.get(parameter));
     }

@@ -1,5 +1,5 @@
 ﻿import {Component} from "react";
-import {FirestoreValues} from "../../../enums/common.enum";
+import {FirestoreValues} from "../../../enums/firebase.enum";
 import {FirebaseUtil} from "../../../utils/firebase.util";
 import Link from "next/link";
 
