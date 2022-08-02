@@ -5,6 +5,7 @@ import AGButton from "../../../components/AG-Button";
 import {FeatureLocationApi} from "../../../interfaces/api.interface";
 import {BasicData} from "../../../interfaces/common.interface";
 import {GetServerSideProps} from "next";
+import Link from "next/link";
 
 interface AssetAddProps {
   campaignOptions: string[];
@@ -25,13 +26,13 @@ interface AssetAddState {
 }
 
 export default class Add extends Component<AssetAddProps, AssetAddState> {
-    
+
   constructor(props: AssetAddProps) {
     super(props);
     this.state = {
       jsonData: '',
       dbLocation: FirestoreValues.Parts,
-      formData: { name: '', path: '', type: '', thumb: '', campaign: [] },
+      formData: {name: '', path: '', type: '', thumb: '', campaign: []},
       typeOptions: [],
       selectedCampaign: '',
       locationOptions: Object.values(FirestoreValues),
@@ -39,22 +40,22 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
       selectedStorage: StorageValues.BaseMesh,
     };
   }
-  
+
   async getTypeOptionsByCampaign(campaign: string) {
     const diff = this.state.dbLocation === FirestoreValues.Accessories ? 'Accessories' : '';
-    
+
     this.setState({
       selectedCampaign: campaign,
       typeOptions: campaign.length <= 0 ? [] : (await FirebaseUtil.Instance().GetParameters<BasicData[]>(campaign + diff))[0]
     });
   }
-  
+
   renderTypeOptions() {
     return this.state.typeOptions?.map(x => {
       return <option value={x.id} key={x.id}>{x.id}</option>
     });
   }
-  
+
   renderCampaignOptions() {
     return this.props.campaignOptions.map(x => {
       return <option value={x} key={x}>{x}</option>
@@ -72,9 +73,9 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
       return <option value={x} key={x}>{x}</option>
     });
   }
-  
+
   renderUploadType() {
-    switch(this.state.dbLocation) {
+    switch (this.state.dbLocation) {
       case FirestoreValues.Accessories:
       case FirestoreValues.Parts:
         return this.renderPartForm();
@@ -82,9 +83,9 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
         return this.renderParameterForm();
     }
   }
-  
+
   renderPartForm() {
-    const { formData, selectedCampaign } = this.state;
+    const {formData, selectedCampaign} = this.state;
     return (
       <>
         <div className="mx-2 my-2 border-slate-600 border-2 rounded">
@@ -132,7 +133,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
       </>
     );
   }
-  
+
   renderParameterForm() {
     return (
       <>
@@ -140,28 +141,34 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
       </>
     );
   }
-    
+
   render() {
-    const { dbLocation, selectedStorage } = this.state;
-    
+    const {dbLocation, selectedStorage} = this.state;
+
     return (
       <div className='flex justify-center'>
         <div className='w-2/3'>
-          <h1 className="ml-5 font-bold">Insert Into DB</h1>
-          <div className="flex my-2">
-            <p className="mx-2">Db location:</p>
-            <select className="w-52 rounded border-2 border-slate-600" required
-                    value={dbLocation}
-                    onChange={e => this.setState({dbLocation: e.target.value as FirestoreValues})}>
-              {this.renderLocationOptions()}
-            </select>
+          <h1 className="ml-5 my-2 font-bold">Insert Into DB</h1>
+          <div className="flex justify-between">
+            <div className="flex my-2">
+              <p className="mx-2">Db location:</p>
+              <select className="w-52 rounded border-2 border-slate-600" required
+                      value={dbLocation}
+                      onChange={e => this.setState({dbLocation: e.target.value as FirestoreValues})}>
+                {this.renderLocationOptions()}
+              </select>
+            </div>
+            <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
+              <Link href="list"><p className="mx-2 text-white hover:cursor-help">Go to List</p></Link>
+            </div>
           </div>
 
           {this.renderUploadType()}
 
           <form>
             <div className='mx-2'>
-              <textarea required className="w-full border-2 border-amber-600 rounded" rows={5} value={this.state.jsonData} onChange={(e) => this.setState({ jsonData: e.target.value})} />
+              <textarea required className="w-full border-2 border-amber-600 rounded" rows={5}
+                        value={this.state.jsonData} onChange={(e) => this.setState({jsonData: e.target.value})}/>
             </div>
             <AGButton type='primary' form onClickEvent={() => this.insertDB()}>Insert json</AGButton>
           </form>
@@ -192,10 +199,10 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   }
 
   async insertDB(jsonData: string | undefined = this.state.jsonData) {
-    const { dbLocation } = this.state;
-    if(dbLocation && jsonData) {
+    const {dbLocation} = this.state;
+    if (dbLocation && jsonData) {
       if (dbLocation !== FirestoreValues.Parameters) {
-        await FirebaseUtil.Instance().InsertDB(dbLocation, jsonData);
+        await FirebaseUtil.Instance().InsertDB(jsonData, dbLocation);
         alert('Done inserting');
       } else {
         await FirebaseUtil.Instance().UpdateDB(dbLocation, jsonData);
@@ -203,25 +210,25 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
       }
     }
   }
-  
+
   async insertDBForm() {
-    const { formData, thumbToUpload, fileToUpload, dbLocation } = this.state;
-    
-    if(thumbToUpload && fileToUpload) {
+    const {formData, thumbToUpload, fileToUpload, dbLocation} = this.state;
+
+    if (thumbToUpload && fileToUpload) {
       const uploadFileTo = dbLocation === FirestoreValues.Parts ? StorageValues.Part : StorageValues.Accessory;
-      
+
       formData.thumb = await FirebaseUtil.Instance().UploadFile(thumbToUpload, StorageValues.Thumbnail);
-      formData.path = await FirebaseUtil.Instance().UploadFile(fileToUpload, uploadFileTo);
+      formData.path = await FirebaseUtil.Instance().UploadFile(fileToUpload, uploadFileTo, formData.type.toLowerCase());
       formData.campaign.push(this.state.selectedCampaign);
-      
+
       await this.insertDB(JSON.stringify(formData));
       alert("Data inserted");
     }
   }
-  
+
   async insertFile() {
-    const { loneFile, selectedStorage } = this.state;
-    if(loneFile && selectedStorage) {
+    const {loneFile, selectedStorage} = this.state;
+    if (loneFile && selectedStorage) {
       const newPath = await FirebaseUtil.Instance().UploadFile(loneFile, selectedStorage);
       console.log(newPath);
       alert("File uploaded");
@@ -231,7 +238,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
 
 export const getServerSideProps: GetServerSideProps<AssetAddProps> = async (context) => {
   const campaigns = (await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns))[0];
-  
+
   return {
     props: {
       campaignOptions: campaigns,
