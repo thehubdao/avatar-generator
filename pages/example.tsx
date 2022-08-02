@@ -127,8 +127,8 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   tellParentIAmReady() {
     window.parent.postMessage({source: "avatar-generator", eventName: 'ready'}, '*');
     window.addEventListener("message", ({data, source}) => {
-      const parentData: {target: string, type: string} = JSON.parse(data);
-      if(parentData.target === 'avatar-generator' && parentData.type === 'subscribe')
+      const { target, type } = data;
+      if(target === 'avatar-generator' && type === 'subscribe')
         this.onIFrame = true;
     });
   }
