@@ -604,7 +604,7 @@ export const getServerSideProps: GetServerSideProps<ExampleProps> = async (conte
     }
   }
   
-  const campaigns = await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns);
+  const campaigns = (await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns))[0];
   const isCampaign = campaigns.some(c => c === subdomain);
   
   let _baseMeshPath: string;
