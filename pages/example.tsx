@@ -35,6 +35,9 @@ import {ExporterUtil} from "../utils/exporter.util";
 import {GetServerSideProps} from "next";
 import {AccessoryInfoInterface, BasicData, ExportInterface, PartInfoInterface} from "../interfaces/common.interface";
 import {FirebaseUtil} from "../utils/firebase.util";
+import { LogComponent } from "../components/log.component";
+import { CategorySelectorComponent } from "../components/categorySelector.component";
+import { CategoryChildrenComponent } from "../components/categoryChildren.component";
 
 interface ExampleProps {
   campaign?: string | null;
@@ -306,6 +309,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
   
   async onCategoryChange(value: string) {
+    // TODO: Change camera position besed on 
     const _partList = this.filterListByBodyPart(value);
     this.setState({ partList: _partList, selectedPart: value });
   }
@@ -423,7 +427,14 @@ export default class Example extends Component<ExampleProps, ExampleState> {
         <Head>
           <title>ThreeJs Example</title>
         </Head>
-        <div className="fixed left-0 top-0 w-1/6 h-screen bg-slate-600 bg-opacity-50 p-2 hover:overflow-y-auto">
+        <div className="fixed w-[360px] h-4/5 left-[50%] translate-x-[-50%] flex justify-center items-start rounded-b-[180px] overflow-hidden">
+          <div className="bg-[#56AADC] w-full h-screen absolute"></div>
+          <div className="relative h-full" ref={ref => this.mount = ref} />
+        </div>
+        {/* <div>
+          <div ref={ref => this.mount = ref} />
+        </div> */}
+        <div className="fixed left-0 top-0 w-full h-screen bg-slate-600 bg-opacity-50 p-2 hover:overflow-y-auto hidden">
           <div className="mb-2 flex bg-slate-400">
             <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.rotateCamera} onChange={e => this.updateCameraAutoRotate(e.target.checked)} />
             <p>Rotate camera</p>
@@ -542,20 +553,9 @@ export default class Example extends Component<ExampleProps, ExampleState> {
             </div>
           </div>
         </div>
-        <div className="fixed right-0 top-0 w-1/6 bg-slate-600 bg-opacity-50 p-2">
-          <p className="text-white">Logs</p>
-          { this.state.logs ?
-            <>
-              <p className="text-white">Scene polycount: <span className="text-yellow-300">{this.state.logs.render.triangles}</span></p>
-              <p className="text-white">Active Drawcalls: <span className="text-yellow-300">{this.state.logs.render.calls}</span></p>
-              <p className="text-white">Textures in Memory: <span className="text-yellow-300">{this.state.logs.memory.textures}</span></p>
-              <p className="text-white">Geometries in Memory: <span className="text-yellow-300">{this.state.logs.memory.geometries}</span></p>
-            </>
-            : ''}
-        </div>
-        <div>
-          <div ref={ref => this.mount = ref} />
-        </div>
+        {/* <LogComponent logs={this.state.logs} /> */}
+        <CategorySelectorComponent list={this.state.selectList} handleClick={(value:string) => {this.onCategoryChange(value)}}/>
+        <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => {this.changePart(id, path, name)}}/>
       </>
     );
   }
