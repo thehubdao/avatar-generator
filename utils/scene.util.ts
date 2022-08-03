@@ -19,13 +19,17 @@ export function GetBaseCamera(): PerspectiveCamera {
     0.1,
     1000
   );
-  camera.position.set(0, 2, 5);
+  camera.position.set(0, 1.5, 0.85);
   
   return camera;
 }
 
 export function GetBaseRenderer(): WebGLRenderer {
-  let renderer = new WebGLRenderer();
+  let renderer = new WebGLRenderer({
+    alpha: true,
+    antialias: true,
+  });
+  renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);
   
   return renderer;
@@ -33,7 +37,7 @@ export function GetBaseRenderer(): WebGLRenderer {
 
 export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTMLCanvasElement) {
   let controls = new OrbitControls(camera, domElement);
-  controls.target.set(0, 1, 0);
+  controls.target.set(0, 1.7, 0);
   // TODO: Elaborate
   // controls.enablePan = false;
   
