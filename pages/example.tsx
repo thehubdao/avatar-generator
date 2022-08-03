@@ -62,7 +62,9 @@ interface ExampleState {
   logs?: WebGLInfo;
   skinColor: string;
   editModeSelected: boolean;
-  currentModule: ViewModuleState
+  currentModule: ViewModuleState;
+  resX: number;
+  resY: number;
 }
 
 export default class Example extends Component<ExampleProps, ExampleState> {
@@ -106,7 +108,9 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       savedModels: {},
       skinColor: '',
       editModeSelected: true,
-      currentModule: ViewModuleState.OnModule
+      currentModule: ViewModuleState.OnModule,
+      resX: 0,
+      resY: 0
     };
     
     this.mount = null;
@@ -122,6 +126,9 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     await this.getAccessoryBones();
     await this.getPartsData();
     await this.loadPreData();
+
+    this.setState({resX: window.innerWidth});
+    this.setState({resY: window.innerHeight});
     
     // IFrame impl
     this.tellParentIAmReady();
@@ -246,6 +253,8 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
 
   onWindowResize = (event: Event) => {
+    this.setState({resX: window.innerWidth});
+    this.setState({resY: window.innerHeight});
     this.camera!.aspect = window.innerWidth / window.innerHeight;
     
     // adjust the FOV
@@ -309,7 +318,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
   
   async onCategoryChange(value: string) {
-    // TODO: Change camera position besed on 
+    // TODO: Change camera position besed on category
     const _partList = this.filterListByBodyPart(value);
     this.setState({ partList: _partList, selectedPart: value });
   }
@@ -553,9 +562,10 @@ export default class Example extends Component<ExampleProps, ExampleState> {
             </div>
           </div>
         </div>
-        {/* <LogComponent logs={this.state.logs} /> */}
+        
         <CategorySelectorComponent list={this.state.selectList} handleClick={(value:string) => {this.onCategoryChange(value)}}/>
         <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => {this.changePart(id, path, name)}}/>
+        <LogComponent logs={this.state.logs} resX={this.state.resX} resY={this.state.resY}/>
       </>
     );
   }
