@@ -19,13 +19,17 @@ export function GetBaseCamera(): PerspectiveCamera {
     0.1,
     1000
   );
-  camera.position.set(0, 2, 5);
+  camera.position.set(0.5, 0.7, 2.3);
   
   return camera;
 }
 
 export function GetBaseRenderer(): WebGLRenderer {
-  let renderer = new WebGLRenderer();
+  let renderer = new WebGLRenderer({
+    alpha: true,
+    antialias: true,
+  });
+  renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);
   
   return renderer;

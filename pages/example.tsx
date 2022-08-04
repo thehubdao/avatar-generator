@@ -17,7 +17,7 @@ import {
   GetBaseRenderer,
   GetBaseScene
 } from "../utils/scene.util";
-import {GetTestLights} from "../utils/test-scene.util";
+import {GetTestLights, GetAmbientLights} from "../utils/test-scene.util";
 import {
   GetAccessoryBones,
   GetAccessoryListByCampaign,
@@ -39,6 +39,9 @@ import {FirebaseUtil} from "../utils/firebase.util";
 import {CampaignConfig} from "../enums/campaign.enum";
 import AGLoading from "../components/AG-Loading";
 import {RandomArrayElement} from "../utils/common.util";
+import { LogComponent } from "../components/log.component";
+import { CategorySelectorComponent } from "../components/categorySelector.component";
+import { CategoryChildrenComponent } from "../components/categoryChildren.component";
 
 interface ExampleProps {
   campaign?: string | null;
@@ -66,6 +69,8 @@ interface ExampleState {
   editModeSelected: boolean;
   currentModule: ViewModuleState;
   loading: boolean;
+  resX: number;
+  resY: number;
 }
 
 export default class Example extends Component<ExampleProps, ExampleState> {
@@ -111,6 +116,8 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       editModeSelected: true,
       currentModule: ViewModuleState.OnModule,
       loading: false,
+      resX: 0,
+      resY: 0,
     };
     
     this.mount = null;
@@ -128,6 +135,9 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     await this.getPartsData();
     await this.loadPreData();
     this.setLoading(false);
+
+    this.setState({resX: window.innerWidth});
+    this.setState({resY: window.innerHeight});
     
     // IFrame impl
     this.tellParentIAmReady();
@@ -243,6 +253,10 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     for(const l of lights) {
       this.scene.add(l);
     }
+    const aLights = GetAmbientLights();
+    for(const l of aLights) {
+      this.scene.add(l);
+    }
 
     this.baseModel = await ImporterUtil.FirebaseGltfModel(this.props.baseMeshPath);
     console.log('base', this.baseModel);
@@ -270,6 +284,8 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
 
   onWindowResize = (event: Event) => {
+    this.setState({resX: window.innerWidth});
+    this.setState({resY: window.innerHeight});
     this.camera!.aspect = window.innerWidth / window.innerHeight;
     
     // adjust the FOV
@@ -333,6 +349,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
   
   async onCategoryChange(value: string) {
+    // TODO: Change camera position based on category
     const _partList = this.filterListByBodyPart(value);
     this.setState({ partList: _partList, selectedPart: value });
   }
@@ -391,30 +408,10 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     if(this.onIFrame)
       window.parent.postMessage({source: 'avatar-generator', eventName: 'exported', data: this.exportData }, '*');
   }
-  
-  optionList() {
-    return this.state.selectList.map((x) => {
-      return <option value={x.id} key={x.id}>{x.id}</option>
-    });
-  }
 
   optionListAccessories() {
     return this.state.aSelectList.map((x) => {
       return <option value={x.id} key={x.id}>{x.id}</option>
-    });
-  }
-  
-  partSelectList() {
-    return this.state.partList.map((x) => {
-      return (
-          <div className="flex justify-center py-2" key={x.id}>
-            <button
-              className="font-bold py-2 px-4 mx-2 w-full rounded bg-orange-400 text-white"
-              onClick={() => this.changePart(x.id, x.path, x.name)}>
-              {x.name}
-            </button>
-          </div>
-      );
     });
   }
 
@@ -432,14 +429,29 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     });
   }
 
+  changeView() {
+    console.log("edit mode? ", this.state.editModeSelected);
+    const parent = this.mount?.parentNode as HTMLElement;
+    if (this.state.editModeSelected) {
+      parent!.classList.add('!w-full');
+      parent!.classList.add('!h-full');
+      parent!.classList.remove('rounded-b-[180px]');
+      this.setState({editModeSelected: false, currentModule: ViewModuleState.SwitchingModule});
+    } else {
+      parent!.classList.remove('!w-full');
+      parent!.classList.remove('!h-full');
+      parent!.classList.add('rounded-b-[180px]');
+      setTimeout(() => {
+        this.setState({editModeSelected: true, currentModule: ViewModuleState.SwitchingModule});
+      }, 500);
+    }
+  }
+
   render() {
     return (
       <>
-        {
-          this.state.editModeSelected ?
-            this.renderEditMode() :
-            this.renderViewMode()
-        }
+        {this.renderEditMode()}
+        <LogComponent logs={this.state.logs} resX={this.state.resX} resY={this.state.resY}/>
       </>
     );
   }
@@ -450,7 +462,11 @@ export default class Example extends Component<ExampleProps, ExampleState> {
         <Head>
           <title>ThreeJs Example</title>
         </Head>
-        <div className="fixed left-0 top-0 w-1/6 h-screen bg-slate-600 bg-opacity-50 p-2 hover:overflow-y-auto">
+        <div className="fixed w-[360px] h-4/5 left-[50%] translate-x-[-50%] flex justify-center items-start rounded-b-[180px] overflow-hidden transition-width transition-height duration-300 ease-in-out">
+          <div className="bg-[#56AADC] w-full h-screen absolute"></div>
+          <div className="relative h-full" ref={ref => this.mount = ref} />
+        </div>
+        <div className="fixed left-0 top-0 w-full h-screen bg-slate-600 bg-opacity-50 p-2 hover:overflow-y-auto hidden">
           <div className="mb-2 flex bg-slate-400">
             <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.rotateCamera} onChange={e => this.updateCameraAutoRotate(e.target.checked)} />
             <p>Rotate camera</p>
@@ -503,22 +519,6 @@ export default class Example extends Component<ExampleProps, ExampleState> {
             </div>
           </div>
           {
-            this.partList && this.partList.length > 0 ?
-              <div className="mb-2 bg-slate-400">
-                <div className="m-2">
-                  <p className="font-bold text-purple-900">Feature</p>
-                  <select value={this.state.selectedPart} className="w-full my-2"
-                          onChange={(e) => this.onCategoryChange(e.target.value)}>
-                    {this.optionList()}
-                  </select>
-                </div>
-              </div>
-              : ''
-          }
-          <div className="mb-2 bg-slate-400">
-            {this.partSelectList()}
-          </div>
-          {
             this.accessoryList && this.accessoryList?.length > 0 ?
               <div className="mb-2 bg-slate-400">
                 <div className="m-2">
@@ -559,30 +559,20 @@ export default class Example extends Component<ExampleProps, ExampleState> {
               </button>
             </div>
           </div>
-          <div className="mb-2 bg-slate-400">
-            <div className="flex justify-center py-2">
-              <button
-                className="font-bold py-2 px-4 mx-2 w-full rounded bg-indigo-400 text-white"
-                onClick={() => this.setState({editModeSelected: false, currentModule: ViewModuleState.SwitchingModule})}>
-                Goto ViewMode
-              </button>
-            </div>
+        </div>
+        <div onClick={() => {this.changeView()}} className="fixed top-4 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
+          <div>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+              <path className="fill-gray-600" d="M17.5,1.917a6.4,6.4,0,0,0-5.5,3.3,6.4,6.4,0,0,0-5.5-3.3A6.8,6.8,0,0,0,0,8.967c0,4.547,4.786,9.513,8.8,12.88a4.974,4.974,0,0,0,6.4,0C19.214,18.48,24,13.514,24,8.967A6.8,6.8,0,0,0,17.5,1.917Z"/>
+            </svg>
           </div>
         </div>
-        <div className="fixed right-0 top-0 w-1/6 bg-slate-600 bg-opacity-50 p-2">
-          <p className="text-white">Logs</p>
-          { this.state.logs ?
-            <>
-              <p className="text-white">Scene polycount: <span className="text-yellow-300">{this.state.logs.render.triangles}</span></p>
-              <p className="text-white">Active Drawcalls: <span className="text-yellow-300">{this.state.logs.render.calls}</span></p>
-              <p className="text-white">Textures in Memory: <span className="text-yellow-300">{this.state.logs.memory.textures}</span></p>
-              <p className="text-white">Geometries in Memory: <span className="text-yellow-300">{this.state.logs.memory.geometries}</span></p>
-            </>
-            : ''}
-        </div>
-        <div>
-          <div ref={ref => this.mount = ref} />
-        </div>
+        {this.state.editModeSelected &&
+        <>
+          <CategorySelectorComponent list={this.state.selectList} handleClick={(value:string) => {this.onCategoryChange(value)}}/>
+          <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => {this.changePart(id, path, name)}}/>
+        </>
+        }
         <AGLoading loading={this.state.loading} />
       </>
     );
@@ -593,24 +583,6 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       this.mount!.appendChild(this.renderer!.domElement);
       this.setState({currentModule: ViewModuleState.OnModule});
     }
-  }
-
-  private renderViewMode() {
-    return (
-      <>
-        <h1>
-          Welcome to View Mode! :D
-        </h1>
-        <button
-          className="font-bold py-2 px-4 rounded bg-blue-500 text-white"
-          onClick={() => this.setState({editModeSelected: true, currentModule: ViewModuleState.SwitchingModule})}>
-          Goto EditMode
-        </button>
-        <div>
-          <div ref={ref => this.mount = ref} />
-        </div>
-      </>
-    );
   }
 }
 
