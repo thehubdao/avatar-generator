@@ -1,12 +1,13 @@
 import { BodyPartLocationApi } from "../interfaces/api.interface";
+import {BasicData} from "../interfaces/common.interface";
 
 interface ExampleProps {
-  list: BodyPartLocationApi[];
+  list: BodyPartLocationApi[] | BasicData[];
   handleClick: Function;
 }
 
 function optionList(props: ExampleProps) {
-  return props.list.map((x: BodyPartLocationApi) => {
+  return props.list.map((x) => {
     return (
       <div className="overflow-hidden w-16 h-16 flex justify-center flex-col items-center" key={x.id} onClick={() => {props.handleClick(x.id)}}>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
