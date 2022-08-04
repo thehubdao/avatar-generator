@@ -1,4 +1,4 @@
-﻿import {AxesHelper, BoxGeometry, DoubleSide, Mesh, MeshPhongMaterial, PointLight} from "three";
+﻿import {AxesHelper, BoxGeometry, DoubleSide, Mesh, MeshPhongMaterial, PointLight, AmbientLight} from "three";
 
 export function GetTestCube(): Mesh {
   let geometry = new BoxGeometry(2, 16, 2);
@@ -28,6 +28,13 @@ export function GetTestLights(): PointLight[] {
   lights[ 0 ].position.set( 10, 10, 10 );
   // lights[ 1 ].position.set( 100, 200, 100 );
   // lights[ 2 ].position.set( - 100, - 200, - 100 );
+  
+  return lights;
+}
+
+export function GetAmbientLights(): AmbientLight[] {
+  let lights = [];
+  lights[ 0 ] = new AmbientLight( 0xf0f0f0 );
   
   return lights;
 }
