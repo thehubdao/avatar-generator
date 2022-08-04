@@ -403,7 +403,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   
   async exportModel() {
     this.exportData!.attributesBase64 = window.btoa(JSON.stringify(this.exportData?.attributes));
-    this.exportData!.model = await ExporterUtil.ExportModelGlb(this.baseModel!);
+    this.exportData!.model = new Blob([await ExporterUtil.ExportModelGlb(this.baseModel!) as ArrayBuffer], { type: 'application/octet-stream' });
     console.log(this.exportData);
     if(this.onIFrame)
       window.parent.postMessage({source: 'avatar-generator', eventName: 'exported', data: this.exportData }, '*');
