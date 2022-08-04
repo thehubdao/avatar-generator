@@ -17,7 +17,7 @@ import {
   GetBaseRenderer,
   GetBaseScene
 } from "../utils/scene.util";
-import {GetTestLights} from "../utils/test-scene.util";
+import {GetTestLights, GetAmbientLights} from "../utils/test-scene.util";
 import {
   GetAccessoryBones,
   GetAccessoryListByCampaign,
@@ -224,6 +224,10 @@ export default class Example extends Component<ExampleProps, ExampleState> {
 
     const lights = GetTestLights();
     for(const l of lights) {
+      this.scene.add(l);
+    }
+    const aLights = GetAmbientLights();
+    for(const l of aLights) {
       this.scene.add(l);
     }
 
