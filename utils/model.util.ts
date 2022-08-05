@@ -1,8 +1,16 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {ImporterUtil} from "./importer.util";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
-import {Group, Mesh, Object3D, SkinnedMesh} from "three";
+import {
+  Group,
+  Mesh,
+  MeshStandardMaterial,
+  MeshToonMaterial,
+  Object3D,
+  SkinnedMesh
+} from "three";
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
+import {TextureUtil} from "./texture.util";
 
 export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partIndex: number) {
   const partModel = await ImporterUtil.LoadGltfModel(partUrl);
@@ -31,7 +39,7 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   });
   
   if(chestMesh == undefined) {
-    console.error('Piece not found:', `${selectedPart.value} not found on replace model, please verify the glb file.`);
+    console.error('Piece not found:', `'${selectedPart.value}' not found on replace model, please verify the glb file.`);
     return;
   }
   
@@ -43,12 +51,14 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
     chest.traverse(object => {
       if((object as SkinnedMesh).isSkinnedMesh) {
         (object as SkinnedMesh).skeleton = baseSkeleton.clone();
+        ChangeToToonMaterial(object as SkinnedMesh);
       }
     });
   }
   
   if((chest as SkinnedMesh).isSkinnedMesh) {
     (chest as SkinnedMesh).skeleton = baseSkeleton.clone();
+    ChangeToToonMaterial(chest as SkinnedMesh);
   }
   
   console.log('base', baseModel);
@@ -58,7 +68,6 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   baseModel.children.splice(partInfo.partIndex, 1);
   baseModel.add(chest);
 }
-
 
 export function ReplaceModelAccessory(accessoriesInfo: Record<string, AccessoryInfoInterface>, selectedAcc: string, accessory: GLTF) {
   const bone = accessoriesInfo[selectedAcc];
@@ -80,3 +89,12 @@ export function ReplaceModelAccessory(accessoriesInfo: Record<string, AccessoryI
   bone.hasIt = true;
   bone.bone.add(accessoryMesh);
 }
+
+export function ChangeToToonMaterial(object: SkinnedMesh, tone?: 'threeTone' | 'fourTone' | 'fiveTone') {
+  const mapClone = (object.material as MeshStandardMaterial).map?.clone();
+  const _toneTexture = TextureUtil.GetToneTexture(tone);
+  object.material = new MeshToonMaterial({
+    map: mapClone,
+    gradientMap: _toneTexture,
+  });
+} 

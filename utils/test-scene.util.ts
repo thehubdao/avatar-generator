@@ -34,7 +34,7 @@ export function GetTestLights(): PointLight[] {
 
 export function GetAmbientLights(): AmbientLight[] {
   let lights = [];
-  lights[ 0 ] = new AmbientLight( 0xf0f0f0 );
+  lights[ 0 ] = new AmbientLight( 0x404040 );
   
   return lights;
 }
