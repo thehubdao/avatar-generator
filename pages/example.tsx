@@ -37,7 +37,7 @@ import {GetServerSideProps} from "next";
 import {AccessoryInfoInterface, BasicData, ExportInterface, PartInfoInterface} from "../interfaces/common.interface";
 import {FirebaseUtil} from "../utils/firebase.util";
 import {CampaignConfig} from "../enums/campaign.enum";
-import AGLoading from "../components/AG-Loading";
+import AGLoading from "../components/ag-loading.component";
 import {RandomArrayElement} from "../utils/common.util";
 import { LogComponent } from "../components/log.component";
 import { CategorySelectorComponent } from "../components/categorySelector.component";
@@ -207,8 +207,6 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
 
   filterListByBodyPart(bodyPartType: string) {
-    // console.log('input', this.partList);
-    // console.log('filterBy', bodyPartType);
     return this.partList!.filter(x => x.type === bodyPartType);
   }
 

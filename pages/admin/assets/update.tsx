@@ -1,7 +1,7 @@
 ﻿import {Component} from "react";
 import {GetServerSideProps} from "next";
 import {FirebaseUtil} from "../../../utils/firebase.util";
-import AGButton from "../../../components/AG-Button";
+import AGButton from "../../../components/ag-button.component";
 import Link from "next/link";
 
 interface AssetUpdateProps {

@@ -1,7 +1,7 @@
 ﻿import {Component} from "react";
 import {FirebaseUtil} from "../../../utils/firebase.util";
 import {FirestoreParameters, FirestoreValues, StorageValues} from "../../../enums/firebase.enum";
-import AGButton from "../../../components/AG-Button";
+import AGButton from "../../../components/ag-button.component";
 import {FeatureLocationApi} from "../../../interfaces/api.interface";
 import {BasicData} from "../../../interfaces/common.interface";
 import {GetServerSideProps} from "next";

@@ -2,8 +2,8 @@ import Head from 'next/head'
 import styles from './../styles/home.module.scss'
 import {Component} from "react";
 import Link from "next/link";
-import AGLoading from "../components/AG-Loading";
-import AGButton from "../components/AG-Button";
+import AGLoading from "../components/ag-loading.component";
+import AGButton from "../components/ag-button.component";
 
 interface HomeState {
   loading: boolean;
