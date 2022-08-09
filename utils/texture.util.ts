@@ -1,6 +1,6 @@
 import {NearestFilter, Texture, TextureLoader} from "three";
 
-type TextureTone = 'threeTone' | 'fourTone' | 'fiveTone';
+export type TextureTone = 'threeTone' | 'fourTone' | 'fiveTone';
 
 export class TextureUtil {
   private static _textureLoader: TextureLoader;
@@ -28,10 +28,10 @@ export class TextureUtil {
     TextureUtil._toneTexture[tone] = texture.clone();
   }
   
-  static GetToneTexture(tone: TextureTone = 'threeTone' ) {
+  static async GetToneTexture(tone: TextureTone = 'threeTone' ) {
     let toneTexture = TextureUtil.getSavedToneTexture(tone);
     if(toneTexture === undefined) {
-      toneTexture = TextureUtil.getTextureUtilInstance().load(`resources/tones/${tone}.jpg`);
+      toneTexture = await TextureUtil.getTextureUtilInstance().loadAsync(`resources/tones/${tone}.jpg`);
       toneTexture.minFilter = NearestFilter;
       toneTexture.magFilter = NearestFilter;
       TextureUtil.saveToneTexture(tone, toneTexture);
