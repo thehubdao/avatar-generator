@@ -46,8 +46,6 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   // @ts-ignore
   const chest: Object3D = SkeletonUtils.clone(chestMesh);
   let baseSkeleton: Skeleton;
-  console.log(partInfo);
-  console.log(baseModel);
   
   const basePartRef = baseModel.children[partInfo.partIndex];
   if((basePartRef as SkinnedMesh).isSkinnedMesh) {
