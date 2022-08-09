@@ -31,7 +31,7 @@ import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {AttributeValues, GlobalValues, ViewModuleState} from "../enums/common.enum";
 import {FirestoreParameters} from "../enums/firebase.enum";
 import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
-import {ReplaceModelAccessory, ReplaceModelPartOnly} from "../utils/model.util";
+import {ReplaceModelAccessory, ReplaceModelPartOnly, TransformObject3dToToonMaterial} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
 import {GetServerSideProps} from "next";
 import {
@@ -273,6 +273,8 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       }
     });
     
+    // Remove if want basemesh on toonMaterial
+    // await TransformObject3dToToonMaterial(this.baseModel.scene);
     this.scene.add(this.baseModel.scene);
 
     // remember these initial values
@@ -354,16 +356,16 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   async onCategoryChange(value: string) {
     const _partList = this.filterListByBodyPart(value);
     this.setState({ partList: _partList, selectedPart: value });
-    await this.setFeatureCamPosition(value, this.props.campaignConfig.partsCamPos);
+    this.setFeatureCamPosition(value, this.props.campaignConfig.partsCamPos);
   }
   
   async onAccessoryChange(value: string) {
     const _accessoryList = this.filterListByAccessory(value);
     this.setState({ accessoryList: _accessoryList, selectedAcc: value });
-    await this.setFeatureCamPosition(value, this.props.campaignConfig.accCamPos);
+    this.setFeatureCamPosition(value, this.props.campaignConfig.accCamPos);
   }
 
-  async setFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
+  setFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
     const confRef = posLocation ? posLocation[index] : undefined;
     if(confRef) {
       this.changeCamPosition(new Vector3(confRef.pos?.x, confRef.pos?.y, confRef.pos?.z));

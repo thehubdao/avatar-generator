@@ -103,10 +103,22 @@ export function ReplaceModelAccessory(accessoriesInfo: Record<string, AccessoryI
 }
 
 export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTone) {
-  const mapClone = (object.material as MeshStandardMaterial).map?.clone();
-  const _toneTexture = await TextureUtil.GetToneTexture(tone);
-  object.material = new MeshToonMaterial({
-    map: mapClone,
-    gradientMap: _toneTexture,
+  const materialRef = object.material as MeshStandardMaterial;
+  if(materialRef.isMeshStandardMaterial) {
+    const mapClone = materialRef.map?.clone();
+    const _toneTexture = await TextureUtil.GetToneTexture(tone);
+    object.material = new MeshToonMaterial({
+      map: mapClone,
+      gradientMap: _toneTexture,
+    });
+  }
+}
+
+export async function TransformObject3dToToonMaterial(object: Object3D, tone?: TextureTone) {
+  object.traverse(async subObj => {
+    const skinnedRef = subObj as SkinnedMesh;
+    if(skinnedRef.isSkinnedMesh) {
+      await ChangeToToonMaterial(skinnedRef, tone);
+    }
   });
-} 
+}
