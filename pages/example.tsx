@@ -34,9 +34,14 @@ import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {ReplaceModelAccessory, ReplaceModelPartOnly} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
 import {GetServerSideProps} from "next";
-import {AccessoryInfoInterface, BasicData, ExportInterface, PartInfoInterface} from "../interfaces/common.interface";
+import {
+  AccessoryInfoInterface,
+  BasicData,
+  CampaignConfig,
+  ExportInterface, LookAtVectors,
+  PartInfoInterface
+} from "../interfaces/common.interface";
 import {FirebaseUtil} from "../utils/firebase.util";
-import {CampaignConfig} from "../enums/campaign.enum";
 import AGLoading from "../components/ag-loading.component";
 import {RandomArrayElement} from "../utils/common.util";
 import { LogComponent } from "../components/log.component";
@@ -46,7 +51,7 @@ import { CategoryChildrenComponent } from "../components/categoryChildren.compon
 interface ExampleProps {
   campaign?: string | null;
   baseMeshPath: string;
-  campaignConfig: CampaignConfig[];
+  campaignConfig: CampaignConfig;
   selectListBodyParts: BasicData[];
   selectListAccessories: BasicData[];
   attributeConfig: BasicData[] | null;
@@ -318,14 +323,14 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.renderer!.render(this.scene!, this.camera!);
   }
   
-  onClickChangeCamPosition = () => {
+  changeCamPosition(value: Vector3 = this.state.cameraPos.clone()) {
     this.doCameraMovement = true;
     this.controls!.autoRotate = false;
-    this.cameraTargetPosition = this.state.cameraPos.clone();
+    this.cameraTargetPosition = value;
   }
   
-  onClickChangeLookAtPosition = () => {
-    this.controls!.target = this.state.cameraLookAt.clone();
+  changeLookAtPosition(value: Vector3 = this.state.cameraLookAt.clone()) {
+    this.controls!.target = value;
   }
 
   onClickChangeSkinColor = () => {
@@ -347,14 +352,23 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
   
   async onCategoryChange(value: string) {
-    // TODO: Change camera position based on category
     const _partList = this.filterListByBodyPart(value);
     this.setState({ partList: _partList, selectedPart: value });
+    await this.setFeatureCamPosition(value, this.props.campaignConfig.partsCamPos);
   }
   
   async onAccessoryChange(value: string) {
     const _accessoryList = this.filterListByAccessory(value);
     this.setState({ accessoryList: _accessoryList, selectedAcc: value });
+    await this.setFeatureCamPosition(value, this.props.campaignConfig.accCamPos);
+  }
+
+  async setFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
+    const confRef = posLocation ? posLocation[index] : undefined;
+    if(confRef) {
+      this.changeCamPosition(new Vector3(confRef.pos?.x, confRef.pos?.y, confRef.pos?.z));
+      this.changeLookAtPosition(new Vector3(confRef.lookAt?.x, confRef.lookAt?.y, confRef.lookAt?.z));
+    }
   }
   
   async changePart(id: string, partPath: string, name: string, selectedPart: string = this.state.selectedPart) {
@@ -494,7 +508,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
               </div>
             </div>
             <div className="flex justify-center pb-2">
-              <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white" onClick={() => this.onClickChangeCamPosition()}>Change CamPosition</button>
+              <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white" onClick={() => this.changeCamPosition()}>Change CamPosition</button>
             </div>
           </div>
           <div className="mb-2 w-full bg-slate-400">
@@ -513,7 +527,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
               </div>
             </div>
             <div className="flex justify-center pb-2">
-              <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white" onClick={() => this.onClickChangeLookAtPosition()}>Change CamLookAt</button>
+              <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white" onClick={() => this.changeLookAtPosition()}>Change CamLookAt</button>
             </div>
           </div>
           {
@@ -567,8 +581,8 @@ export default class Example extends Component<ExampleProps, ExampleState> {
         </div>
         {this.state.editModeSelected &&
         <>
-          <CategorySelectorComponent list={this.state.selectList} handleClick={(value:string) => {this.onCategoryChange(value)}}/>
-          <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => {this.changePart(id, path, name)}}/>
+          <CategorySelectorComponent list={this.state.selectList} handleClick={(value:string) => this.onCategoryChange(value)}/>
+          <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => this.changePart(id, path, name)}/>
         </>
         }
         <AGLoading loading={this.state.loading} />
@@ -607,7 +621,7 @@ export const getServerSideProps: GetServerSideProps<ExampleProps> = async (conte
   const isCampaign = campaigns.some(c => c === subdomain);
   
   let _baseMeshPath: string;
-  let _campaignConfig: CampaignConfig[];
+  let _campaignConfig: CampaignConfig;
   let _selectListBodyParts: BasicData[];
   let _selectListAccessories: BasicData[];
   
@@ -616,21 +630,21 @@ export const getServerSideProps: GetServerSideProps<ExampleProps> = async (conte
     const result = await FirebaseUtil.Instance().GetParameters(subdomain!, subdomain! + GV.Acc, subdomain! + GV.Config);
     _selectListBodyParts = result[0] as BasicData[];
     _selectListAccessories = result[1] as BasicData[];
-    _campaignConfig = result[2] as CampaignConfig[];
+    _campaignConfig = result[2] as CampaignConfig;
   }
   else {
     _baseMeshPath = `base_mesh/${GV.BaseCampaign}.glb`;
     const result = await FirebaseUtil.Instance().GetParameters(GV.BaseCampaign, GV.BaseCampaign + GV.Acc, GV.BaseCampaign + GV.Config);
     _selectListBodyParts = result[0] as BasicData[];
     _selectListAccessories = result[1] as BasicData[];
-    _campaignConfig = result[2] as CampaignConfig[];
+    _campaignConfig = result[2] as CampaignConfig;
   }
   
   return {
     props: {
       campaign: isCampaign ? subdomain : null,
       baseMeshPath: _baseMeshPath,
-      campaignConfig: _campaignConfig ?? [],
+      campaignConfig: _campaignConfig ?? {},
       selectListBodyParts: _selectListBodyParts,
       selectListAccessories: _selectListAccessories,
       attributeConfig: parsedConfig
