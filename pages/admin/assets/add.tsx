@@ -219,7 +219,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
 
       formData.thumb = await FirebaseUtil.Instance().UploadFile(thumbToUpload, StorageValues.Thumbnail);
       formData.path = await FirebaseUtil.Instance().UploadFile(fileToUpload, uploadFileTo, formData.type.toLowerCase());
-      formData.campaign.push(this.state.selectedCampaign);
+      formData.campaign = [this.state.selectedCampaign];
 
       await this.insertDB(JSON.stringify(formData));
       alert("Data inserted");
