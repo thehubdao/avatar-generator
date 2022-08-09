@@ -6,7 +6,7 @@ import {
   Mesh,
   MeshStandardMaterial,
   MeshToonMaterial,
-  Object3D,
+  Object3D, Skeleton,
   SkinnedMesh
 } from "three";
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
@@ -45,8 +45,22 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   
   // @ts-ignore
   const chest: Object3D = SkeletonUtils.clone(chestMesh);
-
-  const baseSkeleton = (baseModel.children[partInfo.partIndex] as SkinnedMesh).skeleton;
+  let baseSkeleton: Skeleton;
+  console.log(partInfo);
+  console.log(baseModel);
+  
+  const basePartRef = baseModel.children[partInfo.partIndex];
+  if((basePartRef as SkinnedMesh).isSkinnedMesh) {
+    baseSkeleton = (basePartRef as SkinnedMesh).skeleton;
+  }
+  else if((basePartRef as Group).isGroup) {
+    baseSkeleton = (basePartRef.children[0] as SkinnedMesh).skeleton;
+  }
+  else {
+    console.error('Skeleton Missing:', 'Skeleton missing from base_mesh some of the parts have weird components.', basePartRef);
+    return;
+  }
+  
   if((chest as Group).isGroup) {
     chest.traverse(object => {
       if((object as SkinnedMesh).isSkinnedMesh) {
