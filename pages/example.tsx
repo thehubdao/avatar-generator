@@ -31,7 +31,12 @@ import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {AttributeValues, GlobalValues, ViewModuleState} from "../enums/common.enum";
 import {FirestoreParameters} from "../enums/firebase.enum";
 import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
-import {ReplaceModelAccessory, ReplaceModelPartOnly, TransformObject3dToToonMaterial} from "../utils/model.util";
+import {
+  ChangeObjectSkinColor,
+  ReplaceModelAccessory,
+  ReplaceModelPartOnly,
+  TransformObject3dToToonMaterial
+} from "../utils/model.util";
 import {ExporterUtil} from "../utils/exporter.util";
 import {GetServerSideProps} from "next";
 import {
@@ -70,7 +75,7 @@ interface ExampleState {
   cameraLookAt: Vector3;
   savedModels: Record<string, GLTF>;
   logs?: WebGLInfo;
-  skinColor: string;
+  skinColor?: string;
   editModeSelected: boolean;
   currentModule: ViewModuleState;
   loading: boolean;
@@ -117,7 +122,6 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       cameraPos: new Vector3(),
       cameraLookAt: new Vector3(),
       savedModels: {},
-      skinColor: '',
       editModeSelected: true,
       currentModule: ViewModuleState.OnModule,
       loading: false,
@@ -335,13 +339,9 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.controls!.target = value;
   }
 
-  onClickChangeSkinColor = () => {
-    this.baseModel!.scene.traverse((object) => {
-      const objectRef = object as SkinnedMesh;
-      if(objectRef.isSkinnedMesh && (objectRef.material as MeshStandardMaterial).name === 'AvatarSkin_MAT') {
-        (objectRef.material as MeshStandardMaterial).color.set(`#${this.state.skinColor}`);
-      }
-    });
+  onClickChangeSkinColor() {
+    if(this.state.skinColor)
+      ChangeObjectSkinColor(this.baseModel!.scene, this.state.skinColor);
   }
   
   updateCameraAutoRotate = (checked: boolean) => {
@@ -384,7 +384,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       this.setState({ savedModels: _savedModels });
     }
     
-    await ReplaceModelPartOnly(this.baseModel!.scene.children[0], replaceModel, this.partListData![selectedPart], this.state.selectList.find(sl => sl.id === selectedPart));
+    await ReplaceModelPartOnly(this.baseModel!.scene.children[0], replaceModel, this.partListData![selectedPart], this.state.selectList.find(sl => sl.id === selectedPart), this.state.skinColor);
     await this.getPartsData();
     FrustumCulledFalse(this.scene!);
     this.addReplaceAttribute(selectedPart, name);
@@ -553,7 +553,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
               <div className="mb-2 w-full bg-slate-400">
                 <div className="flex justify-center py-2">
                   <p>#</p>
-                  <input className="ml-0.5 w-3/6 rounded pl-0.5" type="text" value={this.state.skinColor}
+                  <input className="ml-0.5 w-3/6 rounded pl-0.5" type="text" value={this.state.skinColor || ''}
                          onChange={(e) => this.setState({skinColor: e.target.value})}/>
                 </div>
                 <div className="flex justify-center pb-2">
