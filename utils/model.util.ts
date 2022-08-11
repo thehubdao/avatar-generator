@@ -59,22 +59,11 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
     return;
   }
   
-  if((newPart as Group).isGroup) {
-    newPart.traverse( async object => {
-      if((object as SkinnedMesh).isSkinnedMesh) {
-        (object as SkinnedMesh).skeleton = baseSkeleton.clone();
-        await ChangeToToonMaterial(object as SkinnedMesh);
-      }
-    });
-  }
+  await ChangeSkeleton(newPart, baseSkeleton);
   
-  if((newPart as SkinnedMesh).isSkinnedMesh) {
-    (newPart as SkinnedMesh).skeleton = baseSkeleton.clone();
-    await ChangeToToonMaterial(newPart as SkinnedMesh);
+  if(skinColor) {
+    await ChangeObjectSkinColor(newPart, skinColor);
   }
-  
-  if(skinColor)
-    ChangeObjectSkinColor(newPart, skinColor);
   
   console.log('base', baseModel);
   console.log('replace', newPart);
@@ -82,6 +71,22 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   
   baseModel.children.splice(partInfo.partIndex, 1);
   baseModel.add(newPart);
+}
+
+async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton) {
+  if((newPart as Group).isGroup) {
+    newPart.traverse( async object => {
+      if((object as SkinnedMesh).isSkinnedMesh) {
+        (object as SkinnedMesh).skeleton = baseSkeleton.clone();
+        await ChangeToToonMaterial(object as SkinnedMesh, "fiveTone");
+      }
+    });
+  }
+
+  if((newPart as SkinnedMesh).isSkinnedMesh) {
+    (newPart as SkinnedMesh).skeleton = baseSkeleton.clone();
+    await ChangeToToonMaterial(newPart as SkinnedMesh, "fiveTone");
+  }
 }
 
 export function ReplaceModelAccessory(accessoriesInfo: Record<string, AccessoryInfoInterface>, selectedAcc: string, accessory: GLTF) {
@@ -115,6 +120,7 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
       map: mapClone,
       name: oldName,
       gradientMap: _toneTexture,
+      transparent: true,
     });
   }
 }
@@ -128,7 +134,7 @@ export async function TransformObject3dToToonMaterial(object: Object3D, tone?: T
   });
 }
 
-export function ChangeObjectSkinColor(object: Object3D, skinColor: string, skinMatName: string = 'AvatarSkin_MAT') {
+export async function ChangeObjectSkinColor(object: Object3D, skinColor: string, skinMatName: string = 'AvatarSkin_MAT') {
   object.traverse(subObject => {
     const objectRef = subObject as SkinnedMesh;
     if(objectRef.isSkinnedMesh) {

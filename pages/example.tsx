@@ -121,6 +121,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       aSelectList: props.selectListAccessories,
       cameraPos: new Vector3(),
       cameraLookAt: new Vector3(),
+      skinColor: 'ff0000',
       savedModels: {},
       editModeSelected: true,
       currentModule: ViewModuleState.OnModule,
@@ -143,6 +144,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     await this.getAccessoryBones();
     await this.getPartsData();
     await this.loadPreData();
+    await this.onClickChangeSkinColor();
     this.setLoading(false);
 
     this.setState({resX: window.innerWidth});
@@ -277,8 +279,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       }
     });
     
-    // Remove if want basemesh on toonMaterial
-    // await TransformObject3dToToonMaterial(this.baseModel.scene);
+    await TransformObject3dToToonMaterial(this.baseModel.scene);
     this.scene.add(this.baseModel.scene);
 
     // remember these initial values
@@ -339,9 +340,9 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.controls!.target = value;
   }
 
-  onClickChangeSkinColor() {
+  async onClickChangeSkinColor() {
     if(this.state.skinColor)
-      ChangeObjectSkinColor(this.baseModel!.scene, this.state.skinColor);
+      await ChangeObjectSkinColor(this.baseModel!.scene, this.state.skinColor);
   }
   
   updateCameraAutoRotate = (checked: boolean) => {
