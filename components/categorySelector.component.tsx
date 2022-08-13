@@ -39,15 +39,15 @@ function optionList(props: ExampleProps) {
     let siblings = getSiblings(el);
     siblings.forEach(sibling => {
       let bro = sibling as HTMLElement
-      bro.classList.add('bg-transparent');
+      bro.classList.add('!bg-transparent');
     });
-    el.classList.remove('bg-transparent');
+    el.classList.remove('!bg-transparent');
     props.handleClick(id);
   }
 
   return props.list.map((x) => {
     return (
-      <div className={"overflow-hidden w-12 h-12 flex justify-center flex-col items-center bg-slate-50" + (props.activedPart==x.id?'':' bg-transparent')} key={x.id} onClick={(event:React.MouseEvent) => selectPart(event,x.id)}>
+      <div className={"overflow-hidden w-12 h-12 flex justify-center flex-col items-center bg-slate-50" + (props.activedPart===x.id?'':' !bg-transparent')} key={x.id} onClick={(event:React.MouseEvent) => selectPart(event,x.id)}>
         <div className="pointer-events-none">
           <Image src={'/resources/icos/features/' + x.id + '.svg'} width={30} height={30} alt={x.id}/>
         </div>
