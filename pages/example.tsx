@@ -1,4 +1,5 @@
 ﻿import {Component} from "react";
+import Image from "next/image";
 import {
   AnimationMixer,
   Clock,
@@ -111,7 +112,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   constructor(props: ExampleProps) {
     super(props);
     this.state = {
-      doAnimation: false,
+      doAnimation: true,
       rotateCamera: false,
       selectedPart: props.selectListBodyParts[0].id,
       selectedAcc: props.selectListAccessories[0].id,
@@ -121,7 +122,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       aSelectList: props.selectListAccessories,
       cameraPos: new Vector3(),
       cameraLookAt: new Vector3(),
-      skinColor: 'ff0000',
+      skinColor: 'cf9e7c',
       savedModels: {},
       editModeSelected: true,
       currentModule: ViewModuleState.OnModule,
@@ -445,7 +446,6 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
 
   changeView() {
-    console.log("edit mode? ", this.state.editModeSelected);
     const parent = this.mount?.parentNode as HTMLElement;
     if (this.state.editModeSelected) {
       parent!.classList.add('!w-full');
@@ -478,7 +478,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
           <title>ThreeJs Example</title>
         </Head>
         <div className="fixed w-[360px] h-4/5 left-[50%] translate-x-[-50%] flex justify-center items-start rounded-b-[180px] overflow-hidden transition-width transition-height duration-300 ease-in-out">
-          <div className="bg-[#56AADC] w-full h-screen absolute"></div>
+          <div className="bg-[#272727] w-full h-screen absolute"></div>
           <div className="relative h-full" ref={ref => this.mount = ref} />
         </div>
         <div className="fixed left-0 top-0 w-full h-screen bg-slate-600 bg-opacity-50 p-2 hover:overflow-y-auto hidden">
@@ -576,16 +576,20 @@ export default class Example extends Component<ExampleProps, ExampleState> {
           </div>
         </div>
         <div onClick={() => {this.changeView()}} className="fixed top-4 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
-          <div>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-              <path className="fill-gray-600" d="M17.5,1.917a6.4,6.4,0,0,0-5.5,3.3,6.4,6.4,0,0,0-5.5-3.3A6.8,6.8,0,0,0,0,8.967c0,4.547,4.786,9.513,8.8,12.88a4.974,4.974,0,0,0,6.4,0C19.214,18.48,24,13.514,24,8.967A6.8,6.8,0,0,0,17.5,1.917Z"/>
-            </svg>
-          </div>
+          {this.state.editModeSelected ?
+          <Image src={'/resources/icos/buttons/ViewMode.svg'} width={30} height={30} alt={'view mode'}/>
+          :<Image src={'/resources/icos/buttons/EditMode.svg'} width={30} height={30} alt={'edit mode'}/>
+          }
         </div>
-        {this.state.editModeSelected &&
+        {this.state.editModeSelected ?
         <>
-          <CategorySelectorComponent list={this.state.selectList} handleClick={(value:string) => this.onCategoryChange(value)}/>
+          <CategorySelectorComponent list={this.state.selectList} activedPart={this.state.selectedPart} handleClick={(value:string) => this.onCategoryChange(value)}/>
           <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => this.changePart(id, path, name)}/>
+        </>
+        :<>
+          <div onClick={() => this.exportModel()} className="fixed top-20 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
+            <Image src={'/resources/icos/buttons/Mint.svg'} width={30} height={30} alt={'minting'}/>
+          </div>
         </>
         }
         <AGLoading loading={this.state.loading} />
