@@ -78,14 +78,14 @@ async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton) {
     newPart.traverse( async object => {
       if((object as SkinnedMesh).isSkinnedMesh) {
         (object as SkinnedMesh).skeleton = baseSkeleton.clone();
-        await ChangeToToonMaterial(object as SkinnedMesh, "fiveTone");
+        await ChangeToToonMaterial(object as SkinnedMesh, "threeTone");
       }
     });
   }
 
   if((newPart as SkinnedMesh).isSkinnedMesh) {
     (newPart as SkinnedMesh).skeleton = baseSkeleton.clone();
-    await ChangeToToonMaterial(newPart as SkinnedMesh, "fiveTone");
+    await ChangeToToonMaterial(newPart as SkinnedMesh, "threeTone");
   }
 }
 
