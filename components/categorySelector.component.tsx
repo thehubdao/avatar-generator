@@ -1,32 +1,68 @@
+import Image from "next/image";
 import { BodyPartLocationApi } from "../interfaces/api.interface";
 import {BasicData} from "../interfaces/common.interface";
 
 interface ExampleProps {
   list: BodyPartLocationApi[] | BasicData[];
   handleClick: Function;
+  activedPart: string;
+}
+
+function getSiblings(el: HTMLElement) {
+
+  // for collecting siblings
+  let siblings:ChildNode[] = []; 
+
+  // if no parent, return no sibling
+  if(!el.parentNode) {
+      return siblings;
+  }
+
+  // first child of the parent node
+  let sibling  = el.parentNode.firstChild;
+
+  // collecting siblings
+  while (sibling) {
+    if (sibling.nodeType === 1 && sibling !== el) {
+        siblings.push(sibling);
+    }
+    sibling = sibling.nextSibling;
+  }
+  return siblings;
 }
 
 function optionList(props: ExampleProps) {
+
+  function selectPart(e:React.MouseEvent, id:string) {
+    e.preventDefault();
+    const el = e.target as HTMLElement;
+    let siblings = getSiblings(el);
+    siblings.forEach(sibling => {
+      let bro = sibling as HTMLElement
+      bro.classList.add('bg-transparent');
+    });
+    el.classList.remove('bg-transparent');
+    props.handleClick(id);
+  }
+
   return props.list.map((x) => {
     return (
-      <div className="overflow-hidden w-16 h-16 flex justify-center flex-col items-center" key={x.id} onClick={() => {props.handleClick(x.id)}}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
-          <path className="fill-gray-600" d="M17.5,1.917a6.4,6.4,0,0,0-5.5,3.3,6.4,6.4,0,0,0-5.5-3.3A6.8,6.8,0,0,0,0,8.967c0,4.547,4.786,9.513,8.8,12.88a4.974,4.974,0,0,0,6.4,0C19.214,18.48,24,13.514,24,8.967A6.8,6.8,0,0,0,17.5,1.917Z"/>
-        </svg>
-        <p className="text-[0.75rem]">{x.id}</p>
+      <div className={"overflow-hidden w-12 h-12 flex justify-center flex-col items-center bg-slate-50" + (props.activedPart==x.id?'':' bg-transparent')} key={x.id} onClick={(event:React.MouseEvent) => selectPart(event,x.id)}>
+        <div className="pointer-events-none">
+          <Image src={'/resources/icos/features/' + x.id + '.svg'} width={30} height={30} alt={x.id}/>
+        </div>
       </div>
     )
   });
 }
 
 function CategorySelectorComponent(props: ExampleProps) {
+
   return (
-    <div className="w-20 bg-gray-200 border-2 border-gray-100 fixed top-4 right-4 rounded-[6px] drop-shadow-md flex flex-col items-center">
-      <div className="overflow-hidden w-16 h-16 flex justify-center flex-col items-center border-b-2 border-solid border-gray-100">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
-          <path className="fill-gray-600" d="M17.5,1.917a6.4,6.4,0,0,0-5.5,3.3,6.4,6.4,0,0,0-5.5-3.3A6.8,6.8,0,0,0,0,8.967c0,4.547,4.786,9.513,8.8,12.88a4.974,4.974,0,0,0,6.4,0C19.214,18.48,24,13.514,24,8.967A6.8,6.8,0,0,0,17.5,1.917Z"/>
-        </svg>
-        <p className="text-[0.75rem]">features</p>
+    <div className="w-14 bg-gray-200 border-2 border-gray-100 fixed top-4 right-4 rounded-[6px] drop-shadow-md flex flex-col items-center">
+      <div className="overflow-hidden w-12 h-12 flex justify-center flex-col items-center border-b-2 border-solid border-gray-100">
+        <Image src={'/resources/icos/features/features.svg'} width={30} height={30} alt={'features'}/>
+        {/* <p className="text-[0.75rem]">features</p> */}
       </div>
       <div className="py-4">
         {optionList(props)}
