@@ -1,15 +1,14 @@
-﻿export enum BodyPartTypeEnum {
-  Head = 1,
-  Chest = 2,
-  Hands = 3,
-  Legs = 4,
-  Feet = 5,
+﻿export enum GlobalValues {
+  BaseCampaign = 'base',
+  Acc = 'Accessories',
+  Config = 'Config',
 }
 
-export enum AccessoryPartTypeEnum {
-  Head = 'Head',
-  Face = 'Face',
-  LeftHand = 'LHand',
-  RightHand = 'RHand',
-  Hips = 'Hips',
+export enum AttributeValues {
+  Campaign = 'campaign',
+}
+
+export enum ViewModuleState {
+  SwitchingModule,
+  OnModule
 }

@@ -1,9 +1,15 @@
-﻿import {BodyPartTypeEnum} from "../enums/common.enum";
+﻿export interface BodyPartLocationApi extends FeatureLocationApi {
+  id: string;
+}
 
-export interface BodyPartLocationApi {
-  id: number;
+export interface AccLocationApi extends FeatureLocationApi {
+  id: string;
+}
+
+export interface FeatureLocationApi {
   name: string;
-  type: BodyPartTypeEnum;
-  url: string;
+  type: string;
+  path: string;
   thumb: string;
+  campaign: string[];
 }

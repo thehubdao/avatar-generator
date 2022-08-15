@@ -36,3 +36,7 @@ yarn-error.log*
 
 # ide
 /.idea
+
+# test pages
+/pages/test/
+/pages/api/testeo.ts

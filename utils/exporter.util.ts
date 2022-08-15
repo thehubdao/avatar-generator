@@ -18,7 +18,10 @@ export class ExporterUtil {
       binary: true,
     });
     
+    // const blob = new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
+    // return blob;
     SaveArrayBuffer(out as ArrayBuffer, `exported.glb`);
+    return out as ArrayBuffer;
   }
 
   static async ExportModelGltf(model: GLTF) {
