@@ -3,7 +3,7 @@ import {ClientQuestion} from "../enums/campaign.enum";
 
 export interface BasicData {
   id: string;
-  value: string;
+  val: string;
 }
 
 export interface PartInfoInterface {
@@ -21,6 +21,7 @@ export interface AccessoryInfoInterface {
 export interface ExportInterface {
   attributes: BasicData[];
   attributesBase64?: string;
+  picture?: Blob;
   model?: Blob;
 }
 

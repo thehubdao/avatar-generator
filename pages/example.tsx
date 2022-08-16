@@ -6,10 +6,10 @@ import {
   MeshStandardMaterial,
   PerspectiveCamera,
   Scene,
-  SkinnedMesh,
+  SkinnedMesh, Vector2,
   Vector3,
   WebGLInfo,
-  WebGLRenderer
+  WebGLRenderer, WebGLRenderTarget
 } from "three";
 import {
   FrustumCulledFalse,
@@ -44,15 +44,16 @@ import {
   AccessoryInfoInterface,
   BasicData,
   CampaignConfig,
-  ExportInterface, LookAtVectors,
+  ExportInterface,
+  LookAtVectors,
   PartInfoInterface
 } from "../interfaces/common.interface";
 import {FirebaseUtil} from "../utils/firebase.util";
 import AGLoading from "../components/ag-loading.component";
 import {RandomArrayElement} from "../utils/common.util";
-import { LogComponent } from "../components/log.component";
-import { CategorySelectorComponent } from "../components/categorySelector.component";
-import { CategoryChildrenComponent } from "../components/categoryChildren.component";
+import {LogComponent} from "../components/log.component";
+import {CategorySelectorComponent} from "../components/categorySelector.component";
+import {CategoryChildrenComponent} from "../components/categoryChildren.component";
 
 interface ExampleProps {
   campaign?: string | null;
@@ -144,8 +145,8 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     await this.getAccessoryList();
     await this.getAccessoryBones();
     await this.getPartsData();
-    await this.loadPreData();
     await this.onClickChangeSkinColor();
+    await this.loadPreData();
     this.setLoading(false);
 
     this.setState({resX: window.innerWidth});
@@ -170,20 +171,20 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   
   async loadPreData() {
     if(this.props.campaign && this.props.campaign !== GlobalValues.BaseCampaign) {
-      this.exportData?.attributes.push({id: AttributeValues.Campaign, value: this.props.campaign!});
+      this.exportData?.attributes.push({id: AttributeValues.Campaign, val: this.props.campaign!});
     }
 
     if(this.props.attributeConfig) {
       for (const attribute of this.props.attributeConfig) {
         // Is a part
         if(this.state.selectList.some(pl => pl.id === attribute.id)) {
-          const newPart = this.partList!.find(p => p.name === attribute.value);
+          const newPart = this.partList!.find(p => p.name === attribute.val);
           if(newPart)
             await this.changePart(newPart.id, newPart.path, newPart.name, attribute.id);
         }
         // Is an accessory
         else if(this.state.aSelectList.some(pl => pl.id === attribute.id)) {
-          const newAcc = this.accessoryList!.find(p => p.name === attribute.value);
+          const newAcc = this.accessoryList!.find(p => p.name === attribute.val);
           if(newAcc)
             await this.changeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
         }
@@ -410,14 +411,50 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   addReplaceAttribute(addId: string, addValue: string) {
     if(this.exportData?.attributes.some(x => x.id === addId)) {
       const oldAttribute = this.exportData!.attributes.find(x => x.id === addId);
-      oldAttribute!.value = addValue;
+      oldAttribute!.val = addValue;
       return;
     }
     
-    this.exportData?.attributes.push({id: addId, value: addValue});
+    this.exportData?.attributes.push({id: addId, val: addValue});
+  }
+
+  async takeExportPicture() {
+    this.changeView();
+
+    const mimeType = 'image/png';
+    const prevRT = this.renderer!.getRenderTarget();
+    
+    let oldSize: Vector2 = new Vector2();
+    
+    const newRT = new WebGLRenderTarget(200, 200);
+    const newCam = new PerspectiveCamera(
+      50,
+      1,
+      0.1,
+      1000
+    );
+    newCam.position.set(0.5, 0.7, 10);
+    this.renderer!.render(this.scene!, newCam);
+    // this.renderer!.setRenderTarget(newRT);
+    this.renderer!.getSize(oldSize);
+    this.renderer!.setSize(1000, 1000);
+    
+    setTimeout(() => {
+      this.renderer?.domElement.toBlob(blob => {
+        if(blob) {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'screenshot.jpg';
+          a.click();
+        }
+      }, mimeType);
+    }, 2000);
+    
+    // this.renderer!.setRenderTarget(prevRT);
   }
   
   async exportModel() {
+    // this.exportData!.picture = await this.takeExportPicture();
     this.exportData!.attributesBase64 = window.btoa(JSON.stringify(this.exportData?.attributes));
     this.exportData!.model = new Blob([await ExporterUtil.ExportModelGlb(this.baseModel!) as ArrayBuffer], { type: 'application/octet-stream' });
     console.log(this.exportData);
@@ -620,7 +657,7 @@ export const getServerSideProps: GetServerSideProps<ExampleProps> = async (conte
     parsedConfig = JSON.parse(Buffer.from(config as string, 'base64').toString('ascii'));
     if(parsedConfig?.some(x => x.id === AttributeValues.Campaign)) {
       const configCampaign = parsedConfig?.find(x => x.id === AttributeValues.Campaign);
-      subdomain = configCampaign!.value;
+      subdomain = configCampaign!.val;
     }
   }
   

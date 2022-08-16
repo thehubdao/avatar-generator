@@ -50,8 +50,8 @@ export function GetAccessoryBones(baseModel: Group, accessoryBonesList: BasicDat
   let result: Record<string, AccessoryInfoInterface> = {};
   
   bones.traverse((bone) => {
-    if(accessoryBonesList.some(x => x.value === bone.name)) {
-      const foundBone = accessoryBonesList.filter(x => x.value === bone.name);
+    if(accessoryBonesList.some(x => x.val === bone.name)) {
+      const foundBone = accessoryBonesList.filter(x => x.val === bone.name);
       foundBone.forEach(fb => {
         result[fb.id] = { bone: bone };
       })
@@ -66,8 +66,8 @@ export function GetPartsData(baseModel: Group, partList: BasicData[], update: bo
   let result: Record<string, PartInfoInterface> = {};
   
   baseParts.children.forEach((part, index) => {
-    if(partList.some(x => x.value === part.name)) {
-      const foundPart = partList.find(x => x.value === part.name);
+    if(partList.some(x => x.val === part.name)) {
+      const foundPart = partList.find(x => x.val === part.name);
       result[foundPart!.id] = { partIndex: index, featureBase: update ? result[foundPart!.id].featureBase : part.clone() };
     }
   });

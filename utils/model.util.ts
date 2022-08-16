@@ -33,13 +33,13 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   
   let chestMesh: Object3D | undefined = undefined;
   replaceModel.scene.traverse(m => {
-    if(m.name === selectedPart.value) {
+    if(m.name === selectedPart.val) {
       chestMesh = m;
     }
   });
   
   if(chestMesh == undefined) {
-    console.error('Piece not found:', `'${selectedPart.value}' not found on replace model, please verify the glb file.`);
+    console.error('Piece not found:', `'${selectedPart.val}' not found on replace model, please verify the glb file.`);
     return;
   }
   
