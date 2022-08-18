@@ -14,6 +14,8 @@ import {
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
 import {TextureTone, TextureUtil} from "./texture.util";
 
+type MaterialFunction = (obj: SkinnedMesh, tone?: TextureTone) => void;
+
 export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partIndex: number) {
   const partModel = await ImporterUtil.LoadGltfModel(partUrl);
   
@@ -58,7 +60,7 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
     return;
   }
   
-  await ChangeSkeleton(newPart, baseSkeleton);
+  await ChangeSkeleton(newPart, baseSkeleton, ChangeToToonMaterial, "threeTone");
   
   if(skinColor) {
     await ChangeObjectSkinColor(newPart, skinColor);
@@ -72,19 +74,21 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   baseModel.add(newPart);
 }
 
-async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton) {
+async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone) {
   if((newPart as Group).isGroup) {
     newPart.traverse( async object => {
       if((object as SkinnedMesh).isSkinnedMesh) {
         (object as SkinnedMesh).skeleton = baseSkeleton.clone();
-        await ChangeToToonMaterial(object as SkinnedMesh, "threeTone");
+        if(changeMaterial && tone)
+          await changeMaterial(object as SkinnedMesh, tone);
       }
     });
   }
 
   if((newPart as SkinnedMesh).isSkinnedMesh) {
     (newPart as SkinnedMesh).skeleton = baseSkeleton.clone();
-    await ChangeToToonMaterial(newPart as SkinnedMesh, "threeTone");
+    if(changeMaterial && tone)
+      await changeMaterial(newPart as SkinnedMesh, tone);
   }
 }
 
@@ -114,7 +118,7 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
   if(materialRef.isMeshStandardMaterial) {
     const mapClone = materialRef.map?.clone();
     const oldName = materialRef.name;
-    const _toneTexture = await TextureUtil.GetToneTexture(tone);
+    const _toneTexture = await TextureUtil.Instance().GetToneTexture(tone);
     object.material = new MeshToonMaterial({
       map: mapClone,
       name: oldName,

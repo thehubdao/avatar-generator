@@ -3,38 +3,52 @@ import {NearestFilter, Texture, TextureLoader} from "three";
 export type TextureTone = 'threeTone' | 'fourTone' | 'fiveTone';
 
 export class TextureUtil {
-  private static _textureLoader: TextureLoader;
+  //#region Singleton
+  private static _instance: TextureUtil;
+  public static Instance() {
+    if(this._instance === undefined)
+      this._instance = new TextureUtil();
+
+    return this._instance;
+  }
+  //#endregion
   
-  private static _toneTexture: Record<string, Texture>;
+  private _textureLoader: TextureLoader | undefined;
+  private _toneTexture: Record<string, Texture> | undefined;
   
-  private static getTextureUtilInstance() {
-    if(TextureUtil._textureLoader === undefined)
-      TextureUtil._textureLoader = new TextureLoader();
-    
-    return TextureUtil._textureLoader;
+  private constructor() {
+    this._textureLoader = undefined;
+    this._toneTexture = undefined;
   }
   
-  private static getSavedToneTexture(tone: TextureTone) {
-    if(TextureUtil._toneTexture && TextureUtil._toneTexture[tone])
-      return TextureUtil._toneTexture[tone].clone();
+  private getTextureUtilInstance() {
+    if(this._textureLoader === undefined)
+      this._textureLoader = new TextureLoader();
+    
+    return this._textureLoader;
+  }
+  
+  private getSavedToneTexture(tone: TextureTone) {
+    if(this._toneTexture && this._toneTexture[tone])
+      return this._toneTexture[tone].clone();
     
     return undefined;
   }
   
-  private static saveToneTexture(tone: TextureTone, texture: Texture) {
-    if(TextureUtil._toneTexture === undefined)
-      TextureUtil._toneTexture = {};
+  private saveToneTexture(tone: TextureTone, texture: Texture) {
+    if(this._toneTexture === undefined)
+      this._toneTexture = {};
     
-    TextureUtil._toneTexture[tone] = texture.clone();
+    this._toneTexture[tone] = texture.clone();
   }
   
-  static async GetToneTexture(tone: TextureTone = 'threeTone' ) {
-    let toneTexture = TextureUtil.getSavedToneTexture(tone);
+  public async GetToneTexture(tone: TextureTone = 'threeTone' ) {
+    let toneTexture = this.getSavedToneTexture(tone);
     if(toneTexture === undefined) {
-      toneTexture = await TextureUtil.getTextureUtilInstance().loadAsync(`resources/tones/${tone}.jpg`);
+      toneTexture = await this.getTextureUtilInstance().loadAsync(`resources/tones/${tone}.jpg`);
       toneTexture.minFilter = NearestFilter;
       toneTexture.magFilter = NearestFilter;
-      TextureUtil.saveToneTexture(tone, toneTexture);
+      this.saveToneTexture(tone, toneTexture);
     }
     
     return toneTexture;
