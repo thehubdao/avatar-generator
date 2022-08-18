@@ -3,13 +3,13 @@ import Image from "next/image";
 import {
   AnimationMixer,
   Clock,
-  MeshStandardMaterial,
   PerspectiveCamera,
   Scene,
-  SkinnedMesh, Vector2,
+  Vector2,
   Vector3,
   WebGLInfo,
-  WebGLRenderer, WebGLRenderTarget
+  WebGLRenderer,
+  WebGLRenderTarget
 } from "three";
 import {
   FrustumCulledFalse,
@@ -54,6 +54,7 @@ import {RandomArrayElement} from "../utils/common.util";
 import {LogComponent} from "../components/log.component";
 import {CategorySelectorComponent} from "../components/categorySelector.component";
 import {CategoryChildrenComponent} from "../components/categoryChildren.component";
+import {IFrameExportData, IFrameReady} from "../utils/iframe.util";
 
 interface ExampleProps {
   campaign?: string | null;
@@ -154,21 +155,16 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       resY: window.innerHeight
     });
     
-    // IFrame impl
-    this.tellParentIAmReady();
+    IFrameReady(this.setOnIFrame);
   }
   
   setLoading(newState: boolean = true) {
     this.setState({loading: newState});
   }
-
-  tellParentIAmReady() {
-    window.parent.postMessage({source: "avatar-generator", eventName: 'ready'}, '*');
-    window.addEventListener("message", ({data, source}) => {
-      const { target, type } = data;
-      if(target === 'avatar-generator' && type === 'subscribe')
-        this.onIFrame = true;
-    });
+  
+  setOnIFrame() {
+    console.log('IFrame Callback: ', this.onIFrame);
+    this.onIFrame = true;
   }
   
   async loadPreData() {
@@ -461,7 +457,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.exportData!.model = new Blob([await ExporterUtil.ExportModelGlb(this.baseModel!) as ArrayBuffer], { type: 'application/octet-stream' });
     console.log(this.exportData);
     if(this.onIFrame)
-      window.parent.postMessage({source: 'avatar-generator', eventName: 'exported', data: this.exportData }, '*');
+      IFrameExportData(this.exportData!);
   }
 
   optionListAccessories() {

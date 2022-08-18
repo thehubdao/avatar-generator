@@ -12,3 +12,14 @@ export enum ViewModuleState {
   SwitchingModule,
   OnModule
 }
+
+export enum IFrameValues {
+  Project = 'avatar-generator',
+  Event = 'message',
+}
+
+export enum IFrameEvents {
+  Ready = 'ready',
+  Subscribe = 'subscribe',
+  Exported = 'exported',
+}
