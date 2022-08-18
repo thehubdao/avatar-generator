@@ -149,8 +149,10 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     await this.loadPreData();
     this.setLoading(false);
 
-    this.setState({resX: window.innerWidth});
-    this.setState({resY: window.innerHeight});
+    this.setState({
+      resX: window.innerWidth,
+      resY: window.innerHeight
+    });
     
     // IFrame impl
     this.tellParentIAmReady();
@@ -229,12 +231,12 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   
   async getPartsData() {
     this.partListData = GetPartsData(this.baseModel!.scene, this.state.selectList);
-    console.log(this.partListData);
+    // console.log(this.partListData);
   }
   
   async getAccessoryBones() {
     this.accessoryBonesData = GetAccessoryBones(this.baseModel!.scene, this.state.aSelectList);
-    console.log('base', this.accessoryBonesData);
+    // console.log('base', this.accessoryBonesData);
   }
   
   async avatarScene() {
@@ -270,7 +272,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     }
 
     this.baseModel = await ImporterUtil.FirebaseGltfModel(this.props.baseMeshPath);
-    console.log('base', this.baseModel);
+    console.log('Base start', this.baseModel);
     
     this.mixer = new AnimationMixer(this.baseModel.scene);
 
