@@ -1,5 +1,14 @@
 ﻿import {PerspectiveCamera, Scene, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import {SceneInterface} from "../../interfaces/scene.interface";
+
+export function InitSceneController(): SceneInterface {
+  return {
+    scene: GetBaseScene(),
+    camera: GetBaseCamera(),
+    renderer: GetBaseRenderer(),
+  };
+}
 
 export function GetBaseScene(): Scene {
   let scene = new Scene();

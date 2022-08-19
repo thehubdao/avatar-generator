@@ -1,23 +1,17 @@
 ﻿import {Component} from "react";
 import Image from "next/image";
 import {
-  AnimationMixer,
   Clock,
   PerspectiveCamera,
-  Scene,
   Vector2,
   Vector3,
   WebGLInfo,
-  WebGLRenderer,
   WebGLRenderTarget
 } from "three";
 import {
   FrustumCulledFalse,
-  GetBaseCamera,
   GetBaseCameraControls,
-  GetBaseRenderer,
-  GetBaseScene
-} from "../utils/scene.util";
+} from "../utils/threejs/scene.util";
 import {GetTestLights, GetAmbientLights} from "../utils/test-scene.util";
 import {
   GetAccessoryBones,
@@ -27,7 +21,6 @@ import {
   ImporterUtil
 } from "../utils/importer.util";
 import Head from "next/head";
-import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {AttributeValues, GlobalValues, ViewModuleState} from "../enums/common.enum";
 import {FirestoreParameters} from "../enums/firebase.enum";
@@ -56,6 +49,8 @@ import {CategorySelectorComponent} from "../components/categorySelector.componen
 import {CategoryChildrenComponent} from "../components/categoryChildren.component";
 import {IFrameExportData, IFrameReady} from "../utils/iframe.util";
 import {CreateAnimationMixer, SetAnimation} from "../utils/threejs/animation.util";
+import {SceneInterface} from "../interfaces/scene.interface";
+import {InitSceneController} from "../utils/threejs/scene.util";
 
 interface ExampleProps {
   campaign?: string | null;
@@ -91,12 +86,14 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   mount: HTMLDivElement | null;
   clock: Clock;
   
-  scene?: Scene;
-  baseModel?: GLTF;
-  camera?: PerspectiveCamera;
-  renderer?: WebGLRenderer;
-  mixer?: AnimationMixer;
-  controls?: OrbitControls;
+  sc: SceneInterface;
+  
+  // scene?: Scene;
+  // baseModel?: GLTF;
+  // camera?: PerspectiveCamera;
+  // renderer?: WebGLRenderer;
+  // mixer?: AnimationMixer;
+  // controls?: OrbitControls;
 
   doCameraMovement: boolean = false;
   cameraTargetPosition?: Vector3;
@@ -134,6 +131,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       resY: 0,
     };
     
+    this.sc = {};
     this.mount = null;
     this.clock = new Clock();
     this.exportData = {attributes: []};
@@ -232,32 +230,30 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
   
   async getPartsData() {
-    this.partListData = GetPartsData(this.baseModel!.scene, this.state.selectList);
+    this.partListData = GetPartsData(this.sc.baseModel!.scene, this.state.selectList);
     // console.log(this.partListData);
   }
   
   async getAccessoryBones() {
-    this.accessoryBonesData = GetAccessoryBones(this.baseModel!.scene, this.state.aSelectList);
+    this.accessoryBonesData = GetAccessoryBones(this.sc.baseModel!.scene, this.state.aSelectList);
     // console.log('base', this.accessoryBonesData);
   }
   
   async avatarScene() {
-    this.scene = GetBaseScene();
-    this.camera = GetBaseCamera();
-    this.renderer = GetBaseRenderer();
+    this.sc = InitSceneController();
     
-    this.cameraTargetPosition = this.camera.position.clone();
+    this.cameraTargetPosition = this.sc.camera!.position.clone();
     this.setState({
       cameraPos: this.cameraTargetPosition.clone()
     });
 
     // mount scene
-    this.mount!.appendChild(this.renderer.domElement);
+    this.mount!.appendChild(this.sc.renderer!.domElement);
 
     // camera controls
-    this.controls = GetBaseCameraControls(this.camera, this.renderer.domElement);
+    this.sc.controls = GetBaseCameraControls(this.sc.camera!, this.sc.renderer!.domElement);
     this.setState({
-      cameraLookAt: this.controls.target.clone()
+      cameraLookAt: this.sc.controls!.target.clone()
     });
 
     // Add test assets
@@ -266,18 +262,18 @@ export default class Example extends Component<ExampleProps, ExampleState> {
 
     const lights = GetTestLights();
     for(const l of lights) {
-      this.scene.add(l);
+      this.sc.scene!.add(l);
     }
     const aLights = GetAmbientLights();
     for(const l of aLights) {
-      this.scene.add(l);
+      this.sc.scene!.add(l);
     }
 
-    this.baseModel = await ImporterUtil.FirebaseGltfModel(this.props.baseMeshPath);
-    console.log('Base start', this.baseModel);
+    this.sc.baseModel = await ImporterUtil.FirebaseGltfModel(this.props.baseMeshPath);
+    console.log('Base start', this.sc.baseModel);
     
-    this.mixer = CreateAnimationMixer(this.baseModel.scene);
-    await SetAnimation(this.mixer, this.baseModel, this.setHasAnimation);
+    this.sc.mixer = CreateAnimationMixer(this.sc.baseModel!.scene);
+    await SetAnimation(this.sc.mixer, this.sc.baseModel, this.setHasAnimation);
     
     // this.mixer = new AnimationMixer(this.baseModel.scene);
     //
@@ -288,16 +284,16 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     //   }
     // });
     
-    await TransformObject3dToToonMaterial(this.baseModel.scene);
-    this.scene.add(this.baseModel.scene);
+    await TransformObject3dToToonMaterial(this.sc.baseModel.scene);
+    this.sc.scene!.add(this.sc.baseModel.scene);
 
     // remember these initial values
-    this.tanFOV = Math.tan(((Math.PI / 180) * this.camera.fov / 2));
+    this.tanFOV = Math.tan(((Math.PI / 180) * this.sc.camera!.fov / 2));
     this.windowHeight = window.innerHeight;
 
     window.addEventListener( 'resize', this.onWindowResize, false );
     
-    FrustumCulledFalse(this.scene);
+    FrustumCulledFalse(this.sc.scene!);
 
     this.Animate();
   }
@@ -305,16 +301,16 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   onWindowResize = (event: Event) => {
     this.setState({resX: window.innerWidth});
     this.setState({resY: window.innerHeight});
-    this.camera!.aspect = window.innerWidth / window.innerHeight;
+    this.sc.camera!.aspect = window.innerWidth / window.innerHeight;
     
     // adjust the FOV
-    this.camera!.fov = (360 / Math.PI) * Math.atan(this.tanFOV! * ( window.innerHeight / this.windowHeight!));
+    this.sc.camera!.fov = (360 / Math.PI) * Math.atan(this.tanFOV! * ( window.innerHeight / this.windowHeight!));
 
-    this.camera!.updateProjectionMatrix();
+    this.sc.camera!.updateProjectionMatrix();
     //this.camera!.lookAt(this.scene!.position);
 
-    this.renderer!.setSize(window.innerWidth, window.innerHeight);
-    this.renderer!.render(this.scene!, this.camera!);
+    this.sc.renderer!.setSize(window.innerWidth, window.innerHeight);
+    this.sc.renderer!.render(this.sc.scene!, this.sc.camera!);
   }
   
   // Animate the scene
@@ -322,41 +318,41 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     requestAnimationFrame(this.Animate);
 
     let delta = this.clock.getDelta();
-    if (this.mixer && this.state.doAnimation) this.mixer.update(delta);
+    if (this.sc.mixer && this.state.doAnimation) this.sc.mixer.update(delta);
     
-    this.controls!.update();
+    this.sc.controls!.update();
     
-    if(this.camera!.position.distanceTo(this.cameraTargetPosition!) < 0.1) {
+    if(this.sc.camera!.position.distanceTo(this.cameraTargetPosition!) < 0.1) {
       this.doCameraMovement = false;
-      this.controls!.autoRotate = this.state.rotateCamera;
+      this.sc.controls!.autoRotate = this.state.rotateCamera;
     }
     
     if(this.doCameraMovement)
-      this.camera!.position.lerp(this.cameraTargetPosition!, delta);
+      this.sc.camera!.position.lerp(this.cameraTargetPosition!, delta);
 
-    this.setState({ logs: this.renderer!.info})
+    this.setState({ logs: this.sc.renderer!.info})
     
-    this.renderer!.render(this.scene!, this.camera!);
+    this.sc.renderer!.render(this.sc.scene!, this.sc.camera!);
   }
   
   changeCamPosition(value: Vector3 = this.state.cameraPos.clone()) {
     this.doCameraMovement = true;
-    this.controls!.autoRotate = false;
+    this.sc.controls!.autoRotate = false;
     this.cameraTargetPosition = value;
   }
   
   changeLookAtPosition(value: Vector3 = this.state.cameraLookAt.clone()) {
-    this.controls!.target = value;
+    this.sc.controls!.target = value;
   }
 
   async onClickChangeSkinColor() {
     if(this.state.skinColor)
-      await ChangeObjectSkinColor(this.baseModel!.scene, this.state.skinColor);
+      await ChangeObjectSkinColor(this.sc.baseModel!.scene, this.state.skinColor);
   }
   
   updateCameraAutoRotate = (checked: boolean) => {
     this.setState({ rotateCamera: checked });
-    this.controls!.autoRotate = checked;
+    this.sc.controls!.autoRotate = checked;
   }
   
   updateDoAnimation = (checked: boolean) => {
@@ -394,9 +390,9 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       this.setState({ savedModels: _savedModels });
     }
     
-    await ReplaceModelPartOnly(this.baseModel!.scene.children[0], replaceModel, this.partListData![selectedPart], this.state.selectList.find(sl => sl.id === selectedPart), this.state.skinColor);
+    await ReplaceModelPartOnly(this.sc.baseModel!.scene.children[0], replaceModel, this.partListData![selectedPart], this.state.selectList.find(sl => sl.id === selectedPart), this.state.skinColor);
     await this.getPartsData();
-    FrustumCulledFalse(this.scene!);
+    FrustumCulledFalse(this.sc.scene!);
     this.addReplaceAttribute(selectedPart, name);
   }
 
@@ -429,7 +425,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.changeView();
 
     const mimeType = 'image/png';
-    const prevRT = this.renderer!.getRenderTarget();
+    const prevRT = this.sc.renderer!.getRenderTarget();
     
     let oldSize: Vector2 = new Vector2();
     
@@ -441,13 +437,13 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       1000
     );
     newCam.position.set(0.5, 0.7, 10);
-    this.renderer!.render(this.scene!, newCam);
+    this.sc.renderer!.render(this.sc.scene!, newCam);
     // this.renderer!.setRenderTarget(newRT);
-    this.renderer!.getSize(oldSize);
-    this.renderer!.setSize(1000, 1000);
+    this.sc.renderer!.getSize(oldSize);
+    this.sc.renderer!.setSize(1000, 1000);
     
     setTimeout(() => {
-      this.renderer?.domElement.toBlob(blob => {
+      this.sc.renderer?.domElement.toBlob(blob => {
         if(blob) {
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
@@ -463,7 +459,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   async exportModel() {
     // this.exportData!.picture = await this.takeExportPicture();
     this.exportData!.attributesBase64 = window.btoa(JSON.stringify(this.exportData?.attributes));
-    this.exportData!.model = new Blob([await ExporterUtil.ExportModelGlb(this.baseModel!) as ArrayBuffer], { type: 'application/octet-stream' });
+    this.exportData!.model = new Blob([await ExporterUtil.ExportModelGlb(this.sc.baseModel!) as ArrayBuffer], { type: 'application/octet-stream' });
     console.log(this.exportData);
     if(this.onIFrame)
       IFrameExportData(this.exportData!);
@@ -643,7 +639,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   
   componentDidUpdate(prevProps: Readonly<ExampleProps>, prevState: Readonly<ExampleState>, snapshot?: any) {
     if(this.mount && this.state.currentModule !== ViewModuleState.OnModule) {
-      this.mount!.appendChild(this.renderer!.domElement);
+      this.mount!.appendChild(this.sc.renderer!.domElement);
       this.setState({currentModule: ViewModuleState.OnModule});
     }
   }
