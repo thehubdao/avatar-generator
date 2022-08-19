@@ -299,8 +299,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
 
   onWindowResize = (event: Event) => {
-    this.setState({resX: window.innerWidth});
-    this.setState({resY: window.innerHeight});
+    this.setState({ resX: window.innerWidth, resY: window.innerHeight });
     this.sc.camera!.aspect = window.innerWidth / window.innerHeight;
     
     // adjust the FOV
