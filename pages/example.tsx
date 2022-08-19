@@ -55,6 +55,7 @@ import {LogComponent} from "../components/log.component";
 import {CategorySelectorComponent} from "../components/categorySelector.component";
 import {CategoryChildrenComponent} from "../components/categoryChildren.component";
 import {IFrameExportData, IFrameReady} from "../utils/iframe.util";
+import {CreateAnimationMixer, SetAnimation} from "../utils/threejs/animation.util";
 
 interface ExampleProps {
   campaign?: string | null;
@@ -162,9 +163,14 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.setState({loading: newState});
   }
   
-  setOnIFrame() {
+  setOnIFrame = () => {
     console.log('IFrame Callback: ', this.onIFrame);
     this.onIFrame = true;
+  }
+  
+  setHasAnimation = () => {
+    console.log('Animation CallBack: ', this.hasAnimation);
+    this.hasAnimation = true;
   }
   
   async loadPreData() {
@@ -270,14 +276,17 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.baseModel = await ImporterUtil.FirebaseGltfModel(this.props.baseMeshPath);
     console.log('Base start', this.baseModel);
     
-    this.mixer = new AnimationMixer(this.baseModel.scene);
-
-    this.baseModel.animations.forEach((clip) => {
-      if(this.mixer) {
-        this.mixer.clipAction(clip).play();
-        this.hasAnimation = true;
-      }
-    });
+    this.mixer = CreateAnimationMixer(this.baseModel.scene);
+    await SetAnimation(this.mixer, this.baseModel, this.setHasAnimation);
+    
+    // this.mixer = new AnimationMixer(this.baseModel.scene);
+    //
+    // this.baseModel.animations.forEach((clip) => {
+    //   if(this.mixer) {
+    //     this.mixer.clipAction(clip).play();
+    //     this.hasAnimation = true;
+    //   }
+    // });
     
     await TransformObject3dToToonMaterial(this.baseModel.scene);
     this.scene.add(this.baseModel.scene);
