@@ -1,5 +1,7 @@
 ﻿import {Component} from "react";
 import Image from "next/image";
+import Head from "next/head";
+import AGLoading from "../components/ag-loading.component";
 import {
   Clock,
   PerspectiveCamera,
@@ -20,7 +22,6 @@ import {
   GetPartsData,
   ImporterUtil
 } from "../utils/importer.util";
-import Head from "next/head";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {AttributeValues, GlobalValues, ViewModuleState} from "../enums/common.enum";
 import {FirestoreParameters} from "../enums/firebase.enum";
@@ -42,7 +43,6 @@ import {
   PartInfoInterface
 } from "../interfaces/common.interface";
 import {FirebaseUtil} from "../utils/firebase.util";
-import AGLoading from "../components/ag-loading.component";
 import {RandomArrayElement} from "../utils/common.util";
 import {LogComponent} from "../components/log.component";
 import {CategorySelectorComponent} from "../components/categorySelector.component";
