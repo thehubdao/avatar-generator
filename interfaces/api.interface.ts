@@ -8,8 +8,12 @@ export interface AccLocationApi extends FeatureLocationApi {
 
 export interface FeatureLocationApi {
   name: string;
-  type: string;
+  type?: string;
   path: string;
-  thumb: string;
+  thumb?: string;
   campaign: string[];
+}
+
+export interface AnimLocationApi extends Omit<FeatureLocationApi, 'type' | 'thumb'> {
+  id: string;
 }

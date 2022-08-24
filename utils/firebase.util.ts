@@ -1,19 +1,23 @@
-import { FirebaseApp, FirebaseOptions, initializeApp } from "@firebase/app";
+import {FirebaseApp, FirebaseOptions, initializeApp} from "@firebase/app";
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   Firestore,
+  getDoc,
   getDocs,
   getFirestore,
+  orderBy,
   query,
   QueryConstraint,
-  where,
-  orderBy,
-  getDoc, doc, setDoc, deleteDoc, updateDoc
+  setDoc,
+  updateDoc,
+  where
 } from "@firebase/firestore";
-import { FirestoreFilterValues, FirestoreParameters, FirestoreValues, StorageValues } from "../enums/firebase.enum";
-import { FirebaseStorage, getBlob, getStorage, ref, uploadBytes } from "@firebase/storage";
-import { AGQueryConstraints } from "../interfaces/firebase.interface";
+import {FirestoreFilterValues, FirestoreParameters, FirestoreValues, StorageValues} from "../enums/firebase.enum";
+import {FirebaseStorage, getBlob, getStorage, ref, uploadBytes} from "@firebase/storage";
+import {AGQueryConstraints} from "../interfaces/firebase.interface";
 
 export class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -95,6 +99,8 @@ export class FirebaseUtil {
         return this.PartConstraints(constraintsValues);
       case FirestoreValues.Accessories:
         return this.AccessoryConstraints(constraintsValues);
+      case FirestoreValues.Animations:
+        return this.AnimationConstraints(constraintsValues);
       default:
         return [];
     }
@@ -124,6 +130,18 @@ export class FirebaseUtil {
 
     if (type)
       constraints.push(where(FirestoreFilterValues.Type, "==", type));
+
+    constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
+
+    return constraints;
+  }
+
+  private AnimationConstraints(constraintsValues: AGQueryConstraints) {
+    const constraints: QueryConstraint[] = [];
+    const {campaign} = constraintsValues;
+
+    if (campaign)
+      constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
 
     constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
 
@@ -167,7 +185,7 @@ export class FirebaseUtil {
   }
 
   async UploadFile(file: File, fileType: StorageValues, sectionType?: string) {
-    const realSection = sectionType ? '/' + sectionType.replace('acc', '') : '';
+    const realSection = sectionType ? '/' + sectionType.toLowerCase().replace('acc', '') : '';
     const fileRef = ref(this.Storage(), `${fileType}${realSection}/${file.name}`);
     const log = await uploadBytes(fileRef, file);
 

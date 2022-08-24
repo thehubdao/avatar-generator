@@ -1,5 +1,5 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
-import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
+import {AccLocationApi, AnimLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {Group, SkinnedMesh} from "three";
 import {FirebaseUtil} from "./firebase.util";
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
@@ -86,5 +86,10 @@ export async function GetAssetsListByCampaign(campaign?: string | null) {
 
 export async function GetAccessoryListByCampaign(campaign?: string | null) {
   const jsonObject: AccLocationApi[] = await fetch('api/getAccessories' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  return jsonObject;
+}
+
+export async function GetAnimationListByCampaign(campaign?: string | null) {
+  const jsonObject: AnimLocationApi[] = await fetch('api/getAnimations' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }

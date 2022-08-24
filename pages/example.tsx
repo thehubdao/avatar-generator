@@ -17,7 +17,7 @@ import {
 import {GetTestLights, GetAmbientLights} from "../utils/test-scene.util";
 import {
   GetAccessoryBones,
-  GetAccessoryListByCampaign,
+  GetAccessoryListByCampaign, GetAnimationListByCampaign,
   GetAssetsListByCampaign,
   GetPartsData,
   ImporterUtil
@@ -25,7 +25,7 @@ import {
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {AttributeValues, GlobalValues, ViewModuleState} from "../enums/common.enum";
 import {FirestoreParameters} from "../enums/firebase.enum";
-import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
+import {AccLocationApi, AnimLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {
   ChangeObjectSkinColor,
   ReplaceModelAccessory,
@@ -102,6 +102,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   partListData?: Record<string, PartInfoInterface>;
   partList?: BodyPartLocationApi[];
   accessoryList?: AccLocationApi[];
+  animationList?: AnimLocationApi[];
   exportData?: ExportInterface;
   
   tanFOV?: number;
@@ -143,6 +144,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     await this.avatarScene();
     await this.getPartList();
     await this.getAccessoryList();
+    await this.getAnimationList();
     await this.getAccessoryBones();
     await this.getPartsData();
     await this.onClickChangeSkinColor();
@@ -219,6 +221,11 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.accessoryList = await GetAccessoryListByCampaign(this.props.campaign);
     const _accessoryList = this.filterListByAccessory(this.state.selectedAcc);
     this.setState({ accessoryList: _accessoryList });
+  }
+  
+  async getAnimationList() {
+    this.animationList = await GetAnimationListByCampaign(this.props.campaign);
+    console.log(this.animationList);
   }
 
   filterListByBodyPart(bodyPartType: string) {

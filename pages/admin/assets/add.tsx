@@ -23,6 +23,7 @@ interface AssetAddState {
   loneFile?: File;
   loneFileOptions: string[];
   selectedStorage: StorageValues;
+  animation?: boolean;
 }
 
 export default class Add extends Component<AssetAddProps, AssetAddState> {
@@ -32,7 +33,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
     this.state = {
       jsonData: '',
       dbLocation: FirestoreValues.Parts,
-      formData: {name: '', path: '', type: '', thumb: '', campaign: []},
+      formData: {name: '', path: '', campaign: []},
       typeOptions: [],
       selectedCampaign: '',
       locationOptions: Object.values(FirestoreValues),
@@ -43,11 +44,21 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
 
   async getTypeOptionsByCampaign(campaign: string) {
     const diff = this.state.dbLocation === FirestoreValues.Accessories ? 'Accessories' : '';
-
     this.setState({
       selectedCampaign: campaign,
-      typeOptions: campaign.length <= 0 ? [] : (await FirebaseUtil.Instance().GetParameters<BasicData[]>(campaign + diff))[0]
+      typeOptions: [],
+      formData: {
+        ...this.state.formData,
+        type: undefined
+      }
     });
+
+    console.log(this.state.formData.type);
+    
+    if(!this.state.animation)
+      this.setState({
+        typeOptions: campaign.length <= 0 ? [] : (await FirebaseUtil.Instance().GetParameters<BasicData[]>(campaign + diff))[0]
+      });
   }
 
   renderTypeOptions() {
@@ -76,6 +87,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
 
   renderUploadType() {
     switch (this.state.dbLocation) {
+      case FirestoreValues.Animations:
       case FirestoreValues.Accessories:
       case FirestoreValues.Parts:
         return this.renderPartForm();
@@ -85,7 +97,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   }
 
   renderPartForm() {
-    const {formData, selectedCampaign} = this.state;
+    const {formData, selectedCampaign, animation} = this.state;
     return (
       <>
         <div className="mx-2 my-2 border-slate-600 border-2 rounded">
@@ -106,6 +118,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
                 {this.renderCampaignOptions()}
               </select>
             </div>
+            { !animation &&
             <div className="flex my-2">
               <p className="mx-2 w-20 text-right">Type:</p>
               <select className="w-52 rounded border-2 border-slate-600" required
@@ -114,13 +127,15 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
                 <option value=''>Select...</option>
                 {this.renderTypeOptions()}
               </select>
-            </div>
+            </div> }
 
+            { !animation &&
             <div className="flex my-2">
               <p className="mx-2 w-20 text-right my-2">Thumb:</p>
               <input className="ml-2 my-2" type="file" accept=".jpg,.png" required
                      onChange={e => this.setState({thumbToUpload: e.target.files ? e.target.files[0] : undefined})}/>
-            </div>
+            </div> }
+            
             <div className="flex my-2">
               <p className="mx-2 w-20 text-right my-2">File:</p>
               <input className="ml-2 my-2" type="file" accept=".glb" required
@@ -154,7 +169,10 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
               <p className="mx-2">Db location:</p>
               <select className="w-52 rounded border-2 border-slate-600" required
                       value={dbLocation}
-                      onChange={e => this.setState({dbLocation: e.target.value as FirestoreValues})}>
+                      onChange={e => this.setState({
+                        dbLocation: e.target.value as FirestoreValues,
+                        animation: e.target.value === FirestoreValues.Animations
+                      })}>
                 {this.renderLocationOptions()}
               </select>
             </div>
@@ -212,17 +230,32 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   }
 
   async insertDBForm() {
-    const {formData, thumbToUpload, fileToUpload, dbLocation} = this.state;
+    const {formData, thumbToUpload, fileToUpload} = this.state;
 
-    if (thumbToUpload && fileToUpload) {
-      const uploadFileTo = dbLocation === FirestoreValues.Parts ? StorageValues.Part : StorageValues.Accessory;
+    if (fileToUpload) {
+      const uploadFileTo = this.uploadTo();
 
-      formData.thumb = await FirebaseUtil.Instance().UploadFile(thumbToUpload, StorageValues.Thumbnail);
-      formData.path = await FirebaseUtil.Instance().UploadFile(fileToUpload, uploadFileTo, formData.type.toLowerCase());
+      if(thumbToUpload)
+        formData.thumb = await FirebaseUtil.Instance().UploadFile(thumbToUpload, StorageValues.Thumbnail);
+      
+      formData.path = await FirebaseUtil.Instance().UploadFile(fileToUpload, uploadFileTo, formData.type);
       formData.campaign = [this.state.selectedCampaign];
 
       await this.insertDB(JSON.stringify(formData));
       alert("Data inserted");
+    }
+  }
+  
+  uploadTo(location: FirestoreValues | undefined = this.state.dbLocation) {
+    switch (location) {
+      case FirestoreValues.Parts:
+        return StorageValues.Part;
+      case FirestoreValues.Accessories:
+        return StorageValues.Accessory;
+      case FirestoreValues.Animations:
+        return StorageValues.Animation;
+      default:
+        return StorageValues.Missing;
     }
   }
 
