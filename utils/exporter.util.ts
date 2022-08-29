@@ -11,16 +11,16 @@ export class ExporterUtil {
     return ExporterUtil.gltfExporter;
   }
   
-  static async ExportModelGlb(model: GLTF) {
+  static async ExportModelGlb(model: GLTF, saveFile: boolean = true) {
     const exporter = this.getGltfLoaderInstance();
     const out = await exporter.parseAsync(model.scene, {
       animations: model.animations,
       binary: true,
     });
     
-    // const blob = new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
-    // return blob;
-    SaveArrayBuffer(out as ArrayBuffer, `exported.glb`);
+    if(saveFile)
+      SaveArrayBuffer(out as ArrayBuffer, `exported.glb`);
+    
     return out as ArrayBuffer;
   }
 

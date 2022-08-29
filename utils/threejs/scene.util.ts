@@ -37,7 +37,7 @@ export function GetBaseRenderer(): WebGLRenderer {
   let renderer = new WebGLRenderer({
     alpha: true,
     antialias: true,
-    // preserveDrawingBuffer: true,
+    preserveDrawingBuffer: true,
   });
   renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);

@@ -428,44 +428,18 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   }
 
   async takeExportPicture() {
-    this.changeView();
-
     const mimeType = 'image/png';
-    const prevRT = this.sc.renderer!.getRenderTarget();
-    
-    let oldSize: Vector2 = new Vector2();
-    
-    const newRT = new WebGLRenderTarget(200, 200);
-    const newCam = new PerspectiveCamera(
-      50,
-      1,
-      0.1,
-      1000
-    );
-    newCam.position.set(0.5, 0.7, 10);
-    this.sc.renderer!.render(this.sc.scene!, newCam);
-    // this.renderer!.setRenderTarget(newRT);
-    this.sc.renderer!.getSize(oldSize);
-    this.sc.renderer!.setSize(1000, 1000);
-    
-    setTimeout(() => {
-      this.sc.renderer?.domElement.toBlob(blob => {
-        if(blob) {
-          const a = document.createElement('a');
-          a.href = URL.createObjectURL(blob);
-          a.download = 'screenshot.jpg';
-          a.click();
-        }
-      }, mimeType);
-    }, 2000);
-    
-    // this.renderer!.setRenderTarget(prevRT);
+    this.sc.renderer!.domElement.toBlob(blob => {
+      if(blob) {
+        this.exportData!.picture = blob;
+      }
+    }, mimeType);
   }
   
   async exportModel() {
-    // this.exportData!.picture = await this.takeExportPicture();
+    await this.takeExportPicture();
     this.exportData!.attributesBase64 = window.btoa(JSON.stringify(this.exportData?.attributes));
-    this.exportData!.model = new Blob([await ExporterUtil.ExportModelGlb(this.sc.baseModel!) as ArrayBuffer], { type: 'application/octet-stream' });
+    this.exportData!.model = new Blob([await ExporterUtil.ExportModelGlb(this.sc.baseModel!, !this.onIFrame) as ArrayBuffer], { type: 'application/octet-stream' });
     console.log(this.exportData);
     if(this.onIFrame)
       IFrameExportData(this.exportData!);
