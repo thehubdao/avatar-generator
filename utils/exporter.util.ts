@@ -36,7 +36,7 @@ export class ExporterUtil {
 
 }
 
-function save(blob: Blob, fileName: string) {
+export function SaveFile(blob: Blob, fileName: string) {
   const link = document.createElement('a');
   link.style.display = 'none';
   document.body.appendChild(link);
@@ -47,9 +47,9 @@ function save(blob: Blob, fileName: string) {
 }
 
 export function SaveArrayBuffer(buffer: ArrayBuffer, fileName: string) {
-  save(new Blob([buffer], { type: 'application/octet-stream' }), fileName);
+  SaveFile(new Blob([buffer], { type: 'application/octet-stream' }), fileName);
 }
 
 export function SaveString(text: string, fileName: string) {
-  save(new Blob([text], {type: 'text/plain'}), fileName);
+  SaveFile(new Blob([text], {type: 'text/plain'}), fileName);
 }

@@ -32,7 +32,7 @@ import {
   ReplaceModelPartOnly,
   TransformObject3dToToonMaterial
 } from "../utils/model.util";
-import {ExporterUtil} from "../utils/exporter.util";
+import {ExporterUtil, SaveFile} from "../utils/exporter.util";
 import {GetServerSideProps} from "next";
 import {
   AccessoryInfoInterface,
@@ -432,6 +432,9 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.sc.renderer!.domElement.toBlob(blob => {
       if(blob) {
         this.exportData!.picture = blob;
+        
+        if(!this.onIFrame)
+          SaveFile(blob, "picture.png");
       }
     }, mimeType);
   }
