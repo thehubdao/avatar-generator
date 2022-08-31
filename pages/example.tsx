@@ -2,22 +2,13 @@
 import Image from "next/image";
 import Head from "next/head";
 import AGLoading from "../components/ag-loading.component";
-import {
-  Clock,
-  PerspectiveCamera,
-  Vector2,
-  Vector3,
-  WebGLInfo,
-  WebGLRenderTarget
-} from "three";
-import {
-  FrustumCulledFalse,
-  GetBaseCameraControls,
-} from "../utils/threejs/scene.util";
+import {Clock, Vector3, WebGLInfo} from "three";
+import {FrustumCulledFalse, GetBaseCameraControls} from "../utils/threejs/scene.util";
 import {GetTestLights, GetAmbientLights} from "../utils/test-scene.util";
 import {
   GetAccessoryBones,
-  GetAccessoryListByCampaign, GetAnimationListByCampaign,
+  GetAccessoryListByCampaign,
+  GetAnimationListByCampaign,
   GetAssetsListByCampaign,
   GetPartsData,
   ImporterUtil
@@ -282,15 +273,6 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.sc.mixer = CreateAnimationMixer(this.sc.baseModel!.scene);
     await SetAnimation(this.sc.mixer, this.sc.baseModel, this.setHasAnimation);
     
-    // this.mixer = new AnimationMixer(this.baseModel.scene);
-    //
-    // this.baseModel.animations.forEach((clip) => {
-    //   if(this.mixer) {
-    //     this.mixer.clipAction(clip).play();
-    //     this.hasAnimation = true;
-    //   }
-    // });
-    
     await TransformObject3dToToonMaterial(this.sc.baseModel.scene);
     this.sc.scene!.add(this.sc.baseModel.scene);
 
@@ -432,9 +414,6 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     this.sc.renderer!.domElement.toBlob(blob => {
       if(blob) {
         this.exportData!.picture = blob;
-        
-        if(!this.onIFrame)
-          SaveFile(blob, "picture.png");
       }
     }, mimeType);
   }
@@ -442,10 +421,15 @@ export default class Example extends Component<ExampleProps, ExampleState> {
   async exportModel() {
     await this.takeExportPicture();
     this.exportData!.attributesBase64 = window.btoa(JSON.stringify(this.exportData?.attributes));
-    this.exportData!.model = new Blob([await ExporterUtil.ExportModelGlb(this.sc.baseModel!, !this.onIFrame) as ArrayBuffer], { type: 'application/octet-stream' });
+    this.exportData!.model = await ExporterUtil.ExportModelGlb(this.sc.baseModel!);
     console.log(this.exportData);
-    if(this.onIFrame)
+    if(this.onIFrame) {
       IFrameExportData(this.exportData!);
+    }
+    else {
+      await SaveFile(this.exportData!.model, 'model.glb');
+      await SaveFile(this.exportData!.picture!, 'picture.png');
+    }
   }
 
   optionListAccessories() {
