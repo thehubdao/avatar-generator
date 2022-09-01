@@ -62,7 +62,7 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   
   console.log('base', baseModel);
   console.log('replace', newPart);
-  console.log('partInfo', partInfo);
+  // console.log('partInfo', partInfo);
   
   newPart.frustumCulled = false;
   baseModel.children.splice(partInfo.partIndex, 1);
