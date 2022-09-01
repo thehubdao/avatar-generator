@@ -173,13 +173,13 @@ export default class Example extends Component<ExampleProps, ExampleState> {
       for (const attribute of this.props.attributeConfig) {
         // Is a part
         if(this.state.selectList.some(pl => pl.id === attribute.id)) {
-          const newPart = this.partList!.find(p => p.name === attribute.val);
+          const newPart = this.partList!.find(p => p.name === attribute.val && p.type === attribute.id);
           if(newPart)
             await this.changePart(newPart.id, newPart.path, newPart.name, attribute.id);
         }
         // Is an accessory
         else if(this.state.aSelectList.some(pl => pl.id === attribute.id)) {
-          const newAcc = this.accessoryList!.find(p => p.name === attribute.val);
+          const newAcc = this.accessoryList!.find(p => p.name === attribute.val && p.type === attribute.id);
           if(newAcc)
             await this.changeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
         }
@@ -380,7 +380,7 @@ export default class Example extends Component<ExampleProps, ExampleState> {
     
     await ReplaceModelPartOnly(this.sc.baseModel!.scene.children[0], replaceModel, this.partListData![selectedPart], this.state.selectList.find(sl => sl.id === selectedPart), this.state.skinColor);
     await this.getPartsData();
-    FrustumCulledFalse(this.sc.scene!);
+    // FrustumCulledFalse(this.sc.scene!);
     this.addReplaceAttribute(selectedPart, name);
   }
 

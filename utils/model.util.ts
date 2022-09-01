@@ -33,13 +33,7 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
     return;
   }
   
-  let chestMesh: Object3D | undefined = undefined;
-  replaceModel.scene.traverse(m => {
-    if(m.name === selectedPart.val) {
-      chestMesh = m;
-    }
-  });
-  
+  let chestMesh: Object3D | undefined = await GetMatchPiece(replaceModel, selectedPart.val);
   if(chestMesh == undefined) {
     console.error('Piece not found:', `'${selectedPart.val}' not found on replace model, please verify the glb file.`);
     return;
@@ -70,8 +64,20 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   console.log('replace', newPart);
   console.log('partInfo', partInfo);
   
+  newPart.frustumCulled = false;
   baseModel.children.splice(partInfo.partIndex, 1);
   baseModel.add(newPart);
+}
+
+async function GetMatchPiece(object: GLTF, match: string) {
+  let retObj: Object3D | undefined;
+  object.scene.traverse(m => {
+    if(m.name === match) {
+      retObj = m;
+    }
+  });
+  
+  return retObj;
 }
 
 async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone) {
@@ -82,6 +88,8 @@ async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton, changeM
         if(changeMaterial && tone)
           await changeMaterial(object as SkinnedMesh, tone);
       }
+      
+      object.frustumCulled = false;
     });
   }
 
