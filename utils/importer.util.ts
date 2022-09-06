@@ -1,5 +1,5 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
-import {AccLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
+import {AccLocationApi, AnimLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {Group, SkinnedMesh} from "three";
 import {FirebaseUtil} from "./firebase.util";
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
@@ -50,8 +50,8 @@ export function GetAccessoryBones(baseModel: Group, accessoryBonesList: BasicDat
   let result: Record<string, AccessoryInfoInterface> = {};
   
   bones.traverse((bone) => {
-    if(accessoryBonesList.some(x => x.value === bone.name)) {
-      const foundBone = accessoryBonesList.filter(x => x.value === bone.name);
+    if(accessoryBonesList.some(x => x.val === bone.name)) {
+      const foundBone = accessoryBonesList.filter(x => x.val === bone.name);
       foundBone.forEach(fb => {
         result[fb.id] = { bone: bone };
       })
@@ -66,8 +66,8 @@ export function GetPartsData(baseModel: Group, partList: BasicData[], update: bo
   let result: Record<string, PartInfoInterface> = {};
   
   baseParts.children.forEach((part, index) => {
-    if(partList.some(x => x.value === part.name)) {
-      const foundPart = partList.find(x => x.value === part.name);
+    if(partList.some(x => x.val === part.name)) {
+      const foundPart = partList.find(x => x.val === part.name);
       result[foundPart!.id] = { partIndex: index, featureBase: update ? result[foundPart!.id].featureBase : part.clone() };
     }
   });
@@ -86,5 +86,10 @@ export async function GetAssetsListByCampaign(campaign?: string | null) {
 
 export async function GetAccessoryListByCampaign(campaign?: string | null) {
   const jsonObject: AccLocationApi[] = await fetch('api/getAccessories' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  return jsonObject;
+}
+
+export async function GetAnimationListByCampaign(campaign?: string | null) {
+  const jsonObject: AnimLocationApi[] = await fetch('api/getAnimations' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }

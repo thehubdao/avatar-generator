@@ -1,5 +1,14 @@
 ﻿import {PerspectiveCamera, Scene, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import {SceneInterface} from "../../interfaces/scene.interface";
+
+export function InitSceneController(): SceneInterface {
+  return {
+    scene: GetBaseScene(),
+    camera: GetBaseCamera(),
+    renderer: GetBaseRenderer(),
+  };
+}
 
 export function GetBaseScene(): Scene {
   let scene = new Scene();
@@ -28,6 +37,7 @@ export function GetBaseRenderer(): WebGLRenderer {
   let renderer = new WebGLRenderer({
     alpha: true,
     antialias: true,
+    preserveDrawingBuffer: true,
   });
   renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);

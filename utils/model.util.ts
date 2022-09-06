@@ -2,22 +2,24 @@
 import {ImporterUtil} from "./importer.util";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import {
-  Group, Material,
+  Group,
+  Material,
   Mesh,
   MeshStandardMaterial,
   MeshToonMaterial,
-  Object3D, Skeleton,
+  Object3D,
+  Skeleton,
   SkinnedMesh
 } from "three";
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
 import {TextureTone, TextureUtil} from "./texture.util";
 
+type MaterialFunction = (obj: SkinnedMesh, tone?: TextureTone) => void;
+
 export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partIndex: number) {
   const partModel = await ImporterUtil.LoadGltfModel(partUrl);
   
-  // @ts-ignore
   const chest = SkeletonUtils.clone(partModel.scene.children[0].children[partIndex]) as SkinnedMesh;
-  // @ts-ignore
   const oldSkeleton = SkeletonUtils.getBones((baseModel.scene.children[0].children[partIndex] as SkinnedMesh).skeleton);
 
   chest.skeleton.bones = oldSkeleton;
@@ -31,19 +33,12 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
     return;
   }
   
-  let chestMesh: Object3D | undefined = undefined;
-  replaceModel.scene.traverse(m => {
-    if(m.name === selectedPart.value) {
-      chestMesh = m;
-    }
-  });
-  
+  let chestMesh: Object3D | undefined = await GetMatchPiece(replaceModel, selectedPart.val);
   if(chestMesh == undefined) {
-    console.error('Piece not found:', `'${selectedPart.value}' not found on replace model, please verify the glb file.`);
+    console.error('Piece not found:', `'${selectedPart.val}' not found on replace model, please verify the glb file.`);
     return;
   }
   
-  // @ts-ignore
   const newPart: Object3D = SkeletonUtils.clone(chestMesh);
   let baseSkeleton: Skeleton;
   
@@ -59,7 +54,7 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
     return;
   }
   
-  await ChangeSkeleton(newPart, baseSkeleton);
+  await ChangeSkeleton(newPart, baseSkeleton, ChangeToToonMaterial, "threeTone");
   
   if(skinColor) {
     await ChangeObjectSkinColor(newPart, skinColor);
@@ -67,25 +62,41 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   
   console.log('base', baseModel);
   console.log('replace', newPart);
-  console.log('partInfo', partInfo);
+  // console.log('partInfo', partInfo);
   
+  newPart.frustumCulled = false;
   baseModel.children.splice(partInfo.partIndex, 1);
   baseModel.add(newPart);
 }
 
-async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton) {
+async function GetMatchPiece(object: GLTF, match: string) {
+  let retObj: Object3D | undefined;
+  object.scene.traverse(m => {
+    if(m.name === match) {
+      retObj = m;
+    }
+  });
+  
+  return retObj;
+}
+
+async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone) {
   if((newPart as Group).isGroup) {
     newPart.traverse( async object => {
       if((object as SkinnedMesh).isSkinnedMesh) {
         (object as SkinnedMesh).skeleton = baseSkeleton.clone();
-        await ChangeToToonMaterial(object as SkinnedMesh, "threeTone");
+        if(changeMaterial && tone)
+          await changeMaterial(object as SkinnedMesh, tone);
       }
+      
+      object.frustumCulled = false;
     });
   }
 
   if((newPart as SkinnedMesh).isSkinnedMesh) {
     (newPart as SkinnedMesh).skeleton = baseSkeleton.clone();
-    await ChangeToToonMaterial(newPart as SkinnedMesh, "threeTone");
+    if(changeMaterial && tone)
+      await changeMaterial(newPart as SkinnedMesh, tone);
   }
 }
 
@@ -115,7 +126,7 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
   if(materialRef.isMeshStandardMaterial) {
     const mapClone = materialRef.map?.clone();
     const oldName = materialRef.name;
-    const _toneTexture = await TextureUtil.GetToneTexture(tone);
+    const _toneTexture = await TextureUtil.Instance().GetToneTexture(tone);
     object.material = new MeshToonMaterial({
       map: mapClone,
       name: oldName,

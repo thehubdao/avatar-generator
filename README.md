@@ -1,7 +1,28 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Avatar Generator
 
-### Error ThreeJs Util library
-On [/utils/model.util.ts](./utils/model.util.ts) go to imported SkeletonUtils File and remove the `export namespace SkeletonUtils` leaving only the functions.
+---
+## Vercel environments
+Current environment (right now **production** is not in use):
+- [Production](https://avatar-generator-metagamehub.vercel.app)
+- [Dev Preview](https://avatar-generator-git-dev-metagamehub.vercel.app)
+---
+## URL Parameters
+This parameters are to be added at the end of the web app url, after a `?` symbol and multiple parameters concatenated by `&` symbol.
+
+Example: `https://web-app.url?parameter1=value1&parameter2=value2`
+
+### Campaign Parameter:
+We can send campaign to use on the app, campaigns have a set of default configurations, instructions and values to use on the app.
+
+To use: `campaign=value`
+
+Current campaign to use is `decentraland` (base campaign is missing configurations in order to be more usable).
+
+
+### Config Parameter:
+
+---
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
 

@@ -1,6 +1,7 @@
 export enum FirestoreValues {
     Parts = 'parts',
     Accessories = 'accessories',
+    Animations = 'animations',
     Parameters = 'general/parameters',
 }
 
@@ -14,6 +15,8 @@ export enum StorageValues {
     BaseMesh = 'base_mesh',
     Part = 'section',
     Thumbnail = 'thumb',
+    Animation = 'animation',
+    Missing = 'missing',
 }
 
 export enum FirestoreFilterValues {
