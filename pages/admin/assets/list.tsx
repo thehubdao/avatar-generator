@@ -2,6 +2,7 @@
 import {FirestoreValues} from "../../../enums/firebase.enum";
 import {FirebaseUtil} from "../../../utils/firebase.util";
 import Link from "next/link";
+import AGButton from "../../../components/ag-button.component";
 
 interface AssetListProps {
 }
@@ -52,8 +53,11 @@ export default class List extends Component<AssetListProps, AssetListState> {
                 {this.renderLocationOptions()}
               </select>
             </div>
-            <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
-              <Link href="add"><p className="mx-2 text-white hover:cursor-help">Go to Add</p></Link>
+            <div className="flex">
+              <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
+                <Link href="add"><p className="mx-2 text-white hover:cursor-help">Go to Add</p></Link>
+              </div>
+              <AGButton type="danger" onClickEvent={() => FirebaseUtil.Instance().LogOut()}>Log Out</AGButton>
             </div>
           </div>
 

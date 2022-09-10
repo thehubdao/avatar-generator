@@ -6,8 +6,10 @@ import {FeatureLocationApi} from "../../../interfaces/api.interface";
 import {BasicData} from "../../../interfaces/common.interface";
 import {GetServerSideProps} from "next";
 import Link from "next/link";
+import {WithRouterProps} from "next/dist/client/with-router";
+import {withRouter} from "next/router";
 
-interface AssetAddProps {
+interface AssetAddProps extends WithRouterProps {
   campaignOptions: string[];
 }
 
@@ -26,7 +28,7 @@ interface AssetAddState {
   animation?: boolean;
 }
 
-export default class Add extends Component<AssetAddProps, AssetAddState> {
+class Add extends Component<AssetAddProps, AssetAddState> {
 
   constructor(props: AssetAddProps) {
     super(props);
@@ -176,8 +178,11 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
                 {this.renderLocationOptions()}
               </select>
             </div>
-            <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
-              <Link href="list"><p className="mx-2 text-white hover:cursor-help">Go to List</p></Link>
+            <div className="flex">
+              <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
+                <Link href="list"><p className="mx-2 text-white hover:cursor-help">Go to List</p></Link>
+              </div>
+              <AGButton type="danger" onClickEvent={() => FirebaseUtil.Instance().LogOut()} >Log Out</AGButton>
             </div>
           </div>
 
@@ -269,7 +274,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   }
 }
 
-export const getServerSideProps: GetServerSideProps<AssetAddProps> = async (context) => {
+export const getServerSideProps: GetServerSideProps<Omit<AssetAddProps, 'router'>> = async (context) => {
   const campaigns = (await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns))[0];
 
   return {
@@ -278,3 +283,5 @@ export const getServerSideProps: GetServerSideProps<AssetAddProps> = async (cont
     }
   };
 }
+
+export default withRouter(Add);

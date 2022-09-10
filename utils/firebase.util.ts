@@ -17,18 +17,22 @@ import {
 } from "@firebase/firestore";
 import {FirestoreFilterValues, FirestoreParameters, FirestoreValues, StorageValues} from "../enums/firebase.enum";
 import {FirebaseStorage, getBlob, getStorage, ref, uploadBytes} from "@firebase/storage";
-import {AGQueryConstraints} from "../interfaces/firebase.interface";
+import {AGQueryConstraints, LogInInterface} from "../interfaces/firebase.interface";
+import {Auth, getAuth, signInWithEmailAndPassword, signOut, User} from "@firebase/auth";
+import Router from "next/router";
 
 export class FirebaseUtil {
   private static _instance: FirebaseUtil;
   private _app: FirebaseApp | null;
   private _db: Firestore | null;
   private _storage: FirebaseStorage | null;
+  private _auth: Auth | null;
 
   constructor() {
     this._app = null;
     this._db = null;
     this._storage = null;
+    this._auth = null;
   }
 
   public static Instance() {
@@ -67,6 +71,13 @@ export class FirebaseUtil {
       this._storage = getStorage(this.App());
 
     return this._storage;
+  }
+  
+  private Auth() {
+    if(this._auth === null)
+      this._auth = getAuth(this.App());
+    
+    return this._auth;
   }
 
   public async GetInfoDB<T>(dbLocation: FirestoreValues | string, constraintsValues?: AGQueryConstraints, doConstraints: boolean = true) {
@@ -207,5 +218,32 @@ export class FirebaseUtil {
       const docRef = doc(this.DB(), docLocation);
       await updateDoc(docRef, JSON.parse(jsonData));
     }
+  }
+  
+  async LogIn(credentials: LogInInterface) {
+    return signInWithEmailAndPassword(this.Auth(), credentials.user, credentials.pass);
+  }
+  
+  async LogOut() {
+    signOut(this.Auth())
+      .then(() => {
+        Router.push('/admin');
+      });
+  }
+  
+  async IsLogIn() {
+    return new Promise<boolean>((resolve) => {
+      this.Auth().onAuthStateChanged((user) => {
+        user ? resolve(true) : resolve(false);
+      })
+    });
+  }
+
+  async GetCurrentUser() {
+    return new Promise<User | null>((resolve) => {
+      this.Auth().onAuthStateChanged((user) => {
+        resolve(user);
+      })
+    });
   }
 }
