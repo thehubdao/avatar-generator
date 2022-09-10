@@ -23,3 +23,8 @@ export enum IFrameEvents {
   Subscribe = 'subscribe',
   Exported = 'exported',
 }
+
+export enum PageLocation {
+  Admin = '/admin',
+  AssetList = '/admin/assets/list',
+}

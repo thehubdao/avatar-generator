@@ -5,6 +5,7 @@ import AGLoading from "../../components/ag-loading.component";
 import {FirebaseUtil} from "../../utils/firebase.util";
 import {withRouter} from "next/router";
 import {WithRouterProps} from "next/dist/client/with-router";
+import {PageLocation} from "../../enums/common.enum";
 
 interface AdminProps extends WithRouterProps {
 }
@@ -96,7 +97,7 @@ class Admin extends Component<AdminProps, AdminState> {
   
   private GoToList() {
     this.SetLoading();
-    this.props.router.push('/admin/assets/list').then();
+    this.props.router.push(PageLocation.AssetList).then();
   }
 }
 

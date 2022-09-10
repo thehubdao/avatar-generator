@@ -20,6 +20,7 @@ import {FirebaseStorage, getBlob, getStorage, ref, uploadBytes} from "@firebase/
 import {AGQueryConstraints, LogInInterface} from "../interfaces/firebase.interface";
 import {Auth, getAuth, signInWithEmailAndPassword, signOut, User} from "@firebase/auth";
 import Router from "next/router";
+import {PageLocation} from "../enums/common.enum";
 
 export class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -227,7 +228,7 @@ export class FirebaseUtil {
   async LogOut() {
     signOut(this.Auth())
       .then(() => {
-        Router.push('/admin');
+        Router.push(PageLocation.Admin);
       });
   }
   
