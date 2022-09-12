@@ -233,6 +233,10 @@ export async function IsLogIn() {
   });
 }
 
+export async function IsNotLogIn() {
+  return !(await IsLogIn);
+}
+
 export async function LogOut() {
   const { signOut } = await import('@firebase/auth');
   signOut(await FirebaseUtil.Instance().Auth())

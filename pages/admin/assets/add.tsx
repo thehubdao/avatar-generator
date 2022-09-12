@@ -1,5 +1,5 @@
 ﻿import {Component} from "react";
-import {GetParameters, InsertDB, IsLogIn, LogOut, UpdateDB, UploadFile} from "../../../utils/firebase.util";
+import {GetParameters, InsertDB, IsNotLogIn, LogOut, UpdateDB, UploadFile} from "../../../utils/firebase.util";
 import {FirestoreParameters, FirestoreValues, StorageValues} from "../../../enums/firebase.enum";
 import AGButton from "../../../components/ag-button.component";
 import {FeatureLocationApi} from "../../../interfaces/api.interface";
@@ -8,6 +8,7 @@ import {GetServerSideProps} from "next";
 import Link from "next/link";
 import {WithRouterProps} from "next/dist/client/with-router";
 import {withRouter} from "next/router";
+import {PageLocation} from "../../../enums/common.enum";
 
 interface AssetAddProps extends WithRouterProps {
   campaignOptions: string[];
@@ -42,12 +43,11 @@ class Add extends Component<AssetAddProps, AssetAddState> {
       loneFileOptions: Object.values(StorageValues),
       selectedStorage: StorageValues.BaseMesh,
     };
-
-    IsLogIn()
-      .then(res => {
-        if(!res)
-          this.props.router.push('/admin').then();
-      });
+  }
+  
+  async componentDidMount() {
+    if(await IsNotLogIn())
+      await this.props.router.push(PageLocation.Admin);
   }
 
   async getTypeOptionsByCampaign(campaign: string) {

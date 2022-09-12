@@ -1,10 +1,11 @@
 ﻿import {Component} from "react";
 import {FirestoreValues} from "../../../enums/firebase.enum";
-import {DeleteDoc, GetInfoDB, IsLogIn, LogOut} from "../../../utils/firebase.util";
+import {DeleteDoc, GetInfoDB, IsNotLogIn, LogOut} from "../../../utils/firebase.util";
 import Link from "next/link";
 import AGButton from "../../../components/ag-button.component";
 import {WithRouterProps} from "next/dist/client/with-router";
 import {withRouter} from "next/router";
+import {PageLocation} from "../../../enums/common.enum";
 
 interface AssetListProps extends WithRouterProps {
 }
@@ -25,15 +26,12 @@ class List extends Component<AssetListProps, AssetListState> {
       dbLocation: FirestoreValues.Parts,
       locationOptions: Object.values(FirestoreValues),
     };
-    
-    IsLogIn()
-      .then(res => {
-        if(!res)
-          this.props.router.push('/admin').then();
-      });
   }
 
   async componentDidMount() {
+    if(await IsNotLogIn())
+      await this.props.router.push(PageLocation.Admin);
+    
     await this.getDbInfo();
   }
 

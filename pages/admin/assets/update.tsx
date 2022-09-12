@@ -1,10 +1,11 @@
 ﻿import {Component} from "react";
 import {GetServerSideProps} from "next";
-import {GetInfoDB, IsLogIn, UpdateDoc} from "../../../utils/firebase.util";
+import {GetInfoDB, IsNotLogIn, UpdateDoc} from "../../../utils/firebase.util";
 import AGButton from "../../../components/ag-button.component";
 import Link from "next/link";
 import {WithRouterProps} from "next/dist/client/with-router";
 import {withRouter} from "next/router";
+import {PageLocation} from "../../../enums/common.enum";
 
 interface AssetUpdateProps extends WithRouterProps {
   docLocation?: string;
@@ -21,12 +22,11 @@ class Update extends Component<AssetUpdateProps, AssetUpdateState> {
     this.state = {
       jsonData: props.docInfo === null ? undefined : this.formatJson(props.docInfo!),
     };
-
-    IsLogIn()
-      .then(res => {
-        if(!res)
-          this.props.router.push('/admin').then();
-      });
+  }
+  
+  async componentDidMount() {
+    if(await IsNotLogIn())
+      await this.props.router.push(PageLocation.Admin);
   }
 
   formatJson(jsonString: string) {
