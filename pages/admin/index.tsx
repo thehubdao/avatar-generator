@@ -77,10 +77,15 @@ class Admin extends Component<AdminProps, AdminState> {
   private async handleSubmit(event: FormEvent<HTMLFormElement>) {
     const { user, pass } = this.state;
     event.preventDefault();
+    if(!(user && pass)) {
+      alert('Please insert a User and password.');
+      return;
+    }
+    
     this.SetLoading();
     try {
-      const logged = await LogIn({ user: `${user}@freak.com`, pass: pass! });
-      if(logged)
+      const logged = await LogIn({user: `${user}@freak.com`, pass: pass!});
+      if (logged)
         this.GoToList();
     }
     catch (err) {

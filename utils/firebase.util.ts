@@ -30,6 +30,7 @@ class FirebaseUtil {
   }
 
   public async App() {
+    // console.log('App: ', !!this._app);
     if (this._app === null) {
       const config: FirebaseOptions = {
         appId: process.env.NEXT_PUBLIC_FB_APP_ID,
@@ -47,30 +48,50 @@ class FirebaseUtil {
   }
 
   public async DB() {
+    const checked = CheckServerSide();
+    // console.log('DB: ', !!this._db);
     if (this._db === null) {
       const { getFirestore } = await import('@firebase/firestore');
       this._db = getFirestore(await this.App());
     }
 
+    await checked;
     return this._db;
   }
 
   public async Storage() {
+    const checked = CheckServerSide();
+    // console.log('Storage: ', !!this._storage);
     if (this._storage === null) {
       const { getStorage } = await import('@firebase/storage');
       this._storage = getStorage(await this.App());
     }
 
+    await checked;
     return this._storage;
   }
   
   public async Auth() {
+    // console.log('Auth: ', !!this._auth);
     if(this._auth === null) {
       const { getAuth } = await import('@firebase/auth');
       this._auth = getAuth(await this.App());
     }
     
     return this._auth;
+  }
+}
+
+async function CheckServerSide() {
+  // server side
+  if(typeof window === 'undefined') {
+    await FirebaseUtil.Instance().Auth();
+
+    const logInfo: LogInInterface = {
+      user: process.env.AG_FB_USER!,
+      pass: process.env.AG_FB_PASS!,
+    };
+    await LogIn(logInfo);
   }
 }
 
@@ -221,6 +242,9 @@ export async function UploadFile(file: File, fileType: StorageValues, sectionTyp
 }
 
 export async function LogIn(credentials: LogInInterface) {
+  if(!(credentials.pass && credentials.user))
+    return;
+  
   const { signInWithEmailAndPassword } = await import('@firebase/auth');
   return signInWithEmailAndPassword(await FirebaseUtil.Instance().Auth(), credentials.user, credentials.pass);
 }
@@ -234,7 +258,7 @@ export async function IsLogIn() {
 }
 
 export async function IsNotLogIn() {
-  return !(await IsLogIn);
+  return !(await IsLogIn());
 }
 
 export async function LogOut() {
