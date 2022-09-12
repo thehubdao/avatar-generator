@@ -1,6 +1,6 @@
 ﻿import {Component} from "react";
 import {GetServerSideProps} from "next";
-import {FirebaseUtil} from "../../../utils/firebase.util";
+import {GetInfoDB, UpdateDoc} from "../../../utils/firebase.util";
 import AGButton from "../../../components/ag-button.component";
 import Link from "next/link";
 
@@ -55,7 +55,7 @@ export default class Update extends Component<AssetUpdateProps, AssetUpdateState
   }
 
   async updateData() {
-    await FirebaseUtil.Instance().UpdateDoc(this.props.docLocation, this.state.jsonData);
+    await UpdateDoc(this.props.docLocation, this.state.jsonData);
     alert(`Doc "${this.props.docLocation}" has been updated`);
   }
 }
@@ -70,7 +70,7 @@ export const getServerSideProps: GetServerSideProps<AssetUpdateProps> = async (c
     } else {
       newDocLocation = docLocation as string;
     }
-    _docInfo = await FirebaseUtil.Instance().GetInfoDB<any>(newDocLocation);
+    _docInfo = await GetInfoDB<any>(newDocLocation);
   }
 
   return {

@@ -33,7 +33,7 @@ import {
   LookAtVectors,
   PartInfoInterface
 } from "../interfaces/common.interface";
-import {FirebaseUtil} from "../utils/firebase.util";
+import {GetParameters} from "../utils/firebase.util";
 import {RandomArrayElement} from "../utils/common.util";
 import {LogComponent} from "../components/log.component";
 import {CategorySelectorComponent} from "../components/categorySelector.component";
@@ -631,7 +631,7 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
     }
   }
 
-  const campaigns = (await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns))[0];
+  const campaigns = (await GetParameters<string[]>(FirestoreParameters.Campaigns))[0];
   const isCampaign = campaigns.some(c => c === subdomain);
 
   let _baseMeshPath: string;
@@ -641,14 +641,14 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
 
   if(isCampaign) {
     _baseMeshPath = `base_mesh/${subdomain}.glb`;
-    const result = await FirebaseUtil.Instance().GetParameters(subdomain!, subdomain! + GV.Acc, subdomain! + GV.Config);
+    const result = await GetParameters(subdomain!, subdomain! + GV.Acc, subdomain! + GV.Config);
     _selectListBodyParts = result[0] as BasicData[];
     _selectListAccessories = result[1] as BasicData[];
     _campaignConfig = result[2] as CampaignConfig;
   }
   else {
     _baseMeshPath = `base_mesh/${GV.BaseCampaign}.glb`;
-    const result = await FirebaseUtil.Instance().GetParameters(GV.BaseCampaign, GV.BaseCampaign + GV.Acc, GV.BaseCampaign + GV.Config);
+    const result = await GetParameters(GV.BaseCampaign, GV.BaseCampaign + GV.Acc, GV.BaseCampaign + GV.Config);
     _selectListBodyParts = result[0] as BasicData[];
     _selectListAccessories = result[1] as BasicData[];
     _campaignConfig = result[2] as CampaignConfig;

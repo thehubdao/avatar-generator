@@ -1,7 +1,7 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {AccLocationApi, AnimLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
-import {Group, SkinnedMesh} from "three";
-import {FirebaseUtil} from "./firebase.util";
+import {Group} from "three";
+import {GetFile} from "./firebase.util";
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
 
 export class ImporterUtil {
@@ -39,7 +39,7 @@ export class ImporterUtil {
   }
 
   static async FirebaseGltfModel(path: string): Promise<GLTF> {
-    const arrayBuffer = await FirebaseUtil.Instance().GetFile(path);
+    const arrayBuffer = await GetFile(path);
     return this.parseAsync(arrayBuffer);
   }
 

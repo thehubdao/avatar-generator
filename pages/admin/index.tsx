@@ -2,10 +2,11 @@
 import Head from "next/head";
 import AGButton from "../../components/ag-button.component";
 import AGLoading from "../../components/ag-loading.component";
-import {FirebaseUtil} from "../../utils/firebase.util";
+import {IsLogIn, LogIn} from "../../utils/firebase.util";
 import {withRouter} from "next/router";
 import {WithRouterProps} from "next/dist/client/with-router";
 import {PageLocation} from "../../enums/common.enum";
+import {FirebaseError} from "@firebase/util";
 
 interface AdminProps extends WithRouterProps {
 }
@@ -21,11 +22,11 @@ class Admin extends Component<AdminProps, AdminState> {
     super(props);
     this.state = {
       loading: true,
-    }
+    };
   }
   
   async componentDidMount() {
-    if(await FirebaseUtil.Instance().IsLogIn()){
+    if(await IsLogIn()){
       this.GoToList();
     }
     else {
@@ -73,22 +74,21 @@ class Admin extends Component<AdminProps, AdminState> {
     this.setState(newState, callback);
   }
 
-  private handleSubmit(event: FormEvent<HTMLFormElement>) {
+  private async handleSubmit(event: FormEvent<HTMLFormElement>) {
     const { user, pass } = this.state;
-    
-    this.SetLoading();
-    FirebaseUtil.Instance().LogIn({ user: `${user}@freak.com`, pass: pass! })
-      .then((result) => {
-        // console.log('LogInSuccess: ', result);
-        this.GoToList();
-      })
-      .catch((err) => {
-        // console.log('LogInError: ', JSON.parse(JSON.stringify(err)));
-        this.SetLoading(false);
-        alert(`LogIn error: ${err.code}`);
-      });
-    
     event.preventDefault();
+    this.SetLoading();
+    try {
+      const logged = await LogIn({ user: `${user}@freak.com`, pass: pass! });
+      if(logged)
+        this.GoToList();
+    }
+    catch (err) {
+      // console.log('LogInError: ', JSON.parse(JSON.stringify(err)));
+      const error = err as FirebaseError;
+      this.SetLoading(false);
+      alert(`LogIn error: ${error.code}`);
+    }
   }
   
   private SetLoading(newState: boolean = true) {
