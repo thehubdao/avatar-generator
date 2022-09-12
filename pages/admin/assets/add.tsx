@@ -1,5 +1,5 @@
 ﻿import {Component} from "react";
-import {GetParameters, InsertDB, LogOut, UpdateDB, UploadFile} from "../../../utils/firebase.util";
+import {GetParameters, InsertDB, IsLogIn, LogOut, UpdateDB, UploadFile} from "../../../utils/firebase.util";
 import {FirestoreParameters, FirestoreValues, StorageValues} from "../../../enums/firebase.enum";
 import AGButton from "../../../components/ag-button.component";
 import {FeatureLocationApi} from "../../../interfaces/api.interface";
@@ -42,6 +42,12 @@ class Add extends Component<AssetAddProps, AssetAddState> {
       loneFileOptions: Object.values(StorageValues),
       selectedStorage: StorageValues.BaseMesh,
     };
+
+    IsLogIn()
+      .then(res => {
+        if(!res)
+          this.props.router.push('/admin').then();
+      });
   }
 
   async getTypeOptionsByCampaign(campaign: string) {

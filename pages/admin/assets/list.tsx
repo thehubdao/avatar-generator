@@ -1,10 +1,12 @@
 ﻿import {Component} from "react";
 import {FirestoreValues} from "../../../enums/firebase.enum";
-import {DeleteDoc, GetInfoDB, LogOut} from "../../../utils/firebase.util";
+import {DeleteDoc, GetInfoDB, IsLogIn, LogOut} from "../../../utils/firebase.util";
 import Link from "next/link";
 import AGButton from "../../../components/ag-button.component";
+import {WithRouterProps} from "next/dist/client/with-router";
+import {withRouter} from "next/router";
 
-interface AssetListProps {
+interface AssetListProps extends WithRouterProps {
 }
 
 interface AssetListState {
@@ -16,13 +18,19 @@ interface AssetListState {
 
 // Show info from database
 // Delete entry on database (or add a new field for deleted entries) (new field needs to edit getParts as well)
-export default class List extends Component<AssetListProps, AssetListState> {
+class List extends Component<AssetListProps, AssetListState> {
   constructor(props: AssetListProps) {
     super(props);
     this.state = {
       dbLocation: FirestoreValues.Parts,
       locationOptions: Object.values(FirestoreValues),
     };
+    
+    IsLogIn()
+      .then(res => {
+        if(!res)
+          this.props.router.push('/admin').then();
+      });
   }
 
   async componentDidMount() {
@@ -145,3 +153,4 @@ export default class List extends Component<AssetListProps, AssetListState> {
   }
 }
 
+export default withRouter(List);
