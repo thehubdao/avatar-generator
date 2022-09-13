@@ -133,12 +133,17 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   async componentDidMount() {
     this.setLoading();
     await this.avatarScene();
-    await this.getPartList();
-    await this.getAccessoryList();
-    await this.getAnimationList();
+    
+    await Promise.all([
+      this.getPartList(),
+      this.getAccessoryList(),
+      this.getAnimationList()
+    ]);
+    
     await this.getAccessoryBones();
     await this.getPartsData();
     await this.onClickChangeSkinColor();
+    
     await this.loadPreData();
     this.setLoading(false);
 
@@ -186,18 +191,22 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       }
     }
     else {
+      const promises: Promise<void>[] = [];
+      
       // Load random features
       for(const partType of this.state.selectList) {
         const randomPart = RandomArrayElement(this.partList!.filter(p => p.type === partType.id));
         if (randomPart)
-          await this.changePart(randomPart.id, randomPart.path, randomPart.name, partType.id);
+          promises.push(this.changePart(randomPart.id, randomPart.path, randomPart.name, partType.id));
       }
 
       for(const accType of this.state.aSelectList) {
         const randomAcc = RandomArrayElement(this.accessoryList!.filter(a => a.type === accType.id));
         if(randomAcc)
-          await this.changeAccessory(randomAcc.id, randomAcc.path, randomAcc.name, accType.id);
+          promises.push(this.changeAccessory(randomAcc.id, randomAcc.path, randomAcc.name, accType.id));
       }
+      
+      await Promise.all([...promises]);
     }
   }
 
