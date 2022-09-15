@@ -2,7 +2,7 @@
 
 ---
 ## Vercel environments
-Current environment (right now **production** is not in use):
+Current environment (Dev preview can be updated anytime):
 - [Production](https://avatar-generator-metagamehub.vercel.app)
 - [Dev Preview](https://avatar-generator-git-dev-metagamehub.vercel.app)
 ---
