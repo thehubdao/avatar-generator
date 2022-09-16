@@ -244,9 +244,15 @@ export async function UploadFile(file: File, fileType: StorageValues, sectionTyp
 export async function LogIn(credentials: LogInInterface) {
   if(!(credentials.pass && credentials.user))
     return;
-  
+
   const { signInWithEmailAndPassword } = await import('@firebase/auth');
-  return signInWithEmailAndPassword(await FirebaseUtil.Instance().Auth(), credentials.user, credentials.pass);
+  
+  let actualUser = credentials.user;
+  if(!credentials.user.includes('@')) {
+    actualUser = `${credentials.user}@freak.com`;
+  }
+  
+  return signInWithEmailAndPassword(await FirebaseUtil.Instance().Auth(), actualUser, credentials.pass);
 }
 
 export async function IsLogIn() {
@@ -264,8 +270,8 @@ export async function IsNotLogIn() {
 export async function LogOut() {
   const { signOut } = await import('@firebase/auth');
   signOut(await FirebaseUtil.Instance().Auth())
-    .then(() => {
-      Router.push(PageLocation.Admin);
+    .then(async () => {
+      await Router.push(PageLocation.Admin);
     });
 }
 

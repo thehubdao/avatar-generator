@@ -84,7 +84,7 @@ class Admin extends Component<AdminProps, AdminState> {
     
     this.SetLoading();
     try {
-      const logged = await LogIn({user: `${user}@freak.com`, pass: pass!});
+      const logged = await LogIn({user: user!, pass: pass!});
       if (logged)
         this.GoToList();
     }
