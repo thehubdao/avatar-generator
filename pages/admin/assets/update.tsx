@@ -1,7 +1,7 @@
 ﻿import {Component} from "react";
 import {GetServerSideProps} from "next";
 import {GetInfoDB, IsNotLogIn, UpdateDoc} from "../../../utils/firebase.util";
-import AGButton from "../../../components/ag-button.component";
+import AGButton from "../../../components/common/ag-button.component";
 import Link from "next/link";
 import {WithRouterProps} from "next/dist/client/with-router";
 import {withRouter} from "next/router";
