@@ -60,9 +60,9 @@ class List extends Component<AssetListProps, AssetListState> {
               </select>
             </div>
             <div className="flex">
-              <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
-                <Link href="add"><p className="mx-2 text-white hover:cursor-help">Go to Add</p></Link>
-              </div>
+              <AGButton type="alert">
+                <Link href="add">Go to Add</Link>
+              </AGButton>
               <AGButton type="danger" onClickEvent={() => LogOut()}>Log Out</AGButton>
             </div>
           </div>

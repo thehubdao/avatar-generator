@@ -45,9 +45,9 @@ class Update extends Component<AssetUpdateProps, AssetUpdateState> {
           <h1 className="ml-5 font-bold my-2"><span>🤡</span>Update Doc</h1>
           <div className="flex justify-between my-2">
             <h2 className="mx-2">Doc path: <span className="font-bold">{this.props.docLocation}</span></h2>
-            <div className="mx-2 border-2 border-slate-600 rounded bg-amber-600">
-              <Link href="list"><p className="mx-2 text-white hover:cursor-help">Go to List</p></Link>
-            </div>
+            <AGButton type="alert">
+              <Link href="list">Go to List</Link>
+            </AGButton>
           </div>
           <form>
             <div className='mx-2 my-2'>

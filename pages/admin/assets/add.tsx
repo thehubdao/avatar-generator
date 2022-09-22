@@ -186,9 +186,9 @@ class Add extends Component<AssetAddProps, AssetAddState> {
               </select>
             </div>
             <div className="flex">
-              <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
-                <Link href="list"><p className="mx-2 text-white hover:cursor-help">Go to List</p></Link>
-              </div>
+              <AGButton type="alert">
+                <Link href="list">Go to List</Link>
+              </AGButton>
               <AGButton type="danger" onClickEvent={() => LogOut()}>Log Out</AGButton>
             </div>
           </div>

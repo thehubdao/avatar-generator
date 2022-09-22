@@ -4,7 +4,7 @@ interface AGButtonProps {
   type?: 'primary' | 'secondary' | 'alert' | 'danger';
   side?: 'center' | 'start' | 'end';
   onClickEvent?: Function;
-  children?: string;
+  children?: string | JSX.Element;
   form?: boolean;
 }
 
@@ -57,7 +57,7 @@ export default class AGButton extends Component<AGButtonProps, AGButtonState>{
       <div className={`my-2 flex ${this.state.side}`}>
         <button type={this.props.form ? "submit": "button"} className={`mx-2 w-auto rounded py-1 border-1 ${hover} ${textColor} ${color} ${borderColor}`}
                 onClick={() => this.props.onClickEvent ? this.props.onClickEvent() : undefined}>
-          <p className='px-4'>{this.props.children}</p>
+          <span className='px-4'>{this.props.children}</span>
         </button>
       </div>
     );
