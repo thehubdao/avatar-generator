@@ -57,12 +57,12 @@ export default class AGButton extends Component<AGButtonProps, AGButtonState>{
       <div className={`my-2 flex ${this.state.side}`}>
         {
           this.props.form ?
-            <button type="submit" className={`mx-2 w-auto rounded py-1 border-1 ${hover} ${textColor} ${color} ${borderColor}`}
+            <button type="submit" className={`mx-2 w-auto my-auto rounded py-1 border-1 ${hover} ${textColor} ${color} ${borderColor}`}
                  onClick={() => this.props.onClickEvent ? this.props.onClickEvent() : undefined}>
               <span className='px-4'>{this.props.children}</span>
             </button>
             :
-            <div className={`mx-2 w-auto rounded py-1 border-1 cursor-pointer ${hover} ${textColor} ${color} ${borderColor}`}
+            <div className={`mx-2 w-auto my-auto rounded py-1 border-1 cursor-pointer ${hover} ${textColor} ${color} ${borderColor}`}
                  onClick={() => this.props.onClickEvent ? this.props.onClickEvent() : undefined}>
               <span className='px-4'>{this.props.children}</span>
             </div>

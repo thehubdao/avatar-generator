@@ -26,7 +26,7 @@ export default class Login extends Component<LoginProps, LoginState> {
   
   async componentDidMount() {
     if(await IsLogIn()){
-      await this.GoToList();
+      await this.GoToDashboard();
     }
     else {
       this.SetLoading(false);
@@ -85,7 +85,7 @@ export default class Login extends Component<LoginProps, LoginState> {
     try {
       const logged = await LogIn({user: user!, pass: pass!});
       if (logged)
-        this.GoToList();
+        await this.GoToDashboard();
     }
     catch (err) {
       // console.log('LogInError: ', JSON.parse(JSON.stringify(err)));
@@ -99,8 +99,8 @@ export default class Login extends Component<LoginProps, LoginState> {
     this.setState({ loading: newState });
   }
   
-  private async GoToList() {
+  private async GoToDashboard() {
     this.SetLoading();
-    await GoToPage(PageLocation.AssetList);
+    await GoToPage(PageLocation.Admin);
   }
 }

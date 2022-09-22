@@ -3,7 +3,8 @@ export enum FirestoreLocation {
     Accessories = 'accessories',
     Animations = 'animations',
     Parameters = 'general/parameters',
-    Test = 'testing/YEP'
+    User = 'user',
+    Test = 'testing/YEP',
 }
 
 export enum FirestoreParameters {
@@ -23,4 +24,9 @@ export enum FirestoreFilterValues {
     Type = 'type',
     Name = 'name',
     Campaign = 'campaign',
+}
+
+export enum UserRoleValues {
+    superAdmin = 0,
+    admin = 1,
 }

@@ -9,7 +9,7 @@ interface AGTextProps {
   href?: string;
   justText?: boolean;
   side?: 'center' | 'left' | 'right';
-  children: string | JSX.Element | (string | JSX.Element)[];
+  children?: string | JSX.Element | (string | JSX.Element)[];
 }
 
 interface AGTextState {

@@ -4,7 +4,7 @@ import {FirebaseStorage} from "@firebase/storage";
 import {Auth, User} from "@firebase/auth";
 
 import {FirestoreFilterValues, FirestoreLocation, FirestoreParameters, StorageLocation} from "../enums/firebase.enum";
-import {AGQueryConstraints, LogInInterface} from "../interfaces/firebase.interface";
+import {AGQueryConstraints, LogInInterface, UserInterface} from "../interfaces/firebase.interface";
 import {PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
 
@@ -310,6 +310,19 @@ export async function GetCurrentUser() {
 }
 
 export async function HandleNotLoggedIn() {
-  if(await IsNotLogIn())
+  const flag = await IsNotLogIn();
+  if(flag)
     await GoToPage(PageLocation.Login);
+  
+  return flag;
+}
+
+export async function GetUserInfo(userUid: string) {
+  const userLocation = `${FirestoreLocation.User}/${userUid}`;
+  const userDoc = await GetDocument<UserInterface>(userLocation);
+  
+  if(userDoc.length === 0)
+    return undefined;
+  
+  return userDoc[0];
 }
