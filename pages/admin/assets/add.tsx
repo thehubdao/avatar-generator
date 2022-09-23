@@ -1,16 +1,21 @@
 ﻿import {Component} from "react";
-import {GetParameters, InsertDB, IsNotLogIn, LogOut, UpdateDB, UploadFile} from "../../../utils/firebase.util";
+import {
+  GetParameters,
+  HandleNotLoggedIn,
+  InsertDB,
+  LogOut,
+  UpdateDB,
+  UploadFile
+} from "../../../utils/firebase.util";
 import {FirestoreParameters, FirestoreValues, StorageValues} from "../../../enums/firebase.enum";
 import AGButton from "../../../components/common/ag-button.component";
 import {FeatureLocationApi} from "../../../interfaces/api.interface";
 import {BasicData} from "../../../interfaces/common.interface";
 import {GetServerSideProps} from "next";
 import Link from "next/link";
-import {WithRouterProps} from "next/dist/client/with-router";
-import {withRouter} from "next/router";
-import {PageLocation} from "../../../enums/common.enum";
+import Head from "next/head";
 
-interface AssetAddProps extends WithRouterProps {
+interface AssetAddProps {
   campaignOptions: string[];
 }
 
@@ -29,8 +34,7 @@ interface AssetAddState {
   animation?: boolean;
 }
 
-
-class Add extends Component<AssetAddProps, AssetAddState> {
+export default class Add extends Component<AssetAddProps, AssetAddState> {
 
   constructor(props: AssetAddProps) {
     super(props);
@@ -47,8 +51,7 @@ class Add extends Component<AssetAddProps, AssetAddState> {
   }
   
   async componentDidMount() {
-    if(await IsNotLogIn())
-      await this.props.router.push(PageLocation.Admin);
+    await HandleNotLoggedIn();
   }
 
   async getTypeOptionsByCampaign(campaign: string) {
@@ -109,6 +112,9 @@ class Add extends Component<AssetAddProps, AssetAddState> {
     const {formData, selectedCampaign, animation} = this.state;
     return (
       <>
+        <Head>
+          <title>Add Asset</title>
+        </Head>
         <div className="mx-2 my-2 border-slate-600 border-2 rounded">
           <form>
             <h2 className="font-bold ml-5 mb-2"><span>😎</span>Form</h2>
@@ -290,5 +296,3 @@ export const getServerSideProps: GetServerSideProps<Omit<AssetAddProps, 'router'
     }
   };
 }
-
-export default withRouter(Add);

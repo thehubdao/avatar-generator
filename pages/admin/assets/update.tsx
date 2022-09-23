@@ -1,13 +1,11 @@
 ﻿import {Component} from "react";
 import {GetServerSideProps} from "next";
-import {GetInfoDB, IsNotLogIn, UpdateDoc} from "../../../utils/firebase.util";
+import {GetInfoDB, HandleNotLoggedIn, UpdateDoc} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
 import Link from "next/link";
-import {WithRouterProps} from "next/dist/client/with-router";
-import {withRouter} from "next/router";
-import {PageLocation} from "../../../enums/common.enum";
+import Head from "next/head";
 
-interface AssetUpdateProps extends WithRouterProps {
+interface AssetUpdateProps {
   docLocation?: string;
   docInfo?: string | null;
 }
@@ -16,7 +14,7 @@ interface AssetUpdateState {
   jsonData?: string;
 }
 
-class Update extends Component<AssetUpdateProps, AssetUpdateState> {
+export default class Update extends Component<AssetUpdateProps, AssetUpdateState> {
   constructor(props: AssetUpdateProps) {
     super(props);
     this.state = {
@@ -25,8 +23,7 @@ class Update extends Component<AssetUpdateProps, AssetUpdateState> {
   }
   
   async componentDidMount() {
-    if(await IsNotLogIn())
-      await this.props.router.push(PageLocation.Admin);
+    await HandleNotLoggedIn();
   }
 
   formatJson(jsonString: string) {
@@ -40,25 +37,30 @@ class Update extends Component<AssetUpdateProps, AssetUpdateState> {
 
   render() {
     return (
-      <div className="flex justify-center">
-        <div className="w-2/3">
-          <h1 className="ml-5 font-bold my-2"><span>🤡</span>Update Doc</h1>
-          <div className="flex justify-between my-2">
-            <h2 className="mx-2">Doc path: <span className="font-bold">{this.props.docLocation}</span></h2>
-            <AGButton type="alert">
-              <Link href="list">Go to List</Link>
-            </AGButton>
-          </div>
-          <form>
-            <div className='mx-2 my-2'>
+      <>
+        <Head>
+          <title>Update Asset</title>
+        </Head>
+        <div className="flex justify-center">
+          <div className="w-2/3">
+            <h1 className="ml-5 font-bold my-2"><span>🤡</span>Update Doc</h1>
+            <div className="flex justify-between my-2">
+              <h2 className="mx-2">Doc path: <span className="font-bold">{this.props.docLocation}</span></h2>
+              <AGButton type="alert">
+                <Link href="list">Go to List</Link>
+              </AGButton>
+            </div>
+            <form>
+              <div className='mx-2 my-2'>
               <textarea required className="w-full border-2 border-amber-600 rounded whitespace-pre-line"
                         rows={10} value={this.state.jsonData}
                         onChange={(e) => this.setState({jsonData: e.target.value})}/>
-            </div>
-            <AGButton type='primary' onClickEvent={() => this.updateData()}>Update json</AGButton>
-          </form>
+              </div>
+              <AGButton type='primary' onClickEvent={() => this.updateData()}>Update json</AGButton>
+            </form>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -88,5 +90,3 @@ export const getServerSideProps: GetServerSideProps<Omit<AssetUpdateProps, 'rout
     }
   };
 }
-
-export default withRouter(Update);

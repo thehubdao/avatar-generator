@@ -3,12 +3,11 @@ import Head from "next/head";
 import AGButton from "../../components/common/ag-button.component";
 import AGLoading from "../../components/common/ag-loading.component";
 import {IsLogIn, LogIn} from "../../utils/firebase.util";
-import {withRouter} from "next/router";
-import {WithRouterProps} from "next/dist/client/with-router";
 import {PageLocation} from "../../enums/common.enum";
 import {FirebaseError} from "@firebase/util";
+import {GoToPage} from "../../utils/router.util";
 
-interface LoginProps extends WithRouterProps {
+interface LoginProps {
 }
 
 interface LoginState {
@@ -17,7 +16,7 @@ interface LoginState {
   loading: boolean;
 }
 
-class Login extends Component<LoginProps, LoginState> {
+export default class Login extends Component<LoginProps, LoginState> {
   constructor(props: LoginProps) {
     super(props);
     this.state = {
@@ -27,7 +26,7 @@ class Login extends Component<LoginProps, LoginState> {
   
   async componentDidMount() {
     if(await IsLogIn()){
-      this.GoToList();
+      await this.GoToList();
     }
     else {
       this.SetLoading(false);
@@ -38,7 +37,7 @@ class Login extends Component<LoginProps, LoginState> {
     return (
       <>
         <Head>
-          <title>Admin</title>
+          <title>Login</title>
         </Head>
         <AGLoading loading={this.state?.loading} transparency />
         <div className="flex justify-center h-screen items-center bg-amber-100">
@@ -100,10 +99,8 @@ class Login extends Component<LoginProps, LoginState> {
     this.setState({ loading: newState });
   }
   
-  private GoToList() {
+  private async GoToList() {
     this.SetLoading();
-    this.props.router.push(PageLocation.AssetList).then();
+    await GoToPage(PageLocation.AssetList);
   }
 }
-
-export default withRouter(Login);

@@ -1,6 +1,7 @@
 ﻿import {Component} from "react";
 import Head from "next/head";
 import Image from "next/image";
+import Layout from "../../../components/admin/_layout.component";
 import AGText from "../../../components/common/ag-text.component";
 import {IFrameEvents, IFrameValues} from "../../../enums/common.enum";
 
@@ -20,7 +21,7 @@ export default class Info extends Component<InfoProps, InfoState> {
       prodUrl: 'https://avatar-generator-metagamehub.vercel.app/'
     };
   }
-  
+
   render() {
     return (
       <>

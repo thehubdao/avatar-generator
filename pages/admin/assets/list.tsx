@@ -1,13 +1,11 @@
 ﻿import {Component} from "react";
 import {FirestoreValues} from "../../../enums/firebase.enum";
-import {DeleteDoc, GetInfoDB, IsNotLogIn, LogOut} from "../../../utils/firebase.util";
+import {DeleteDoc, GetInfoDB, HandleNotLoggedIn, LogOut} from "../../../utils/firebase.util";
 import Link from "next/link";
 import AGButton from "../../../components/common/ag-button.component";
-import {WithRouterProps} from "next/dist/client/with-router";
-import {withRouter} from "next/router";
-import {PageLocation} from "../../../enums/common.enum";
+import Head from "next/head";
 
-interface AssetListProps extends WithRouterProps {
+interface AssetListProps {
 }
 
 interface AssetListState {
@@ -19,7 +17,7 @@ interface AssetListState {
 
 // Show info from database
 // Delete entry on database (or add a new field for deleted entries) (new field needs to edit getParts as well)
-class List extends Component<AssetListProps, AssetListState> {
+export default class List extends Component<AssetListProps, AssetListState> {
   constructor(props: AssetListProps) {
     super(props);
     this.state = {
@@ -29,8 +27,7 @@ class List extends Component<AssetListProps, AssetListState> {
   }
 
   async componentDidMount() {
-    if(await IsNotLogIn())
-      await this.props.router.push(PageLocation.Admin);
+    await HandleNotLoggedIn();
     
     await this.getDbInfo();
   }
@@ -47,30 +44,35 @@ class List extends Component<AssetListProps, AssetListState> {
     const {dbLocation} = this.state;
 
     return (
-      <div className="flex justify-center">
-        <div className="w-2/3">
-          <h1 className="ml-5 my-2 font-bold"><span>😬</span>DB Info</h1>
-          <div className="my-2 flex justify-between">
-            <div className="flex my-2">
-              <p className="mx-2">Db location:</p>
-              <select className="w-52 rounded border-2 border-slate-600" required
-                      value={dbLocation}
-                      onChange={e => this.changeDbLocation(e.target.value)}>
-                {this.renderLocationOptions()}
-              </select>
+      <>
+        <Head>
+          <title>Asset List</title>
+        </Head>
+        <div className="flex justify-center">
+          <div className="w-2/3">
+            <h1 className="ml-5 my-2 font-bold"><span>😬</span>DB Info</h1>
+            <div className="my-2 flex justify-between">
+              <div className="flex my-2">
+                <p className="mx-2">Db location:</p>
+                <select className="w-52 rounded border-2 border-slate-600" required
+                        value={dbLocation}
+                        onChange={e => this.changeDbLocation(e.target.value)}>
+                  {this.renderLocationOptions()}
+                </select>
+              </div>
+              <div className="flex">
+                <AGButton type="alert">
+                  <Link href="add">Go to Add</Link>
+                </AGButton>
+                <AGButton type="danger" onClickEvent={() => LogOut()}>Log Out</AGButton>
+              </div>
             </div>
-            <div className="flex">
-              <AGButton type="alert">
-                <Link href="add">Go to Add</Link>
-              </AGButton>
-              <AGButton type="danger" onClickEvent={() => LogOut()}>Log Out</AGButton>
-            </div>
+
+            {this.renderDbTable()}
+
           </div>
-
-          {this.renderDbTable()}
-
         </div>
-      </div>
+      </>
     );
   }
 
@@ -150,5 +152,3 @@ class List extends Component<AssetListProps, AssetListState> {
     await this.getDbInfo();
   }
 }
-
-export default withRouter(List);

@@ -30,4 +30,5 @@ export enum IFrameEvents {
 export enum PageLocation {
   Admin = '/admin',
   AssetList = '/admin/assets/list',
+  Login = '/admin/login',
 }

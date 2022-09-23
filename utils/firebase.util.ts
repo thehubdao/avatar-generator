@@ -5,8 +5,8 @@ import {Auth, User} from "@firebase/auth";
 
 import {FirestoreFilterValues, FirestoreParameters, FirestoreValues, StorageValues} from "../enums/firebase.enum";
 import {AGQueryConstraints, LogInInterface} from "../interfaces/firebase.interface";
-import Router from "next/router";
 import {PageLocation} from "../enums/common.enum";
+import {GoToPage} from "./router.util";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -86,11 +86,16 @@ async function CheckServerSide() {
   // server side
   if(typeof window === 'undefined') {
     await FirebaseUtil.Instance().Auth();
+    
+    if(!(process.env.AG_FB_USER && process.env.AG_FB_PASS)) {
+      console.error("Missing Firebase Server Account, please upload this params and redeploy the app.")
+      return;
+    }
 
     if (await IsNotLogIn()) {
       const logInfo: LogInInterface = {
-        user: process.env.AG_FB_USER!,
-        pass: process.env.AG_FB_PASS!,
+        user: process.env.AG_FB_USER,
+        pass: process.env.AG_FB_PASS,
       };
       await LogIn(logInfo);
     }
@@ -273,7 +278,7 @@ export async function LogOut() {
   const { signOut } = await import('@firebase/auth');
   signOut(await FirebaseUtil.Instance().Auth())
     .then(async () => {
-      await Router.push(PageLocation.Admin);
+      await GoToPage(PageLocation.Login);
     });
 }
 
@@ -283,4 +288,9 @@ export async function GetCurrentUser() {
       resolve(user);
     })
   });
+}
+
+export async function HandleNotLoggedIn() {
+  if(await IsNotLogIn())
+    await GoToPage(PageLocation.Login);
 }
