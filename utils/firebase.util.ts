@@ -3,7 +3,7 @@ import {Firestore, QueryConstraint} from "@firebase/firestore";
 import {FirebaseStorage} from "@firebase/storage";
 import {Auth, User} from "@firebase/auth";
 
-import {FirestoreFilterValues, FirestoreParameters, FirestoreValues, StorageValues} from "../enums/firebase.enum";
+import {FirestoreFilterValues, FirestoreLocation, FirestoreParameters, StorageValues} from "../enums/firebase.enum";
 import {AGQueryConstraints, LogInInterface} from "../interfaces/firebase.interface";
 import {PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
@@ -102,40 +102,50 @@ async function CheckServerSide() {
   }
 }
 
-export async function GetInfoDB<T>(dbLocation: FirestoreValues | string, constraintsValues?: AGQueryConstraints, doConstraints: boolean = true) {
-  let constraints: QueryConstraint[] = [];
-  const result: T[] = [];
-
-  if (dbLocation.split('/').length % 2 === 0) {
-    const { doc, getDoc } = await import('@firebase/firestore');
-    const docRef = doc(await FirebaseUtil.Instance().DB(), dbLocation);
-    const leDoc = await getDoc(docRef);
-
-    result.push(leDoc.data() as T);
+export async function GetInfoDB<T>(dbLocation: FirestoreLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints) {
+  let newLocation = dbLocation;
+  if(campaign)
+    newLocation = `${FirestoreParameters.Campaigns}/${campaign}/${dbLocation}`;
+  
+  if (newLocation.split('/').length % 2 === 0) {
+    return GetDocument<T>(newLocation);
   } else {
-    if (doConstraints && constraintsValues)
-      constraints = await GetConstraints(dbLocation, constraintsValues);
-
-    const { collection, getDocs, query } = await import('@firebase/firestore');
-    
-    const myQuery = query(collection(await FirebaseUtil.Instance().DB(), dbLocation), ...constraints);
-    const querySnapshot = await getDocs(myQuery);
-
-    querySnapshot.forEach(snap => {
-      result.push({...snap.data() as T, id: snap.id});
-    })
+    return GetDocuments<T>(newLocation, constraintsValues);
   }
-
-  return result;
 }
 
-function GetConstraints(dbLocation: FirestoreValues | string, constraintsValues: AGQueryConstraints) {
+async function GetDocument<T>(dbLocation: FirestoreLocation | string) {
+  const { doc, getDoc } = await import('@firebase/firestore');
+  const docRef = doc(await FirebaseUtil.Instance().DB(), dbLocation);
+  const leDoc = await getDoc(docRef);
+  
+  const data = leDoc.data() as T;
+  return data ? [data] : [];
+}
+
+async function GetDocuments<T>(dbLocation: FirestoreLocation | string, constraintsValues?: AGQueryConstraints) {
+  const constraints = await GetConstraints(dbLocation, constraintsValues);
+
+  const { collection, getDocs, query } = await import('@firebase/firestore');
+  
+  const myQuery = query(collection(await FirebaseUtil.Instance().DB(), dbLocation), ...constraints);
+  const querySnapshot = await getDocs(myQuery);
+
+  return querySnapshot.docs.map(s => {
+    return {...s.data() as T, id: s.id}
+  });
+}
+
+function GetConstraints(dbLocation: FirestoreLocation | string, constraintsValues?: AGQueryConstraints) {
+  if(!constraintsValues)
+    return [];
+  
   switch (dbLocation) {
-    case FirestoreValues.Parts:
+    case FirestoreLocation.Features:
       return PartConstraints(constraintsValues);
-    case FirestoreValues.Accessories:
+    case FirestoreLocation.Accessories:
       return AccessoryConstraints(constraintsValues);
-    case FirestoreValues.Animations:
+    case FirestoreLocation.Animations:
       return AnimationConstraints(constraintsValues);
     default:
       return [];
@@ -212,13 +222,13 @@ export async function GetParameters<T>(...parameters: string[]): Promise<T[]> {
   return result;
 }
 
-export async function UpdateDB(location: FirestoreValues, jsonData: string) {
+export async function UpdateDB(location: FirestoreLocation, jsonData: string) {
   const { doc, setDoc } = await import('@firebase/firestore');
   const docRef = doc(await FirebaseUtil.Instance().DB(), location);
   return await setDoc(docRef, JSON.parse(jsonData), {merge: true});
 }
 
-export async function DeleteDoc(dbLocation: FirestoreValues, docId: string) {
+export async function DeleteDoc(dbLocation: FirestoreLocation, docId: string) {
   const { deleteDoc, doc } = await import('@firebase/firestore');
   await deleteDoc(doc(await FirebaseUtil.Instance().DB(), `${dbLocation}/${docId}`))
   return docId;
@@ -232,7 +242,7 @@ export async function UpdateDoc(docLocation?: string, jsonData?: string) {
   }
 }
 
-export async function InsertDB(jsonData: string, location: string = FirestoreValues.Parts) {
+export async function InsertDB(jsonData: string, location: string = FirestoreLocation.Features) {
   // console.log(jsonData);
   const { addDoc, collection } = await import('@firebase/firestore');
   const newDoc = await addDoc(collection(await FirebaseUtil.Instance().DB(), location), JSON.parse(jsonData));

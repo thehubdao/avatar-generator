@@ -1,15 +1,16 @@
 ﻿import {Component} from "react";
-import {FirestoreValues} from "../../../enums/firebase.enum";
+import {FirestoreLocation} from "../../../enums/firebase.enum";
 import {DeleteDoc, GetInfoDB, HandleNotLoggedIn, LogOut} from "../../../utils/firebase.util";
 import Link from "next/link";
 import AGButton from "../../../components/common/ag-button.component";
 import Head from "next/head";
+import AGText from "../../../components/common/ag-text.component";
 
 interface AssetListProps {
 }
 
 interface AssetListState {
-  dbLocation: FirestoreValues;
+  dbLocation: FirestoreLocation;
   locationOptions: string[],
   dbHeaders?: string[],
   dbData?: any[],
@@ -21,8 +22,8 @@ export default class List extends Component<AssetListProps, AssetListState> {
   constructor(props: AssetListProps) {
     super(props);
     this.state = {
-      dbLocation: FirestoreValues.Parts,
-      locationOptions: Object.values(FirestoreValues),
+      dbLocation: FirestoreLocation.Features,
+      locationOptions: Object.values(FirestoreLocation),
     };
   }
 
@@ -32,8 +33,9 @@ export default class List extends Component<AssetListProps, AssetListState> {
     await this.getDbInfo();
   }
 
-  async getDbInfo(location: FirestoreValues = this.state.dbLocation) {
-    const data = await GetInfoDB<any>(location);
+  async getDbInfo(location: FirestoreLocation = this.state.dbLocation) {
+    const data = await GetInfoDB<any>(location, 'decentraland');
+    
     this.setState({
       dbData: data,
       dbHeaders: data.length > 0 ? Object.keys(data[0]).sort((a, b) => a.localeCompare(b)) : [],
@@ -78,9 +80,9 @@ export default class List extends Component<AssetListProps, AssetListState> {
 
   async changeDbLocation(newLocation: string) {
     this.setState({
-      dbLocation: newLocation as FirestoreValues
+      dbLocation: newLocation as FirestoreLocation
     });
-    await this.getDbInfo(newLocation as FirestoreValues);
+    await this.getDbInfo(newLocation as FirestoreLocation);
   }
 
   renderLocationOptions() {
@@ -90,19 +92,26 @@ export default class List extends Component<AssetListProps, AssetListState> {
   }
 
   renderDbTable() {
+    const { dbData } = this.state;
     return (
-      <div className="w-full overflow-x-auto border-2 border-slate-600">
-        <table className="border-2">
-          <thead>
-          <tr>
-            {this.renderHeaders()}
-          </tr>
-          </thead>
-          <tbody>
-          {this.renderInfo()}
-          </tbody>
-        </table>
-      </div>
+      <>
+        {
+          dbData && dbData?.length > 0 ?
+          <div className="w-full overflow-x-auto border-2 border-slate-600">
+            <table className="border-2">
+              <thead>
+              <tr>
+                {this.renderHeaders()}
+              </tr>
+              </thead>
+              <tbody>
+              {this.renderInfo()}
+              </tbody>
+            </table>
+          </div>
+            : <AGText type="th2" side="center">No data to show</AGText>
+        }
+      </>
     );
   }
 
@@ -128,7 +137,7 @@ export default class List extends Component<AssetListProps, AssetListState> {
           <tr key={d['id']}>
             <td className="px-1 border-t-2 border-yellow-400 flex justify-evenly">
               <Link href={{pathname: 'update', query: {docLocation: `${this.state.dbLocation}/${d['id']}`}}}>🎏</Link>
-              {this.state.dbLocation !== FirestoreValues.Parameters ?
+              {this.state.dbLocation !== FirestoreLocation.Parameters ?
                 <a className="hover:cursor-pointer" title="delete" onClick={() => this.deleteDoc(d['id'])}>👋</a> : ''
               }
             </td>

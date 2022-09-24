@@ -8,6 +8,7 @@ interface AGTextProps {
   mark?: MarkType | string;
   href?: string;
   justText?: boolean;
+  side?: 'center' | 'left' | 'right';
   children: string | JSX.Element | (string | JSX.Element)[];
 }
 
@@ -16,6 +17,21 @@ interface AGTextState {
 }
 
 export default class AGText extends Component<AGTextProps, AGTextState> {
+  getSide() {
+    const { side } = this.props;
+    if(!side)
+      return '';
+    
+    switch (side) {
+      case "center":
+        return ' text-center';
+      case "left":
+        return ' text-left';
+      case "right":
+        return ' text-right';
+    }
+  }
+  
   renderMark() {
     const { mark } = this.props;
     if(!mark)
@@ -40,13 +56,13 @@ export default class AGText extends Component<AGTextProps, AGTextState> {
     
     switch (type) {
       case 'th1':
-        return <p className="mt-2 mb-10 font-bold text-5xl">{this.renderMark()}{children}</p>;
+        return <p className={"mt-2 mb-10 font-bold text-5xl" + this.getSide()}>{this.renderMark()}{children}</p>;
       case 'th1.5':
-        return <p className="mt-10 mb-2 font-semibold text-3xl text-gray-500">{this.renderMark()}{children}</p>;
+        return <p className={"mt-10 mb-2 font-semibold text-3xl text-gray-500" + this.getSide()}>{this.renderMark()}{children}</p>;
       case 'th2':
-        return <p className="mb-2 mt-5 font-semibold text-lg">{this.renderMark()}{children}</p>;
+        return <p className={"mb-2 mt-5 font-semibold text-lg" + this.getSide()}>{this.renderMark()}{children}</p>;
       case 'th3':
-        return <p className="mt-2 mb-1 font-medium text-base">{this.renderMark()}{children}</p>;
+        return <p className={"mt-2 mb-1 font-medium text-base" + this.getSide()}>{this.renderMark()}{children}</p>;
       case 'text':
         return <p className="my-1 text-justify">{this.renderMark()}{children}</p>;
       case 'code':

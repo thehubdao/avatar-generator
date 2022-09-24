@@ -1,5 +1,5 @@
-export enum FirestoreValues {
-    Parts = 'parts',
+export enum FirestoreLocation {
+    Features = 'features',
     Accessories = 'accessories',
     Animations = 'animations',
     Parameters = 'general/parameters',

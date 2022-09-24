@@ -7,7 +7,7 @@ import {
   UpdateDB,
   UploadFile
 } from "../../../utils/firebase.util";
-import {FirestoreParameters, FirestoreValues, StorageValues} from "../../../enums/firebase.enum";
+import {FirestoreParameters, FirestoreLocation, StorageValues} from "../../../enums/firebase.enum";
 import AGButton from "../../../components/common/ag-button.component";
 import {FeatureLocationApi} from "../../../interfaces/api.interface";
 import {BasicData} from "../../../interfaces/common.interface";
@@ -21,7 +21,7 @@ interface AssetAddProps {
 
 interface AssetAddState {
   jsonData?: string;
-  dbLocation?: FirestoreValues;
+  dbLocation?: FirestoreLocation;
   formData: FeatureLocationApi;
   typeOptions: BasicData[];
   selectedCampaign: string;
@@ -40,11 +40,11 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
     super(props);
     this.state = {
       jsonData: '',
-      dbLocation: FirestoreValues.Parts,
+      dbLocation: FirestoreLocation.Features,
       formData: {name: '', path: '', campaign: []},
       typeOptions: [],
       selectedCampaign: '',
-      locationOptions: Object.values(FirestoreValues),
+      locationOptions: Object.values(FirestoreLocation),
       loneFileOptions: Object.values(StorageValues),
       selectedStorage: StorageValues.BaseMesh,
     };
@@ -55,7 +55,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   }
 
   async getTypeOptionsByCampaign(campaign: string) {
-    const diff = this.state.dbLocation === FirestoreValues.Accessories ? 'Accessories' : '';
+    const diff = this.state.dbLocation === FirestoreLocation.Accessories ? 'Accessories' : '';
     this.setState({
       selectedCampaign: campaign,
       typeOptions: [],
@@ -99,11 +99,11 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
 
   renderUploadType() {
     switch (this.state.dbLocation) {
-      case FirestoreValues.Animations:
-      case FirestoreValues.Accessories:
-      case FirestoreValues.Parts:
+      case FirestoreLocation.Animations:
+      case FirestoreLocation.Accessories:
+      case FirestoreLocation.Features:
         return this.renderPartForm();
-      case FirestoreValues.Parameters:
+      case FirestoreLocation.Parameters:
         return this.renderParameterForm();
     }
   }
@@ -185,8 +185,8 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
               <select className="w-52 rounded border-2 border-slate-600" required
                       value={dbLocation}
                       onChange={e => this.setState({
-                        dbLocation: e.target.value as FirestoreValues,
-                        animation: e.target.value === FirestoreValues.Animations
+                        dbLocation: e.target.value as FirestoreLocation,
+                        animation: e.target.value === FirestoreLocation.Animations
                       })}>
                 {this.renderLocationOptions()}
               </select>
@@ -237,7 +237,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   async insertDB(jsonData: string | undefined = this.state.jsonData) {
     const {dbLocation} = this.state;
     if (dbLocation && jsonData) {
-      if (dbLocation !== FirestoreValues.Parameters) {
+      if (dbLocation !== FirestoreLocation.Parameters) {
         await InsertDB(jsonData, dbLocation);
         alert('Done inserting');
       } else {
@@ -264,13 +264,13 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
     }
   }
   
-  uploadTo(location: FirestoreValues | undefined = this.state.dbLocation) {
+  uploadTo(location: FirestoreLocation | undefined = this.state.dbLocation) {
     switch (location) {
-      case FirestoreValues.Parts:
+      case FirestoreLocation.Features:
         return StorageValues.Part;
-      case FirestoreValues.Accessories:
+      case FirestoreLocation.Accessories:
         return StorageValues.Accessory;
-      case FirestoreValues.Animations:
+      case FirestoreLocation.Animations:
         return StorageValues.Animation;
       default:
         return StorageValues.Missing;
