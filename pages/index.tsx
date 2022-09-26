@@ -43,13 +43,15 @@ import {CreateAnimationMixer, SetAnimation} from "../utils/threejs/animation.uti
 import {SceneInterface} from "../interfaces/scene.interface";
 import {InitSceneController} from "../utils/threejs/scene.util";
 
-interface AvatarGeneratorProps {
+export interface AvatarGeneratorProps {
   campaign?: string | null;
   baseMeshPath: string;
   campaignConfig: CampaignConfig;
   selectListBodyParts: BasicData[];
   selectListAccessories: BasicData[];
   attributeConfig: BasicData[] | null;
+  // callback when data is ready to be used
+  onDataLoaded?: () => void;
 }
 
 interface AvatarGeneratorState {
@@ -146,6 +148,8 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     
     await this.loadPreData();
     this.setLoading(false);
+    // trigger event when component has all data to render
+    this.props.onDataLoaded?.()
 
     this.setState({
       resX: window.innerWidth,
@@ -377,6 +381,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   async changePart(id: string, partPath: string, name: string, selectedPart: string = this.state.selectedPart) {
+    console.log("Change Part: ", id, partPath, name, selectedPart)
     let replaceModel: GLTF;
     if(this.state.savedModels[id]) {
       replaceModel = this.state.savedModels[id];
@@ -490,9 +495,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   private renderEditMode() {
     return (
       <>
-        <Head>
-          <title>ThreeJs Example</title>
-        </Head>
         <div className="fixed w-[360px] h-4/5 left-[50%] translate-x-[-50%] flex justify-center items-start rounded-b-[180px] overflow-hidden transition-width transition-height duration-300 ease-in-out">
           <div className="bg-[#272727] w-full h-screen absolute"></div>
           <div className="relative h-full" ref={ref => this.mount = ref} />

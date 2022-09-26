@@ -45,7 +45,7 @@ export class TextureUtil {
   public async GetToneTexture(tone: TextureTone = 'threeTone' ) {
     let toneTexture = this.getSavedToneTexture(tone);
     if(toneTexture === undefined) {
-      toneTexture = await this.getTextureUtilInstance().loadAsync(`resources/tones/${tone}.jpg`);
+      toneTexture = await this.getTextureUtilInstance().loadAsync(`/resources/tones/${tone}.jpg`);
       toneTexture.minFilter = NearestFilter;
       toneTexture.magFilter = NearestFilter;
       this.saveToneTexture(tone, toneTexture);
