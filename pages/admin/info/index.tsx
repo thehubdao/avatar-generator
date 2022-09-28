@@ -103,7 +103,7 @@ class Info extends Component<InfoProps, InfoState> {
                       </AGText>
                     </AGText>
                     <div className="flex justify-center my-2">
-                      <Image width={640} height={487} src={replitAvatarIFramePic} layout="intrinsic"></Image>
+                      <Image width={640} height={487} src={replitAvatarIFramePic} layout="intrinsic" alt="Replit Example"></Image>
                     </div>
                     <AGText type="text">You can clone this small project and test it on your own.</AGText>
                   </dd>
