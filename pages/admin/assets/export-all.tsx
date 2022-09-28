@@ -32,7 +32,7 @@ interface BulkExportState {
  * @returns
  */
 function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
-  return withRouter(class extends Component<BulkExportProps, BulkExportState>  {
+  return withRouter(class AdminExporter extends Component<BulkExportProps, BulkExportState>  {
     // identify all parts base on feature types
     parts: Map<string, any[]> = new Map()
     // features are the mesh section where a part can be attached
