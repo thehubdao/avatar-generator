@@ -1,6 +1,6 @@
 ﻿import {Component} from "react";
 import Head from "next/head";
-import AGText from "../../../components/ag-text.component";
+import AGText from "../../../components/common/ag-text.component";
 import Image from "next/image";
 
 import replitAvatarIFramePic from '../../../public/resources/images/info/replitAvatarIFrame.jpg';
@@ -103,7 +103,7 @@ class Info extends Component<InfoProps, InfoState> {
                       </AGText>
                     </AGText>
                     <div className="flex justify-center my-2">
-                      <Image width={640} height={487} src={replitAvatarIFramePic} layout="intrinsic"></Image>
+                      <Image width={640} height={487} src={replitAvatarIFramePic} layout="intrinsic" alt=""></Image>
                     </div>
                     <AGText type="text">You can clone this small project and test it on your own.</AGText>
                   </dd>

@@ -2,7 +2,7 @@
 import {FirestoreValues} from "../../../enums/firebase.enum";
 import {DeleteDoc, GetInfoDB, IsNotLogIn, LogOut} from "../../../utils/firebase.util";
 import Link from "next/link";
-import AGButton from "../../../components/ag-button.component";
+import AGButton from "../../../components/common/ag-button.component";
 import {WithRouterProps} from "next/dist/client/with-router";
 import {withRouter} from "next/router";
 import {PageLocation} from "../../../enums/common.enum";

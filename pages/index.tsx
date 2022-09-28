@@ -1,7 +1,7 @@
 import {Component} from "react";
 import Image from "next/image";
 import Head from "next/head";
-import AGLoading from "../components/ag-loading.component";
+import AGLoading from "../components/common/ag-loading.component";
 import {Clock, Vector3, WebGLInfo} from "three";
 import {FrustumCulledFalse, GetBaseCameraControls} from "../utils/threejs/scene.util";
 import {GetTestLights, GetAmbientLights} from "../utils/test-scene.util";
