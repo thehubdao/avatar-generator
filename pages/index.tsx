@@ -242,7 +242,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   async getPartsData() {
     this.partListData = GetPartsData(this.sc.baseModel!.scene, this.state.selectList);
-    // console.log(this.partListData);
   }
 
   async getAccessoryBones() {
@@ -381,7 +380,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   async changePart(id: string, partPath: string, name: string, selectedPart: string = this.state.selectedPart) {
-    console.log("Change Part: ", id, partPath, name, selectedPart)
     let replaceModel: GLTF;
     if(this.state.savedModels[id]) {
       replaceModel = this.state.savedModels[id];
@@ -391,7 +389,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });
     }
-
     await ReplaceModelPartOnly(this.sc.baseModel!.scene.children[0], replaceModel, this.partListData![selectedPart], this.state.selectList.find(sl => sl.id === selectedPart), this.state.skinColor);
     await this.getPartsData();
     // FrustumCulledFalse(this.sc.scene!);
