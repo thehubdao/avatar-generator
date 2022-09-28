@@ -2,12 +2,12 @@
 import {
   GetParameters,
   HandleNotLoggedIn,
-  InsertDB,
+  InsertDoc,
   LogOut,
-  UpdateDB,
+  UpdateDoc,
   UploadFile
 } from "../../../utils/firebase.util";
-import {FirestoreParameters, FirestoreLocation, StorageValues} from "../../../enums/firebase.enum";
+import {FirestoreParameters, FirestoreLocation, StorageLocation} from "../../../enums/firebase.enum";
 import AGButton from "../../../components/common/ag-button.component";
 import {FeatureLocationApi} from "../../../interfaces/api.interface";
 import {BasicData} from "../../../interfaces/common.interface";
@@ -30,7 +30,7 @@ interface AssetAddState {
   locationOptions: string[];
   loneFile?: File;
   loneFileOptions: string[];
-  selectedStorage: StorageValues;
+  selectedStorage: StorageLocation;
   animation?: boolean;
 }
 
@@ -45,8 +45,8 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
       typeOptions: [],
       selectedCampaign: '',
       locationOptions: Object.values(FirestoreLocation),
-      loneFileOptions: Object.values(StorageValues),
-      selectedStorage: StorageValues.BaseMesh,
+      loneFileOptions: Object.values(StorageLocation),
+      selectedStorage: StorageLocation.BaseMesh,
     };
   }
   
@@ -69,7 +69,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
     
     if(!this.state.animation)
       this.setState({
-        typeOptions: campaign.length <= 0 ? [] : (await GetParameters<BasicData[]>(campaign + diff))[0]
+        typeOptions: campaign.length <= 0 ? [] : (await GetParameters<BasicData[]>(undefined, campaign + diff))[0]
       });
   }
 
@@ -216,7 +216,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
                 <p className="mx-2 w-20 text-right">Type:</p>
                 <select className="w-52 rounded border-2 border-slate-600" required
                         value={selectedStorage}
-                        onChange={e => this.setState({selectedStorage: e.target.value as StorageValues})}>
+                        onChange={e => this.setState({selectedStorage: e.target.value as StorageLocation})}>
                   <option value=''>Select...</option>
                   {this.renderFileStorageOptions()}
                 </select>
@@ -238,10 +238,10 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
     const {dbLocation} = this.state;
     if (dbLocation && jsonData) {
       if (dbLocation !== FirestoreLocation.Parameters) {
-        await InsertDB(jsonData, dbLocation);
+        await InsertDoc(jsonData, dbLocation);
         alert('Done inserting');
       } else {
-        await UpdateDB(dbLocation, jsonData);
+        await UpdateDoc(dbLocation, jsonData);
         alert('Done updating');
       }
     }
@@ -254,7 +254,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
       const uploadFileTo = this.uploadTo();
 
       if(thumbToUpload)
-        formData.thumb = await UploadFile(thumbToUpload, StorageValues.Thumbnail);
+        formData.thumb = await UploadFile(thumbToUpload, StorageLocation.Thumbnail);
       
       formData.path = await UploadFile(fileToUpload, uploadFileTo, formData.type);
       formData.campaign = [this.state.selectedCampaign];
@@ -267,13 +267,13 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   uploadTo(location: FirestoreLocation | undefined = this.state.dbLocation) {
     switch (location) {
       case FirestoreLocation.Features:
-        return StorageValues.Part;
+        return StorageLocation.Part;
       case FirestoreLocation.Accessories:
-        return StorageValues.Accessory;
+        return StorageLocation.Accessory;
       case FirestoreLocation.Animations:
-        return StorageValues.Animation;
+        return StorageLocation.Animation;
       default:
-        return StorageValues.Missing;
+        return StorageLocation.Missing;
     }
   }
 
@@ -287,8 +287,9 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   }
 }
 
-export const getServerSideProps: GetServerSideProps<Omit<AssetAddProps, 'router'>> = async (context) => {
-  const campaigns = (await GetParameters<string[]>(FirestoreParameters.Campaigns))[0];
+export const getServerSideProps: GetServerSideProps<AssetAddProps> = async (context) => {
+  // TODO: Change to current user campaigns
+  const campaigns = (await GetParameters<string[]>(undefined, FirestoreParameters.Campaigns))[0];
 
   return {
     props: {

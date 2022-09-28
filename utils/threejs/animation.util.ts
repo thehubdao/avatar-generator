@@ -6,10 +6,10 @@ export function CreateAnimationMixer(objScene: Object3D) {
   return new AnimationMixer(objScene);
 }
 
-export async function SetAnimation(mixer: AnimationMixer, animation: GLTF | string, onAnimationSet?: Function) {
+export async function SetAnimation(mixer: AnimationMixer, animation: GLTF | string, campaign?: string, onAnimationSet?: Function) {
   let animationFile: GLTF;
   if(typeof animation === 'string'){
-    animationFile = await FirebaseGltfModel(animation);
+    animationFile = await FirebaseGltfModel(animation, campaign);
   }
   else {
     animationFile = animation as GLTF;

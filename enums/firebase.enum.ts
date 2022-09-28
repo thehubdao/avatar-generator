@@ -7,11 +7,10 @@ export enum FirestoreLocation {
 }
 
 export enum FirestoreParameters {
-    BasePath = 'general/parameters',
     Campaigns = 'campaign'
 }
 
-export enum StorageValues {
+export enum StorageLocation {
     Accessory = 'accessory',
     BaseMesh = 'base_mesh',
     Part = 'section',

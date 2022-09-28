@@ -1,6 +1,6 @@
 ﻿import {Component} from "react";
 import {GetServerSideProps} from "next";
-import {GetInfoDB, HandleNotLoggedIn, UpdateDoc} from "../../../utils/firebase.util";
+import {GetInfoDB, HandleNotLoggedIn, ReplaceDoc} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
 import Link from "next/link";
 import Head from "next/head";
@@ -65,7 +65,7 @@ export default class Update extends Component<AssetUpdateProps, AssetUpdateState
   }
 
   async updateData() {
-    await UpdateDoc(this.props.docLocation, this.state.jsonData);
+    await ReplaceDoc(this.props.docLocation, this.state.jsonData);
     alert(`Doc "${this.props.docLocation}" has been updated`);
   }
 }

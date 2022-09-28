@@ -320,7 +320,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     // console.log('Base start', this.sc.baseModel);
 
     this.sc.mixer = CreateAnimationMixer(this.sc.baseModel!.scene);
-    await SetAnimation(this.sc.mixer, this.sc.baseModel, this.setHasAnimation);
+    await SetAnimation(this.sc.mixer, this.sc.baseModel, undefined, this.setHasAnimation);
 
     await TransformObject3dToToonMaterial(this.sc.baseModel.scene);
     this.sc.scene!.add(this.sc.baseModel.scene);
@@ -678,7 +678,7 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
     }
   }
 
-  const campaigns = (await GetParameters<string[]>(FirestoreParameters.Campaigns))[0];
+  const campaigns = (await GetParameters<string[]>(undefined, FirestoreParameters.Campaigns))[0];
   const isCampaign = campaigns.some(c => c === subdomain);
 
   let _baseMeshPath: string;
@@ -688,14 +688,14 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
 
   if(isCampaign) {
     _baseMeshPath = `base_mesh/${subdomain}.glb`;
-    const result = await GetParameters(subdomain!, subdomain! + GV.Acc, subdomain! + GV.Config);
+    const result = await GetParameters(undefined, subdomain!, subdomain! + GV.Acc, subdomain! + GV.Config);
     _selectListBodyParts = result[0] as BasicData[];
     _selectListAccessories = result[1] as BasicData[];
     _campaignConfig = result[2] as CampaignConfig;
   }
   else {
     _baseMeshPath = `base_mesh/${GV.BaseCampaign}.glb`;
-    const result = await GetParameters(GV.BaseCampaign, GV.BaseCampaign + GV.Acc, GV.BaseCampaign + GV.Config);
+    const result = await GetParameters(undefined, GV.BaseCampaign, GV.BaseCampaign + GV.Acc, GV.BaseCampaign + GV.Config);
     _selectListBodyParts = result[0] as BasicData[];
     _selectListAccessories = result[1] as BasicData[];
     _campaignConfig = result[2] as CampaignConfig;

@@ -3,7 +3,7 @@ import {Firestore, QueryConstraint} from "@firebase/firestore";
 import {FirebaseStorage} from "@firebase/storage";
 import {Auth, User} from "@firebase/auth";
 
-import {FirestoreFilterValues, FirestoreLocation, FirestoreParameters, StorageValues} from "../enums/firebase.enum";
+import {FirestoreFilterValues, FirestoreLocation, FirestoreParameters, StorageLocation} from "../enums/firebase.enum";
 import {AGQueryConstraints, LogInInterface} from "../interfaces/firebase.interface";
 import {PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
@@ -197,11 +197,12 @@ async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
   return constraints;
 }
 
-export async function GetFile(path: string) {
+export async function GetFile(path: string, campaign?: string) {
   const { getBlob, ref } = await import('@firebase/storage');
-  const baseMeshRef = ref(await FirebaseUtil.Instance().Storage(), path);
+  const campaignSection = campaign ? `${campaign}/` : '';
+  const baseMeshRef = ref(await FirebaseUtil.Instance().Storage(), campaignSection + path);
 
-  // Server Side
+  // // Server Side
   // const stream = await getStream(baseMeshRef);
   // return stream;
 
@@ -209,9 +210,11 @@ export async function GetFile(path: string) {
   return stream.arrayBuffer();
 }
 
-export async function GetParameters<T>(...parameters: string[]): Promise<T[]> {
+export async function GetParameters<T>(campaign?: string, ...parameters: string[]): Promise<T[]> {
   const { doc, getDoc } = await import('@firebase/firestore');
-  const docRef = doc(await FirebaseUtil.Instance().DB(), FirestoreParameters.BasePath);
+  
+  const realLocation = campaign ? `${campaign}/${FirestoreLocation.Parameters}` : FirestoreLocation.Parameters;
+  const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
   const leDoc = await getDoc(docRef);
 
   const result: T[] = [];
@@ -222,37 +225,43 @@ export async function GetParameters<T>(...parameters: string[]): Promise<T[]> {
   return result;
 }
 
-export async function UpdateDB(location: FirestoreLocation, jsonData: string) {
+export async function UpdateDoc(location: FirestoreLocation, jsonData: string, campaign?: string) {
   const { doc, setDoc } = await import('@firebase/firestore');
-  const docRef = doc(await FirebaseUtil.Instance().DB(), location);
+  const campaignLocation = campaign ? `${campaign}/` : '';
+  const docRef = doc(await FirebaseUtil.Instance().DB(), campaignLocation + location);
   return await setDoc(docRef, JSON.parse(jsonData), {merge: true});
 }
 
-export async function DeleteDoc(dbLocation: FirestoreLocation, docId: string) {
+export async function DeleteDoc(location: FirestoreLocation, docId: string, campaign?: string) {
   const { deleteDoc, doc } = await import('@firebase/firestore');
-  await deleteDoc(doc(await FirebaseUtil.Instance().DB(), `${dbLocation}/${docId}`))
+  const campaignLocation = campaign ? `${campaign}/` : '';
+  await deleteDoc(doc(await FirebaseUtil.Instance().DB(), `${campaignLocation}${location}/${docId}`))
   return docId;
 }
 
-export async function UpdateDoc(docLocation?: string, jsonData?: string) {
+export async function ReplaceDoc(docLocation?: string, jsonData?: string, campaign?: string) {
   if (docLocation && jsonData) {
     const { doc, updateDoc } = await import('@firebase/firestore');
-    const docRef = doc(await FirebaseUtil.Instance().DB(), docLocation);
+    const campaignLocation = campaign ? `${campaign}/` : '';
+    const docRef = doc(await FirebaseUtil.Instance().DB(), campaignLocation + docLocation);
     await updateDoc(docRef, JSON.parse(jsonData));
   }
 }
 
-export async function InsertDB(jsonData: string, location: string = FirestoreLocation.Features) {
+export async function InsertDoc(jsonData: string, location: string = FirestoreLocation.Features, campaign?: string) {
   // console.log(jsonData);
   const { addDoc, collection } = await import('@firebase/firestore');
-  const newDoc = await addDoc(collection(await FirebaseUtil.Instance().DB(), location), JSON.parse(jsonData));
+  const campaignLocation = campaign ? `${campaign}/` : '';
+  const newDoc = await addDoc(collection(await FirebaseUtil.Instance().DB(), campaignLocation + location), JSON.parse(jsonData));
   // console.log('New Doc: ', newDoc.id);
 }
 
-export async function UploadFile(file: File, fileType: StorageValues, sectionType?: string) {
+export async function UploadFile(file: File, fileType: StorageLocation, sectionType?: string, campaign?: string) {
   const { ref, uploadBytes } = await import('@firebase/storage');
+  const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
   const realSection = sectionType ? '/' + sectionType.toLowerCase().replace('acc', '') : '';
-  const fileRef = ref(await FirebaseUtil.Instance().Storage(), `${fileType}${realSection}/${file.name}`);
+  
+  const fileRef = ref(await FirebaseUtil.Instance().Storage(), `${campaignSection}${fileType}${realSection}/${file.name}`);
   const log = await uploadBytes(fileRef, file);
 
   return log.metadata.fullPath;
