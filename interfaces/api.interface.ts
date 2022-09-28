@@ -1,5 +1,6 @@
 ﻿export interface BodyPartLocationApi extends FeatureLocationApi {
   id: string;
+  index: string;
 }
 
 export interface AccLocationApi extends FeatureLocationApi {

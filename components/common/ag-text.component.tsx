@@ -60,7 +60,7 @@ export default class AGText extends Component<AGTextProps, AGTextState> {
           </div>
         );
       case "link":
-        return <> <a target="_blank" rel="noreferrer" href={href} className="underline">{children}</a></>
+        return <> <a target="_blank" rel='noreferrer' href={href} className="underline">{children}</a></>
       case "end":
         return <div className="mb-20"></div>;
     }
