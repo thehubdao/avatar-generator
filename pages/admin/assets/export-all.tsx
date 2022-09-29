@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import {WithRouterProps} from "next/dist/client/with-router";
 import {withRouter} from "next/router";
 
-import AGButton from "../../../components/ag-button.component";
+import AGButton from "../../../components/common/ag-button.component";
 import { IsNotLogIn} from "../../../utils/firebase.util";
 import {PageLocation} from "../../../enums/common.enum";
 
@@ -50,7 +50,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
         totalIterations: 0,
         iterationStarts: 0,
         iterationEnds: 0,
-        logs: '',
+        logs: 'logs ==============\n',
       }
       this.ref = React.createRef()
     }
@@ -64,16 +64,24 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
       avatarGenerator.changeView()
     }
 
+    log(text: string) {
+      const logText = this.state.logs
+      this.setState({ logs: logText + text + '\n' })
+    }
+
     /**
      * trigger process to export all different combination meshes
      */
     async onExportAll() {
       this.setState({ exportRunning: true })
+      this.log("Generating permutations...")
       await this.generatePermutations()
       console.time("export time")
+      this.log("Starting downloads...")
       for await(const comb of this.downloadCombination()) {
-        console.log('download completed: ', comb)
+        this.log(`permutation downloaded for ${comb}`)
       }
+      this.log(`Downloads finished`)
       console.timeLog("export time")
       this.setState({ exportRunning: false })
     }
@@ -90,6 +98,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
       const permutations = Array
         .from(this.permutationPool)
         .slice(iterationStarts, iterationEnds)
+      this.log(`Amount of permutations to download ${permutations.length}`)
       for(let itr = 0; itr < permutations.length; itr++) {
         const comb = permutations[itr]
         await this.setCombinationByIndexes(comb)
@@ -269,9 +278,9 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
                 }
               </div>
             </div>
-            <div className="w-8/12 font-mono">
+            <div className="w-8/12 font-mono overflow-x-auto">
               <pre>
-                Logs
+                {this.state.logs}
               </pre>
             </div>
           </div>
