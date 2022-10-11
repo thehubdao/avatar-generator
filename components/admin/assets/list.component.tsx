@@ -1,40 +1,45 @@
 ﻿import {Component} from "react";
 import {FirestoreLocation} from "../../../enums/firebase.enum";
-import {DeleteDoc, GetInfoDB, HandleNotLoggedIn, LogOut} from "../../../utils/firebase.util";
-import Link from "next/link";
+import {DeleteDoc, GetInfoDB} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
-import Head from "next/head";
 import AGText from "../../../components/common/ag-text.component";
+import {AdminComponents} from "../../../enums/common.enum";
+import {AdminComponentParams} from "../../../interfaces/common.interface";
+import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../../interfaces/api.interface";
 
 interface AssetListProps {
+  campaign?: string;
+  changeComponent: (newComponent: AdminComponents, params?: AdminComponentParams) => void;
 }
 
 interface AssetListState {
   dbLocation: FirestoreLocation;
-  locationOptions: string[],
   dbHeaders?: string[],
-  dbData?: any[],
+  dbData?: (FeatureInterface | AccessoryInterface | AnimationInterface)[],
 }
 
 // Show info from database
 // Delete entry on database (or add a new field for deleted entries) (new field needs to edit getParts as well)
-export default class List extends Component<AssetListProps, AssetListState> {
+export default class AssetList extends Component<AssetListProps, AssetListState> {
+  locationOptions: string[];
+  
   constructor(props: AssetListProps) {
     super(props);
     this.state = {
       dbLocation: FirestoreLocation.Features,
-      locationOptions: Object.values(FirestoreLocation),
     };
+    
+    this.locationOptions = Object.keys(FirestoreLocation);
   }
 
   async componentDidMount() {
-    await HandleNotLoggedIn();
-    
     await this.getDbInfo();
   }
 
   async getDbInfo(location: FirestoreLocation = this.state.dbLocation) {
-    const data = await GetInfoDB<any>(location, 'decentraland');
+    const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, this.props.campaign);
+    
+    console.log(Object.keys(data));
     
     this.setState({
       dbData: data,
@@ -47,9 +52,6 @@ export default class List extends Component<AssetListProps, AssetListState> {
 
     return (
       <>
-        <Head>
-          <title>Asset List</title>
-        </Head>
         <div className="flex justify-center">
           <div className="w-2/3">
             <h1 className="ml-5 my-2 font-bold"><span>😬</span>DB Info</h1>
@@ -58,15 +60,12 @@ export default class List extends Component<AssetListProps, AssetListState> {
                 <p className="mx-2">Db location:</p>
                 <select className="w-52 rounded border-2 border-slate-600" required
                         value={dbLocation}
-                        onChange={e => this.changeDbLocation(e.target.value)}>
+                        onChange={e => void this.changeDbLocation(e.target.value)}>
                   {this.renderLocationOptions()}
                 </select>
               </div>
               <div className="flex">
-                <AGButton type="alert">
-                  <Link href="add">Go to Add</Link>
-                </AGButton>
-                <AGButton type="danger" onClickEvent={() => LogOut()}>Log Out</AGButton>
+                <AGButton type="alert" onClickEvent={() => this.props.changeComponent(AdminComponents.AssetAdd)}>Go to Add</AGButton>
               </div>
             </div>
 
@@ -86,8 +85,9 @@ export default class List extends Component<AssetListProps, AssetListState> {
   }
 
   renderLocationOptions() {
-    return this.state.locationOptions.map(x => {
-      return <option value={x} key={x}>{x}</option>
+    return this.locationOptions.map(x => {
+      const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
+      return <option value={val} key={x}>{x}</option>
     });
   }
 
@@ -136,17 +136,19 @@ export default class List extends Component<AssetListProps, AssetListState> {
         return (
           <tr key={d['id']}>
             <td className="px-1 border-t-2 border-yellow-400 flex justify-evenly">
-              <Link href={{pathname: 'update', query: {docLocation: `${this.state.dbLocation}/${d['id']}`}}}>🎏</Link>
+              <a onClick={() => this.props.changeComponent(AdminComponents.AssetModify, {docLocation: `${this.state.dbLocation}/${d.id}`})}>🎏</a>
               {this.state.dbLocation !== FirestoreLocation.Parameters ?
-                <a className="hover:cursor-pointer" title="delete" onClick={() => this.deleteDoc(d['id'])}>👋</a> : ''
+                <a className="hover:cursor-pointer" title="delete" onClick={() => void this.deleteDoc(d.id)}>👋</a> : ''
               }
             </td>
             {
-              this.state.dbHeaders!.map(h => {
+              this.state.dbHeaders &&
+              this.state.dbHeaders.map(h => {
                 acc++;
-                const show = typeof (d[h]) === 'object' ? JSON.stringify(d[h]) : d[h];
+                const key = h as keyof typeof d;
+                const show = typeof (d[key]) === 'object' ? JSON.stringify(d[key]) : d[key];
                 return <td className="px-1 min-w-fit max-w-md truncate border-l-2 border-t-2 border-yellow-400"
-                           title={show} key={d['id'] + '_' + acc}>{show}</td>
+                           title={show} key={`${d.id}_${acc}`}>{show}</td>
               })
             }
           </tr>

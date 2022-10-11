@@ -1,29 +1,52 @@
 ﻿import {Component} from "react";
-import {GetServerSideProps} from "next";
-import {GetInfoDB, HandleNotLoggedIn, ReplaceDoc} from "../../../utils/firebase.util";
+import {GetInfoDB, ReplaceDoc} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
-import Link from "next/link";
-import Head from "next/head";
+import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../../interfaces/api.interface";
+import {AdminComponents} from "../../../enums/common.enum";
+import {AdminComponentParams} from "../../../interfaces/common.interface";
 
 interface AssetUpdateProps {
   docLocation?: string;
-  docInfo?: string | null;
+  changeComponent: (newComponent: AdminComponents, params?: AdminComponentParams) => void;
 }
 
 interface AssetUpdateState {
-  jsonData?: string;
+  doc: string;
+  jsonData: string;
+  message?: string;
 }
 
 export default class Update extends Component<AssetUpdateProps, AssetUpdateState> {
   constructor(props: AssetUpdateProps) {
     super(props);
     this.state = {
-      jsonData: props.docInfo === null ? undefined : this.formatJson(props.docInfo!),
-    };
+      doc: '',
+      jsonData: '',
+    }
   }
   
   async componentDidMount() {
-    await HandleNotLoggedIn();
+    await this.initData();
+  }
+  
+  async initData() {
+    const {docLocation} = this.props;
+    
+    if(!docLocation) return this.setState({ message: 'Missing document information' });
+    
+    let newDocLocation = docLocation;
+    
+    if (docLocation.split('/').length % 2 !== 0) {
+      newDocLocation = docLocation.slice(0, docLocation.lastIndexOf('/'));
+    }
+    
+    const _docInfo = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(newDocLocation);
+    const jsonData = _docInfo.length > 0 ? this.formatJson(JSON.stringify(_docInfo[0])) : '';
+    
+    this.setState({
+      doc: newDocLocation,
+      jsonData,
+    });
   }
 
   formatJson(jsonString: string) {
@@ -38,17 +61,12 @@ export default class Update extends Component<AssetUpdateProps, AssetUpdateState
   render() {
     return (
       <>
-        <Head>
-          <title>Update Asset</title>
-        </Head>
         <div className="flex justify-center">
           <div className="w-2/3">
             <h1 className="ml-5 font-bold my-2"><span>🤡</span>Update Doc</h1>
             <div className="flex justify-between my-2">
               <h2 className="mx-2">Doc path: <span className="font-bold">{this.props.docLocation}</span></h2>
-              <AGButton type="alert">
-                <Link href="list">Go to List</Link>
-              </AGButton>
+              <AGButton type="alert" onClickEvent={() => this.props.changeComponent(AdminComponents.AssetList)}>Go to List</AGButton>
             </div>
             <form>
               <div className='mx-2 my-2'>
@@ -56,7 +74,7 @@ export default class Update extends Component<AssetUpdateProps, AssetUpdateState
                         rows={10} value={this.state.jsonData}
                         onChange={(e) => this.setState({jsonData: e.target.value})}/>
               </div>
-              <AGButton type='primary' onClickEvent={() => this.updateData()}>Update json</AGButton>
+              <AGButton type='primary' onClickEvent={() => void this.updateData()}>Update json</AGButton>
             </form>
           </div>
         </div>
@@ -65,28 +83,12 @@ export default class Update extends Component<AssetUpdateProps, AssetUpdateState
   }
 
   async updateData() {
+    if(!this.props.docLocation) {
+      alert('Missing document location to update!');
+      return;
+    }
+    
     await ReplaceDoc(this.props.docLocation, this.state.jsonData);
     alert(`Doc "${this.props.docLocation}" has been updated`);
   }
-}
-
-export const getServerSideProps: GetServerSideProps<Omit<AssetUpdateProps, 'router'>> = async (context) => {
-  const {docLocation} = context.query;
-  let newDocLocation: string = '';
-  let _docInfo: any[] = [];
-  if (docLocation) {
-    if ((docLocation as string).split('/').length % 2 !== 0) {
-      newDocLocation = (docLocation as string).slice(0, docLocation.lastIndexOf('/'));
-    } else {
-      newDocLocation = docLocation as string;
-    }
-    _docInfo = await GetInfoDB<any>(newDocLocation);
-  }
-
-  return {
-    props: {
-      docLocation: newDocLocation,
-      docInfo: _docInfo.length > 0 ? JSON.stringify(_docInfo[0]) : null,
-    }
-  };
 }

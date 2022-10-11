@@ -1,30 +1,27 @@
 ﻿import {Component} from "react";
 import {
   GetParameters,
-  HandleNotLoggedIn,
   InsertDoc,
   LogOut,
   UpdateDoc,
   UploadFile
 } from "../../../utils/firebase.util";
-import {FirestoreParameters, FirestoreLocation, StorageLocation} from "../../../enums/firebase.enum";
+import {FirestoreLocation, StorageLocation} from "../../../enums/firebase.enum";
 import AGButton from "../../../components/common/ag-button.component";
-import {FeatureLocationApi} from "../../../interfaces/api.interface";
-import {BasicData} from "../../../interfaces/common.interface";
-import {GetServerSideProps} from "next";
-import Link from "next/link";
-import Head from "next/head";
+import {AssetInterface} from "../../../interfaces/api.interface";
+import {AdminComponentParams, BasicData} from "../../../interfaces/common.interface";
+import {AdminComponents} from "../../../enums/common.enum";
 
 interface AssetAddProps {
-  campaignOptions: string[];
+  campaign: string;
+  changeComponent: (newComponent: AdminComponents, params?: AdminComponentParams) => void;
 }
 
 interface AssetAddState {
   jsonData?: string;
   dbLocation?: FirestoreLocation;
-  formData: FeatureLocationApi;
+  formData: Partial<AssetInterface>;
   typeOptions: BasicData[];
-  selectedCampaign: string;
   fileToUpload?: File;
   thumbToUpload?: File;
   locationOptions: string[];
@@ -34,16 +31,15 @@ interface AssetAddState {
   animation?: boolean;
 }
 
-export default class Add extends Component<AssetAddProps, AssetAddState> {
+export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
 
   constructor(props: AssetAddProps) {
     super(props);
     this.state = {
       jsonData: '',
       dbLocation: FirestoreLocation.Features,
-      formData: {name: '', path: '', campaign: []},
       typeOptions: [],
-      selectedCampaign: '',
+      formData: {},
       locationOptions: Object.values(FirestoreLocation),
       loneFileOptions: Object.values(StorageLocation),
       selectedStorage: StorageLocation.BaseMesh,
@@ -51,21 +47,11 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   }
   
   async componentDidMount() {
-    await HandleNotLoggedIn();
+    await this.getTypeOptionsByCampaign();
   }
 
-  async getTypeOptionsByCampaign(campaign: string) {
+  async getTypeOptionsByCampaign(campaign: string = this.props.campaign) {
     const diff = this.state.dbLocation === FirestoreLocation.Accessories ? 'Accessories' : '';
-    this.setState({
-      selectedCampaign: campaign,
-      typeOptions: [],
-      formData: {
-        ...this.state.formData,
-        type: undefined
-      }
-    });
-
-    console.log(this.state.formData.type);
     
     if(!this.state.animation)
       this.setState({
@@ -76,12 +62,6 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   renderTypeOptions() {
     return this.state.typeOptions?.map(x => {
       return <option value={x.id} key={x.id}>{x.id}</option>
-    });
-  }
-
-  renderCampaignOptions() {
-    return this.props.campaignOptions.map(x => {
-      return <option value={x} key={x}>{x}</option>
     });
   }
 
@@ -109,35 +89,23 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   }
 
   renderPartForm() {
-    const {formData, selectedCampaign, animation} = this.state;
+    const {formData, animation} = this.state;
     return (
       <>
-        <Head>
-          <title>Add Asset</title>
-        </Head>
         <div className="mx-2 my-2 border-slate-600 border-2 rounded">
           <form>
             <h2 className="font-bold ml-5 mb-2"><span>😎</span>Form</h2>
             <div className="flex my-2">
               <p className="mx-2 w-20 text-right">Name:</p>
               <input className="w-52 border-slate-600 border-2 rounded px-1" type="text" required
-                     value={formData.name}
+                     value={formData?.name}
                      onChange={(e) => this.setState({formData: {...formData, name: e.target.value}})}/>
-            </div>
-            <div className="flex my-2">
-              <p className="mx-2 w-20 text-right">Campaign:</p>
-              <select className="w-52 rounded border-2 border-slate-600" required
-                      value={selectedCampaign}
-                      onChange={e => this.getTypeOptionsByCampaign(e.target.value)}>
-                <option value=''>Select...</option>
-                {this.renderCampaignOptions()}
-              </select>
             </div>
             { !animation &&
             <div className="flex my-2">
               <p className="mx-2 w-20 text-right">Type:</p>
               <select className="w-52 rounded border-2 border-slate-600" required
-                      value={formData.type}
+                      value={formData?.type}
                       onChange={e => this.setState({formData: {...formData, type: e.target.value}})}>
                 <option value=''>Select...</option>
                 {this.renderTypeOptions()}
@@ -159,7 +127,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
 
           </form>
         </div>
-        <AGButton type='secondary' onClickEvent={() => this.insertDBForm()}>Insert form</AGButton>
+        <AGButton type='secondary' onClickEvent={() => void this.insertDBForm()}>Insert form</AGButton>
       </>
     );
   }
@@ -192,10 +160,8 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
               </select>
             </div>
             <div className="flex">
-              <AGButton type="alert">
-                <Link href="list">Go to List</Link>
-              </AGButton>
-              <AGButton type="danger" onClickEvent={() => LogOut()}>Log Out</AGButton>
+              <AGButton type="alert" onClickEvent={() => this.props.changeComponent(AdminComponents.AssetList)}>Go to List</AGButton>
+              <AGButton type="danger" onClickEvent={void LogOut}>Log Out</AGButton>
             </div>
           </div>
 
@@ -206,7 +172,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
               <textarea required className="w-full border-2 border-amber-600 rounded" rows={5}
                         value={this.state.jsonData} onChange={(e) => this.setState({jsonData: e.target.value})}/>
             </div>
-            <AGButton type='primary' onClickEvent={() => this.insertDB()}>Insert json</AGButton>
+            <AGButton type='primary' onClickEvent={() => void this.insertDB()}>Insert json</AGButton>
           </form>
 
           <form>
@@ -227,7 +193,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
                        onChange={e => this.setState({loneFile: e.target.files ? e.target.files[0] : undefined})}/>
               </div>
             </div>
-            <AGButton type='alert' onClickEvent={() => this.insertFile()}>Insert File</AGButton>
+            <AGButton type='alert' onClickEvent={() => void this.insertFile()}>Insert File</AGButton>
           </form>
         </div>
       </div>
@@ -249,7 +215,12 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
 
   async insertDBForm() {
     const {formData, thumbToUpload, fileToUpload} = this.state;
-
+    
+    if(!formData) {
+      console.error("Missing Form Data!");
+      return;
+    }
+    
     if (fileToUpload) {
       const uploadFileTo = this.uploadTo();
 
@@ -257,7 +228,6 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
         formData.thumb = await UploadFile(thumbToUpload, StorageLocation.Thumbnail);
       
       formData.path = await UploadFile(fileToUpload, uploadFileTo, formData.type);
-      formData.campaign = [this.state.selectedCampaign];
 
       await this.insertDB(JSON.stringify(formData));
       alert("Data inserted");
@@ -285,15 +255,4 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
       alert("File uploaded");
     }
   }
-}
-
-export const getServerSideProps: GetServerSideProps<AssetAddProps> = async (context) => {
-  // TODO: Change to current user campaigns
-  const campaigns = (await GetParameters<string[]>(undefined, FirestoreParameters.Campaigns))[0];
-
-  return {
-    props: {
-      campaignOptions: campaigns,
-    }
-  };
 }
