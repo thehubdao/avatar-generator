@@ -3,11 +3,11 @@ import {GetInfoDB, ReplaceDoc} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../../interfaces/api.interface";
 import {AdminComponents} from "../../../enums/common.enum";
-import {AdminComponentParams} from "../../../interfaces/common.interface";
+import {ChangeComponentFunction} from "../../../interfaces/common.interface";
 
 interface AssetUpdateProps {
   docLocation?: string;
-  changeComponent: (newComponent: AdminComponents, params?: AdminComponentParams) => void;
+  changeComponent: ChangeComponentFunction;
 }
 
 interface AssetUpdateState {

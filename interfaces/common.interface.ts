@@ -1,5 +1,6 @@
 ﻿import {Object3D} from "three";
 import {ClientQuestion} from "../enums/campaign.enum";
+import {AdminComponents} from "../enums/common.enum";
 
 export interface BasicData {
   id: string;
@@ -46,6 +47,8 @@ export interface CampaignConfig {
   accCamPos?: Record<string, LookAtVectors>;
 }
 
-export interface AdminComponentParams {
+interface AdminComponentParams {
   docLocation?: string;
 }
+
+export type ChangeComponentFunction = (newComponent: AdminComponents, params?: AdminComponentParams) => void;

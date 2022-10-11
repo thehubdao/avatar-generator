@@ -4,12 +4,12 @@ import {DeleteDoc, GetInfoDB} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
 import AGText from "../../../components/common/ag-text.component";
 import {AdminComponents} from "../../../enums/common.enum";
-import {AdminComponentParams} from "../../../interfaces/common.interface";
+import {ChangeComponentFunction} from "../../../interfaces/common.interface";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../../interfaces/api.interface";
 
 interface AssetListProps {
   campaign?: string;
-  changeComponent: (newComponent: AdminComponents, params?: AdminComponentParams) => void;
+  changeComponent: ChangeComponentFunction;
 }
 
 interface AssetListState {

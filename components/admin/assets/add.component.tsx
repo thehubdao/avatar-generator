@@ -9,12 +9,12 @@ import {
 import {FirestoreLocation, StorageLocation} from "../../../enums/firebase.enum";
 import AGButton from "../../../components/common/ag-button.component";
 import {AssetInterface} from "../../../interfaces/api.interface";
-import {AdminComponentParams, BasicData} from "../../../interfaces/common.interface";
+import {ChangeComponentFunction, BasicData} from "../../../interfaces/common.interface";
 import {AdminComponents} from "../../../enums/common.enum";
 
 interface AssetAddProps {
   campaign: string;
-  changeComponent: (newComponent: AdminComponents, params?: AdminComponentParams) => void;
+  changeComponent: ChangeComponentFunction;
 }
 
 interface AssetAddState {
