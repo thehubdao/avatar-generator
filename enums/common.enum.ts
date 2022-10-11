@@ -32,3 +32,9 @@ export enum PageLocation {
   AssetList = '/admin/assets/list',
   Login = '/admin/login',
 }
+
+export enum AdminComponents {
+  AssetAdd,
+  AssetList,
+  AssetModify,
+}

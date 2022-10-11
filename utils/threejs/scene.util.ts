@@ -3,10 +3,15 @@ import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {SceneInterface} from "../../interfaces/scene.interface";
 
 export function InitSceneController(): SceneInterface {
+  const camera = GetBaseCamera();
+  const renderer = GetBaseRenderer();
+  const controls = GetBaseCameraControls(camera, renderer.domElement);
+  
   return {
     scene: GetBaseScene(),
-    camera: GetBaseCamera(),
-    renderer: GetBaseRenderer(),
+    camera,
+    renderer,
+    controls
   };
 }
 

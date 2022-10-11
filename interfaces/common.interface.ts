@@ -7,7 +7,7 @@ export interface BasicData {
   detail?: string;
 }
 
-export interface PartInfoInterface {
+export interface FeatureInfoInterface {
   partIndex: number;
   featureBase?: Object3D;
 }
@@ -44,4 +44,8 @@ export interface CampaignConfig {
   defCam?: LookAtVectors,
   partsCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
+}
+
+export interface AdminComponentParams {
+  docLocation?: string;
 }

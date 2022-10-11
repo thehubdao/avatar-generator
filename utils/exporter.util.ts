@@ -1,5 +1,6 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
+import {Delay} from "./common.util";
 
 export class ExporterUtil {
   private static gltfExporter: GLTFExporter;
@@ -33,10 +34,6 @@ export class ExporterUtil {
 
 }
 
-export const delay = (ms: number) => new Promise(resolve => {
-  setTimeout(resolve, ms);
-});
-
 export async function SaveFile(blob: Blob, fileName: string) {
   const link = document.createElement('a');
   link.style.display = 'none';
@@ -45,7 +42,7 @@ export async function SaveFile(blob: Blob, fileName: string) {
   document.body.appendChild(link);
   link.click();
   
-  await delay(100);
+  await Delay(100);
   link.remove();
 }
 

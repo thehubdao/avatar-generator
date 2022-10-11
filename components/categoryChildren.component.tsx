@@ -1,13 +1,13 @@
 import Image from "next/image";
-import { BodyPartLocationApi } from "../interfaces/api.interface";
+import { FeatureInterface } from "../interfaces/api.interface";
 
 interface ExampleProps {
-  list: BodyPartLocationApi[];
-  handleClick: Function;
+  list?: FeatureInterface[];
+  handleClick: (id: string, path: string, name: string) => void;
 }
 
 function optionList(props: ExampleProps) {
-  return props.list.map((x: BodyPartLocationApi) => {
+  return props.list.map((x: FeatureInterface) => {
     return (
       <div className="w-16 h-16 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md mb-4" key={x.id} onClick={() => {props.handleClick(x.id, x.path, x.name)}}>
         <div className="flex flex-col items-center justify-center h-full">

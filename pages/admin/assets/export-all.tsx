@@ -188,7 +188,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
      */
     parseAvatarData() {
       const avatarGenerator = this.ref.current;
-      this.features = Object.entries(avatarGenerator?.partListData || {})
+      this.features = Object.entries(avatarGenerator?.featureListData || {})
         .map(([type]) => ({
           type,
           id: type,
@@ -198,7 +198,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
       
       this.features.forEach((feature) => {
         const { type } = feature
-        const partList = avatarGenerator?.partList || []
+        const partList = avatarGenerator?.featureList || []
         const partsByType = partList
           .filter((part) =>
             part.type === type

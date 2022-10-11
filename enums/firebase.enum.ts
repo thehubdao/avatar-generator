@@ -1,7 +1,11 @@
 export enum FirestoreLocation {
-    Features = 'features',
+    Features = 'parts',
     Accessories = 'accessories',
     Animations = 'animations',
+    Parameters = '/',
+}
+
+export enum FirestoreGlobalLocation {
     Parameters = 'general/parameters',
     User = 'user',
     Test = 'testing/YEP',

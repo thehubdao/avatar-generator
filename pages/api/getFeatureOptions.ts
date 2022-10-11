@@ -8,7 +8,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { campaign, type } = req.query;
     const realCampaign = campaign as string ?? GlobalValues.BaseCampaign;
     
-    const data = await GetInfoDB( FirestoreLocation.Features, realCampaign, {
+    const data = await GetInfoDB( FirestoreLocation.Features, undefined, {
       campaign: realCampaign,
       type: type as string | undefined
     });

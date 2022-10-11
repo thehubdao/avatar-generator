@@ -10,7 +10,7 @@ import {
   Skeleton,
   SkinnedMesh
 } from "three";
-import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
+import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
 import {TextureTone, TextureUtil} from "./texture.util";
 import {LoadGltfModel} from "./importer.util";
 
@@ -27,7 +27,7 @@ export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partInd
   baseModel.scene.children[0].children[partIndex] = chest;
 }
 
-export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GLTF, partInfo: PartInfoInterface, selectedPart?: BasicData, skinColor?: string) {
+export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GLTF, partInfo: FeatureInfoInterface, selectedPart?: BasicData, skinColor?: string) {
   if(selectedPart == undefined) {
     console.error('No selected Part', 'There is no selected part to replace on base model.');
     return;

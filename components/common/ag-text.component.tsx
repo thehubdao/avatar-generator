@@ -1,4 +1,5 @@
 ﻿import {Component} from "react";
+import {Delay} from "../../utils/common.util";
 
 type TextType = 'th1' | 'th1.5' | 'th2' | 'th3' | 'text' | 'code' | 'link' | 'end';
 type MarkType = 'bullet' | 'dash';
@@ -70,7 +71,7 @@ export default class AGText extends Component<AGTextProps, AGTextState> {
           <div>
             <button title="Copy"
                     className="bg-sky-300 border-cyan-500 border-2 rounded-lg p-2 float-right mr-3 -mt-2"
-                    onClick={() => this.copyToClipboard(children as string)}>{this.state?.copied ? '✔' : '📄'}</button>
+                    onClick={() => void this.copyToClipboard(children as string)}>{this.state?.copied ? '✔' : '📄'}</button>
             <p className={'my-2 mx-1 p-2 bg-slate-400 text-sm text-indigo-900 rounded' + (this.props.justText ? ' break-all' : ' whitespace-pre-wrap') }
                style={{fontFamily: '"Lucida Console", Monaco'}}>{children}</p>
           </div>
@@ -82,14 +83,16 @@ export default class AGText extends Component<AGTextProps, AGTextState> {
     }
   }
   
-  copyToClipboard(text: string) {
-    navigator.clipboard.writeText(text)
-      .then(_ => {
-        this.setState({copied: true});
-        setTimeout(() => {
-          this.setState({copied: false});
-        }, 1000);
-      });
+  async copyToClipboard(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+
+      this.setState({copied: true});
+      await Delay(1000);
+      this.setState({copied: false});
+    } catch (e) {
+      console.error("Error copying to clipboard: ", e);
+    }
   }
   
   render() {

@@ -7,15 +7,12 @@ import {IFrameEvents, IFrameValues} from "../../../enums/common.enum";
 
 import replitAvatarIFramePic from '../../../public/resources/images/info/replitAvatarIFrame.jpg';
 
-interface InfoProps {
-}
-
 interface InfoState {
   prodUrl: string;
 }
 
-export default class Info extends Component<InfoProps, InfoState> {
-  constructor(props: InfoProps) {
+export default class Info extends Component<undefined, InfoState> {
+  constructor(props: undefined) {
     super(props);
     this.state = {
       prodUrl: 'https://avatar-generator-metagamehub.vercel.app/'
@@ -24,7 +21,7 @@ export default class Info extends Component<InfoProps, InfoState> {
 
   render() {
     return (
-      <>
+      <Layout>
         <Head>
           <title>Info</title>
         </Head>

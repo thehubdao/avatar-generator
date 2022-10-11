@@ -1,20 +1,20 @@
 import Image from "next/image";
-import { BodyPartLocationApi } from "../interfaces/api.interface";
+import { FeatureInterface } from "../interfaces/api.interface";
 import {BasicData} from "../interfaces/common.interface";
+import React from "react";
 
 interface ExampleProps {
-  list: BodyPartLocationApi[] | BasicData[];
-  handleClick: Function;
+  list: FeatureInterface[] | BasicData[];
+  handleClick: (id: string) => void;
   handleClick2: Function;
   activedPart: string;
   close: boolean;
 }
 
-
 function getSiblings(el: HTMLElement) {
 
   // for collecting siblings
-  let siblings:ChildNode[] = []; 
+  const siblings: ChildNode[] = [];
 
   // if no parent, return no sibling
   if(!el.parentNode) {
@@ -36,12 +36,12 @@ function getSiblings(el: HTMLElement) {
 
 function optionList(props: ExampleProps) {
 
-  function selectPart(e:React.MouseEvent, id:string) {
+  function selectPart(e: React.MouseEvent<HTMLDivElement>, id: string) {
     e.preventDefault();
     const el = e.target as HTMLElement;
-    let siblings = getSiblings(el);
+    const siblings = getSiblings(el);
     siblings.forEach(sibling => {
-      let bro = sibling as HTMLElement
+      const bro = sibling as HTMLElement
       bro.classList.add('!bg-transparent');
     });
     el.classList.remove('!bg-transparent');
@@ -50,7 +50,7 @@ function optionList(props: ExampleProps) {
 
   return props.list.map((x) => {
     return (
-      <div className={"overflow-hidden w-12 h-12 flex justify-center flex-col items-center bg-slate-50" + (props.activedPart===x.id?'':' !bg-transparent')} key={x.id} onClick={(event:React.MouseEvent) => selectPart(event,x.id)}>
+      <div className={"overflow-hidden w-12 h-12 flex justify-center flex-col items-center bg-slate-50" + (props.activePart===x.id?'':' !bg-transparent')} key={x.id} onClick={event => selectPart(event, x.id)}>
         <div className="pointer-events-none">
           <Image src={'/resources/icos/features/' + x.id + '.svg'} width={30} height={30} alt={x.id}/>
         </div>

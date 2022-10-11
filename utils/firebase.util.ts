@@ -3,7 +3,13 @@ import {Firestore, QueryConstraint} from "@firebase/firestore";
 import {FirebaseStorage} from "@firebase/storage";
 import {Auth, User} from "@firebase/auth";
 
-import {FirestoreFilterValues, FirestoreLocation, FirestoreParameters, StorageLocation} from "../enums/firebase.enum";
+import {
+  FirestoreFilterValues,
+  FirestoreGlobalLocation,
+  FirestoreLocation,
+  FirestoreParameters,
+  StorageLocation
+} from "../enums/firebase.enum";
 import {AGQueryConstraints, LogInInterface, UserInterface} from "../interfaces/firebase.interface";
 import {PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
@@ -213,7 +219,7 @@ export async function GetFile(path: string, campaign?: string) {
 export async function GetParameters<T>(campaign?: string, ...parameters: string[]): Promise<T[]> {
   const { doc, getDoc } = await import('@firebase/firestore');
   
-  const realLocation = campaign ? `${campaign}/${FirestoreLocation.Parameters}` : FirestoreLocation.Parameters;
+  const realLocation = campaign ? `${campaign}/${FirestoreLocation.Parameters}` : FirestoreGlobalLocation.Parameters;
   const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
   const leDoc = await getDoc(docRef);
 
@@ -239,8 +245,8 @@ export async function DeleteDoc(location: FirestoreLocation, docId: string, camp
   return docId;
 }
 
-export async function ReplaceDoc(docLocation?: string, jsonData?: string, campaign?: string) {
-  if (docLocation && jsonData) {
+export async function ReplaceDoc(docLocation: string, jsonData?: string, campaign?: string) {
+  if (jsonData) {
     const { doc, updateDoc } = await import('@firebase/firestore');
     const campaignLocation = campaign ? `${campaign}/` : '';
     const docRef = doc(await FirebaseUtil.Instance().DB(), campaignLocation + docLocation);
@@ -318,7 +324,7 @@ export async function HandleNotLoggedIn() {
 }
 
 export async function GetUserInfo(userUid: string) {
-  const userLocation = `${FirestoreLocation.User}/${userUid}`;
+  const userLocation = `${FirestoreGlobalLocation.User}/${userUid}`;
   const userDoc = await GetDocument<UserInterface>(userLocation);
   
   if(userDoc.length === 0)

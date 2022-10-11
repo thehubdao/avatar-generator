@@ -1,20 +1,19 @@
-﻿export interface BodyPartLocationApi extends FeatureLocationApi {
-  id: string;
+﻿export interface AssetInterface {
   index: string;
-}
-
-export interface AccLocationApi extends FeatureLocationApi {
-  id: string;
-}
-
-export interface FeatureLocationApi {
   name: string;
-  type?: string;
+  type: string;
   path: string;
   thumb?: string;
-  campaign: string[];
 }
 
-export interface AnimLocationApi extends Omit<FeatureLocationApi, 'type' | 'thumb'> {
+export interface FeatureInterface extends AssetInterface {
+  id: string;
+}
+
+export interface AccessoryInterface extends AssetInterface {
+  id: string;
+}
+
+export interface AnimationInterface extends Omit<AssetInterface, 'type' | 'index'> {
   id: string;
 }

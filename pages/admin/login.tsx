@@ -7,17 +7,14 @@ import {PageLocation} from "../../enums/common.enum";
 import {FirebaseError} from "@firebase/util";
 import {GoToPage} from "../../utils/router.util";
 
-interface LoginProps {
-}
-
 interface LoginState {
   user?: string;
   pass?: string;
   loading: boolean;
 }
 
-export default class Login extends Component<LoginProps, LoginState> {
-  constructor(props: LoginProps) {
+export default class Login extends Component<undefined, LoginState> {
+  constructor(props: undefined) {
     super(props);
     this.state = {
       loading: true,
@@ -43,7 +40,7 @@ export default class Login extends Component<LoginProps, LoginState> {
         <div className="flex justify-center h-screen items-center bg-amber-100">
           <div className="w-5/6">
             <div className="flex justify-center">
-              <form onSubmit={event => this.handleSubmit(event)} className="w-2/3 max-w-xs">
+              <form onSubmit={event => void this.handleSubmit(event)} className="w-2/3 max-w-xs">
                 <div className="my-2 flex justify-center">
                   <p className="font-bold text-3xl">Welcome</p>
                 </div>
@@ -83,7 +80,7 @@ export default class Login extends Component<LoginProps, LoginState> {
     
     this.SetLoading();
     try {
-      const logged = await LogIn({user: user!, pass: pass!});
+      const logged = await LogIn({user, pass});
       if (logged)
         await this.GoToDashboard();
     }
@@ -95,7 +92,7 @@ export default class Login extends Component<LoginProps, LoginState> {
     }
   }
   
-  private SetLoading(newState: boolean = true) {
+  private SetLoading(newState = true) {
     this.setState({ loading: newState });
   }
   
