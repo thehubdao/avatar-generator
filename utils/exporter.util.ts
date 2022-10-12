@@ -2,36 +2,48 @@
 import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
 import {Delay} from "./common.util";
 
-export class ExporterUtil {
-  private static gltfExporter: GLTFExporter;
-
-  private static getGltfLoaderInstance(): GLTFExporter {
-    if(ExporterUtil.gltfExporter === undefined)
-      ExporterUtil.gltfExporter = new GLTFExporter();
-
-    return ExporterUtil.gltfExporter;
+class ExporterUtil {
+  private static _instance: ExporterUtil;
+  private _gltfExporter: GLTFExporter | null;
+  
+  constructor() {
+    this._gltfExporter = null;
   }
   
-  static async ExportModelGlb(model: GLTF) {
-    const exporter = this.getGltfLoaderInstance();
-    const out = await exporter.parseAsync(model.scene, {
-      animations: model.animations,
-      binary: true,
-    });
-        
-    return new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
-  }
-
-  static async ExportModelGltf(model: GLTF) {
-    const exporter = this.getGltfLoaderInstance();
-    const out = await exporter.parseAsync(model.scene, {
-      animations: model.animations,
-    });
+  public static Instance() {
+    if(ExporterUtil._instance === undefined)
+      ExporterUtil._instance = new ExporterUtil();
     
+    return ExporterUtil._instance;
+  }
+  
+  public GltfExporter() {
+    if(this._gltfExporter == null) {
+      this._gltfExporter = new GLTFExporter();
+    }
+    
+    return this._gltfExporter;
+  }
+}
+
+export async function ExportModelGlb(model: GLTF) {
+    const exporter = ExporterUtil.Instance().GltfExporter();
+    const out = await exporter.parseAsync(model.scene, {
+        animations: model.animations,
+        binary: true,
+    });
+
+    return new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
+}
+
+export async function ExportModelGltf(model: GLTF) {
+    const exporter = ExporterUtil.Instance().GltfExporter();
+    const out = await exporter.parseAsync(model.scene, {
+        animations: model.animations,
+    });
+
     const jsonString = JSON.stringify(out, null, 2);
     await SaveString(jsonString, `exported.gltf`);
-  }
-
 }
 
 export async function SaveFile(blob: Blob, fileName: string) {

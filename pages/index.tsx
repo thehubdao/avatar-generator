@@ -17,7 +17,7 @@ import {
   ReplaceModelPartOnly,
   TransformObject3dToToonMaterial
 } from "../utils/model.util";
-import {ExporterUtil, SaveFile} from "../utils/exporter.util";
+import {ExportModelGlb, SaveFile} from "../utils/exporter.util";
 import {GetServerSideProps} from "next";
 import {
   AccessoryInfoInterface,
@@ -486,7 +486,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     this.exportData.attributesBase64 = window.btoa(JSON.stringify(this.exportData.attributes));
     const exportPromises = await Promise.all([
       this.takeExportPicture(),
-      ExporterUtil.ExportModelGlb(this.sc.armature)
+      ExportModelGlb(this.sc.armature)
     ]);
     this.exportData.picture = exportPromises[0];
     this.exportData.model = exportPromises[1];
