@@ -1,7 +1,7 @@
 ﻿import {Component} from "react";
 import {Delay} from "../../utils/common.util";
 
-type TextType = 'th1' | 'th1.5' | 'th2' | 'th3' | 'text' | 'code' | 'link' | 'end';
+type TextType = 'th1' | 'th1.5' | 'th2' | 'th3' | 'text' | 'code' | 'link' | 'end' | 'icon';
 type MarkType = 'bullet' | 'dash';
 
 interface AGTextProps {
@@ -80,6 +80,8 @@ export default class AGText extends Component<AGTextProps, AGTextState> {
         return <> <a target="_blank" rel='noreferrer' href={href} className="underline">{children}</a></>
       case "end":
         return <div className="mb-20"></div>;
+      case "icon":
+        return <span className="text-4xl">{children}</span>
     }
   }
   

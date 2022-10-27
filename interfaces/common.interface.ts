@@ -47,7 +47,7 @@ export interface CampaignConfig {
   accCamPos?: Record<string, LookAtVectors>;
 }
 
-interface AdminComponentParams {
+export interface AdminComponentParams {
   docLocation?: string;
 }
 

@@ -16,7 +16,7 @@ interface AssetUpdateState {
   message?: string;
 }
 
-export default class Update extends Component<AssetUpdateProps, AssetUpdateState> {
+export default class AssetUpdate extends Component<AssetUpdateProps, AssetUpdateState> {
   constructor(props: AssetUpdateProps) {
     super(props);
     this.state = {

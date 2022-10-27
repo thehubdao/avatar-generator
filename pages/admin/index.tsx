@@ -11,12 +11,15 @@ interface AdminState {
 export default class Admin extends Component<undefined, AdminState> {
   constructor(props: undefined) {
     super(props);
-    this.state = {};
+    this.state = {
+      // selectedCampaign: 'decentraland'
+    };
   }
   
   setUserInfo(user?: UserInterface) {
     this.setState({
-      userInfo: user
+      userInfo: user,
+      selectedCampaign: user?.campaign?.at(0),
     });
   }
   
@@ -27,15 +30,15 @@ export default class Admin extends Component<undefined, AdminState> {
   }
   
   render() {
-    const { userInfo } = this.state;
+    const { userInfo, selectedCampaign } = this.state;
     
     return (
       <>
         <Layout userInfo={userInfo}
+                currentCampaign={selectedCampaign}
                 setUserInfo={(user) => this.setUserInfo(user)}
                 setCurrentCampaign={(campaign) => this.setCurrentCampaign(campaign)}>
-          <Navbar userRole={userInfo?.role} campaign="decentraland">
-            <h1>Hello World!</h1>
+          <Navbar userRole={userInfo?.role} campaign={selectedCampaign}>
           </Navbar>
         </Layout>
       </>

@@ -2,15 +2,21 @@ import {Component} from "react";
 import {UserRoleValues} from "../../enums/firebase.enum";
 import {AdminComponents} from "../../enums/common.enum";
 import AssetList from "./assets/list.component";
+import AGButton from "../common/ag-button.component";
+import AGText from "../common/ag-text.component";
+import AssetAdd from "./assets/add.component";
+import {AdminComponentParams} from "../../interfaces/common.interface";
+import AssetUpdate from "./assets/update.component";
 
 interface NavbarProps {
-  children: JSX.Element;
+  children?: JSX.Element | JSX.Element[];
   userRole?: UserRoleValues;
   campaign?: string;
 }
 
 interface NavbarState {
   currentComponent: AdminComponents;
+  componentParams?: AdminComponentParams;
 }
 
 export default class Navbar extends Component<NavbarProps, NavbarState> {
@@ -25,11 +31,11 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
     return (
       <>
         <div className="flex">
-          <div className="flex-none w-20 h-screen bg-red-400 border-r-2 border-yellow-400">
+          <div className="flex-none max-h-full min-h-screen bg-red-400 border-r-2 border-yellow-400">
             {this.renderNavBar()}
           </div>
-          <div className="flex-auto h-full border-t-2 border-yellow-400 flex justify-center">
-            <div className="my-auto w-full">
+          <div className="flex-1 h-full border-t-2 border-yellow-400 flex justify-center">
+            <div className="my-auto max-w-full">
               {this.renderSelectedComponent()}
             </div>
           </div>
@@ -52,15 +58,27 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
   private navSuperAdmin() {
     return (
       <>
+        <AGButton type="alert" tooltip="Create user">
+          <AGText type="icon">🤡</AGText>
+        </AGButton>
+        {this.navAdmin()}
       </>
     );
   }
 
   private navAdmin() {
     return (
-      <div className="flex flex-col">
-        
-      </div>
+      <>
+        <AGButton type="primary" tooltip="Asset list" onClickEvent={() => this.setCurrentComponent(AdminComponents.AssetList)}>
+          <AGText type="icon">👯‍♀️</AGText>
+        </AGButton>
+        <AGButton type="primary" tooltip="Add Asset" onClickEvent={() => this.setCurrentComponent(AdminComponents.AssetAdd)}>
+          <AGText type="icon">😆</AGText>
+        </AGButton>
+        <AGButton type="secondary" tooltip="Config campaign">
+          <AGText type="icon">⛺️</AGText>
+        </AGButton>
+      </>
     );
   }
 
@@ -69,17 +87,25 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
     switch (currentComponent) {
       case AdminComponents.AssetList:
         return <AssetList campaign={this.props.campaign}
-                          changeComponent={(nc) => this.setCurrentComponent(nc)} />
+                          changeComponent={(nc, params) => this.setCurrentComponent(nc, params)} />
+      
       case AdminComponents.AssetAdd:
+        return <AssetAdd campaign={this.props.campaign}
+                         changeComponent={(nc) => this.setCurrentComponent(nc)} />
+      
       case AdminComponents.AssetModify:
+        return <AssetUpdate docLocation={this.state.componentParams?.docLocation}
+                            changeComponent={(nc) => this.setCurrentComponent(nc)} />
+      
       default:
         return <p>Missing Component!</p>;
     }
   }
 
-  private setCurrentComponent(newComponent: AdminComponents) {
+  private setCurrentComponent(newComponent: AdminComponents, params?: AdminComponentParams) {
     this.setState({
       currentComponent: newComponent,
+      componentParams: params,
     });
   }
 }

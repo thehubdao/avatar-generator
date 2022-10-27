@@ -2,7 +2,6 @@
 import {
   GetParameters,
   InsertDoc,
-  LogOut,
   UpdateDoc,
   UploadFile
 } from "../../../utils/firebase.util";
@@ -11,13 +10,15 @@ import AGButton from "../../../components/common/ag-button.component";
 import {AssetInterface} from "../../../interfaces/api.interface";
 import {ChangeComponentFunction, BasicData} from "../../../interfaces/common.interface";
 import {AdminComponents} from "../../../enums/common.enum";
+import {LogError} from "../../../utils/common.util";
 
 interface AssetAddProps {
-  campaign: string;
+  campaign?: string;
   changeComponent: ChangeComponentFunction;
 }
 
 interface AssetAddState {
+  message?: string;
   jsonData?: string;
   dbLocation?: FirestoreLocation;
   formData: Partial<AssetInterface>;
@@ -50,7 +51,12 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
     await this.getTypeOptionsByCampaign();
   }
 
-  async getTypeOptionsByCampaign(campaign: string = this.props.campaign) {
+  async getTypeOptionsByCampaign(campaign: string | undefined = this.props.campaign) {
+    if(campaign == undefined) {
+      await LogError("AssetAdd", "Missing campaign");
+      return this.setState({ message: "Missing campaign!" });
+    }
+    
     const diff = this.state.dbLocation === FirestoreLocation.Accessories ? 'Accessories' : '';
     
     if(!this.state.animation)
@@ -161,7 +167,6 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
             </div>
             <div className="flex">
               <AGButton type="alert" onClickEvent={() => this.props.changeComponent(AdminComponents.AssetList)}>Go to List</AGButton>
-              <AGButton type="danger" onClickEvent={void LogOut}>Log Out</AGButton>
             </div>
           </div>
 
@@ -202,36 +207,32 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
 
   async insertDB(jsonData: string | undefined = this.state.jsonData) {
     const {dbLocation} = this.state;
-    if (dbLocation && jsonData) {
-      if (dbLocation !== FirestoreLocation.Parameters) {
-        await InsertDoc(jsonData, dbLocation);
-        alert('Done inserting');
-      } else {
-        await UpdateDoc(dbLocation, jsonData);
-        alert('Done updating');
-      }
+    if (!(dbLocation && jsonData)) return LogError("AssetAdd", "Missing Data/Location to save new asset!");
+
+    if (dbLocation !== FirestoreLocation.Parameters) {
+      await InsertDoc(jsonData, dbLocation);
+      alert('Done inserting');
+    } else {
+      await UpdateDoc(dbLocation, jsonData);
+      alert('Done updating');
     }
   }
 
   async insertDBForm() {
+    const {campaign} = this.props;
     const {formData, thumbToUpload, fileToUpload} = this.state;
     
-    if(!formData) {
-      console.error("Missing Form Data!");
-      return;
-    }
-    
-    if (fileToUpload) {
-      const uploadFileTo = this.uploadTo();
+    if (!formData) return LogError("AssetAdd", "Missing Form Data!");
+    if (!fileToUpload) return LogError("AssetAdd", "No file to upload!");
 
-      if(thumbToUpload)
-        formData.thumb = await UploadFile(thumbToUpload, StorageLocation.Thumbnail);
-      
-      formData.path = await UploadFile(fileToUpload, uploadFileTo, formData.type);
+    const uploadFileTo = this.uploadTo();
 
-      await this.insertDB(JSON.stringify(formData));
-      alert("Data inserted");
-    }
+    formData.thumb = thumbToUpload ?
+      await UploadFile(thumbToUpload, StorageLocation.Thumbnail, undefined, campaign) : undefined;
+    formData.path = await UploadFile(fileToUpload, uploadFileTo, formData.type, campaign);
+
+    await this.insertDB(JSON.stringify(formData));
+    alert("Data inserted");
   }
   
   uploadTo(location: FirestoreLocation | undefined = this.state.dbLocation) {

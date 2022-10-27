@@ -5,8 +5,9 @@ import AGButton from "../common/ag-button.component";
 import {UserRoleValues} from "../../enums/firebase.enum";
 
 interface LayoutProps {
-  userInfo?: UserInterface;
   children: JSX.Element | JSX.Element[];
+  userInfo?: UserInterface;
+  currentCampaign?: string;
   setUserInfo: (user?: UserInterface) => void;
   setCurrentCampaign: (campaign?: string) => void;
 }
@@ -40,7 +41,7 @@ export default class Layout extends Component<LayoutProps> {
   }
 
   render() {
-    const { userInfo } = this.props;
+    const { userInfo, currentCampaign } = this.props;
     
     return (
       <>
@@ -53,10 +54,12 @@ export default class Layout extends Component<LayoutProps> {
                         <span>🧔‍♀️: </span>{this.getUserOrEmail()}
                     </p>
                     <p className="ml-2">
-                        <span>🚩: </span>{userInfo.role != undefined ? UserRoleValues[userInfo.role] : 'missing'}
+                        <span>👨‍🌾: </span>{userInfo.role != undefined ? UserRoleValues[userInfo.role] : 'missing'}
                     </p>
-                    <div>
-                        <select>
+                    <div className="ml-2 flex">
+                        <p>🚩:</p>
+                        <select className="ml-1" defaultValue={currentCampaign}
+                                onChange={e => this.props.setCurrentCampaign(e.target.value)}>
                             <option value=''>Select...</option>
                           {this.renderCampaignOptions()}
                         </select>
@@ -64,7 +67,7 @@ export default class Layout extends Component<LayoutProps> {
                 </div>
             }
           </div>
-          <AGButton type="danger" onClickEvent={void LogOut}>Log Out</AGButton>
+          <AGButton type="danger" onClickEvent={() => void LogOut()}>Log Out</AGButton>
         </div>
         {this.props.children}
       </>

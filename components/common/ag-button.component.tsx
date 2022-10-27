@@ -6,6 +6,7 @@ interface AGButtonProps {
   onClickEvent?: () => void;
   children?: string | JSX.Element;
   form?: boolean;
+  tooltip?: string;
 }
 
 interface AGButtonState {
@@ -58,12 +59,12 @@ export default class AGButton extends Component<AGButtonProps, AGButtonState>{
         {
           this.props.form ?
             <button type="submit" className={`mx-2 w-auto my-auto rounded py-1 border-1 ${hover} ${textColor} ${color} ${borderColor}`}
-                 onClick={this.props.onClickEvent}>
+                 onClick={this.props.onClickEvent} title={this.props.tooltip}>
               <span className='px-4'>{this.props.children}</span>
             </button>
             :
             <div className={`mx-2 w-auto my-auto rounded py-1 border-1 cursor-pointer ${hover} ${textColor} ${color} ${borderColor}`}
-                 onClick={this.props.onClickEvent}>
+                 onClick={this.props.onClickEvent} title={this.props.tooltip}>
               <span className='px-4'>{this.props.children}</span>
             </div>
         }
