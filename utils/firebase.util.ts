@@ -1,7 +1,8 @@
 import {FirebaseApp, FirebaseOptions} from "@firebase/app";
 import {Firestore, QueryConstraint} from "@firebase/firestore";
 import {FirebaseStorage} from "@firebase/storage";
-import {Auth, User} from "@firebase/auth";
+import {Auth, User, UserCredential} from "@firebase/auth";
+import {FirebaseError} from "@firebase/util";
 
 import {
   FirestoreFilterValues,
@@ -13,6 +14,8 @@ import {
 import {AGQueryConstraints, LogInInterface, UserInterface} from "../interfaces/firebase.interface";
 import {PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
+import {LogError} from "./common.util";
+import {Result} from "../interfaces/common.interface";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -231,6 +234,10 @@ export async function GetParameters<T>(campaign?: string, ...parameters: string[
   return result;
 }
 
+function CampaignLocation(campaign?: string) {
+  return campaign ? `${campaign}/` : '';
+}
+
 export async function UpdateDoc(location: FirestoreLocation, jsonData: string, campaign?: string) {
   const { doc, setDoc } = await import('@firebase/firestore');
   const campaignLocation = campaign ? `${campaign}/` : '';
@@ -257,9 +264,17 @@ export async function ReplaceDoc(docLocation: string, jsonData?: string, campaig
 export async function InsertDoc(jsonData: string, location: string = FirestoreLocation.Features, campaign?: string) {
   // console.log(jsonData);
   const { addDoc, collection } = await import('@firebase/firestore');
-  const campaignLocation = campaign ? `${campaign}/` : '';
-  const newDoc = await addDoc(collection(await FirebaseUtil.Instance().DB(), campaignLocation + location), JSON.parse(jsonData));
+  const newDoc = await addDoc(
+    collection(await FirebaseUtil.Instance().DB(),CampaignLocation(campaign) + location), 
+    JSON.parse(jsonData));
   // console.log('New Doc: ', newDoc.id);
+}
+
+export async function InsertDocWithId(newDocId: string, data: {}, location: FirestoreLocation | FirestoreGlobalLocation, campaign?: string) {
+  const {setDoc, doc} = await import('@firebase/firestore');
+
+  const newDoc = doc(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location, newDocId);
+  await setDoc(newDoc, data);
 }
 
 export async function UploadFile(file: File, fileType: StorageLocation, sectionType?: string, campaign?: string) {
@@ -331,4 +346,59 @@ export async function GetUserInfo(userUid: string) {
     return undefined;
   
   return userDoc[0];
+}
+
+export async function CreateNewUser(newUser: Partial<UserInterface>) : Promise<Result<boolean>> {
+  if (newUser.email == undefined) {
+    LogError("FirebaseUtil", "Missing email on create user!").then();
+    return { successful: false, errMessage: 'Missing email on create user!'};
+  }
+
+  const {createUserWithEmailAndPassword, updateCurrentUser} = await import('@firebase/auth');
+  let result: Result<boolean>;
+  let leUser: UserCredential | undefined;
+
+  // Create user
+  try {
+    const originalUser = await GetCurrentUser();
+    leUser = await createUserWithEmailAndPassword(
+      await FirebaseUtil.Instance().Auth(),
+      newUser.email,
+      RandomPassword());
+
+    await updateCurrentUser(await FirebaseUtil.Instance().Auth(), originalUser);
+    result = {successful: true, value: true};
+  } catch (e) {
+    const err = e as FirebaseError;
+    LogError("FirebaseUtil", `Error on create User: ${err.message}`).then();
+    result = {successful: false, errMessage: `Error on create User: ${err.message}`, errCode: err.code};
+  }
+
+  // Save user info on db
+  if(leUser != undefined)
+    await InsertDocWithId(leUser.user.uid, newUser, FirestoreGlobalLocation.User);
+
+  // Reset password
+  if(result.successful) {
+    const {sendPasswordResetEmail} = await import('@firebase/auth');
+
+    try {
+      await sendPasswordResetEmail(await FirebaseUtil.Instance().Auth(), newUser.email);
+    } catch (e) {
+      const err = e as FirebaseError;
+      LogError("FirebaseUtil", `Error resetting password for account ${newUser.email}`).then();
+      result = {
+        successful: false,
+        errMessage: `Error resetting password for account ${newUser.email}: ${err.message}`,
+        errCode: err.code
+      };
+    }
+  }
+  
+  // Return errors to view
+  return result;
+}
+
+function RandomPassword() {
+  return Math.random().toString(36).substring(2, 12);
 }

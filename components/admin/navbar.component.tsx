@@ -7,6 +7,7 @@ import AGText from "../common/ag-text.component";
 import AssetAdd from "./assets/add.component";
 import {AdminComponentParams} from "../../interfaces/common.interface";
 import AssetUpdate from "./assets/update.component";
+import UserAdd from "./user/add.component";
 
 interface NavbarProps {
   children?: JSX.Element | JSX.Element[];
@@ -58,7 +59,7 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
   private navSuperAdmin() {
     return (
       <>
-        <AGButton type="alert" tooltip="Create user">
+        <AGButton type="alert" tooltip="Create user" onClickEvent={() => this.setCurrentComponent(AdminComponents.UserAdd)}>
           <AGText type="icon">🤡</AGText>
         </AGButton>
         {this.navAdmin()}
@@ -96,7 +97,10 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
       case AdminComponents.AssetModify:
         return <AssetUpdate docLocation={this.state.componentParams?.docLocation}
                             changeComponent={(nc) => this.setCurrentComponent(nc)} />
-      
+
+      case AdminComponents.UserAdd:
+        return <UserAdd creatorRole={this.props.userRole} />
+
       default:
         return <p>Missing Component!</p>;
     }

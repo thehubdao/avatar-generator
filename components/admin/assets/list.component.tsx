@@ -39,8 +39,6 @@ export default class AssetList extends Component<AssetListProps, AssetListState>
   async getDbInfo(location: FirestoreLocation = this.state.dbLocation) {
     const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, this.props.campaign);
     
-    console.log(Object.keys(data));
-    
     this.setState({
       dbData: data,
       dbHeaders: data.length > 0 ? Object.keys(data[0]).sort((a, b) => a.localeCompare(b)) : [],

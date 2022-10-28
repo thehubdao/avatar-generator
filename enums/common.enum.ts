@@ -37,4 +37,5 @@ export enum AdminComponents {
   AssetAdd,
   AssetList,
   AssetModify,
+  UserAdd,
 }

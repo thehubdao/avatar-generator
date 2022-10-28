@@ -34,3 +34,7 @@ export enum UserRoleValues {
     superAdmin = 0,
     admin = 1,
 }
+
+export enum AuthError {
+    EmailInUse = 'auth/email-already-in-use',
+}

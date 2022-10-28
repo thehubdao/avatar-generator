@@ -52,3 +52,10 @@ export interface AdminComponentParams {
 }
 
 export type ChangeComponentFunction = (newComponent: AdminComponents, params?: AdminComponentParams) => void;
+
+export interface Result<T> {
+  successful: boolean;
+  value?: T;
+  errMessage?: string;
+  errCode?: string;
+}
