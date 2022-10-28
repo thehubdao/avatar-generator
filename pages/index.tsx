@@ -1,14 +1,15 @@
 import {Component} from "react";
 import Image from "next/image";
+import Head from "next/head";
 import AGLoading from "../components/common/ag-loading.component";
-import {FrustumCulledFalse} from "../utils/threejs/scene.util";
-import {GetTestLights, GetAmbientLights} from "../utils/test-scene.util";
+import {FrustumCulledFalse, InitSceneController} from "../utils/threejs/scene.util";
+import {GetAmbientLights, GetTestLights} from "../utils/test-scene.util";
 import {
   GetAccessoryBones, GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign, GetGltfModel,
   GetPartsData,
 } from "../utils/importer.util";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {AttributeValues, GlobalValues, ViewModuleState} from "../enums/common.enum";
+import {AttributeValues, GlobalValues, Module, ViewModuleState} from "../enums/common.enum";
 import {FirestoreParameters} from "../enums/firebase.enum";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../interfaces/api.interface";
 import {
@@ -24,8 +25,8 @@ import {
   BasicData,
   CampaignConfig,
   ExportInterface,
-  LookAtVectors,
-  FeatureInfoInterface
+  FeatureInfoInterface,
+  LookAtVectors
 } from "../interfaces/common.interface";
 import {GetParameters} from "../utils/firebase.util";
 import {Delay, LogError, RandomArrayElement} from "../utils/common.util";
@@ -35,7 +36,6 @@ import ColorSelectorComponent from "../components/selectors/colorSelector.compon
 import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../utils/iframe.util";
 import {CreateAnimationMixer, SetAnimation} from "../utils/threejs/animation.util";
 import {SceneInterface} from "../interfaces/scene.interface";
-import {InitSceneController} from "../utils/threejs/scene.util";
 import {Clock, Vector3, WebGLInfo} from "three";
 
 export interface AvatarGeneratorProps {
@@ -112,6 +112,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     };
     
     this.savedModels = {};
+
     this.threeCanvas = null;
     this.clock = new Clock();
     this.exportData = {attributes: []};
@@ -122,15 +123,16 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     if (!this.props.onlyView) this.changeView();
     
     await this.avatarScene();
-    
+
     await Promise.all([
       this.getPartList(),
       this.getAccessoryList(),
       this.getAnimationList()
     ]);
-    
+
     await this.getAccessoryBones();
     await this.getPartsData();
+    await this.onClickChangeSkinColor();
     await this.loadPreData();
     await this.onClickChangeSkinColor();
     
@@ -193,25 +195,25 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   async loadPreData() {
-    if(!(this.featureList && this.accessoryList))
-      return LogError("AvatarGenerator", "No feature/accessory list!");
-    
-    if(this.props.campaign && this.props.campaign !== GlobalValues.BaseCampaign) {
+    if (!(this.featureList && this.accessoryList))
+      return LogError(Module.AvatarGenerator, "No feature/accessory list!");
+
+    if (this.props.campaign && this.props.campaign !== GlobalValues.BaseCampaign) {
       this.exportData?.attributes.push({id: AttributeValues.Campaign, val: this.props.campaign});
     }
 
-    if(this.props.attributeConfig) {
+    if (this.props.attributeConfig) {
       for (const attribute of this.props.attributeConfig) {
         // Is a part
-        if(this.state.featureSelectList.some(pl => pl.id === attribute.id)) {
+        if (this.state.featureSelectList.some(pl => pl.id === attribute.id)) {
           const newPart = this.featureList.find(p => p.name === attribute.val && p.type === attribute.id);
-          if(newPart)
+          if (newPart)
             await this.changePart(newPart.id, newPart.path, newPart.name, attribute.id);
         }
         // Is an accessory
-        else if(this.state.accSelectList.some(pl => pl.id === attribute.id)) {
+        else if (this.state.accSelectList.some(pl => pl.id === attribute.id)) {
           const newAcc = this.accessoryList.find(p => p.name === attribute.val && p.type === attribute.id);
-          if(newAcc)
+          if (newAcc)
             await this.changeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
         }
       }
@@ -221,18 +223,18 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       let randomAccessory: AccLocationApi[] = [];
       
       // Load random features
-      for(const partType of this.state.featureSelectList) {
+      for (const partType of this.state.featureSelectList) {
         const randomPart = RandomArrayElement(this.featureList.filter(p => p.type === partType.id));
         if (randomPart)
           randomFeature.push(randomPart);
       }
 
-      for(const accType of this.state.accSelectList) {
+      for (const accType of this.state.accSelectList) {
         const randomAcc = RandomArrayElement(this.accessoryList.filter(a => a.type === accType.id));
-        if(randomAcc)
+        if (randomAcc)
           randomAccessory.push(randomAcc);
       }
-
+      
       const modelPromises: Promise<GLTF>[] = [];
       for (const feature of randomFeature)
         modelPromises.push(this.getWearableOption(feature.id, feature.path));
@@ -251,13 +253,13 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     this.featureList = await GetAssetsListByCampaign(this.props.campaign);
     const _partList = this.filterListByBodyPart(this.state.selectedPart);
     // console.log('result', this.featureList);
-    this.setState({ partList: _partList });
+    this.setState({partList: _partList});
   }
 
   async getAccessoryList() {
     this.accessoryList = await GetAccessoryListByCampaign(this.props.campaign);
     const _accessoryList = this.filterListByAccessory(this.state.selectedAcc);
-    this.setState({ accessoryList: _accessoryList });
+    this.setState({accessoryList: _accessoryList});
   }
 
   async getAnimationList() {
@@ -267,39 +269,39 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   filterListByBodyPart(bodyPartType: string) {
     if (!this.featureList)
-      return void LogError("AvatarGenerator", "Missing feature list!");
-    
+      return void LogError(Module.AvatarGenerator, "Missing feature list!");
+
     return this.featureList.filter(x => x.type === bodyPartType);
   }
 
   filterListByAccessory(accessoryPartType: string) {
-    if(!this.accessoryList)
-      return void LogError("AvatarGenerator", "Missing accessory list!");
-    
+    if (!this.accessoryList)
+      return void LogError(Module.AvatarGenerator, "Missing accessory list!");
+
     return this.accessoryList.filter(x => x.type === accessoryPartType);
   }
 
   async getPartsData() {
-    if(!(this.sc && this.sc.armature))
-      return LogError("AvatarGenerator", "Missing armature!")
-    
+    if (!(this.sc && this.sc.armature))
+      return LogError(Module.AvatarGenerator, "Missing armature!")
+
     this.featureListData = await GetPartsData(this.sc.armature.scene, this.state.featureSelectList);
   }
 
   async getAccessoryBones() {
-    if(!(this.sc && this.sc.armature))
-      return LogError("AvatarGenerator", "Missing armature!");
-    
+    if (!(this.sc && this.sc.armature))
+      return LogError(Module.AvatarGenerator, "Missing armature!");
+
     this.accessoryBonesData = await GetAccessoryBones(this.sc.armature.scene, this.state.accSelectList);
   }
 
   async avatarScene() {
-    if(!this.threeCanvas)
-      return LogError("AvatarGenerator", "Error initializing canvas!");
+    if (!this.threeCanvas)
+      return LogError(Module.AvatarGenerator, "Error initializing canvas!");
 
     this.sc = InitSceneController();
-    if(!this.sc) return LogError("AvatarGenerator", "Error initializing scene!");
-    
+    if (!this.sc) return LogError(Module.AvatarGenerator, "Error initializing scene!");
+
     // mount scene
     this.threeCanvas.appendChild(this.sc.renderer.domElement);
 
@@ -313,11 +315,11 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     // this.scene.add(GetTestAxis(5));
 
     const lights = GetTestLights();
-    for(const l of lights) {
+    for (const l of lights) {
       this.sc.scene.add(l);
     }
     const aLights = GetAmbientLights();
-    for(const l of aLights) {
+    for (const l of aLights) {
       this.sc.scene.add(l);
     }
 
@@ -334,7 +336,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     this.tanFOV = Math.tan(((Math.PI / 180) * this.sc.camera.fov / 2));
     this.windowHeight = window.innerHeight;
 
-    window.addEventListener( 'resize', this.onWindowResize, false );
+    window.addEventListener('resize', this.onWindowResize, false);
 
     FrustumCulledFalse(this.sc.scene);
 
@@ -342,15 +344,15 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   onWindowResize = () => {
-    if(!this.sc) return void LogError("AvatarGenerator", "Missing scene");
-    if(!(this.tanFOV && this.windowHeight))
-      return void LogError("AvatarGenerator", "Missing fov/windowHeight on resize!");
-    
-    this.setState({ resX: window.innerWidth, resY: window.innerHeight });
+    if (!this.sc) return void LogError(Module.AvatarGenerator, "Missing scene");
+    if (!(this.tanFOV && this.windowHeight))
+      return void LogError(Module.AvatarGenerator, "Missing fov/windowHeight on resize!");
+
+    this.setState({resX: window.innerWidth, resY: window.innerHeight});
     this.sc.camera.aspect = window.innerWidth / window.innerHeight;
 
     // adjust the FOV
-    this.sc.camera.fov = (360 / Math.PI) * Math.atan(this.tanFOV * ( window.innerHeight / this.windowHeight));
+    this.sc.camera.fov = (360 / Math.PI) * Math.atan(this.tanFOV * (window.innerHeight / this.windowHeight));
 
     this.sc.camera.updateProjectionMatrix();
     //this.camera!.lookAt(this.scene!.position);
@@ -361,7 +363,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   // Animate the scene
   Animate = () => {
-    if(!this.sc) return void LogError("AvatarGenerator", "Missing three scene");
+    if (!this.sc) return void LogError(Module.AvatarGenerator, "Missing three scene");
     requestAnimationFrame(this.Animate);
 
     const delta = this.clock.getDelta();
@@ -369,21 +371,21 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
     this.sc.controls.update();
 
-    if(this.sc.camera.position.distanceTo(this.state.cameraPos) < 0.1) {
+    if (this.sc.camera.position.distanceTo(this.state.cameraPos) < 0.1) {
       this.doCameraMovement = false;
     }
 
-    if(this.doCameraMovement)
+    if (this.doCameraMovement)
       this.sc.camera.position.lerp(this.state.cameraPos, delta);
 
-    this.setState({ logs: this.sc.renderer.info})
+    this.setState({logs: this.sc.renderer.info})
 
     this.sc.renderer.render(this.sc.scene, this.sc.camera);
   }
 
   changeCamPosition(value: Vector3) {
-    if(!this.sc) return void LogError("AvatarGenerator", "Missing scene");
-    
+    if (!this.sc) return void LogError(Module.AvatarGenerator, "Missing scene");
+
     this.doCameraMovement = true;
     this.sc.controls.autoRotate = false;
     this.setState({
@@ -392,13 +394,13 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   changeLookAtPosition(value: Vector3 = this.state.cameraLookAt.clone()) {
-    if(!this.sc) return void LogError("AvatarGenerator", "Missing Scene");
+    if (!this.sc) return void LogError(Module.AvatarGenerator, "Missing Scene");
     this.sc.controls.target = value;
   }
 
   async onClickChangeSkinColor(newSkinColor = this.state.skinColor) {
-    if(!(this.sc && this.sc.armature)) return LogError("AvatarGenerator", "Missing armature for skin color change");
-    if(newSkinColor == undefined) return LogError("AvatarGenerator", "Missing new skin color");
+    if (!(this.sc && this.sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature for skin color change");
+    if (newSkinColor == undefined) return LogError(Module.AvatarGenerator, "Missing new skin color");
     
     await ChangeObjectSkinColor(this.sc.armature.scene, newSkinColor);
     this.setState({skinColor: newSkinColor});
@@ -406,7 +408,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   onCategoryChange(value: string) {
     const _partList = this.filterListByBodyPart(value);
-    this.setState({ partList: _partList, selectedPart: value });
+    this.setState({partList: _partList, selectedPart: value});
     this.setFeatureCamPosition(value, this.props.campaignConfig.partsCamPos);
   }
 
@@ -418,7 +420,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   setFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
     const confRef = posLocation ? posLocation[index] : undefined;
-    if(confRef) {
+    if (confRef) {
       this.changeCamPosition(new Vector3(confRef.pos?.x, confRef.pos?.y, confRef.pos?.z));
       this.changeLookAtPosition(new Vector3(confRef.lookAt?.x, confRef.lookAt?.y, confRef.lookAt?.z));
     }
@@ -437,9 +439,9 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   async changePart(id: string, partPath: string, name: string, selectedPart: string = this.state.selectedPart) {
-    if(!(this.sc && this.sc.armature)) return LogError("AvatarGenerator", "Missing armature in order to change part");
-    if(!this.featureListData) return LogError("AvatarGenerator", "Missing feature list data");
-    
+    if (!(this.sc && this.sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature in order to change part");
+    if (!this.featureListData) return LogError(Module.AvatarGenerator, "Missing feature list data");
+
     const replaceModel = await this.getWearableOption(id, partPath);
     
     await ReplaceModelPartOnly(this.sc.armature.scene.children[0], replaceModel, this.featureListData[selectedPart], this.state.featureSelectList.find(sl => sl.id === selectedPart), this.state.skinColor);
@@ -448,8 +450,8 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   async changeAccessory(id: string, path: string, name: string, selectedAcc: string = this.state.selectedAcc) {
-    if(!this.accessoryBonesData) return LogError("AvatarGenerator", "Missing accessory data");
-    
+    if (!this.accessoryBonesData) return LogError(Module.AvatarGenerator, "Missing accessory data");
+
     const replaceModel = await this.getWearableOption(id, path);
 
     ReplaceModelAccessory(this.accessoryBonesData, selectedAcc, replaceModel);
@@ -457,9 +459,9 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   addReplaceAttribute(addId: string, addValue: string) {
-    if(this.exportData && this.exportData.attributes.some(x => x.id === addId)) {
+    if (this.exportData && this.exportData.attributes.some(x => x.id === addId)) {
       const oldAttribute = this.exportData.attributes.find(x => x.id === addId);
-      if(oldAttribute)
+      if (oldAttribute)
         oldAttribute.val = addValue;
       return;
     }
@@ -469,11 +471,11 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   takeExportPicture() {
     return new Promise<Blob>((resolve, reject) => {
-      if(!this.sc) return reject("Missing scene");
-      
+      if (!this.sc) return reject("Missing scene");
+
       const mimeType = 'image/png';
       this.sc.renderer.domElement.toBlob(blob => {
-        if(blob) {
+        if (blob) {
           resolve(blob);
         }
       }, mimeType);
@@ -481,8 +483,8 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   async exportModel() {
-    if(!(this.sc && this.sc.armature)) return LogError("AvatarGenerator", "Missing armature on export");
-    
+    if (!(this.sc && this.sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature on export");
+
     this.exportData.attributesBase64 = window.btoa(JSON.stringify(this.exportData.attributes));
     const exportPromises = await Promise.all([
       this.takeExportPicture(),
@@ -490,12 +492,11 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     ]);
     this.exportData.picture = exportPromises[0];
     this.exportData.model = exportPromises[1];
-    
+
     console.log(this.exportData);
-    if(this.onIFrame) {
+    if (this.onIFrame) {
       IFrameExportData(this.exportData);
-    }
-    else {
+    } else {
       await SaveFile(this.exportData.model, 'model.glb');
       await SaveFile(this.exportData.picture, 'picture.png');
     }
@@ -522,7 +523,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   changeView() {
-    if(!this.threeCanvas) return LogError("AvatarGenerator", "Missing canvas");
+    if(!this.threeCanvas) return LogError(Module.AvatarGenerator, "Missing canvas");
     
     // const parent = this.mount?.parentNode as HTMLElement;
     if (this.state.editModeSelected) {
@@ -680,9 +681,9 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   componentDidUpdate() {
-    if(this.threeCanvas && this.state.currentModule !== ViewModuleState.OnModule) {
-      if(!this.sc) return LogError("AvatarGenerator", "Missing scene on view transition");
-      
+    if (this.threeCanvas && this.state.currentModule !== ViewModuleState.OnModule) {
+      if (!this.sc) return LogError(Module.AvatarGenerator, "Missing scene on view transition");
+
       this.threeCanvas.appendChild(this.sc.renderer.domElement);
       this.setState({currentModule: ViewModuleState.OnModule});
     }
@@ -694,21 +695,21 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
   // Get subdomain
   let subdomain: string | undefined;
   let parsedConfig: BasicData[] | null = null;
-  const { campaign, config, bg, ov } = context.query;
-  if(campaign)
+  const {campaign, config, bg, ov} = context.query;
+  if (campaign)
     subdomain = campaign as string;
   else
     subdomain = context.req.headers.host?.split(".")[0];
 
-  if(config) {
+  if (config) {
     parsedConfig = JSON.parse(Buffer.from(config as string, 'base64').toString('ascii')) as BasicData[];
-    if(parsedConfig && parsedConfig.some(x => x.id === AttributeValues.Campaign)) {
+    if (parsedConfig && parsedConfig.some(x => x.id === AttributeValues.Campaign)) {
       const configCampaign = parsedConfig.find(x => x.id === AttributeValues.Campaign);
-      if(configCampaign)
+      if (configCampaign)
         subdomain = configCampaign.val;
     }
   }
-  
+
   const campaigns = (await GetParameters<string[]>(undefined, FirestoreParameters.Campaigns))[0];
   const isCampaign = campaigns.some(c => c === subdomain);
 
@@ -717,21 +718,20 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
   let _selectListBodyParts: BasicData[];
   let _selectListAccessories: BasicData[];
 
-  if(isCampaign && subdomain) {
+  if (isCampaign && subdomain) {
     _baseMeshPath = `base_mesh/${subdomain}.glb`;
     const result = await GetParameters(undefined, subdomain, subdomain + GV.Acc, subdomain + GV.Config);
     _selectListBodyParts = result[0] as BasicData[];
     _selectListAccessories = result[1] as BasicData[];
     _campaignConfig = result[2] as CampaignConfig;
-  }
-  else {
+  } else {
     _baseMeshPath = `base_mesh/${GV.BaseCampaign}.glb`;
     const result = await GetParameters(undefined, GV.BaseCampaign, GV.BaseCampaign + GV.Acc, GV.BaseCampaign + GV.Config);
     _selectListBodyParts = result[0] as BasicData[];
     _selectListAccessories = result[1] as BasicData[];
     _campaignConfig = result[2] as CampaignConfig;
   }
-  
+
   return {
     props: {
       campaign: isCampaign ? subdomain : null,

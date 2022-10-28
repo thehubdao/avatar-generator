@@ -1,15 +1,10 @@
 ﻿import {Component} from "react";
-import {
-  GetParameters,
-  InsertDoc,
-  UpdateDoc,
-  UploadFile
-} from "../../../utils/firebase.util";
+import {GetParameters, InsertDoc, UpdateDoc, UploadFile} from "../../../utils/firebase.util";
 import {FirestoreLocation, StorageLocation} from "../../../enums/firebase.enum";
 import AGButton from "../../../components/common/ag-button.component";
 import {AssetInterface} from "../../../interfaces/api.interface";
-import {ChangeComponentFunction, BasicData} from "../../../interfaces/common.interface";
-import {AdminComponents} from "../../../enums/common.enum";
+import {BasicData, ChangeComponentFunction} from "../../../interfaces/common.interface";
+import {AdminComponents, Module} from "../../../enums/common.enum";
 import {LogError} from "../../../utils/common.util";
 
 interface AssetAddProps {
@@ -46,20 +41,20 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
       selectedStorage: StorageLocation.BaseMesh,
     };
   }
-  
+
   async componentDidMount() {
     await this.getTypeOptionsByCampaign();
   }
 
   async getTypeOptionsByCampaign(campaign: string | undefined = this.props.campaign) {
-    if(campaign == undefined) {
-      await LogError("AssetAdd", "Missing campaign");
-      return this.setState({ message: "Missing campaign!" });
+    if (campaign == undefined) {
+      await LogError(Module.AssetAdd, "Missing campaign");
+      return this.setState({message: "Missing campaign!"});
     }
-    
+
     const diff = this.state.dbLocation === FirestoreLocation.Accessories ? 'Accessories' : '';
-    
-    if(!this.state.animation)
+
+    if (!this.state.animation)
       this.setState({
         typeOptions: campaign.length <= 0 ? [] : (await GetParameters<BasicData[]>(undefined, campaign + diff))[0]
       });
@@ -107,24 +102,24 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
                      value={formData?.name}
                      onChange={(e) => this.setState({formData: {...formData, name: e.target.value}})}/>
             </div>
-            { !animation &&
-            <div className="flex my-2">
-              <p className="mx-2 w-20 text-right">Type:</p>
-              <select className="w-52 rounded border-2 border-slate-600" required
-                      value={formData?.type}
-                      onChange={e => this.setState({formData: {...formData, type: e.target.value}})}>
-                <option value=''>Select...</option>
-                {this.renderTypeOptions()}
-              </select>
-            </div> }
+            {!animation &&
+                <div className="flex my-2">
+                    <p className="mx-2 w-20 text-right">Type:</p>
+                    <select className="w-52 rounded border-2 border-slate-600" required
+                            value={formData?.type}
+                            onChange={e => this.setState({formData: {...formData, type: e.target.value}})}>
+                        <option value=''>Select...</option>
+                      {this.renderTypeOptions()}
+                    </select>
+                </div>}
 
-            { !animation &&
-            <div className="flex my-2">
-              <p className="mx-2 w-20 text-right my-2">Thumb:</p>
-              <input className="ml-2 my-2" type="file" accept=".jpg,.png" required
-                     onChange={e => this.setState({thumbToUpload: e.target.files ? e.target.files[0] : undefined})}/>
-            </div> }
-            
+            {!animation &&
+                <div className="flex my-2">
+                    <p className="mx-2 w-20 text-right my-2">Thumb:</p>
+                    <input className="ml-2 my-2" type="file" accept=".jpg,.png" required
+                           onChange={e => this.setState({thumbToUpload: e.target.files ? e.target.files[0] : undefined})}/>
+                </div>}
+
             <div className="flex my-2">
               <p className="mx-2 w-20 text-right my-2">File:</p>
               <input className="ml-2 my-2" type="file" accept=".glb" required
@@ -166,7 +161,8 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
               </select>
             </div>
             <div className="flex">
-              <AGButton type="alert" onClickEvent={() => this.props.changeComponent(AdminComponents.AssetList)}>Go to List</AGButton>
+              <AGButton type="alert" onClickEvent={() => this.props.changeComponent(AdminComponents.AssetList)}>Go to
+                List</AGButton>
             </div>
           </div>
 
@@ -207,7 +203,7 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
 
   async insertDB(jsonData: string | undefined = this.state.jsonData) {
     const {dbLocation} = this.state;
-    if (!(dbLocation && jsonData)) return LogError("AssetAdd", "Missing Data/Location to save new asset!");
+    if (!(dbLocation && jsonData)) return LogError(Module.AssetAdd, "Missing Data/Location to save new asset!");
 
     if (dbLocation !== FirestoreLocation.Parameters) {
       await InsertDoc(jsonData, dbLocation);
@@ -221,9 +217,9 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
   async insertDBForm() {
     const {campaign} = this.props;
     const {formData, thumbToUpload, fileToUpload} = this.state;
-    
-    if (!formData) return LogError("AssetAdd", "Missing Form Data!");
-    if (!fileToUpload) return LogError("AssetAdd", "No file to upload!");
+
+    if (!formData) return LogError(Module.AssetAdd, "Missing Form Data!");
+    if (!fileToUpload) return LogError(Module.AssetAdd, "No file to upload!");
 
     const uploadFileTo = this.uploadTo();
 
@@ -234,7 +230,7 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
     await this.insertDB(JSON.stringify(formData));
     alert("Data inserted");
   }
-  
+
   uploadTo(location: FirestoreLocation | undefined = this.state.dbLocation) {
     switch (location) {
       case FirestoreLocation.Features:

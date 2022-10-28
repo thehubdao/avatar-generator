@@ -12,7 +12,7 @@ import {
   StorageLocation
 } from "../enums/firebase.enum";
 import {AGQueryConstraints, LogInInterface, UserInterface} from "../interfaces/firebase.interface";
-import {PageLocation} from "../enums/common.enum";
+import {Module, PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
 import {LogError} from "./common.util";
 import {Result} from "../interfaces/common.interface";
@@ -49,7 +49,7 @@ class FirebaseUtil {
         messagingSenderId: process.env.NEXT_PUBLIC_FB_MESSAGING_SENDER_ID,
         storageBucket: process.env.NEXT_PUBLIC_FB_STORAGE_BUCKET,
       }
-      const { initializeApp } = await import('@firebase/app');
+      const {initializeApp} = await import('@firebase/app');
       this._app = initializeApp(config);
     }
 
@@ -60,7 +60,7 @@ class FirebaseUtil {
     const checked = CheckServerSide();
     // console.log('DB: ', !!this._db);
     if (this._db === null) {
-      const { getFirestore } = await import('@firebase/firestore');
+      const {getFirestore} = await import('@firebase/firestore');
       this._db = getFirestore(await this.App());
     }
 
@@ -72,31 +72,31 @@ class FirebaseUtil {
     const checked = CheckServerSide();
     // console.log('Storage: ', !!this._storage);
     if (this._storage === null) {
-      const { getStorage } = await import('@firebase/storage');
+      const {getStorage} = await import('@firebase/storage');
       this._storage = getStorage(await this.App());
     }
 
     await checked;
     return this._storage;
   }
-  
+
   public async Auth() {
     // console.log('Auth: ', !!this._auth);
-    if(this._auth === null) {
-      const { getAuth } = await import('@firebase/auth');
+    if (this._auth === null) {
+      const {getAuth} = await import('@firebase/auth');
       this._auth = getAuth(await this.App());
     }
-    
+
     return this._auth;
   }
 }
 
 async function CheckServerSide() {
   // server side
-  if(typeof window === 'undefined') {
+  if (typeof window === 'undefined') {
     await FirebaseUtil.Instance().Auth();
-    
-    if(!(process.env.AG_FB_USER && process.env.AG_FB_PASS)) {
+
+    if (!(process.env.AG_FB_USER && process.env.AG_FB_PASS)) {
       console.error("Missing Firebase Server Account, please upload this params and redeploy the app.")
       return;
     }
@@ -113,9 +113,9 @@ async function CheckServerSide() {
 
 export async function GetInfoDB<T>(dbLocation: FirestoreLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints) {
   let newLocation = dbLocation;
-  if(campaign)
+  if (campaign)
     newLocation = `${FirestoreParameters.Campaigns}/${campaign}/${dbLocation}`;
-  
+
   if (newLocation.split('/').length % 2 === 0) {
     return GetDocument<T>(newLocation);
   } else {
@@ -124,10 +124,10 @@ export async function GetInfoDB<T>(dbLocation: FirestoreLocation | string, campa
 }
 
 async function GetDocument<T>(dbLocation: FirestoreLocation | string) {
-  const { doc, getDoc } = await import('@firebase/firestore');
+  const {doc, getDoc} = await import('@firebase/firestore');
   const docRef = doc(await FirebaseUtil.Instance().DB(), dbLocation);
   const leDoc = await getDoc(docRef);
-  
+
   const data = leDoc.data() as T;
   return data ? [data] : [];
 }
@@ -135,8 +135,8 @@ async function GetDocument<T>(dbLocation: FirestoreLocation | string) {
 async function GetDocuments<T>(dbLocation: FirestoreLocation | string, constraintsValues?: AGQueryConstraints) {
   const constraints = await GetConstraints(dbLocation, constraintsValues);
 
-  const { collection, getDocs, query } = await import('@firebase/firestore');
-  
+  const {collection, getDocs, query} = await import('@firebase/firestore');
+
   const myQuery = query(collection(await FirebaseUtil.Instance().DB(), dbLocation), ...constraints);
   const querySnapshot = await getDocs(myQuery);
 
@@ -146,9 +146,9 @@ async function GetDocuments<T>(dbLocation: FirestoreLocation | string, constrain
 }
 
 function GetConstraints(dbLocation: FirestoreLocation | string, constraintsValues?: AGQueryConstraints) {
-  if(!constraintsValues)
+  if (!constraintsValues)
     return [];
-  
+
   switch (dbLocation) {
     case FirestoreLocation.Features:
       return PartConstraints(constraintsValues);
@@ -164,7 +164,7 @@ function GetConstraints(dbLocation: FirestoreLocation | string, constraintsValue
 async function PartConstraints(constraintsValues: AGQueryConstraints) {
   const constraints: QueryConstraint[] = [];
   const {type, campaign} = constraintsValues;
-  const { orderBy, where } = await import('@firebase/firestore');
+  const {orderBy, where} = await import('@firebase/firestore');
 
   if (campaign)
     constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
@@ -180,7 +180,7 @@ async function PartConstraints(constraintsValues: AGQueryConstraints) {
 async function AccessoryConstraints(constraintsValues: AGQueryConstraints) {
   const constraints: QueryConstraint[] = [];
   const {type, campaign} = constraintsValues;
-  const { orderBy, where } = await import('@firebase/firestore');
+  const {orderBy, where} = await import('@firebase/firestore');
 
   if (campaign)
     constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
@@ -196,7 +196,7 @@ async function AccessoryConstraints(constraintsValues: AGQueryConstraints) {
 async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
   const constraints: QueryConstraint[] = [];
   const {campaign} = constraintsValues;
-  const { orderBy, where } = await import('@firebase/firestore');
+  const {orderBy, where} = await import('@firebase/firestore');
 
   if (campaign)
     constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
@@ -207,7 +207,7 @@ async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
 }
 
 export async function GetFile(path: string, campaign?: string) {
-  const { getBlob, ref } = await import('@firebase/storage');
+  const {getBlob, ref} = await import('@firebase/storage');
   const campaignSection = campaign ? `${campaign}/` : '';
   const baseMeshRef = ref(await FirebaseUtil.Instance().Storage(), campaignSection + path);
 
@@ -220,8 +220,8 @@ export async function GetFile(path: string, campaign?: string) {
 }
 
 export async function GetParameters<T>(campaign?: string, ...parameters: string[]): Promise<T[]> {
-  const { doc, getDoc } = await import('@firebase/firestore');
-  
+  const {doc, getDoc} = await import('@firebase/firestore');
+
   const realLocation = campaign ? `${campaign}/${FirestoreLocation.Parameters}` : FirestoreGlobalLocation.Parameters;
   const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
   const leDoc = await getDoc(docRef);
@@ -230,7 +230,7 @@ export async function GetParameters<T>(campaign?: string, ...parameters: string[
   for (const parameter of parameters) {
     result.push(leDoc.get(parameter));
   }
-  
+
   return result;
 }
 
@@ -239,14 +239,14 @@ function CampaignLocation(campaign?: string) {
 }
 
 export async function UpdateDoc(location: FirestoreLocation, jsonData: string, campaign?: string) {
-  const { doc, setDoc } = await import('@firebase/firestore');
+  const {doc, setDoc} = await import('@firebase/firestore');
   const campaignLocation = campaign ? `${campaign}/` : '';
   const docRef = doc(await FirebaseUtil.Instance().DB(), campaignLocation + location);
   return await setDoc(docRef, JSON.parse(jsonData), {merge: true});
 }
 
 export async function DeleteDoc(location: FirestoreLocation, docId: string, campaign?: string) {
-  const { deleteDoc, doc } = await import('@firebase/firestore');
+  const {deleteDoc, doc} = await import('@firebase/firestore');
   const campaignLocation = campaign ? `${campaign}/` : '';
   await deleteDoc(doc(await FirebaseUtil.Instance().DB(), `${campaignLocation}${location}/${docId}`))
   return docId;
@@ -254,7 +254,7 @@ export async function DeleteDoc(location: FirestoreLocation, docId: string, camp
 
 export async function ReplaceDoc(docLocation: string, jsonData?: string, campaign?: string) {
   if (jsonData) {
-    const { doc, updateDoc } = await import('@firebase/firestore');
+    const {doc, updateDoc} = await import('@firebase/firestore');
     const campaignLocation = campaign ? `${campaign}/` : '';
     const docRef = doc(await FirebaseUtil.Instance().DB(), campaignLocation + docLocation);
     await updateDoc(docRef, JSON.parse(jsonData));
@@ -263,9 +263,9 @@ export async function ReplaceDoc(docLocation: string, jsonData?: string, campaig
 
 export async function InsertDoc(jsonData: string, location: string = FirestoreLocation.Features, campaign?: string) {
   // console.log(jsonData);
-  const { addDoc, collection } = await import('@firebase/firestore');
+  const {addDoc, collection} = await import('@firebase/firestore');
   const newDoc = await addDoc(
-    collection(await FirebaseUtil.Instance().DB(),CampaignLocation(campaign) + location), 
+    collection(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location),
     JSON.parse(jsonData));
   // console.log('New Doc: ', newDoc.id);
 }
@@ -278,10 +278,10 @@ export async function InsertDocWithId(newDocId: string, data: {}, location: Fire
 }
 
 export async function UploadFile(file: File, fileType: StorageLocation, sectionType?: string, campaign?: string) {
-  const { ref, uploadBytes } = await import('@firebase/storage');
+  const {ref, uploadBytes} = await import('@firebase/storage');
   const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
   const realSection = sectionType ? '/' + sectionType.toLowerCase().replace('acc', '') : '';
-  
+
   const fileRef = ref(await FirebaseUtil.Instance().Storage(), `${campaignSection}${fileType}${realSection}/${file.name}`);
   const log = await uploadBytes(fileRef, file);
 
@@ -289,16 +289,16 @@ export async function UploadFile(file: File, fileType: StorageLocation, sectionT
 }
 
 export async function LogIn(credentials: LogInInterface) {
-  if(!(credentials.pass && credentials.user))
+  if (!(credentials.pass && credentials.user))
     return;
 
-  const { signInWithEmailAndPassword } = await import('@firebase/auth');
-  
+  const {signInWithEmailAndPassword} = await import('@firebase/auth');
+
   let actualUser = credentials.user;
-  if(!credentials.user.includes('@')) {
+  if (!credentials.user.includes('@')) {
     actualUser = `${credentials.user}@freak.com`;
   }
-  
+
   return signInWithEmailAndPassword(await FirebaseUtil.Instance().Auth(), actualUser, credentials.pass);
 }
 
@@ -315,7 +315,7 @@ export async function IsNotLogIn() {
 }
 
 export async function LogOut() {
-  const { signOut } = await import('@firebase/auth');
+  const {signOut} = await import('@firebase/auth');
   signOut(await FirebaseUtil.Instance().Auth())
     .then(async () => {
       await GoToPage(PageLocation.Login);
@@ -332,26 +332,26 @@ export async function GetCurrentUser() {
 
 export async function HandleNotLoggedIn() {
   const flag = await IsNotLogIn();
-  if(flag)
+  if (flag)
     await GoToPage(PageLocation.Login);
-  
+
   return flag;
 }
 
 export async function GetUserInfo(userUid: string) {
   const userLocation = `${FirestoreGlobalLocation.User}/${userUid}`;
   const userDoc = await GetDocument<UserInterface>(userLocation);
-  
-  if(userDoc.length === 0)
+
+  if (userDoc.length === 0)
     return undefined;
-  
+
   return userDoc[0];
 }
 
-export async function CreateNewUser(newUser: Partial<UserInterface>) : Promise<Result<boolean>> {
+export async function CreateNewUser(newUser: Partial<UserInterface>): Promise<Result<boolean>> {
   if (newUser.email == undefined) {
-    LogError("FirebaseUtil", "Missing email on create user!").then();
-    return { successful: false, errMessage: 'Missing email on create user!'};
+    LogError(Module.FirebaseUtil, "Missing email on create user!").then();
+    return {successful: false, errMessage: 'Missing email on create user!'};
   }
 
   const {createUserWithEmailAndPassword, updateCurrentUser} = await import('@firebase/auth');
@@ -370,23 +370,23 @@ export async function CreateNewUser(newUser: Partial<UserInterface>) : Promise<R
     result = {successful: true, value: true};
   } catch (e) {
     const err = e as FirebaseError;
-    LogError("FirebaseUtil", `Error on create User: ${err.message}`).then();
+    LogError(Module.FirebaseUtil, `Error on create User: ${err.message}`).then();
     result = {successful: false, errMessage: `Error on create User: ${err.message}`, errCode: err.code};
   }
 
   // Save user info on db
-  if(leUser != undefined)
+  if (leUser != undefined)
     await InsertDocWithId(leUser.user.uid, newUser, FirestoreGlobalLocation.User);
 
   // Reset password
-  if(result.successful) {
+  if (result.successful) {
     const {sendPasswordResetEmail} = await import('@firebase/auth');
 
     try {
       await sendPasswordResetEmail(await FirebaseUtil.Instance().Auth(), newUser.email);
     } catch (e) {
       const err = e as FirebaseError;
-      LogError("FirebaseUtil", `Error resetting password for account ${newUser.email}`).then();
+      LogError(Module.FirebaseUtil, `Error resetting password for account ${newUser.email}`).then();
       result = {
         successful: false,
         errMessage: `Error resetting password for account ${newUser.email}: ${err.message}`,
@@ -394,7 +394,7 @@ export async function CreateNewUser(newUser: Partial<UserInterface>) : Promise<R
       };
     }
   }
-  
+
   // Return errors to view
   return result;
 }

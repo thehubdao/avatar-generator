@@ -39,3 +39,9 @@ export enum AdminComponents {
   AssetModify,
   UserAdd,
 }
+
+export enum Module {
+  FirebaseUtil = 'FirebaseUtil',
+  AssetAdd = 'AssetAdd',
+  AvatarGenerator = 'AvatarGenerator',
+}

@@ -26,7 +26,7 @@ export default class UserAdd extends Component<UserAddProps> {
         {this.props.creatorRole === UserRoleValues.superAdmin ?
           <>
             <AGText type="th1">New User</AGText>
-            <form onSubmit={event => this.createNewUser(event)}>
+            <form onSubmit={event => void this.createNewUser(event)}>
               <p>Nombre</p>
               <input type="text" ref={r => this.userName = r}/>
               <p>Usuario</p>
@@ -35,7 +35,7 @@ export default class UserAdd extends Component<UserAddProps> {
             </form>
           </>
           :
-          <AGText type="th1">You can't create Users!</AGText>
+          <AGText type="th1">You can not create Users!</AGText>
         }
       </>
     );
