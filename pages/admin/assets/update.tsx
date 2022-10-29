@@ -1,10 +1,13 @@
 ﻿import {Component} from "react";
 import {GetServerSideProps} from "next";
-import {FirebaseUtil} from "../../../utils/firebase.util";
-import AGButton from "../../../components/ag-button.component";
+import {GetInfoDB, IsNotLogIn, UpdateDoc} from "../../../utils/firebase.util";
+import AGButton from "../../../components/common/ag-button.component";
 import Link from "next/link";
+import {WithRouterProps} from "next/dist/client/with-router";
+import {withRouter} from "next/router";
+import {PageLocation} from "../../../enums/common.enum";
 
-interface AssetUpdateProps {
+interface AssetUpdateProps extends WithRouterProps {
   docLocation?: string;
   docInfo?: string | null;
 }
@@ -13,12 +16,17 @@ interface AssetUpdateState {
   jsonData?: string;
 }
 
-export default class Update extends Component<AssetUpdateProps, AssetUpdateState> {
+class Update extends Component<AssetUpdateProps, AssetUpdateState> {
   constructor(props: AssetUpdateProps) {
     super(props);
     this.state = {
       jsonData: props.docInfo === null ? undefined : this.formatJson(props.docInfo!),
     };
+  }
+  
+  async componentDidMount() {
+    if(await IsNotLogIn())
+      await this.props.router.push(PageLocation.Admin);
   }
 
   formatJson(jsonString: string) {
@@ -55,12 +63,12 @@ export default class Update extends Component<AssetUpdateProps, AssetUpdateState
   }
 
   async updateData() {
-    await FirebaseUtil.Instance().UpdateDoc(this.props.docLocation, this.state.jsonData);
+    await UpdateDoc(this.props.docLocation, this.state.jsonData);
     alert(`Doc "${this.props.docLocation}" has been updated`);
   }
 }
 
-export const getServerSideProps: GetServerSideProps<AssetUpdateProps> = async (context) => {
+export const getServerSideProps: GetServerSideProps<Omit<AssetUpdateProps, 'router'>> = async (context) => {
   const {docLocation} = context.query;
   let newDocLocation: string = '';
   let _docInfo: any[] = [];
@@ -70,7 +78,7 @@ export const getServerSideProps: GetServerSideProps<AssetUpdateProps> = async (c
     } else {
       newDocLocation = docLocation as string;
     }
-    _docInfo = await FirebaseUtil.Instance().GetInfoDB<any>(newDocLocation);
+    _docInfo = await GetInfoDB<any>(newDocLocation);
   }
 
   return {
@@ -80,3 +88,5 @@ export const getServerSideProps: GetServerSideProps<AssetUpdateProps> = async (c
     }
   };
 }
+
+export default withRouter(Update);

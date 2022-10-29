@@ -3,6 +3,7 @@ export enum FirestoreValues {
     Accessories = 'accessories',
     Animations = 'animations',
     Parameters = 'general/parameters',
+    Test = 'testing/YEP'
 }
 
 export enum FirestoreParameters {

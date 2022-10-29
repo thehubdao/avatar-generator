@@ -1,9 +1,13 @@
 ﻿import {Component} from "react";
 import {FirestoreValues} from "../../../enums/firebase.enum";
-import {FirebaseUtil} from "../../../utils/firebase.util";
+import {DeleteDoc, GetInfoDB, IsNotLogIn, LogOut} from "../../../utils/firebase.util";
 import Link from "next/link";
+import AGButton from "../../../components/common/ag-button.component";
+import {WithRouterProps} from "next/dist/client/with-router";
+import {withRouter} from "next/router";
+import {PageLocation} from "../../../enums/common.enum";
 
-interface AssetListProps {
+interface AssetListProps extends WithRouterProps {
 }
 
 interface AssetListState {
@@ -15,7 +19,7 @@ interface AssetListState {
 
 // Show info from database
 // Delete entry on database (or add a new field for deleted entries) (new field needs to edit getParts as well)
-export default class List extends Component<AssetListProps, AssetListState> {
+class List extends Component<AssetListProps, AssetListState> {
   constructor(props: AssetListProps) {
     super(props);
     this.state = {
@@ -25,11 +29,14 @@ export default class List extends Component<AssetListProps, AssetListState> {
   }
 
   async componentDidMount() {
+    if(await IsNotLogIn())
+      await this.props.router.push(PageLocation.Admin);
+    
     await this.getDbInfo();
   }
 
   async getDbInfo(location: FirestoreValues = this.state.dbLocation) {
-    const data = await FirebaseUtil.Instance().GetInfoDB<any>(location);
+    const data = await GetInfoDB<any>(location);
     this.setState({
       dbData: data,
       dbHeaders: data.length > 0 ? Object.keys(data[0]).sort((a, b) => a.localeCompare(b)) : [],
@@ -52,8 +59,11 @@ export default class List extends Component<AssetListProps, AssetListState> {
                 {this.renderLocationOptions()}
               </select>
             </div>
-            <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
-              <Link href="add"><p className="mx-2 text-white hover:cursor-help">Go to Add</p></Link>
+            <div className="flex">
+              <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
+                <Link href="add"><p className="mx-2 text-white hover:cursor-help">Go to Add</p></Link>
+              </div>
+              <AGButton type="danger" onClickEvent={() => LogOut()}>Log Out</AGButton>
             </div>
           </div>
 
@@ -135,9 +145,10 @@ export default class List extends Component<AssetListProps, AssetListState> {
   }
 
   async deleteDoc(docId: string) {
-    const result = await FirebaseUtil.Instance().DeleteDoc(this.state.dbLocation, docId);
+    const result = await DeleteDoc(this.state.dbLocation, docId);
     alert(`Doc "${result}" has been deleted.`);
     await this.getDbInfo();
   }
 }
 
+export default withRouter(List);

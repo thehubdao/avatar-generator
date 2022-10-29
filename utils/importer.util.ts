@@ -1,7 +1,7 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {AccLocationApi, AnimLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
-import {Group, SkinnedMesh} from "three";
-import {FirebaseUtil} from "./firebase.util";
+import {Group} from "three";
+import {GetFile} from "./firebase.util";
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
 
 export class ImporterUtil {
@@ -39,7 +39,7 @@ export class ImporterUtil {
   }
 
   static async FirebaseGltfModel(path: string): Promise<GLTF> {
-    const arrayBuffer = await FirebaseUtil.Instance().GetFile(path);
+    const arrayBuffer = await GetFile(path);
     return this.parseAsync(arrayBuffer);
   }
 
@@ -80,16 +80,16 @@ async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
 }
 
 export async function GetAssetsListByCampaign(campaign?: string | null) {
-  const jsonObject: BodyPartLocationApi[] = await fetch('api/getParts' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  const jsonObject: BodyPartLocationApi[] = await fetch('/api/getParts' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
 
 export async function GetAccessoryListByCampaign(campaign?: string | null) {
-  const jsonObject: AccLocationApi[] = await fetch('api/getAccessories' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  const jsonObject: AccLocationApi[] = await fetch('/api/getAccessories' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
 
 export async function GetAnimationListByCampaign(campaign?: string | null) {
-  const jsonObject: AnimLocationApi[] = await fetch('api/getAnimations' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  const jsonObject: AnimLocationApi[] = await fetch('/api/getAnimations' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }

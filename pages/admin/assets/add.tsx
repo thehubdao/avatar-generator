@@ -1,13 +1,16 @@
 ﻿import {Component} from "react";
-import {FirebaseUtil} from "../../../utils/firebase.util";
+import {GetParameters, InsertDB, IsNotLogIn, LogOut, UpdateDB, UploadFile} from "../../../utils/firebase.util";
 import {FirestoreParameters, FirestoreValues, StorageValues} from "../../../enums/firebase.enum";
-import AGButton from "../../../components/ag-button.component";
+import AGButton from "../../../components/common/ag-button.component";
 import {FeatureLocationApi} from "../../../interfaces/api.interface";
 import {BasicData} from "../../../interfaces/common.interface";
 import {GetServerSideProps} from "next";
 import Link from "next/link";
+import {WithRouterProps} from "next/dist/client/with-router";
+import {withRouter} from "next/router";
+import {PageLocation} from "../../../enums/common.enum";
 
-interface AssetAddProps {
+interface AssetAddProps extends WithRouterProps {
   campaignOptions: string[];
 }
 
@@ -26,7 +29,7 @@ interface AssetAddState {
   animation?: boolean;
 }
 
-export default class Add extends Component<AssetAddProps, AssetAddState> {
+class Add extends Component<AssetAddProps, AssetAddState> {
 
   constructor(props: AssetAddProps) {
     super(props);
@@ -40,6 +43,11 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
       loneFileOptions: Object.values(StorageValues),
       selectedStorage: StorageValues.BaseMesh,
     };
+  }
+  
+  async componentDidMount() {
+    if(await IsNotLogIn())
+      await this.props.router.push(PageLocation.Admin);
   }
 
   async getTypeOptionsByCampaign(campaign: string) {
@@ -57,7 +65,7 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
     
     if(!this.state.animation)
       this.setState({
-        typeOptions: campaign.length <= 0 ? [] : (await FirebaseUtil.Instance().GetParameters<BasicData[]>(campaign + diff))[0]
+        typeOptions: campaign.length <= 0 ? [] : (await GetParameters<BasicData[]>(campaign + diff))[0]
       });
   }
 
@@ -176,8 +184,11 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
                 {this.renderLocationOptions()}
               </select>
             </div>
-            <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
-              <Link href="list"><p className="mx-2 text-white hover:cursor-help">Go to List</p></Link>
+            <div className="flex">
+              <div className="mx-2 my-2 border-2 border-slate-600 rounded bg-amber-600">
+                <Link href="list"><p className="mx-2 text-white hover:cursor-help">Go to List</p></Link>
+              </div>
+              <AGButton type="danger" onClickEvent={() => LogOut()}>Log Out</AGButton>
             </div>
           </div>
 
@@ -220,10 +231,10 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
     const {dbLocation} = this.state;
     if (dbLocation && jsonData) {
       if (dbLocation !== FirestoreValues.Parameters) {
-        await FirebaseUtil.Instance().InsertDB(jsonData, dbLocation);
+        await InsertDB(jsonData, dbLocation);
         alert('Done inserting');
       } else {
-        await FirebaseUtil.Instance().UpdateDB(dbLocation, jsonData);
+        await UpdateDB(dbLocation, jsonData);
         alert('Done updating');
       }
     }
@@ -236,9 +247,9 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
       const uploadFileTo = this.uploadTo();
 
       if(thumbToUpload)
-        formData.thumb = await FirebaseUtil.Instance().UploadFile(thumbToUpload, StorageValues.Thumbnail);
+        formData.thumb = await UploadFile(thumbToUpload, StorageValues.Thumbnail);
       
-      formData.path = await FirebaseUtil.Instance().UploadFile(fileToUpload, uploadFileTo, formData.type);
+      formData.path = await UploadFile(fileToUpload, uploadFileTo, formData.type);
       formData.campaign = [this.state.selectedCampaign];
 
       await this.insertDB(JSON.stringify(formData));
@@ -262,15 +273,15 @@ export default class Add extends Component<AssetAddProps, AssetAddState> {
   async insertFile() {
     const {loneFile, selectedStorage} = this.state;
     if (loneFile && selectedStorage) {
-      const newPath = await FirebaseUtil.Instance().UploadFile(loneFile, selectedStorage);
+      const newPath = await UploadFile(loneFile, selectedStorage);
       console.log(newPath);
       alert("File uploaded");
     }
   }
 }
 
-export const getServerSideProps: GetServerSideProps<AssetAddProps> = async (context) => {
-  const campaigns = (await FirebaseUtil.Instance().GetParameters<string[]>(FirestoreParameters.Campaigns))[0];
+export const getServerSideProps: GetServerSideProps<Omit<AssetAddProps, 'router'>> = async (context) => {
+  const campaigns = (await GetParameters<string[]>(FirestoreParameters.Campaigns))[0];
 
   return {
     props: {
@@ -278,3 +289,5 @@ export const getServerSideProps: GetServerSideProps<AssetAddProps> = async (cont
     }
   };
 }
+
+export default withRouter(Add);
