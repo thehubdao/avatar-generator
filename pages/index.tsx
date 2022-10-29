@@ -52,6 +52,8 @@ export interface AvatarGeneratorProps {
   attributeConfig: BasicData[] | null;
   // callback when data is ready to be used
   onDataLoaded?: () => void;
+  bgColor?: string;
+  onlyView: boolean;
 }
 
 interface AvatarGeneratorState {
@@ -134,6 +136,8 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   async componentDidMount() {
     this.setLoading();
+    if (this.props.onlyView) this.changeView();
+    
     await this.avatarScene();
     
     await Promise.all([
@@ -156,7 +160,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       resY: window.innerHeight
     });
 
-    IFrameReady(this.setOnIFrame);
+    IFrameReady(this.setOnIFrame, this.changePartFromIFrame);
   }
 
   setLoading(newState: boolean = true) {
@@ -166,6 +170,15 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   setOnIFrame = () => {
     console.log('IFrame Callback: ', this.onIFrame);
     this.onIFrame = true;
+  }
+
+  changePartFromIFrame = async (params?: BasicData) => {
+    if(!params) return console.log("Missing feature option!");
+    
+    const feature = this.partList?.find(p => p.type === params.id && p.name === params.val);
+    if(!feature) return console.log("Feature option not found!");
+    
+    await this.changePart(feature.id, feature.path, feature.name, feature.type);
   }
 
   setHasAnimation = () => {
@@ -484,7 +497,9 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     return (
       <>
         {this.renderEditMode()}
-        <LogComponent logs={this.state.logs} resX={this.state.resX} resY={this.state.resY}/>
+        {!this.props.onlyView &&
+          <LogComponent logs={this.state.logs} resX={this.state.resX} resY={this.state.resY}/>
+        }
       </>
     );
   }
@@ -493,7 +508,8 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     return (
       <>
         <div className="fixed w-[360px] h-4/5 left-[50%] translate-x-[-50%] flex justify-center items-start rounded-b-[180px] overflow-hidden transition-width transition-height duration-300 ease-in-out">
-          <div className="bg-[#272727] w-full h-screen absolute"></div>
+          <div style={{backgroundColor: `#${this.props.bgColor ?? '272727'}`}}
+               className="w-full h-screen absolute"></div>
           <div className="relative h-full" ref={ref => this.mount = ref} />
         </div>
         <div className="fixed left-0 top-0 w-full h-screen bg-slate-600 bg-opacity-50 p-2 hover:overflow-y-auto hidden">
@@ -590,21 +606,27 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
             </div>
           </div>
         </div>
-        <div onClick={() => {this.changeView()}} className="fixed top-4 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
-          {this.state.editModeSelected ?
-            <Image src={'/resources/icos/buttons/ViewMode.svg'} width={30} height={30} alt={'view mode'}/>
-            :<Image src={'/resources/icos/buttons/EditMode.svg'} width={30} height={30} alt={'edit mode'}/>
-          }
-        </div>
+        {!this.props.onlyView &&
+            <div onClick={() => this.changeView()}
+                 className="fixed top-4 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
+              {this.state.editModeSelected ?
+                <Image src={'/resources/icos/buttons/ViewMode.svg'} width={30} height={30} alt={'view mode'}/>
+                : <Image src={'/resources/icos/buttons/EditMode.svg'} width={30} height={30} alt={'edit mode'}/>
+              }
+            </div>
+        }
         {this.state.editModeSelected ?
           <>
             <CategorySelectorComponent list={this.state.selectList} activedPart={this.state.selectedPart} handleClick={(value:string) => this.onCategoryChange(value)}/>
             <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => this.changePart(id, path, name)}/>
           </>
           :<>
-            <div onClick={() => this.exportModel()} className="fixed top-20 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
-              <Image src={'/resources/icos/buttons/Mint.svg'} width={30} height={30} alt={'minting'}/>
-            </div>
+            {!this.props.onlyView &&
+              <div onClick={() => this.exportModel()}
+                   className="fixed top-20 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
+                <Image src={'/resources/icos/buttons/Mint.svg'} width={30} height={30} alt={'minting'}/>
+              </div>
+            }
           </>
         }
         <AGLoading loading={this.state.loading} />
@@ -625,7 +647,7 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
   // Get subdomain
   let subdomain: string | undefined;
   let parsedConfig: BasicData[] | null = null;
-  const { campaign, config } = context.query;
+  const { campaign, config, bg, ov } = context.query;
   if(campaign)
     subdomain = campaign as string;
   else
@@ -669,7 +691,9 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
       campaignConfig: _campaignConfig ?? {},
       selectListBodyParts: _selectListBodyParts,
       selectListAccessories: _selectListAccessories,
-      attributeConfig: parsedConfig
+      attributeConfig: parsedConfig,
+      bgColor: bg as string ?? null,
+      onlyView: ov != undefined ? (ov as string).toLowerCase() === 'true' : false,
     }
   };
 }

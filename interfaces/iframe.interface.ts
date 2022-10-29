@@ -1,6 +1,7 @@
-export interface IFrameInBound {
+export interface IFrameInBound<T> {
   target: string;
   eventName: string;
+  payload: T;
 }
 
 export interface IFrameOutBound {

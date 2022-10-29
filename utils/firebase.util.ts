@@ -87,11 +87,13 @@ async function CheckServerSide() {
   if(typeof window === 'undefined') {
     await FirebaseUtil.Instance().Auth();
 
-    const logInfo: LogInInterface = {
-      user: process.env.AG_FB_USER!,
-      pass: process.env.AG_FB_PASS!,
-    };
-    await LogIn(logInfo);
+    if (await IsNotLogIn()) {
+      const logInfo: LogInInterface = {
+        user: process.env.AG_FB_USER!,
+        pass: process.env.AG_FB_PASS!,
+      };
+      await LogIn(logInfo);
+    }
   }
 }
 

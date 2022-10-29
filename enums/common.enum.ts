@@ -22,6 +22,7 @@ export enum IFrameEvents {
   Ready = 'ready',
   Subscribe = 'subscribe',
   Exported = 'exported',
+  ChangePart = 'change',
 }
 
 export enum PageLocation {
