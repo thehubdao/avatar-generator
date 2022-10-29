@@ -2,14 +2,15 @@ import {IFrameInBound, IFrameOutBound} from "../interfaces/iframe.interface";
 import {IFrameEvents, IFrameValues} from "../enums/common.enum";
 import {BasicData, ExportInterface} from "../interfaces/common.interface";
 
-export function IFrameReady(onSubscribed: Function, onChangePart?: (params?: BasicData) => Promise<void>) {
+export function IFrameReady(onSubscribed: Function, onChangePart?: (params?: BasicData) => Promise<void>, onExport?: () => Promise<void>) {
   TellParentReady();
   SetSubscribeEvent(onSubscribed);
-  SetOnChangePart(onChangePart)
+  SetOnChangePart(onChangePart);
+  Export(onExport);
 }
 
 function TellParentReady() {
-  const message: IFrameOutBound = {
+  const message: IFrameOutBound<void> = {
     source: IFrameValues.Project,
     eventName: IFrameEvents.Ready
   };
@@ -25,7 +26,7 @@ function SetSubscribeEvent(onSubscribed: Function) {
   });
 }
 
-function SetOnChangePart(onChangePart: ((params?: BasicData) => Promise<void>) | undefined) {
+function SetOnChangePart(onChangePart?: (params?: BasicData) => Promise<void>) {
   window.addEventListener(IFrameValues.Event, ({data, source}) => {
     const { target, eventName, payload } = data as IFrameInBound<BasicData>;
     if(onChangePart && target === IFrameValues.Project && eventName === IFrameEvents.ChangePart)
@@ -33,12 +34,20 @@ function SetOnChangePart(onChangePart: ((params?: BasicData) => Promise<void>) |
   });
 }
 
+function Export(onExport?: () => Promise<void>) {
+  window.addEventListener(IFrameValues.Event, ({data, source}) => {
+    const {target, eventName} = data as IFrameInBound<void>;
+    if(onExport && target === IFrameValues.Project && eventName === IFrameEvents.Exported)
+      onExport().then();
+  });
+}
+
 export function IFrameExportData(data: ExportInterface) {
   SendMessage(data);
 }
 
-function SendMessage(sendData: any) {
-  const message: IFrameOutBound = {
+function SendMessage<T>(sendData: T) {
+  const message: IFrameOutBound<T> = {
     source: IFrameValues.Project,
     eventName: IFrameEvents.Exported,
     data: sendData,

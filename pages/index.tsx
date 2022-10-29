@@ -120,7 +120,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       cameraLookAt: new Vector3(),
       skinColor: 'cf9e7c',
       savedModels: {},
-      editModeSelected: true,
+      editModeSelected: false,
       currentModule: ViewModuleState.OnModule,
       loading: false,
       resX: 0,
@@ -136,7 +136,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   async componentDidMount() {
     this.setLoading();
-    if (this.props.onlyView) this.changeView();
+    if (!this.props.onlyView) this.changeView();
     
     await this.avatarScene();
     
@@ -160,7 +160,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       resY: window.innerHeight
     });
 
-    IFrameReady(this.setOnIFrame, this.changePartFromIFrame);
+    IFrameReady(this.setOnIFrame, this.changePartFromIFrame, this.exportFromIFrame);
   }
 
   setLoading(newState: boolean = true) {
@@ -173,12 +173,17 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   changePartFromIFrame = async (params?: BasicData) => {
+    if(!this.onIFrame) return console.log("Not on IFrame, subscribe if you forgot!");
     if(!params) return console.log("Missing feature option!");
     
     const feature = this.partList?.find(p => p.type === params.id && p.name === params.val);
     if(!feature) return console.log("Feature option not found!");
     
     await this.changePart(feature.id, feature.path, feature.name, feature.type);
+  }
+  
+  exportFromIFrame = () => {
+    return this.exportModel();
   }
 
   setHasAnimation = () => {
@@ -507,7 +512,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   private renderEditMode() {
     return (
       <>
-        <div className="fixed w-[360px] h-4/5 left-[50%] translate-x-[-50%] flex justify-center items-start rounded-b-[180px] overflow-hidden transition-width transition-height duration-300 ease-in-out">
+        <div className="fixed w-[360px] h-4/5 left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
           <div style={{backgroundColor: `#${this.props.bgColor ?? '272727'}`}}
                className="w-full h-screen absolute"></div>
           <div className="relative h-full" ref={ref => this.mount = ref} />
@@ -629,7 +634,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
             }
           </>
         }
-        <AGLoading loading={this.state.loading} />
+        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor} />
       </>
     );
   }
