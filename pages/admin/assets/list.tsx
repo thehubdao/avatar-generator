@@ -17,6 +17,7 @@ interface AssetListState {
   dbData?: any[],
 }
 
+
 // Show info from database
 // Delete entry on database (or add a new field for deleted entries) (new field needs to edit getParts as well)
 class List extends Component<AssetListProps, AssetListState> {
