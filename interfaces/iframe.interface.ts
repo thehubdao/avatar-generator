@@ -4,8 +4,8 @@ export interface IFrameInBound<T> {
   payload: T;
 }
 
-export interface IFrameOutBound {
+export interface IFrameOutBound<T> {
   source: string;
   eventName: string;
-  data?: any;
+  data?: T;
 }
