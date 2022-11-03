@@ -175,7 +175,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       await this.changePart(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
     }
     else {
-      if(params.id.endsWith(GlobalValues.Acc)) {
+      if(params.id.endsWith(GlobalValues.AccEnd)) {
         const accessory = this.accessoryList?.find(a => a.type === params.id && a.name === params.val);
 
         if(!accessory) return console.log("Accessory option not found!");
@@ -431,6 +431,9 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });
     }
+    
+    console.log('BonesData: ',this.accessoryBonesData);
+    console.log('SelectedAcc: ', { selectedAcc, replaceModel});
 
     await ReplaceModelAccessory(this.accessoryBonesData!, selectedAcc, replaceModel);
     this.addReplaceAttribute(selectedAcc, name);

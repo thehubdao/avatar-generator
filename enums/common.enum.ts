@@ -2,6 +2,7 @@
   BaseCampaign = 'base',
   Acc = 'Accessories',
   Config = 'Config',
+  AccEnd = 'Acc',
 }
 
 export enum AttributeValues {
