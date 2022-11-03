@@ -33,7 +33,7 @@ import {RandomArrayElement} from "../utils/common.util";
 import {LogComponent} from "../components/log.component";
 import {CategorySelectorComponent} from "../components/categorySelector.component";
 import {CategoryChildrenComponent} from "../components/categoryChildren.component";
-import {IFrameExportData, IFrameReady} from "../utils/iframe.util";
+import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../utils/iframe.util";
 import {CreateAnimationMixer, SetAnimation} from "../utils/threejs/animation.util";
 import {SceneInterface} from "../interfaces/scene.interface";
 import {InitSceneController} from "../utils/threejs/scene.util";
@@ -155,7 +155,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       resY: window.innerHeight
     });
 
-    IFrameReady(this.setOnIFrame, this.changePartFromIFrame, this.exportFromIFrame);
+    IFrameReady(this.setOnIFrame);
   }
 
   setLoading(newState: boolean = true) {
@@ -165,6 +165,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   setOnIFrame = () => {
     console.log('IFrame Callback: ', this.onIFrame);
     this.onIFrame = true;
+    SetIFrameEvents(this.changePartFromIFrame, this.exportFromIFrame, this.changeSkinColorFromIFrame);
   }
 
   changePartFromIFrame = async (params?: BasicData) => {
@@ -188,6 +189,10 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
         await this.changePart(feature.id, feature.path, feature.name, feature.type);
       }
     }
+  }
+  
+  changeSkinColorFromIFrame = (newColor?: string) => {
+    return this.onClickChangeSkinColor(newColor);
   }
   
   exportFromIFrame = () => {
@@ -371,9 +376,9 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     this.sc.controls!.target = value;
   }
 
-  async onClickChangeSkinColor() {
-    if(this.state.skinColor)
-      await ChangeObjectSkinColor(this.sc.baseModel!.scene, this.state.skinColor);
+  async onClickChangeSkinColor(newSkinColor = this.state.skinColor) {
+    if(newSkinColor != undefined)
+      await ChangeObjectSkinColor(this.sc.baseModel!.scene, newSkinColor);
   }
 
   updateCameraAutoRotate = (checked: boolean) => {
@@ -431,9 +436,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });
     }
-    
-    console.log('BonesData: ',this.accessoryBonesData);
-    console.log('SelectedAcc: ', { selectedAcc, replaceModel});
 
     await ReplaceModelAccessory(this.accessoryBonesData!, selectedAcc, replaceModel);
     this.addReplaceAttribute(selectedAcc, name);
