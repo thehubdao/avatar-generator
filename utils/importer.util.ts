@@ -97,12 +97,12 @@ async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
 }
 
 export async function GetAssetsListByCampaign(campaign?: string | null) {
-  const jsonObject: BodyPartLocationApi[] = await fetch('/api/getParts' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  const jsonObject: BodyPartLocationApi[] = await fetch('/api/getFeatureOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
 
 export async function GetAccessoryListByCampaign(campaign?: string | null) {
-  const jsonObject: AccLocationApi[] = await fetch('/api/getAccessories' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  const jsonObject: AccLocationApi[] = await fetch('/api/getAccessoryOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
 
