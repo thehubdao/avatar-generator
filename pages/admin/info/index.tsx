@@ -1,7 +1,8 @@
 ﻿import {Component} from "react";
 import Head from "next/head";
-import AGText from "../../../components/common/ag-text.component";
 import Image from "next/image";
+import AGText from "../../../components/common/ag-text.component";
+import {IFrameEvents, IFrameValues} from "../../../enums/common.enum";
 
 import replitAvatarIFramePic from '../../../public/resources/images/info/replitAvatarIFrame.jpg';
 
@@ -12,7 +13,7 @@ interface InfoState {
   prodUrl: string;
 }
 
-class Info extends Component<InfoProps, InfoState> {
+export default class Info extends Component<InfoProps, InfoState> {
   constructor(props: InfoProps) {
     super(props);
     this.state = {
@@ -51,8 +52,8 @@ class Info extends Component<InfoProps, InfoState> {
                     </AGText>
                     <AGText type='code'>{
                       `{
-  source: “avatar-generator”,
-  eventName: “ready”
+  source: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.Ready}”
 }`
                     }</AGText>
                     <AGText type='text'>
@@ -69,8 +70,8 @@ class Info extends Component<InfoProps, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  source: “avatar-generator”,
-  eventName: “exported",
+  source: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.Exported}",
   data: {
     attributes: { id: string, val: string }[],
     attributesBase64: string,
@@ -95,14 +96,30 @@ class Info extends Component<InfoProps, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  target: “avatar-generator”,
-  eventName: “subscribe”
+  target: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.Subscribe}”
 }`
                       }
                     </AGText>
                   </dd>
 
-                  <dt><AGText type="th3" mark="dash">Change feature event:</AGText></dt>
+                  <dt><AGText type="th3" mark="dash">Change skin color event:</AGText></dt>
+                  <dd>
+                    <AGText type="text">
+                      Message expected on AG in order to change avatar{"'"}s skin color.
+                    </AGText>
+                    <AGText type="code">
+                      {
+                        `{
+  target: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.ChangeSkinColor}”,
+  payload: string       // Hex color without #
+}`
+                      }
+                    </AGText>
+                  </dd>
+                  
+                  <dt><AGText type="th3" mark="dash">Change feature/accessory event:</AGText></dt>
                   <dd>
                     <AGText type="text">
                       Message sent to AG in order to change a feature on the current avatar.
@@ -110,11 +127,11 @@ class Info extends Component<InfoProps, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  target: “avatar-generator”,
-  eventName: “change”,
+  target: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.ChangePart}”,
   payload: {
-    id: string,       // Feature type
-    val: string,      // Feature name
+    id: string,       // Feature/Accessory type
+    val: string,      // Feature/Accessory name
     detail?: string   // glb file Url
   }
 }`
@@ -131,8 +148,8 @@ class Info extends Component<InfoProps, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  target: “avatar-generator”,
-  eventName: “exported”
+  target: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.Exported}”
 }`
                       }
                     </AGText>
@@ -246,5 +263,3 @@ class Info extends Component<InfoProps, InfoState> {
     );
   }
 }
-
-export default Info;
