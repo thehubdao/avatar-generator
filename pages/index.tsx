@@ -1,17 +1,12 @@
 import {Component} from "react";
 import Image from "next/image";
-import Head from "next/head";
 import AGLoading from "../components/common/ag-loading.component";
 import {Clock, Vector3, WebGLInfo} from "three";
 import {FrustumCulledFalse, GetBaseCameraControls} from "../utils/threejs/scene.util";
 import {GetTestLights, GetAmbientLights} from "../utils/test-scene.util";
 import {
-  GetAccessoryBones,
-  GetAccessoryListByCampaign,
-  GetAnimationListByCampaign,
-  GetAssetsListByCampaign,
+  GetAccessoryBones, GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign, GetGltfModel,
   GetPartsData,
-  ImporterUtil
 } from "../utils/importer.util";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {AttributeValues, GlobalValues, ViewModuleState} from "../enums/common.enum";
@@ -176,10 +171,23 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     if(!this.onIFrame) return console.log("Not on IFrame, subscribe if you forgot!");
     if(!params) return console.log("Missing feature option!");
     
-    const feature = this.partList?.find(p => p.type === params.id && p.name === params.val);
-    if(!feature) return console.log("Feature option not found!");
-    
-    await this.changePart(feature.id, feature.path, feature.name, feature.type);
+    if(params.detail && params.detail.startsWith('http')) {
+      await this.changePart(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
+    }
+    else {
+      if(params.id.endsWith(GlobalValues.Acc)) {
+        const accessory = this.accessoryList?.find(a => a.type === params.id && a.name === params.val);
+
+        if(!accessory) return console.log("Accessory option not found!");
+        await this.changeAccessory(accessory.id, accessory.path, accessory.name, accessory.type);
+      }
+      else {
+        const feature = this.partList?.find(p => p.type === params.id && p.name === params.val);
+
+        if(!feature) return console.log("Feature option not found!");
+        await this.changePart(feature.id, feature.path, feature.name, feature.type);
+      }
+    }
   }
   
   exportFromIFrame = () => {
@@ -297,7 +305,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       this.sc.scene!.add(l);
     }
 
-    this.sc.baseModel = await ImporterUtil.FirebaseGltfModel(this.props.baseMeshPath);
+    this.sc.baseModel = await GetGltfModel(this.props.baseMeshPath);
     console.log('Base start', this.sc.baseModel);
 
     this.sc.mixer = CreateAnimationMixer(this.sc.baseModel!.scene);
@@ -402,7 +410,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     if(this.state.savedModels[id]) {
       replaceModel = this.state.savedModels[id];
     } else {
-      replaceModel = await ImporterUtil.FirebaseGltfModel(partPath);
+      replaceModel = await GetGltfModel(partPath);
       const _savedModels = {...this.state.savedModels};
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });
@@ -418,7 +426,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     if(this.state.savedModels[id]) {
       replaceModel = this.state.savedModels[id];
     } else {
-      replaceModel = await ImporterUtil.FirebaseGltfModel(path);
+      replaceModel = await GetGltfModel(path);
       const _savedModels = {...this.state.savedModels};
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });

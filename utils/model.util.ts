@@ -1,5 +1,4 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {ImporterUtil} from "./importer.util";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import {
   Group,
@@ -13,11 +12,12 @@ import {
 } from "three";
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
 import {TextureTone, TextureUtil} from "./texture.util";
+import {LoadGltfModel} from "./importer.util";
 
 type MaterialFunction = (obj: SkinnedMesh, tone?: TextureTone) => void;
 
 export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partIndex: number) {
-  const partModel = await ImporterUtil.LoadGltfModel(partUrl);
+  const partModel = await LoadGltfModel(partUrl);
   
   const chest = SkeletonUtils.clone(partModel.scene.children[0].children[partIndex]) as SkinnedMesh;
   const oldSkeleton = SkeletonUtils.getBones((baseModel.scene.children[0].children[partIndex] as SkinnedMesh).skeleton);
