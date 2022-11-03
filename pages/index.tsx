@@ -175,10 +175,18 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       await this.changePart(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
     }
     else {
-      const feature = this.partList?.find(p => p.type === params.id && p.name === params.val);
-      if(!feature) return console.log("Feature option not found!");
+      if(params.id.endsWith(GlobalValues.Acc)) {
+        const accessory = this.accessoryList?.find(a => a.type === params.id && a.name === params.val);
 
-      await this.changePart(feature.id, feature.path, feature.name, feature.type);
+        if(!accessory) return console.log("Accessory option not found!");
+        await this.changeAccessory(accessory.id, accessory.path, accessory.name, accessory.type);
+      }
+      else {
+        const feature = this.partList?.find(p => p.type === params.id && p.name === params.val);
+
+        if(!feature) return console.log("Feature option not found!");
+        await this.changePart(feature.id, feature.path, feature.name, feature.type);
+      }
     }
   }
   
