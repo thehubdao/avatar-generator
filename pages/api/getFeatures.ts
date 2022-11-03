@@ -8,9 +8,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { campaign } = req.query;
 
     const useCampaign = campaign != undefined ? campaign as string : GlobalValues.BaseCampaign;
-    const [data] = await GetParameters<BasicData[]>(useCampaign + GlobalValues.Acc);
+    const [data] = await GetParameters<BasicData[]>(useCampaign);
     const result = data.map(d => d.id);
-
+    
     res
       .status(200)
       .json(result);
