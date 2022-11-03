@@ -4,22 +4,10 @@
 ## Vercel environments
 Current environment (Dev preview can be updated anytime):
 - [Production](https://avatar-generator-metagamehub.vercel.app)
-- [Dev Preview](https://avatar-generator-git-dev-metagamehub.vercel.app)
+- [Dev Preview](https://avatar-generator-git-dev-dap-frontend.vercel.app)
 ---
-## URL Parameters
-This parameters are to be added at the end of the web app url, after a `?` symbol and multiple parameters concatenated by `&` symbol.
-
-Example: `https://web-app.url?parameter1=value1&parameter2=value2`
-
-### Campaign Parameter:
-We can send campaign to use on the app, campaigns have a set of default configurations, instructions and values to use on the app.
-
-To use: `campaign=value`
-
-Current campaign to use is `decentraland` (base campaign is missing configurations in order to be more usable).
-
-
-### Config Parameter:
+## How to Use
+Go to "/admin/page" on any of the working links for a detailed list of functions and parameters on how to use this webapp.
 
 ---
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
