@@ -23,6 +23,7 @@ interface BulkExportState {
   logs: string;
 }
 
+
 /**
  * HOC to intercept Avatar preview exporter from Admin view
  * To access the Avatar Module, you can use the member variable `this.ref`
