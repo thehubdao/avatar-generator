@@ -102,7 +102,7 @@ async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton, changeM
 export function ReplaceModelAccessory(accessoriesInfo: Record<string, AccessoryInfoInterface>, selectedAcc: string, accessory: GLTF) {
   const bone = accessoriesInfo[selectedAcc];
   const accessoryMesh = accessory.scene.children[0].clone() as Mesh;
-  accessoryMesh.scale.set(0.1, 0.1, 0.1);
+  accessoryMesh.scale.set(1, 1, 1);
 
   if(bone.hasIt) {
     bone.bone.children.splice(bone.accessoryIndex!, 1);
