@@ -33,6 +33,8 @@ import {RandomArrayElement} from "../utils/common.util";
 import {LogComponent} from "../components/log.component";
 import {CategorySelectorComponent} from "../components/categorySelector.component";
 import {CategoryChildrenComponent} from "../components/categoryChildren.component";
+import {AccessorySelectorComponent} from "../components/accessorySelector.component";
+import {AccessoryChildrenComponent} from "../components/accessoryChildren.component";
 import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../utils/iframe.util";
 import {CreateAnimationMixer, SetAnimation} from "../utils/threejs/animation.util";
 import {SceneInterface} from "../interfaces/scene.interface";
@@ -66,6 +68,7 @@ interface AvatarGeneratorState {
   logs?: WebGLInfo;
   skinColor?: string;
   editModeSelected: boolean;
+  featuresSelected: boolean;
   currentModule: ViewModuleState;
   loading: boolean;
   resX: number;
@@ -116,6 +119,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       skinColor: 'cf9e7c',
       savedModels: {},
       editModeSelected: false,
+      featuresSelected: true,
       currentModule: ViewModuleState.OnModule,
       loading: false,
       resX: 0,
@@ -495,29 +499,30 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   changeView() {
-    const parent = this.mount?.parentNode as HTMLElement;
+    // const parent = this.mount?.parentNode as HTMLElement;
     if (this.state.editModeSelected) {
-      parent!.classList.add('!w-full');
-      parent!.classList.add('!h-full');
-      parent!.classList.remove('rounded-b-[180px]');
+      // parent!.classList.add('!w-full');
+      // parent!.classList.add('!h-full');
+      // parent!.classList.remove('rounded-b-[180px]');
       this.setState({editModeSelected: false, currentModule: ViewModuleState.SwitchingModule});
     } else {
-      parent!.classList.remove('!w-full');
-      parent!.classList.remove('!h-full');
-      parent!.classList.add('rounded-b-[180px]');
+      // parent!.classList.remove('!w-full');
+      // parent!.classList.remove('!h-full');
+      // parent!.classList.add('rounded-b-[180px]');
       setTimeout(() => {
         this.setState({editModeSelected: true, currentModule: ViewModuleState.SwitchingModule});
       }, 500);
     }
   }
 
+  changeEditSelection(value: boolean) {
+    this.setState({featuresSelected: value});
+  }
+
   render() {
     return (
       <>
         {this.renderEditMode()}
-        {!this.props.onlyView &&
-          <LogComponent logs={this.state.logs} resX={this.state.resX} resY={this.state.resY}/>
-        }
       </>
     );
   }
@@ -525,9 +530,8 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   private renderEditMode() {
     return (
       <>
-        <div className="fixed w-[360px] h-4/5 left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-          <div style={{backgroundColor: `#${this.props.bgColor ?? '272727'}`}}
-               className="w-full h-screen absolute"></div>
+        <div className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+          <div style={{backgroundColor: `#${this.props.bgColor ?? '272727'}`}} className="w-full h-screen absolute" />
           <div className="relative h-full" ref={ref => this.mount = ref} />
         </div>
         <div className="fixed left-0 top-0 w-full h-screen bg-slate-600 bg-opacity-50 p-2 hover:overflow-y-auto hidden">
@@ -626,28 +630,62 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
         </div>
         {!this.props.onlyView &&
             <div onClick={() => this.changeView()}
-                 className="fixed top-4 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
-              {this.state.editModeSelected ?
-                <Image src={'/resources/icos/buttons/ViewMode.svg'} width={30} height={30} alt={'view mode'}/>
-                : <Image src={'/resources/icos/buttons/EditMode.svg'} width={30} height={30} alt={'edit mode'}/>
-              }
+                 className="z-10 fixed bottom-14 right-4 w-24 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex items-center justify-center px-14">
+              <div className="m-2">
+                {
+                  this.state.editModeSelected ?
+                  <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width={'1rem'}
+	                viewBox="0 0 511.996 511.996">
+                    <path d="M508.245,246.953L363.435,102.133c-5.001-5.001-13.099-5.001-18.099,0c-5.001,5-5.001,13.099,0,18.099l122.965,122.965
+                          H12.8c-7.074,0-12.8,5.726-12.8,12.8c0,7.074,5.726,12.8,12.8,12.8h455.492L345.327,391.763c-5.001,5-5.001,13.099,0,18.099
+                          c5.009,5.001,13.099,5.001,18.108,0l144.811-144.811C513.246,260.051,513.246,251.953,508.245,246.953z"/>
+                  </svg>
+                  : <svg version="1.1" id="Layer_2" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width={'1rem'}
+                    viewBox="0 0 217.855 217.855">
+                      <path d="M215.658,53.55L164.305,2.196C162.899,0.79,160.991,0,159.002,0c-1.989,0-3.897,0.79-5.303,2.196L3.809,152.086
+                        c-1.35,1.352-2.135,3.166-2.193,5.075l-1.611,52.966c-0.063,2.067,0.731,4.069,2.193,5.532c1.409,1.408,3.317,2.196,5.303,2.196
+                        c0.076,0,0.152-0.001,0.229-0.004l52.964-1.613c1.909-0.058,3.724-0.842,5.075-2.192l149.89-149.889
+                        C218.587,61.228,218.587,56.479,215.658,53.55z M57.264,201.336l-42.024,1.28l1.279-42.026l91.124-91.125l40.75,40.743
+                        L57.264,201.336z M159,99.602l-40.751-40.742l40.752-40.753l40.746,40.747L159,99.602z"/>
+                    </svg>
+
+                }
+              </div>
+              <div className="mr-2">{this.state.editModeSelected ? 'NEXT':'EDIT'}</div>
             </div>
         }
         {this.state.editModeSelected ?
           <>
-            <CategorySelectorComponent list={this.state.selectList} activedPart={this.state.selectedPart} handleClick={(value:string) => this.onCategoryChange(value)}/>
-            <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => this.changePart(id, path, name)}/>
+            <CategorySelectorComponent close={!this.state.featuresSelected} list={this.state.selectList} activedPart={this.state.selectedPart} handleClick={(value:string) => this.onCategoryChange(value)} handleClick2={(value:boolean) => this.changeEditSelection(value)} />
+            <AccessorySelectorComponent close={this.state.featuresSelected} list={this.state.aSelectList} activedPart={this.state.selectedAcc} handleClick={(value:string) => this.onAccessoryChange(value)} handleClick2={(value:boolean) => this.changeEditSelection(value)} />
+            {
+              this.state.featuresSelected ?
+              <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => this.changePart(id, path, name)}/>
+              : <AccessoryChildrenComponent list={this.state.accessoryList} handleClick={(id: string, path: string, name: string) => this.changeAccessory(id, path, name)}/>
+            }
           </>
           :<>
             {!this.props.onlyView &&
               <div onClick={() => this.exportModel()}
-                   className="fixed top-20 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
-                <Image src={'/resources/icos/buttons/Mint.svg'} width={30} height={30} alt={'minting'}/>
+              className="z-10 fixed bottom-28 right-4 w-24 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex items-center justify-center px-14">
+                <div className="m-2">
+                  <svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width={'1rem'}
+	                viewBox="0 0 460 460">
+                    <path d="M427.137,0C408.93,0,51.379,0,32.865,0C14.743,0,0,14.743,0,32.865v394.272c0,18.122,14.743,32.865,32.865,32.865
+                      c0,0,374.895,0,394.272,0c18.122,0,32.865-14.743,32.865-32.865V32.865C460.001,14.743,445.258,0,427.137,0z M245.812,30h50.995
+                      v54.466h-50.995V30z M107.198,30h108.615v69.466c0,8.284,6.716,15,15,15h80.995c8.284,0,15-6.716,15-15V30h26.377v119.636H107.198
+                      V30z M107.007,430.001V308.673h245.986v121.328H107.007z M430.002,427.137L430.002,427.137c-0.001,1.58-1.286,2.865-2.866,2.865
+                      h-44.143V293.673c0-8.284-6.716-15-15-15H92.007c-8.284,0-15,6.716-15,15v136.328H32.865c-1.58,0-2.865-1.285-2.865-2.865V32.865
+                      C30,31.285,31.285,30,32.865,30h44.333v134.636c0,8.284,6.716,15,15,15h275.986c8.284,0,15-6.716,15-15V30h43.953
+                      c1.58,0,2.865,1.285,2.865,2.865V427.137z"/>
+                  </svg>
+                </div>
+                <div className="mr-2">SAVE</div>
               </div>
             }
           </>
         }
-        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor} />
+        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor}/>
       </>
     );
   }
