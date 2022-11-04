@@ -10,6 +10,7 @@ interface ExampleProps {
   close: boolean;
 }
 
+
 function getSiblings(el: HTMLElement) {
 
   // for collecting siblings
