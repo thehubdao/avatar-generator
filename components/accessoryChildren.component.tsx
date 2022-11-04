@@ -1,17 +1,17 @@
 import Image from "next/image";
-import { BodyPartLocationApi } from "../interfaces/api.interface";
+import { AccLocationApi } from "../interfaces/api.interface";
 
 interface ExampleProps {
-  list: BodyPartLocationApi[];
+  list: AccLocationApi[];
   handleClick: Function;
 }
 
 function optionList(props: ExampleProps) {
-  return props.list.map((x: BodyPartLocationApi) => {
+  return props.list.map((x: AccLocationApi) => {
     return (
       <div className="w-16 h-16 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md mb-4" key={x.id} onClick={() => {props.handleClick(x.id, x.path, x.name)}}>
         <div className="flex flex-col items-center justify-center h-full">
-          <Image src={'/resources/icos/features/' + x.type + '.svg'} width={30} height={30} alt={x.type}/>
+          <Image src={'/resources/icos/accessories/' + x.type + '.svg'} width={30} height={30} alt={x.type}/>
           <p className="text-[0.7rem] whitespace-nowrap">{x.name}</p>
         </div>
       </div>
@@ -19,7 +19,7 @@ function optionList(props: ExampleProps) {
   });
 }
 
-function CategoryChildrenComponent(props: ExampleProps) {
+function AccessoryChildrenComponent(props: ExampleProps) {
   return (
     <div className="fixed top-4 right-4 h-[75%] overflow-auto scrollbar-hide" >
       <div>
@@ -37,4 +37,4 @@ function CategoryChildrenComponent(props: ExampleProps) {
   )
 }
 
-export {CategoryChildrenComponent};
+export {AccessoryChildrenComponent};
