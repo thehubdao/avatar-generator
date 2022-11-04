@@ -5,7 +5,9 @@ import {BasicData} from "../interfaces/common.interface";
 interface ExampleProps {
   list: BodyPartLocationApi[] | BasicData[];
   handleClick: Function;
+  handleClick2: Function;
   activedPart: string;
+  close: boolean;
 }
 
 function getSiblings(el: HTMLElement) {
@@ -59,10 +61,9 @@ function optionList(props: ExampleProps) {
 function CategorySelectorComponent(props: ExampleProps) {
 
   return (
-    <div className="w-14 bg-gray-200 border-2 border-gray-100 fixed top-4 right-4 rounded-[6px] drop-shadow-md flex flex-col items-center">
-      <div className="overflow-hidden w-12 h-12 flex justify-center flex-col items-center border-b-2 border-solid border-gray-100">
+    <div className={"w-14 bg-gray-200 border-2 border-gray-100 fixed top-4 left-4 rounded-[6px] drop-shadow-md flex flex-col items-center " + (props.close ? 'h-[50px] overflow-hidden left-20':'')}>
+      <div className="w-12 h-12 flex justify-center items-center border-b-2 border-solid border-gray-100 p-2" onClick={() => props.handleClick2(true)}>
         <Image src={'/resources/icos/features/features.svg'} width={30} height={30} alt={'features'}/>
-        {/* <p className="text-[0.75rem]">features</p> */}
       </div>
       <div className="py-4">
         {optionList(props)}
