@@ -6,7 +6,6 @@ import {UserInterface} from "../../../interfaces/firebase.interface";
 import {CreateNewUser, GetCurrentUser} from "../../../utils/firebase.util";
 
 interface UserAddProps {
-  creatorRole?: UserRoleValues;
 }
 
 export default class UserAdd extends Component<UserAddProps> {
@@ -19,24 +18,19 @@ export default class UserAdd extends Component<UserAddProps> {
     this.userName = null;
     this.userAccount = null;
   }
-  
+
   render() {
     return (
       <>
-        {this.props.creatorRole === UserRoleValues.superAdmin ?
-          <>
-            <AGText type="th1">New User</AGText>
-            <form onSubmit={event => void this.createNewUser(event)}>
-              <p>Nombre</p>
-              <input type="text" ref={r => this.userName = r}/>
-              <p>Usuario</p>
-              <input type="text" ref={r => this.userAccount = r}/>
-              <AGButton type="danger" form>Add</AGButton>
-            </form>
-          </>
-          :
-          <AGText type="th1">You can not create Users!</AGText>
-        }
+        <AGText type="th1">New User</AGText>
+        <form onSubmit={event => void this.createNewUser(event)}>
+          <p>Nombre</p>
+          <input type="text" ref={r => this.userName = r}/>
+          <p>Usuario</p>
+          <input type="text" ref={r => this.userAccount = r}/>
+          <AGButton type="danger" form>Add</AGButton>
+        </form>
+        <AGButton type="alert" >Cancel</AGButton>
       </>
     );
   }
@@ -48,11 +42,9 @@ export default class UserAdd extends Component<UserAddProps> {
       name: this.userName?.value,
       email: this.userAccount?.value,
       role: UserRoleValues.admin,
-    }
-    
-    await CreateNewUser(newUser);
-    
-    const currentUser = await GetCurrentUser();
-    console.log(currentUser);
+    };
+    const result = await CreateNewUser(newUser);
+    if(result.successful)
+      console.log("Go back to list and show alert");
   }
 }

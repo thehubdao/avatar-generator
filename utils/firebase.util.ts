@@ -111,7 +111,7 @@ async function CheckServerSide() {
   }
 }
 
-export async function GetInfoDB<T>(dbLocation: FirestoreLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints) {
+export async function GetInfoDB<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints) {
   let newLocation = dbLocation;
   if (campaign)
     newLocation = `${FirestoreParameters.Campaigns}/${campaign}/${dbLocation}`;
@@ -401,4 +401,14 @@ export async function CreateNewUser(newUser: Partial<UserInterface>): Promise<Re
 
 function RandomPassword() {
   return Math.random().toString(36).substring(2, 12);
+}
+
+export async function GetUserList() {
+  try {
+    return await GetInfoDB<UserInterface>(FirestoreGlobalLocation.User);
+  }
+  catch (e) {
+    const err = e as FirebaseError;
+    return LogError(Module.FirebaseUtil, `Error while retrieving UserList: ${err.message}`);
+  }
 }

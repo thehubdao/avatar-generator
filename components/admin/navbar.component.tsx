@@ -8,6 +8,7 @@ import AssetAdd from "./assets/add.component";
 import {AdminComponentParams} from "../../interfaces/common.interface";
 import AssetUpdate from "./assets/update.component";
 import UserAdd from "./user/add.component";
+import UserList from "./user/list.component";
 
 interface NavbarProps {
   children?: JSX.Element | JSX.Element[];
@@ -62,6 +63,9 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
         <AGButton type="alert" tooltip="Create user" onClickEvent={() => this.setCurrentComponent(AdminComponents.UserAdd)}>
           <AGText type="icon">🤡</AGText>
         </AGButton>
+        <AGButton type="alert" tooltip="User list" onClickEvent={() => this.setCurrentComponent(AdminComponents.UserList)}>
+          <AGText type="icon">👨‍👩‍👧‍👦</AGText>
+        </AGButton>
         {this.navAdmin()}
       </>
     );
@@ -99,7 +103,10 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
                             changeComponent={(nc) => this.setCurrentComponent(nc)} />
 
       case AdminComponents.UserAdd:
-        return <UserAdd creatorRole={this.props.userRole} />
+        return <UserAdd />
+
+      case AdminComponents.UserList:
+        return <UserList changeComponent={nc => this.setCurrentComponent(nc)} />
 
       default:
         return <p>Missing Component!</p>;

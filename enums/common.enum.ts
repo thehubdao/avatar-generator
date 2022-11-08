@@ -38,6 +38,7 @@ export enum AdminComponents {
   AssetList,
   AssetModify,
   UserAdd,
+  UserList,
 }
 
 export enum Module {
