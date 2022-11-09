@@ -29,6 +29,7 @@ interface AssetAddState {
   animation?: boolean;
 }
 
+
 class Add extends Component<AssetAddProps, AssetAddState> {
 
   constructor(props: AssetAddProps) {
