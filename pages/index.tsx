@@ -204,7 +204,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   setHasAnimation = () => {
-    console.log('Animation CallBack: ', this.hasAnimation);
+    // console.log('Animation CallBack: ', this.hasAnimation);
     this.hasAnimation = true;
   }
 
@@ -264,7 +264,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   async getAnimationList() {
     this.animationList = await GetAnimationListByCampaign(this.props.campaign);
-    console.log(this.animationList);
+    // console.log(this.animationList);
   }
 
   filterListByBodyPart(bodyPartType: string) {
@@ -315,7 +315,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     }
 
     this.sc.baseModel = await GetGltfModel(this.props.baseMeshPath);
-    console.log('Base start', this.sc.baseModel);
+    // console.log('Base start', this.sc.baseModel);
 
     this.sc.mixer = CreateAnimationMixer(this.sc.baseModel!.scene);
     await SetAnimation(this.sc.mixer, this.sc.baseModel, this.setHasAnimation);
