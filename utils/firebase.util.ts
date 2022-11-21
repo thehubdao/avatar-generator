@@ -5,6 +5,7 @@ import {Auth, User, UserCredential} from "@firebase/auth";
 import {FirebaseError} from "@firebase/util";
 
 import {
+  AuthValues,
   FirestoreFilterValues,
   FirestoreGlobalLocation,
   FirestoreLocation,
@@ -112,7 +113,7 @@ async function CheckServerSide() {
 }
 
 export async function GetInfoDB<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints) {
-  let newLocation = dbLocation;
+  let newLocation = dbLocation === '/' ? FirestoreGlobalLocation.Parameters : dbLocation;
   if (campaign)
     newLocation = `${FirestoreParameters.Campaigns}/${campaign}/${dbLocation}`;
 
@@ -240,8 +241,13 @@ function CampaignLocation(campaign?: string) {
 
 export async function UpdateDoc(location: FirestoreLocation, jsonData: string, campaign?: string) {
   const {doc, setDoc} = await import('@firebase/firestore');
-  const campaignLocation = campaign ? `${campaign}/` : '';
-  const docRef = doc(await FirebaseUtil.Instance().DB(), campaignLocation + location);
+  const newLocation = campaign ?
+                        campaign + location :
+                        location !== '/' ?
+                          location :
+                          FirestoreGlobalLocation.Parameters;
+
+  const docRef = doc(await FirebaseUtil.Instance().DB(), newLocation);
   return await setDoc(docRef, JSON.parse(jsonData), {merge: true});
 }
 
@@ -296,7 +302,7 @@ export async function LogIn(credentials: LogInInterface) {
 
   let actualUser = credentials.user;
   if (!credentials.user.includes('@')) {
-    actualUser = `${credentials.user}@freak.com`;
+    actualUser = `${credentials.user}${AuthValues.DefaultEmail}`;
   }
 
   return signInWithEmailAndPassword(await FirebaseUtil.Instance().Auth(), actualUser, credentials.pass);
@@ -332,6 +338,7 @@ export async function GetCurrentUser() {
 
 export async function HandleNotLoggedIn() {
   const flag = await IsNotLogIn();
+  
   if (flag)
     await GoToPage(PageLocation.Login);
 
@@ -341,7 +348,7 @@ export async function HandleNotLoggedIn() {
 export async function GetUserInfo(userUid: string) {
   const userLocation = `${FirestoreGlobalLocation.User}/${userUid}`;
   const userDoc = await GetDocument<UserInterface>(userLocation);
-
+  
   if (userDoc.length === 0)
     return undefined;
 
@@ -405,7 +412,7 @@ function RandomPassword() {
 
 export async function GetUserList() {
   try {
-    return await GetInfoDB<UserInterface>(FirestoreGlobalLocation.User);
+    return GetInfoDB<UserInterface>(FirestoreGlobalLocation.User);
   }
   catch (e) {
     const err = e as FirebaseError;

@@ -2,6 +2,7 @@
 import Layout from "../../components/admin/_layout.component";
 import Navbar from "../../components/admin/navbar.component";
 import {UserInterface} from "../../interfaces/firebase.interface";
+import Head from "next/head";
 
 interface AdminState {
   userInfo?: UserInterface;
@@ -34,6 +35,9 @@ export default class Admin extends Component<undefined, AdminState> {
     
     return (
       <>
+        <Head>
+          <title>Admin</title>
+        </Head>
         <Layout userInfo={userInfo}
                 currentCampaign={selectedCampaign}
                 setUserInfo={(user) => this.setUserInfo(user)}

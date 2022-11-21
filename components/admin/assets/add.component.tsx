@@ -20,7 +20,6 @@ interface AssetAddState {
   typeOptions: BasicData[];
   fileToUpload?: File;
   thumbToUpload?: File;
-  locationOptions: string[];
   loneFile?: File;
   loneFileOptions: string[];
   selectedStorage: StorageLocation;
@@ -28,6 +27,7 @@ interface AssetAddState {
 }
 
 export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
+  locationOptions: string[];
 
   constructor(props: AssetAddProps) {
     super(props);
@@ -36,10 +36,11 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
       dbLocation: FirestoreLocation.Features,
       typeOptions: [],
       formData: {},
-      locationOptions: Object.values(FirestoreLocation),
       loneFileOptions: Object.values(StorageLocation),
       selectedStorage: StorageLocation.BaseMesh,
     };
+    
+    this.locationOptions = Object.keys(FirestoreLocation); 
   }
 
   async componentDidMount() {
@@ -67,8 +68,9 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
   }
 
   renderLocationOptions() {
-    return this.state.locationOptions.map(x => {
-      return <option value={x} key={x}>{x}</option>
+    return this.locationOptions.map(x => {
+      const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
+      return <option value={val} key={x}>{x}</option>
     });
   }
 

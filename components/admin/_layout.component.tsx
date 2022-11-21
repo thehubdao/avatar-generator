@@ -2,7 +2,7 @@
 import {GetCurrentUser, GetUserInfo, HandleNotLoggedIn, LogOut} from "../../utils/firebase.util";
 import {UserInterface} from "../../interfaces/firebase.interface";
 import AGButton from "../common/ag-button.component";
-import {UserRoleValues} from "../../enums/firebase.enum";
+import {AuthValues, UserRoleValues} from "../../enums/firebase.enum";
 
 interface LayoutProps {
   children: JSX.Element | JSX.Element[];
@@ -34,7 +34,7 @@ export default class Layout extends Component<LayoutProps> {
     if (userInfo?.email == undefined)
       return '';
     
-    if(!userInfo.email.includes('@freak.com'))
+    if(!userInfo.email.includes(AuthValues.DefaultEmail))
       return userInfo.email;
 
     return userInfo.email.substring(0, userInfo.email.indexOf('@'));
