@@ -59,8 +59,8 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
     await ChangeObjectSkinColor(newPart, skinColor);
   }
   
-  console.log('base', baseModel);
-  console.log('replace', newPart);
+  // console.log('base', baseModel);
+  // console.log('replace', newPart);
   // console.log('partInfo', partInfo);
   
   newPart.frustumCulled = false;
