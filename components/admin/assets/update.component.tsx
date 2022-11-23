@@ -88,7 +88,7 @@ export default class AssetUpdate extends Component<AssetUpdateProps, AssetUpdate
       return;
     }
     
-    await ReplaceDoc(this.props.docLocation, this.state.jsonData);
-    alert(`Doc "${this.props.docLocation}" has been updated`);
+    await ReplaceDoc(this.state.doc, this.state.jsonData);
+    alert(`Doc "${this.state.doc}" has been updated`);
   }
 }

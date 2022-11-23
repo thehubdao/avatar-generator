@@ -261,8 +261,13 @@ export async function DeleteDoc(location: FirestoreLocation, docId: string, camp
 export async function ReplaceDoc(docLocation: string, jsonData?: string, campaign?: string) {
   if (jsonData) {
     const {doc, updateDoc} = await import('@firebase/firestore');
-    const campaignLocation = campaign ? `${campaign}/` : '';
-    const docRef = doc(await FirebaseUtil.Instance().DB(), campaignLocation + docLocation);
+    const newLocation = campaign ?
+      campaign + docLocation :
+      docLocation !== '/' ?
+        docLocation :
+        FirestoreGlobalLocation.Parameters;
+    
+    const docRef = doc(await FirebaseUtil.Instance().DB(), newLocation);
     await updateDoc(docRef, JSON.parse(jsonData));
   }
 }
