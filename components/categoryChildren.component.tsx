@@ -26,7 +26,7 @@ function CategoryChildrenComponent(props: ExampleProps) {
         {optionList(props)}
       </div>
       <div className="fixed top-[80%] right-4">
-        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width={'1rem'}
+        <svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
         viewBox="0 0 330 330">
           <path fill="rgba(255, 255, 255, 0.5)" d="M328.859,84.26C326.537,78.655,321.067,75,315,75H15c-6.067,0-11.537,3.655-13.858,9.26
             c-2.321,5.605-1.038,12.057,3.252,16.347l150,150C157.323,253.536,161.161,255,165,255s7.678-1.464,10.606-4.394l150-150
