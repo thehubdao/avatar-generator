@@ -1,7 +1,8 @@
 ﻿import {Component} from "react";
 import Head from "next/head";
-import AGText from "../../../components/ag-text.component";
 import Image from "next/image";
+import AGText from "../../../components/common/ag-text.component";
+import {IFrameEvents, IFrameValues} from "../../../enums/common.enum";
 
 import replitAvatarIFramePic from '../../../public/resources/images/info/replitAvatarIFrame.jpg';
 
@@ -12,7 +13,7 @@ interface InfoState {
   prodUrl: string;
 }
 
-class Info extends Component<InfoProps, InfoState> {
+export default class Info extends Component<InfoProps, InfoState> {
   constructor(props: InfoProps) {
     super(props);
     this.state = {
@@ -41,41 +42,26 @@ class Info extends Component<InfoProps, InfoState> {
                   our AG handles in order to work properly inside an IFrame:
                 </AGText>
 
+                <AGText type="th2">Messages from IFrame</AGText>
                 <dl>
-                  <dt><AGText type='th3' mark='1.'>Ready event:</AGText></dt>
+                  <dt><AGText type="th3" mark="dash">Ready event:</AGText></dt>
                   <dd>
                     <AGText type='text'>
                       Event sent from AG, telling parent window the app is ready, the object sent through the
                       PostMessage:
                     </AGText>
                     <AGText type='code'>{
-                    `{
-  source: “avatar-generator”,
-  eventName: “ready”
+                      `{
+  source: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.Ready}”
 }`
                     }</AGText>
                     <AGText type='text'>
                       Should be receive on the parent window in order to subscribe to AG export event.
                     </AGText>
                   </dd>
-                  
-                  <dt><AGText type="th3" mark="2.">Subscribe event:</AGText></dt>
-                  <dd>
-                    <AGText type="text">
-                      Message expected on AG in order to allow exporting from the app, without this message the app
-                      won’t send the exported data to the parent window.
-                    </AGText>
-                    <AGText type="code">
-                      {
-                        `{
-  target: “avatar-generator”,
-  eventName: “subscribe”
-}`
-                      }
-                    </AGText>
-                  </dd>
-                  
-                  <dt><AGText type="th3" mark="3.">Exported event:</AGText></dt>
+
+                  <dt><AGText type="th3" mark="dash">Exported event:</AGText></dt>
                   <dd>
                     <AGText type="text">
                       Once parent window is subscribed and the export button is pressed, it will return the following
@@ -84,8 +70,8 @@ class Info extends Component<InfoProps, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  source: “avatar-generator”,
-  eventName: “exported",
+  source: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.Exported}",
   data: {
     attributes: { id: string, val: string }[],
     attributesBase64: string,
@@ -96,20 +82,92 @@ class Info extends Component<InfoProps, InfoState> {
                       }
                     </AGText>
                     <AGText type="text">We are in the process of adding the video.</AGText>
-                    <AGText type="text">Example using this events can be found in this link:</AGText>
-                    <AGText type="text">
-                      <AGText type="link" href="https://replit.com/@OswaldUnity/AvatarIFrame#script.js">
-                        https://replit.com/@OswaldUnity/AvatarIFrame#script.js
-                      </AGText>
-                    </AGText>
-                    <div className="flex justify-center my-2">
-                      <Image width={640} height={487} src={replitAvatarIFramePic} layout="intrinsic"></Image>
-                    </div>
-                    <AGText type="text">You can clone this small project and test it on your own.</AGText>
                   </dd>
                 </dl>
                 
+                <AGText type="th2">Requests to IFrame</AGText>
+                <dl>
+                  <dt><AGText type="th3" mark="dash">Subscribe event:</AGText></dt>
+                  <dd>
+                    <AGText type="text">
+                      Message expected on AG in order to allow exporting from the app, without this message the app
+                      won’t send the exported event to the parent window.
+                    </AGText>
+                    <AGText type="code">
+                      {
+                        `{
+  target: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.Subscribe}”
+}`
+                      }
+                    </AGText>
+                  </dd>
+
+                  <dt><AGText type="th3" mark="dash">Change skin color event:</AGText></dt>
+                  <dd>
+                    <AGText type="text">
+                      Message expected on AG in order to change avatar{"'"}s skin color.
+                    </AGText>
+                    <AGText type="code">
+                      {
+                        `{
+  target: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.ChangeSkinColor}”,
+  payload: string       // Hex color without #
+}`
+                      }
+                    </AGText>
+                  </dd>
+                  
+                  <dt><AGText type="th3" mark="dash">Change feature/accessory event:</AGText></dt>
+                  <dd>
+                    <AGText type="text">
+                      Message sent to AG in order to change a feature on the current avatar.
+                    </AGText>
+                    <AGText type="code">
+                      {
+                        `{
+  target: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.ChangePart}”,
+  payload: {
+    id: string,       // Feature/Accessory type
+    val: string,      // Feature/Accessory name
+    detail?: string   // glb file Url
+  }
+}`
+                      }
+                    </AGText>
+                    <AGText type="text">You can consult a list of features/accessories on the api.</AGText>
+                  </dd>
+
+                  <dt><AGText type="th3" mark="dash">Export event:</AGText></dt>
+                  <dd>
+                    <AGText type="text">
+                      Message sent to AG in order to export current avatar (Triggers the Exported event from the IFrame).
+                    </AGText>
+                    <AGText type="code">
+                      {
+                        `{
+  target: “${IFrameValues.Project}”,
+  eventName: “${IFrameEvents.Exported}”
+}`
+                      }
+                    </AGText>
+                  </dd>
+                </dl>
+                <br/>
+                <AGText type="text">Example using this events can be found in this link:</AGText>
+                <AGText type="text">
+                  <AGText type="link" href="https://replit.com/@OswaldUnity/AvatarIFrame#script.js">
+                    https://replit.com/@OswaldUnity/AvatarIFrame#script.js
+                  </AGText>
+                </AGText>
+                <div className="flex justify-center my-2">
+                  <Image width={640} height={487} src={replitAvatarIFramePic} layout="intrinsic" alt="Replit Example"></Image>
+                </div>
+                <AGText type="text">You can clone this small project and test it on your own.</AGText>
               </section>
+              
               <section>
                 <AGText type="th2">URL Parameters:</AGText>
                 <dl>
@@ -125,6 +183,36 @@ class Info extends Component<InfoProps, InfoState> {
                     <AGText type="text">
                       This link will show current decentraland implementation as well as start with a random set of
                       features on display avatar.
+                    </AGText>
+                  </dd>
+
+                  <dt><AGText type="th3" mark="bullet">Background color:</AGText></dt>
+                  <dd>
+                    <AGText type="text">Change avatar canvas background color to a hex value.</AGText>
+                    <AGText type="text">Link example:</AGText>
+                    <AGText type="text">
+                      <AGText type="link" href={this.state.prodUrl + '?bg=00FFFF'}>
+                        {this.state.prodUrl + '?bg=00FFFF'}
+                      </AGText>
+                    </AGText>
+                    <AGText type="text">
+                      This link will show our base campaign implementation with a {'"'}#00FFFF{'"'} {'>'} {'"'}
+                      <span style={{backgroundColor: '#00FFFF'}}>&nbsp;&nbsp;&nbsp;</span>{'"'}
+                      background color.
+                    </AGText>
+                  </dd>
+
+                  <dt><AGText type="th3" mark="bullet">Only view:</AGText></dt>
+                  <dd>
+                    <AGText type="text">Shows AG with only the view mode.</AGText>
+                    <AGText type="text">Link example:</AGText>
+                    <AGText type="text">
+                      <AGText type="link" href={this.state.prodUrl + '?ov=true'}>
+                        {this.state.prodUrl + '?ov=true'}
+                      </AGText>
+                    </AGText>
+                    <AGText type="text">
+                      This link will show our base campaign implementation with only the view mode.
                     </AGText>
                   </dd>
                   
@@ -175,5 +263,3 @@ class Info extends Component<InfoProps, InfoState> {
     );
   }
 }
-
-export default Info;

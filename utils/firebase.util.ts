@@ -87,11 +87,13 @@ async function CheckServerSide() {
   if(typeof window === 'undefined') {
     await FirebaseUtil.Instance().Auth();
 
-    const logInfo: LogInInterface = {
-      user: process.env.AG_FB_USER!,
-      pass: process.env.AG_FB_PASS!,
-    };
-    await LogIn(logInfo);
+    if (await IsNotLogIn()) {
+      const logInfo: LogInInterface = {
+        user: process.env.AG_FB_USER!,
+        pass: process.env.AG_FB_PASS!,
+      };
+      await LogIn(logInfo);
+    }
   }
 }
 
@@ -226,10 +228,10 @@ export async function UpdateDoc(docLocation?: string, jsonData?: string) {
 }
 
 export async function InsertDB(jsonData: string, location: string = FirestoreValues.Parts) {
-  console.log(jsonData);
+  // console.log(jsonData);
   const { addDoc, collection } = await import('@firebase/firestore');
   const newDoc = await addDoc(collection(await FirebaseUtil.Instance().DB(), location), JSON.parse(jsonData));
-  console.log('New Doc: ', newDoc.id);
+  // console.log('New Doc: ', newDoc.id);
 }
 
 export async function UploadFile(file: File, fileType: StorageValues, sectionType?: string) {

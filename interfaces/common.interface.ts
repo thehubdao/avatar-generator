@@ -4,6 +4,7 @@ import {ClientQuestion} from "../enums/campaign.enum";
 export interface BasicData {
   id: string;
   val: string;
+  detail?: string;
 }
 
 export interface PartInfoInterface {

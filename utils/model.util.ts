@@ -1,5 +1,4 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {ImporterUtil} from "./importer.util";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import {
   Group,
@@ -13,11 +12,12 @@ import {
 } from "three";
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
 import {TextureTone, TextureUtil} from "./texture.util";
+import {LoadGltfModel} from "./importer.util";
 
 type MaterialFunction = (obj: SkinnedMesh, tone?: TextureTone) => void;
 
 export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partIndex: number) {
-  const partModel = await ImporterUtil.LoadGltfModel(partUrl);
+  const partModel = await LoadGltfModel(partUrl);
   
   const chest = SkeletonUtils.clone(partModel.scene.children[0].children[partIndex]) as SkinnedMesh;
   const oldSkeleton = SkeletonUtils.getBones((baseModel.scene.children[0].children[partIndex] as SkinnedMesh).skeleton);
@@ -41,7 +41,6 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   
   const newPart: Object3D = SkeletonUtils.clone(chestMesh);
   let baseSkeleton: Skeleton;
-  
   const basePartRef = baseModel.children[partInfo.partIndex];
   if((basePartRef as SkinnedMesh).isSkinnedMesh) {
     baseSkeleton = (basePartRef as SkinnedMesh).skeleton;
@@ -60,8 +59,8 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
     await ChangeObjectSkinColor(newPart, skinColor);
   }
   
-  console.log('base', baseModel);
-  console.log('replace', newPart);
+  // console.log('base', baseModel);
+  // console.log('replace', newPart);
   // console.log('partInfo', partInfo);
   
   newPart.frustumCulled = false;
@@ -103,7 +102,7 @@ async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton, changeM
 export function ReplaceModelAccessory(accessoriesInfo: Record<string, AccessoryInfoInterface>, selectedAcc: string, accessory: GLTF) {
   const bone = accessoriesInfo[selectedAcc];
   const accessoryMesh = accessory.scene.children[0].clone() as Mesh;
-  accessoryMesh.scale.set(0.1, 0.1, 0.1);
+  accessoryMesh.scale.set(1, 1, 1);
 
   if(bone.hasIt) {
     bone.bone.children.splice(bone.accessoryIndex!, 1);
