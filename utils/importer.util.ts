@@ -1,48 +1,65 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
-import {AccLocationApi, AnimLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 import {Group} from "three";
 import {GetFile} from "./firebase.util";
 import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
+import {AccLocationApi, AnimLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 
-export class ImporterUtil {
-  private static gltfLoader: GLTFLoader;
-
-  private static getGltfLoaderInstance(): GLTFLoader {
-    if(ImporterUtil.gltfLoader === undefined)
-      ImporterUtil.gltfLoader = new GLTFLoader();
-
-    return ImporterUtil.gltfLoader;
-  }
+class ImporterUtil {
+  private static _instance: ImporterUtil;
+  private _gltfLoader: GLTFLoader | null;
   
-  private static parseAsync(array: ArrayBuffer): Promise<GLTF> {
-    const loader = this.getGltfLoaderInstance();
-    return new Promise<GLTF>((resolve, reject) => {
-      loader.parse(array, '', 
-        (glb) => {
-          resolve(glb);
-        },
-        (error) => {
-          reject(error);
-        })
-    });
-  }
-  
-
-  static async LoadGltfModel(url: string): Promise<GLTF> {
-    const loader = this.getGltfLoaderInstance();
-    return loader.loadAsync(url);
-  }
-  
-  static async FetchGltfModel(url: string): Promise<GLTF> {
-    const arrayBuffer = await FetchArrayBuffer(url);
-    return this.parseAsync(arrayBuffer);
+  constructor() {
+    this._gltfLoader = null;
   }
 
-  static async FirebaseGltfModel(path: string): Promise<GLTF> {
-    const arrayBuffer = await GetFile(path);
-    return this.parseAsync(arrayBuffer);
+  public static Instance() {
+    if (ImporterUtil._instance === undefined)
+      ImporterUtil._instance = new ImporterUtil();
+
+    return ImporterUtil._instance;
   }
 
+  public GetGltfLoaderInstance(): GLTFLoader {
+    if(this._gltfLoader === null)
+      this._gltfLoader = new GLTFLoader();
+
+    return this._gltfLoader;
+  }
+}
+
+function ParseAsync(array: ArrayBuffer): Promise<GLTF> {
+  const loader = ImporterUtil.Instance().GetGltfLoaderInstance();
+  return new Promise<GLTF>((resolve, reject) => {
+    loader.parse(array, '',
+      (glb) => {
+        resolve(glb);
+      },
+      (error) => {
+        reject(error);
+      })
+  });
+}
+
+export async function LoadGltfModel(url: string): Promise<GLTF> {
+  const loader = ImporterUtil.Instance().GetGltfLoaderInstance();
+  return loader.loadAsync(url);
+}
+
+export async function FetchGltfModel(url: string): Promise<GLTF> {
+  const arrayBuffer = await FetchArrayBuffer(url);
+  return ParseAsync(arrayBuffer);
+}
+
+export async function FirebaseGltfModel(path: string): Promise<GLTF> {
+  const arrayBuffer = await GetFile(path);
+  return ParseAsync(arrayBuffer);
+}
+
+export async function GetGltfModel(path: string) {
+  if(path.startsWith('http'))
+    return FetchGltfModel(path);
+  else
+    return FirebaseGltfModel(path);
 }
 
 export function GetAccessoryBones(baseModel: Group, accessoryBonesList: BasicData[]): Record<string, AccessoryInfoInterface> {
@@ -80,12 +97,12 @@ async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
 }
 
 export async function GetAssetsListByCampaign(campaign?: string | null) {
-  const jsonObject: BodyPartLocationApi[] = await fetch('/api/getParts' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  const jsonObject: BodyPartLocationApi[] = await fetch('/api/getFeatureOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
 
 export async function GetAccessoryListByCampaign(campaign?: string | null) {
-  const jsonObject: AccLocationApi[] = await fetch('/api/getAccessories' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  const jsonObject: AccLocationApi[] = await fetch('/api/getAccessoryOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
 

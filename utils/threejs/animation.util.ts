@@ -1,6 +1,6 @@
 import {AnimationMixer, Object3D} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {ImporterUtil} from "../importer.util";
+import {FirebaseGltfModel} from "../importer.util";
 
 export function CreateAnimationMixer(objScene: Object3D) {
   return new AnimationMixer(objScene);
@@ -9,7 +9,7 @@ export function CreateAnimationMixer(objScene: Object3D) {
 export async function SetAnimation(mixer: AnimationMixer, animation: GLTF | string, onAnimationSet?: Function) {
   let animationFile: GLTF;
   if(typeof animation === 'string'){
-    animationFile = await ImporterUtil.FirebaseGltfModel(animation);
+    animationFile = await FirebaseGltfModel(animation);
   }
   else {
     animationFile = animation as GLTF;

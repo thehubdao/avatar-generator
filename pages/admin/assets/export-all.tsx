@@ -2,10 +2,9 @@ import React, {Component} from "react";
 import {WithRouterProps} from "next/dist/client/with-router";
 import {withRouter} from "next/router";
 
-import AGButton from "../../../components/ag-button.component";
+import AGButton from "../../../components/common/ag-button.component";
 import { IsNotLogIn} from "../../../utils/firebase.util";
 import {PageLocation} from "../../../enums/common.enum";
-import {delay} from "../../../utils/exporter.util";
 
 import AvatarGenerator, { 
   getServerSideProps as serverProps,
@@ -16,8 +15,14 @@ interface BulkExportProps extends WithRouterProps, AvatarGeneratorProps {
   campaigns: string[];
 }
 
-// boundary a value name
-const clamp = (num: number, min: number, max: number): number => Math.min(Math.max(num, min), max);
+interface BulkExportState {
+  exportRunning: boolean;
+  totalIterations: number;
+  iterationStarts: number;
+  iterationEnds: number;
+  logs: string;
+}
+
 
 
 /**
@@ -29,23 +34,26 @@ const clamp = (num: number, min: number, max: number): number => Math.min(Math.m
  * @returns
  */
 function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
-  return withRouter(class extends Component<BulkExportProps>  {
+  return withRouter(class AdminExporter extends Component<BulkExportProps, BulkExportState>  {
     // identify all parts base on feature types
     parts: Map<string, any[]> = new Map()
     // features are the mesh section where a part can be attached
-    features: { type: string, offset: number, id: string }[] = []
-    // keep each combinatio unique
-    combinationHistory: Set<string> = new Set()
-    // current combination
-    combination: number[] = []
+    features: { type: string, id: string }[] = []
+    // Saving all combination index to export
+    // and make sure they are unique
+    permutationPool: Set<number[]> = new Set()
     // Avatar component reference
     private ref: React.RefObject<AvatarGenerator>
 
     constructor(props: BulkExportProps) {
       super(props);
       this.state = {
-        selectedCampaign: null,
-      };
+        exportRunning: false,
+        totalIterations: 0,
+        iterationStarts: 0,
+        iterationEnds: 0,
+        logs: 'logs ==============\n',
+      }
       this.ref = React.createRef()
     }
   
@@ -56,94 +64,91 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
 
       // set the avatar generator page in export/viewport mode by default
       avatarGenerator.changeView()
-      console.log("avatar generator data: ", avatarGenerator)
     }
-    
-    /**
-     * 
-     * @returns 
-     */
-    renderCampaignOptions() {
-      return this.props.campaigns.map((option) =>
-        <option value={option} key={option}>{option}</option>
-      );
-    }
-    
-    /**
-     * 
-     * @param event 
-     */
-    onSelectCampaign = (event: any) => {
-      this.setState({
-        selectedCampaign: event.target.value
-      })
+
+    log(text: string) {
+      const logText = this.state.logs
+      this.setState({ logs: logText + text + '\n' })
     }
 
     /**
-     * trigger to export all combination meshes
+     * trigger process to export all different combination meshes
      */
     async onExportAll() {
-      const avatarGenerator = this.ref.current
-
-  
-      //this.ref.current?.exportModel()
-      await this.permutationParts()
+      this.setState({ exportRunning: true })
+      this.log("Generating permutations...")
+      await this.generatePermutations()
+      console.time("export time")
+      this.log("Starting downloads...")
+      for await(const comb of this.downloadCombination()) {
+        this.log(`permutation downloaded for ${comb}`)
+      }
+      this.log(`Downloads finished`)
+      console.timeLog("export time")
+      this.setState({ exportRunning: false })
     }
-    
+
+    async onStopProcess() {
+      this.setState({ exportRunning: false })
+    }
+
     /**
-     * 
+     * Download one combination with unique traits
      */
-    async permutationParts() {
-      const partIndexes = this.combination;
-      const partLengthByFeature = this.features.map(
-        ({type}) => this.parts.get(type)?.length
-      );
-      const iterationLimit = this.getIterationNumbers();
+    async *downloadCombination() {
+      const { iterationStarts, iterationEnds } = this.state
+      const permutations = Array
+        .from(this.permutationPool)
+        .slice(iterationStarts, iterationEnds)
+      this.log(`Amount of permutations to download ${permutations.length}`)
+      for(let itr = 0; itr < permutations.length; itr++) {
+        const comb = permutations[itr]
+        await this.setCombinationByIndexes(comb)
+        await this.ref.current?.exportModel()
+        
+        yield comb.join(" - ")
+
+        if(!this.state.exportRunning) {
+          break
+        }
+      }
+    }
+
+    /**
+     * Generate all permutations
+     * @returns 
+     */
+    async generatePermutations() {
+      const arr = Array.from(this.parts)
+        .map(([_, items]) => items)
+        .map(items => items.map(it => it.index))
+      const featuresLength = this.features.length
+      const indices = new Array(featuresLength).fill(0)
+      const iterationLimit = this.getTotalIteration();
       let iteration = 0;
 
-      console.log("starting: ", partIndexes)
-      console.log("limits: ", partLengthByFeature)
-
       while(iteration < iterationLimit) {
-        //await delay(2000);
+        iteration++
 
-        const comb = await this.getCombinationByIteration(iteration)
-        console.log(`itr ${iteration}: `, comb);
+        let indicesArr: number[] = []
+        for(let i = 0; i < featuresLength; i++) {
+          const index = arr[i][indices[i]] as number
+          indicesArr.push(index)
+        }
+        this.permutationPool.add(indicesArr)
 
-        iteration++;
-      }
-      
-      
-      console.log('Finished combinations');
-    }
-
-    getCombinationByIteration(itr: number) {
-      let remain = itr
-      const partIndexes = this.combination;
-      const partLengthByFeature = this.features.map(
-        ({type}) => this.parts.get(type)?.length
-      );
-
-      const combinationIndex = partIndexes.map((part, index) => {
-        const nextIndexFeature = clamp(index + 1, 1, partLengthByFeature.length - 1)
-        const limit = partLengthByFeature[index] || 0
-        const offset = partLengthByFeature.slice(nextIndexFeature)
-        const cycle = offset.reduce((acc: number, amount) => {
-          acc += amount as number
-          return acc
-        }, 0);
-        let value = 0
-        
-        if(remain > 0) {
-          value = clamp(Math.floor(itr / cycle), 0, limit)
-          remain -= cycle * limit 
+        let next = featuresLength - 1
+        while(next >= 0 && (indices[next] + 1 >= arr[next].length)) {
+          next--
         }
 
-        
-        return value
-      });
+        if(next < 0) return
+        indices[next]++
 
-      return combinationIndex
+        for(let itr = next + 1; itr < featuresLength; itr++) {
+          indices[itr] = 0
+        }
+      }
     }
 
     /**
@@ -152,23 +157,19 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
      */
     async setCombinationByIndexes(partIndexes: number[]) {
       const avatarGenerator = this.ref.current
-      const changePartAsync = []
       for(let itr = 0; itr < this.features.length; itr++) {
         const feature = this.features[itr]
         const partIndex = partIndexes[itr]
         const partsByType = this.parts.get(feature.type) || []
         const part = partsByType[partIndex]
-
-        const promise = avatarGenerator?.changePart(
+        await avatarGenerator?.changePart(
           part.id,
           part.path,
           part.name,
           part.type
         )
-        changePartAsync.push(promise)
       }
 
-      await Promise.all(changePartAsync)
       console.log('combination done')
     }
 
@@ -179,7 +180,6 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
      */
     setInitialCombination() {
       const partIndexes = new Array(this.features.length).fill(0)
-      this.combination = partIndexes
       this.setCombinationByIndexes(partIndexes)
     }
 
@@ -207,28 +207,84 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
         this.parts.set(type, partsByType)
       });
 
-      console.log('feature keys', avatarGenerator?.partListData, this.features, this.parts)
+      const totalComb = this.getTotalIteration()
       this.setInitialCombination();
+      this.setState({ iterationEnds: totalComb, totalIterations: totalComb })
     }
 
-    getIterationNumbers() {
+    /**
+     * Gets how many iterations take to pass over all combinations
+     * this number is based on the amounts of parts in each feature type
+     * i.e.
+     *      parts grouped by features = [ 10, 5, 3, 7 ]
+     *      total iterations = 10 * 5 * 3 * 7
+     * @returns - total iterations
+     */
+    getTotalIteration(): number {
       let recursionNumber = 1
-
-      this.parts.forEach((partsByType) =>
-        recursionNumber *= partsByType.length
-      )
-
-      console.log('Amount of possible combinations: ', recursionNumber)
+      this.parts.forEach((partsByType) => recursionNumber *= partsByType.length)
       return recursionNumber;
     }
 
     render() {
       return (
         <>
-          <div className="fixed" style={{width: "50%", zIndex: 9999}}>
-            <AGButton type="secondary" onClickEvent={() => this.onExportAll()}>
-                Export All
-            </AGButton>
+          <div 
+            className="flex flex-row fixed inset-x-0 bottom-0 p-1.5 w-10/12 bg-gray-700 overflow-hidden text-slate-300"
+            style={{
+              zIndex: 9999,
+              height: 150,
+            }}
+          >
+            <div className="w-4/12 font-mono">
+              <div>
+                <h3>Export all combination meshes</h3>
+                <div className="flex py-1">
+                  <div className="w-6/12">Iteration starts at:</div>
+                  <div className="w-3/12">
+                    <input
+                      className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg bg-slate-300 px-2"
+                      type="number"
+                      placeholder="0"
+                      value={this.state.iterationStarts}
+                      onChange={({ target }) => this.setState({iterationStarts: Number(target.value)})}
+                    />
+                  </div>
+                </div>
+                <div className="flex py-1">
+                  <div className="w-6/12">Iteration ends at:</div>
+                  <div className="w-3/12">
+                    <input
+                      className="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg bg-slate-300 px-2"
+                      placeholder={String(this.state.totalIterations)}
+                      type="number"
+                      value={this.state.iterationEnds}
+                      onChange={({ target }) => this.setState({iterationEnds: Number(target.value)})}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div>
+                {
+                  this.state.exportRunning
+                  ? (
+                    <AGButton type="alert" onClickEvent={() => this.onStopProcess()}>
+                      Stop
+                    </AGButton>
+                  )
+                  : (
+                    <AGButton type="secondary" onClickEvent={() => this.onExportAll()}>
+                      Export All
+                    </AGButton>
+                  )
+                }
+              </div>
+            </div>
+            <div className="w-8/12 font-mono overflow-x-auto">
+              <pre>
+                {this.state.logs}
+              </pre>
+            </div>
           </div>
           <AvatarComp
             ref={this.ref}

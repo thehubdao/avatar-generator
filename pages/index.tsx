@@ -1,17 +1,12 @@
 import {Component} from "react";
 import Image from "next/image";
-import Head from "next/head";
-import AGLoading from "../components/ag-loading.component";
+import AGLoading from "../components/common/ag-loading.component";
 import {Clock, Vector3, WebGLInfo} from "three";
 import {FrustumCulledFalse, GetBaseCameraControls} from "../utils/threejs/scene.util";
 import {GetTestLights, GetAmbientLights} from "../utils/test-scene.util";
 import {
-  GetAccessoryBones,
-  GetAccessoryListByCampaign,
-  GetAnimationListByCampaign,
-  GetAssetsListByCampaign,
+  GetAccessoryBones, GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign, GetGltfModel,
   GetPartsData,
-  ImporterUtil
 } from "../utils/importer.util";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {AttributeValues, GlobalValues, ViewModuleState} from "../enums/common.enum";
@@ -38,7 +33,12 @@ import {RandomArrayElement} from "../utils/common.util";
 import {LogComponent} from "../components/log.component";
 import {CategorySelectorComponent} from "../components/categorySelector.component";
 import {CategoryChildrenComponent} from "../components/categoryChildren.component";
-import {IFrameExportData, IFrameReady} from "../utils/iframe.util";
+import {AccessorySelectorComponent} from "../components/accessorySelector.component";
+import {AccessoryChildrenComponent} from "../components/accessoryChildren.component";
+import FeatureSelectorComponent from "../components/selectors/featureSelector.component";
+import OptionSelectorComponent from "../components/selectors/optionSelector.component";
+import ColorSelectorComponent from "../components/selectors/colorSelector.component";
+import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../utils/iframe.util";
 import {CreateAnimationMixer, SetAnimation} from "../utils/threejs/animation.util";
 import {SceneInterface} from "../interfaces/scene.interface";
 import {InitSceneController} from "../utils/threejs/scene.util";
@@ -52,6 +52,8 @@ export interface AvatarGeneratorProps {
   attributeConfig: BasicData[] | null;
   // callback when data is ready to be used
   onDataLoaded?: () => void;
+  bgColor?: string;
+  onlyView: boolean;
 }
 
 interface AvatarGeneratorState {
@@ -69,6 +71,7 @@ interface AvatarGeneratorState {
   logs?: WebGLInfo;
   skinColor?: string;
   editModeSelected: boolean;
+  featuresSelected: boolean;
   currentModule: ViewModuleState;
   loading: boolean;
   resX: number;
@@ -116,9 +119,10 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       aSelectList: props.selectListAccessories,
       cameraPos: new Vector3(),
       cameraLookAt: new Vector3(),
-      skinColor: 'cf9e7c',
+      skinColor: 'F2A47E',// 'cf9e7c',
       savedModels: {},
-      editModeSelected: true,
+      editModeSelected: false,
+      featuresSelected: true,
       currentModule: ViewModuleState.OnModule,
       loading: false,
       resX: 0,
@@ -134,6 +138,8 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   async componentDidMount() {
     this.setLoading();
+    if (!this.props.onlyView) this.changeView();
+    
     await this.avatarScene();
     
     await Promise.all([
@@ -144,9 +150,9 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     
     await this.getAccessoryBones();
     await this.getPartsData();
+    await this.loadPreData();
     await this.onClickChangeSkinColor();
     
-    await this.loadPreData();
     this.setLoading(false);
     // trigger event when component has all data to render
     this.props.onDataLoaded?.()
@@ -166,10 +172,42 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   setOnIFrame = () => {
     console.log('IFrame Callback: ', this.onIFrame);
     this.onIFrame = true;
+    SetIFrameEvents(this.changePartFromIFrame, this.exportFromIFrame, this.changeSkinColorFromIFrame);
+  }
+
+  changePartFromIFrame = async (params?: BasicData) => {
+    if(!this.onIFrame) return console.log("Not on IFrame, subscribe if you forgot!");
+    if(!params) return console.log("Missing feature option!");
+    
+    if(params.detail && params.detail.startsWith('http')) {
+      await this.changePart(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
+    }
+    else {
+      if(params.id.endsWith(GlobalValues.AccEnd)) {
+        const accessory = this.accessoryList?.find(a => a.type === params.id && a.name === params.val);
+
+        if(!accessory) return console.log("Accessory option not found!");
+        await this.changeAccessory(accessory.id, accessory.path, accessory.name, accessory.type);
+      }
+      else {
+        const feature = this.partList?.find(p => p.type === params.id && p.name === params.val);
+
+        if(!feature) return console.log("Feature option not found!");
+        await this.changePart(feature.id, feature.path, feature.name, feature.type);
+      }
+    }
+  }
+  
+  changeSkinColorFromIFrame = (newColor?: string) => {
+    return this.onClickChangeSkinColor(newColor);
+  }
+  
+  exportFromIFrame = () => {
+    return this.exportModel();
   }
 
   setHasAnimation = () => {
-    console.log('Animation CallBack: ', this.hasAnimation);
+    // console.log('Animation CallBack: ', this.hasAnimation);
     this.hasAnimation = true;
   }
 
@@ -229,7 +267,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   async getAnimationList() {
     this.animationList = await GetAnimationListByCampaign(this.props.campaign);
-    console.log(this.animationList);
+    // console.log(this.animationList);
   }
 
   filterListByBodyPart(bodyPartType: string) {
@@ -242,7 +280,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   async getPartsData() {
     this.partListData = GetPartsData(this.sc.baseModel!.scene, this.state.selectList);
-    // console.log(this.partListData);
   }
 
   async getAccessoryBones() {
@@ -280,8 +317,8 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       this.sc.scene!.add(l);
     }
 
-    this.sc.baseModel = await ImporterUtil.FirebaseGltfModel(this.props.baseMeshPath);
-    console.log('Base start', this.sc.baseModel);
+    this.sc.baseModel = await GetGltfModel(this.props.baseMeshPath);
+    // console.log('Base start', this.sc.baseModel);
 
     this.sc.mixer = CreateAnimationMixer(this.sc.baseModel!.scene);
     await SetAnimation(this.sc.mixer, this.sc.baseModel, this.setHasAnimation);
@@ -346,9 +383,11 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     this.sc.controls!.target = value;
   }
 
-  async onClickChangeSkinColor() {
-    if(this.state.skinColor)
-      await ChangeObjectSkinColor(this.sc.baseModel!.scene, this.state.skinColor);
+  async onClickChangeSkinColor(newSkinColor = this.state.skinColor) {
+    if(newSkinColor != undefined) {
+      await ChangeObjectSkinColor(this.sc.baseModel!.scene, newSkinColor);
+      this.setState({skinColor: newSkinColor});
+    }
   }
 
   updateCameraAutoRotate = (checked: boolean) => {
@@ -381,17 +420,15 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   async changePart(id: string, partPath: string, name: string, selectedPart: string = this.state.selectedPart) {
-    console.log("Change Part: ", id, partPath, name, selectedPart)
     let replaceModel: GLTF;
     if(this.state.savedModels[id]) {
       replaceModel = this.state.savedModels[id];
     } else {
-      replaceModel = await ImporterUtil.FirebaseGltfModel(partPath);
+      replaceModel = await GetGltfModel(partPath);
       const _savedModels = {...this.state.savedModels};
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });
     }
-
     await ReplaceModelPartOnly(this.sc.baseModel!.scene.children[0], replaceModel, this.partListData![selectedPart], this.state.selectList.find(sl => sl.id === selectedPart), this.state.skinColor);
     await this.getPartsData();
     // FrustumCulledFalse(this.sc.scene!);
@@ -403,7 +440,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     if(this.state.savedModels[id]) {
       replaceModel = this.state.savedModels[id];
     } else {
-      replaceModel = await ImporterUtil.FirebaseGltfModel(path);
+      replaceModel = await GetGltfModel(path);
       const _savedModels = {...this.state.savedModels};
       _savedModels[id] = replaceModel;
       this.setState({ savedModels: _savedModels });
@@ -436,7 +473,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     await this.takeExportPicture();
     this.exportData!.attributesBase64 = window.btoa(JSON.stringify(this.exportData?.attributes));
     this.exportData!.model = await ExporterUtil.ExportModelGlb(this.sc.baseModel!);
-    console.log(this.exportData);
     if(this.onIFrame) {
       IFrameExportData(this.exportData!);
     }
@@ -467,27 +503,30 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   changeView() {
-    const parent = this.mount?.parentNode as HTMLElement;
+    // const parent = this.mount?.parentNode as HTMLElement;
     if (this.state.editModeSelected) {
-      parent!.classList.add('!w-full');
-      parent!.classList.add('!h-full');
-      parent!.classList.remove('rounded-b-[180px]');
+      // parent!.classList.add('!w-full');
+      // parent!.classList.add('!h-full');
+      // parent!.classList.remove('rounded-b-[180px]');
       this.setState({editModeSelected: false, currentModule: ViewModuleState.SwitchingModule});
     } else {
-      parent!.classList.remove('!w-full');
-      parent!.classList.remove('!h-full');
-      parent!.classList.add('rounded-b-[180px]');
+      // parent!.classList.remove('!w-full');
+      // parent!.classList.remove('!h-full');
+      // parent!.classList.add('rounded-b-[180px]');
       setTimeout(() => {
         this.setState({editModeSelected: true, currentModule: ViewModuleState.SwitchingModule});
       }, 500);
     }
   }
 
+  changeEditSelection(value: boolean) {
+    this.setState({featuresSelected: value});
+  }
+
   render() {
     return (
       <>
         {this.renderEditMode()}
-        <LogComponent logs={this.state.logs} resX={this.state.resX} resY={this.state.resY}/>
       </>
     );
   }
@@ -495,122 +534,124 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   private renderEditMode() {
     return (
       <>
-        <div className="fixed w-[360px] h-4/5 left-[50%] translate-x-[-50%] flex justify-center items-start rounded-b-[180px] overflow-hidden transition-width transition-height duration-300 ease-in-out">
-          <div className="bg-[#272727] w-full h-screen absolute"></div>
+        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor}/>
+        {/* CANVAS WRAPPER */}
+        <div className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+          {/* CANVAS BACKGROUND */}
+          <div style={{backgroundColor: `#${this.props.bgColor ?? '272727'}`}} className="w-full h-screen absolute" />
+          {/* CANVAS */}
           <div className="relative h-full" ref={ref => this.mount = ref} />
         </div>
-        <div className="fixed left-0 top-0 w-full h-screen bg-slate-600 bg-opacity-50 p-2 hover:overflow-y-auto hidden">
-          <div className="mb-2 flex bg-slate-400">
-            <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.rotateCamera} onChange={e => this.updateCameraAutoRotate(e.target.checked)} />
-            <p>Rotate camera</p>
-          </div>
-          {
-            this.hasAnimation ?
-              <div className="mb-2 flex bg-slate-400">
-                <input className="mt-1.5 mx-2" type="checkbox" checked={this.state.doAnimation}
-                       onChange={e => this.updateDoAnimation(e.target.checked)}/>
-                <p>Do Animation</p>
+        {!this.props.onlyView &&
+            <div onClick={() => this.changeView()}
+                 className="z-10 fixed top-4 right-4 bg-slate-100 border-2 border-slate-50 rounded-[4px] drop-shadow-md flex items-center justify-center px-2">
+              <div className="m-2">
+                {
+                  this.state.editModeSelected ?
+                  <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
+	                viewBox="0 0 511.996 511.996">
+                    <path d="M508.245,246.953L363.435,102.133c-5.001-5.001-13.099-5.001-18.099,0c-5.001,5-5.001,13.099,0,18.099l122.965,122.965
+                          H12.8c-7.074,0-12.8,5.726-12.8,12.8c0,7.074,5.726,12.8,12.8,12.8h455.492L345.327,391.763c-5.001,5-5.001,13.099,0,18.099
+                          c5.009,5.001,13.099,5.001,18.108,0l144.811-144.811C513.246,260.051,513.246,251.953,508.245,246.953z"/>
+                  </svg>
+                  : <svg version="1.1" id="Layer_2" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
+                    viewBox="0 0 217.855 217.855">
+                      <path d="M215.658,53.55L164.305,2.196C162.899,0.79,160.991,0,159.002,0c-1.989,0-3.897,0.79-5.303,2.196L3.809,152.086
+                        c-1.35,1.352-2.135,3.166-2.193,5.075l-1.611,52.966c-0.063,2.067,0.731,4.069,2.193,5.532c1.409,1.408,3.317,2.196,5.303,2.196
+                        c0.076,0,0.152-0.001,0.229-0.004l52.964-1.613c1.909-0.058,3.724-0.842,5.075-2.192l149.89-149.889
+                        C218.587,61.228,218.587,56.479,215.658,53.55z M57.264,201.336l-42.024,1.28l1.279-42.026l91.124-91.125l40.75,40.743
+                        L57.264,201.336z M159,99.602l-40.751-40.742l40.752-40.753l40.746,40.747L159,99.602z"/>
+                    </svg>
+
+                }
               </div>
-              : ''
-          }
-          <div className="mb-2 w-full bg-slate-400">
-            <div className="flex pt-2 mb-2 justify-evenly">
-              <div className="flex justify-center">
-                <p>X:</p>
-                <input className="ml-1 w-1/3 rounded pl-1" type="number" value={this.state.cameraPos.x} onChange={(e) => this.setState({cameraPos: new Vector3(Number(e.target.value), this.state.cameraPos.y, this.state.cameraPos.z)})} />
-              </div>
-              <div className="flex justify-center">
-                <p>Y:</p>
-                <input className="ml-1 w-1/3 rounded pl-1" type="number" value={this.state.cameraPos.y} onChange={(e) => this.setState({cameraPos: new Vector3(this.state.cameraPos.x, Number(e.target.value), this.state.cameraPos.z)})} />
-              </div>
-              <div className="flex justify-center">
-                <p>Z:</p>
-                <input className="ml-1 w-1/3 rounded pl-1" type="number" value={this.state.cameraPos.z} onChange={(e) => this.setState({cameraPos: new Vector3(this.state.cameraPos.x, this.state.cameraPos.y, Number(e.target.value))})} />
-              </div>
+              <div className="mr-2 text-xs">{this.state.editModeSelected ? 'NEXT':'EDIT'}</div>
             </div>
-            <div className="flex justify-center pb-2">
-              <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white" onClick={() => this.changeCamPosition()}>Change CamPosition</button>
-            </div>
-          </div>
-          <div className="mb-2 w-full bg-slate-400">
-            <div className="flex pt-2 mb-2 justify-evenly">
-              <div className="flex justify-center">
-                <p>X:</p>
-                <input className="ml-1 w-1/3 rounded pl-1" type="number" value={this.state.cameraLookAt.x} onChange={(e) => this.setState({cameraLookAt: new Vector3(Number(e.target.value), this.state.cameraLookAt.y, this.state.cameraLookAt.z)})} />
-              </div>
-              <div className="flex justify-center">
-                <p>Y:</p>
-                <input className="ml-1 w-1/3 rounded pl-1" type="number" value={this.state.cameraLookAt.y} onChange={(e) => this.setState({cameraLookAt: new Vector3(this.state.cameraLookAt.x, Number(e.target.value), this.state.cameraLookAt.z)})} />
-              </div>
-              <div className="flex justify-center">
-                <p>Z:</p>
-                <input className="ml-1 w-1/3 rounded pl-1" type="number" value={this.state.cameraLookAt.z} onChange={(e) => this.setState({cameraLookAt: new Vector3(this.state.cameraLookAt.x, this.state.cameraLookAt.y, Number(e.target.value))})} />
-              </div>
-            </div>
-            <div className="flex justify-center pb-2">
-              <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white" onClick={() => this.changeLookAtPosition()}>Change CamLookAt</button>
-            </div>
-          </div>
-          {
-            this.accessoryList && this.accessoryList?.length > 0 ?
-              <div className="mb-2 bg-slate-400">
-                <div className="m-2">
-                  <p className="font-bold text-cyan-900">Accessories</p>
-                  <select value={this.state.selectedAcc} className="w-full my-2"
-                          onChange={(e) => this.onAccessoryChange(e.target.value)}>
-                    {this.optionListAccessories()}
-                  </select>
-                </div>
-              </div>
-              : ''
-          }
-          <div className="mb-2 bg-slate-400">
-            {this.accessorySelectList()}
-          </div>
-          {
-            this.props.campaign === 'decentraland' ?
-              <div className="mb-2 w-full bg-slate-400">
-                <div className="flex justify-center py-2">
-                  <p>#</p>
-                  <input className="ml-0.5 w-3/6 rounded pl-0.5" type="text" value={this.state.skinColor || ''}
-                         onChange={(e) => this.setState({skinColor: e.target.value})}/>
-                </div>
-                <div className="flex justify-center pb-2">
-                  <button className="font-bold py-2 px-4 rounded bg-blue-500 text-white"
-                          onClick={() => this.onClickChangeSkinColor()}>Change SkinColor
-                  </button>
-                </div>
-              </div>
-              : ''
-          }
-          <div className="mb-2 bg-slate-400">
-            <div className="flex justify-center py-2">
-              <button
-                className="font-bold py-2 px-4 mx-2 w-full rounded bg-emerald-600 text-white"
-                onClick={() => this.exportModel()}>
-                Export Model
-              </button>
-            </div>
-          </div>
-        </div>
-        <div onClick={() => {this.changeView()}} className="fixed top-4 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
-          {this.state.editModeSelected ?
-            <Image src={'/resources/icos/buttons/ViewMode.svg'} width={30} height={30} alt={'view mode'}/>
-            :<Image src={'/resources/icos/buttons/EditMode.svg'} width={30} height={30} alt={'edit mode'}/>
-          }
-        </div>
+        }
         {this.state.editModeSelected ?
           <>
-            <CategorySelectorComponent list={this.state.selectList} activedPart={this.state.selectedPart} handleClick={(value:string) => this.onCategoryChange(value)}/>
-            <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => this.changePart(id, path, name)}/>
-          </>
-          :<>
-            <div onClick={() => this.exportModel()} className="fixed top-20 left-4 w-12 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex flex-col items-center justify-center">
-              <Image src={'/resources/icos/buttons/Mint.svg'} width={30} height={30} alt={'minting'}/>
+            <div className="fixed bottom-0 left-0 w-screen">
+              <div className="w-full">
+                {
+                  this.state.featuresSelected &&
+                  <OptionSelectorComponent list={this.state.partList} activeOption={this.exportData?.attributes.find(o => o.id === this.state.selectedPart)} handleClick={(id: string, path: string, name: string) => this.changePart(id, path, name)}/>
+                }
+              </div>
+              <div className="w-full bg-slate-100 flex">
+                <div className="w-[calc(100%_-_60px)]">
+                  {
+                    this.state.featuresSelected ?
+                    <FeatureSelectorComponent list={this.state.selectList} activeFeature={this.state.selectedPart} handleClick={(value:string) => this.onCategoryChange(value)}/>
+                    :
+                    <ColorSelectorComponent list={['F6C89B','E8A36F', '9F5835', 'F2A47E', 'C67E42']} activeColor={this.state.skinColor} handleClick={(value:string) => this.onClickChangeSkinColor(value)}/>
+                  }
+                </div>
+                <div className="w-[60px] pt-3" onClick={() => this.changeEditSelection(!this.state.featuresSelected)}>
+                  <div className="border-l border-slate-400 text-center flex flex-col items-center">
+                    <div className={"rounded-md w-[40px] h-[40px] flex justify-center items-center"}>
+                      {
+                        this.state.featuresSelected ?
+                        <Image src='/resources/icos/buttons/head.svg' width={25} height={25} alt={'Color button'} className='opacity-70'/>
+                        :
+                        <Image src='/resources/icos/features/features.svg' width={30} height={30} alt={'Color button'} className='opacity-70'/>
+                      }
+                    </div>
+                    <p className='text-[10px] pt-1 opacity-50 w-[40px]'>{this.state.featuresSelected ? 'Skin':'Features'}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </>
+          :<>
+            {!this.props.onlyView &&
+              <div onClick={() => this.exportModel()}
+              className="z-10 fixed bottom-4 right-4 bg-slate-100 border-2 border-slate-50 rounded-[4px] drop-shadow-md flex items-center justify-center px-2">
+                <div className="m-2">
+                  <svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
+	                viewBox="0 0 460 460">
+                    <path d="M427.137,0C408.93,0,51.379,0,32.865,0C14.743,0,0,14.743,0,32.865v394.272c0,18.122,14.743,32.865,32.865,32.865
+                      c0,0,374.895,0,394.272,0c18.122,0,32.865-14.743,32.865-32.865V32.865C460.001,14.743,445.258,0,427.137,0z M245.812,30h50.995
+                      v54.466h-50.995V30z M107.198,30h108.615v69.466c0,8.284,6.716,15,15,15h80.995c8.284,0,15-6.716,15-15V30h26.377v119.636H107.198
+                      V30z M107.007,430.001V308.673h245.986v121.328H107.007z M430.002,427.137L430.002,427.137c-0.001,1.58-1.286,2.865-2.866,2.865
+                      h-44.143V293.673c0-8.284-6.716-15-15-15H92.007c-8.284,0-15,6.716-15,15v136.328H32.865c-1.58,0-2.865-1.285-2.865-2.865V32.865
+                      C30,31.285,31.285,30,32.865,30h44.333v134.636c0,8.284,6.716,15,15,15h275.986c8.284,0,15-6.716,15-15V30h43.953
+                      c1.58,0,2.865,1.285,2.865,2.865V427.137z"/>
+                  </svg>
+                </div>
+                <div className="mr-2 text-xs">SAVE</div>
+              </div>
+            }
+          </>
+          // <>
+          //   <CategorySelectorComponent close={!this.state.featuresSelected} list={this.state.selectList} activedPart={this.state.selectedPart} handleClick={(value:string) => this.onCategoryChange(value)} handleClick2={(value:boolean) => this.changeEditSelection(value)} />
+          //   <AccessorySelectorComponent close={this.state.featuresSelected} list={this.state.aSelectList} activedPart={this.state.selectedAcc} handleClick={(value:string) => this.onAccessoryChange(value)} handleClick2={(value:boolean) => this.changeEditSelection(value)} />
+          //   {
+          //     this.state.featuresSelected ?
+          //     <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => this.changePart(id, path, name)}/>
+          //     : <AccessoryChildrenComponent list={this.state.accessoryList} handleClick={(id: string, path: string, name: string) => this.changeAccessory(id, path, name)}/>
+          //   }
+          // </>
+          // :<>
+          //   {!this.props.onlyView &&
+          //     <div onClick={() => this.exportModel()}
+          //     className="z-10 fixed bottom-28 right-4 w-24 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex items-center justify-center px-14">
+          //       <div className="m-2">
+          //         <svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width={'1rem'}
+	        //         viewBox="0 0 460 460">
+          //           <path d="M427.137,0C408.93,0,51.379,0,32.865,0C14.743,0,0,14.743,0,32.865v394.272c0,18.122,14.743,32.865,32.865,32.865
+          //             c0,0,374.895,0,394.272,0c18.122,0,32.865-14.743,32.865-32.865V32.865C460.001,14.743,445.258,0,427.137,0z M245.812,30h50.995
+          //             v54.466h-50.995V30z M107.198,30h108.615v69.466c0,8.284,6.716,15,15,15h80.995c8.284,0,15-6.716,15-15V30h26.377v119.636H107.198
+          //             V30z M107.007,430.001V308.673h245.986v121.328H107.007z M430.002,427.137L430.002,427.137c-0.001,1.58-1.286,2.865-2.866,2.865
+          //             h-44.143V293.673c0-8.284-6.716-15-15-15H92.007c-8.284,0-15,6.716-15,15v136.328H32.865c-1.58,0-2.865-1.285-2.865-2.865V32.865
+          //             C30,31.285,31.285,30,32.865,30h44.333v134.636c0,8.284,6.716,15,15,15h275.986c8.284,0,15-6.716,15-15V30h43.953
+          //             c1.58,0,2.865,1.285,2.865,2.865V427.137z"/>
+          //         </svg>
+          //       </div>
+          //       <div className="mr-2">SAVE</div>
+          //     </div>
+          //   }
+          // </>
         }
-        <AGLoading loading={this.state.loading} />
       </>
     );
   }
@@ -628,7 +669,7 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
   // Get subdomain
   let subdomain: string | undefined;
   let parsedConfig: BasicData[] | null = null;
-  const { campaign, config } = context.query;
+  const { campaign, config, bg, ov } = context.query;
   if(campaign)
     subdomain = campaign as string;
   else
@@ -672,7 +713,9 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
       campaignConfig: _campaignConfig ?? {},
       selectListBodyParts: _selectListBodyParts,
       selectListAccessories: _selectListAccessories,
-      attributeConfig: parsedConfig
+      attributeConfig: parsedConfig,
+      bgColor: bg as string ?? null,
+      onlyView: ov != undefined ? (ov as string).toLowerCase() === 'true' : false,
     }
   };
 }

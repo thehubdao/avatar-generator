@@ -1,7 +1,7 @@
 ﻿import {ChangeEvent, Component, FormEvent} from "react";
 import Head from "next/head";
-import AGButton from "../../components/ag-button.component";
-import AGLoading from "../../components/ag-loading.component";
+import AGButton from "../../components/common/ag-button.component";
+import AGLoading from "../../components/common/ag-loading.component";
 import {IsLogIn, LogIn} from "../../utils/firebase.util";
 import {withRouter} from "next/router";
 import {WithRouterProps} from "next/dist/client/with-router";
