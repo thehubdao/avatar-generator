@@ -30,11 +30,6 @@ import {
 } from "../interfaces/common.interface";
 import {GetParameters} from "../utils/firebase.util";
 import {RandomArrayElement} from "../utils/common.util";
-import {LogComponent} from "../components/log.component";
-import {CategorySelectorComponent} from "../components/categorySelector.component";
-import {CategoryChildrenComponent} from "../components/categoryChildren.component";
-import {AccessorySelectorComponent} from "../components/accessorySelector.component";
-import {AccessoryChildrenComponent} from "../components/accessoryChildren.component";
 import FeatureSelectorComponent from "../components/selectors/featureSelector.component";
 import OptionSelectorComponent from "../components/selectors/optionSelector.component";
 import ColorSelectorComponent from "../components/selectors/colorSelector.component";
@@ -67,7 +62,6 @@ interface AvatarGeneratorState {
   aSelectList: BasicData[];
   cameraPos: Vector3;
   cameraLookAt: Vector3;
-  savedModels: Record<string, GLTF>;
   logs?: WebGLInfo;
   skinColor?: string;
   editModeSelected: boolean;
@@ -84,12 +78,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   sc: SceneInterface;
 
-  // scene?: Scene;
-  // baseModel?: GLTF;
-  // camera?: PerspectiveCamera;
-  // renderer?: WebGLRenderer;
-  // mixer?: AnimationMixer;
-  // controls?: OrbitControls;
+  savedModels: Record<string, GLTF>;
 
   doCameraMovement: boolean = false;
   cameraTargetPosition?: Vector3;
@@ -120,16 +109,16 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       cameraPos: new Vector3(),
       cameraLookAt: new Vector3(),
       skinColor: 'F2A47E',// 'cf9e7c',
-      savedModels: {},
       editModeSelected: false,
       featuresSelected: true,
       currentModule: ViewModuleState.OnModule,
-      loading: false,
+      loading: true,
       resX: 0,
       resY: 0,
     };
 
     this.sc = {};
+    this.savedModels = {};
     this.mount = null;
     this.clock = new Clock();
     this.exportData = {attributes: []};
@@ -137,7 +126,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   async componentDidMount() {
-    this.setLoading();
     if (!this.props.onlyView) this.changeView();
     
     await this.avatarScene();
@@ -150,10 +138,11 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     
     await this.getAccessoryBones();
     await this.getPartsData();
-    await this.onClickChangeSkinColor();
-    
     await this.loadPreData();
     await this.setStartAnimation();
+    await this.onClickChangeSkinColor();
+    
+    // this.setLoading(false);
     this.setLoading(false);
     // trigger event when component has all data to render
     this.props.onDataLoaded?.()
@@ -234,22 +223,33 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       }
     }
     else {
-      const promises: Promise<void>[] = [];
+      let randomFeature: BodyPartLocationApi[] = [];
+      let randomAccessory: AccLocationApi[] = [];
       
       // Load random features
       for(const partType of this.state.selectList) {
         const randomPart = RandomArrayElement(this.partList!.filter(p => p.type === partType.id));
         if (randomPart)
-          promises.push(this.changePart(randomPart.id, randomPart.path, randomPart.name, partType.id));
+          randomFeature.push(randomPart);
       }
 
       for(const accType of this.state.aSelectList) {
         const randomAcc = RandomArrayElement(this.accessoryList!.filter(a => a.type === accType.id));
         if(randomAcc)
-          promises.push(this.changeAccessory(randomAcc.id, randomAcc.path, randomAcc.name, accType.id));
+          randomAccessory.push(randomAcc);
       }
-      
-      await Promise.all([...promises]);
+
+      const modelPromises: Promise<GLTF>[] = [];
+      for (const feature of randomFeature)
+        modelPromises.push(this.getWearableOption(feature.id, feature.path));
+      for (const acc of randomAccessory)
+        modelPromises.push(this.getWearableOption(acc.id, acc.path));
+      await Promise.all([...modelPromises]);
+
+      for (const feature of randomFeature)
+        await this.changePart(feature.id, feature.path, feature.name, feature.type);
+      for (const acc of randomAccessory)
+        await this.changeAccessory(acc.id, acc.path, acc.name, acc.type);
     }
   }
 
@@ -419,33 +419,29 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       this.changeLookAtPosition(new Vector3(confRef.lookAt?.x, confRef.lookAt?.y, confRef.lookAt?.z));
     }
   }
-
-  async changePart(id: string, partPath: string, name: string, selectedPart: string = this.state.selectedPart) {
+  
+  async getWearableOption(id: string, partPath: string) {
     let replaceModel: GLTF;
-    if(this.state.savedModels[id]) {
-      replaceModel = this.state.savedModels[id];
+    if(this.savedModels[id]) {
+      replaceModel = this.savedModels[id];
     } else {
       replaceModel = await GetGltfModel(partPath);
-      const _savedModels = {...this.state.savedModels};
-      _savedModels[id] = replaceModel;
-      this.setState({ savedModels: _savedModels });
+      this.savedModels[id] = replaceModel;
     }
+    
+    return replaceModel;
+  }
+
+  async changePart(id: string, partPath: string, name: string, selectedPart: string = this.state.selectedPart) {
+    const replaceModel = await this.getWearableOption(id, partPath);
+    
     await ReplaceModelPartOnly(this.sc.baseModel!.scene.children[0], replaceModel, this.partListData![selectedPart], this.state.selectList.find(sl => sl.id === selectedPart), this.state.skinColor);
     await this.getPartsData();
-    // FrustumCulledFalse(this.sc.scene!);
     this.addReplaceAttribute(selectedPart, name);
   }
 
   async changeAccessory(id: string, path: string, name: string, selectedAcc: string = this.state.selectedAcc) {
-    let replaceModel: GLTF;
-    if(this.state.savedModels[id]) {
-      replaceModel = this.state.savedModels[id];
-    } else {
-      replaceModel = await GetGltfModel(path);
-      const _savedModels = {...this.state.savedModels};
-      _savedModels[id] = replaceModel;
-      this.setState({ savedModels: _savedModels });
-    }
+    const replaceModel = await this.getWearableOption(id, path);
 
     await ReplaceModelAccessory(this.accessoryBonesData!, selectedAcc, replaceModel);
     this.addReplaceAttribute(selectedAcc, name);
@@ -535,6 +531,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   private renderEditMode() {
     return (
       <>
+        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor}/>
         {/* CANVAS WRAPPER */}
         <div className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
           {/* CANVAS BACKGROUND */}
@@ -652,7 +649,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
           //   }
           // </>
         }
-        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor}/>
       </>
     );
   }
