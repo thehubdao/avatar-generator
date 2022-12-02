@@ -144,6 +144,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     
     // this.setLoading(false);
     this.setLoading(false);
+    this.setLoading(false);
     // trigger event when component has all data to render
     this.props.onDataLoaded?.()
 
@@ -531,7 +532,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   private renderEditMode() {
     return (
       <>
-        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor}/>
+        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor} />
         {/* CANVAS WRAPPER */}
         <div className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
           {/* CANVAS BACKGROUND */}
