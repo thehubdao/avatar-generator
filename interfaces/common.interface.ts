@@ -39,12 +39,20 @@ interface AGVector3 {
 }
 
 export interface CampaignConfig {
-  clientRequirements?: ClientQuestion[],
+  clientRequirements?: ClientQuestion[];
   defEyesColor?: string;
   defSkinColor?: string;
-  defCam?: LookAtVectors,
+  defCam?: LookAtVectors;
   partsCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
+}
+
+export interface CampaignParameters {
+  owner: string;
+  armature: string;
+  features?: BasicData[];
+  accessories?: BasicData[];
+  config?: CampaignConfig;
 }
 
 export interface AdminComponentParams {

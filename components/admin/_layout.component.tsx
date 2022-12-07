@@ -2,14 +2,17 @@
 import {GetCurrentUser, GetUserInfo, HandleNotLoggedIn, LogOut} from "../../utils/firebase.util";
 import {UserInterface} from "../../interfaces/firebase.interface";
 import AGButton from "../common/ag-button.component";
-import {AuthValues, UserRoleValues} from "../../enums/firebase.enum";
+import {UserRoleValues} from "../../enums/firebase.enum";
+import {GoToPage} from "../../utils/router.util";
+import {PageLocation} from "../../enums/common.enum";
 
 interface LayoutProps {
-  children: JSX.Element | JSX.Element[];
+  children: JSX.Element | JSX.Element[] | boolean;
   userInfo?: UserInterface;
   currentCampaign?: string;
   setUserInfo: (user?: UserInterface) => void;
   setCurrentCampaign: (campaign?: string) => void;
+  noCampaign?: boolean;
 }
 
 export default class Layout extends Component<LayoutProps> {
@@ -25,23 +28,16 @@ export default class Layout extends Component<LayoutProps> {
     const currentUser = await GetCurrentUser();
     if(currentUser) {
       const uInfo = await GetUserInfo(currentUser.uid);
+      
+      if(uInfo?.campaign == undefined || uInfo?.campaign?.length == 0)
+        await GoToPage(PageLocation.FirstSteps);
+      
       this.props.setUserInfo(uInfo);
     }
   }
-  
-  getUserOrEmail() {
-    const {userInfo} = this.props;
-    if (userInfo?.email == undefined)
-      return '';
-    
-    if(!userInfo.email.includes(AuthValues.DefaultEmail))
-      return userInfo.email;
-
-    return userInfo.email.substring(0, userInfo.email.indexOf('@'));
-  }
 
   render() {
-    const { userInfo, currentCampaign } = this.props;
+    const { userInfo, currentCampaign, noCampaign } = this.props;
     
     return (
       <>
@@ -51,19 +47,21 @@ export default class Layout extends Component<LayoutProps> {
                 <div className="my-auto flex flex-col sm:flex-row">
                     <p className="font-bold">{userInfo.name}</p>
                     <p className="ml-2">
-                        <span>🧔‍♀️: </span>{this.getUserOrEmail()}
+                        <span>🧔‍♀️: </span>{userInfo.account}
                     </p>
                     <p className="ml-2">
                         <span>👨‍🌾: </span>{userInfo.role != undefined ? UserRoleValues[userInfo.role] : 'missing'}
                     </p>
+                  { !noCampaign &&
                     <div className="ml-2 flex">
-                        <p>🚩:</p>
-                        <select className="ml-1" defaultValue={currentCampaign}
-                                onChange={e => this.props.setCurrentCampaign(e.target.value)}>
-                            <option value=''>Select...</option>
-                          {this.renderCampaignOptions()}
-                        </select>
+                      <p>🚩:</p>
+                      <select className="ml-1" defaultValue={currentCampaign}
+                              onChange={e => this.props.setCurrentCampaign(e.target.value)}>
+                        <option value=''>Select...</option>
+                        {this.renderCampaignOptions()}
+                      </select>
                     </div>
+                  }
                 </div>
             }
           </div>
@@ -76,10 +74,11 @@ export default class Layout extends Component<LayoutProps> {
   
   private renderCampaignOptions() {
     const {userInfo} = this.props;
+    
     if (!(userInfo && userInfo.campaign?.length > 0))
       return <></>;
     
-    userInfo.campaign.map(campaign => {
+    return userInfo.campaign.map(campaign => {
       return <option value={campaign} key={`key_${campaign}`}>{campaign}</option>
     });
   }
