@@ -1,17 +1,10 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
-import {
-  Group,
-  Material,
-  Mesh,
-  MeshStandardMaterial,
-  MeshToonMaterial,
-  Object3D,
-  Skeleton,
-  SkinnedMesh
-} from "three";
+import {Group, Material, Mesh, MeshStandardMaterial, MeshToonMaterial, Object3D, Skeleton, SkinnedMesh} from "three";
 import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
 import {TextureTone, TextureUtil} from "./texture.util";
+import {LogError} from "./common.util";
+import {Module} from "../enums/common.enum";
 import {LoadGltfModel} from "./importer.util";
 
 type MaterialFunction = (obj: SkinnedMesh, tone?: TextureTone) => void;
@@ -28,16 +21,12 @@ export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partInd
 }
 
 export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GLTF, partInfo: FeatureInfoInterface, selectedPart?: BasicData, skinColor?: string) {
-  if(selectedPart == undefined) {
-    console.error('No selected Part', 'There is no selected part to replace on base model.');
-    return;
-  }
+  if(selectedPart == undefined)
+    return LogError(Module.ModelUtil, "There is no selected part to replace on base model.");
   
   let chestMesh: Object3D | undefined = await GetMatchPiece(replaceModel, selectedPart.val);
-  if(chestMesh == undefined) {
-    console.error('Piece not found:', `'${selectedPart.val}' not found on replace model, please verify the glb file.`);
-    return;
-  }
+  if(chestMesh == undefined)
+    return LogError(Module.ModelUtil, `Piece not found: '${selectedPart.val}' not found on replace model, please verify the glb file.`);
   
   const newPart: Object3D = SkeletonUtils.clone(chestMesh);
   let baseSkeleton: Skeleton;
@@ -49,8 +38,7 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
     baseSkeleton = (basePartRef.children[0] as SkinnedMesh).skeleton;
   }
   else {
-    console.error('Skeleton Missing:', 'Skeleton missing from base_mesh some of the parts have weird components.', basePartRef);
-    return;
+    return LogError(Module.ModelUtil, "Skeleton missing from base_mesh some of the parts have weird components.")
   }
   
   await ChangeSkeleton(newPart, baseSkeleton, ChangeToToonMaterial, "threeTone");

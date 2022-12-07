@@ -33,6 +33,6 @@ export default class UserList extends Component<UserListProps, UserListState> {
   }
 
   private renderUserList() {
-    return this.state?.userList.map(u => <p>{JSON.stringify(u)}</p>)
+    return this.state?.userList.map(u => <p key={'uKey_' + u.email}>{JSON.stringify(u)}</p>)
   }
 }
