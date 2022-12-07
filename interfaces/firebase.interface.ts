@@ -2,7 +2,7 @@
 
 export interface AGQueryConstraints {
   campaign?: string;
-  type?: string
+  type?: string;
 }
 
 export interface LogInInterface {
@@ -11,8 +11,9 @@ export interface LogInInterface {
 }
 
 export interface UserInterface {
-  role: UserRoleValues,
-  name: string,
-  email: string,
-  campaign: string[],
+  role: UserRoleValues;
+  name: string;
+  account: string;
+  email: string;
+  campaign: string[];
 }

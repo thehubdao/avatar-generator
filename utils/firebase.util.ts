@@ -240,15 +240,20 @@ function CampaignLocation(campaign?: string) {
 }
 
 export async function UpdateDoc(location: FirestoreLocation, jsonData: string, campaign?: string) {
+  return UpdateDocObject(location, JSON.parse(jsonData), campaign);
+}
+
+export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlobalLocation, data: {}, campaign?: string, docName?: string) {
   const {doc, setDoc} = await import('@firebase/firestore');
   const newLocation = campaign ?
-                        campaign + location :
-                        location !== '/' ?
-                          location :
-                          FirestoreGlobalLocation.Parameters;
+    campaign + location :
+    location !== '/' ?
+      location :
+      FirestoreGlobalLocation.Parameters;
+  const newDocName = docName == undefined ? '' : `/${docName}`;
 
-  const docRef = doc(await FirebaseUtil.Instance().DB(), newLocation);
-  return await setDoc(docRef, JSON.parse(jsonData), {merge: true});
+  const docRef = doc(await FirebaseUtil.Instance().DB(), newLocation + newDocName);
+  return await setDoc(docRef, data, {merge: true});
 }
 
 export async function DeleteDoc(location: FirestoreLocation, docId: string, campaign?: string) {
@@ -266,7 +271,7 @@ export async function ReplaceDoc(docLocation: string, jsonData?: string, campaig
       docLocation !== '/' ?
         docLocation :
         FirestoreGlobalLocation.Parameters;
-    
+
     const docRef = doc(await FirebaseUtil.Instance().DB(), newLocation);
     await updateDoc(docRef, JSON.parse(jsonData));
   }
@@ -281,19 +286,29 @@ export async function InsertDoc(jsonData: string, location: string = FirestoreLo
   // console.log('New Doc: ', newDoc.id);
 }
 
-export async function InsertDocWithId(newDocId: string, data: {}, location: FirestoreLocation | FirestoreGlobalLocation, campaign?: string) {
+export async function InsertDocWithId(newDocId: string, data: {}, location: FirestoreLocation | FirestoreGlobalLocation, campaign?: string): Promise<Result<string>> {
   const {setDoc, doc} = await import('@firebase/firestore');
 
-  const newDoc = doc(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location, newDocId);
-  await setDoc(newDoc, data);
+  try {
+    const newDoc = doc(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location, newDocId);
+    await setDoc(newDoc, data);
+    return {successful: true, value: newDocId};
+  } catch (e) {
+    const err = e as FirebaseError;
+    LogError(Module.FirebaseUtil, `Error creating doc: ${newDocId}, at ${location} with message: ${err.message}`).then();
+    return {successful: false, errCode: err.code, errMessage: err.message};
+  }
 }
 
 export async function UploadFile(file: File, fileType: StorageLocation, sectionType?: string, campaign?: string) {
   const {ref, uploadBytes} = await import('@firebase/storage');
+  const {uuidv4} = await import('@firebase/util');
+  
   const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
   const realSection = sectionType ? '/' + sectionType.toLowerCase().replace('acc', '') : '';
-
-  const fileRef = ref(await FirebaseUtil.Instance().Storage(), `${campaignSection}${fileType}${realSection}/${file.name}`);
+  const newName = uuidv4();
+  
+  const fileRef = ref(await FirebaseUtil.Instance().Storage(), `${campaignSection}${fileType}${realSection}/${newName}`);
   const log = await uploadBytes(fileRef, file);
 
   return log.metadata.fullPath;
@@ -343,7 +358,7 @@ export async function GetCurrentUser() {
 
 export async function HandleNotLoggedIn() {
   const flag = await IsNotLogIn();
-  
+
   if (flag)
     await GoToPage(PageLocation.Login);
 
@@ -353,7 +368,7 @@ export async function HandleNotLoggedIn() {
 export async function GetUserInfo(userUid: string) {
   const userLocation = `${FirestoreGlobalLocation.User}/${userUid}`;
   const userDoc = await GetDocument<UserInterface>(userLocation);
-  
+
   if (userDoc.length === 0)
     return undefined;
 
@@ -418,8 +433,7 @@ function RandomPassword() {
 export async function GetUserList() {
   try {
     return GetInfoDB<UserInterface>(FirestoreGlobalLocation.User);
-  }
-  catch (e) {
+  } catch (e) {
     const err = e as FirebaseError;
     return LogError(Module.FirebaseUtil, `Error while retrieving UserList: ${err.message}`);
   }

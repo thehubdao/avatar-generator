@@ -1,23 +1,15 @@
 import {Component, FormEvent} from "react";
-import {UserRoleValues} from "../../../enums/firebase.enum";
+import {AuthValues, UserRoleValues} from "../../../enums/firebase.enum";
 import AGButton from "../../common/ag-button.component";
 import AGText from "../../common/ag-text.component";
 import {UserInterface} from "../../../interfaces/firebase.interface";
-import {CreateNewUser, GetCurrentUser} from "../../../utils/firebase.util";
+import {CreateNewUser} from "../../../utils/firebase.util";
+import {IsEmail, LogError} from "../../../utils/common.util";
+import {Module} from "../../../enums/common.enum";
 
-interface UserAddProps {
-}
-
-export default class UserAdd extends Component<UserAddProps> {
-  private userName: HTMLInputElement | null;
-  private userAccount: HTMLInputElement | null;
-  
-  constructor(props: UserAddProps) {
-    super(props);
-    
-    this.userName = null;
-    this.userAccount = null;
-  }
+export default class UserAdd extends Component {
+  private userName: HTMLInputElement | null = null;
+  private userAccount: HTMLInputElement | null = null;
 
   render() {
     return (
@@ -40,11 +32,21 @@ export default class UserAdd extends Component<UserAddProps> {
     
     const newUser: Partial<UserInterface> = {
       name: this.userName?.value,
-      email: this.userAccount?.value,
+      account: this.userAccount?.value,
+      email: this.userEmail(this.userAccount?.value),
       role: UserRoleValues.admin,
     };
     const result = await CreateNewUser(newUser);
     if(result.successful)
       console.log("Go back to list and show alert");
+  }
+
+  private userEmail(account?: string) {
+    if(!account) {
+      void LogError(Module.UserAdd, "Missing account!").then();
+      return undefined;
+    }
+
+    return IsEmail(account) ? account : account + AuthValues.DefaultEmail;
   }
 }

@@ -9,7 +9,7 @@ import {
   GetPartsData,
 } from "../utils/importer.util";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {AttributeValues, GlobalValues, Module, ViewModuleState} from "../enums/common.enum";
+import {ExportAttributeValues, GlobalValues, Module, ViewModuleState} from "../enums/common.enum";
 import {FirestoreParameters} from "../enums/firebase.enum";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../interfaces/api.interface";
 import {
@@ -199,7 +199,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       return LogError(Module.AvatarGenerator, "No feature/accessory list!");
 
     if (this.props.campaign && this.props.campaign !== GlobalValues.BaseCampaign) {
-      this.exportData?.attributes.push({id: AttributeValues.Campaign, val: this.props.campaign});
+      this.exportData?.attributes.push({id: ExportAttributeValues.Campaign, val: this.props.campaign});
     }
 
     if (this.props.attributeConfig) {
@@ -703,8 +703,8 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
 
   if (config) {
     parsedConfig = JSON.parse(Buffer.from(config as string, 'base64').toString('ascii')) as BasicData[];
-    if (parsedConfig && parsedConfig.some(x => x.id === AttributeValues.Campaign)) {
-      const configCampaign = parsedConfig.find(x => x.id === AttributeValues.Campaign);
+    if (parsedConfig && parsedConfig.some(x => x.id === ExportAttributeValues.Campaign)) {
+      const configCampaign = parsedConfig.find(x => x.id === ExportAttributeValues.Campaign);
       if (configCampaign)
         subdomain = configCampaign.val;
     }
