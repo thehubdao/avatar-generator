@@ -1,5 +1,5 @@
 export enum FirestoreLocation {
-    Features = 'parts',
+    Features = 'features',
     Accessories = 'accessories',
     Animations = 'animations',
     Parameters = '/',
@@ -8,7 +8,7 @@ export enum FirestoreLocation {
 export enum FirestoreGlobalLocation {
     Parameters = 'general/parameters',
     User = 'user',
-    Test = 'testing/YEP',
+    Campaign = 'campaign',
 }
 
 export enum FirestoreParameters {
@@ -18,7 +18,7 @@ export enum FirestoreParameters {
 export enum StorageLocation {
     Accessory = 'accessory',
     BaseMesh = 'base_mesh',
-    Part = 'section',
+    Feature = 'feature',
     Thumbnail = 'thumb',
     Animation = 'animation',
     Missing = 'missing',

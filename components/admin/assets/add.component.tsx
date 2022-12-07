@@ -236,7 +236,7 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
   uploadTo(location: FirestoreLocation | undefined = this.state.dbLocation) {
     switch (location) {
       case FirestoreLocation.Features:
-        return StorageLocation.Part;
+        return StorageLocation.Feature;
       case FirestoreLocation.Accessories:
         return StorageLocation.Accessory;
       case FirestoreLocation.Animations:
@@ -247,9 +247,10 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
   }
 
   async insertFile() {
+    const {campaign} = this.props;
     const {loneFile, selectedStorage} = this.state;
     if (loneFile && selectedStorage) {
-      const newPath = await UploadFile(loneFile, selectedStorage);
+      const newPath = await UploadFile(loneFile, selectedStorage, undefined, campaign);
       console.log(newPath);
       alert("File uploaded");
     }
