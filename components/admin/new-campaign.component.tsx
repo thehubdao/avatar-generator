@@ -14,10 +14,7 @@ import {GoToPage} from "../../utils/router.util";
 import {PageLocation} from "../../enums/common.enum";
 import {UserInterface} from "../../interfaces/firebase.interface";
 
-interface NewCampaignProps {
-}
-
-export default function NewCampaign({}: NewCampaignProps) {
+export default function NewCampaign() {
   const campaignNameInput = useRef<HTMLInputElement>(null);
   const armatureFileInput = useRef<HTMLInputElement>(null);
 
@@ -31,7 +28,7 @@ export default function NewCampaign({}: NewCampaignProps) {
     if (!featuresNum) return <></>;
 
     return Array.from({length: featuresNum}).map((_, index) =>
-      <div key={'fKey_' + index}>
+      <div key={`fKey_${index}`}>
         <p>Feature:</p>
         <input type="text" value={featureList[index]?.id} required placeholder={`${index + 1} feature type`}
                onChange={event => setFeatureList((prevState) => {
@@ -53,7 +50,7 @@ export default function NewCampaign({}: NewCampaignProps) {
     if (!accessoriesNum) return <></>;
 
     return Array.from({length: accessoriesNum}).map((_, index) =>
-      <div key={'aKey_' + index}>
+      <div key={`aKey_${index}`}>
         <p>Accessory:</p>
         <input type="text" value={accessoryList[index]?.id} required placeholder={`${index + 1} accessory type`}
                onChange={event => setAccessoryList((prevState) => {
@@ -93,7 +90,7 @@ export default function NewCampaign({}: NewCampaignProps) {
     ]);
 
     // Check userInfo exists
-    if (userInfo == null) return HandleNotLoggedIn();
+    if (userInfo == null) return void HandleNotLoggedIn();
 
     // Get information for the features
     const newFeatureList = featuresNum ? featureList.slice(0, featuresNum) : [];
@@ -127,7 +124,7 @@ export default function NewCampaign({}: NewCampaignProps) {
   }
 
   return (
-    <form onSubmit={event => onSubmit(event)}>
+    <form onSubmit={event => void onSubmit(event)}>
       { message != undefined ? <AGText type="text" mark='😡'>{message}</AGText> : ''}
       <AGText type="th2">Nombre Campaña</AGText>
       <input type="text" ref={campaignNameInput} placeholder="Campaign name" required />

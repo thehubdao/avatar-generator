@@ -5,14 +5,11 @@ import {UserInterface} from "../../interfaces/firebase.interface";
 import Head from "next/head";
 import AGText from "../../components/common/ag-text.component";
 
-interface PageProps {
-}
-
 interface PageState {
   userInfo?: UserInterface;
 }
 
-export default class FirstStepsPage extends Component<PageProps, PageState> {
+export default class FirstStepsPage extends Component<undefined, PageState> {
   private setUserInfo(user?: UserInterface) {
     this.setState({
       userInfo: user,

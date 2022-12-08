@@ -1,13 +1,13 @@
 import Image from "next/image";
-import { FeatureInterface } from "../interfaces/api.interface";
+import {FeatureInterface} from "../interfaces/api.interface";
 import {BasicData} from "../interfaces/common.interface";
-import React from "react";
+import {MouseEvent} from "react";
 
 interface ExampleProps {
   list: FeatureInterface[] | BasicData[];
   handleClick: (id: string) => void;
-  handleClick2: Function;
-  activedPart: string;
+  handleClick2: (flag: boolean) => void;
+  activeFeature: string;
   close: boolean;
 }
 
@@ -17,17 +17,17 @@ function getSiblings(el: HTMLElement) {
   const siblings: ChildNode[] = [];
 
   // if no parent, return no sibling
-  if(!el.parentNode) {
-      return siblings;
+  if (!el.parentNode) {
+    return siblings;
   }
 
   // first child of the parent node
-  let sibling  = el.parentNode.firstChild;
+  let sibling = el.parentNode.firstChild;
 
   // collecting siblings
   while (sibling) {
     if (sibling.nodeType === 1 && sibling !== el) {
-        siblings.push(sibling);
+      siblings.push(sibling);
     }
     sibling = sibling.nextSibling;
   }
@@ -36,7 +36,7 @@ function getSiblings(el: HTMLElement) {
 
 function optionList(props: ExampleProps) {
 
-  function selectPart(e: React.MouseEvent<HTMLDivElement>, id: string) {
+  function selectFeature(e: MouseEvent<HTMLDivElement>, id: string) {
     e.preventDefault();
     const el = e.target as HTMLElement;
     const siblings = getSiblings(el);
@@ -50,9 +50,11 @@ function optionList(props: ExampleProps) {
 
   return props.list.map((x) => {
     return (
-      <div className={"overflow-hidden w-12 h-12 flex justify-center flex-col items-center bg-slate-50" + (props.activePart===x.id?'':' !bg-transparent')} key={x.id} onClick={event => selectPart(event, x.id)}>
+      <div
+        className={"overflow-hidden w-12 h-12 flex justify-center flex-col items-center bg-slate-50" + (props.activeFeature === x.id ? '' : ' !bg-transparent')}
+        key={x.id} onClick={event => selectFeature(event, x.id)}>
         <div className="pointer-events-none">
-          <Image src={'/resources/icos/features/' + x.id + '.svg'} width={30} height={30} alt={x.id}/>
+          <Image src={'/resources/icons/features/' + x.id + '.svg'} width={30} height={30} alt={x.id}/>
         </div>
       </div>
     )
@@ -62,9 +64,11 @@ function optionList(props: ExampleProps) {
 function CategorySelectorComponent(props: ExampleProps) {
 
   return (
-    <div className={"w-14 bg-gray-200 border-2 border-gray-100 fixed top-4 left-4 rounded-[6px] drop-shadow-md flex flex-col items-center " + (props.close ? 'h-[50px] overflow-hidden left-20':'')}>
-      <div className="w-12 h-12 flex justify-center items-center border-b-2 border-solid border-gray-100 p-2" onClick={() => props.handleClick2(true)}>
-        <Image src={'/resources/icos/features/features.svg'} width={30} height={30} alt={'features'}/>
+    <div
+      className={"w-14 bg-gray-200 border-2 border-gray-100 fixed top-4 left-4 rounded-[6px] drop-shadow-md flex flex-col items-center " + (props.close ? 'h-[50px] overflow-hidden left-20' : '')}>
+      <div className="w-12 h-12 flex justify-center items-center border-b-2 border-solid border-gray-100 p-2"
+           onClick={() => props.handleClick2(true)}>
+        <Image src={'/resources/icons/features/features.svg'} width={30} height={30} alt={'features'}/>
       </div>
       <div className="py-4">
         {optionList(props)}
@@ -73,4 +77,4 @@ function CategorySelectorComponent(props: ExampleProps) {
   )
 }
 
-export { CategorySelectorComponent };
+export {CategorySelectorComponent};

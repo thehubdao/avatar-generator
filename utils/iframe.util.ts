@@ -7,10 +7,10 @@ export function IFrameReady(onSubscribed: () => void) {
   SetSubscribeEvent(onSubscribed);
 }
 
-export function SetIFrameEvents(onChangePart?: (params?: BasicData) => Promise<void>,
+export function SetIFrameEvents(onChangeFeature?: (params?: BasicData) => Promise<void>,
                                 onExport?: () => Promise<void>,
                                 onChangeSkinColor?: (newSkin?: string) => Promise<void>) {
-  SetOnChangePart(onChangePart);
+  SetOnChangeFeature(onChangeFeature);
   Export(onExport);
   ChangeSkinColor(onChangeSkinColor);
 }
@@ -28,8 +28,8 @@ function SetSubscribeEvent(onSubscribed: () => void) {
   InBoundEventListener(IFrameEvents.Subscribe, onSubscribed);
 }
 
-function SetOnChangePart(onChangePart?: (params?: BasicData) => Promise<void>) {
-  InBoundEventListener(IFrameEvents.ChangePart, onChangePart);
+function SetOnChangeFeature(onChangeFeature?: (params?: BasicData) => Promise<void>) {
+  InBoundEventListener(IFrameEvents.ChangeFeature, onChangeFeature);
 }
 
 function Export(onExport?: () => Promise<void>) {

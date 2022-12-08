@@ -152,7 +152,7 @@ function GetConstraints(dbLocation: FirestoreLocation | string, constraintsValue
 
   switch (dbLocation) {
     case FirestoreLocation.Features:
-      return PartConstraints(constraintsValues);
+      return FeatureConstraints(constraintsValues);
     case FirestoreLocation.Accessories:
       return AccessoryConstraints(constraintsValues);
     case FirestoreLocation.Animations:
@@ -162,7 +162,7 @@ function GetConstraints(dbLocation: FirestoreLocation | string, constraintsValue
   }
 }
 
-async function PartConstraints(constraintsValues: AGQueryConstraints) {
+async function FeatureConstraints(constraintsValues: AGQueryConstraints) {
   const constraints: QueryConstraint[] = [];
   const {type, campaign} = constraintsValues;
   const {orderBy, where} = await import('@firebase/firestore');

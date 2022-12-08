@@ -9,7 +9,7 @@ export interface BasicData {
 }
 
 export interface FeatureInfoInterface {
-  partIndex: number;
+  featureIndex: number;
   featureBase?: Object3D;
 }
 
@@ -43,7 +43,7 @@ export interface CampaignConfig {
   defEyesColor?: string;
   defSkinColor?: string;
   defCam?: LookAtVectors;
-  partsCamPos?: Record<string, LookAtVectors>;
+  featuresCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
 }
 

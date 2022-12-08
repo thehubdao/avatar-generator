@@ -162,7 +162,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
         const partIndex = partIndexes[itr]
         const partsByType = this.parts.get(feature.type) || []
         const part = partsByType[partIndex]
-        await avatarGenerator?.changePart(
+        await avatarGenerator?.changeFeature(
           part.id,
           part.path,
           part.name,

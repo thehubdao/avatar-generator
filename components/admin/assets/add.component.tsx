@@ -85,13 +85,13 @@ export default class AssetAdd extends Component<AssetAddProps, AssetAddState> {
       case FirestoreLocation.Animations:
       case FirestoreLocation.Accessories:
       case FirestoreLocation.Features:
-        return this.renderPartForm();
+        return this.renderFeatureForm();
       case FirestoreLocation.Parameters:
         return this.renderParameterForm();
     }
   }
 
-  renderPartForm() {
+  renderFeatureForm() {
     const {formData, animation} = this.state;
     return (
       <>

@@ -5,8 +5,9 @@ import AGLoading from "../components/common/ag-loading.component";
 import {FrustumCulledFalse, InitSceneController} from "../utils/threejs/scene.util";
 import {GetAmbientLights, GetTestLights} from "../utils/test-scene.util";
 import {
+  FirebaseGltfModel,
   GetAccessoryBones, GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign, GetGltfModel,
-  GetPartsData,
+  GetFeaturesData,
 } from "../utils/importer.util";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {ExportAttributeValues, GlobalValues, Module, ViewModuleState} from "../enums/common.enum";
@@ -15,7 +16,7 @@ import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../inter
 import {
   ChangeObjectSkinColor,
   ReplaceModelAccessory,
-  ReplaceModelPartOnly,
+  ReplaceModelFeatureOnly,
   TransformObject3dToToonMaterial
 } from "../utils/model.util";
 import {ExportModelGlb, SaveFile} from "../utils/exporter.util";
@@ -42,7 +43,7 @@ export interface AvatarGeneratorProps {
   campaign?: string | null;
   baseMeshPath: string;
   campaignConfig: CampaignConfig;
-  selectListBodyParts: BasicData[];
+  selectListBodyFeatures: BasicData[];
   selectListAccessories: BasicData[];
   attributeConfig: BasicData[] | null;
   // callback when data is ready to be used
@@ -52,9 +53,9 @@ export interface AvatarGeneratorProps {
 }
 
 interface AvatarGeneratorState {
-  selectedPart: string;
+  selectedFeature: string;
   selectedAcc: string;
-  partList?: FeatureInterface[];
+  featureList?: FeatureInterface[];
   accessoryList?: AccessoryInterface[];
   featureSelectList: BasicData[];
   accSelectList: BasicData[];
@@ -75,7 +76,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   clock: Clock;
 
   sc?: SceneInterface;
-  
+
   savedModels: Record<string, GLTF>;
 
   doCameraMovement = false;
@@ -96,9 +97,9 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   constructor(props: AvatarGeneratorProps) {
     super(props);
     this.state = {
-      selectedPart: props.selectListBodyParts[0].id,
+      selectedFeature: props.selectListBodyFeatures[0].id,
       selectedAcc: props.selectListAccessories[0].id,
-      featureSelectList: props.selectListBodyParts,
+      featureSelectList: props.selectListBodyFeatures,
       accSelectList: props.selectListAccessories,
       cameraPos: new Vector3(),
       cameraLookAt: new Vector3(),
@@ -110,7 +111,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       resX: 0,
       resY: 0,
     };
-    
+
     this.savedModels = {};
 
     this.threeCanvas = null;
@@ -120,22 +121,22 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   async componentDidMount() {
-    if (!this.props.onlyView) this.changeView();
-    
+    if (!this.props.onlyView) await this.changeView();
+
     await this.avatarScene();
 
     await Promise.all([
-      this.getPartList(),
+      this.getFeatureList(),
       this.getAccessoryList(),
       this.getAnimationList()
     ]);
 
     await this.getAccessoryBones();
-    await this.getPartsData();
+    await this.getFeaturesData();
     await this.onClickChangeSkinColor();
     await this.loadPreData();
     await this.onClickChangeSkinColor();
-    
+
     this.setLoading(false);
     // trigger event when component has all data to render
     this.props.onDataLoaded?.()
@@ -155,36 +156,34 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   setOnIFrame = () => {
     console.log('IFrame Callback: ', this.onIFrame);
     this.onIFrame = true;
-    SetIFrameEvents(this.changePartFromIFrame, this.exportFromIFrame, this.changeSkinColorFromIFrame);
+    SetIFrameEvents(this.changeFeatureFromIFrame, this.exportFromIFrame, this.changeSkinColorFromIFrame);
   }
 
-  changePartFromIFrame = async (params?: BasicData) => {
-    if(!this.onIFrame) return console.log("Not on IFrame, subscribe if you forgot!");
-    if(!params) return console.log("Missing feature option!");
-    
-    if(params.detail && params.detail.startsWith('http')) {
-      await this.changePart(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
-    }
-    else {
-      if(params.id.endsWith(GlobalValues.AccEnd)) {
+  changeFeatureFromIFrame = async (params?: BasicData) => {
+    if (!this.onIFrame) return console.log("Not on IFrame, subscribe if you forgot!");
+    if (!params) return console.log("Missing feature option!");
+
+    if (params.detail && params.detail.startsWith('http')) {
+      await this.changeFeature(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
+    } else {
+      if (params.id.endsWith(GlobalValues.AccEnd)) {
         const accessory = this.accessoryList?.find(a => a.type === params.id && a.name === params.val);
 
-        if(!accessory) return console.log("Accessory option not found!");
+        if (!accessory) return console.log("Accessory option not found!");
         await this.changeAccessory(accessory.id, accessory.path, accessory.name, accessory.type);
-      }
-      else {
-        const feature = this.partList?.find(p => p.type === params.id && p.name === params.val);
+      } else {
+        const feature = this.featureList?.find(p => p.type === params.id && p.name === params.val);
 
-        if(!feature) return console.log("Feature option not found!");
-        await this.changePart(feature.id, feature.path, feature.name, feature.type);
+        if (!feature) return console.log("Feature option not found!");
+        await this.changeFeature(feature.id, feature.path, feature.name, feature.type);
       }
     }
   }
-  
+
   changeSkinColorFromIFrame = (newColor?: string) => {
     return this.onClickChangeSkinColor(newColor);
   }
-  
+
   exportFromIFrame = () => {
     return this.exportModel();
   }
@@ -204,11 +203,11 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
     if (this.props.attributeConfig) {
       for (const attribute of this.props.attributeConfig) {
-        // Is a part
+        // Is a feature
         if (this.state.featureSelectList.some(pl => pl.id === attribute.id)) {
-          const newPart = this.featureList.find(p => p.name === attribute.val && p.type === attribute.id);
-          if (newPart)
-            await this.changePart(newPart.id, newPart.path, newPart.name, attribute.id);
+          const newFeature = this.featureList.find(p => p.name === attribute.val && p.type === attribute.id);
+          if (newFeature)
+            await this.changeFeature(newFeature.id, newFeature.path, newFeature.name, attribute.id);
         }
         // Is an accessory
         else if (this.state.accSelectList.some(pl => pl.id === attribute.id)) {
@@ -217,16 +216,15 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
             await this.changeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
         }
       }
-    }
-    else {
-      let randomFeature: BodyPartLocationApi[] = [];
-      let randomAccessory: AccLocationApi[] = [];
-      
+    } else {
+      const randomFeature: FeatureInterface[] = [];
+      const randomAccessory: AccessoryInterface[] = [];
+
       // Load random features
-      for (const partType of this.state.featureSelectList) {
-        const randomPart = RandomArrayElement(this.featureList.filter(p => p.type === partType.id));
-        if (randomPart)
-          randomFeature.push(randomPart);
+      for (const featureType of this.state.featureSelectList) {
+        const randomFeatureOption = RandomArrayElement(this.featureList.filter(p => p.type === featureType.id));
+        if (randomFeatureOption)
+          randomFeature.push(randomFeatureOption);
       }
 
       for (const accType of this.state.accSelectList) {
@@ -234,7 +232,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
         if (randomAcc)
           randomAccessory.push(randomAcc);
       }
-      
+
       const modelPromises: Promise<GLTF>[] = [];
       for (const feature of randomFeature)
         modelPromises.push(this.getWearableOption(feature.id, feature.path));
@@ -243,17 +241,17 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       await Promise.all([...modelPromises]);
 
       for (const feature of randomFeature)
-        await this.changePart(feature.id, feature.path, feature.name, feature.type);
+        await this.changeFeature(feature.id, feature.path, feature.name, feature.type);
       for (const acc of randomAccessory)
         await this.changeAccessory(acc.id, acc.path, acc.name, acc.type);
     }
   }
 
-  async getPartList() {
+  async getFeatureList() {
     this.featureList = await GetAssetsListByCampaign(this.props.campaign);
-    const _partList = this.filterListByBodyPart(this.state.selectedPart);
+    const _featureList = this.filterListByBodyFeature(this.state.selectedFeature);
     // console.log('result', this.featureList);
-    this.setState({partList: _partList});
+    this.setState({featureList: _featureList});
   }
 
   async getAccessoryList() {
@@ -267,25 +265,25 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     // console.log(this.animationList);
   }
 
-  filterListByBodyPart(bodyPartType: string) {
+  filterListByBodyFeature(bodyFeatureType: string) {
     if (!this.featureList)
       return void LogError(Module.AvatarGenerator, "Missing feature list!");
 
-    return this.featureList.filter(x => x.type === bodyPartType);
+    return this.featureList.filter(x => x.type === bodyFeatureType);
   }
 
-  filterListByAccessory(accessoryPartType: string) {
+  filterListByAccessory(accessoryOptionType: string) {
     if (!this.accessoryList)
       return void LogError(Module.AvatarGenerator, "Missing accessory list!");
 
-    return this.accessoryList.filter(x => x.type === accessoryPartType);
+    return this.accessoryList.filter(x => x.type === accessoryOptionType);
   }
 
-  async getPartsData() {
+  async getFeaturesData() {
     if (!(this.sc && this.sc.armature))
       return LogError(Module.AvatarGenerator, "Missing armature!")
 
-    this.featureListData = await GetPartsData(this.sc.armature.scene, this.state.featureSelectList);
+    this.featureListData = await GetFeaturesData(this.sc.armature.scene, this.state.featureSelectList);
   }
 
   async getAccessoryBones() {
@@ -401,20 +399,20 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   async onClickChangeSkinColor(newSkinColor = this.state.skinColor) {
     if (!(this.sc && this.sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature for skin color change");
     if (newSkinColor == undefined) return LogError(Module.AvatarGenerator, "Missing new skin color");
-    
+
     await ChangeObjectSkinColor(this.sc.armature.scene, newSkinColor);
     this.setState({skinColor: newSkinColor});
   }
 
   onCategoryChange(value: string) {
-    const _partList = this.filterListByBodyPart(value);
-    this.setState({partList: _partList, selectedPart: value});
-    this.setFeatureCamPosition(value, this.props.campaignConfig.partsCamPos);
+    const _featureList = this.filterListByBodyFeature(value);
+    this.setState({featureList: _featureList, selectedFeature: value});
+    this.setFeatureCamPosition(value, this.props.campaignConfig.featuresCamPos);
   }
 
   onAccessoryChange(value: string) {
     const _accessoryList = this.filterListByAccessory(value);
-    this.setState({ accessoryList: _accessoryList, selectedAcc: value });
+    this.setState({accessoryList: _accessoryList, selectedAcc: value});
     this.setFeatureCamPosition(value, this.props.campaignConfig.accCamPos);
   }
 
@@ -425,28 +423,28 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       this.changeLookAtPosition(new Vector3(confRef.lookAt?.x, confRef.lookAt?.y, confRef.lookAt?.z));
     }
   }
-  
-  async getWearableOption(id: string, partPath: string) {
+
+  async getWearableOption(id: string, optionPath: string) {
     let replaceModel: GLTF;
-    if(this.savedModels[id]) {
+    if (this.savedModels[id]) {
       replaceModel = this.savedModels[id];
     } else {
-      replaceModel = await GetGltfModel(partPath);
+      replaceModel = await GetGltfModel(optionPath);
       this.savedModels[id] = replaceModel;
     }
-    
+
     return replaceModel;
   }
 
-  async changePart(id: string, partPath: string, name: string, selectedPart: string = this.state.selectedPart) {
-    if (!(this.sc && this.sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature in order to change part");
+  async changeFeature(id: string, featurePath: string, name: string, selectedFeature: string = this.state.selectedFeature) {
+    if (!(this.sc && this.sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature in order to change feature");
     if (!this.featureListData) return LogError(Module.AvatarGenerator, "Missing feature list data");
 
-    const replaceModel = await this.getWearableOption(id, partPath);
-    
-    await ReplaceModelPartOnly(this.sc.armature.scene.children[0], replaceModel, this.featureListData[selectedPart], this.state.featureSelectList.find(sl => sl.id === selectedPart), this.state.skinColor);
-    await this.getPartsData();
-    this.addReplaceAttribute(selectedPart, name);
+    const replaceModel = await this.getWearableOption(id, featurePath);
+
+    await ReplaceModelFeatureOnly(this.sc.armature.scene.children[0], replaceModel, this.featureListData[selectedFeature], this.state.featureSelectList.find(sl => sl.id === selectedFeature), this.state.skinColor);
+    await this.getFeaturesData();
+    this.addReplaceAttribute(selectedFeature, name);
   }
 
   async changeAccessory(id: string, path: string, name: string, selectedAcc: string = this.state.selectedAcc) {
@@ -486,12 +484,12 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     if (!(this.sc && this.sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature on export");
 
     this.exportData.attributesBase64 = window.btoa(JSON.stringify(this.exportData.attributes));
-    const exportPromises = await Promise.all([
+    const [picturePromise, modelPromise] = await Promise.all([
       this.takeExportPicture(),
       ExportModelGlb(this.sc.armature)
     ]);
-    this.exportData.picture = exportPromises[0];
-    this.exportData.model = exportPromises[1];
+    this.exportData.picture = picturePromise;
+    this.exportData.model = modelPromise;
 
     console.log(this.exportData);
     if (this.onIFrame) {
@@ -502,29 +500,9 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     }
   }
 
-  optionListAccessories() {
-    return this.state.aSelectList.map((x) => {
-      return <option value={x.id} key={x.id}>{x.id}</option>
-    });
-  }
+  async changeView() {
+    if (!this.threeCanvas) return LogError(Module.AvatarGenerator, "Missing canvas");
 
-  accessorySelectList() {
-    return this.state.accessoryList.map((x) => {
-      return (
-        <div className="flex justify-center py-2" key={x.id}>
-          <button
-            className="font-bold py-2 px-4 mx-2 w-full rounded bg-orange-400 text-white"
-            onClick={() => this.changeAccessory(x.id, x.path, x.name)}>
-            {x.name}
-          </button>
-        </div>
-      );
-    });
-  }
-
-  changeView() {
-    if(!this.threeCanvas) return LogError(Module.AvatarGenerator, "Missing canvas");
-    
     // const parent = this.mount?.parentNode as HTMLElement;
     if (this.state.editModeSelected) {
       // parent!.classList.add('!w-full');
@@ -558,38 +536,39 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   private renderEditMode() {
     return (
       <>
-        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor} />
+        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor}/>
         {/* CANVAS WRAPPER */}
-        <div className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+        <div
+          className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
           {/* CANVAS BACKGROUND */}
-          <div style={{backgroundColor: `#${this.props.bgColor ?? '272727'}`}} className="w-full h-screen absolute" />
+          <div style={{backgroundColor: `#${this.props.bgColor ?? '272727'}`}} className="w-full h-screen absolute"/>
           {/* CANVAS */}
-          <div className="relative h-full" ref={ref => this.mount = ref} />
+          <div className="relative h-full" ref={ref => this.threeCanvas = ref}/>
         </div>
         {!this.props.onlyView &&
-            <div onClick={() => this.changeView()}
+            <div onClick={() => void this.changeView()}
                  className="z-10 fixed top-4 right-4 bg-slate-100 border-2 border-slate-50 rounded-[4px] drop-shadow-md flex items-center justify-center px-2">
-              <div className="m-2">
-                {
-                  this.state.editModeSelected ?
-                  <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
-	                viewBox="0 0 511.996 511.996">
-                    <path d="M508.245,246.953L363.435,102.133c-5.001-5.001-13.099-5.001-18.099,0c-5.001,5-5.001,13.099,0,18.099l122.965,122.965
+                <div className="m-2">
+                  {
+                    this.state.editModeSelected ?
+                      <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
+                           viewBox="0 0 511.996 511.996">
+                        <path d="M508.245,246.953L363.435,102.133c-5.001-5.001-13.099-5.001-18.099,0c-5.001,5-5.001,13.099,0,18.099l122.965,122.965
                           H12.8c-7.074,0-12.8,5.726-12.8,12.8c0,7.074,5.726,12.8,12.8,12.8h455.492L345.327,391.763c-5.001,5-5.001,13.099,0,18.099
                           c5.009,5.001,13.099,5.001,18.108,0l144.811-144.811C513.246,260.051,513.246,251.953,508.245,246.953z"/>
-                  </svg>
-                  : <svg version="1.1" id="Layer_2" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
-                    viewBox="0 0 217.855 217.855">
-                      <path d="M215.658,53.55L164.305,2.196C162.899,0.79,160.991,0,159.002,0c-1.989,0-3.897,0.79-5.303,2.196L3.809,152.086
+                      </svg>
+                      : <svg version="1.1" id="Layer_2" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
+                             viewBox="0 0 217.855 217.855">
+                        <path d="M215.658,53.55L164.305,2.196C162.899,0.79,160.991,0,159.002,0c-1.989,0-3.897,0.79-5.303,2.196L3.809,152.086
                         c-1.35,1.352-2.135,3.166-2.193,5.075l-1.611,52.966c-0.063,2.067,0.731,4.069,2.193,5.532c1.409,1.408,3.317,2.196,5.303,2.196
                         c0.076,0,0.152-0.001,0.229-0.004l52.964-1.613c1.909-0.058,3.724-0.842,5.075-2.192l149.89-149.889
                         C218.587,61.228,218.587,56.479,215.658,53.55z M57.264,201.336l-42.024,1.28l1.279-42.026l91.124-91.125l40.75,40.743
                         L57.264,201.336z M159,99.602l-40.751-40.742l40.752-40.753l40.746,40.747L159,99.602z"/>
-                    </svg>
+                      </svg>
 
-                }
-              </div>
-              <div className="mr-2 text-xs">{this.state.editModeSelected ? 'NEXT':'EDIT'}</div>
+                  }
+                </div>
+                <div className="mr-2 text-xs">{this.state.editModeSelected ? 'NEXT' : 'EDIT'}</div>
             </div>
         }
         {this.state.editModeSelected ?
@@ -598,16 +577,22 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
               <div className="w-full">
                 {
                   this.state.featuresSelected &&
-                  <OptionSelectorComponent list={this.state.partList} activeOption={this.exportData?.attributes.find(o => o.id === this.state.selectedPart)} handleClick={(id: string, path: string, name: string) => this.changePart(id, path, name)}/>
+                    <OptionSelectorComponent list={this.state.featureList}
+                                             activeOption={this.exportData?.attributes.find(o => o.id === this.state.selectedFeature)}
+                                             handleClick={(id: string, path: string, name: string) => void this.changeFeature(id, path, name)}/>
                 }
               </div>
               <div className="w-full bg-slate-100 flex">
                 <div className="w-[calc(100%_-_60px)]">
                   {
                     this.state.featuresSelected ?
-                    <FeatureSelectorComponent list={this.state.selectList} activeFeature={this.state.selectedPart} handleClick={(value:string) => this.onCategoryChange(value)}/>
-                    :
-                    <ColorSelectorComponent list={['F6C89B','E8A36F', '9F5835', 'F2A47E', 'C67E42']} activeColor={this.state.skinColor} handleClick={(value:string) => this.onClickChangeSkinColor(value)}/>
+                      <FeatureSelectorComponent list={this.state.featureSelectList}
+                                                activeFeature={this.state.selectedFeature}
+                                                handleClick={(value: string) => this.onCategoryChange(value)}/>
+                      :
+                      <ColorSelectorComponent list={['F6C89B', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
+                                              activeColor={this.state.skinColor}
+                                              handleClick={(value: string) => void this.onClickChangeSkinColor(value)}/>
                   }
                 </div>
                 <div className="w-[60px] pt-3" onClick={() => this.changeEditSelection(!this.state.featuresSelected)}>
@@ -615,66 +600,40 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
                     <div className={"rounded-md w-[40px] h-[40px] flex justify-center items-center"}>
                       {
                         this.state.featuresSelected ?
-                        <Image src='/resources/icos/buttons/head.svg' width={25} height={25} alt={'Color button'} className='opacity-70'/>
-                        :
-                        <Image src='/resources/icos/features/features.svg' width={30} height={30} alt={'Color button'} className='opacity-70'/>
+                          <Image src='/resources/icons/buttons/head.svg' width={25} height={25} alt={'Color button'}
+                                 className='opacity-70'/>
+                          :
+                          <Image src='/resources/icons/features/features.svg' width={30} height={30}
+                                 alt={'Color button'} className='opacity-70'/>
                       }
                     </div>
-                    <p className='text-[10px] pt-1 opacity-50 w-[40px]'>{this.state.featuresSelected ? 'Skin':'Features'}</p>
+                    <p
+                      className='text-[10px] pt-1 opacity-50 w-[40px]'>{this.state.featuresSelected ? 'Skin' : 'Features'}</p>
                   </div>
                 </div>
               </div>
             </div>
           </>
-          :<>
+          : <>
             {!this.props.onlyView &&
-              <div onClick={() => this.exportModel()}
-              className="z-10 fixed bottom-4 right-4 bg-slate-100 border-2 border-slate-50 rounded-[4px] drop-shadow-md flex items-center justify-center px-2">
-                <div className="m-2">
-                  <svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
-	                viewBox="0 0 460 460">
-                    <path d="M427.137,0C408.93,0,51.379,0,32.865,0C14.743,0,0,14.743,0,32.865v394.272c0,18.122,14.743,32.865,32.865,32.865
+                <div onClick={() => void this.exportModel()}
+                     className="z-10 fixed bottom-4 right-4 bg-slate-100 border-2 border-slate-50 rounded-[4px] drop-shadow-md flex items-center justify-center px-2">
+                    <div className="m-2">
+                        <svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
+                             viewBox="0 0 460 460">
+                            <path d="M427.137,0C408.93,0,51.379,0,32.865,0C14.743,0,0,14.743,0,32.865v394.272c0,18.122,14.743,32.865,32.865,32.865
                       c0,0,374.895,0,394.272,0c18.122,0,32.865-14.743,32.865-32.865V32.865C460.001,14.743,445.258,0,427.137,0z M245.812,30h50.995
                       v54.466h-50.995V30z M107.198,30h108.615v69.466c0,8.284,6.716,15,15,15h80.995c8.284,0,15-6.716,15-15V30h26.377v119.636H107.198
                       V30z M107.007,430.001V308.673h245.986v121.328H107.007z M430.002,427.137L430.002,427.137c-0.001,1.58-1.286,2.865-2.866,2.865
                       h-44.143V293.673c0-8.284-6.716-15-15-15H92.007c-8.284,0-15,6.716-15,15v136.328H32.865c-1.58,0-2.865-1.285-2.865-2.865V32.865
                       C30,31.285,31.285,30,32.865,30h44.333v134.636c0,8.284,6.716,15,15,15h275.986c8.284,0,15-6.716,15-15V30h43.953
                       c1.58,0,2.865,1.285,2.865,2.865V427.137z"/>
-                  </svg>
+                        </svg>
+                    </div>
+                    <div className="mr-2 text-xs">SAVE</div>
                 </div>
-                <div className="mr-2 text-xs">SAVE</div>
-              </div>
             }
           </>
-          // <>
-          //   <CategorySelectorComponent close={!this.state.featuresSelected} list={this.state.selectList} activedPart={this.state.selectedPart} handleClick={(value:string) => this.onCategoryChange(value)} handleClick2={(value:boolean) => this.changeEditSelection(value)} />
-          //   <AccessorySelectorComponent close={this.state.featuresSelected} list={this.state.aSelectList} activedPart={this.state.selectedAcc} handleClick={(value:string) => this.onAccessoryChange(value)} handleClick2={(value:boolean) => this.changeEditSelection(value)} />
-          //   {
-          //     this.state.featuresSelected ?
-          //     <CategoryChildrenComponent list={this.state.partList} handleClick={(id: string, path: string, name: string) => this.changePart(id, path, name)}/>
-          //     : <AccessoryChildrenComponent list={this.state.accessoryList} handleClick={(id: string, path: string, name: string) => this.changeAccessory(id, path, name)}/>
-          //   }
-          // </>
-          // :<>
-          //   {!this.props.onlyView &&
-          //     <div onClick={() => this.exportModel()}
-          //     className="z-10 fixed bottom-28 right-4 w-24 h-12 bg-gray-200 border-2 border-gray-100 rounded-[6px] drop-shadow-md flex items-center justify-center px-14">
-          //       <div className="m-2">
-          //         <svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width={'1rem'}
-	        //         viewBox="0 0 460 460">
-          //           <path d="M427.137,0C408.93,0,51.379,0,32.865,0C14.743,0,0,14.743,0,32.865v394.272c0,18.122,14.743,32.865,32.865,32.865
-          //             c0,0,374.895,0,394.272,0c18.122,0,32.865-14.743,32.865-32.865V32.865C460.001,14.743,445.258,0,427.137,0z M245.812,30h50.995
-          //             v54.466h-50.995V30z M107.198,30h108.615v69.466c0,8.284,6.716,15,15,15h80.995c8.284,0,15-6.716,15-15V30h26.377v119.636H107.198
-          //             V30z M107.007,430.001V308.673h245.986v121.328H107.007z M430.002,427.137L430.002,427.137c-0.001,1.58-1.286,2.865-2.866,2.865
-          //             h-44.143V293.673c0-8.284-6.716-15-15-15H92.007c-8.284,0-15,6.716-15,15v136.328H32.865c-1.58,0-2.865-1.285-2.865-2.865V32.865
-          //             C30,31.285,31.285,30,32.865,30h44.333v134.636c0,8.284,6.716,15,15,15h275.986c8.284,0,15-6.716,15-15V30h43.953
-          //             c1.58,0,2.865,1.285,2.865,2.865V427.137z"/>
-          //         </svg>
-          //       </div>
-          //       <div className="mr-2">SAVE</div>
-          //     </div>
-          //   }
-          // </>
         }
       </>
     );
@@ -715,21 +674,21 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
 
   let _baseMeshPath: string;
   let _campaignConfig: CampaignConfig;
-  let _selectListBodyParts: BasicData[];
+  let _selectListBodyFeatures: BasicData[];
   let _selectListAccessories: BasicData[];
 
   if (isCampaign && subdomain) {
     _baseMeshPath = `base_mesh/${subdomain}.glb`;
-    const result = await GetParameters(undefined, subdomain, subdomain + GV.Acc, subdomain + GV.Config);
-    _selectListBodyParts = result[0] as BasicData[];
-    _selectListAccessories = result[1] as BasicData[];
-    _campaignConfig = result[2] as CampaignConfig;
+    const [bodyFeatureList, accessoryList, campaignConfig] = await GetParameters<BasicData[] | CampaignConfig>(undefined, subdomain, subdomain + GV.Acc, subdomain + GV.Config);
+    _selectListBodyFeatures = bodyFeatureList as BasicData[];
+    _selectListAccessories = accessoryList as BasicData[];
+    _campaignConfig = campaignConfig as CampaignConfig;
   } else {
     _baseMeshPath = `base_mesh/${GV.BaseCampaign}.glb`;
-    const result = await GetParameters(undefined, GV.BaseCampaign, GV.BaseCampaign + GV.Acc, GV.BaseCampaign + GV.Config);
-    _selectListBodyParts = result[0] as BasicData[];
-    _selectListAccessories = result[1] as BasicData[];
-    _campaignConfig = result[2] as CampaignConfig;
+    const [bodyFeatureList, accessoryList, campaignConfig] = await GetParameters<BasicData | CampaignConfig>(undefined, GV.BaseCampaign, GV.BaseCampaign + GV.Acc, GV.BaseCampaign + GV.Config);
+    _selectListBodyFeatures = bodyFeatureList as BasicData[];
+    _selectListAccessories = accessoryList as BasicData[];
+    _campaignConfig = campaignConfig as CampaignConfig;
   }
 
   return {
@@ -737,7 +696,7 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
       campaign: isCampaign ? subdomain : null,
       baseMeshPath: _baseMeshPath,
       campaignConfig: _campaignConfig ?? {},
-      selectListBodyParts: _selectListBodyParts,
+      selectListBodyFeatures: _selectListBodyFeatures,
       selectListAccessories: _selectListAccessories,
       attributeConfig: parsedConfig,
       bgColor: bg as string ?? null,

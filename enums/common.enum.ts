@@ -23,7 +23,7 @@ export enum IFrameEvents {
   Ready = 'ready',
   Subscribe = 'subscribe',
   Exported = 'exported',
-  ChangePart = 'change',
+  ChangeFeature = 'change',
   ChangeSkinColor = 'change_color',
 }
 
