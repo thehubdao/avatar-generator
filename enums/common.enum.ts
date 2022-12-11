@@ -49,3 +49,9 @@ export enum Module {
   ModelUtil = 'ModelUtil',
   UserAdd = 'UserAdd',
 }
+
+export enum EmailResult {
+  NoEmail,
+  BadEmail,
+  GoodEmail,
+}

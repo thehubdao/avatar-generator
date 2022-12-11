@@ -17,3 +17,7 @@ export interface UserInterface {
   email: string;
   campaign: string[];
 }
+
+export interface UserWithPass extends UserInterface{
+  password: string;
+}
