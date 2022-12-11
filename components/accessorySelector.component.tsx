@@ -1,32 +1,33 @@
 import Image from "next/image";
-import { AccLocationApi } from "../interfaces/api.interface";
+import {MouseEvent} from "react";
+import {AccessoryInterface} from "../interfaces/api.interface";
 import {BasicData} from "../interfaces/common.interface";
 
 interface ExampleProps {
-  list: AccLocationApi[] | BasicData[];
-  handleClick: Function;
-  handleClick2: Function;
-  activedPart: string;
+  list: AccessoryInterface[] | BasicData[];
+  handleClick: (id: string) => void;
+  handleClick2: (flag: boolean) => void;
+  activeFeature: string;
   close: boolean;
 }
 
 function getSiblings(el: HTMLElement) {
 
   // for collecting siblings
-  let siblings:ChildNode[] = []; 
+  const siblings: ChildNode[] = [];
 
   // if no parent, return no sibling
-  if(!el.parentNode) {
-      return siblings;
+  if (!el.parentNode) {
+    return siblings;
   }
 
   // first child of the parent node
-  let sibling  = el.parentNode.firstChild;
+  let sibling = el.parentNode.firstChild;
 
   // collecting siblings
   while (sibling) {
     if (sibling.nodeType === 1 && sibling !== el) {
-        siblings.push(sibling);
+      siblings.push(sibling);
     }
     sibling = sibling.nextSibling;
   }
@@ -34,13 +35,13 @@ function getSiblings(el: HTMLElement) {
 }
 
 function optionList(props: ExampleProps) {
-
-  function selectPart(e:React.MouseEvent, id:string) {
+  function selectFeature(e: MouseEvent, id: string) {
     e.preventDefault();
+    
     const el = e.target as HTMLElement;
-    let siblings = getSiblings(el);
+    const siblings = getSiblings(el);
     siblings.forEach(sibling => {
-      let bro = sibling as HTMLElement
+      const bro = sibling as HTMLElement
       bro.classList.add('!bg-transparent');
     });
     el.classList.remove('!bg-transparent');
@@ -49,9 +50,11 @@ function optionList(props: ExampleProps) {
 
   return props.list.map((x) => {
     return (
-      <div className={"overflow-hidden w-12 h-12 flex justify-center flex-col items-center bg-slate-50" + (props.activedPart===x.id?'':' !bg-transparent')} key={x.id} onClick={(event:React.MouseEvent) => selectPart(event,x.id)}>
+      <div
+        className={"overflow-hidden w-12 h-12 flex justify-center flex-col items-center bg-slate-50" + (props.activeFeature === x.id ? '' : ' !bg-transparent')}
+        key={x.id} onClick={(event: MouseEvent) => selectFeature(event, x.id)}>
         <div className="pointer-events-none">
-          <Image src={'/resources/icos/accessories/' + x.id + '.svg'} width={30} height={30} alt={x.id}/>
+          <Image src={'/resources/icons/accessories/' + x.id + '.svg'} width={30} height={30} alt={x.id}/>
           {/* <p>{x.id}</p> */}
         </div>
       </div>
@@ -59,12 +62,13 @@ function optionList(props: ExampleProps) {
   });
 }
 
-function AccessorySelectorComponent(props: ExampleProps) {
-
+export default function AccessorySelectorComponent(props: ExampleProps) {
   return (
-    <div className={"w-14 bg-gray-200 border-2 border-gray-100 fixed top-4 left-4 rounded-[6px] drop-shadow-md flex flex-col items-center " + (props.close ? 'h-[50px] overflow-hidden left-20':'')}>
-      <div className="w-12 h-12 flex justify-center items-center border-b-2 border-solid border-gray-100 p-2" onClick={() => props.handleClick2(false)}>
-        <Image src={'/resources/icos/accessories/accessories.svg'} width={30} height={30} alt={'features'}/>
+    <div
+      className={"w-14 bg-gray-200 border-2 border-gray-100 fixed top-4 left-4 rounded-[6px] drop-shadow-md flex flex-col items-center " + (props.close ? 'h-[50px] overflow-hidden left-20' : '')}>
+      <div className="w-12 h-12 flex justify-center items-center border-b-2 border-solid border-gray-100 p-2"
+           onClick={() => props.handleClick2(false)}>
+        <Image src={'/resources/icons/accessories/accessories.svg'} width={30} height={30} alt={'features'}/>
       </div>
       <div className="py-4">
         {optionList(props)}
@@ -72,5 +76,3 @@ function AccessorySelectorComponent(props: ExampleProps) {
     </div>
   )
 }
-
-export { AccessorySelectorComponent };

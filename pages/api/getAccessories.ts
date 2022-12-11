@@ -1,4 +1,4 @@
-import {NextApiRequest, NextApiResponse} from "next";
+﻿import {NextApiRequest, NextApiResponse} from "next";
 import {GetParameters} from "../../utils/firebase.util";
 import {GlobalValues} from "../../enums/common.enum";
 import {BasicData} from "../../interfaces/common.interface";

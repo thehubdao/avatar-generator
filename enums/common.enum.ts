@@ -5,7 +5,7 @@
   AccEnd = 'Acc',
 }
 
-export enum AttributeValues {
+export enum ExportAttributeValues {
   Campaign = 'campaign',
 }
 
@@ -23,11 +23,29 @@ export enum IFrameEvents {
   Ready = 'ready',
   Subscribe = 'subscribe',
   Exported = 'exported',
-  ChangePart = 'change',
+  ChangeFeature = 'change',
   ChangeSkinColor = 'change_color',
 }
 
 export enum PageLocation {
   Admin = '/admin',
   AssetList = '/admin/assets/list',
+  Login = '/admin/login',
+  FirstSteps = '/admin/firstSteps',
+}
+
+export enum AdminComponents {
+  AssetAdd,
+  AssetList,
+  AssetModify,
+  UserAdd,
+  UserList,
+}
+
+export enum Module {
+  FirebaseUtil = 'FirebaseUtil',
+  AssetAdd = 'AssetAdd',
+  AvatarGenerator = 'AvatarGenerator',
+  ModelUtil = 'ModelUtil',
+  UserAdd = 'UserAdd',
 }

@@ -1,5 +1,6 @@
 ﻿import {Object3D} from "three";
 import {ClientQuestion} from "../enums/campaign.enum";
+import {AdminComponents} from "../enums/common.enum";
 
 export interface BasicData {
   id: string;
@@ -7,8 +8,8 @@ export interface BasicData {
   detail?: string;
 }
 
-export interface PartInfoInterface {
-  partIndex: number;
+export interface FeatureInfoInterface {
+  featureIndex: number;
   featureBase?: Object3D;
 }
 
@@ -38,10 +39,31 @@ interface AGVector3 {
 }
 
 export interface CampaignConfig {
-  clientRequirements?: ClientQuestion[],
+  clientRequirements?: ClientQuestion[];
   defEyesColor?: string;
   defSkinColor?: string;
-  defCam?: LookAtVectors,
-  partsCamPos?: Record<string, LookAtVectors>;
+  defCam?: LookAtVectors;
+  featuresCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
+}
+
+export interface CampaignParameters {
+  owner: string;
+  armature: string;
+  features?: BasicData[];
+  accessories?: BasicData[];
+  config?: CampaignConfig;
+}
+
+export interface AdminComponentParams {
+  docLocation?: string;
+}
+
+export type ChangeComponentFunction = (newComponent: AdminComponents, params?: AdminComponentParams) => void;
+
+export interface Result<T> {
+  successful: boolean;
+  value?: T;
+  errMessage?: string;
+  errCode?: string;
 }

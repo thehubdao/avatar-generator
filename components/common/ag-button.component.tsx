@@ -3,9 +3,10 @@
 interface AGButtonProps {
   type?: 'primary' | 'secondary' | 'alert' | 'danger';
   side?: 'center' | 'start' | 'end';
-  onClickEvent?: Function;
-  children?: string;
+  onClickEvent?: () => void;
+  children?: string | JSX.Element;
   form?: boolean;
+  tooltip?: string;
 }
 
 interface AGButtonState {
@@ -51,14 +52,22 @@ export default class AGButton extends Component<AGButtonProps, AGButtonState>{
   }
   
   render() {
-    const { color, borderColor, textColor, hover} = this.state;
+    const { color, borderColor, textColor, hover, side} = this.state;
     
     return (
-      <div className={`my-2 flex ${this.state.side}`}>
-        <button type={this.props.form ? "submit": "button"} className={`mx-2 w-auto rounded py-1 border-1 ${hover} ${textColor} ${color} ${borderColor}`}
-                onClick={() => this.props.onClickEvent ? this.props.onClickEvent() : undefined}>
-          <p className='px-4'>{this.props.children}</p>
-        </button>
+      <div className={`my-2 flex ${side ?? ''}`}>
+        {
+          this.props.form ?
+            <button type="submit" className={`mx-2 w-auto my-auto rounded py-1 border-1 ${hover} ${textColor} ${color} ${borderColor}`}
+                 onClick={this.props.onClickEvent} title={this.props.tooltip}>
+              <span className='px-4'>{this.props.children}</span>
+            </button>
+            :
+            <div className={`mx-2 w-auto my-auto rounded py-1 border-1 cursor-pointer ${hover} ${textColor} ${color} ${borderColor}`}
+                 onClick={this.props.onClickEvent} title={this.props.tooltip}>
+              <span className='px-4'>{this.props.children}</span>
+            </div>
+        }
       </div>
     );
   }

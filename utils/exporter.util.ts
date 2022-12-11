@@ -1,41 +1,50 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
+import {Delay} from "./common.util";
 
-export class ExporterUtil {
-  private static gltfExporter: GLTFExporter;
-
-  private static getGltfLoaderInstance(): GLTFExporter {
-    if(ExporterUtil.gltfExporter === undefined)
-      ExporterUtil.gltfExporter = new GLTFExporter();
-
-    return ExporterUtil.gltfExporter;
+class ExporterUtil {
+  private static _instance: ExporterUtil;
+  private _gltfExporter: GLTFExporter | null;
+  
+  constructor() {
+    this._gltfExporter = null;
   }
   
-  static async ExportModelGlb(model: GLTF) {
-    const exporter = this.getGltfLoaderInstance();
-    const out = await exporter.parseAsync(model.scene, {
-      animations: model.animations,
-      binary: true,
-    });
-        
-    return new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
-  }
-
-  static async ExportModelGltf(model: GLTF) {
-    const exporter = this.getGltfLoaderInstance();
-    const out = await exporter.parseAsync(model.scene, {
-      animations: model.animations,
-    });
+  public static Instance() {
+    if(ExporterUtil._instance === undefined)
+      ExporterUtil._instance = new ExporterUtil();
     
-    const jsonString = JSON.stringify(out, null, 2);
-    await SaveString(jsonString, `exported.gltf`);
+    return ExporterUtil._instance;
   }
-
+  
+  public GltfExporter() {
+    if(this._gltfExporter == null) {
+      this._gltfExporter = new GLTFExporter();
+    }
+    
+    return this._gltfExporter;
+  }
 }
 
-export const delay = (ms: number) => new Promise(resolve => {
-  setTimeout(resolve, ms);
-});
+export async function ExportModelGlb(model: GLTF) {
+    const exporter = ExporterUtil.Instance().GltfExporter();
+    const out = await exporter.parseAsync(model.scene, {
+        animations: model.animations,
+        binary: true,
+    });
+
+    return new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
+}
+
+export async function ExportModelGltf(model: GLTF) {
+    const exporter = ExporterUtil.Instance().GltfExporter();
+    const out = await exporter.parseAsync(model.scene, {
+        animations: model.animations,
+    });
+
+    const jsonString = JSON.stringify(out, null, 2);
+    await SaveString(jsonString, `exported.gltf`);
+}
 
 export async function SaveFile(blob: Blob, fileName: string) {
   const link = document.createElement('a');
@@ -45,7 +54,7 @@ export async function SaveFile(blob: Blob, fileName: string) {
   document.body.appendChild(link);
   link.click();
   
-  await delay(100);
+  await Delay(100);
   link.remove();
 }
 

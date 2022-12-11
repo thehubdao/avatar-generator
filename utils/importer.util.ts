@@ -1,8 +1,8 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
+import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../interfaces/api.interface";
 import {Group} from "three";
 import {GetFile} from "./firebase.util";
-import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
-import {AccLocationApi, AnimLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
+import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
 
 class ImporterUtil {
   private static _instance: ImporterUtil;
@@ -50,8 +50,8 @@ export async function FetchGltfModel(url: string): Promise<GLTF> {
   return ParseAsync(arrayBuffer);
 }
 
-export async function FirebaseGltfModel(path: string): Promise<GLTF> {
-  const arrayBuffer = await GetFile(path);
+export async function FirebaseGltfModel(path: string, campaign?: string): Promise<GLTF> {
+  const arrayBuffer = await GetFile(path, campaign);
   return ParseAsync(arrayBuffer);
 }
 
@@ -62,34 +62,38 @@ export async function GetGltfModel(path: string) {
     return FirebaseGltfModel(path);
 }
 
-export function GetAccessoryBones(baseModel: Group, accessoryBonesList: BasicData[]): Record<string, AccessoryInfoInterface> {
-  const bones = baseModel.children[0];
-  let result: Record<string, AccessoryInfoInterface> = {};
-  
-  bones.traverse((bone) => {
-    if(accessoryBonesList.some(x => x.val === bone.name)) {
-      const foundBone = accessoryBonesList.filter(x => x.val === bone.name);
-      foundBone.forEach(fb => {
-        result[fb.id] = { bone: bone };
-      })
-    }
+export async function GetAccessoryBones(baseModel: Group, accessoryBonesList: BasicData[]) {
+  return new Promise<Record<string, AccessoryInfoInterface>>((resolve) => {
+    const bones = baseModel.children[0];
+    let result: Record<string, AccessoryInfoInterface> = {};
+
+    bones.traverse((bone) => {
+      if(accessoryBonesList.some(x => x.val === bone.name)) {
+        const foundBone = accessoryBonesList.filter(x => x.val === bone.name);
+        foundBone.forEach(fb => {
+          result[fb.id] = { bone: bone };
+        })
+      }
+    });
+
+    resolve(result);
   });
-  
-  return result;
 }
 
-export function GetPartsData(baseModel: Group, partList: BasicData[], update: boolean = false): Record<string, PartInfoInterface> {
-  const baseParts = baseModel.children[0];
-  let result: Record<string, PartInfoInterface> = {};
-  
-  baseParts.children.forEach((part, index) => {
-    if(partList.some(x => x.val === part.name)) {
-      const foundPart = partList.find(x => x.val === part.name);
-      result[foundPart!.id] = { partIndex: index, featureBase: update ? result[foundPart!.id].featureBase : part.clone() };
-    }
-  });
+export async function GetFeaturesData(baseModel: Group, featureList: BasicData[], update: boolean = false) {
+  return new Promise<Record<string, FeatureInfoInterface>>(resolve => {
+    const baseFeatures = baseModel.children[0];
+    let result: Record<string, FeatureInfoInterface> = {};
 
-  return result;
+    for(const [index, feature] of baseFeatures.children.entries()) {
+      if(featureList.some(x => x.val === feature.name)) {
+        const foundFeature = featureList.find(x => x.val === feature.name);
+        result[foundFeature!.id] = { featureIndex: index, featureBase: update ? result[foundFeature!.id].featureBase : feature.clone() };
+      }
+    }
+
+    resolve(result);
+  });
 }
 
 async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
@@ -97,16 +101,16 @@ async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
 }
 
 export async function GetAssetsListByCampaign(campaign?: string | null) {
-  const jsonObject: BodyPartLocationApi[] = await fetch('/api/getFeatureOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  const jsonObject: FeatureInterface[] = await fetch('/api/getFeatureOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
 
 export async function GetAccessoryListByCampaign(campaign?: string | null) {
-  const jsonObject: AccLocationApi[] = await fetch('/api/getAccessoryOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  const jsonObject: AccessoryInterface[] = await fetch('/api/getAccessoryOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
 
 export async function GetAnimationListByCampaign(campaign?: string | null) {
-  const jsonObject: AnimLocationApi[] = await fetch('/api/getAnimations' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
+  const jsonObject: AnimationInterface[] = await fetch('/api/getAnimations' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
   return jsonObject;
 }
