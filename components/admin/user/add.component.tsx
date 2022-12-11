@@ -1,52 +1,63 @@
-import {Component, FormEvent} from "react";
+import {FormEvent, useRef} from "react";
 import {AuthValues, UserRoleValues} from "../../../enums/firebase.enum";
 import AGButton from "../../common/ag-button.component";
 import AGText from "../../common/ag-text.component";
-import {UserInterface} from "../../../interfaces/firebase.interface";
+import {UserWithPass} from "../../../interfaces/firebase.interface";
 import {CreateNewUser} from "../../../utils/firebase.util";
 import {IsEmail, LogError} from "../../../utils/common.util";
-import {Module} from "../../../enums/common.enum";
+import {EmailResult, Module} from "../../../enums/common.enum";
 
-export default class UserAdd extends Component {
-  private userName: HTMLInputElement | null = null;
-  private userAccount: HTMLInputElement | null = null;
+export default function UserAdd() {
+  const userName = useRef<HTMLInputElement>(null);
+  const userAccount = useRef<HTMLInputElement>(null);
+  const userPass = useRef<HTMLInputElement>(null);
 
-  render() {
-    return (
-      <>
-        <AGText type="th1">New User</AGText>
-        <form onSubmit={event => void this.createNewUser(event)}>
-          <p>Nombre</p>
-          <input type="text" ref={r => this.userName = r}/>
-          <p>Usuario</p>
-          <input type="text" ref={r => this.userAccount = r}/>
-          <AGButton type="danger" form>Add</AGButton>
-        </form>
-        <AGButton type="alert" >Cancel</AGButton>
-      </>
-    );
-  }
-
-  private async createNewUser(event: FormEvent<HTMLFormElement>) {
+  async function createNewUser(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    const newEmail = userEmail(userAccount?.current?.value);
+    if(newEmail == undefined) return;
     
-    const newUser: Partial<UserInterface> = {
-      name: this.userName?.value,
-      account: this.userAccount?.value,
-      email: this.userEmail(this.userAccount?.value),
+    const newUser: Partial<UserWithPass> = {
+      account: userAccount?.current?.value,
+      email: newEmail,
+      name: userName?.current?.value,
+      password: userPass?.current?.value,
       role: UserRoleValues.admin,
     };
+
     const result = await CreateNewUser(newUser);
-    if(result.successful)
+    if (result.successful)
       console.log("Go back to list and show alert");
   }
 
-  private userEmail(account?: string) {
-    if(!account) {
-      void LogError(Module.UserAdd, "Missing account!").then();
-      return undefined;
-    }
+  function userEmail(account?: string) {
+    if (account == undefined) return void LogError(Module.UserAdd, "Missing account!");
 
-    return IsEmail(account) ? account : account + AuthValues.DefaultEmail;
+    switch (IsEmail(account)) {
+      case EmailResult.NoEmail:
+        return account + AuthValues.DefaultEmail;
+      case EmailResult.GoodEmail:
+        return account;
+      case EmailResult.BadEmail:
+        alert("Wrong email, please insert a valid email or account");
+        return void LogError(Module.UserAdd, "Wrong email, please insert a valid email or account");
+    }
   }
+
+  return (
+    <>
+      <AGText type="th1">New User</AGText>
+      <form onSubmit={event => void createNewUser(event)}>
+        <p>Name</p>
+        <input type="text" ref={userName}/>
+        <p>User</p>
+        <input type="text" ref={userAccount}/>
+        <p>Password</p>
+        <input type="text" ref={userPass}/>
+        <AGButton type="danger" form>Add</AGButton>
+      </form>
+      <AGButton type="alert">Cancel</AGButton>
+    </>
+  );
 }

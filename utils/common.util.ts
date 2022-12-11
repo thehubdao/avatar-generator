@@ -1,4 +1,4 @@
-﻿import {Module} from "../enums/common.enum";
+﻿import {EmailResult, Module} from "../enums/common.enum";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
@@ -9,11 +9,15 @@ export async function LogError(origin: string | Module, message: string) {
   console.error(`${origin} - `, message);
 }
 
-export const Delay = (ms: number) => new Promise<void>(resolve => {
-  setTimeout(resolve, ms);
-});
+export function Delay(ms: number) {
+  return new Promise<void>(resolve => {
+    setTimeout(resolve, ms);
+  });
+}
 
-export function IsEmail(text: string) {
+export function IsEmail(text: string): EmailResult {
+  if (!text.includes('@') && !text.includes('.')) return EmailResult.NoEmail;
+  
   const regExp = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
-  return regExp.test(text.toLowerCase());
+  return regExp.test(text.toLowerCase()) ? EmailResult.GoodEmail : EmailResult.BadEmail;
 }
