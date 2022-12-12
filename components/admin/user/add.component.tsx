@@ -4,14 +4,19 @@ import AGButton from "../../common/ag-button.component";
 import AGText from "../../common/ag-text.component";
 import {UserWithPass} from "../../../interfaces/firebase.interface";
 import {CreateNewUser} from "../../../utils/firebase.util";
-import {IsEmail, LogError} from "../../../utils/common.util";
-import {EmailResult, Module} from "../../../enums/common.enum";
+import {Delay, IsEmail, LogError} from "../../../utils/common.util";
+import {AdminComponents, EmailResult, Module} from "../../../enums/common.enum";
+import {ChangeComponentFunction} from "../../../interfaces/common.interface";
 
-export default function UserAdd() {
+interface UserAddProps {
+  changeComponent: ChangeComponentFunction;
+}
+
+export default function UserAdd({changeComponent}: UserAddProps) {
   const userName = useRef<HTMLInputElement>(null);
   const userAccount = useRef<HTMLInputElement>(null);
   const userPass = useRef<HTMLInputElement>(null);
-
+  
   async function createNewUser(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -27,8 +32,14 @@ export default function UserAdd() {
     };
 
     const result = await CreateNewUser(newUser);
-    if (result.successful)
-      console.log("Go back to list and show alert");
+    if (!result.successful) {
+      alert(result.errMessage);
+    }
+    else {
+      alert("User created successfully!");
+      await Delay(2000);
+      changeComponent(AdminComponents.UserList);
+    }
   }
 
   function userEmail(account?: string) {
@@ -50,11 +61,11 @@ export default function UserAdd() {
       <AGText type="th1">New User</AGText>
       <form onSubmit={event => void createNewUser(event)}>
         <p>Name</p>
-        <input type="text" ref={userName}/>
+        <input type="text" ref={userName} required />
         <p>User</p>
-        <input type="text" ref={userAccount}/>
+        <input type="text" ref={userAccount} required />
         <p>Password</p>
-        <input type="text" ref={userPass}/>
+        <input type="text" ref={userPass} minLength={8} />
         <AGButton type="danger" form>Add</AGButton>
       </form>
       <AGButton type="alert">Cancel</AGButton>
