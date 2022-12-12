@@ -12,7 +12,13 @@ import {
   FirestoreParameters,
   StorageLocation
 } from "../enums/firebase.enum";
-import {AGQueryConstraints, LogInInterface, UserInterface, UserWithPass} from "../interfaces/firebase.interface";
+import {
+  AdminUser,
+  AGQueryConstraints,
+  LogInInterface,
+  UserInterface,
+  UserWithPass
+} from "../interfaces/firebase.interface";
 import {Module, PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
 import {LogError, RandomPassword} from "./common.util";
@@ -224,7 +230,7 @@ export async function GetFile(path: string, campaign?: string) {
 export async function GetParameters<T>(campaign?: string, ...parameters: string[]): Promise<T[]> {
   const {doc, getDoc} = await import('@firebase/firestore');
 
-  const realLocation = campaign ? `${campaign}/${FirestoreLocation.Parameters}` : FirestoreGlobalLocation.Parameters;
+  const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}` : FirestoreGlobalLocation.Parameters;
   const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
   const leDoc = await getDoc(docRef);
 
@@ -440,4 +446,25 @@ export async function GetUserList() {
     const err = e as FirebaseError;
     return LogError(Module.FirebaseUtil, `Error while retrieving UserList: ${err.message}`);
   }
+}
+
+export async function UpdateAdminCampaigns() {
+  return;
+  
+  const {doc, getDoc, collection} = await import('@firebase/firestore');
+  
+  const adminDocLocation = `${FirestoreGlobalLocation.User}/${process.env.AG_ADMIN_ID}`
+  const docRef = doc(await FirebaseUtil.Instance().DB(), adminDocLocation);
+
+  // Get admin account base on role and last update
+  const adminDoc = (await getDoc(docRef)).data() as AdminUser;
+  
+  // If last update at least an hour continue
+  
+  // Get the whole list of campaigns in db as a string array
+  const collectionRef = collection(await FirebaseUtil.Instance().DB(), FirestoreGlobalLocation.Campaign);
+  console.log(collectionRef);
+  
+  // Update this account with the new data
+  
 }

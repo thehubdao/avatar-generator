@@ -18,6 +18,10 @@ export interface UserInterface {
   campaign: string[];
 }
 
+export interface AdminUser extends  UserInterface {
+  lastUpdate: Date;
+}
+
 export interface UserWithPass extends UserInterface{
   password: string;
 }

@@ -1,4 +1,12 @@
-﻿export interface AssetInterface {
+﻿import {DefaultApiResponses} from "../enums/api.enum";
+
+export interface ApiResponse<T> {
+  success: boolean,
+  message: string | DefaultApiResponses,
+  data?: T,
+}
+
+export interface AssetInterface {
   index: string;
   name: string;
   type: string;
