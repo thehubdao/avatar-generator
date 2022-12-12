@@ -103,7 +103,7 @@ export default class Navbar extends Component<NavbarProps, NavbarState> {
                             changeComponent={(nc) => this.setCurrentComponent(nc)} />
 
       case AdminComponents.UserAdd:
-        return <UserAdd />
+        return <UserAdd changeComponent={(nc) => this.setCurrentComponent(nc)} />
 
       case AdminComponents.UserList:
         return <UserList changeComponent={nc => this.setCurrentComponent(nc)} />

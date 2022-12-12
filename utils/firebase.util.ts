@@ -12,11 +12,12 @@ import {
   FirestoreParameters,
   StorageLocation
 } from "../enums/firebase.enum";
-import {AGQueryConstraints, LogInInterface, UserInterface} from "../interfaces/firebase.interface";
+import {AGQueryConstraints, LogInInterface, UserInterface, UserWithPass} from "../interfaces/firebase.interface";
 import {Module, PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
-import {LogError} from "./common.util";
+import {LogError, RandomPassword} from "./common.util";
 import {Result} from "../interfaces/common.interface";
+import {ConvertObject, ConvertType} from "./common/object-converter.util";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -375,7 +376,7 @@ export async function GetUserInfo(userUid: string) {
   return userDoc[0];
 }
 
-export async function CreateNewUser(newUser: Partial<UserInterface>): Promise<Result<boolean>> {
+export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Result<boolean>> {
   if (newUser.email == undefined) {
     LogError(Module.FirebaseUtil, "Missing email on create user!").then();
     return {successful: false, errMessage: 'Missing email on create user!'};
@@ -391,7 +392,7 @@ export async function CreateNewUser(newUser: Partial<UserInterface>): Promise<Re
     leUser = await createUserWithEmailAndPassword(
       await FirebaseUtil.Instance().Auth(),
       newUser.email,
-      RandomPassword());
+      newUser.password ?? RandomPassword());
 
     await updateCurrentUser(await FirebaseUtil.Instance().Auth(), originalUser);
     result = {successful: true, value: true};
@@ -399,11 +400,16 @@ export async function CreateNewUser(newUser: Partial<UserInterface>): Promise<Re
     const err = e as FirebaseError;
     LogError(Module.FirebaseUtil, `Error on create User: ${err.message}`).then();
     result = {successful: false, errMessage: `Error on create User: ${err.message}`, errCode: err.code};
+    return result;
   }
 
   // Save user info on db
-  if (leUser != undefined)
-    await InsertDocWithId(leUser.user.uid, newUser, FirestoreGlobalLocation.User);
+  if (leUser != undefined) {
+    const realUser = ConvertObject<UserInterface>(newUser, ConvertType.UserInterface);
+    const insertedDoc = await InsertDocWithId(leUser.user.uid, realUser, FirestoreGlobalLocation.User);
+    if(!insertedDoc.successful)
+      return {successful: false, errMessage: insertedDoc.errMessage, errCode: insertedDoc.errCode};
+  }
 
   // Reset password
   if (result.successful) {
@@ -419,15 +425,12 @@ export async function CreateNewUser(newUser: Partial<UserInterface>): Promise<Re
         errMessage: `Error resetting password for account ${newUser.email}: ${err.message}`,
         errCode: err.code
       };
+      return result;
     }
   }
 
   // Return errors to view
   return result;
-}
-
-function RandomPassword() {
-  return Math.random().toString(36).substring(2, 12);
 }
 
 export async function GetUserList() {
