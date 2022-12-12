@@ -2,19 +2,31 @@
 import {GetInfoDB} from "../../utils/firebase.util";
 import {GlobalValues} from "../../enums/common.enum";
 import {FirestoreLocation} from "../../enums/firebase.enum";
-import {AnimationInterface} from "../../interfaces/api.interface";
+import {AnimationInterface, ApiResponse} from "../../interfaces/api.interface";
+import {DefaultApiResponses} from "../../enums/api.enum";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if(req.method === 'GET') {
-    const { campaign } = req.query;
+export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<AnimationInterface[]>>) {
+  if (req.method === 'GET') {
+    const {campaign} = req.query;
     const realCampaign = campaign as string ?? GlobalValues.BaseCampaign;
-    
-    const data = await GetInfoDB<AnimationInterface>(FirestoreLocation.Animations, undefined, {
+
+    const data = await GetInfoDB<AnimationInterface>(FirestoreLocation.Animations, realCampaign, {
       campaign: realCampaign
     });
 
-    res
+    return res
       .status(200)
-      .json(data);
+      .json({
+        success: true,
+        message: DefaultApiResponses.GetSuccess,
+        data
+      });
   }
+  
+  res
+    .status(400)
+    .json({
+      success: false,
+      message: DefaultApiResponses.BadRequest,
+    });
 }
