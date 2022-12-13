@@ -29,6 +29,7 @@ export default function UserAdd({changeComponent}: UserAddProps) {
       name: userName?.current?.value,
       password: userPass?.current?.value,
       role: UserRoleValues.admin,
+      campaign: [],
     };
 
     const result = await CreateNewUser(newUser);
@@ -65,7 +66,7 @@ export default function UserAdd({changeComponent}: UserAddProps) {
         <p>User</p>
         <input type="text" ref={userAccount} required />
         <p>Password</p>
-        <input type="text" ref={userPass} minLength={8} />
+        <input type="password" ref={userPass} minLength={8} />
         <AGButton type="danger" form>Add</AGButton>
       </form>
       <AGButton type="alert">Cancel</AGButton>

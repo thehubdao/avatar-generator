@@ -398,8 +398,8 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
     leUser = await createUserWithEmailAndPassword(
       await FirebaseUtil.Instance().Auth(),
       newUser.email,
-      newUser.password ?? RandomPassword());
-
+      newUser.password == undefined ? RandomPassword() : newUser.password);
+    
     await updateCurrentUser(await FirebaseUtil.Instance().Auth(), originalUser);
     result = {successful: true, value: true};
   } catch (e) {
@@ -413,8 +413,19 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
   if (leUser != undefined) {
     const realUser = ConvertObject<UserInterface>(newUser, ConvertType.UserInterface);
     const insertedDoc = await InsertDocWithId(leUser.user.uid, realUser, FirestoreGlobalLocation.User);
-    if(!insertedDoc.successful)
+    if(!insertedDoc.successful) {
+      const {deleteUser} = await import('@firebase/auth');
+      
+      try {
+        await deleteUser(leUser.user);
+      } catch (e) {
+        const err = e as FirebaseError;
+        const errMessage = `Error deleting wrongfully created auth account. Error: ${err.message}`;
+        void LogError(Module.FirebaseUtil, errMessage);
+        return {successful: false, errMessage, errCode: err.code};
+      }
       return {successful: false, errMessage: insertedDoc.errMessage, errCode: insertedDoc.errCode};
+    }
   }
 
   // Reset password
