@@ -41,13 +41,13 @@ export default function Layout({
       const isNotLogIn = await HandleNotLoggedIn();
       if (isNotLogIn)
         return;
-      
+
       await updateUserInfo();
     };
-    
+
     componentDidMount()
       .catch(err => console.error(err));
-  },);
+  }, []);
 
   function renderCampaignOptions() {
     if (!(userInfo && userInfo.campaign?.length > 0))

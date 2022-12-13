@@ -1,38 +1,35 @@
-import {Component} from "react";
-import {ChangeComponentFunction} from "../../../interfaces/common.interface";
+import {useEffect, useState} from "react";
 import {UserInterface} from "../../../interfaces/firebase.interface";
 import {GetUserList} from "../../../utils/firebase.util";
 
-interface UserListProps {
-  changeComponent: ChangeComponentFunction;
-}
+export default function UserList() {
+  const [userList, setUserList] = useState<UserInterface[]>();
 
-interface UserListState {
-  userList: UserInterface[];
-}
+  useEffect(() => {
+    const componentDidMount = async () => {
+      await getUserListData();
+    };
 
-export default class UserList extends Component<UserListProps, UserListState> {
-  async componentDidMount() {
-    await this.getUserListData();
-  }
+    componentDidMount()
+      .catch(err => console.error(err));
+  }, []);
 
-  private async getUserListData() {
+  async function getUserListData() {
     const userData = await GetUserList();
-    
-    this.setState({
-      userList: userData ?? []
-    });
+    setUserList(userData ?? []);
   }
 
-  render() {
-    return (
-      <>
-        {this.renderUserList()}
-      </>
-    );
+  function renderUserList() {
+    return userList == undefined ?
+      <></> :
+      userList.map(u =>
+        <p key={'uKey_' + u.email}>{JSON.stringify(u)}</p>
+      );
   }
 
-  private renderUserList() {
-    return this.state?.userList.map(u => <p key={'uKey_' + u.email}>{JSON.stringify(u)}</p>)
-  }
+  return (
+    <>
+      {renderUserList()}
+    </>
+  );
 }

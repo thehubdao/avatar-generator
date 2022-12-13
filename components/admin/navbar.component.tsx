@@ -102,7 +102,7 @@ export default function Navbar({userRole, campaign, campaignList}: NavbarProps) 
         return <UserAdd changeComponent={(nc) => updateCurrentComponent(nc)}/>
 
       case AdminComponents.UserList:
-        return <UserList changeComponent={nc => updateCurrentComponent(nc)}/>
+        return <UserList />
 
       case AdminComponents.NewCampaign:
         return <NewCampaign campaignList={campaignList}/>
