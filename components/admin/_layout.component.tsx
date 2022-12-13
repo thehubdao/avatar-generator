@@ -37,14 +37,17 @@ export default function Layout({
   }
 
   useEffect(() => {
-    (async () => {
+    const componentDidMount = async () => {
       const isNotLogIn = await HandleNotLoggedIn();
       if (isNotLogIn)
         return;
-
+      
       await updateUserInfo();
-    })();
-  }, []);
+    };
+    
+    componentDidMount()
+      .catch(err => console.error(err));
+  },);
 
   function renderCampaignOptions() {
     if (!(userInfo && userInfo.campaign?.length > 0))
