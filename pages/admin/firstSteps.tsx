@@ -25,7 +25,7 @@ export default function FirstStepsPage() {
               noCampaign
               setCurrentCampaign={() => void {}}>
         <AGText type="th1">First Steps</AGText>
-        <NewCampaign onCampaignCreated={(flag) => onCampaignCreated(flag)}/>
+        <NewCampaign onCampaignCreated={(flag) => void onCampaignCreated(flag)}/>
       </Layout>
     </>
   );
