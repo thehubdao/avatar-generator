@@ -17,7 +17,7 @@ export function Delay(ms: number) {
 
 export function IsEmail(text: string): EmailResult {
   if (!text.includes('@') && !text.includes('.')) return EmailResult.NoEmail;
-  
+
   const regExp = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
   return regExp.test(text.toLowerCase()) ? EmailResult.GoodEmail : EmailResult.BadEmail;
 }

@@ -10,11 +10,15 @@ import {
   UploadFile
 } from "../../utils/firebase.util";
 import {FirestoreGlobalLocation, StorageLocation} from "../../enums/firebase.enum";
-import {GoToPage} from "../../utils/router.util";
-import {PageLocation} from "../../enums/common.enum";
+import {GlobalValues} from "../../enums/common.enum";
 import {UserInterface} from "../../interfaces/firebase.interface";
 
-export default function NewCampaign() {
+interface NewCampaignProps {
+  campaignList?: string[];
+  onCampaignCreated?: (didCreate: boolean) => void;
+}
+
+export default function NewCampaign({onCampaignCreated, campaignList}: NewCampaignProps) {
   const campaignNameInput = useRef<HTMLInputElement>(null);
   const armatureFileInput = useRef<HTMLInputElement>(null);
 
@@ -70,7 +74,7 @@ export default function NewCampaign() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    
+
     // Create campaign folder
     if (campaignNameInput.current == null)
       return setMessage('Missing campaign Name!');
@@ -97,6 +101,8 @@ export default function NewCampaign() {
 
     // Get information for the accessories
     const newAccessoryList = accessoriesNum ? accessoryList.slice(0, accessoriesNum) : [];
+    newAccessoryList.forEach(a => a.id = `${a.id}${GlobalValues.AccEnd}`);
+    console.log(newAccessoryList);
 
     // Make doc campaign object
     const docData: CampaignParameters = {
@@ -105,40 +111,43 @@ export default function NewCampaign() {
       features: newFeatureList,
       accessories: newAccessoryList,
     };
-    
+
     // Upload information to DB
     const result = await InsertDocWithId(newCampaign, docData, FirestoreGlobalLocation.Campaign);
-    
+
     // Update user info
     const newUserInfo: Partial<UserInterface> = {
-      campaign: [newCampaign],
+      campaign: campaignList ? [...campaignList, newCampaign] : [newCampaign]
     };
-    
+
     await UpdateDocObject(FirestoreGlobalLocation.User, newUserInfo, undefined, userInfo.uid);
-    
+
     // Send user to admin dashboard
-    if(result.successful)
-      await GoToPage(PageLocation.Admin)
+    if (result.successful)
+      alert("Campaign created successfully");
     else
       setMessage(result.errMessage);
+
+    if (onCampaignCreated)
+      onCampaignCreated(result.successful);
   }
 
   return (
     <form onSubmit={event => void onSubmit(event)}>
-      { message != undefined ? <AGText type="text" mark='😡'>{message}</AGText> : ''}
+      {message != undefined ? <AGText type="text" mark='😡'>{message}</AGText> : ''}
       <AGText type="th2">Nombre Campaña</AGText>
-      <input type="text" ref={campaignNameInput} placeholder="Campaign name" required />
+      <input type="text" ref={campaignNameInput} placeholder="Campaign name" required/>
       <AGText type="th2">Armature</AGText>
-      <input type="file" ref={armatureFileInput} placeholder="Armature" required />
+      <input type="file" ref={armatureFileInput} placeholder="Armature" required/>
       <AGText type="th2">Amount of features</AGText>
       <input type="number" onChange={event => setFeatureNum(event.target.valueAsNumber)}
-             placeholder="Amount of features"/>
+             placeholder="Amount of features" min={0}/>
       <AGText type="th2">Features:</AGText>
       {renderFeatureInputs()}
       <hr/>
       <AGText type="th2">Amount of accessories</AGText>
       <input type="number" onChange={event => setAccessoryNum(event.target.valueAsNumber)}
-             placeholder="Amount of accessories"/>
+             placeholder="Amount of accessories" min={0}/>
       <AGText type="th2">Accessories:</AGText>
       {renderAccessoryInputs()}
       <AGButton form>Create Campaign</AGButton>
