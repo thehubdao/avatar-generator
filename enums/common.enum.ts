@@ -40,6 +40,7 @@ export enum AdminComponents {
   AssetModify,
   UserAdd,
   UserList,
+  NewCampaign,
 }
 
 export enum Module {
