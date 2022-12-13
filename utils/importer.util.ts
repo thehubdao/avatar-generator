@@ -7,7 +7,7 @@ import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interf
 class ImporterUtil {
   private static _instance: ImporterUtil;
   private _gltfLoader: GLTFLoader | null;
-  
+
   constructor() {
     this._gltfLoader = null;
   }
@@ -20,7 +20,7 @@ class ImporterUtil {
   }
 
   public GetGltfLoaderInstance(): GLTFLoader {
-    if(this._gltfLoader === null)
+    if (this._gltfLoader === null)
       this._gltfLoader = new GLTFLoader();
 
     return this._gltfLoader;
@@ -56,7 +56,7 @@ export async function FirebaseGltfModel(path: string, campaign?: string): Promis
 }
 
 export async function GetGltfModel(path: string) {
-  if(path.startsWith('http'))
+  if (path.startsWith('http'))
     return FetchGltfModel(path);
   else
     return FirebaseGltfModel(path);
@@ -68,10 +68,10 @@ export async function GetAccessoryBones(baseModel: Group, accessoryBonesList: Ba
     let result: Record<string, AccessoryInfoInterface> = {};
 
     bones.traverse((bone) => {
-      if(accessoryBonesList.some(x => x.val === bone.name)) {
+      if (accessoryBonesList.some(x => x.val === bone.name)) {
         const foundBone = accessoryBonesList.filter(x => x.val === bone.name);
         foundBone.forEach(fb => {
-          result[fb.id] = { bone: bone };
+          result[fb.id] = {bone: bone};
         })
       }
     });
@@ -85,10 +85,13 @@ export async function GetFeaturesData(baseModel: Group, featureList: BasicData[]
     const baseFeatures = baseModel.children[0];
     let result: Record<string, FeatureInfoInterface> = {};
 
-    for(const [index, feature] of baseFeatures.children.entries()) {
-      if(featureList.some(x => x.val === feature.name)) {
+    for (const [index, feature] of baseFeatures.children.entries()) {
+      if (featureList.some(x => x.val === feature.name)) {
         const foundFeature = featureList.find(x => x.val === feature.name);
-        result[foundFeature!.id] = { featureIndex: index, featureBase: update ? result[foundFeature!.id].featureBase : feature.clone() };
+        result[foundFeature!.id] = {
+          featureIndex: index,
+          featureBase: update ? result[foundFeature!.id].featureBase : feature.clone()
+        };
       }
     }
 

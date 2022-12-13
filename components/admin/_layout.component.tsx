@@ -23,7 +23,7 @@ export default function Layout({
                                  setCurrentCampaign,
                                  children
                                }: LayoutProps) {
-  
+
   async function updateUserInfo() {
     const currentUser = await GetCurrentUser();
     if (currentUser) {

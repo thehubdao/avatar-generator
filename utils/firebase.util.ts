@@ -310,11 +310,11 @@ export async function InsertDocWithId(newDocId: string, data: {}, location: Fire
 export async function UploadFile(file: File, fileType: StorageLocation, sectionType?: string, campaign?: string) {
   const {ref, uploadBytes} = await import('@firebase/storage');
   const {uuidv4} = await import('@firebase/util');
-  
+
   const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
   const realSection = sectionType ? '/' + sectionType.toLowerCase().replace('acc', '') : '';
   const newName = uuidv4();
-  
+
   const fileRef = ref(await FirebaseUtil.Instance().Storage(), `${campaignSection}${fileType}${realSection}/${newName}`);
   const log = await uploadBytes(fileRef, file);
 
@@ -413,7 +413,7 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
   if (leUser != undefined) {
     const realUser = ConvertObject<UserInterface>(newUser, ConvertType.UserInterface);
     const insertedDoc = await InsertDocWithId(leUser.user.uid, realUser, FirestoreGlobalLocation.User);
-    if(!insertedDoc.successful)
+    if (!insertedDoc.successful)
       return {successful: false, errMessage: insertedDoc.errMessage, errCode: insertedDoc.errCode};
   }
 
@@ -450,21 +450,21 @@ export async function GetUserList() {
 
 export async function UpdateAdminCampaigns() {
   return;
-  
+
   const {doc, getDoc, collection} = await import('@firebase/firestore');
-  
+
   const adminDocLocation = `${FirestoreGlobalLocation.User}/${process.env.AG_ADMIN_ID}`
   const docRef = doc(await FirebaseUtil.Instance().DB(), adminDocLocation);
 
   // Get admin account base on role and last update
   const adminDoc = (await getDoc(docRef)).data() as AdminUser;
-  
+
   // If last update at least an hour continue
-  
+
   // Get the whole list of campaigns in db as a string array
   const collectionRef = collection(await FirebaseUtil.Instance().DB(), FirestoreGlobalLocation.Campaign);
   console.log(collectionRef);
-  
+
   // Update this account with the new data
-  
+
 }
