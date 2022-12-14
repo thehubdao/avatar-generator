@@ -5,10 +5,7 @@ import {UpdateAdminCampaigns} from "../../utils/firebase.util";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<void>>) {
   if (req.method == RequestMethod.Post) {
-    const {force} = req.headers;
-    
-    const forceUpdate = !!force;
-    await UpdateAdminCampaigns(forceUpdate);
+    await UpdateAdminCampaigns();
 
     return res
       .status(200)

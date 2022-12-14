@@ -470,7 +470,7 @@ export async function GetCollectionList(dbLocation: string | FirestoreGlobalLoca
   });
 }
 
-export async function UpdateAdminCampaigns(forceUpdate: boolean = false) {
+export async function UpdateAdminCampaigns() {
   const {doc, setDoc, getDoc, Timestamp} = await import('@firebase/firestore');
 
   const adminDocLocation = `${FirestoreGlobalLocation.User}/${process.env.AG_ADMIN_ID}`
@@ -479,21 +479,18 @@ export async function UpdateAdminCampaigns(forceUpdate: boolean = false) {
   // Get admin account base on role and last update
   const adminDoc = (await getDoc(docRef)).data() as AdminUser;
 
-  // If last update at least an hour continue
-  // if(forceUpdate || (Timestamp.now().seconds - adminDoc.lastUpdate.seconds >= 3600)) {
-    // Get the whole list of campaigns in db as a string array
-    const campaignList = await GetCollectionList(FirestoreGlobalLocation.Campaign);
+  // Get the whole list of campaigns in db as a string array
+  const campaignList = await GetCollectionList(FirestoreGlobalLocation.Campaign);
 
-    // Update this account with the new data
-    const data: Partial<AdminUser> = {
-      campaign: [...new Set([...adminDoc.campaign, ...campaignList])],
-      lastUpdate: Timestamp.now(),
-    };
-    await setDoc(docRef, data, {merge: true});
-    
-    const newParams: AGParameters = {
-      campaigns: campaignList,
-    };
-    await UpdateDocObject(FirestoreGlobalLocation.ParametersV2, newParams);
-  // }
+  // Update this account with the new data
+  const data: Partial<AdminUser> = {
+    campaign: [...new Set([...adminDoc.campaign, ...campaignList])],
+    lastUpdate: Timestamp.now(),
+  };
+  await setDoc(docRef, data, {merge: true});
+
+  const newParams: AGParameters = {
+    campaigns: campaignList,
+  };
+  await UpdateDocObject(FirestoreGlobalLocation.ParametersV2, newParams);
 }
