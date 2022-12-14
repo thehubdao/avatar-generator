@@ -24,30 +24,28 @@ export default function Layout({
                                  children
                                }: LayoutProps) {
 
-  async function updateUserInfo() {
-    const currentUser = await GetCurrentUser();
-    if (currentUser) {
-      const uInfo = await GetUserInfo(currentUser.uid);
-
-      if (uInfo?.campaign == undefined || uInfo?.campaign?.length == 0)
-        await GoToPage(PageLocation.FirstSteps);
-
-      setUserInfo(uInfo);
-    }
-  }
-
   useEffect(() => {
     const componentDidMount = async () => {
       const isNotLogIn = await HandleNotLoggedIn();
       if (isNotLogIn)
         return;
 
-      await updateUserInfo();
+      const currentUser = await GetCurrentUser();
+      if (currentUser) {
+        const uInfo = await GetUserInfo(currentUser.uid);
+
+        if (uInfo?.campaign == undefined || uInfo?.campaign?.length == 0) {
+          await GoToPage(PageLocation.FirstSteps);
+          return;
+        }
+
+        setUserInfo(uInfo);
+      }
     };
 
     componentDidMount()
       .catch(err => console.error(err));
-  }, []);
+  }, [setUserInfo]);
 
   function renderCampaignOptions() {
     if (!(userInfo && userInfo.campaign?.length > 0))
