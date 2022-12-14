@@ -1,5 +1,4 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
-import {AccessoryInterface, AnimationInterface, ApiResponse, FeatureInterface} from "../interfaces/api.interface";
 import {Group} from "three";
 import {GetFile} from "./firebase.util";
 import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
@@ -101,19 +100,4 @@ export async function GetFeaturesData(baseModel: Group, featureList: BasicData[]
 
 async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
   return fetch(url).then(data => data.arrayBuffer());
-}
-
-export async function GetAssetsListByCampaign(campaign?: string | null) {
-  const jsonObject: ApiResponse<FeatureInterface[]> = await fetch('/api/getFeatureOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
-  return jsonObject.data;
-}
-
-export async function GetAccessoryListByCampaign(campaign?: string | null) {
-  const jsonObject: ApiResponse<AccessoryInterface[]> = await fetch('/api/getAccessoryOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
-  return jsonObject.data;
-}
-
-export async function GetAnimationListByCampaign(campaign?: string | null) {
-  const jsonObject: ApiResponse<AnimationInterface[]> = await fetch('/api/getAnimations' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
-  return jsonObject.data;
 }

@@ -49,6 +49,7 @@ export enum Module {
   AvatarGenerator = 'AvatarGenerator',
   ModelUtil = 'ModelUtil',
   UserAdd = 'UserAdd',
+  ApiUtil = 'ApiUtil',
 }
 
 export enum EmailResult {

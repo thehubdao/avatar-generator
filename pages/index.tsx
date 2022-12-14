@@ -1,15 +1,19 @@
 import {Component} from "react";
 import Image from "next/image";
 import Head from "next/head";
+import {Clock, Vector3, WebGLInfo} from "three";
+import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
+import {GetServerSideProps} from "next";
+
 import AGLoading from "../components/common/ag-loading.component";
 import {FrustumCulledFalse, InitSceneController} from "../utils/threejs/scene.util";
 import {GetAmbientLights, GetTestLights} from "../utils/test-scene.util";
 import {
   FirebaseGltfModel,
-  GetAccessoryBones, GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign, GetGltfModel,
+  GetAccessoryBones,
+  GetGltfModel,
   GetFeaturesData,
 } from "../utils/importer.util";
-import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {ExportAttributeValues, GlobalValues, Module, ViewModuleState} from "../enums/common.enum";
 import {FirestoreParameters} from "../enums/firebase.enum";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../interfaces/api.interface";
@@ -20,7 +24,6 @@ import {
   TransformObject3dToToonMaterial
 } from "../utils/model.util";
 import {ExportModelGlb, SaveFile} from "../utils/exporter.util";
-import {GetServerSideProps} from "next";
 import {
   AccessoryInfoInterface,
   BasicData,
@@ -37,7 +40,7 @@ import ColorSelectorComponent from "../components/selectors/colorSelector.compon
 import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../utils/iframe.util";
 import {CreateAnimationMixer, SetAnimation} from "../utils/threejs/animation.util";
 import {SceneInterface} from "../interfaces/scene.interface";
-import {Clock, Vector3, WebGLInfo} from "three";
+import {GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign} from "../utils/api.util";
 
 export interface AvatarGeneratorProps {
   campaign?: string | null;
@@ -248,20 +251,23 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   }
 
   async getFeatureList() {
-    this.featureList = await GetAssetsListByCampaign(this.props.campaign);
+    const {value: newAssetList} = await GetAssetsListByCampaign(this.props.campaign);
+    this.featureList = newAssetList;
     const _featureList = this.filterListByBodyFeature(this.state.selectedFeature);
     // console.log('result', this.featureList);
     this.setState({featureList: _featureList});
   }
 
   async getAccessoryList() {
-    this.accessoryList = await GetAccessoryListByCampaign(this.props.campaign);
+    const {value: newAccList} = await GetAccessoryListByCampaign(this.props.campaign);
+    this.accessoryList = newAccList;
     const _accessoryList = this.filterListByAccessory(this.state.selectedAcc);
     this.setState({accessoryList: _accessoryList});
   }
 
   async getAnimationList() {
-    this.animationList = await GetAnimationListByCampaign(this.props.campaign);
+    const {value: newAnimationList} = await GetAnimationListByCampaign(this.props.campaign);
+    this.animationList = newAnimationList;
     // console.log(this.animationList);
   }
 

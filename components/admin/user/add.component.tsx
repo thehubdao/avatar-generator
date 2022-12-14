@@ -33,7 +33,7 @@ export default function UserAdd({changeComponent}: UserAddProps) {
     };
 
     const result = await CreateNewUser(newUser);
-    if (!result.successful) {
+    if (!result.success) {
       alert(result.errMessage);
     }
     else {

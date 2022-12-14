@@ -299,11 +299,11 @@ export async function InsertDocWithId(newDocId: string, data: {}, location: Fire
   try {
     const newDoc = doc(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location, newDocId);
     await setDoc(newDoc, data);
-    return {successful: true, value: newDocId};
+    return {success: true, value: newDocId};
   } catch (e) {
     const err = e as FirebaseError;
     LogError(Module.FirebaseUtil, `Error creating doc: ${newDocId}, at ${location} with message: ${err.message}`).then();
-    return {successful: false, errCode: err.code, errMessage: err.message};
+    return {success: false, errCode: err.code, errMessage: err.message};
   }
 }
 
@@ -385,7 +385,7 @@ export async function GetUserInfo(userUid: string) {
 export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Result<boolean>> {
   if (newUser.email == undefined) {
     LogError(Module.FirebaseUtil, "Missing email on create user!").then();
-    return {successful: false, errMessage: 'Missing email on create user!'};
+    return {success: false, errMessage: 'Missing email on create user!'};
   }
 
   const {createUserWithEmailAndPassword, updateCurrentUser} = await import('@firebase/auth');
@@ -401,11 +401,11 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
       newUser.password == undefined ? RandomPassword() : newUser.password);
     
     await updateCurrentUser(await FirebaseUtil.Instance().Auth(), originalUser);
-    result = {successful: true, value: true};
+    result = {success: true, value: true};
   } catch (e) {
     const err = e as FirebaseError;
     LogError(Module.FirebaseUtil, `Error on create User: ${err.message}`).then();
-    result = {successful: false, errMessage: `Error on create User: ${err.message}`, errCode: err.code};
+    result = {success: false, errMessage: `Error on create User: ${err.message}`, errCode: err.code};
     return result;
   }
 
@@ -414,7 +414,7 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
     const realUser = ConvertObject<UserInterface>(newUser, ConvertType.UserInterface);
     const insertedDoc = await InsertDocWithId(leUser.user.uid, realUser, FirestoreGlobalLocation.User);
     
-    if(!insertedDoc.successful) {
+    if(!insertedDoc.success) {
       const {deleteUser} = await import('@firebase/auth');
       
       try {
@@ -423,15 +423,15 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
         const err = e as FirebaseError;
         const errMessage = `Error deleting wrongfully created auth account. Error: ${err.message}`;
         void LogError(Module.FirebaseUtil, errMessage);
-        return {successful: false, errMessage, errCode: err.code};
+        return {success: false, errMessage, errCode: err.code};
       }
       
-      return {successful: false, errMessage: insertedDoc.errMessage, errCode: insertedDoc.errCode};
+      return {success: false, errMessage: insertedDoc.errMessage, errCode: insertedDoc.errCode};
     }
   }
 
   // Reset password
-  if (result.successful) {
+  if (result.success) {
     const {sendPasswordResetEmail} = await import('@firebase/auth');
 
     try {
@@ -440,7 +440,7 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
       const err = e as FirebaseError;
       LogError(Module.FirebaseUtil, `Error resetting password for account ${newUser.email}`).then();
       result = {
-        successful: false,
+        success: false,
         errMessage: `Error resetting password for account ${newUser.email}: ${err.message}`,
         errCode: err.code
       };

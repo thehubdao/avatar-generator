@@ -123,13 +123,13 @@ export default function NewCampaign({onCampaignCreated, campaignList}: NewCampai
     await UpdateDocObject(FirestoreGlobalLocation.User, newUserInfo, undefined, userInfo.uid);
 
     // Send user to admin dashboard
-    if (result.successful)
+    if (result.success)
       alert("Campaign created successfully");
     else
       setMessage(result.errMessage);
 
     if (onCampaignCreated)
-      onCampaignCreated(result.successful);
+      onCampaignCreated(result.success);
   }
 
   return (
