@@ -1,4 +1,5 @@
 ﻿import {UserRoleValues} from "../enums/firebase.enum";
+import {Timestamp} from "@firebase/firestore";
 
 export interface AGQueryConstraints {
   campaign?: string;
@@ -19,9 +20,13 @@ export interface UserInterface {
 }
 
 export interface AdminUser extends  UserInterface {
-  lastUpdate: Date;
+  lastUpdate: Timestamp;
 }
 
 export interface UserWithPass extends UserInterface{
   password: string;
+}
+
+export interface AGParameters {
+  campaigns: string[],
 }

@@ -9,6 +9,7 @@ export enum FirestoreGlobalLocation {
     Parameters = 'general/parameters',
     User = 'user',
     Campaign = 'campaign',
+    ParametersV2 = 'general/parametersV2',
 }
 
 export enum FirestoreParameters {
