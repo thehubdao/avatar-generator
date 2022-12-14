@@ -13,7 +13,7 @@ import {
   StorageLocation
 } from "../enums/firebase.enum";
 import {
-  AdminUser,
+  AdminUser, AGParameters,
   AGQueryConstraints,
   LogInInterface,
   UserInterface,
@@ -480,7 +480,7 @@ export async function UpdateAdminCampaigns(forceUpdate: boolean = false) {
   const adminDoc = (await getDoc(docRef)).data() as AdminUser;
 
   // If last update at least an hour continue
-  if(forceUpdate || (Timestamp.now().seconds - adminDoc.lastUpdate.seconds >= 3600)) {
+  // if(forceUpdate || (Timestamp.now().seconds - adminDoc.lastUpdate.seconds >= 3600)) {
     // Get the whole list of campaigns in db as a string array
     const campaignList = await GetCollectionList(FirestoreGlobalLocation.Campaign);
 
@@ -490,5 +490,10 @@ export async function UpdateAdminCampaigns(forceUpdate: boolean = false) {
       lastUpdate: Timestamp.now(),
     };
     await setDoc(docRef, data, {merge: true});
-  }
+    
+    const newParams: AGParameters = {
+      campaigns: campaignList,
+    };
+    await UpdateDocObject(FirestoreGlobalLocation.ParametersV2, newParams);
+  // }
 }

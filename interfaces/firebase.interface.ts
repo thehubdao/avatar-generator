@@ -26,3 +26,7 @@ export interface AdminUser extends  UserInterface {
 export interface UserWithPass extends UserInterface{
   password: string;
 }
+
+export interface AGParameters {
+  campaigns: string[],
+}
