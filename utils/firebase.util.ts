@@ -461,10 +461,17 @@ export async function GetUserList() {
   }
 }
 
-export async function UpdateAdminCampaigns() {
-  return;
+export async function GetCollectionList(dbLocation: string | FirestoreGlobalLocation) {
+  const {collection, getDocs} = await import('@firebase/firestore');
 
-  const {doc, getDoc, collection} = await import('@firebase/firestore');
+  const querySnapshot = await getDocs(collection(await FirebaseUtil.Instance().DB(), dbLocation));
+  return querySnapshot.docs.map(s => {
+    return s.id
+  });
+}
+
+export async function UpdateAdminCampaigns(forceUpdate: boolean = false) {
+  const {doc, setDoc, getDoc, Timestamp} = await import('@firebase/firestore');
 
   const adminDocLocation = `${FirestoreGlobalLocation.User}/${process.env.AG_ADMIN_ID}`
   const docRef = doc(await FirebaseUtil.Instance().DB(), adminDocLocation);
@@ -473,11 +480,15 @@ export async function UpdateAdminCampaigns() {
   const adminDoc = (await getDoc(docRef)).data() as AdminUser;
 
   // If last update at least an hour continue
+  if(forceUpdate || (Timestamp.now().seconds - adminDoc.lastUpdate.seconds >= 3600)) {
+    // Get the whole list of campaigns in db as a string array
+    const campaignList = await GetCollectionList(FirestoreGlobalLocation.Campaign);
 
-  // Get the whole list of campaigns in db as a string array
-  const collectionRef = collection(await FirebaseUtil.Instance().DB(), FirestoreGlobalLocation.Campaign);
-  console.log(collectionRef);
-
-  // Update this account with the new data
-
+    // Update this account with the new data
+    const data: Partial<AdminUser> = {
+      campaign: [...new Set([...adminDoc.campaign, ...campaignList])],
+      lastUpdate: Timestamp.now(),
+    };
+    await setDoc(docRef, data, {merge: true});
+  }
 }
