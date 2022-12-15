@@ -20,7 +20,8 @@ export async function ReplaceModelFeature(baseModel: GLTF, featureUrl: string, f
   baseModel.scene.children[0].children[featureIndex] = chest;
 }
 
-export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel: GLTF, featureInfo: FeatureInfoInterface, selectedFeature?: BasicData, skinColor?: string) {
+export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel: GLTF, featureInfo?: FeatureInfoInterface, selectedFeature?: BasicData, skinColor?: string) {
+  if(featureInfo == undefined) return LogError(Module.ModelUtil, "Missing feature on armature.");
   if(selectedFeature == undefined)
     return LogError(Module.ModelUtil, "There is no selected feature to replace on base model.");
   
