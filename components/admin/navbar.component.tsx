@@ -15,7 +15,7 @@ import AssetUpdate from "./assets/update.component";
 import UserAdd from "./user/add.component";
 import UserList from "./user/list.component";
 // Campaign
-import NewCampaign from "./new-campaign.component";
+import CampaignAdd from "./campaign/add.component";
 
 //#endregion Components
 
@@ -69,7 +69,7 @@ export default function Navbar({userRole, campaign, campaignList}: NavbarProps) 
           <AGText type="icon">😆</AGText>
         </AGButton>
         <AGButton type="secondary" tooltip="New Campaign"
-                  onClickEvent={() => setCurrentComponent(AdminComponents.NewCampaign)}>
+                  onClickEvent={() => setCurrentComponent(AdminComponents.CampaignAdd)}>
           <AGText type="icon">⛺️</AGText>
         </AGButton>
         <AGButton type="secondary" tooltip="Config Campaign">
@@ -104,8 +104,8 @@ export default function Navbar({userRole, campaign, campaignList}: NavbarProps) 
       case AdminComponents.UserList:
         return <UserList />
 
-      case AdminComponents.NewCampaign:
-        return <NewCampaign campaignList={campaignList}/>
+      case AdminComponents.CampaignAdd:
+        return <CampaignAdd campaignList={campaignList}/>
 
       default:
         return <p>Missing Component!</p>;

@@ -1,24 +1,25 @@
-import AGText from "../common/ag-text.component";
+import AGText from "../../common/ag-text.component";
 import {FormEvent, useRef, useState} from "react";
-import {BasicData, CampaignParameters} from "../../interfaces/common.interface";
-import AGButton from "../common/ag-button.component";
+import {BasicData, CampaignParameters} from "../../../interfaces/common.interface";
+import AGButton from "../../common/ag-button.component";
 import {
   GetCurrentUser,
   HandleNotLoggedIn,
   InsertDocWithId,
   UpdateDocObject,
   UploadFile
-} from "../../utils/firebase.util";
-import {FirestoreGlobalLocation, StorageLocation} from "../../enums/firebase.enum";
-import {GlobalValues} from "../../enums/common.enum";
-import {UserInterface} from "../../interfaces/firebase.interface";
+} from "../../../utils/firebase.util";
+import {FirestoreGlobalLocation, StorageLocation} from "../../../enums/firebase.enum";
+import {GlobalValues, Module} from "../../../enums/common.enum";
+import {UserInterface} from "../../../interfaces/firebase.interface";
+import {LogError} from "../../../utils/common.util";
 
 interface NewCampaignProps {
   campaignList?: string[];
   onCampaignCreated?: (didCreate: boolean) => void;
 }
 
-export default function NewCampaign({onCampaignCreated, campaignList}: NewCampaignProps) {
+export default function CampaignAdd({onCampaignCreated, campaignList}: NewCampaignProps) {
   const campaignNameInput = useRef<HTMLInputElement>(null);
   const armatureFileInput = useRef<HTMLInputElement>(null);
 
@@ -85,13 +86,15 @@ export default function NewCampaign({onCampaignCreated, campaignList}: NewCampai
     if (armatureFileInput.current == null || armatureFileInput.current.files == null)
       return setMessage('Missing Armature!');
 
-    const newArmature = armatureFileInput.current.files[0];
+    const newArmature = armatureFileInput.current.files.item(0);
 
     // Get current user UID - Promises
     const [uploadedArmature, userInfo] = await Promise.all([
       UploadFile(newArmature, StorageLocation.BaseMesh, undefined, newCampaign),
       GetCurrentUser()
     ]);
+    
+    if(uploadedArmature == undefined) return LogError(Module.CampaignAdd, "Error uploading armature");
 
     // Check userInfo exists
     if (userInfo == null) return void HandleNotLoggedIn();

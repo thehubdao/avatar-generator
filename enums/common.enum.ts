@@ -40,7 +40,7 @@ export enum AdminComponents {
   AssetModify,
   UserAdd,
   UserList,
-  NewCampaign,
+  CampaignAdd,
 }
 
 export enum Module {
@@ -50,10 +50,21 @@ export enum Module {
   ModelUtil = 'ModelUtil',
   UserAdd = 'UserAdd',
   ApiUtil = 'ApiUtil',
+  CampaignAdd = 'CampaignAdd',
 }
 
 export enum EmailResult {
   NoEmail,
   BadEmail,
   GoodEmail,
+}
+
+export enum CampaignParameterName {
+  Owner = 'owner',
+  Armature = 'armature',
+  Features = 'features',
+  Accessories = 'accessories',
+  Config = 'Config',
+  All = '',
+  Missing = 'NaN',
 }

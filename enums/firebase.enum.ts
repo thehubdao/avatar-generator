@@ -36,10 +36,6 @@ export enum UserRoleValues {
     admin = 1,
 }
 
-export enum AuthError {
-    EmailInUse = 'auth/email-already-in-use',
-}
-
 export enum AuthValues {
     DefaultEmail = '@freakground.com',
 }
