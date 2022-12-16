@@ -1,10 +1,11 @@
 ﻿import {useEffect} from "react";
-import {GetCurrentUser, GetUserInfo, HandleNotLoggedIn, LogOut} from "../../utils/firebase.util";
+import {GetCurrentUser, HandleNotLoggedIn, LogOut} from "../../utils/firebase.util";
 import {UserInterface} from "../../interfaces/firebase.interface";
 import AGButton from "../common/ag-button.component";
 import {UserRoleValues} from "../../enums/firebase.enum";
 import {GoToPage} from "../../utils/router.util";
 import {PageLocation} from "../../enums/common.enum";
+import {SessionUserInfo} from "../../utils/common/session.util";
 
 interface LayoutProps {
   children: JSX.Element | JSX.Element[] | boolean;
@@ -26,9 +27,9 @@ export default function Layout({
 
   async function updateUserInfo() {
     const currentUser = await GetCurrentUser();
-
+    
     if (currentUser) {
-      const uInfo = await GetUserInfo(currentUser.uid);
+      const uInfo = await SessionUserInfo(currentUser.uid);
 
       if (uInfo?.campaign == undefined || uInfo?.campaign?.length == 0)
         await GoToPage(PageLocation.FirstSteps);
