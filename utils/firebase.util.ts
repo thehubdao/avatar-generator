@@ -13,13 +13,14 @@ import {
   StorageLocation
 } from "../enums/firebase.enum";
 import {
-  AdminUser, AGParameters,
+  AdminUser,
+  AGParameters,
   AGQueryConstraints,
   LogInInterface,
   UserInterface,
   UserWithPass
 } from "../interfaces/firebase.interface";
-import {Module, PageLocation} from "../enums/common.enum";
+import {CampaignParameterName, Module, PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
 import {LogError, RandomPassword} from "./common.util";
 import {Result} from "../interfaces/common.interface";
@@ -227,7 +228,7 @@ export async function GetFile(path: string, campaign?: string) {
   return stream.arrayBuffer();
 }
 
-export async function GetParameters<T>(campaign?: string, ...parameters: string[]): Promise<T[]> {
+export async function GetParameters<T>(campaign?: string, ...parameters: (string | CampaignParameterName)[]): Promise<T[]> {
   const {doc, getDoc} = await import('@firebase/firestore');
 
   const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}` : FirestoreGlobalLocation.Parameters;
@@ -236,7 +237,7 @@ export async function GetParameters<T>(campaign?: string, ...parameters: string[
 
   const result: T[] = [];
   for (const parameter of parameters) {
-    result.push(leDoc.get(parameter));
+    result.push(leDoc.get(parameter as string));
   }
 
   return result;
@@ -307,7 +308,9 @@ export async function InsertDocWithId(newDocId: string, data: {}, location: Fire
   }
 }
 
-export async function UploadFile(file: File, fileType: StorageLocation, sectionType?: string, campaign?: string) {
+export async function UploadFile(file: File | null | undefined, fileType: StorageLocation, sectionType?: string, campaign?: string) {
+  if(file == null) return void LogError(Module.FirebaseUtil, "Missing file to upload");
+  
   const {ref, uploadBytes} = await import('@firebase/storage');
   const {uuidv4} = await import('@firebase/util');
 

@@ -47,6 +47,9 @@ export interface CampaignConfig {
   accCamPos?: Record<string, LookAtVectors>;
 }
 
+/***
+ * Update CampaignParameterName enum as well, when changing names on this interface
+  */
 export interface CampaignParameters {
   owner: string;
   armature: string;
