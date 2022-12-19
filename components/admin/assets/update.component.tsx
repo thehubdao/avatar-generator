@@ -26,12 +26,16 @@ export default function AssetUpdate({docLocation, campaign, changeComponent}: As
 
     componentDidMount()
       .catch(err => console.error(err));
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function initData() {
     if (!docLocation) return setMessage('Missing document information');
 
-    let newDocLocation = `${FirestoreGlobalLocation.Campaign}/${campaign}${AddOrRemoveSlash(docLocation)}`;
+    let newDocLocation = campaign != undefined ?
+      `${FirestoreGlobalLocation.Campaign}/${campaign}${AddOrRemoveSlash(docLocation)}` : 
+      docLocation;
 
     if (docLocation.split('/').length % 2 !== 0) {
       newDocLocation = docLocation.slice(0, docLocation.lastIndexOf('/'));

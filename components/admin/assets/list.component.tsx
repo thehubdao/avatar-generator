@@ -1,5 +1,5 @@
 ﻿import {useEffect, useState} from "react";
-import {FirestoreGlobalLocation, FirestoreLocation} from "../../../enums/firebase.enum";
+import {FirestoreLocation} from "../../../enums/firebase.enum";
 import {DeleteDoc, GetInfoDB} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
 import AGText from "../../../components/common/ag-text.component";
@@ -26,6 +26,8 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
 
     componentDidMount()
       .catch(err => console.error(err));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // TODO: check if maybe there is a better way to ask for information, maybe a force sometimes, others just get the session info

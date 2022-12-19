@@ -44,7 +44,9 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
   useEffect(() => {
     (async () => {
       await getTypeOptionsByCampaign();
-    })();
+    })().catch(err => console.error(err));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [campaign, dbLocation])
 
   async function getTypeOptionsByCampaign(leCampaign: string | undefined = campaign) {
