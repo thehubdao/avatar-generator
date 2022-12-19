@@ -25,3 +25,10 @@ export function IsEmail(text: string): EmailResult {
 export function RandomPassword() {
   return Math.random().toString(36).substring(2, 12);
 }
+
+export function AddOrRemoveSlash(text: string) {
+  if(text.charAt(0) === '/')
+    return text.substring(1);
+
+  return `/${text}`;
+}

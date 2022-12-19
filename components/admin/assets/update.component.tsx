@@ -1,55 +1,54 @@
-﻿import {Component} from "react";
+﻿import {useEffect, useState} from "react";
 import {GetInfoDB, ReplaceDoc} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../../interfaces/api.interface";
 import {AdminComponents} from "../../../enums/common.enum";
 import {ChangeComponentFunction} from "../../../interfaces/common.interface";
+import {FirestoreGlobalLocation} from "../../../enums/firebase.enum";
+import AGText from "../../common/ag-text.component";
+import {AddOrRemoveSlash} from "../../../utils/common.util";
 
 interface AssetUpdateProps {
+  campaign?: string;
   docLocation?: string;
   changeComponent: ChangeComponentFunction;
 }
 
-interface AssetUpdateState {
-  doc: string;
-  jsonData: string;
-  message?: string;
-}
+export default function AssetUpdate({docLocation, campaign, changeComponent}: AssetUpdateProps) {
+  const [doc, setDoc] = useState<string>('');
+  const [jsonData, setJsonData] = useState<string>('');
+  const [message, setMessage] = useState<string>();
 
-export default class AssetUpdate extends Component<AssetUpdateProps, AssetUpdateState> {
-  constructor(props: AssetUpdateProps) {
-    super(props);
-    this.state = {
-      doc: '',
-      jsonData: '',
-    }
-  }
-  
-  async componentDidMount() {
-    await this.initData();
-  }
-  
-  async initData() {
-    const {docLocation} = this.props;
+  useEffect(() => {
+    const componentDidMount = async () => {
+      await initData();
+    };
+
+    componentDidMount()
+      .catch(err => console.error(err));
     
-    if(!docLocation) return this.setState({ message: 'Missing document information' });
-    
-    let newDocLocation = docLocation;
-    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function initData() {
+    if (!docLocation) return setMessage('Missing document information');
+
+    let newDocLocation = campaign != undefined ?
+      `${FirestoreGlobalLocation.Campaign}/${campaign}${AddOrRemoveSlash(docLocation)}` : 
+      docLocation;
+
     if (docLocation.split('/').length % 2 !== 0) {
       newDocLocation = docLocation.slice(0, docLocation.lastIndexOf('/'));
     }
-    
+
     const _docInfo = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(newDocLocation);
-    const jsonData = _docInfo.length > 0 ? this.formatJson(JSON.stringify(_docInfo[0])) : '';
-    
-    this.setState({
-      doc: newDocLocation,
-      jsonData,
-    });
+    const _jsonData = _docInfo.length > 0 ? formatJson(JSON.stringify(_docInfo[0])) : '';
+
+    setDoc(newDocLocation);
+    setJsonData(_jsonData);
   }
 
-  formatJson(jsonString: string) {
+  function formatJson(jsonString: string) {
     let result = jsonString;
     result = result.replace('{', '{\n\t');
     result = result.replaceAll(',', ',\n\t');
@@ -58,37 +57,33 @@ export default class AssetUpdate extends Component<AssetUpdateProps, AssetUpdate
     return result;
   }
 
-  render() {
-    return (
-      <>
-        <div className="flex justify-center">
-          <div className="w-2/3">
-            <h1 className="ml-5 font-bold my-2"><span>🤡</span>Update Doc</h1>
-            <div className="flex justify-between my-2">
-              <h2 className="mx-2">Doc path: <span className="font-bold">{this.props.docLocation}</span></h2>
-              <AGButton type="alert" onClickEvent={() => this.props.changeComponent(AdminComponents.AssetList)}>Go to List</AGButton>
-            </div>
-            <form>
-              <div className='mx-2 my-2'>
-              <textarea required className="w-full border-2 border-amber-600 rounded whitespace-pre-line"
-                        rows={10} value={this.state.jsonData}
-                        onChange={(e) => this.setState({jsonData: e.target.value})}/>
-              </div>
-              <AGButton type='primary' onClickEvent={() => void this.updateData()}>Update json</AGButton>
-            </form>
-          </div>
-        </div>
-      </>
-    );
+  async function updateData() {
+    if (docLocation == undefined) return alert('Missing document location to update!');
+
+    await ReplaceDoc(doc, jsonData);
+    alert(`Doc "${doc}" has been updated`);
   }
 
-  async updateData() {
-    if(!this.props.docLocation) {
-      alert('Missing document location to update!');
-      return;
-    }
-    
-    await ReplaceDoc(this.state.doc, this.state.jsonData);
-    alert(`Doc "${this.state.doc}" has been updated`);
-  }
+  return (
+    <>
+      <div className="flex justify-center">
+        <div className="w-2/3">
+          {message != undefined ? <AGText type="text" mark='😡'>{message}</AGText> : ''}
+          <h1 className="ml-5 font-bold my-2"><span>🤡</span>Update Doc</h1>
+          <div className="flex justify-between my-2">
+            <h2 className="mx-2">Doc path: <span className="font-bold">{docLocation}</span></h2>
+            <AGButton type="alert" onClickEvent={() => changeComponent(AdminComponents.AssetList)}>Go to List</AGButton>
+          </div>
+          <form>
+            <div className='mx-2 my-2'>
+              <textarea required className="w-full border-2 border-amber-600 rounded whitespace-pre-line"
+                        rows={10} value={jsonData}
+                        onChange={(e) => setJsonData(e.target.value)}/>
+            </div>
+            <AGButton type='primary' onClickEvent={() => void updateData()}>Update json</AGButton>
+          </form>
+        </div>
+      </div>
+    </>
+  );
 }

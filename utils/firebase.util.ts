@@ -9,19 +9,19 @@ import {
   FirestoreFilterValues,
   FirestoreGlobalLocation,
   FirestoreLocation,
-  FirestoreParameters,
   StorageLocation
 } from "../enums/firebase.enum";
 import {
-  AdminUser, AGParameters,
+  AdminUser,
+  AGParameters,
   AGQueryConstraints,
   LogInInterface,
   UserInterface,
   UserWithPass
 } from "../interfaces/firebase.interface";
-import {Module, PageLocation} from "../enums/common.enum";
+import {CampaignParameterName, Module, PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
-import {LogError, RandomPassword} from "./common.util";
+import {AddOrRemoveSlash, LogError, RandomPassword} from "./common.util";
 import {Result} from "../interfaces/common.interface";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
 
@@ -120,9 +120,9 @@ async function CheckServerSide() {
 }
 
 export async function GetInfoDB<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints) {
-  let newLocation = dbLocation === '/' ? FirestoreGlobalLocation.Parameters : dbLocation;
-  if (campaign)
-    newLocation = `${FirestoreParameters.Campaigns}/${campaign}/${dbLocation}`;
+  const newLocation = campaign != undefined ?
+    `${FirestoreGlobalLocation.Campaign}/${campaign}${AddOrRemoveSlash(dbLocation)}` :
+    dbLocation;
 
   if (newLocation.split('/').length % 2 === 0) {
     return GetDocument<T>(newLocation);
@@ -227,7 +227,14 @@ export async function GetFile(path: string, campaign?: string) {
   return stream.arrayBuffer();
 }
 
-export async function GetParameters<T>(campaign?: string, ...parameters: string[]): Promise<T[]> {
+export async function GetParameter<T>(campaign: string |  undefined, parameter: string | CampaignParameterName): Promise<T | undefined> {
+  if(parameter === CampaignParameterName.Missing) return undefined;
+  
+  const result = await GetParameters<T>(campaign, parameter);
+  return result.at(0);
+}
+
+export async function GetParameters<T>(campaign?: string, ...parameters: (string | CampaignParameterName)[]): Promise<T[]> {
   const {doc, getDoc} = await import('@firebase/firestore');
 
   const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}` : FirestoreGlobalLocation.Parameters;
@@ -236,31 +243,43 @@ export async function GetParameters<T>(campaign?: string, ...parameters: string[
 
   const result: T[] = [];
   for (const parameter of parameters) {
-    result.push(leDoc.get(parameter));
+    if (parameter !== CampaignParameterName.All) {
+      result.push(leDoc.get(parameter as string));
+    } else {
+      result.push(leDoc.data() as T);
+    }
   }
 
   return result;
 }
 
 function CampaignLocation(campaign?: string) {
-  return campaign ? `${campaign}/` : '';
+  return campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}/` : '';
 }
 
-export async function UpdateDoc(location: FirestoreLocation, jsonData: string, campaign?: string) {
+export async function UpdateDoc(jsonData: string, location: FirestoreLocation, campaign?: string) {
   return UpdateDocObject(location, JSON.parse(jsonData), campaign);
 }
 
-export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlobalLocation, data: {}, campaign?: string, docName?: string) {
+export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlobalLocation, data: {}, campaign?: string, docName?: string): Promise<Result<boolean>> {
   const {doc, setDoc} = await import('@firebase/firestore');
-  const newLocation = campaign ?
-    campaign + location :
-    location !== '/' ?
-      location :
-      FirestoreGlobalLocation.Parameters;
-  const newDocName = docName == undefined ? '' : `/${docName}`;
 
-  const docRef = doc(await FirebaseUtil.Instance().DB(), newLocation + newDocName);
-  return await setDoc(docRef, data, {merge: true});
+  try {
+    const newLocation = campaign ?
+      `${FirestoreGlobalLocation.Campaign}/${campaign}/${location}` :
+      location !== '/' ?
+        location :
+        FirestoreGlobalLocation.Parameters;
+    const newDocName = docName == undefined ? '' : `/${docName}`;
+
+    const docRef = doc(await FirebaseUtil.Instance().DB(), `${newLocation}${newDocName}`);
+    await setDoc(docRef, data, {merge: true});
+    return {success: true, value: true};
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error updating doc: ${docName}, errMessage: ${err.message}`);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
 }
 
 export async function DeleteDoc(location: FirestoreLocation, docId: string, campaign?: string) {
@@ -284,13 +303,20 @@ export async function ReplaceDoc(docLocation: string, jsonData?: string, campaig
   }
 }
 
-export async function InsertDoc(jsonData: string, location: string = FirestoreLocation.Features, campaign?: string) {
-  // console.log(jsonData);
+export async function InsertDoc(jsonData: string, location: string = FirestoreLocation.Features, campaign?: string): Promise<Result<string>> {
   const {addDoc, collection} = await import('@firebase/firestore');
-  const newDoc = await addDoc(
-    collection(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location),
-    JSON.parse(jsonData));
-  // console.log('New Doc: ', newDoc.id);
+
+  try {
+    const newDoc = await addDoc(
+      collection(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location),
+      JSON.parse(jsonData));
+
+    return {success: true, value: newDoc.id};
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error creating doc, at ${location} with err message: ${err.message}`);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
 }
 
 export async function InsertDocWithId(newDocId: string, data: {}, location: FirestoreLocation | FirestoreGlobalLocation, campaign?: string): Promise<Result<string>> {
@@ -307,7 +333,9 @@ export async function InsertDocWithId(newDocId: string, data: {}, location: Fire
   }
 }
 
-export async function UploadFile(file: File, fileType: StorageLocation, sectionType?: string, campaign?: string) {
+export async function UploadFile(file: File | null | undefined, fileType: StorageLocation, sectionType?: string, campaign?: string) {
+  if (file == null) return void LogError(Module.FirebaseUtil, "Missing file to upload");
+
   const {ref, uploadBytes} = await import('@firebase/storage');
   const {uuidv4} = await import('@firebase/util');
 
@@ -399,7 +427,7 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
       await FirebaseUtil.Instance().Auth(),
       newUser.email,
       newUser.password == undefined ? RandomPassword() : newUser.password);
-    
+
     await updateCurrentUser(await FirebaseUtil.Instance().Auth(), originalUser);
     result = {success: true, value: true};
   } catch (e) {
@@ -413,10 +441,10 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
   if (leUser != undefined) {
     const realUser = ConvertObject<UserInterface>(newUser, ConvertType.UserInterface);
     const insertedDoc = await InsertDocWithId(leUser.user.uid, realUser, FirestoreGlobalLocation.User);
-    
-    if(!insertedDoc.success) {
+
+    if (!insertedDoc.success) {
       const {deleteUser} = await import('@firebase/auth');
-      
+
       try {
         await deleteUser(leUser.user);
       } catch (e) {
@@ -425,7 +453,7 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
         void LogError(Module.FirebaseUtil, errMessage);
         return {success: false, errMessage, errCode: err.code};
       }
-      
+
       return {success: false, errMessage: insertedDoc.errMessage, errCode: insertedDoc.errCode};
     }
   }
