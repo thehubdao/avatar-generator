@@ -95,7 +95,8 @@ export default function Navbar({userRole, campaign, campaignList}: NavbarProps) 
                          changeComponent={(nc) => updateCurrentComponent(nc)}/>
 
       case AdminComponents.AssetModify:
-        return <AssetUpdate docLocation={componentParams?.docLocation}
+        return <AssetUpdate campaign={campaign}
+                            docLocation={componentParams?.docLocation}
                             changeComponent={(nc) => updateCurrentComponent(nc)}/>
 
       case AdminComponents.UserAdd:

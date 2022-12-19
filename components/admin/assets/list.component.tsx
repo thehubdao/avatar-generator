@@ -1,5 +1,5 @@
 ﻿import {useEffect, useState} from "react";
-import {FirestoreLocation} from "../../../enums/firebase.enum";
+import {FirestoreGlobalLocation, FirestoreLocation} from "../../../enums/firebase.enum";
 import {DeleteDoc, GetInfoDB} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
 import AGText from "../../../components/common/ag-text.component";
@@ -74,9 +74,11 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
         let acc = 0;
         return (
           <tr key={datum['id']}>
-            <td className="px-1 border-t-2 border-yellow-400 flex justify-evenly">
+            <td className="px-1 border-t-2 border-yellow-400 flex justify-evenly hover:cursor-pointer">
               <a
-                onClick={() => changeComponent(AdminComponents.AssetModify, {docLocation: `${dbLocation}/${datum.id}`})}>🎏</a>
+                onClick={() => changeComponent(AdminComponents.AssetModify, {
+                  docLocation: `${dbLocation}${datum.id != undefined ? '/' + datum.id : ''}`
+                })}>🎏</a>
               {dbLocation !== FirestoreLocation.Parameters ?
                 <a className="hover:cursor-pointer" title="delete" onClick={() => void deleteDoc(datum.id)}>👋</a> : ''
               }

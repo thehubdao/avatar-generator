@@ -9,7 +9,6 @@ import {
   FirestoreFilterValues,
   FirestoreGlobalLocation,
   FirestoreLocation,
-  FirestoreParameters,
   StorageLocation
 } from "../enums/firebase.enum";
 import {
@@ -22,7 +21,7 @@ import {
 } from "../interfaces/firebase.interface";
 import {CampaignParameterName, Module, PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
-import {LogError, RandomPassword} from "./common.util";
+import {AddOrRemoveSlash, LogError, RandomPassword} from "./common.util";
 import {Result} from "../interfaces/common.interface";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
 
@@ -118,13 +117,6 @@ async function CheckServerSide() {
       await LogIn(logInfo);
     }
   }
-}
-
-function AddOrRemoveSlash(text: string) {
-  if(text.charAt(0) === '/')
-    return text.substring(1);
-  
-  return `/${text}`;
 }
 
 export async function GetInfoDB<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints) {
