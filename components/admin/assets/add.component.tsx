@@ -1,5 +1,5 @@
 ﻿import {useEffect, useRef, useState} from "react";
-import {GetParameters, InsertDoc, UpdateDoc, UploadFile} from "../../../utils/firebase.util";
+import {InsertDoc, UpdateDoc, UploadFile} from "../../../utils/firebase.util";
 import {FirestoreLocation, StorageLocation} from "../../../enums/firebase.enum";
 import AGButton from "../../../components/common/ag-button.component";
 import {AssetInterface} from "../../../interfaces/api.interface";
@@ -7,6 +7,7 @@ import {BasicData, ChangeComponentFunction} from "../../../interfaces/common.int
 import {AdminComponents, CampaignParameterName, Module} from "../../../enums/common.enum";
 import {LogError} from "../../../utils/common.util";
 import AGText from "../../common/ag-text.component";
+import {SessionCampaignParameter} from "../../../utils/common/session.util";
 
 interface AssetAddProps {
   campaign?: string;
@@ -39,6 +40,12 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
+  useEffect(() => {
+    (async () => {
+      await getTypeOptionsByCampaign();
+    })();
+  }, [campaign, dbLocation])
 
   async function getTypeOptionsByCampaign(leCampaign: string | undefined = campaign) {
     if (animation) return;
@@ -48,9 +55,8 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
     }
     
     const parameter = parameterToFind();
-    const newTypeOptions = leCampaign.length <= 0 ? [] :
-      (await GetParameters<BasicData[]>(leCampaign, parameter))[0];
-    setTypeOptions(newTypeOptions);
+    const result = await SessionCampaignParameter(leCampaign, parameter);
+    setTypeOptions(result ?? []);
   }
 
   function renderTypeOptions() {
@@ -94,14 +100,14 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
             <div className="flex my-2">
               <p className="mx-2 w-20 text-right">Name:</p>
               <input className="w-52 border-slate-600 border-2 rounded px-1" type="text" required
-                     value={formData?.name}
+                     value={formData.name ?? ''}
                      onChange={(e) => setFormData({...formData, name: e.target.value})}/>
             </div>
             {!animation &&
                 <div className="flex my-2">
                     <p className="mx-2 w-20 text-right">Type:</p>
                     <select className="w-52 rounded border-2 border-slate-600" required
-                            value={formData?.type}
+                            value={formData.type ?? ''}
                             onChange={e => setFormData({...formData, type: e.target.value})}>
                         <option value=''>Select...</option>
                       {renderTypeOptions()}
@@ -136,12 +142,12 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
 
   async function insertDB(_jsonData: string | undefined = jsonData) {
     if (!(dbLocation && _jsonData)) return LogError(Module.AssetAdd, "Missing Data/Location to save new asset!");
-
+    
     if (dbLocation !== FirestoreLocation.Parameters) {
-      await InsertDoc(_jsonData, dbLocation);
+      await InsertDoc(_jsonData, dbLocation, campaign);
       alert('Done inserting');
     } else {
-      await UpdateDoc(dbLocation, _jsonData);
+      await UpdateDoc(_jsonData, dbLocation, campaign);
       alert('Done updating');
     }
   }
@@ -165,8 +171,6 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
         return CampaignParameterName.Features;
       case FirestoreLocation.Accessories:
         return CampaignParameterName.Accessories;
-      case FirestoreLocation.Parameters:
-        return CampaignParameterName.All;
       default:
         return CampaignParameterName.Missing;
     }
@@ -180,11 +184,12 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
     const leFile = fileToUpload.current.files.item(0);
     const leThumb = thumbToUpload.current?.files?.item(0);
 
-    formData.thumb = await UploadFile(leThumb, StorageLocation.Thumbnail, undefined, campaign);
+    if(leThumb != undefined)
+      formData.thumb = await UploadFile(leThumb, StorageLocation.Thumbnail, undefined, campaign);
+    
     formData.path = await UploadFile(leFile, uploadFileTo, formData.type, campaign);
 
     await insertDB(JSON.stringify(formData));
-    alert("Data inserted");
   }
 
   async function insertFile() {

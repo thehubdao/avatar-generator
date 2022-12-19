@@ -18,8 +18,6 @@ interface AssetListState {
   dbData?: (FeatureInterface | AccessoryInterface | AnimationInterface)[],
 }
 
-// Show info from database
-// Delete entry on database (or add a new field for deleted entries) (new field needs to edit getFeatures as well)
 export default class AssetList extends Component<AssetListProps, AssetListState> {
   locationOptions: string[];
   

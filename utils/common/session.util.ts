@@ -1,11 +1,14 @@
 import {UserInterface} from "../../interfaces/firebase.interface";
-import {GetInfoDB, GetUserInfo} from "../firebase.util";
+import {GetInfoDB, GetParameter, GetParameters, GetUserInfo} from "../firebase.util";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
 import {FirestoreLocation} from "../../enums/firebase.enum";
+import {BasicData} from "../../interfaces/common.interface";
+import {CampaignParameterName} from "../../enums/common.enum";
 
 enum SessionConstant {
   UserInfo,
   DBInfo,
+  Parameter,
 }
 
 interface SessionRequest {
@@ -88,4 +91,9 @@ export async function SessionDBInfo(location: FirestoreLocation, campaign?: stri
   return GetData(SessionConstant.DBInfo,
     () => GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, campaign),
     location, campaign);
+}
+
+export async function SessionCampaignParameter(campaign: string | undefined, param: CampaignParameterName) {
+  return GetData(SessionConstant.Parameter, () => GetParameter<BasicData[]>(campaign, param),
+    campaign, param);
 }
