@@ -423,10 +423,11 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
   // Create user
   try {
     const originalUser = await GetCurrentUser();
+
     leUser = await createUserWithEmailAndPassword(
       await FirebaseUtil.Instance().Auth(),
       newUser.email,
-      newUser.password == undefined ? RandomPassword() : newUser.password);
+      newUser.password == undefined || newUser.password === '' ? RandomPassword() : newUser.password);
 
     await updateCurrentUser(await FirebaseUtil.Instance().Auth(), originalUser);
     result = {success: true, value: true};
