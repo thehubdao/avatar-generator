@@ -120,10 +120,17 @@ async function CheckServerSide() {
   }
 }
 
+function AddOrRemoveSlash(text: string) {
+  if(text.charAt(0) === '/')
+    return text.substring(1);
+  
+  return `/${text}`;
+}
+
 export async function GetInfoDB<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints) {
-  let newLocation = dbLocation === '/' ? FirestoreGlobalLocation.Parameters : dbLocation;
-  if (campaign)
-    newLocation = `${FirestoreParameters.Campaigns}/${campaign}/${dbLocation}`;
+  const newLocation = campaign != undefined ?
+    `${FirestoreGlobalLocation.Campaign}/${campaign}${AddOrRemoveSlash(dbLocation)}` :
+    dbLocation;
 
   if (newLocation.split('/').length % 2 === 0) {
     return GetDocument<T>(newLocation);
