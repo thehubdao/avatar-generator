@@ -153,6 +153,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     await this.onClickChangeSkinColor();
     
     await this.loadPreData();
+    await this.setStartAnimation();
     this.setLoading(false);
     // trigger event when component has all data to render
     this.props.onDataLoaded?.()
@@ -661,6 +662,14 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       this.mount!.appendChild(this.sc.renderer!.domElement);
       this.setState({currentModule: ViewModuleState.OnModule});
     }
+  }
+  
+  private async setStartAnimation() {
+    const startAnimation = this.animationList?.at(0);
+    if(startAnimation == undefined) return;
+    if(this.sc.mixer == undefined) return;
+    
+    await SetAnimation(this.sc.mixer, startAnimation.path);
   }
 }
 
