@@ -28,7 +28,7 @@ function OptionThumbnail({opt}: OptionProps) {
   }, [opt])
   
   return (
-    <div className='w-[75px] h-[75px] rounded-md overflow-hidden flex justify-center items-center'>
+    <div className='w-[75px] h-[75px] rounded-md overflow-hidden flex justify-center items-center bg-gray-700'>
       {/* <Image src={'/resources/icos/features/' + opt.type + '.svg'} width={50} height={50} alt={opt.name}/> */}
       <Image placeholder="blur" blurDataURL="/resources/images/image.png"
              src={imageUrl ?? '/resources/images/image.png'} width={75} height={75} alt={opt.name}/>
