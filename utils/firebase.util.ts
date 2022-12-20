@@ -2,6 +2,7 @@ import {FirebaseApp, FirebaseOptions} from "@firebase/app";
 import {Firestore, QueryConstraint} from "@firebase/firestore";
 import {FirebaseStorage} from "@firebase/storage";
 import {Auth, User} from "@firebase/auth";
+import {FirebaseError} from "@firebase/util";
 
 import {FirestoreFilterValues, FirestoreParameters, FirestoreValues, StorageValues} from "../enums/firebase.enum";
 import {AGQueryConstraints, LogInInterface} from "../interfaces/firebase.interface";
@@ -283,4 +284,24 @@ export async function GetCurrentUser() {
       resolve(user);
     })
   });
+}
+
+export async function GetFileUrl(imagePath?: string) {
+  // TODO: replace with LogError
+  if(imagePath == undefined) {
+    console.error('Missing image location');
+    return undefined;
+  }
+  
+  try {
+    const {ref, getDownloadURL} = await import('@firebase/storage');
+
+    const imageRef = ref(await FirebaseUtil.Instance().Storage(), imagePath);
+    return getDownloadURL(imageRef);
+  }
+  catch (e) {
+    const err = e as FirebaseError;
+    console.error(`Error getting Image Url. ${err.message}`);
+    return undefined;
+  }
 }
