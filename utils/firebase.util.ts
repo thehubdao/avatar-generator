@@ -288,7 +288,7 @@ export async function GetCurrentUser() {
 
 export async function GetFileUrl(imagePath?: string) {
   // TODO: replace with LogError
-  if(imagePath == undefined) {
+  if(imagePath == undefined || imagePath === '') {
     // console.error('Missing image location');
     return undefined;
   }

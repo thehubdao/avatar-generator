@@ -23,16 +23,23 @@ function OptionThumbnail({opt}: OptionProps) {
   
   useEffect(() => {
     (async () => {
-      setImageUrl(await GetFileUrl(opt.thumb));
+      const newImage = await GetFileUrl(opt.thumb);
+      setImageUrl(newImage ?? '/resources/images/image.png');
     })().catch(err => console.error(err));
   }, [opt])
-  
+
   return (
-    <div className='w-[75px] h-[75px] rounded-md overflow-hidden flex justify-center items-center bg-gray-700'>
-      {/* <Image src={'/resources/icos/features/' + opt.type + '.svg'} width={50} height={50} alt={opt.name}/> */}
-      <Image placeholder="blur" blurDataURL="/resources/images/image.png"
-             src={imageUrl ?? '/resources/images/image.png'} width={75} height={75} alt={opt.name}/>
-    </div>
+    <>
+      {imageUrl == undefined ?
+        <div className='w-[75px] h-[75px] rounded-md overflow-hidden flex justify-center items-center bg-gray-700 blur-md'>
+          <Image src={'/resources/images/image.png'} width={75} height={75} alt={opt.name}/>
+        </div> :
+        <div className='w-[75px] h-[75px] rounded-md overflow-hidden flex justify-center items-center bg-gray-700'>
+          <Image placeholder="blur" blurDataURL="/resources/images/image.png"
+                 src={imageUrl} width={75} height={75} alt={opt.name}/>
+        </div>
+      }
+    </>
   );
 }
 
