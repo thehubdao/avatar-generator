@@ -1,19 +1,14 @@
-import {Component} from "react";
+import {useEffect, useState} from "react";
 import Image from "next/image";
 import Head from "next/head";
-import {Clock, Vector3, WebGLInfo} from "three";
+import {Clock, Vector3} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {GetServerSideProps} from "next";
 
 import AGLoading from "../components/common/ag-loading.component";
 import {FrustumCulledFalse, InitSceneController} from "../utils/threejs/scene.util";
 import {GetAmbientLights, GetTestLights} from "../utils/test-scene.util";
-import {
-  FirebaseGltfModel,
-  GetAccessoryBones,
-  GetGltfModel,
-  GetFeaturesData,
-} from "../utils/importer.util";
+import {FirebaseGltfModel, GetAccessoryBones, GetFeaturesData, GetGltfModel,} from "../utils/importer.util";
 import {ExportAttributeValues, GlobalValues, Module, ViewModuleState} from "../enums/common.enum";
 import {FirestoreParameters} from "../enums/firebase.enum";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../interfaces/api.interface";
@@ -55,168 +50,149 @@ export interface AvatarGeneratorProps {
   onlyView: boolean;
 }
 
-interface AvatarGeneratorState {
-  selectedFeature: string;
-  selectedAcc: string;
-  featureList?: FeatureInterface[];
-  accessoryList?: AccessoryInterface[];
-  featureSelectList: BasicData[];
-  accSelectList: BasicData[];
-  cameraPos: Vector3;
-  cameraLookAt: Vector3;
-  logs?: WebGLInfo;
-  skinColor?: string;
-  editModeSelected: boolean;
-  featuresSelected: boolean;
-  currentModule: ViewModuleState;
-  loading: boolean;
-  resX: number;
-  resY: number;
-}
+export default function AvatarGenerator({
+                                          selectListBodyFeatures,
+                                          selectListAccessories,
+                                          onlyView,
+                                          onDataLoaded,
+                                          campaign,
+                                          attributeConfig,
+                                          baseMeshPath,
+                                          campaignConfig,
+                                          bgColor
+                                        }: AvatarGeneratorProps) {
+  const [selectedFeature, setSelectedFeature] = useState<string>(selectListBodyFeatures[0].id);
+  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories[0].id);
+  const [cameraPos, setCameraPos] = useState<Vector3>(new Vector3());
+  const [cameraLookAt, setCameraLookAt] = useState<Vector3>(new Vector3());
+  const [skinColor, setSkinColor] = useState<string>('F2A47E');
+  const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
+  const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
+  const [currentModule, setCurrentModule] = useState<ViewModuleState>(ViewModuleState.OnModule);
+  const [loading, setLoading] = useState<boolean>(true);
 
-export default class AvatarGenerator extends Component<AvatarGeneratorProps, AvatarGeneratorState> {
-  threeCanvas: HTMLDivElement | null;
-  clock: Clock;
+  const featureSelectList: BasicData[] = selectListBodyFeatures;
+  const accSelectList: BasicData[] = selectListAccessories;
+  
+  let threeCanvas: HTMLDivElement | null = null;
+  const clock: Clock = new Clock();
+  let sc: SceneInterface | undefined;
 
-  sc?: SceneInterface;
+  const savedModels: Record<string, GLTF> = {};
 
-  savedModels: Record<string, GLTF>;
+  let doCameraMovement = false;
 
-  doCameraMovement = false;
-  cameraTargetPosition?: Vector3;
+  let accessoryBonesData: Record<string, AccessoryInfoInterface> | undefined;
+  let featureListData: Record<string, FeatureInfoInterface> | undefined;
+  let featureList: FeatureInterface[] | undefined;
+  let accessoryList: AccessoryInterface[] | undefined;
+  let animationList: AnimationInterface[] | undefined;
+  const exportData: ExportInterface = {attributes: []};
 
-  accessoryBonesData?: Record<string, AccessoryInfoInterface>;
-  featureListData?: Record<string, FeatureInfoInterface>;
-  featureList?: FeatureInterface[];
-  accessoryList?: AccessoryInterface[];
-  animationList?: AnimationInterface[];
-  exportData: ExportInterface;
+  let tanFOV: number | undefined;
+  let windowHeight: number | undefined;
+  let hasAnimation: boolean | undefined;
+  let onIFrame: boolean = false;
 
-  tanFOV?: number;
-  windowHeight?: number;
-  hasAnimation?: boolean;
-  private onIFrame: boolean;
+  useEffect(() => {
+    const componentDidMount = async () => {
+      if (!onlyView) await changeView();
 
-  constructor(props: AvatarGeneratorProps) {
-    super(props);
-    this.state = {
-      selectedFeature: props.selectListBodyFeatures[0].id,
-      selectedAcc: props.selectListAccessories[0].id,
-      featureSelectList: props.selectListBodyFeatures,
-      accSelectList: props.selectListAccessories,
-      cameraPos: new Vector3(),
-      cameraLookAt: new Vector3(),
-      skinColor: 'F2A47E',// 'cf9e7c',
-      editModeSelected: false,
-      featuresSelected: true,
-      currentModule: ViewModuleState.OnModule,
-      loading: true,
-      resX: 0,
-      resY: 0,
+      await avatarScene();
+
+      await Promise.all([
+        getFeatureList(),
+        getAccessoryList(),
+        getAnimationList()
+      ]);
+
+      await getAccessoryBones();
+      await getFeaturesData();
+      await onClickChangeSkinColor();
+      await loadPreData();
+      await onClickChangeSkinColor();
+
+      setLoading(false);
+      // trigger event when component has all data to render
+      onDataLoaded?.()
+
+      IFrameReady(setOnIFrame);
     };
+    
+    componentDidMount()
+      .catch(err => console.error(err));
+  }, []);
 
-    this.savedModels = {};
+  useEffect(() => {
+    if (threeCanvas && currentModule !== ViewModuleState.OnModule) {
+      if (!sc) return void LogError(Module.AvatarGenerator, "Missing scene on view transition");
 
-    this.threeCanvas = null;
-    this.clock = new Clock();
-    this.exportData = {attributes: []};
-    this.onIFrame = false;
+      threeCanvas.appendChild(sc.renderer.domElement);
+      setCurrentModule(ViewModuleState.OnModule);
+    }
+  }, [currentModule]);
+
+  const setOnIFrame = () => {
+    console.log('IFrame Callback: ', onIFrame);
+    onIFrame = true;
+    SetIFrameEvents(changeFeatureFromIFrame, exportFromIFrame, changeSkinColorFromIFrame);
   }
 
-  async componentDidMount() {
-    if (!this.props.onlyView) await this.changeView();
-
-    await this.avatarScene();
-
-    await Promise.all([
-      this.getFeatureList(),
-      this.getAccessoryList(),
-      this.getAnimationList()
-    ]);
-
-    await this.getAccessoryBones();
-    await this.getFeaturesData();
-    await this.onClickChangeSkinColor();
-    await this.loadPreData();
-    await this.onClickChangeSkinColor();
-
-    this.setLoading(false);
-    // trigger event when component has all data to render
-    this.props.onDataLoaded?.()
-
-    this.setState({
-      resX: window.innerWidth,
-      resY: window.innerHeight
-    });
-
-    IFrameReady(this.setOnIFrame);
-  }
-
-  setLoading(newState = true) {
-    this.setState({loading: newState});
-  }
-
-  setOnIFrame = () => {
-    console.log('IFrame Callback: ', this.onIFrame);
-    this.onIFrame = true;
-    SetIFrameEvents(this.changeFeatureFromIFrame, this.exportFromIFrame, this.changeSkinColorFromIFrame);
-  }
-
-  changeFeatureFromIFrame = async (params?: BasicData) => {
-    if (!this.onIFrame) return console.log("Not on IFrame, subscribe if you forgot!");
+  const changeFeatureFromIFrame = async (params?: BasicData) => {
+    if (!onIFrame) return console.log("Not on IFrame, subscribe if you forgot!");
     if (!params) return console.log("Missing feature option!");
 
     if (params.detail && params.detail.startsWith('http')) {
-      await this.changeFeature(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
+      await changeFeature(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
     } else {
       if (params.id.endsWith(GlobalValues.AccEnd)) {
-        const accessory = this.accessoryList?.find(a => a.type === params.id && a.name === params.val);
+        const accessory = accessoryList?.find(a => a.type === params.id && a.name === params.val);
 
         if (!accessory) return console.log("Accessory option not found!");
-        await this.changeAccessory(accessory.id, accessory.path, accessory.name, accessory.type);
+        await changeAccessory(accessory.id, accessory.path, accessory.name, accessory.type);
       } else {
-        const feature = this.featureList?.find(p => p.type === params.id && p.name === params.val);
+        const feature = featureList?.find(p => p.type === params.id && p.name === params.val);
 
         if (!feature) return console.log("Feature option not found!");
-        await this.changeFeature(feature.id, feature.path, feature.name, feature.type);
+        await changeFeature(feature.id, feature.path, feature.name, feature.type);
       }
     }
   }
 
-  changeSkinColorFromIFrame = (newColor?: string) => {
-    return this.onClickChangeSkinColor(newColor);
+  const changeSkinColorFromIFrame = (newColor?: string) => {
+    return onClickChangeSkinColor(newColor);
   }
 
-  exportFromIFrame = () => {
-    return this.exportModel();
+  const exportFromIFrame = () => {
+    return exportModel();
   }
 
-  setHasAnimation = () => {
+  const setHasAnimation = () => {
     // console.log('Animation CallBack: ', this.hasAnimation);
-    this.hasAnimation = true;
+    hasAnimation = true;
   }
 
-  async loadPreData() {
-    if (!(this.featureList && this.accessoryList))
+  async function loadPreData() {
+    if (!(featureList && accessoryList))
       return LogError(Module.AvatarGenerator, "No feature/accessory list!");
 
-    if (this.props.campaign && this.props.campaign !== GlobalValues.BaseCampaign) {
-      this.exportData?.attributes.push({id: ExportAttributeValues.Campaign, val: this.props.campaign});
+    if (campaign && campaign !== GlobalValues.BaseCampaign) {
+      exportData?.attributes.push({id: ExportAttributeValues.Campaign, val: campaign});
     }
 
-    if (this.props.attributeConfig) {
-      for (const attribute of this.props.attributeConfig) {
+    if (attributeConfig) {
+      for (const attribute of attributeConfig) {
         // Is a feature
-        if (this.state.featureSelectList.some(pl => pl.id === attribute.id)) {
-          const newFeature = this.featureList.find(p => p.name === attribute.val && p.type === attribute.id);
+        if (featureSelectList.some(pl => pl.id === attribute.id)) {
+          const newFeature = featureList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newFeature)
-            await this.changeFeature(newFeature.id, newFeature.path, newFeature.name, attribute.id);
+            await changeFeature(newFeature.id, newFeature.path, newFeature.name, attribute.id);
         }
         // Is an accessory
-        else if (this.state.accSelectList.some(pl => pl.id === attribute.id)) {
-          const newAcc = this.accessoryList.find(p => p.name === attribute.val && p.type === attribute.id);
+        else if (accSelectList.some(pl => pl.id === attribute.id)) {
+          const newAcc = accessoryList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newAcc)
-            await this.changeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
+            await changeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
         }
       }
     } else {
@@ -224,95 +200,70 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       const randomAccessory: AccessoryInterface[] = [];
 
       // Load random features
-      for (const featureType of this.state.featureSelectList) {
-        const randomFeatureOption = RandomArrayElement(this.featureList.filter(p => p.type === featureType.id));
+      for (const featureType of featureSelectList) {
+        const randomFeatureOption = RandomArrayElement(featureList.filter(p => p.type === featureType.id));
         if (randomFeatureOption)
           randomFeature.push(randomFeatureOption);
       }
 
-      for (const accType of this.state.accSelectList) {
-        const randomAcc = RandomArrayElement(this.accessoryList.filter(a => a.type === accType.id));
+      for (const accType of accSelectList) {
+        const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.id));
         if (randomAcc)
           randomAccessory.push(randomAcc);
       }
 
       const modelPromises: Promise<GLTF>[] = [];
       for (const feature of randomFeature)
-        modelPromises.push(this.getWearableOption(feature.id, feature.path));
+        modelPromises.push(getWearableOption(feature.id, feature.path));
       for (const acc of randomAccessory)
-        modelPromises.push(this.getWearableOption(acc.id, acc.path));
+        modelPromises.push(getWearableOption(acc.id, acc.path));
       await Promise.all([...modelPromises]);
 
       for (const feature of randomFeature)
-        await this.changeFeature(feature.id, feature.path, feature.name, feature.type);
+        await changeFeature(feature.id, feature.path, feature.name, feature.type);
       for (const acc of randomAccessory)
-        await this.changeAccessory(acc.id, acc.path, acc.name, acc.type);
+        await changeAccessory(acc.id, acc.path, acc.name, acc.type);
     }
   }
 
-  async getFeatureList() {
-    const {value: newAssetList} = await GetAssetsListByCampaign(this.props.campaign);
-    this.featureList = newAssetList;
-    const _featureList = this.filterListByBodyFeature(this.state.selectedFeature);
-    // console.log('result', this.featureList);
-    this.setState({featureList: _featureList});
+  async function getFeatureList() {
+    const {value: newAssetList} = await GetAssetsListByCampaign(campaign);
+    featureList = newAssetList;
   }
 
-  async getAccessoryList() {
-    const {value: newAccList} = await GetAccessoryListByCampaign(this.props.campaign);
-    this.accessoryList = newAccList;
-    const _accessoryList = this.filterListByAccessory(this.state.selectedAcc);
-    this.setState({accessoryList: _accessoryList});
+  async function getAccessoryList() {
+    const {value: newAccList} = await GetAccessoryListByCampaign(campaign);
+    accessoryList = newAccList;
   }
 
-  async getAnimationList() {
-    const {value: newAnimationList} = await GetAnimationListByCampaign(this.props.campaign);
-    this.animationList = newAnimationList;
-    // console.log(this.animationList);
+  async function getAnimationList() {
+    const {value: newAnimationList} = await GetAnimationListByCampaign(campaign);
+    animationList = newAnimationList;
   }
 
-  filterListByBodyFeature(bodyFeatureType: string) {
-    if (!this.featureList)
-      return void LogError(Module.AvatarGenerator, "Missing feature list!");
+  async function getFeaturesData() {
+    if (!(sc && sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature!")
 
-    return this.featureList.filter(x => x.type === bodyFeatureType);
+    featureListData = await GetFeaturesData(sc.armature.scene, featureSelectList);
   }
 
-  filterListByAccessory(accessoryOptionType: string) {
-    if (!this.accessoryList)
-      return void LogError(Module.AvatarGenerator, "Missing accessory list!");
+  async function getAccessoryBones() {
+    if (!(sc && sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature!");
 
-    return this.accessoryList.filter(x => x.type === accessoryOptionType);
+    accessoryBonesData = await GetAccessoryBones(sc.armature.scene, accSelectList);
   }
 
-  async getFeaturesData() {
-    if (!(this.sc && this.sc.armature))
-      return LogError(Module.AvatarGenerator, "Missing armature!")
+  async function avatarScene() {
+    if (!threeCanvas) return LogError(Module.AvatarGenerator, "Error initializing canvas!");
 
-    this.featureListData = await GetFeaturesData(this.sc.armature.scene, this.state.featureSelectList);
-  }
-
-  async getAccessoryBones() {
-    if (!(this.sc && this.sc.armature))
-      return LogError(Module.AvatarGenerator, "Missing armature!");
-
-    this.accessoryBonesData = await GetAccessoryBones(this.sc.armature.scene, this.state.accSelectList);
-  }
-
-  async avatarScene() {
-    if (!this.threeCanvas)
-      return LogError(Module.AvatarGenerator, "Error initializing canvas!");
-
-    this.sc = InitSceneController();
-    if (!this.sc) return LogError(Module.AvatarGenerator, "Error initializing scene!");
+    sc = InitSceneController();
+    if (!sc) return LogError(Module.AvatarGenerator, "Error initializing scene!");
 
     // mount scene
-    this.threeCanvas.appendChild(this.sc.renderer.domElement);
+    threeCanvas.appendChild(sc.renderer.domElement);
 
-    this.setState({
-      cameraPos: this.sc.camera.position.clone(),
-      cameraLookAt: this.sc.controls.target.clone()
-    });
+    setCameraPos(sc.camera.position.clone());
+    setCameraLookAt(sc.controls.target.clone());
 
     // Add test assets
     // this.scene.add(GetTestCube());
@@ -320,165 +271,158 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
     const lights = GetTestLights();
     for (const l of lights) {
-      this.sc.scene.add(l);
+      sc.scene.add(l);
     }
     const aLights = GetAmbientLights();
     for (const l of aLights) {
-      this.sc.scene.add(l);
+      sc.scene.add(l);
     }
 
-    this.sc.armature = await FirebaseGltfModel(this.props.baseMeshPath);
+    sc.armature = await FirebaseGltfModel(baseMeshPath);
     // console.log('Base start', this.sc.armature);
 
-    this.sc.mixer = CreateAnimationMixer(this.sc.armature.scene);
-    await SetAnimation(this.sc.mixer, this.sc.armature, undefined, this.setHasAnimation);
+    sc.mixer = CreateAnimationMixer(sc.armature.scene);
+    await SetAnimation(sc.mixer, sc.armature, undefined, setHasAnimation);
 
-    await TransformObject3dToToonMaterial(this.sc.armature.scene);
-    this.sc.scene.add(this.sc.armature.scene);
+    await TransformObject3dToToonMaterial(sc.armature.scene);
+    sc.scene.add(sc.armature.scene);
 
     // remember these initial values
-    this.tanFOV = Math.tan(((Math.PI / 180) * this.sc.camera.fov / 2));
-    this.windowHeight = window.innerHeight;
+    tanFOV = Math.tan(((Math.PI / 180) * sc.camera.fov / 2));
+    windowHeight = window.innerHeight;
 
-    window.addEventListener('resize', this.onWindowResize, false);
+    window.addEventListener('resize', onWindowResize, false);
 
-    FrustumCulledFalse(this.sc.scene);
+    FrustumCulledFalse(sc.scene);
 
-    this.Animate();
+    Animate();
   }
 
-  onWindowResize = () => {
-    if (!this.sc) return void LogError(Module.AvatarGenerator, "Missing scene");
-    if (!(this.tanFOV && this.windowHeight))
+  const onWindowResize = () => {
+    if (!sc) return void LogError(Module.AvatarGenerator, "Missing scene");
+    if (!(tanFOV && windowHeight))
       return void LogError(Module.AvatarGenerator, "Missing fov/windowHeight on resize!");
-
-    this.setState({resX: window.innerWidth, resY: window.innerHeight});
-    this.sc.camera.aspect = window.innerWidth / window.innerHeight;
+    
+    sc.camera.aspect = window.innerWidth / window.innerHeight;
 
     // adjust the FOV
-    this.sc.camera.fov = (360 / Math.PI) * Math.atan(this.tanFOV * (window.innerHeight / this.windowHeight));
+    sc.camera.fov = (360 / Math.PI) * Math.atan(tanFOV * (window.innerHeight / windowHeight));
 
-    this.sc.camera.updateProjectionMatrix();
+    sc.camera.updateProjectionMatrix();
     //this.camera!.lookAt(this.scene!.position);
 
-    this.sc.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.sc.renderer.render(this.sc.scene, this.sc.camera);
+    sc.renderer.setSize(window.innerWidth, window.innerHeight);
+    sc.renderer.render(sc.scene, sc.camera);
   }
 
   // Animate the scene
-  Animate = () => {
-    if (!this.sc) return void LogError(Module.AvatarGenerator, "Missing three scene");
-    requestAnimationFrame(this.Animate);
+  const Animate = () => {
+    if (!sc) return void LogError(Module.AvatarGenerator, "Missing three scene");
+    requestAnimationFrame(Animate);
 
-    const delta = this.clock.getDelta();
-    if (this.sc.mixer) this.sc.mixer.update(delta);
+    const delta = clock.getDelta();
+    if (sc.mixer) sc.mixer.update(delta);
 
-    this.sc.controls.update();
+    sc.controls.update();
 
-    if (this.sc.camera.position.distanceTo(this.state.cameraPos) < 0.1) {
-      this.doCameraMovement = false;
+    if (sc.camera.position.distanceTo(cameraPos) < 0.1) {
+      doCameraMovement = false;
     }
 
-    if (this.doCameraMovement)
-      this.sc.camera.position.lerp(this.state.cameraPos, delta);
+    if (doCameraMovement)
+      sc.camera.position.lerp(cameraPos, delta);
 
-    this.setState({logs: this.sc.renderer.info})
-
-    this.sc.renderer.render(this.sc.scene, this.sc.camera);
+    sc.renderer.render(sc.scene, sc.camera);
   }
 
-  changeCamPosition(value: Vector3) {
-    if (!this.sc) return void LogError(Module.AvatarGenerator, "Missing scene");
+  function changeCamPosition(value: Vector3) {
+    if (!sc) return void LogError(Module.AvatarGenerator, "Missing scene");
 
-    this.doCameraMovement = true;
-    this.sc.controls.autoRotate = false;
-    this.setState({
-      cameraPos: value
-    });
+    doCameraMovement = true;
+    sc.controls.autoRotate = false;
+    setCameraPos(value);
   }
 
-  changeLookAtPosition(value: Vector3 = this.state.cameraLookAt.clone()) {
-    if (!this.sc) return void LogError(Module.AvatarGenerator, "Missing Scene");
-    this.sc.controls.target = value;
+  function changeLookAtPosition(value: Vector3 = cameraLookAt.clone()) {
+    if (!sc) return void LogError(Module.AvatarGenerator, "Missing Scene");
+    sc.controls.target = value;
   }
 
-  async onClickChangeSkinColor(newSkinColor = this.state.skinColor) {
-    if (!(this.sc && this.sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature for skin color change");
+  async function onClickChangeSkinColor(newSkinColor = skinColor) {
+    if (!(sc && sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature for skin color change");
     if (newSkinColor == undefined) return LogError(Module.AvatarGenerator, "Missing new skin color");
 
-    await ChangeObjectSkinColor(this.sc.armature.scene, newSkinColor);
-    this.setState({skinColor: newSkinColor});
+    await ChangeObjectSkinColor(sc.armature.scene, newSkinColor);
+    setSkinColor(newSkinColor);
   }
 
-  onCategoryChange(value: string) {
-    const _featureList = this.filterListByBodyFeature(value);
-    this.setState({featureList: _featureList, selectedFeature: value});
-    this.setFeatureCamPosition(value, this.props.campaignConfig.featuresCamPos);
+  function onCategoryChange(value: string) {
+    setSelectedFeature(value);
+    setFeatureCamPosition(value, campaignConfig.featuresCamPos);
   }
 
-  onAccessoryChange(value: string) {
-    const _accessoryList = this.filterListByAccessory(value);
-    this.setState({accessoryList: _accessoryList, selectedAcc: value});
-    this.setFeatureCamPosition(value, this.props.campaignConfig.accCamPos);
+  function onAccessoryChange(value: string) {
+    setSelectedAcc(value);
+    setFeatureCamPosition(value, campaignConfig.accCamPos);
   }
 
-  setFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
+  function setFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
     const confRef = posLocation ? posLocation[index] : undefined;
     if (confRef) {
-      this.changeCamPosition(new Vector3(confRef.pos?.x, confRef.pos?.y, confRef.pos?.z));
-      this.changeLookAtPosition(new Vector3(confRef.lookAt?.x, confRef.lookAt?.y, confRef.lookAt?.z));
+      changeCamPosition(new Vector3(confRef.pos?.x, confRef.pos?.y, confRef.pos?.z));
+      changeLookAtPosition(new Vector3(confRef.lookAt?.x, confRef.lookAt?.y, confRef.lookAt?.z));
     }
   }
 
-  async getWearableOption(id: string, optionPath: string) {
+  async function getWearableOption(id: string, optionPath: string) {
     let replaceModel: GLTF;
-    if (this.savedModels[id]) {
-      replaceModel = this.savedModels[id];
+    if (savedModels[id]) {
+      replaceModel = savedModels[id];
     } else {
       replaceModel = await GetGltfModel(optionPath);
-      this.savedModels[id] = replaceModel;
+      savedModels[id] = replaceModel;
     }
 
     return replaceModel;
   }
 
-  async changeFeature(id: string, featurePath: string, name: string, selectedFeature: string = this.state.selectedFeature) {
-    if (!(this.sc && this.sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature in order to change feature");
-    if (!this.featureListData) return LogError(Module.AvatarGenerator, "Missing feature list data");
+  async function changeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {
+    if (!(sc && sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature in order to change feature");
+    if (!featureListData) return LogError(Module.AvatarGenerator, "Missing feature list data");
 
-    const replaceModel = await this.getWearableOption(id, featurePath);
+    const replaceModel = await getWearableOption(id, featurePath);
 
-    await ReplaceModelFeatureOnly(this.sc.armature.scene.children[0], replaceModel, this.featureListData[selectedFeature], this.state.featureSelectList.find(sl => sl.id === selectedFeature), this.state.skinColor);
-    await this.getFeaturesData();
-    this.addReplaceAttribute(selectedFeature, name);
+    await ReplaceModelFeatureOnly(sc.armature.scene.children[0], replaceModel, featureListData[_selectedFeature], featureSelectList.find(sl => sl.id === _selectedFeature), skinColor);
+    await getFeaturesData();
+    addReplaceAttribute(_selectedFeature, name);
   }
 
-  async changeAccessory(id: string, path: string, name: string, selectedAcc: string = this.state.selectedAcc) {
-    if (!this.accessoryBonesData) return LogError(Module.AvatarGenerator, "Missing accessory data");
+  async function changeAccessory(id: string, path: string, name: string, _selectedAcc: string = selectedAcc) {
+    if (!accessoryBonesData) return LogError(Module.AvatarGenerator, "Missing accessory data");
 
-    const replaceModel = await this.getWearableOption(id, path);
+    const replaceModel = await getWearableOption(id, path);
 
-    ReplaceModelAccessory(this.accessoryBonesData, selectedAcc, replaceModel);
-    this.addReplaceAttribute(selectedAcc, name);
+    ReplaceModelAccessory(accessoryBonesData, _selectedAcc, replaceModel);
+    addReplaceAttribute(_selectedAcc, name);
   }
 
-  addReplaceAttribute(addId: string, addValue: string) {
-    if (this.exportData && this.exportData.attributes.some(x => x.id === addId)) {
-      const oldAttribute = this.exportData.attributes.find(x => x.id === addId);
+  function addReplaceAttribute(addId: string, addValue: string) {
+    if (exportData && exportData.attributes.some(x => x.id === addId)) {
+      const oldAttribute = exportData.attributes.find(x => x.id === addId);
       if (oldAttribute)
         oldAttribute.val = addValue;
       return;
     }
 
-    this.exportData?.attributes.push({id: addId, val: addValue});
+    exportData?.attributes.push({id: addId, val: addValue});
   }
 
-  takeExportPicture() {
+  function takeExportPicture() {
     return new Promise<Blob>((resolve, reject) => {
-      if (!this.sc) return reject("Missing scene");
+      if (!sc) return reject("Missing scene");
 
       const mimeType = 'image/png';
-      this.sc.renderer.domElement.toBlob(blob => {
+      sc.renderer.domElement.toBlob(blob => {
         if (blob) {
           resolve(blob);
         }
@@ -486,77 +430,57 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     });
   }
 
-  async exportModel() {
-    if (!(this.sc && this.sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature on export");
+  async function exportModel() {
+    if (!(sc && sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature on export");
 
-    this.exportData.attributesBase64 = window.btoa(JSON.stringify(this.exportData.attributes));
+    exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
     const [picturePromise, modelPromise] = await Promise.all([
-      this.takeExportPicture(),
-      ExportModelGlb(this.sc.armature)
+      takeExportPicture(),
+      ExportModelGlb(sc.armature)
     ]);
-    this.exportData.picture = picturePromise;
-    this.exportData.model = modelPromise;
+    exportData.picture = picturePromise;
+    exportData.model = modelPromise;
 
-    console.log(this.exportData);
-    if (this.onIFrame) {
-      IFrameExportData(this.exportData);
+    console.log(exportData);
+    if (onIFrame) {
+      IFrameExportData(exportData);
     } else {
-      await SaveFile(this.exportData.model, 'model.glb');
-      await SaveFile(this.exportData.picture, 'picture.png');
+      await SaveFile(exportData.model, 'model.glb');
+      await SaveFile(exportData.picture, 'picture.png');
     }
   }
 
-  async changeView() {
-    if (!this.threeCanvas) return LogError(Module.AvatarGenerator, "Missing canvas");
+  async function changeView() {
+    if (!threeCanvas) return LogError(Module.AvatarGenerator, "Missing canvas");
 
-    // const parent = this.mount?.parentNode as HTMLElement;
-    if (this.state.editModeSelected) {
-      // parent!.classList.add('!w-full');
-      // parent!.classList.add('!h-full');
-      // parent!.classList.remove('rounded-b-[180px]');
-      this.setState({editModeSelected: false, currentModule: ViewModuleState.SwitchingModule});
+    if (editModeSelected) {
+      setEditModeSelected(false);
+      setCurrentModule(ViewModuleState.SwitchingModule);
     } else {
-      // parent!.classList.remove('!w-full');
-      // parent!.classList.remove('!h-full');
-      // parent!.classList.add('rounded-b-[180px]');
       await Delay(500);
-      this.setState({editModeSelected: true, currentModule: ViewModuleState.SwitchingModule});
+      setEditModeSelected(true);
+      setCurrentModule(ViewModuleState.SwitchingModule);
     }
   }
 
-  changeEditSelection(value: boolean) {
-    this.setState({featuresSelected: value});
-  }
-
-  render() {
+  function renderEditMode() {
     return (
       <>
-        <Head>
-          <title>Avatar Generator</title>
-        </Head>
-        {this.renderEditMode()}
-      </>
-    );
-  }
-
-  private renderEditMode() {
-    return (
-      <>
-        <AGLoading loading={this.state.loading} bgColor={this.props.bgColor}/>
+        <AGLoading loading={loading} bgColor={bgColor}/>
         {/* CANVAS WRAPPER */}
         <div
           className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
           {/* CANVAS BACKGROUND */}
-          <div style={{backgroundColor: `#${this.props.bgColor ?? '272727'}`}} className="w-full h-screen absolute"/>
+          <div style={{backgroundColor: `#${bgColor ?? '272727'}`}} className="w-full h-screen absolute"/>
           {/* CANVAS */}
-          <div className="relative h-full" ref={ref => this.threeCanvas = ref}/>
+          <div className="relative h-full" ref={ref => threeCanvas = ref}/>
         </div>
-        {!this.props.onlyView &&
-            <div onClick={() => void this.changeView()}
+        {!onlyView &&
+            <div onClick={() => void changeView()}
                  className="z-10 fixed top-4 right-4 bg-slate-100 border-2 border-slate-50 rounded-[4px] drop-shadow-md flex items-center justify-center px-2">
                 <div className="m-2">
                   {
-                    this.state.editModeSelected ?
+                    editModeSelected ?
                       <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
                            viewBox="0 0 511.996 511.996">
                         <path d="M508.245,246.953L363.435,102.133c-5.001-5.001-13.099-5.001-18.099,0c-5.001,5-5.001,13.099,0,18.099l122.965,122.965
@@ -574,38 +498,38 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
                   }
                 </div>
-                <div className="mr-2 text-xs">{this.state.editModeSelected ? 'NEXT' : 'EDIT'}</div>
+                <div className="mr-2 text-xs">{editModeSelected ? 'NEXT' : 'EDIT'}</div>
             </div>
         }
-        {this.state.editModeSelected ?
+        {editModeSelected ?
           <>
             <div className="fixed bottom-0 left-0 w-screen">
               <div className="w-full">
                 {
-                  this.state.featuresSelected &&
-                    <OptionSelectorComponent list={this.state.featureList}
-                                             activeOption={this.exportData?.attributes.find(o => o.id === this.state.selectedFeature)}
-                                             handleClick={(id: string, path: string, name: string) => void this.changeFeature(id, path, name)}/>
+                  featuresSelected &&
+                    <OptionSelectorComponent list={featureList}
+                                             activeOption={exportData?.attributes.find(o => o.id === selectedFeature)}
+                                             handleClick={(id: string, path: string, name: string) => void changeFeature(id, path, name)}/>
                 }
               </div>
               <div className="w-full bg-slate-100 flex">
                 <div className="w-[calc(100%_-_60px)]">
                   {
-                    this.state.featuresSelected ?
-                      <FeatureSelectorComponent list={this.state.featureSelectList}
-                                                activeFeature={this.state.selectedFeature}
-                                                handleClick={(value: string) => this.onCategoryChange(value)}/>
+                    featuresSelected ?
+                      <FeatureSelectorComponent list={featureSelectList}
+                                                activeFeature={selectedFeature}
+                                                handleClick={(value: string) => onCategoryChange(value)}/>
                       :
                       <ColorSelectorComponent list={['F6C89B', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
-                                              activeColor={this.state.skinColor}
-                                              handleClick={(value: string) => void this.onClickChangeSkinColor(value)}/>
+                                              activeColor={skinColor}
+                                              handleClick={(value: string) => void onClickChangeSkinColor(value)}/>
                   }
                 </div>
-                <div className="w-[60px] pt-3" onClick={() => this.changeEditSelection(!this.state.featuresSelected)}>
+                <div className="w-[60px] pt-3" onClick={() => setFeaturesSelected(!featuresSelected)}>
                   <div className="border-l border-slate-400 text-center flex flex-col items-center">
                     <div className={"rounded-md w-[40px] h-[40px] flex justify-center items-center"}>
                       {
-                        this.state.featuresSelected ?
+                        featuresSelected ?
                           <Image src='/resources/icons/buttons/head.svg' width={25} height={25} alt={'Color button'}
                                  className='opacity-70'/>
                           :
@@ -614,15 +538,15 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
                       }
                     </div>
                     <p
-                      className='text-[10px] pt-1 opacity-50 w-[40px]'>{this.state.featuresSelected ? 'Skin' : 'Features'}</p>
+                      className='text-[10px] pt-1 opacity-50 w-[40px]'>{featuresSelected ? 'Skin' : 'Features'}</p>
                   </div>
                 </div>
               </div>
             </div>
           </>
           : <>
-            {!this.props.onlyView &&
-                <div onClick={() => void this.exportModel()}
+            {!onlyView &&
+                <div onClick={() => void exportModel()}
                      className="z-10 fixed bottom-4 right-4 bg-slate-100 border-2 border-slate-50 rounded-[4px] drop-shadow-md flex items-center justify-center px-2">
                     <div className="m-2">
                         <svg version="1.1" id="Layer_3" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="16px"
@@ -645,14 +569,14 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     );
   }
 
-  componentDidUpdate() {
-    if (this.threeCanvas && this.state.currentModule !== ViewModuleState.OnModule) {
-      if (!this.sc) return LogError(Module.AvatarGenerator, "Missing scene on view transition");
-
-      this.threeCanvas.appendChild(this.sc.renderer.domElement);
-      this.setState({currentModule: ViewModuleState.OnModule});
-    }
-  }
+  return (
+    <>
+      <Head>
+        <title>Avatar Generator</title>
+      </Head>
+      {renderEditMode()}
+    </>
+  );
 }
 
 export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = async (context) => {
