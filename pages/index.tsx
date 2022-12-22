@@ -91,8 +91,7 @@ export default function AvatarGenerator({
 
   let tanFOV: number | undefined;
   let windowHeight: number | undefined;
-  let hasAnimation: boolean | undefined;
-  let onIFrame: boolean = false;
+  let onIFrame = false;
 
   useEffect(() => {
     const componentDidMount = async () => {
@@ -121,6 +120,8 @@ export default function AvatarGenerator({
     
     componentDidMount()
       .catch(err => console.error(err));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -130,6 +131,8 @@ export default function AvatarGenerator({
       threeCanvas.appendChild(sc.renderer.domElement);
       setCurrentModule(ViewModuleState.OnModule);
     }
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentModule]);
 
   const setOnIFrame = () => {
@@ -165,11 +168,6 @@ export default function AvatarGenerator({
 
   const exportFromIFrame = () => {
     return exportModel();
-  }
-
-  const setHasAnimation = () => {
-    // console.log('Animation CallBack: ', this.hasAnimation);
-    hasAnimation = true;
   }
 
   async function loadPreData() {
@@ -282,7 +280,7 @@ export default function AvatarGenerator({
     // console.log('Base start', this.sc.armature);
 
     sc.mixer = CreateAnimationMixer(sc.armature.scene);
-    await SetAnimation(sc.mixer, sc.armature, undefined, setHasAnimation);
+    await SetAnimation(sc.mixer, sc.armature, undefined);
 
     await TransformObject3dToToonMaterial(sc.armature.scene);
     sc.scene.add(sc.armature.scene);
