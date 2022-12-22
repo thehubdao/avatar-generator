@@ -23,6 +23,14 @@ interface BulkExportState {
   logs: string;
 }
 
+interface Part {
+  id: string;
+  index: string;
+  path: string;
+  name: string;
+  type: string;
+}
+
 
 
 /**
@@ -36,7 +44,7 @@ interface BulkExportState {
 function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
   return withRouter(class AdminExporter extends Component<BulkExportProps, BulkExportState>  {
     // identify all parts base on feature types
-    parts: Map<string, any[]> = new Map()
+    parts: Map<string, Part[]> = new Map()
     // features are the mesh section where a part can be attached
     features: { type: string, id: string }[] = []
     // Saving all combination index to export
@@ -63,7 +71,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
         await this.props.router.push(PageLocation.Admin);
 
       // set the avatar generator page in export/viewport mode by default
-      avatarGenerator.changeView()
+      await avatarGenerator.changeView()
     }
 
     log(text: string) {
@@ -74,10 +82,10 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
     /**
      * trigger process to export all different combination meshes
      */
-    async onExportAll() {
+    async onExportAll(): Promise<void> {
       this.setState({ exportRunning: true })
       this.log("Generating permutations...")
-      await this.generatePermutations()
+      this.generatePermutations()
       console.time("export time")
       this.log("Starting downloads...")
       for await(const comb of this.downloadCombination()) {
@@ -88,7 +96,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
       this.setState({ exportRunning: false })
     }
 
-    async onStopProcess() {
+    onStopProcess() {
       this.setState({ exportRunning: false })
     }
 
@@ -118,21 +126,26 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
      * Generate all permutations
      * @returns 
      */
-    async generatePermutations() {
-      const arr = Array.from(this.parts)
-        .map(([_, items]) => items)
+    generatePermutations() {
+      
+      const arr: string[][] = Array.from(this.parts)
+        /* eslint-disable */
+        .map(([_index, items]) => items)
+        /* eslint-enable */
         .map(items => items.map(it => it.index))
+      
       const featuresLength = this.features.length
-      const indices = new Array(featuresLength).fill(0)
+      const indices: number[] = (new Array(featuresLength) as number[]).fill(0)
       const iterationLimit = this.getTotalIteration();
       let iteration = 0;
 
       while(iteration < iterationLimit) {
         iteration++
 
-        let indicesArr: number[] = []
+        const indicesArr: number[] = []
         for(let i = 0; i < featuresLength; i++) {
-          const index = arr[i][indices[i]] as number
+          const partIndex = arr[i][indices[i]]
+          const index = Number(partIndex)
           indicesArr.push(index)
         }
         this.permutationPool.add(indicesArr)
@@ -179,8 +192,8 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
      * and the value of the feature represents the index for the feature part
      */
     setInitialCombination() {
-      const partIndexes = new Array(this.features.length).fill(0)
-      this.setCombinationByIndexes(partIndexes)
+      const partIndexes: number[] = (new Array(this.features.length) as number[]).fill(0)
+      void this.setCombinationByIndexes(partIndexes)
     }
 
     /**
@@ -268,12 +281,12 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
                 {
                   this.state.exportRunning
                   ? (
-                    <AGButton type="alert" onClickEvent={() => this.onStopProcess()}>
+                    <AGButton type="alert" onClickEvent={() => { this.onStopProcess() }}>
                       Stop
                     </AGButton>
                   )
                   : (
-                    <AGButton type="secondary" onClickEvent={() => this.onExportAll()}>
+                    <AGButton type="secondary" onClickEvent={() => { void this.onExportAll() }}>
                       Export All
                     </AGButton>
                   )
