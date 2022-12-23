@@ -33,8 +33,8 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
     return;
   }
   
-  let chestMesh: Object3D | undefined = await GetMatchPiece(replaceModel, selectedPart.val);
-  if(chestMesh == undefined) {
+  let chestMesh = await GetMatchPiece(replaceModel, selectedPart.val);
+  if(chestMesh == null) {
     console.error('Piece not found:', `'${selectedPart.val}' not found on replace model, please verify the glb file.`);
     return;
   }
@@ -68,15 +68,37 @@ export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GL
   baseModel.add(newPart);
 }
 
-async function GetMatchPiece(object: GLTF, match: string) {
-  let retObj: Object3D | undefined;
-  object.scene.traverse(m => {
-    if(m.name === match) {
-      retObj = m;
+async function GetMatchPiece(object: GLTF, match?: string) {
+  return new Promise<Object3D | null>((resolve) => {
+    let retObj: Object3D | null = null;
+    if(match != undefined) {
+      object.scene.traverse(m => {
+        if (m.name === match) {
+          retObj = m;
+        }
+      });
     }
+
+    if (retObj == null) {
+      let objectFound = false;
+      object.scene.traverse(m => {
+        if (objectFound) return;
+
+        const skinnedMesh = m as SkinnedMesh;
+        if (skinnedMesh.isSkinnedMesh) {
+          if ((skinnedMesh.parent as Group).isGroup)
+            retObj = skinnedMesh.parent;
+          else
+            retObj = skinnedMesh;
+
+          objectFound = true;
+          return;
+        }
+      });
+    }
+
+    resolve(retObj);
   });
-  
-  return retObj;
 }
 
 async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone) {
