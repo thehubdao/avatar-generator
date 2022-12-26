@@ -68,9 +68,8 @@ export default function AvatarGenerator({
   const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // TODO: can be sent to variable instead of state
-  const [cameraPos, setCameraPos] = useState<Vector3>(new Vector3());
-  const [cameraLookAt, setCameraLookAt] = useState<Vector3>(new Vector3());
+  let cameraPos: Vector3 = new Vector3();
+  let cameraLookAt: Vector3 = new Vector3();
 
   const featureSelectList: BasicData[] = selectListBodyFeatures;
   const accSelectList: BasicData[] = selectListAccessories;
@@ -250,8 +249,8 @@ export default function AvatarGenerator({
     // mount scene
     threeCanvas.appendChild(sc.renderer.domElement);
 
-    setCameraPos(sc.camera.position.clone());
-    setCameraLookAt(sc.controls.target.clone());
+    cameraPos = sc.camera.position.clone();
+    cameraLookAt = sc.controls.target.clone();
 
     // Add test assets
     // this.scene.add(GetTestCube());
@@ -328,7 +327,7 @@ export default function AvatarGenerator({
 
     doCameraMovement = true;
     sc.controls.autoRotate = false;
-    setCameraPos(value);
+    cameraPos = value;
   }
 
   function changeLookAtPosition(value: Vector3 = cameraLookAt.clone()) {
@@ -405,11 +404,10 @@ export default function AvatarGenerator({
     exportData?.attributes.push({id: addId, val: addValue});
   }
 
-  function takeExportPicture() {
+  function takeExportPicture(mimeType: string = 'image/png') {
     return new Promise<Blob>((resolve, reject) => {
       if (!sc) return reject("Missing scene");
-
-      const mimeType = 'image/png';
+      
       sc.renderer.domElement.toBlob(blob => {
         if (blob) {
           resolve(blob);
@@ -504,7 +502,10 @@ export default function AvatarGenerator({
                                                   handleClick={(value: string) => void onClickChangeSkinColor(value)}/>
                       }
                     </div>
-                    <div className="w-[60px] pt-3" onClick={() => setFeaturesSelected(!featuresSelected)}>
+                    <div className="w-[60px] pt-3" onClick={() => {
+                      setFeaturesSelected(prev => !prev)
+                      // void changeCamPosition(new Vector3(2, 2, 2))
+                    }}>
                       <div className="border-l border-slate-400 text-center flex flex-col items-center">
                         <div className={"rounded-md w-[40px] h-[40px] flex justify-center items-center"}>
                           {
