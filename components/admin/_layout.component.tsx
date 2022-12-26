@@ -1,11 +1,11 @@
-﻿import {useEffect} from "react";
-import {GetCurrentUser, HandleNotLoggedIn, LogOut} from "../../utils/firebase.util";
+﻿import {useEffect, useState} from "react";
+import {GetCurrentUserInfo, HandleNotLoggedIn, LogOut} from "../../utils/firebase.util";
 import {UserInterface} from "../../interfaces/firebase.interface";
 import AGButton from "../common/ag-button.component";
 import {UserRoleValues} from "../../enums/firebase.enum";
 import {GoToPage} from "../../utils/router.util";
 import {PageLocation} from "../../enums/common.enum";
-import {SessionUserInfo} from "../../utils/common/session.util";
+import AGLoading from "../common/ag-loading.component";
 
 interface LayoutProps {
   children: JSX.Element | JSX.Element[] | boolean;
@@ -24,18 +24,16 @@ export default function Layout({
                                  setCurrentCampaign,
                                  children
                                }: LayoutProps) {
+  const [loading, setLoading] = useState<boolean>(true);
 
   async function updateUserInfo() {
-    const currentUser = await GetCurrentUser();
-    
-    if (currentUser) {
-      const uInfo = await SessionUserInfo(currentUser.uid);
+    const uInfo = await GetCurrentUserInfo();
 
-      if (uInfo?.campaign == undefined || uInfo?.campaign?.length == 0)
-        await GoToPage(PageLocation.FirstSteps);
+    if (uInfo?.campaign == undefined || uInfo?.campaign?.length == 0)
+      await GoToPage(PageLocation.FirstSteps);
 
-      setUserInfo(uInfo);
-    }
+    setLoading(false);
+    setUserInfo(uInfo);
   }
   
   useEffect(() => {
@@ -64,6 +62,7 @@ export default function Layout({
 
   return (
     <>
+      <AGLoading loading={loading} transparency />
       <div className="bg-emerald-500 flex justify-between">
         <div className="ml-3 mr-1 my-2 flex">
           {userInfo &&
@@ -90,7 +89,9 @@ export default function Layout({
         </div>
         <AGButton type="danger" onClickEvent={() => void LogOut()}>Log Out</AGButton>
       </div>
-      {children}
+      { !loading &&
+        children
+      }
     </>
   );
 }

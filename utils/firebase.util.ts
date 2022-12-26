@@ -24,6 +24,7 @@ import {GoToPage} from "./router.util";
 import {AddOrRemoveSlash, LogError, RandomPassword} from "./common.util";
 import {Result} from "../interfaces/common.interface";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
+import {SessionUserInfo} from "./common/session.util";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -408,6 +409,15 @@ export async function GetUserInfo(userUid: string) {
     return undefined;
 
   return userDoc[0];
+}
+
+export async function GetCurrentUserInfo(forceUpdate = false) {
+  const currentUser = await GetCurrentUser();
+  
+  if (currentUser)
+    return SessionUserInfo(currentUser.uid, forceUpdate);
+  
+  return undefined;
 }
 
 export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Result<boolean>> {

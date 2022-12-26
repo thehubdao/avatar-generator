@@ -45,7 +45,7 @@ function keyToString(request: SessionRequest) {
   return `${request.sessionId}-${arrayToString}`;
 }
 
-async function GetData<T>(key: SessionConstant, findData: () => Promise<T | undefined>, ...params: any[]): Promise<T | undefined> {
+async function GetData<T>(forceUpdate: boolean, key: SessionConstant, findData: () => Promise<T | undefined>, ...params: any[]): Promise<T | undefined> {
   const data = SessionUtil.Instance().Data();
 
   const request: SessionRequest = {
@@ -55,7 +55,7 @@ async function GetData<T>(key: SessionConstant, findData: () => Promise<T | unde
   const leKey = keyToString(request);
   
   let datum = data.get(leKey);
-  if (datum == undefined) {
+  if (datum == undefined || forceUpdate) {
     const value = await findData();
     data.set(leKey, value);
     datum = value;
@@ -83,17 +83,17 @@ async function GetAndReplaceData<T>(key: SessionConstant, replaceData: (prev?: T
   return datum as T;
 }
 
-export async function SessionUserInfo(userUID: string) {
-  return GetData<UserInterface>(SessionConstant.UserInfo, async () => GetUserInfo(userUID), userUID);
+export function SessionUserInfo(userUID: string, forceUpdate = false) {
+  return GetData<UserInterface>(forceUpdate, SessionConstant.UserInfo, async () => GetUserInfo(userUID), userUID);
 }
 
-export async function SessionDBInfo(location: FirestoreLocation, campaign?: string) {
-  return GetData(SessionConstant.DBInfo,
+export function SessionDBInfo(location: FirestoreLocation, campaign: string | undefined, forceUpdate = false) {
+  return GetData(forceUpdate, SessionConstant.DBInfo,
     () => GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, campaign),
     location, campaign);
 }
 
-export async function SessionCampaignParameter(campaign: string | undefined, param: CampaignParameterName) {
-  return GetData(SessionConstant.Parameter, () => GetParameter<BasicData[]>(campaign, param),
+export function SessionCampaignParameter(campaign: string | undefined, param: CampaignParameterName, forceUpdate = false) {
+  return GetData(forceUpdate, SessionConstant.Parameter, () => GetParameter<BasicData[]>(campaign, param),
     campaign, param);
 }

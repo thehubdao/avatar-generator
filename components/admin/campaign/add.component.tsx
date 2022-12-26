@@ -105,7 +105,6 @@ export default function CampaignAdd({onCampaignCreated, campaignList}: NewCampai
     // Get information for the accessories
     const newAccessoryList = accessoriesNum ? accessoryList.slice(0, accessoriesNum) : [];
     newAccessoryList.forEach(a => a.id = `${a.id}${GlobalValues.AccEnd}`);
-    console.log(newAccessoryList);
 
     // Make doc campaign object
     const docData: CampaignParameters = {
