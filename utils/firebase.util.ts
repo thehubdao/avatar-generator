@@ -230,9 +230,18 @@ export async function GetFile(path: string, campaign?: string) {
 
 export async function GetParameter<T>(campaign: string |  undefined, parameter: string | CampaignParameterName): Promise<T | undefined> {
   if(parameter === CampaignParameterName.Missing) return undefined;
+
+  const {doc, getDoc} = await import('@firebase/firestore');
+
+  const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}` : FirestoreGlobalLocation.ParametersV2;
+  const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
+  const leDoc = await getDoc(docRef);
   
-  const result = await GetParameters<T>(campaign, parameter);
-  return result.at(0);
+    if (parameter !== CampaignParameterName.All) {
+      return leDoc.get(parameter as string) as T;
+    } else {
+      return leDoc.data() as T;
+    }
 }
 
 export async function GetParameters<T>(campaign?: string, ...parameters: (string | CampaignParameterName)[]): Promise<T[]> {
