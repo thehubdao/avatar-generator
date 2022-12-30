@@ -1,6 +1,6 @@
 import {NextApiRequest, NextApiResponse} from "next";
-import {GetParameters} from "../../utils/firebase.util";
-import {GlobalValues} from "../../enums/common.enum";
+import {GetParameter} from "../../utils/firebase.util";
+import {CampaignParameterName, GlobalValues} from "../../enums/common.enum";
 import {BasicData} from "../../interfaces/common.interface";
 import {ApiResponse} from "../../interfaces/api.interface";
 import {DefaultApiResponses} from "../../enums/api.enum";
@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     const {campaign} = req.query;
 
     const useCampaign = campaign != undefined ? campaign as string : GlobalValues.BaseCampaign;
-    const [data] = await GetParameters<BasicData[]>(useCampaign, useCampaign);
+    const data = await GetParameter<BasicData[]>(useCampaign, CampaignParameterName.Features);
     
     const result = data == undefined ? [] : data.map(d => d.id);
 
