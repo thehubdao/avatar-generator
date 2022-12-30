@@ -20,7 +20,7 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
   const [dbLocation, setDbLocation] = useState<FirestoreLocation>(FirestoreLocation.Features);
   const [typeOptions, setTypeOptions] = useState<BasicData[]>([]);
   const [formData, setFormData] = useState<Partial<AssetInterface>>({});
-  const [selectedStorage, setSelectedStorage] = useState<StorageLocation>(StorageLocation.BaseMesh);
+  const [selectedStorage, setSelectedStorage] = useState<StorageLocation>(StorageLocation.AvatarBase);
   const [animation, setAnimation] = useState<boolean>();
 
   const fileToUpload = useRef<HTMLInputElement>(null);

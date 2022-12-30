@@ -38,13 +38,13 @@ export default function CampaignAdd({onCampaignCreated, campaignList}: NewCampai
         <input type="text" value={featureList[index]?.id} required placeholder={`${index + 1} feature type`}
                onChange={event => setFeatureList((prevState) => {
                  if (prevState[index] == undefined) prevState[index] = {val: '', id: ''};
-                 prevState[index].id = event.target.value;
+                 prevState[index].id = event.target.value.trim();
                  return prevState;
                })}/>
         <p>Name:</p>
         <input type="text" value={featureList[index]?.val} required placeholder={`${index + 1} feature section name`}
                onChange={event => setFeatureList((prevState) => {
-                 prevState[index].val = event.target.value;
+                 prevState[index].val = event.target.value.trim();
                  return prevState;
                })}/>
         <hr/>
@@ -60,13 +60,13 @@ export default function CampaignAdd({onCampaignCreated, campaignList}: NewCampai
         <input type="text" value={accessoryList[index]?.id} required placeholder={`${index + 1} accessory type`}
                onChange={event => setAccessoryList((prevState) => {
                  if (prevState[index] == undefined) prevState[index] = {val: '', id: ''};
-                 prevState[index].id = event.target.value;
+                 prevState[index].id = event.target.value.trim();
                  return prevState;
                })}/>
         <p>Name:</p>
         <input type="text" value={accessoryList[index]?.val} required placeholder={`${index + 1} accessory bone`}
                onChange={event => setAccessoryList((prevState) => {
-                 prevState[index].val = event.target.value;
+                 prevState[index].val = event.target.value.trim();
                  return prevState;
                })}/>
         <hr/>
@@ -90,7 +90,7 @@ export default function CampaignAdd({onCampaignCreated, campaignList}: NewCampai
 
     // Get current user UID - Promises
     const [uploadedArmature, userInfo] = await Promise.all([
-      UploadFile(newArmature, StorageLocation.BaseMesh, undefined, newCampaign),
+      UploadFile(newArmature, StorageLocation.AvatarBase, undefined, newCampaign),
       GetCurrentUser()
     ]);
     

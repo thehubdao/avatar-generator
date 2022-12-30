@@ -264,7 +264,7 @@ export async function GetParameters<T>(campaign?: string, ...parameters: (string
 }
 
 function CampaignLocation(campaign?: string) {
-  return campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}/` : '';
+  return campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}/` : '';
 }
 
 export async function UpdateDoc(jsonData: string, location: FirestoreLocation, campaign?: string) {
@@ -276,7 +276,7 @@ export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlo
 
   try {
     const newLocation = campaign ?
-      `${FirestoreGlobalLocation.Campaign}/${campaign}/${location}` :
+      `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}/${location}` :
       location !== '/' ?
         location :
         FirestoreGlobalLocation.Parameters;
@@ -333,7 +333,7 @@ export async function InsertDocWithId(newDocId: string, data: {}, location: Fire
   const {setDoc, doc} = await import('@firebase/firestore');
 
   try {
-    const newDoc = doc(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location, newDocId);
+    const newDoc = doc(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location, newDocId.trim().toLowerCase());
     await setDoc(newDoc, data);
     return {success: true, value: newDocId};
   } catch (e) {
