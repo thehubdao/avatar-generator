@@ -1,4 +1,4 @@
-﻿import {useEffect, useState} from "react";
+﻿import {useCallback, useEffect, useState} from "react";
 import {FirestoreLocation} from "../../../enums/firebase.enum";
 import {DeleteDoc, GetInfoDB} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
@@ -18,7 +18,18 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
   const [dbHeaders, setDbHeaders] = useState<string[]>();
 
   const locationOptions: string[] = Object.keys(FirestoreLocation);
-
+  
+  const getDbInfo = useCallback(async (location: FirestoreLocation = dbLocation) => {
+    // const data = await SessionDBInfo(location, campaign, forceUpdate);
+    const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, campaign);
+    const headers = data != undefined && data.length > 0 ?
+      Object.keys(data[0]).sort((a, b) => a.localeCompare(b)) :
+      [];
+    
+    setDbData(data);
+    setDbHeaders(headers);
+  }, [dbLocation, campaign]);
+  
   useEffect(() => {
     const componentDidMount = async () => {
       await getDbInfo();
@@ -26,17 +37,7 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
 
     componentDidMount()
       .catch(err => console.error(err));
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // TODO: check if maybe there is a better way to ask for information, maybe a force sometimes, others just get the session info
-  async function getDbInfo(location: FirestoreLocation = dbLocation) {
-    const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, campaign);
-
-    setDbData(data);
-    setDbHeaders(data.length > 0 ? Object.keys(data[0]).sort((a, b) => a.localeCompare(b)) : []);
-  }
+  }, [getDbInfo]);
 
   async function changeDbLocation(newLocation: string) {
     setDbLocation(newLocation as FirestoreLocation);
