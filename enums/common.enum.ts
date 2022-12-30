@@ -1,5 +1,5 @@
-﻿export enum GlobalValues {
-  BaseCampaign = 'base',
+﻿export const enum GlobalValues {
+  BaseCampaign = 'delete',
   Acc = 'Accessories',
   Config = 'Config',
   AccEnd = 'Acc',

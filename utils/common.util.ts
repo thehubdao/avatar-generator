@@ -32,3 +32,7 @@ export function AddOrRemoveSlash(text: string) {
 
   return `/${text}`;
 }
+
+export function Base64ToObj<T>(toParse: string) {
+  return JSON.parse(Buffer.from(toParse, 'base64').toString('ascii')) as T;
+}
