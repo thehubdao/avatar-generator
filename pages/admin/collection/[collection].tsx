@@ -6,7 +6,7 @@ import AGButton from "../../../components/common/ag-button.component";
 import { IsNotLogIn} from "../../../utils/firebase.util";
 import {PageLocation} from "../../../enums/common.enum";
 
-import AvatarGenerator, { 
+import AvatarGenerator, {
   getServerSideProps as serverProps,
   AvatarGeneratorProps
 } from "../../index"
@@ -37,8 +37,8 @@ interface Part {
  * HOC to intercept Avatar preview exporter from Admin view
  * To access the Avatar Module, you can use the member variable `this.ref`
  * and use its methods and variables
- * 
- * @param AvatarComp 
+ *
+ * @param AvatarComp
  * @returns
  */
 function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
@@ -64,9 +64,9 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
       }
       this.ref = React.createRef()
     }
-  
+
     async componentDidMount() {
-      const avatarGenerator = this.ref.current as AvatarGenerator 
+      const avatarGenerator = this.ref.current as AvatarGenerator
       if(await IsNotLogIn())
         await this.props.router.push(PageLocation.Admin);
 
@@ -113,7 +113,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
         const comb = permutations[itr]
         await this.setCombinationByIndexes(comb)
         await this.ref.current?.exportModel()
-        
+
         yield comb.join(" - ")
 
         if(!this.state.exportRunning) {
@@ -124,16 +124,16 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
 
     /**
      * Generate all permutations
-     * @returns 
+     * @returns
      */
     generatePermutations() {
-      
+
       const arr: string[][] = Array.from(this.parts)
         /* eslint-disable */
         .map(([_index, items]) => items)
         /* eslint-enable */
         .map(items => items.map(it => it.index))
-      
+
       const featuresLength = this.features.length
       const indices: number[] = (new Array(featuresLength) as number[]).fill(0)
       const iterationLimit = this.getTotalIteration();
@@ -165,8 +165,8 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
     }
 
     /**
-     * 
-     * @param partIndexes 
+     *
+     * @param partIndexes
      */
     async setCombinationByIndexes(partIndexes: number[]) {
       const avatarGenerator = this.ref.current
@@ -197,7 +197,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
     }
 
     /**
-     * 
+     *
      */
     parseAvatarData() {
       const avatarGenerator = this.ref.current;
@@ -208,7 +208,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
           offset: 0,
         }))
         .sort((partA, partB) => partA.id > partB.id ? 1 : -1);
-      
+
       this.features.forEach((feature) => {
         const { type } = feature
         const partList = avatarGenerator?.featureList || []
@@ -242,7 +242,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
     render() {
       return (
         <>
-          <div 
+          <div
             className="flex flex-row fixed inset-x-0 bottom-0 p-1.5 w-10/12 bg-gray-700 overflow-hidden text-slate-300"
             style={{
               zIndex: 9999,
@@ -280,16 +280,16 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
               <div>
                 {
                   this.state.exportRunning
-                  ? (
-                    <AGButton type="alert" onClickEvent={() => { this.onStopProcess() }}>
-                      Stop
-                    </AGButton>
-                  )
-                  : (
-                    <AGButton type="secondary" onClickEvent={() => { void this.onExportAll() }}>
-                      Export All
-                    </AGButton>
-                  )
+                    ? (
+                      <AGButton type="alert" onClickEvent={() => { this.onStopProcess() }}>
+                        Stop
+                      </AGButton>
+                    )
+                    : (
+                      <AGButton type="secondary" onClickEvent={() => { void this.onExportAll() }}>
+                        Export All
+                      </AGButton>
+                    )
                 }
               </div>
             </div>
@@ -307,7 +307,7 @@ function withAdminExporter(AvatarComp: typeof AvatarGenerator) {
         </>
       )
     }
-    
+
   })
 }
 
