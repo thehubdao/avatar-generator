@@ -398,7 +398,7 @@ export default function AvatarEditor({
     exportData?.attributes.push({id: addId, val: addValue});
   }
 
-  function takeExportPicture(mimeType: string = 'image/png') {
+  function takeExportPicture(mimeType = 'image/png') {
     return new Promise<Blob>((resolve, reject) => {
       if (!sc) return reject("Missing scene");
 

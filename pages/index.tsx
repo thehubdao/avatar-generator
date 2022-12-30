@@ -7,8 +7,10 @@ export default function RootPage() {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const {campaign, ...params} = context.query;
-  const leCampaign = campaign ?? GlobalValues.BaseCampaign;
-  const leParams = Object.keys(params).length > 0 ? '?' + new URLSearchParams(params as Record<string, string>).toString() : '';
+  const leCampaign = campaign as string ?? GlobalValues.BaseCampaign;
+  const leParams = Object.keys(params).length > 0 ? `?${await (new Promise<string>(resolve => {
+    resolve(new URLSearchParams(params as Record<string, string>).toString());
+  }))}` : '';
   
   return {
     redirect: {
