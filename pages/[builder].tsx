@@ -35,11 +35,11 @@ export default function AvatarGenerator({
 }
 
 export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = async (context) => {
-  const {campaign, config, bg, ov} = context.query;
+  const {builder, config, bg, ov} = context.query;
   
   let parsedConfig: BasicData[] | null = null;
   
-  let leCampaign = campaign as string ?? GlobalValues.BaseCampaign;
+  let leCampaign = builder as string ?? GlobalValues.BaseCampaign;
 
   if (config) {
     parsedConfig = Base64ToObj<BasicData[]>(config as string);
