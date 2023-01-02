@@ -6,6 +6,12 @@ import AGText from "../../../components/common/ag-text.component";
 import {AdminComponents} from "../../../enums/common.enum";
 import {ChangeComponentFunction} from "../../../interfaces/common.interface";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../../interfaces/api.interface";
+import {
+  AccessoryInterfaceProps,
+  AnimationInterfaceProps,
+  CampaignInterfaceProps,
+  FeatureInterfaceProps
+} from "../../../constants/obj-props.constant";
 
 interface AssetListProps {
   campaign?: string;
@@ -19,12 +25,23 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
 
   const locationOptions: string[] = Object.keys(FirestoreLocation);
   
+  const setHeaders = () => {
+    switch (dbLocation) {
+      case FirestoreLocation.Features:
+        return FeatureInterfaceProps;
+      case FirestoreLocation.Accessories:
+        return AccessoryInterfaceProps;
+      case FirestoreLocation.Animations:
+        return AnimationInterfaceProps;
+      case FirestoreLocation.Parameters:
+        return CampaignInterfaceProps;
+    }
+  };
+  
   const getDbInfo = useCallback(async (location: FirestoreLocation = dbLocation) => {
     // const data = await SessionDBInfo(location, campaign, forceUpdate);
     const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, campaign);
-    const headers = data != undefined && data.length > 0 ?
-      Object.keys(data[0]).sort((a, b) => a.localeCompare(b)) :
-      [];
+    const headers = setHeaders().map(h => h.prop);
     
     setDbData(data);
     setDbHeaders(headers);

@@ -187,7 +187,7 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
     const leThumb = thumbToUpload.current?.files?.item(0);
 
     if(leThumb != undefined)
-      formData.thumb = await UploadFile(leThumb, StorageLocation.Thumbnail, undefined, campaign);
+      formData.thumb = await UploadFile(leThumb, StorageLocation.Thumbnail, formData.type, campaign);
     
     formData.path = await UploadFile(leFile, uploadFileTo, formData.type, campaign);
 
