@@ -18,7 +18,7 @@ export enum FirestoreParameters {
 
 export enum StorageLocation {
     Accessory = 'accessory',
-    BaseMesh = 'base_mesh',
+    AvatarBase = 'avatar_base',
     Feature = 'feature',
     Thumbnail = 'thumb',
     Animation = 'animation',

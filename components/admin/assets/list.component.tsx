@@ -1,4 +1,4 @@
-﻿import {useEffect, useState} from "react";
+﻿import {useCallback, useEffect, useState} from "react";
 import {FirestoreLocation} from "../../../enums/firebase.enum";
 import {DeleteDoc, GetInfoDB} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
@@ -6,6 +6,12 @@ import AGText from "../../../components/common/ag-text.component";
 import {AdminComponents} from "../../../enums/common.enum";
 import {ChangeComponentFunction} from "../../../interfaces/common.interface";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../../interfaces/api.interface";
+import {
+  AccessoryInterfaceProps,
+  AnimationInterfaceProps,
+  CampaignInterfaceProps,
+  FeatureInterfaceProps
+} from "../../../constants/obj-props.constant";
 
 interface AssetListProps {
   campaign?: string;
@@ -18,7 +24,26 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
   const [dbHeaders, setDbHeaders] = useState<string[]>();
 
   const locationOptions: string[] = Object.keys(FirestoreLocation);
-
+  
+  const setHeaders = useCallback(() => {
+    switch (dbLocation) {
+      case FirestoreLocation.Features:
+        return FeatureInterfaceProps;
+      case FirestoreLocation.Accessories:
+        return AccessoryInterfaceProps;
+      case FirestoreLocation.Animations:
+        return AnimationInterfaceProps;
+      case FirestoreLocation.Parameters:
+        return CampaignInterfaceProps;
+    }
+  }, [dbLocation]);
+  
+  const getDbInfo = useCallback(async (location: FirestoreLocation = dbLocation) => {
+    // const data = await SessionDBInfo(location, campaign, forceUpdate);
+    const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, campaign);
+    setDbData(data);
+  }, [dbLocation, campaign]);
+  
   useEffect(() => {
     const componentDidMount = async () => {
       await getDbInfo();
@@ -26,17 +51,12 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
 
     componentDidMount()
       .catch(err => console.error(err));
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // TODO: check if maybe there is a better way to ask for information, maybe a force sometimes, others just get the session info
-  async function getDbInfo(location: FirestoreLocation = dbLocation) {
-    const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, campaign);
-
-    setDbData(data);
-    setDbHeaders(data.length > 0 ? Object.keys(data[0]).sort((a, b) => a.localeCompare(b)) : []);
-  }
+  }, [getDbInfo]);
+  
+  useEffect(() => {
+    const headers = setHeaders().map(h => h.prop);
+    setDbHeaders(headers);
+  }, [setHeaders])
 
   async function changeDbLocation(newLocation: string) {
     setDbLocation(newLocation as FirestoreLocation);

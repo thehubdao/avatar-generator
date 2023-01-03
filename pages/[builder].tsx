@@ -39,7 +39,7 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
   
   let parsedConfig: BasicData[] | null = null;
   
-  let leCampaign = builder as string ?? GlobalValues.BaseCampaign;
+  let leCampaign = (builder as string).toLowerCase() ?? GlobalValues.BaseCampaign;
 
   if (config) {
     parsedConfig = Base64ToObj<BasicData[]>(config as string);

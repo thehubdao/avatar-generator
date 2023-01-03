@@ -20,6 +20,10 @@ export async function ReplaceModelFeature(baseModel: GLTF, featureUrl: string, f
   baseModel.scene.children[0].children[featureIndex] = chest;
 }
 
+function IsSkinnedMesh(obj: Object3D): obj is SkinnedMesh {
+  return (obj as SkinnedMesh).isSkinnedMesh;
+}
+
 export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel: GLTF, featureInfo?: FeatureInfoInterface, selectedFeature?: BasicData, skinColor?: string) {
   if(featureInfo == undefined) return LogError(Module.ModelUtil, "Missing feature on armature.");
   if(selectedFeature == undefined)
@@ -32,8 +36,8 @@ export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel:
   const newFeature: Object3D = SkeletonUtils.clone(changeMesh);
   let baseSkeleton: Skeleton;
   const baseFeatureRef = baseModel.children[featureInfo.featureIndex];
-  if((baseFeatureRef as SkinnedMesh).isSkinnedMesh) {
-    baseSkeleton = (baseFeatureRef as SkinnedMesh).skeleton;
+  if(IsSkinnedMesh(baseFeatureRef)) {
+    baseSkeleton = baseFeatureRef.skeleton;
   }
   else if((baseFeatureRef as Group).isGroup) {
     baseSkeleton = (baseFeatureRef.children[0] as SkinnedMesh).skeleton;

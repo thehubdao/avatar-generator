@@ -43,6 +43,7 @@ export interface CampaignConfig {
   defEyesColor?: string;
   defSkinColor?: string;
   defCam?: LookAtVectors;
+  defAnimation?: string;
   featuresCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
 }
@@ -69,4 +70,8 @@ export interface Result<T> {
   value?: T;
   errMessage?: string;
   errCode?: string;
+}
+
+export interface ObjProp {
+  prop: string;
 }
