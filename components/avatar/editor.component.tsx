@@ -1,13 +1,15 @@
 import {useEffect, useState} from "react";
 import {Clock, Vector3} from "three";
+import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {
   AccessoryInfoInterface,
-  BasicData, CampaignConfig,
+  BasicData,
+  CampaignConfig,
   ExportInterface,
-  FeatureInfoInterface, LookAtVectors
+  FeatureInfoInterface,
+  LookAtVectors
 } from "../../interfaces/common.interface";
 import {SceneInterface} from "../../interfaces/scene.interface";
-import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
 import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../../utils/iframe.util";
 import {ExportAttributeValues, GlobalValues, Module} from "../../enums/common.enum";
@@ -44,6 +46,28 @@ interface AvatarEditorProps {
   onlyView: boolean;
 }
 
+let cameraPos: Vector3 = new Vector3();
+let cameraLookAt: Vector3 = new Vector3();
+
+let threeCanvas: HTMLDivElement | null = null;
+const clock: Clock = new Clock();
+let sc: SceneInterface | undefined;
+
+const savedModels: Record<string, GLTF> = {};
+
+let doCameraMovement = false;
+
+let accessoryBonesData: Record<string, AccessoryInfoInterface> | undefined;
+let featureListData: Record<string, FeatureInfoInterface> | undefined;
+let featureList: FeatureInterface[] | undefined;
+let accessoryList: AccessoryInterface[] | undefined;
+let animationList: AnimationInterface[] | undefined;
+const exportData: ExportInterface = {attributes: []};
+
+let tanFOV: number | undefined;
+let windowHeight: number | undefined;
+let onIFrame = false;
+
 export default function AvatarEditor({
                                        selectListFeatures,
                                        selectListAccessories,
@@ -61,31 +85,8 @@ export default function AvatarEditor({
   const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
   const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
-
-  let cameraPos: Vector3 = new Vector3();
-  let cameraLookAt: Vector3 = new Vector3();
-
-  const featureSelectList: BasicData[] = selectListFeatures;
-  const accSelectList: BasicData[] = selectListAccessories;
-
-  let threeCanvas: HTMLDivElement | null = null;
-  const clock: Clock = new Clock();
-  let sc: SceneInterface | undefined;
-
-  const savedModels: Record<string, GLTF> = {};
-
-  let doCameraMovement = false;
-
-  let accessoryBonesData: Record<string, AccessoryInfoInterface> | undefined;
-  let featureListData: Record<string, FeatureInfoInterface> | undefined;
-  let featureList: FeatureInterface[] | undefined;
-  let accessoryList: AccessoryInterface[] | undefined;
-  let animationList: AnimationInterface[] | undefined;
-  const exportData: ExportInterface = {attributes: []};
-
-  let tanFOV: number | undefined;
-  let windowHeight: number | undefined;
-  let onIFrame = false;
+  const [featureListShow, setFeatureListShow] = useState<FeatureInterface[]>();
+  const [accessoryListShow, setAccessoryListShow] = useState<AccessoryInterface[]>();
 
   useEffect(() => {
     const componentDidMount = async () => {
@@ -164,13 +165,13 @@ export default function AvatarEditor({
     if (attributeConfig) {
       for (const attribute of attributeConfig) {
         // Is a feature
-        if (featureSelectList.some(pl => pl.id === attribute.id)) {
+        if (selectListFeatures.some(pl => pl.id === attribute.id)) {
           const newFeature = featureList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newFeature)
             await changeFeature(newFeature.id, newFeature.path, newFeature.name, attribute.id);
         }
         // Is an accessory
-        else if (accSelectList.some(pl => pl.id === attribute.id)) {
+        else if (selectListAccessories.some(pl => pl.id === attribute.id)) {
           const newAcc = accessoryList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newAcc)
             await changeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
@@ -181,13 +182,13 @@ export default function AvatarEditor({
       const randomAccessory: AccessoryInterface[] = [];
 
       // Load random features
-      for (const featureType of featureSelectList) {
+      for (const featureType of selectListFeatures) {
         const randomFeatureOption = RandomArrayElement(featureList.filter(p => p.type === featureType.id));
         if (randomFeatureOption)
           randomFeature.push(randomFeatureOption);
       }
 
-      for (const accType of accSelectList) {
+      for (const accType of selectListAccessories) {
         const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.id));
         if (randomAcc)
           randomAccessory.push(randomAcc);
@@ -210,28 +211,37 @@ export default function AvatarEditor({
   async function getFeatureList() {
     const {value: newAssetList} = await GetAssetsListByCampaign(campaign);
     featureList = newAssetList;
+    setFeatureListShow(filterList(featureList, selectedFeature));
   }
 
   async function getAccessoryList() {
     const {value: newAccList} = await GetAccessoryListByCampaign(campaign);
     accessoryList = newAccList;
+    setAccessoryListShow(filterList(accessoryList, selectedAcc));
   }
 
   async function getAnimationList() {
     const {value: newAnimationList} = await GetAnimationListByCampaign(campaign);
     animationList = newAnimationList;
   }
+  
+  const filterList = (list: (FeatureInterface | AccessoryInterface)[] | undefined, type: string) => {
+    if(list == undefined)
+      return void LogError(Module.AvatarGenerator, "Missing feature/accessory list!");
+      
+    return list.filter(l => l.type === type);
+  }
 
   async function getFeaturesData() {
     if (!(sc && sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature!")
 
-    featureListData = await GetFeaturesData(sc.armature.scene, featureSelectList);
+    featureListData = await GetFeaturesData(sc.armature.scene, selectListFeatures);
   }
 
   async function getAccessoryBones() {
     if (!(sc && sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature!");
 
-    accessoryBonesData = await GetAccessoryBones(sc.armature.scene, accSelectList);
+    accessoryBonesData = await GetAccessoryBones(sc.armature.scene, selectListAccessories);
   }
 
   async function avatarScene() {
@@ -339,11 +349,13 @@ export default function AvatarEditor({
 
   function onCategoryChange(value: string) {
     setSelectedFeature(value);
+    setFeatureListShow(filterList(featureList, value));
     setFeatureCamPosition(value, campaignConfig.featuresCamPos);
   }
 
   function onAccessoryChange(value: string) {
     setSelectedAcc(value);
+    setAccessoryListShow(filterList(accessoryList, value));
     setFeatureCamPosition(value, campaignConfig.accCamPos);
   }
 
@@ -373,7 +385,7 @@ export default function AvatarEditor({
 
     const replaceModel = await getWearableOption(id, featurePath);
 
-    await ReplaceModelFeatureOnly(sc.armature.scene.children[0], replaceModel, featureListData[_selectedFeature], featureSelectList.find(sl => sl.id === _selectedFeature), skinColor);
+    await ReplaceModelFeatureOnly(sc.armature.scene.children[0], replaceModel, featureListData[_selectedFeature], selectListFeatures.find(sl => sl.id === _selectedFeature), skinColor);
     await getFeaturesData();
     addReplaceAttribute(_selectedFeature, name);
   }
@@ -478,7 +490,7 @@ export default function AvatarEditor({
                   <div className="w-full">
                     {
                       featuresSelected &&
-                        <OptionSelectorComponent list={featureList}
+                        <OptionSelectorComponent list={featureListShow}
                                                  activeOption={exportData?.attributes.find(o => o.id === selectedFeature)}
                                                  handleClick={(id: string, path: string, name: string) => void changeFeature(id, path, name)}/>
                     }
@@ -487,7 +499,7 @@ export default function AvatarEditor({
                     <div className="w-[calc(100%_-_60px)]">
                       {
                         featuresSelected ?
-                          <FeatureSelectorComponent list={featureSelectList}
+                          <FeatureSelectorComponent list={selectListFeatures}
                                                     activeFeature={selectedFeature}
                                                     handleClick={(value: string) => onCategoryChange(value)}/>
                           :

@@ -25,7 +25,7 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
 
   const locationOptions: string[] = Object.keys(FirestoreLocation);
   
-  const setHeaders = () => {
+  const setHeaders = useCallback(() => {
     switch (dbLocation) {
       case FirestoreLocation.Features:
         return FeatureInterfaceProps;
@@ -36,7 +36,7 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
       case FirestoreLocation.Parameters:
         return CampaignInterfaceProps;
     }
-  };
+  }, [dbLocation]);
   
   const getDbInfo = useCallback(async (location: FirestoreLocation = dbLocation) => {
     // const data = await SessionDBInfo(location, campaign, forceUpdate);
@@ -56,7 +56,7 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
   useEffect(() => {
     const headers = setHeaders().map(h => h.prop);
     setDbHeaders(headers);
-  }, [dbLocation])
+  }, [setHeaders])
 
   async function changeDbLocation(newLocation: string) {
     setDbLocation(newLocation as FirestoreLocation);
