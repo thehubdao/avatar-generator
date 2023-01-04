@@ -171,7 +171,7 @@ export async function ChangeObjectSkinColor(object: Object3D, skinColor: string,
     const objectRef = subObject as SkinnedMesh;
     if(objectRef.isSkinnedMesh) {
       const matRef = objectRef.material as Material;
-      if(matRef.name === skinMatName)
+      if(matRef.name.startsWith(skinMatName))
         (matRef as MeshStandardMaterial).color.set(`#${skinColor}`);
     }
   });
