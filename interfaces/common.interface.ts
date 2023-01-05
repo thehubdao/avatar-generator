@@ -13,10 +13,8 @@ export interface PartInfoInterface {
 }
 
 export interface AccessoryInfoInterface {
-  bone: Object3D;
-  hasIt?: boolean;
+  accessoryIndex: number;
   accessoryRef?: Object3D;
-  accessoryIndex?: number;
 }
 
 export interface ExportInterface {

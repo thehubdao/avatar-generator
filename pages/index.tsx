@@ -5,7 +5,10 @@ import {Clock, Vector3, WebGLInfo} from "three";
 import {FrustumCulledFalse, GetBaseCameraControls} from "../utils/threejs/scene.util";
 import {GetTestLights, GetAmbientLights} from "../utils/test-scene.util";
 import {
-  GetAccessoryBones, GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign, GetGltfModel,
+  GetAccessoryListByCampaign,
+  GetAnimationListByCampaign,
+  GetAssetsListByCampaign,
+  GetGltfModel,
   GetPartsData,
 } from "../utils/importer.util";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
@@ -82,8 +85,8 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   doCameraMovement: boolean = false;
   cameraTargetPosition?: Vector3;
-
-  accessoryBonesData?: Record<string, AccessoryInfoInterface>;
+  
+  accessoryListData: Record<string, AccessoryInfoInterface>;
   partListData?: Record<string, PartInfoInterface>;
   partList?: BodyPartLocationApi[];
   accessoryList?: AccLocationApi[];
@@ -123,6 +126,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
     this.clock = new Clock();
     this.exportData = {attributes: []};
     this.onIFrame = false;
+    this.accessoryListData = {};
   }
 
   async componentDidMount() {
@@ -136,7 +140,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
       this.getAnimationList()
     ]);
     
-    await this.getAccessoryBones();
     await this.getPartsData();
     await this.loadPreData();
     await this.setStartAnimation();
@@ -282,11 +285,6 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
 
   async getPartsData() {
     this.partListData = GetPartsData(this.sc.baseModel!.scene, this.state.selectList);
-  }
-
-  async getAccessoryBones() {
-    this.accessoryBonesData = GetAccessoryBones(this.sc.baseModel!.scene, this.state.aSelectList);
-    // console.log('base', this.accessoryBonesData);
   }
 
   async avatarScene() {
@@ -444,7 +442,7 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   async changeAccessory(id: string, path: string, name: string, selectedAcc: string = this.state.selectedAcc) {
     const replaceModel = await this.getWearableOption(id, path);
 
-    await ReplaceModelAccessory(this.accessoryBonesData!, selectedAcc, replaceModel);
+    await ReplaceModelAccessory(this.sc.baseModel!.scene.children[0], replaceModel, this.accessoryListData, selectedAcc);
     this.addReplaceAttribute(selectedAcc, name);
   }
 
