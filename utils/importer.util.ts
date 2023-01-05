@@ -1,7 +1,7 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {Group} from "three";
 import {GetFile} from "./firebase.util";
-import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
+import {BasicData, PartInfoInterface} from "../interfaces/common.interface";
 import {AccLocationApi, AnimLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
 
 class ImporterUtil {
@@ -60,22 +60,6 @@ export async function GetGltfModel(path: string) {
     return FetchGltfModel(path);
   else
     return FirebaseGltfModel(path);
-}
-
-export function GetAccessoryBones(baseModel: Group, accessoryBonesList: BasicData[]): Record<string, AccessoryInfoInterface> {
-  const bones = baseModel.children[0];
-  let result: Record<string, AccessoryInfoInterface> = {};
-  
-  bones.traverse((bone) => {
-    if(accessoryBonesList.some(x => x.val === bone.name)) {
-      const foundBone = accessoryBonesList.filter(x => x.val === bone.name);
-      foundBone.forEach(fb => {
-        result[fb.id] = { bone: bone };
-      })
-    }
-  });
-  
-  return result;
 }
 
 export function GetPartsData(baseModel: Group, partList: BasicData[], update: boolean = false): Record<string, PartInfoInterface> {
