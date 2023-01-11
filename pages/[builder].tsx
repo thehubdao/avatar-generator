@@ -23,7 +23,7 @@ export default function AvatarGenerator({
                                         }: AvatarGeneratorProps) {
   return (<>
     <AvatarEditor campaign={campaign}
-                  avatarBasePath={campaignParams?.armature ?? ''}
+                  avatarBasePath={campaignParams?.armature ?? GlobalValues.AvatarBase}
                   campaignConfig={campaignParams?.config ?? {}}
                   selectListFeatures={campaignParams?.features ?? []}
                   selectListAccessories={campaignParams?.accessories ?? []}

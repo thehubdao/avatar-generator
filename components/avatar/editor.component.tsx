@@ -79,8 +79,8 @@ export default function AvatarEditor({
                                        campaignConfig,
                                        bgColor
                                      }: AvatarEditorProps) {
-  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures[0].id);
-  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories[0].id);
+  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].id : '');
+  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].id : '');
   const [skinColor, setSkinColor] = useState<string>('F2A47E');
   const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
   const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
