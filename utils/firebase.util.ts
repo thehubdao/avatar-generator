@@ -401,6 +401,26 @@ export async function GetCurrentUser() {
   });
 }
 
+export async function GetFileUrl(imagePath?: string) {
+  // TODO: replace with LogError
+  if(imagePath == undefined || imagePath === '') {
+    // console.error('Missing image location');
+    return undefined;
+  }
+  
+  try {
+    const {ref, getDownloadURL} = await import('@firebase/storage');
+
+    const imageRef = ref(await FirebaseUtil.Instance().Storage(), imagePath);
+    return getDownloadURL(imageRef);
+  }
+  catch (e) {
+    const err = e as FirebaseError;
+    console.error(`Error getting Image Url. ${err.message}`);
+    return undefined;
+  }
+}
+
 export async function HandleNotLoggedIn() {
   const flag = await IsNotLogIn();
 

@@ -3,6 +3,8 @@
   Acc = 'Accessories',
   Config = 'Config',
   AccEnd = 'Acc',
+  AccGroup = 'Accessories.AG',
+  AvatarBase = 'base_mesh/MetaAvatarHub.glb',
 }
 
 export enum ExportAttributeValues {

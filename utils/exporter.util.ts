@@ -1,6 +1,7 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
 import {Delay} from "./common.util";
+import {CleanModelForExport} from "./model.util";
 
 class ExporterUtil {
   private static _instance: ExporterUtil;
@@ -28,6 +29,7 @@ class ExporterUtil {
 
 export async function ExportModelGlb(model: GLTF) {
     const exporter = ExporterUtil.Instance().GltfExporter();
+    CleanModelForExport(model);
     const out = await exporter.parseAsync(model.scene, {
         animations: model.animations,
         binary: true,

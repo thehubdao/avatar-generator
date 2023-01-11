@@ -15,7 +15,7 @@ import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../../utils/iframe
 import {ExportAttributeValues, GlobalValues, Module} from "../../enums/common.enum";
 import {LogError, RandomArrayElement} from "../../utils/common.util";
 import {GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign} from "../../utils/api.util";
-import {FirebaseGltfModel, GetAccessoryBones, GetFeaturesData, GetGltfModel} from "../../utils/importer.util";
+import {FirebaseGltfModel, GetFeaturesData, GetGltfModel} from "../../utils/importer.util";
 import {FrustumCulledFalse, InitSceneController} from "../../utils/threejs/scene.util";
 import {GetAmbientLights, GetTestLights} from "../../utils/test-scene.util";
 import {CreateAnimationMixer, SetAnimation} from "../../utils/threejs/animation.util";
@@ -54,7 +54,7 @@ const savedModels: Record<string, GLTF> = {};
 
 let doCameraMovement = false;
 
-let accessoryBonesData: Record<string, AccessoryInfoInterface> | undefined;
+const accessoryListData: Record<string, AccessoryInfoInterface> = {};
 let featureListData: Record<string, FeatureInfoInterface> | undefined;
 let featureList: FeatureInterface[] | undefined;
 let accessoryList: AccessoryInterface[] | undefined;
@@ -76,8 +76,8 @@ export default function AvatarEditor({
                                        campaignConfig,
                                        bgColor
                                      }: AvatarEditorProps) {
-  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures[0].id);
-  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories[0].id);
+  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].id : '');
+  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].id : '');
   const [skinColor, setSkinColor] = useState<string>('F2A47E');
   const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
   const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
@@ -96,8 +96,7 @@ export default function AvatarEditor({
         getAccessoryList(),
         getAnimationList()
       ]);
-
-      await getAccessoryBones();
+      
       await getFeaturesData();
       await onClickChangeSkinColor();
       await loadPreData();
@@ -233,12 +232,6 @@ export default function AvatarEditor({
     if (!(sc && sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature!")
 
     featureListData = await GetFeaturesData(sc.armature.scene, selectListFeatures);
-  }
-
-  async function getAccessoryBones() {
-    if (!(sc && sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature!");
-
-    accessoryBonesData = await GetAccessoryBones(sc.armature.scene, selectListAccessories);
   }
 
   async function avatarScene() {
@@ -388,11 +381,12 @@ export default function AvatarEditor({
   }
 
   async function changeAccessory(id: string, path: string, name: string, _selectedAcc: string = selectedAcc) {
-    if (!accessoryBonesData) return LogError(Module.AvatarGenerator, "Missing accessory data");
+    if (!(sc && sc.armature)) return LogError(Module.AvatarGenerator, "Missing armature in order to change accessory");
+    if (!accessoryListData) return LogError(Module.AvatarGenerator, "Missing accessory data");
 
     const replaceModel = await getWearableOption(id, path);
-
-    ReplaceModelAccessory(accessoryBonesData, _selectedAcc, replaceModel);
+    
+    await ReplaceModelAccessory(sc?.armature.scene.children[0], replaceModel, accessoryListData, selectedAcc);
     addReplaceAttribute(_selectedAcc, name);
   }
 
