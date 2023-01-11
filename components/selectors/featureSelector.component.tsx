@@ -35,16 +35,18 @@ function optionList({list, activeOpc, handleClick}: props) {
 }
 
 export default function FeatureSelectorComponent(props: props) {
+  const itemsLength = props.list?.length ? props.list.length : 1;
+  const itemsPerView = 6;
   return (
     <div className='w-full relative'>
       <div
         className='absolute h-full w-[50px] top-0 left-0 bg-gradient-to-r from-slate-100 z-10 pointer-events-none'></div>
       <p className='nm-flat-slate-100 hidden absolute'></p>
       <Swiper
-        slidesPerView={6}
+        slidesPerView={itemsPerView}
         centeredSlides={true}
         grabCursor={true}
-        loop={true}
+        loop={itemsLength < itemsPerView ? false : true}
         // onSlideChange={() => console.log('slide change')}
         // onSwiper={(swiper) => console.log(swiper)}
         className='!pb-2 !pt-3'
