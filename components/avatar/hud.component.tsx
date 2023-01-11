@@ -1,14 +1,14 @@
 import AGButton from "../common/ag-button.component";
-import { BsArrowRight } from 'react-icons/Bs';
-import { CiEdit } from 'react-icons/Ci';
-import { CiSaveUp2 } from 'react-icons/Ci';
+import { BsArrowRight } from 'react-icons/bs';
+import { CiEdit } from 'react-icons/ci';
+import { CiSaveUp2 } from 'react-icons/ci';
 import { AccessoryInterface, FeatureInterface } from "../../interfaces/api.interface";
-import { BasicData, ExportInterface } from "../../interfaces/common.interface";
+import { BasicData } from "../../interfaces/common.interface";
 import OptionSelectorComponent from "../selectors/optionSelector.component";
 import FeatureSelectorComponent from "../selectors/featureSelector.component";
 import ColorSelectorComponent from "../selectors/colorSelector.component";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
   editModeSelected: boolean;
@@ -19,12 +19,13 @@ interface Props {
   accessoryList: AccessoryInterface[] | undefined;
   selectedAcc: string;
   skinColor: string;
-  exportData: ExportInterface;
+  exportData: BasicData[];
   changeView: () => void;
   changeFeature: (id: string, path: string, name: string) => void;
   onCategoryChange: (value: string) => void;
   onAccessoryChange: (value: string) => void;
   onClickChangeSkinColor: (value: string) => void;
+  exportModel: () => void;
 }
 
 export default function HudComponent({ editModeSelected,
@@ -40,9 +41,17 @@ export default function HudComponent({ editModeSelected,
                                         changeFeature,
                                         onCategoryChange,
                                         onAccessoryChange,
-                                        onClickChangeSkinColor
+                                        onClickChangeSkinColor,
+                                        exportModel
                                       }: Props) {
   const [selectorOption, setSelectorOption] = useState<number>(1);
+
+  useEffect(() => {
+    console.log("color: ", skinColor)
+    console.log("data: ", exportData)
+    // console.log("selected feature: ", selectedFeature)
+  }, [skinColor, exportData]);
+
   return (
     <div className="fixed">
       <div onClick={() => changeView()}>
@@ -68,14 +77,16 @@ export default function HudComponent({ editModeSelected,
           <div className="w-full">
             {
               selectorOption == 1 &&
+              <>
               <OptionSelectorComponent list={featureList}
-                activeOption={exportData.attributes.find(o => o.id === selectedFeature)}
+                activeOption={exportData.find(e => e.id === selectedFeature)}
                 handleClick={(id: string, path: string, name: string) => changeFeature(id, path, name)} />
+                </>
             }
             {
               selectorOption == 2 &&
               <OptionSelectorComponent list={accessoryList}
-                activeOption={exportData.attributes.find(o => o.id === selectedFeature)}
+                activeOption={exportData.find(e => e.id === selectedAcc)}
                 handleClick={(id: string, path: string, name: string) => changeFeature(id, path, name)} />
             }
           </div>
@@ -146,7 +157,7 @@ export default function HudComponent({ editModeSelected,
         </div>
         :
         <AGButton>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between" onClick={() => exportModel()}>
             <CiSaveUp2 />
             <p className="text-sm">SAVE</p>
           </div>
