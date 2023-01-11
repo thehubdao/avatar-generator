@@ -21,7 +21,7 @@ function optionList(props: props) {
     return (
       <SwiperSlide className='flex flex-col items-center' key={opt}>
         <div
-          className={'rounded-md transition duration-200 ease-in-out w-[50px] h-[50px] flex items-center justify-center' + (props.activeColor == opt ? ' nm-inset-slate-100' : '')}
+          className={'cursor-pointer rounded-md transition duration-200 ease-in-out w-[50px] h-[50px] flex items-center justify-center' + (props.activeColor == opt ? ' nm-inset-slate-100' : '')}
           onClick={(event: MouseEvent) => selectFeature(event, opt)}>
           <div className='w-4/6 h-4/6 rounded-md' style={{backgroundColor: ('#' + opt)}}></div>
         </div>
