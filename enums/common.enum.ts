@@ -3,6 +3,7 @@
   Acc = 'Accessories',
   Config = 'Config',
   AccEnd = 'Acc',
+  AccGroup = 'Accessories.AG'
 }
 
 export enum ExportAttributeValues {

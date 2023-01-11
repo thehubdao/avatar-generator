@@ -11,7 +11,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const leParams = Object.keys(params).length > 0 ? `?${await (new Promise<string>(resolve => {
     resolve(new URLSearchParams(params as Record<string, string>).toString());
   }))}` : '';
-  
+
   return {
     redirect: {
       destination: `/${leCampaign}${leParams}`,
