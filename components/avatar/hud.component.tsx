@@ -1,14 +1,13 @@
 import AGButton from "../common/ag-button.component";
-import { BsArrowRight } from 'react-icons/Bs';
-import { CiEdit } from 'react-icons/Ci';
-import { CiSaveUp2 } from 'react-icons/Ci';
-import { AccessoryInterface, FeatureInterface } from "../../interfaces/api.interface";
-import { BasicData, ExportInterface } from "../../interfaces/common.interface";
+import {BsArrowRight} from 'react-icons/bs';
+import {CiEdit, CiSaveUp2} from 'react-icons/ci';
+import {AccessoryInterface, FeatureInterface} from "../../interfaces/api.interface";
+import {BasicData, ExportInterface} from "../../interfaces/common.interface";
 import OptionSelectorComponent from "../selectors/optionSelector.component";
 import FeatureSelectorComponent from "../selectors/featureSelector.component";
 import ColorSelectorComponent from "../selectors/colorSelector.component";
 import Image from "next/image";
-import { useState } from "react";
+import {useState} from "react";
 
 interface Props {
   editModeSelected: boolean;
