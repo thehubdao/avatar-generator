@@ -84,6 +84,7 @@ export default function AvatarEditor({
   const [loading, setLoading] = useState<boolean>(true);
   const [featureListShow, setFeatureListShow] = useState<FeatureInterface[]>();
   const [accessoryListShow, setAccessoryListShow] = useState<AccessoryInterface[]>();
+  const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
 
   useEffect(() => {
     const componentDidMount = async () => {
@@ -395,10 +396,13 @@ export default function AvatarEditor({
       const oldAttribute = exportData.attributes.find(x => x.id === addId);
       if (oldAttribute)
         oldAttribute.val = addValue;
+      
+      setSelectedOpc([...exportData.attributes]);
       return;
     }
 
     exportData?.attributes.push({id: addId, val: addValue});
+    setSelectedOpc([...exportData.attributes]);
   }
 
   function takeExportPicture(mimeType = 'image/png') {
@@ -450,7 +454,7 @@ export default function AvatarEditor({
           <>
             {!onlyView &&
                 <HudComponent
-                  exportData={exportData}
+                  exportData={selectedOpc}
                   editModeSelected={editModeSelected}
                   selectListFeatures={selectListFeatures}
                   featureList={featureListShow}
@@ -459,11 +463,12 @@ export default function AvatarEditor({
                   accessoryList={accessoryListShow}
                   selectedAcc={selectedAcc}
                   skinColor={skinColor}
-                  changeView={() => void setEditModeSelected(!editModeSelected)}
+                  changeView={() => setEditModeSelected(!editModeSelected)}
                   changeFeature={(id: string, path: string, name: string) => void changeFeature(id, path, name)}
                   onCategoryChange={(value: string) => onCategoryChange(value)}
                   onAccessoryChange={(value: string) => onAccessoryChange(value)}
                   onClickChangeSkinColor={(value:string) => void onClickChangeSkinColor(value)}
+                  exportModel={() => void exportModel()}
                 />
             }
           </>
