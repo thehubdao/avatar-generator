@@ -52,19 +52,20 @@ function OptionList({list, activeOption, handleClick}: props) {
   useEffect(() => {
     console.log("active option: ", activeOption);
   }, [activeOption]);
-  // console.log("active option: ", activeOption);
-  return list.map((opt) => {
-    return (
-      <SwiperSlide className={'flex justify-center items-center transition-transform' + (activeOption?.val === opt.name?' -translate-y-2':'')} key={opt.id}>
-        <p className='nm-flat-slate-100 hidden absolute'></p>
-        <div className="rounded-md w-[75px] h-[75px] flex items-center justify-center relative overflow-hidden" onClick={(event:MouseEvent) => selectPart(event,opt)}>
-          <OptionThumbnail opt={opt}/>
-          <p className='text-[10px] px-2 absolute bottom-0 right-0 bg-slate-100 max-w-full rounded-tl-md'>{opt.name}</p>
-          <div className={'w-2 h-2 absolute top-1 right-1 rounded-full bg-green-400 border border-green-600 opacity-0' + (activeOption?.val === opt.name?'  opacity-100':'')}></div>
-        </div>
-      </SwiperSlide>
-    )
-  });
+  
+  return list != undefined ? 
+    list.map((opt) => {
+      return (
+        <SwiperSlide className={'flex justify-center items-center transition-transform' + (activeOption?.val === opt.name?' -translate-y-2':'')} key={opt.id}>
+          <p className='nm-flat-slate-100 hidden absolute'></p>
+          <div className="rounded-md w-[75px] h-[75px] flex items-center justify-center relative overflow-hidden" onClick={event => selectFeature(event, opt)}>
+            <OptionThumbnail opt={opt}/>
+            <p className='text-[10px] px-2 absolute bottom-0 right-0 bg-slate-100 max-w-full rounded-tl-md'>{opt.name}</p>
+            <div className={'w-2 h-2 absolute top-1 right-1 rounded-full bg-green-400 border border-green-600 opacity-0' + (activeOption?.val === opt.name?'  opacity-100':'')}></div>
+          </div>
+        </SwiperSlide>
+      )
+    }) : <></>;
 }
 
 export default function OptionSelectorComponent(props: props) {
@@ -74,8 +75,6 @@ export default function OptionSelectorComponent(props: props) {
         slidesPerView={4}
         grabCursor={true}
         loop={true}
-        // onSlideChange={() => console.log('slide change')}
-        // onSwiper={(swiper) => console.log(swiper)}
         className='!py-2'
       >
         {OptionList(props)}

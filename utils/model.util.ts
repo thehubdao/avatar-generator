@@ -57,8 +57,8 @@ export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel:
   if(selectedFeature == undefined)
     return LogError(Module.ModelUtil, "There is no selected feature to replace on base model.");
   
-  const changeMesh: Object3D | undefined = await GetMatchPiece(replaceModel, selectedFeature.val);
-  if(changeMesh == undefined)
+  const changeMesh: Object3D | null = await GetMatchPiece(replaceModel, selectedFeature.val);
+  if(changeMesh == null)
     return LogError(Module.ModelUtil, `Piece not found: '${selectedFeature.val}' not found on replace model, please verify the glb file.`);
   
   const newFeature: Object3D = SkeletonUtils.clone(changeMesh);
