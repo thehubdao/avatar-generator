@@ -53,6 +53,7 @@ export enum Module {
   UserAdd = 'UserAdd',
   ApiUtil = 'ApiUtil',
   CampaignAdd = 'CampaignAdd',
+  AnimationUtil = 'AnimationUtil',
 }
 
 export enum EmailResult {

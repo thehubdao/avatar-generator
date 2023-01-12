@@ -101,6 +101,7 @@ export default function AvatarEditor({
       await getFeaturesData();
       await onClickChangeSkinColor();
       await loadPreData();
+      await changeStartAnimation();
       await onClickChangeSkinColor();
 
       setLoading(false);
@@ -203,6 +204,13 @@ export default function AvatarEditor({
       for (const acc of randomAccessory)
         await changeAccessory(acc.id, acc.path, acc.name, acc.type);
     }
+  }
+
+  async function changeStartAnimation() {
+    if(sc?.mixer == undefined) return LogError(Module.AvatarGenerator, "Missing animation mixer!");
+
+    const startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
+    await SetAnimation(sc.mixer, startAnimation?.path);
   }
 
   async function getFeatureList() {
