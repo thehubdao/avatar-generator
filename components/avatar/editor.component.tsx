@@ -78,7 +78,7 @@ export default function AvatarEditor({
                                      }: AvatarEditorProps) {
   const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].id : '');
   const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].id : '');
-  const [skinColor, setSkinColor] = useState<string>('F2A47E');
+  const [skinColor, setSkinColor] = useState<string>(campaignConfig.defSkinColor ?? 'F2A47E');
   const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
   const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
