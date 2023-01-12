@@ -50,7 +50,7 @@ function OptionList({list, activeOption, handleClick}: props) {
   }
 
   useEffect(() => {
-    console.log("active option: ", activeOption);
+    // console.log("active option: ", activeOption);
   }, [activeOption]);
   
   return list != undefined ? 

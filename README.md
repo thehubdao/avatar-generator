@@ -15,3 +15,13 @@ Go to "[/admin/info](https://avatar-generator-metagamehub.vercel.app/admin/info)
 - [TypeScript](https://www.typescriptlang.org) language.
 - [Firebase](https://console.firebase.google.com) database, storage and authentication.
 - [ThreeJs](https://threejs.org) graphics.
+
+---
+## Linter comments
+In order to avoid 2 of the most hard to figure linter errors, use this comments:
+- useEffect deps
+
+`// eslint-disable-next-line react-hooks/exhaustive-deps`
+- console.log
+
+`// eslint-disable-next-line no-console`
