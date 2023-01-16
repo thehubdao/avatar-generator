@@ -1,6 +1,6 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
-import {Group, Material, Mesh, MeshStandardMaterial, MeshToonMaterial, Object3D, Skeleton, SkinnedMesh} from "three";
+import {Group, Material, MeshStandardMaterial, MeshToonMaterial, Object3D, Skeleton, SkinnedMesh} from "three";
 import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
 import {TextureTone, TextureUtil} from "./texture.util";
 import {LogError} from "./common.util";
@@ -111,33 +111,40 @@ async function GetMatchPiece(object: GLTF, match?: string) {
 }
 
 async function ChangeSkeleton(newFeature: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone) {
-  if ((newFeature as Group).isGroup) {
-    newFeature.traverse(async object => {
-      if (IsSkinnedMesh(object)) {
-        object.skeleton = baseSkeleton.clone();
-        if (changeMaterial && tone)
-          await changeMaterial(object, tone);
-      }
+  newFeature.traverse(async object => {
+    if (IsSkinnedMesh(object)) {
+      object.skeleton = baseSkeleton.clone();
+      if (changeMaterial && tone)
+        await changeMaterial(object, tone);
+    }
 
-      object.frustumCulled = false;
-    });
-  }
+    object.frustumCulled = false;
+  });
 
-  if (IsSkinnedMesh(newFeature)) {
-    newFeature.skeleton = baseSkeleton.clone();
-    if (changeMaterial && tone)
-      await changeMaterial(newFeature, tone);
-  }
+  // if (IsSkinnedMesh(newFeature)) {
+  //   newFeature.skeleton = baseSkeleton.clone();
+  //   if (changeMaterial && tone)
+  //     await changeMaterial(newFeature, tone);
+  // }
 }
 
 function FindOrCreateAccessoryGroup(baseModel: Object3D) {
+  let accGroup: Group | undefined = undefined;
+  let isFoundAccGroup = false;
+
   baseModel.traverse(object => {
+    if (isFoundAccGroup) return;
+
     if (object.name === GlobalValues.AccGroup) {
-      return object as Group;
+      isFoundAccGroup = true;
+      accGroup = object as Group;
+      return;
     }
   });
 
-  const accGroup = new Group();
+  if (isFoundAccGroup && accGroup != undefined) return accGroup;
+
+  accGroup = new Group();
   accGroup.name = GlobalValues.AccGroup;
   baseModel.add(accGroup);
 
@@ -185,7 +192,7 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
   // Add new one
   accessoryGroup.add(leAcc);
 
-  console.log('leModel', baseModel);
+  // console.log('leModel', baseModel);
 }
 
 export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTone) {
