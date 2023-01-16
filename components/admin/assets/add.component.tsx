@@ -199,6 +199,7 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
     const realFile = loneFile.current.files.item(0);
     
     const newPath = await UploadFile(realFile, selectedStorage, undefined, campaign);
+    // eslint-disable-next-line no-console
     console.log(newPath);
     alert("File uploaded");
   }

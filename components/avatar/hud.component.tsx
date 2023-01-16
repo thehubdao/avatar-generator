@@ -46,8 +46,8 @@ export default function HudComponent({ editModeSelected,
   const [selectorOption, setSelectorOption] = useState<number>(1);
 
   useEffect(() => {
-    console.log("color: ", skinColor)
-    console.log("data: ", exportData)
+    // console.log("color: ", skinColor)
+    // console.log("data: ", exportData)
     // console.log("selected feature: ", selectedFeature)
   }, [skinColor, exportData]);
 

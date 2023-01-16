@@ -78,7 +78,7 @@ export default function AvatarEditor({
                                      }: AvatarEditorProps) {
   const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].id : '');
   const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].id : '');
-  const [skinColor, setSkinColor] = useState<string>('F2A47E');
+  const [skinColor, setSkinColor] = useState<string>(campaignConfig.defSkinColor ?? 'F2A47E');
   const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
   const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
@@ -101,6 +101,7 @@ export default function AvatarEditor({
       await getFeaturesData();
       await onClickChangeSkinColor();
       await loadPreData();
+      await changeStartAnimation();
       await onClickChangeSkinColor();
 
       setLoading(false);
@@ -117,14 +118,14 @@ export default function AvatarEditor({
   }, []);
 
   const setOnIFrame = () => {
-    console.log('IFrame Callback: ', onIFrame);
+    // console.log('IFrame Callback: ', onIFrame);
     onIFrame = true;
     SetIFrameEvents(changeFeatureFromIFrame, exportFromIFrame, changeSkinColorFromIFrame);
   }
 
   const changeFeatureFromIFrame = async (params?: BasicData) => {
-    if (!onIFrame) return console.log("Not on IFrame, subscribe if you forgot!");
-    if (!params) return console.log("Missing feature option!");
+    if (!onIFrame) return LogError(Module.AvatarGenerator, "Not on IFrame, subscribe if you forgot!");
+    if (!params) return LogError(Module.AvatarGenerator, "Missing feature option!");
 
     if (params.detail && params.detail.startsWith('http')) {
       await changeFeature(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
@@ -132,12 +133,12 @@ export default function AvatarEditor({
       if (params.id.endsWith(GlobalValues.AccEnd)) {
         const accessory = accessoryList?.find(a => a.type === params.id && a.name === params.val);
 
-        if (!accessory) return console.log("Accessory option not found!");
+        if (!accessory) return LogError(Module.AvatarGenerator, "Accessory option not found!");
         await changeAccessory(accessory.id, accessory.path, accessory.name, accessory.type);
       } else {
         const feature = featureList?.find(p => p.type === params.id && p.name === params.val);
 
-        if (!feature) return console.log("Feature option not found!");
+        if (!feature) return LogError(Module.AvatarGenerator, "Feature option not found!");
         await changeFeature(feature.id, feature.path, feature.name, feature.type);
       }
     }
@@ -203,6 +204,13 @@ export default function AvatarEditor({
       for (const acc of randomAccessory)
         await changeAccessory(acc.id, acc.path, acc.name, acc.type);
     }
+  }
+
+  async function changeStartAnimation() {
+    if(sc?.mixer == undefined) return LogError(Module.AvatarGenerator, "Missing animation mixer!");
+
+    const startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
+    await SetAnimation(sc.mixer, startAnimation?.path);
   }
 
   async function getFeatureList() {
@@ -428,6 +436,7 @@ export default function AvatarEditor({
     exportData.picture = picturePromise;
     exportData.model = modelPromise;
 
+    // eslint-disable-next-line no-console
     console.log(exportData);
     if (onIFrame) {
       IFrameExportData(exportData);
