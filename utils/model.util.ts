@@ -160,7 +160,8 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
   }
 
   // Get accessory for use
-
+  const newAcc: Object3D = SkeletonUtils.clone(leAcc);
+  
   // Find the accessory group, IF doesnt exist, create it
   const accessoryGroup = FindOrCreateAccessoryGroup(baseModel);
 
@@ -172,12 +173,12 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
 
     // Update info
     accInfo.accessoryIndex = accessoryGroup.children.length;
-    accInfo.accessoryRef = leAcc;
+    accInfo.accessoryRef = newAcc;
   } else {
     // Create info
     allAccInfo[selectedAcc] = {
       accessoryIndex: accessoryGroup.children.length,
-      accessoryRef: leAcc,
+      accessoryRef: newAcc,
     };
   }
 
@@ -187,12 +188,10 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
     console.error('Missing skeleton');
     return;
   }
-  await ChangeSkeleton(leAcc, newSkeleton);
+  await ChangeSkeleton(newAcc, newSkeleton, ChangeToToonMaterial, "threeTone");
 
   // Add new one
-  accessoryGroup.add(leAcc);
-
-  // console.log('leModel', baseModel);
+  accessoryGroup.add(newAcc);
 }
 
 export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTone) {
@@ -200,10 +199,12 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
   if (materialRef.isMeshStandardMaterial) {
     const mapClone = materialRef.map?.clone();
     const oldName = materialRef.name;
+    const oldColor = materialRef.color.clone();
     const _toneTexture = await TextureUtil.Instance().GetToneTexture(tone);
     object.material = new MeshToonMaterial({
       map: mapClone,
       name: oldName,
+      color: oldColor,
       gradientMap: _toneTexture,
       transparent: true,
     });
