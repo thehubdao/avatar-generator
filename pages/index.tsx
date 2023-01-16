@@ -172,9 +172,13 @@ export default class AvatarGenerator extends Component<AvatarGeneratorProps, Ava
   changePartFromIFrame = async (params?: BasicData) => {
     if(!this.onIFrame) return console.log("Not on IFrame, subscribe if you forgot!");
     if(!params) return console.log("Missing feature option!");
-    
-    if(params.detail && params.detail.startsWith('http')) {
-      await this.changePart(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
+
+    if (params.detail && params.detail.startsWith('http')) {
+      if (params.id.endsWith(GlobalValues.AccEnd)) {
+        await this.changeAccessory(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
+      } else {
+        await this.changePart(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
+      }
     }
     else {
       if(params.id.endsWith(GlobalValues.AccEnd)) {
