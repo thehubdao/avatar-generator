@@ -126,33 +126,40 @@ async function GetMatchPiece(object: GLTF, match?: string) {
 }
 
 async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone) {
-  if ((newPart as Group).isGroup) {
-    newPart.traverse(async object => {
-      if (IsSkinnedMesh(object)) {
-        object.skeleton = baseSkeleton.clone();
-        if (changeMaterial && tone)
-          await changeMaterial(object, tone);
-      }
+  newPart.traverse(async object => {
+    if (IsSkinnedMesh(object)) {
+      object.skeleton = baseSkeleton.clone();
+      if (changeMaterial && tone)
+        await changeMaterial(object, tone);
+    }
 
-      object.frustumCulled = false;
-    });
-  }
+    object.frustumCulled = false;
+  });
 
-  if (IsSkinnedMesh(newPart)) {
-    newPart.skeleton = baseSkeleton.clone();
-    if (changeMaterial && tone)
-      await changeMaterial(newPart, tone);
-  }
+  // if (IsSkinnedMesh(newPart)) {
+  //   newPart.skeleton = baseSkeleton.clone();
+  //   if (changeMaterial && tone)
+  //     await changeMaterial(newPart, tone);
+  // }
 }
 
 function FindOrCreateAccessoryGroup(baseModel: Object3D) {
+  let accGroup: Group | undefined = undefined;
+  let isFoundAccGroup = false;
+
   baseModel.traverse(object => {
+    if (isFoundAccGroup) return;
+
     if (object.name === GlobalValues.AccGroup) {
-      return object as Group;
+      isFoundAccGroup = true;
+      accGroup = object as Group;
+      return;
     }
   });
 
-  const accGroup = new Group();
+  if (isFoundAccGroup && accGroup != undefined) return accGroup;
+
+  accGroup = new Group();
   accGroup.name = GlobalValues.AccGroup;
   baseModel.add(accGroup);
 
@@ -200,7 +207,7 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
   // Add new one
   accessoryGroup.add(leAcc);
 
-  console.log('leModel', baseModel);
+  // console.log('leModel', baseModel);
 }
 
 export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTone) {
