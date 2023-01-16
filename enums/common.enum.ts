@@ -54,6 +54,7 @@ export enum Module {
   ApiUtil = 'ApiUtil',
   CampaignAdd = 'CampaignAdd',
   AnimationUtil = 'AnimationUtil',
+  Viewer = 'ThreeViewer',
 }
 
 export enum EmailResult {

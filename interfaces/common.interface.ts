@@ -30,7 +30,7 @@ export interface LookAtVectors {
   pos?: AGVector3;
 }
 
-interface AGVector3 {
+export interface AGVector3 {
   x: number;
   y: number;
   z: number;
