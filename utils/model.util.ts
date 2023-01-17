@@ -1,6 +1,6 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
-import {Group, Material, Mesh, MeshStandardMaterial, MeshToonMaterial, Object3D, Skeleton, SkinnedMesh} from "three";
+import {Group, Material, MeshStandardMaterial, MeshToonMaterial, Object3D, Skeleton, SkinnedMesh} from "three";
 import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
 import {TextureTone, TextureUtil} from "./texture.util";
 import {LogError} from "./common.util";
@@ -111,33 +111,40 @@ async function GetMatchPiece(object: GLTF, match?: string) {
 }
 
 async function ChangeSkeleton(newFeature: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone) {
-  if ((newFeature as Group).isGroup) {
-    newFeature.traverse(async object => {
-      if (IsSkinnedMesh(object)) {
-        object.skeleton = baseSkeleton.clone();
-        if (changeMaterial && tone)
-          await changeMaterial(object, tone);
-      }
+  newFeature.traverse(async object => {
+    if (IsSkinnedMesh(object)) {
+      object.skeleton = baseSkeleton.clone();
+      if (changeMaterial && tone)
+        await changeMaterial(object, tone);
+    }
 
-      object.frustumCulled = false;
-    });
-  }
+    object.frustumCulled = false;
+  });
 
-  if (IsSkinnedMesh(newFeature)) {
-    newFeature.skeleton = baseSkeleton.clone();
-    if (changeMaterial && tone)
-      await changeMaterial(newFeature, tone);
-  }
+  // if (IsSkinnedMesh(newFeature)) {
+  //   newFeature.skeleton = baseSkeleton.clone();
+  //   if (changeMaterial && tone)
+  //     await changeMaterial(newFeature, tone);
+  // }
 }
 
 function FindOrCreateAccessoryGroup(baseModel: Object3D) {
+  let accGroup: Group | undefined = undefined;
+  let isFoundAccGroup = false;
+
   baseModel.traverse(object => {
+    if (isFoundAccGroup) return;
+
     if (object.name === GlobalValues.AccGroup) {
-      return object as Group;
+      isFoundAccGroup = true;
+      accGroup = object as Group;
+      return;
     }
   });
 
-  const accGroup = new Group();
+  if (isFoundAccGroup && accGroup != undefined) return accGroup;
+
+  accGroup = new Group();
   accGroup.name = GlobalValues.AccGroup;
   baseModel.add(accGroup);
 
@@ -153,7 +160,8 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
   }
 
   // Get accessory for use
-
+  const newAcc: Object3D = SkeletonUtils.clone(leAcc);
+  
   // Find the accessory group, IF doesnt exist, create it
   const accessoryGroup = FindOrCreateAccessoryGroup(baseModel);
 
@@ -165,12 +173,12 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
 
     // Update info
     accInfo.accessoryIndex = accessoryGroup.children.length;
-    accInfo.accessoryRef = leAcc;
+    accInfo.accessoryRef = newAcc;
   } else {
     // Create info
     allAccInfo[selectedAcc] = {
       accessoryIndex: accessoryGroup.children.length,
-      accessoryRef: leAcc,
+      accessoryRef: newAcc,
     };
   }
 
@@ -180,12 +188,10 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
     console.error('Missing skeleton');
     return;
   }
-  await ChangeSkeleton(leAcc, newSkeleton);
+  await ChangeSkeleton(newAcc, newSkeleton, ChangeToToonMaterial, "threeTone");
 
   // Add new one
-  accessoryGroup.add(leAcc);
-
-  console.log('leModel', baseModel);
+  accessoryGroup.add(newAcc);
 }
 
 export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTone) {
@@ -193,10 +199,12 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
   if (materialRef.isMeshStandardMaterial) {
     const mapClone = materialRef.map?.clone();
     const oldName = materialRef.name;
+    const oldColor = materialRef.color.clone();
     const _toneTexture = await TextureUtil.Instance().GetToneTexture(tone);
     object.material = new MeshToonMaterial({
       map: mapClone,
       name: oldName,
+      color: oldColor,
       gradientMap: _toneTexture,
       transparent: true,
     });
