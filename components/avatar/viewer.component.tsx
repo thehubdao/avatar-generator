@@ -1,5 +1,5 @@
 import {useEffect, useRef} from "react";
-import {Clock, Object3D, PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
+import {AnimationMixer, Clock, Object3D, PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {LogError} from "../../utils/common.util";
 import {Module} from "../../enums/common.enum";
@@ -16,6 +16,7 @@ let _scene: Scene | undefined;
 let _camera: PerspectiveCamera | undefined;
 let _renderer: WebGLRenderer | undefined;
 let _controls: OrbitControls | undefined;
+const _mixers: AnimationMixer[] = [];
 
 let _cameraPos: Vector3 = new Vector3();
 let _cameraLookAt: Vector3 = new Vector3();
@@ -25,6 +26,23 @@ const _clock: Clock = new Clock();
 
 let _tanFOV: number | undefined;
 let _windowHeight: number | undefined;
+
+export function AddMixer(newMixer: AnimationMixer) {
+  if (!_mixers.some(m => m === newMixer))
+    _mixers.push(newMixer);
+}
+
+export function RemoveMixer(mixer: AnimationMixer) {
+  const index = _mixers.findIndex(m => m === mixer);
+  if (index > 0)
+    _mixers.slice(index, 1);
+}
+
+function DoAnimation(delta: number) {
+  for (const mixer of _mixers) {
+    mixer.update(delta);
+  }
+}
 
 export function AddToScene(toAdd: Object3D) {
   if (_scene == undefined)
@@ -63,15 +81,17 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
 
 //#region Component
 interface AvatarViewerProps {
-  extraLoopLogic: (delta: number) => void;
+  onReady: () => Promise<void>;
 }
 
-export default function AvatarViewer({extraLoopLogic}: AvatarViewerProps) {
+export default function AvatarViewer({onReady}: AvatarViewerProps) {
   const threeCanvas = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const componentDidMount = async () => {
       await initScene();
+
+      await onReady()
     };
 
     componentDidMount()
@@ -129,7 +149,7 @@ export default function AvatarViewer({extraLoopLogic}: AvatarViewerProps) {
 
     const delta = _clock.getDelta();
 
-    extraLoopLogic(delta);
+    DoAnimation(delta);
 
     _controls.update();
 

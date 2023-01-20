@@ -55,6 +55,8 @@ export enum Module {
   CampaignAdd = 'CampaignAdd',
   AnimationUtil = 'AnimationUtil',
   Viewer = 'ThreeViewer',
+  Editor = 'AvatarEditor',
+  CommonUtil = 'CommonUtil',
 }
 
 export enum EmailResult {
