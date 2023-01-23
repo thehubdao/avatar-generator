@@ -11,7 +11,7 @@ import {
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
 import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../../utils/iframe.util";
 import {ExportAttributeValues, GlobalValues, Module} from "../../enums/common.enum";
-import {Delay, FilterList, LogError, RandomArrayElement} from "../../utils/common.util";
+import {FilterList, LogError, RandomArrayElement} from "../../utils/common.util";
 import {GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign} from "../../utils/api.util";
 import {SaveFile} from "../../utils/exporter.util";
 import AGLoading from "../common/ag-loading.component";
@@ -286,53 +286,45 @@ export default function AvatarEditor({
     }
   }
 
-  function renderEditMode() {
-    return (
-      <>
-        {/* LOADING */}
-        <AGLoading loading={loading} bgColor={bgColor}/>
-        {/* CANVAS WRAPPER */}
-        <div
-          className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-          {/* CANVAS BACKGROUND */}
-          <div style={{backgroundColor: `#${bgColor ?? '272727'}`}} className="w-full h-screen absolute"/>
-          {/* CANVAS */}
-          <AvatarBuilder avatarBasePath={avatarBasePath}
-                         onReady={() => onAvatarBuilderReady()}/>
-        </div>
-        {loading ? <></> :
-          <>
-            {!onlyView &&
-                <HudComponent
-                    exportData={selectedOpc}
-                    editModeSelected={editModeSelected}
-                    selectListFeatures={selectListFeatures}
-                    featureList={featureListShow}
-                    selectedFeature={selectedFeature}
-                    selectListAccessories={selectListAccessories}
-                    accessoryList={accessoryListShow}
-                    selectedAcc={selectedAcc}
-                    skinColor={skinColor}
-                    changeView={() => setEditModeSelected(!editModeSelected)}
-                    changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
-                    onCategoryChange={(value: string) => onCategoryChange(value)}
-                    onAccessoryChange={(value: string) => onAccessoryChange(value)}
-                    onClickChangeSkinColor={(value: string) => void onClickChangeSkinColor(value)}
-                    exportModel={() => void exportModel()}
-                />
-            }
-          </>
-        }
-      </>
-    );
-  }
-
   return (
     <>
       <Head>
         <title>Avatar Generator</title>
       </Head>
-      {renderEditMode()}
+      {/* LOADING */}
+      <AGLoading loading={loading} bgColor={bgColor}/>
+      {/* CANVAS WRAPPER */}
+      <div
+        className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+        {/* CANVAS BACKGROUND */}
+        <div style={{backgroundColor: `#${bgColor ?? '272727'}`}} className="w-full h-screen absolute"/>
+        {/* CANVAS */}
+        <AvatarBuilder avatarBasePath={avatarBasePath}
+                       onReady={() => onAvatarBuilderReady()}/>
+      </div>
+      {loading ? <></> :
+        <>
+          {!onlyView &&
+              <HudComponent
+                  exportData={selectedOpc}
+                  editModeSelected={editModeSelected}
+                  selectListFeatures={selectListFeatures}
+                  featureList={featureListShow}
+                  selectedFeature={selectedFeature}
+                  selectListAccessories={selectListAccessories}
+                  accessoryList={accessoryListShow}
+                  selectedAcc={selectedAcc}
+                  skinColor={skinColor}
+                  changeView={() => setEditModeSelected(!editModeSelected)}
+                  changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
+                  onCategoryChange={(value: string) => onCategoryChange(value)}
+                  onAccessoryChange={(value: string) => onAccessoryChange(value)}
+                  onClickChangeSkinColor={(value: string) => void onClickChangeSkinColor(value)}
+                  exportModel={() => void exportModel()}
+              />
+          }
+        </>
+      }
     </>
   );
 }
