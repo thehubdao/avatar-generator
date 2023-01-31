@@ -4,6 +4,8 @@
   onClickEvent?: () => void;
   children?: string | JSX.Element;
   form?: boolean;
+  nm?: boolean;
+  fit?: boolean;
   tooltip?: string;
 }
 
@@ -15,7 +17,7 @@ interface AGButtonState {
   side: string;
 }
 
-export default function AGButton({type, align, form, onClickEvent, tooltip, children}: AGButtonProps) {
+export default function AGButton({type, align, form, nm, fit, onClickEvent, tooltip, children}: AGButtonProps) {
   const vD: AGButtonState = {
     ...getBtnType(),
     side: getSide()
@@ -50,7 +52,7 @@ export default function AGButton({type, align, form, onClickEvent, tooltip, chil
           color: 'bg-slate-100',
           textColor: 'text-gray-800',
           borderColor: 'border-gray-600',
-          hover: 'hover:bg-slate-200'
+          hover: nm ? 'hover:shadow-flat-soft' : 'hover:bg-slate-200'
         };
     }
   }
@@ -71,16 +73,16 @@ export default function AGButton({type, align, form, onClickEvent, tooltip, chil
       {
         form ?
           <button type="submit"
-                  className={`mx-2 w-auto my-auto rounded py-1 border-1 ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor}`}
+                  className={`mx-2 w-auto my-auto rounded py-1 border-1 ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor} ${nm ? 'shadow-flat-hard rounded-full':''} ${fit ? 'w-fit':'min-w-[100px]'}`}
                   onClick={onClickEvent} title={tooltip}>
             <div className='px-4'>{children}</div>
           </button>
           :
-          <div
-            className={`mx-2 w-auto min-w-[70px] my-auto rounded py-1 border-1 cursor-pointer ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor}`}
+          <button
+            className={`mx-2 w-auto my-auto rounded py-1 border-1 cursor-pointer ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor} ${nm ? 'shadow-flat-hard rounded-full':''} ${fit ? 'w-fit':'min-w-[100px]'}`}
             onClick={onClickEvent} title={tooltip}>
             <div className='px-2'>{children}</div>
-          </div>
+          </button>
       }
     </div>
   );

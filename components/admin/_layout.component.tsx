@@ -6,6 +6,7 @@ import {UserRoleValues} from "../../enums/firebase.enum";
 import {GoToPage} from "../../utils/router.util";
 import {PageLocation} from "../../enums/common.enum";
 import AGLoading from "../common/ag-loading.component";
+import Header from "./header.component";
 
 interface LayoutProps {
   children: JSX.Element | JSX.Element[] | boolean;
@@ -29,8 +30,8 @@ export default function Layout({
   async function updateUserInfo() {
     const uInfo = await GetCurrentUserInfo();
 
-    if (uInfo?.campaign == undefined || uInfo?.campaign?.length == 0)
-      await GoToPage(PageLocation.FirstSteps);
+    // if (uInfo?.campaign == undefined || uInfo?.campaign?.length == 0)
+    //   await GoToPage(PageLocation.FirstSteps);
 
     setLoading(false);
     setUserInfo(uInfo);
@@ -63,7 +64,11 @@ export default function Layout({
   return (
     <>
       <AGLoading loading={loading} transparency />
-      <div className="bg-emerald-500 flex justify-between">
+      <Header />
+      { !loading &&
+        children
+      }
+      <div className="bg-emerald-500 flex justify-between hidden">
         <div className="ml-3 mr-1 my-2 flex">
           {userInfo &&
               <div className="my-auto flex flex-col sm:flex-row">
@@ -89,9 +94,7 @@ export default function Layout({
         </div>
         <AGButton type="danger" onClickEvent={() => void LogOut()}>Log Out</AGButton>
       </div>
-      { !loading &&
-        children
-      }
+      
     </>
   );
 }

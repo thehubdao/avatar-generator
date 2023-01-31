@@ -2,8 +2,8 @@
 import Head from "next/head";
 import {UserInterface} from "../../interfaces/firebase.interface";
 import Layout from "../../components/admin/_layout.component";
-import Navbar from "../../components/admin/navbar.component";
 import AGLoading from "../../components/common/ag-loading.component";
+import Dashboard from "../../components/admin/dashboard.component";
 
 export default function Admin() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -21,16 +21,18 @@ export default function Admin() {
       <Head>
         <title>Admin Dashboard</title>
       </Head>
-      <AGLoading loading={loading} transparency/>
-      <Layout userInfo={userInfo}
-              currentCampaign={selectedCampaign}
-              setUserInfo={(user) => updateUserInfo(user)}
-              setCurrentCampaign={(campaign) => setSelectedCampaign(campaign)}>
-        {!loading &&
-            <Navbar userRole={userInfo?.role} campaign={selectedCampaign} campaignList={userInfo?.campaign}>
-            </Navbar>
-        }
-      </Layout>
+      <div className="bg-bg">
+        <AGLoading loading={loading} transparency/>
+        <Layout userInfo={userInfo}
+                currentCampaign={selectedCampaign}
+                setUserInfo={(user) => updateUserInfo(user)}
+                setCurrentCampaign={(campaign) => setSelectedCampaign(campaign)}>
+          {!loading &&
+              <Dashboard userRole={userInfo?.role} campaign={selectedCampaign} campaignList={userInfo?.campaign}>
+              </Dashboard>
+          }
+        </Layout>
+      </div>
     </>
   );
 }
