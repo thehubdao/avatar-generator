@@ -67,7 +67,7 @@ export async function GetFeaturesData(baseModel: Group, featureList: BasicData[]
     let result: Record<string, FeatureInfoInterface> = {};
 
     for (const [index, feature] of baseFeatures.children.entries()) {
-      if (featureList.some(x => x.val === feature.name)) {
+      if (featureList.some(x => feature.name.startsWith(x.val))) {
         const foundFeature = featureList.find(x => x.val === feature.name);
         result[foundFeature!.id] = {
           featureIndex: index,
