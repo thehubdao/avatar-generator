@@ -7,7 +7,7 @@ export interface ApiResponse<T> {
 }
 
 export interface AssetInterface {
-  index: string;
+  index: number;
   name: string;
   type: string;
   path: string;
