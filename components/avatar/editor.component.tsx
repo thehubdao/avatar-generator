@@ -33,8 +33,6 @@ interface AvatarEditorProps {
   selectListFeatures: BasicData[];
   selectListAccessories: BasicData[];
   attributeConfig: BasicData[] | null;
-  // callback when data is ready to be used
-  onDataLoaded?: () => void;
   bgColor?: string;
   onlyView: boolean;
 }
@@ -54,7 +52,6 @@ export default function AvatarEditor({
                                        selectListFeatures,
                                        selectListAccessories,
                                        onlyView,
-                                       onDataLoaded,
                                        campaign,
                                        attributeConfig,
                                        avatarBasePath,
@@ -98,8 +95,6 @@ export default function AvatarEditor({
     await ChangeStartAnimation(startAnimation?.path);
 
     setLoading(false);
-    // trigger event when component has all data to render
-    onDataLoaded?.()
 
     IFrameReady(setOnIFrame);
   }
