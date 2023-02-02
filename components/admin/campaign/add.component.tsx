@@ -1,6 +1,6 @@
 import AGText from "../../common/ag-text.component";
 import {FormEvent, useRef, useState} from "react";
-import {BasicData, CampaignParameters} from "../../../interfaces/common.interface";
+import {BasicData, CampaignParameters, FeatureBasic} from "../../../interfaces/common.interface";
 import AGButton from "../../common/ag-button.component";
 import {
   GetCurrentUser,
@@ -26,7 +26,7 @@ export default function CampaignAdd({onCampaignCreated, campaignList}: NewCampai
   const [message, setMessage] = useState<string>();
   const [featuresNum, setFeatureNum] = useState<number>();
   const [accessoriesNum, setAccessoryNum] = useState<number>();
-  const [featureList, setFeatureList] = useState<BasicData[]>([]);
+  const [featureList, setFeatureList] = useState<FeatureBasic[]>([]);
   const [accessoryList, setAccessoryList] = useState<BasicData[]>([]);
 
   function renderFeatureInputs() {
@@ -37,7 +37,7 @@ export default function CampaignAdd({onCampaignCreated, campaignList}: NewCampai
         <p>Feature:</p>
         <input type="text" value={featureList[index]?.id} required placeholder={`${index + 1} feature type`}
                onChange={event => setFeatureList((prevState) => {
-                 if (prevState[index] == undefined) prevState[index] = {val: '', id: ''};
+                 if (prevState[index] == undefined) prevState[index] = {val: '', id: '', index: index};
                  prevState[index].id = event.target.value.trim();
                  return prevState;
                })}/>
