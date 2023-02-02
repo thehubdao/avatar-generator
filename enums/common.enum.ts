@@ -5,6 +5,7 @@
   AccEnd = 'Acc',
   AccGroup = 'Accessories.AG',
   AvatarBase = 'base_mesh/MetaAvatarHub.glb',
+  CollectorIndexSeparator = '_',
 }
 
 export enum ExportAttributeValues {
@@ -57,6 +58,7 @@ export enum Module {
   Viewer = 'ThreeViewer',
   Editor = 'AvatarEditor',
   CommonUtil = 'CommonUtil',
+  CollectionComponent = 'CollectionComponent',
 }
 
 export enum EmailResult {
