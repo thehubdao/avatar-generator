@@ -9,6 +9,10 @@ export async function LogError(origin: string | Module, message: string) {
   console.error(`${origin} - `, message);
 }
 
+export async function LogWarning(origin: string | Module, message: string) {
+  console.warn(`${origin} - `, message);
+}
+
 export function Delay(ms: number) {
   return new Promise<void>(resolve => {
     setTimeout(resolve, ms);

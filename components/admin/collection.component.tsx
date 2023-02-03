@@ -5,7 +5,7 @@ import {AnimationInterface, FeatureInterface} from "../../interfaces/api.interfa
 import {GetAnimationListByCampaign, GetAssetsListByCampaign} from "../../utils/api.util";
 import AvatarBuilder from "../avatar/builder.component";
 import AGLoading from "../common/ag-loading.component";
-import {LogError} from "../../utils/common.util";
+import {LogError, LogWarning} from "../../utils/common.util";
 import {UpdateDocObject} from "../../utils/firebase.util";
 import {FirestoreLocation} from "../../enums/firebase.enum";
 
@@ -21,6 +21,7 @@ let _isRange: boolean = true;
 let _start: Map<number, number> | undefined;
 let _end: Map<number, number> | undefined;
 
+let _currentIteration: Map<number, number> | undefined;
 const _minIndexValues: Map<number, number> = new Map();
 const _maxIndexValues: Map<number, number> = new Map();
 
@@ -139,12 +140,30 @@ function SetMaxIndexValues(featureList: FeatureBasic[]) {
   console.log('MaxValues', _maxIndexValues);
 }
 
-function GetNextIteration() {
-  // _currentIteration;
-  // Current to end
-  // TODO:
-  //  recursive function, on max value on this certain augmented index change values and switch to next index
-  //  Always start from last index of map
+function NextIteration() {
+  if (_currentIteration == undefined) {
+    _currentIteration = new Map(_start);
+    return;
+  }
+  
+  LowerIteration(_currentIteration.size - 1);
+}
+
+function LowerIteration(index: number) {
+  if (index < 0)
+    return void LogWarning(Module.CollectionComponent, "Reached end of the line");
+  
+  const current = _currentIteration?.get(index);
+  const max = _maxIndexValues.get(index);
+  if (current == undefined || max == undefined)
+    return void LogError(Module.CollectionComponent, "Missing current and max index values!");
+  
+  if (current < max) {
+    _currentIteration?.set(index, max + 1);
+  } else {
+    _currentIteration?.set(index, 0);
+    LowerIteration(index - 1);
+  }
 }
 
 function ReadjustFeatureIndexes(featureList: FeatureInterface[] | undefined) {
