@@ -30,6 +30,7 @@ export default function AvatarCollectionPage({isCampaign, campaign, campaignPara
                           avatarBasePath={campaignParams?.armature ?? ''}
                           featureList={campaignParams?.features ?? []}
                           defaultAnimation={campaignParams?.config?.defAnimation}
+                          skinColor={campaignParams?.config?.defSkinColor ?? '00ffff'}
         />
         :
         <h1>Is not a Campaign</h1>

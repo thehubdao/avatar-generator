@@ -3,11 +3,12 @@ import {GlobalValues, Module} from "../../enums/common.enum";
 import {FeatureBasic} from "../../interfaces/common.interface";
 import {AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
 import {GetAnimationListByCampaign, GetAssetsListByCampaign} from "../../utils/api.util";
-import AvatarBuilder from "../avatar/builder.component";
+import AvatarBuilder, {ChangeFeature, SetFeaturesData} from "../avatar/builder.component";
 import AGLoading from "../common/ag-loading.component";
 import {LogError, LogWarning} from "../../utils/common.util";
 import {UpdateDocObject} from "../../utils/firebase.util";
 import {FirestoreLocation} from "../../enums/firebase.enum";
+import Layout from "./_layout.component";
 
 enum RangeType {
   Single,
@@ -48,7 +49,7 @@ function GetRangeType(single: string | undefined, start: string | undefined, end
 
 function IsRange(single: string | undefined, start: string | undefined, end: string | undefined, size: number) {
   const rangeType = GetRangeType(single, start, end);
-  console.log('RangeType', rangeType);
+  console.log('RangeType', RangeType[rangeType]);
   switch (rangeType) {
     case RangeType.Single:
       const singleValues = GetIndexValues(single, size);
@@ -90,7 +91,7 @@ function IsRange(single: string | undefined, start: string | undefined, end: str
       break;
   }
   
-  console.log('Kek', _start, _end, _isRange);
+  console.log('Ranges', _start, _end, _isRange);
 }
 
 function GetIndexValues(input: string | undefined, size: number): { map: Map<number, number> | undefined, valid: boolean } {
@@ -143,10 +144,12 @@ function SetMaxIndexValues(featureList: FeatureBasic[]) {
 function NextIteration() {
   if (_currentIteration == undefined) {
     _currentIteration = new Map(_start);
+    console.log('CurrentIteration: ', _currentIteration);
     return;
   }
   
   LowerIteration(_currentIteration.size - 1);
+  console.log('CurrentIteration: ', _currentIteration);
 }
 
 function LowerIteration(index: number) {
@@ -199,7 +202,7 @@ function ReadjustFeatureIndexes(featureList: FeatureInterface[] | undefined) {
     }
   }
   
-  console.log(_featureOptionListData, _featureOptionToUpdate, orderedList, missingIndexList);
+  console.log('EndValues', _featureOptionListData, _featureOptionToUpdate, orderedList, missingIndexList);
 }
 
 async function UpdateNewIndexesOnDB(campaign: string) {
@@ -228,9 +231,10 @@ interface AvatarCollectionProps {
   avatarBasePath: string;
   defaultAnimation: string | undefined;
   featureList: FeatureBasic[];
+  skinColor: string;
 }
 
-export default function AvatarCollection({start, end, single, campaign, avatarBasePath, featureList}: AvatarCollectionProps) {
+export default function AvatarCollection({start, end, single, campaign, avatarBasePath, featureList, skinColor}: AvatarCollectionProps) {
   const [loading, setLoading] = useState<boolean>(true);
   const isDoable = avatarBasePath !== '' || featureList.length > 0;
 
@@ -259,7 +263,9 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
 
     IsRange(start, end, single, size);
 
-    // SetCombination();
+    NextIteration();
+    await SetFeaturesData(featureList);
+    await onRenderCurrentIteration();
   }
 
   async function getFeatureList(featureList: FeatureBasic[]) {
@@ -275,6 +281,30 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
       _featureOptionListData.set(feature.index, featureData.value?.filter(f => f.type === feature.id));
     }
   }
+
+  async function onRenderCurrentIteration() {
+    if (_currentIteration == undefined)
+      return LogError(Module.CollectionComponent, "Missing current iteration to render!");
+
+    for (const [index, val] of _currentIteration?.entries()) {
+      const listData = _featureOptionListData.get(index);
+      if (listData == undefined) {
+        void LogWarning(Module.CollectionComponent, "Missing list data to render!");
+        continue;
+      }
+      
+      const item = listData.find(l => l.index === val);
+      if (item == undefined) {
+        void LogWarning(Module.CollectionComponent, `Missing item on key: ${index} index: ${val}`);
+        continue;
+      }
+      console.log('Item', item);
+      await ChangeFeature(item.id, item.path, item.name, item.type, featureList.find(sf => sf.id === item.type), skinColor);
+      // TODO: find ways to avoid this
+      await SetFeaturesData(featureList);
+      // addReplaceAttribute(selectedFeature, name);
+    }
+  }
   
   async function getAnimationList() {
     const animationData = await GetAnimationListByCampaign(campaign);
@@ -282,7 +312,11 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
       _animationListData = animationData.value;
   }
 
-  function onStartCollection() {
+  function onClickDoCollection() {
+    
+  }
+  
+  function onDoOne() {
     
   }
   
@@ -294,8 +328,12 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
     <>
       <AGLoading loading={loading} transparency />
       {isDoable ?
-        <AvatarBuilder avatarBasePath={avatarBasePath}
-                       onReady={() => onCollectionReady()}/>
+        <Layout setUserInfo={() => {}}
+                noCampaign
+                setCurrentCampaign={() => {}} >
+          <AvatarBuilder avatarBasePath={avatarBasePath}
+                         onReady={() => onCollectionReady()}/>
+        </Layout>
         :
         <h1>Missing info</h1>
       }
