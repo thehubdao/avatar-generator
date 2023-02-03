@@ -108,17 +108,17 @@ function GetIndexValues(input: string | undefined, size: number): { map: Map<num
   return IsValidIndexValues(result, size);
 }
 
-function IsValidIndexValues(leMap: Map<number, number>, size: number) {
-  if (leMap.size !== size) return {map: undefined, valid: false};
+function IsValidIndexValues(indexValues: Map<number, number>, size: number) {
+  if (indexValues.size !== size) return {map: undefined, valid: false};
 
-  for (const [key, value] of leMap.entries()) {
+  for (const [key, value] of indexValues.entries()) {
     const maxVal = _maxIndexValues.get(key);
     if (maxVal == undefined || maxVal < value) {
       return {map: undefined, valid: false};
     }
   }
 
-  return {map: leMap, valid: true};
+  return {map: indexValues, valid: true};
 }
 
 function SetMinIndexValues(size: number) {
@@ -130,7 +130,12 @@ function SetMinIndexValues(size: number) {
 }
 
 function SetMaxIndexValues(featureList: FeatureBasic[]) {
-  // TODO: receive the list of features, get the length of every part, and that's the max index values 
+  for (const feature of featureList) {
+    const optionList = _featureOptionListData.get(feature.index);
+    if (optionList != undefined)
+      _maxIndexValues.set(feature.index, optionList.length);
+  }
+  
   console.log('MaxValues', _maxIndexValues);
 }
 
