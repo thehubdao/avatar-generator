@@ -4,6 +4,7 @@ import {Vector3} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {
   BasicData,
+  FeatureBasic,
   CampaignConfig,
   ExportInterface,
   LookAtVectors
@@ -30,7 +31,7 @@ interface AvatarEditorProps {
   campaign?: string | null;
   avatarBasePath: string;
   campaignConfig: CampaignConfig;
-  selectListFeatures: BasicData[];
+  selectListFeatures: FeatureBasic[];
   selectListAccessories: BasicData[];
   attributeConfig: BasicData[] | null;
   bgColor?: string;
