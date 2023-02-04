@@ -282,6 +282,7 @@ export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlo
         FirestoreGlobalLocation.Parameters;
     const newDocName = docName == undefined ? '' : `/${docName}`;
 
+    console.log('Update doc loc', newLocation, newDocName);
     const docRef = doc(await FirebaseUtil.Instance().DB(), `${newLocation}${newDocName}`);
     await setDoc(docRef, data, {merge: true});
     return {success: true, value: true};
