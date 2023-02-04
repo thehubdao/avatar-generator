@@ -1,14 +1,14 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {GlobalValues, Module} from "../../enums/common.enum";
 import {FeatureBasic} from "../../interfaces/common.interface";
 import {AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
 import {GetAnimationListByCampaign, GetAssetsListByCampaign} from "../../utils/api.util";
-import AvatarBuilder, {ChangeFeature, SetFeaturesData} from "../avatar/builder.component";
+import AvatarBuilder, {ChangeFeature, ChangeSkinColor, SetFeaturesData} from "../avatar/builder.component";
 import AGLoading from "../common/ag-loading.component";
-import {LogError, LogWarning} from "../../utils/common.util";
+import {Delay, LogError, LogWarning} from "../../utils/common.util";
 import {UpdateDocObject} from "../../utils/firebase.util";
 import {FirestoreLocation} from "../../enums/firebase.enum";
-import Layout from "./_layout.component";
+import AGButton from "../common/ag-button.component";
 
 enum RangeType {
   Single,
@@ -18,6 +18,7 @@ enum RangeType {
   MinToMax,
 }
 
+let _reachedEnd: boolean = false;
 let _isRange: boolean = true;
 let _start: Map<number, number> | undefined;
 let _end: Map<number, number> | undefined;
@@ -153,18 +154,23 @@ function NextIteration() {
 }
 
 function LowerIteration(index: number) {
-  if (index < 0)
+  if (index < 0) {
+    _reachedEnd = true;
     return void LogWarning(Module.CollectionComponent, "Reached end of the line");
+  }
   
   const current = _currentIteration?.get(index);
-  const max = _maxIndexValues.get(index);
+  const max = _end?.get(index);
   if (current == undefined || max == undefined)
     return void LogError(Module.CollectionComponent, "Missing current and max index values!");
   
   if (current < max) {
     _currentIteration?.set(index, max + 1);
   } else {
-    _currentIteration?.set(index, 0);
+    const min = _start?.get(index);
+    if(min == undefined) return void LogError(Module.CollectionComponent, "Missing min index value!");
+    
+    _currentIteration?.set(index, min);
     LowerIteration(index - 1);
   }
 }
@@ -223,6 +229,20 @@ async function ReadjustAllFeatureIndexes(featureList: FeatureBasic[], campaign: 
   await UpdateNewIndexesOnDB(campaign);
 }
 
+function IndexValuesToString(indexValues: Map<number, number> | undefined) {
+  let result = '';
+  
+  if (indexValues != undefined) {
+    for (let i = 0; i < indexValues.size; i++) {
+      const value = indexValues.get(i);
+      result += `-${value ?? ''}`;
+    }
+    result = result.substring(1);
+  }
+  
+  return result;
+}
+
 interface AvatarCollectionProps {
   start: string | undefined;
   end: string | undefined;
@@ -236,7 +256,12 @@ interface AvatarCollectionProps {
 
 export default function AvatarCollection({start, end, single, campaign, avatarBasePath, featureList, skinColor}: AvatarCollectionProps) {
   const [loading, setLoading] = useState<boolean>(true);
+  const [uiEnd, setUiEnd] = useState<string>('');
+  
+  const doCollection = useRef<boolean>(false);
+  const uiStart = useRef<string>('');
   const isDoable = avatarBasePath !== '' || featureList.length > 0;
+  const currentIteration: string = _currentIteration == undefined ? '' : IndexValuesToString(_currentIteration);
 
   useEffect(() => {
     const componentDidMount = async () => {
@@ -252,6 +277,10 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
       .catch(err => console.error(err));
   }, []);
   
+  useEffect(() => {
+    console.log('CurrentIteration: ', currentIteration);
+  }, [currentIteration]);
+  
   async function onCollectionReady() {
     await ReadjustAllFeatureIndexes(featureList, campaign);
     // Get size from amount of features
@@ -262,10 +291,21 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
     SetMaxIndexValues(featureList);
 
     IsRange(start, end, single, size);
+    UpdateUi();
 
     NextIteration();
     await SetFeaturesData(featureList);
     await onRenderCurrentIteration();
+    await ChangeSkinColor(skinColor);
+  }
+  
+  function UpdateUi() {
+    const newStart = IndexValuesToString(_start);
+    const newEnd = IndexValuesToString(_end);
+    
+    console.log('SomeText: ', newStart, newEnd, _start, _end);
+    uiStart.current = newStart;
+    setUiEnd(newEnd);
   }
 
   async function getFeatureList(featureList: FeatureBasic[]) {
@@ -312,28 +352,66 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
       _animationListData = animationData.value;
   }
 
+  async function onExport() {
+    console.log("Doing export!");
+  }
+
+  async function processSingle() {
+    await onRenderCurrentIteration();
+    await onExport();
+    NextIteration();
+  }
+
+  async function onStartCollection() {
+    while (!_reachedEnd && doCollection.current) {
+      // await processSingle();
+      console.log("Doing while", _reachedEnd, doCollection.current);
+      await Delay(1000);
+    }
+  }
+  
+  function onClickDoSingle() {
+    void processSingle();
+  }
+  
   function onClickDoCollection() {
+    console.log('Pressed start')
+    if (doCollection.current) return;
     
+    doCollection.current = true;
+    void onStartCollection();
   }
   
-  function onDoOne() {
-    
+  function onClickStopCollection() {
+    console.log('Pressed stop')
+    doCollection.current = false;
   }
   
-  function onExport() {
-    
+  function mahUi() {
+    return (
+      <>
+        <div>
+          <p>Info</p>
+          <p>Current: <span>{currentIteration}</span></p>
+          <p>Start: <span>{uiStart.current}</span></p>
+          <p>End: <span>{uiEnd}</span></p>
+        </div>
+        <AGButton onClickEvent={() => onClickDoCollection()}>Start</AGButton>
+        <AGButton onClickEvent={() => onClickStopCollection()}>Stop</AGButton>
+        <AGButton onClickEvent={() => onClickDoSingle()}>Single</AGButton>
+      </>
+    );
   }
 
   return (
     <>
       <AGLoading loading={loading} transparency />
       {isDoable ?
-        <Layout setUserInfo={() => {}}
-                noCampaign
-                setCurrentCampaign={() => {}} >
+        <>
+          {mahUi()}
           <AvatarBuilder avatarBasePath={avatarBasePath}
                          onReady={() => onCollectionReady()}/>
-        </Layout>
+        </>
         :
         <h1>Missing info</h1>
       }
