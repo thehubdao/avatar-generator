@@ -18,7 +18,11 @@
             normal: '#54575C',
             dark: '#111111'
           },
-          bg: '#F5F7FF'
+          bg: '#F5F7FF',
+          purple: '#7f3eae',
+          orange: '#d85b00',
+          blue: '#006cad',
+          light: 'rgba(255,255,255,0.4)'
         },
         boxShadow: {
           'flat-soft': '2px 2px 4px #E9ECF6, -2px -2px 4px #ffffff',
