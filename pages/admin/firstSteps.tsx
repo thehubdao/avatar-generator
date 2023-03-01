@@ -11,10 +11,10 @@ import {GetCurrentUserInfo} from "../../utils/firebase.util";
 export default function FirstStepsPage() {
   const [userInfo, setUserInfo] = useState<UserInterface>();
   
-  useEffect(() => {
-    if(userInfo != undefined && userInfo.campaign.length > 0)
-      void GoToPage(PageLocation.Admin);
-  }, [userInfo]);
+  // useEffect(() => {
+  //   if(userInfo != undefined && userInfo.campaign.length > 0)
+  //     void GoToPage(PageLocation.Admin);
+  // }, [userInfo]);
 
   async function onCampaignCreated(didCreate: boolean) {
     if (didCreate) {
@@ -32,7 +32,6 @@ export default function FirstStepsPage() {
               userInfo={userInfo}
               noCampaign
               setCurrentCampaign={() => void {}}>
-        <AGText type="th1">First Steps</AGText>
         <CampaignAdd onCampaignCreated={(flag) => void onCampaignCreated(flag)}/>
       </Layout>
     </>
