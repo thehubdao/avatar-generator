@@ -22,6 +22,7 @@
           purple: '#7f3eae',
           orange: '#d85b00',
           blue: '#006cad',
+          red: '#fa5953',
           light: 'rgba(255,255,255,0.4)'
         },
         boxShadow: {
