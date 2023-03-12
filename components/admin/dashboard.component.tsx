@@ -19,6 +19,7 @@ import CampaignAdd from "./campaign/add.component";
 
 // Icons
 import { AiOutlineLink } from 'react-icons/ai';
+import Header from "./header.component";
 
 //#endregion Components
 
@@ -190,6 +191,7 @@ export default function Dashboard({ userRole, campaignList }: DashboardProps) {
 
   return (
     <div>
+      <Header backBtn={!viewDashboard} backClickHandler={() => setviewDashboard(true)}/>
       {viewDashboard ?
         <>
           <h1 className="font-humane text-9xl text-gray-normal">CAMPAIGNS</h1>
