@@ -5,6 +5,7 @@
   children?: string | JSX.Element;
   form?: boolean;
   nm?: boolean;
+  selected?: boolean;
   fit?: boolean;
   tooltip?: string;
 }
@@ -17,7 +18,7 @@ interface AGButtonState {
   side: string;
 }
 
-export default function AGButton({type, align, form, nm, fit, onClickEvent, tooltip, children}: AGButtonProps) {
+export default function AGButton({type, align, form, nm, selected, fit, onClickEvent, tooltip, children}: AGButtonProps) {
   const vD: AGButtonState = {
     ...getBtnType(),
     side: getSide()
@@ -73,13 +74,13 @@ export default function AGButton({type, align, form, nm, fit, onClickEvent, tool
       {
         form ?
           <button type="submit"
-                  className={`mx-2 w-auto min-h-[32px] my-auto rounded py-1 border-1 ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor} ${nm ? 'shadow-flat-hard rounded-full':''} ${fit ? 'w-fit':'min-w-[100px]'}`}
+                  className={`mx-2 w-auto min-h-[32px] my-auto rounded py-1 border-1 ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor} ${nm ? 'shadow-flat-hard rounded-full':''} ${selected ? 'shadow-inset-hard rounded-full':''} ${fit ? 'w-fit':'min-w-[100px]'}`}
                   onClick={onClickEvent} title={tooltip}>
             <div className='px-4'>{children}</div>
           </button>
           :
           <button
-            className={`mx-2 w-auto min-h-[32px] my-auto rounded py-1 border-1 cursor-pointer ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor} ${nm ? 'shadow-flat-hard rounded-full':''} ${fit ? 'w-fit':'min-w-[100px]'}`}
+            className={`mx-2 w-auto min-h-[32px] my-auto rounded py-1 border-1 cursor-pointer ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor} ${nm ? 'shadow-flat-hard rounded-full':''} ${selected ? 'shadow-inset-hard rounded-full':''} ${fit ? 'w-fit':'min-w-[100px]'}`}
             onClick={onClickEvent} title={tooltip}>
             <div className='px-2'>{children}</div>
           </button>
