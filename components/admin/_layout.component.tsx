@@ -2,7 +2,6 @@
 import {GetCurrentUserInfo, HandleNotLoggedIn} from "../../utils/firebase.util";
 import {UserInterface} from "../../interfaces/firebase.interface";
 import AGLoading from "../common/ag-loading.component";
-import Header from "./header.component";
 
 interface LayoutProps {
   children: JSX.Element | JSX.Element[] | boolean;
@@ -51,7 +50,6 @@ export default function Layout({
   return (
     <>
       <AGLoading loading={loading} transparency />
-      <Header />
       <div className="min-h-screen pt-[88px] px-5 bg-bg">
         { !loading &&
           children
