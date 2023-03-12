@@ -7,6 +7,7 @@ import AGText from "../../../components/common/ag-text.component";
 import { AdminComponents } from "../../../enums/common.enum";
 import { ChangeComponentFunction } from "../../../interfaces/common.interface";
 import { AccessoryInterface, AnimationInterface, FeatureInterface } from "../../../interfaces/api.interface";
+import { CampaignParameters } from '../../../interfaces/common.interface'
 import {
   AccessoryInterfaceProps,
   AnimationInterfaceProps,
@@ -15,7 +16,7 @@ import {
 } from "../../../constants/obj-props.constant";
 
 // Icons
-import { AiOutlineLink, AiOutlineEye, AiOutlineEdit, AiOutlineDelete } from "react-icons/ai";
+import { AiOutlineLink, AiOutlineEye, AiOutlineEdit, AiOutlineDelete, AiOutlineHome } from "react-icons/ai";
 
 interface AssetListProps {
   campaign?: string;
@@ -23,7 +24,7 @@ interface AssetListProps {
 }
 
 interface ThumbnailProps {
-  opt: FeatureInterface | AccessoryInterface | AnimationInterface;
+  opt: FeatureInterface | AccessoryInterface | AnimationInterface | CampaignParameters;
 }
 
 function Thumbnail({opt}: ThumbnailProps) {
@@ -40,11 +41,11 @@ function Thumbnail({opt}: ThumbnailProps) {
     <>
       {imageUrl == undefined ?
         <div className='w-[192px] h-[192px] rounded-md overflow-hidden flex justify-center items-center bg-gray-700 blur-md'>
-          <Image src={'/resources/images/image.png'} width={192} height={192} alt={opt.name}/>
+          <Image src={'/resources/images/image.png'} width={192} height={192} alt={opt.name ?? 'thumbnail'}/>
         </div> :
         <div className='w-[192px] h-[192px] rounded-md overflow-hidden flex justify-center items-center bg-gray-700'>
           <Image placeholder="blur" blurDataURL="/resources/images/image.png"
-                 src={imageUrl} width={192} height={192} alt={opt.name}/>
+                 src={imageUrl} width={192} height={192} alt={opt.name ?? 'thumbnail'}/>
         </div>
       }
     </>
@@ -53,7 +54,7 @@ function Thumbnail({opt}: ThumbnailProps) {
 
 export default function AssetList({ campaign, changeComponent }: AssetListProps) {
   const [dbLocation, setDbLocation] = useState<FirestoreLocation>(FirestoreLocation.Parameters);
-  const [dbData, setDbData] = useState<(FeatureInterface | AccessoryInterface | AnimationInterface)[]>();
+  const [dbData, setDbData] = useState<(FeatureInterface | AccessoryInterface | AnimationInterface | CampaignParameters)[]>();
   const [dbHeaders, setDbHeaders] = useState<string[]>();
 
   const locationOptions: string[] = Object.keys(FirestoreLocation);
@@ -73,7 +74,7 @@ export default function AssetList({ campaign, changeComponent }: AssetListProps)
 
   const getDbInfo = useCallback(async (location: FirestoreLocation = dbLocation) => {
     // const data = await SessionDBInfo(location, campaign, forceUpdate);
-    const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, campaign);
+    const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface | CampaignParameters>(location, campaign);
     setDbData(data);
   }, [dbLocation, campaign]);
 
@@ -99,12 +100,15 @@ export default function AssetList({ campaign, changeComponent }: AssetListProps)
   function renderButtonOptions() {
     return locationOptions.map(x => {
       const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
-      return <div className={`${x === 'Parameters' ? 'order-1':''} inline`} key={x}>
-        <AGButton nm onClickEvent={() => void changeDbLocation(val)}>
+      return <div className={`${x === 'Parameters' ? 'order-1 text-2xl':'order-2'}`} key={x}>
+        <AGButton nm selected={dbLocation == val ? true : false} fit={x === 'Parameters' ? true : false} onClickEvent={() => void changeDbLocation(val)}>
           <div className={`flex items-center gap-2 p-2`}>
-            <div className={`w-2 h-2 rounded-full ${dbLocation == val ? ' bg-green-400' : 'bg-gray-light'}`}></div>
             <div className={`uppercase ${dbLocation == val ? ' font-medium' : ''}`}>
-              {x}
+              {x === 'Parameters' ?
+                <AiOutlineHome />
+                :
+                x
+              }
             </div>
           </div>
         </AGButton>
@@ -129,54 +133,68 @@ export default function AssetList({ campaign, changeComponent }: AssetListProps)
 
   function renderInfo() {
     if (dbData && dbHeaders) {
+      let id = 0;
       // eslint-disable-next-line no-console
-      console.log("dbData: ", dbData)
-      return dbData.map(datum => {
-        return (
-          <div key={datum['id']} className="w-56 p-4 shadow-flat-soft m-4 bg-light hover:shadow-flat-hard transition-all duration-300">
-            {/* DATA */}
-            <div className="text-left">
-              {datum.name && <p className="text-xl font-medium uppercase overflow-hidden text-ellipsis whitespace-nowrap shadow-inset-medium max-w-full py-1 px-3 rounded-md">{datum.name}</p>}
-              {datum.type && <p className="text-sm overflow-hidden text-ellipsis whitespace-nowrap my-2"><span className="font-medium">Type:</span> {datum.type}</p>}
-            </div>
-            {/* THUMBNAIL */}
-            <div>
-              <Thumbnail opt={datum}/>
-            </div>
-            {/* ACTION BUTTONS */}
-            <div className="flex justify-between text-xl pt-6">
-              <div className="flex gap-2">
-                <button className="shadow-inset-hard p-2 rounded-full hover:shadow-inset-soft hover:text-blue transition-all duration-300"
-                title={datum.path}
-                onClick={() => {copyToClipboard(datum.path)}}>
-                  <AiOutlineLink />
-                </button>
-                <div className="shadow-inset-hard p-2 rounded-full text-gray-light cursor-not-allowed">
-                  <AiOutlineEye />
+      console.log("data: ", dbData);
+      if (dbLocation !== '/') {
+        return dbData.map(datum => {
+          id += 1;
+          return (
+            <div key={id} className="w-56 p-4 shadow-flat-soft m-4 bg-light hover:shadow-flat-hard transition-all duration-300">
+              {/* DATA */}
+              <div className="text-left">
+                {datum.name && <p className="text-xl font-medium uppercase overflow-hidden text-ellipsis whitespace-nowrap shadow-inset-medium max-w-full py-1 px-3 rounded-md">{datum.name}</p>}
+                {datum.type && <p className="text-sm overflow-hidden text-ellipsis whitespace-nowrap my-2"><span className="font-medium">Type:</span> {datum.type}</p>}
+              </div>
+              {/* THUMBNAIL */}
+              <div>
+                <Thumbnail opt={datum}/>
+              </div>
+              {/* ACTION BUTTONS */}
+              <div className="flex justify-between text-xl pt-6">
+                <div className="flex gap-2">
+                  <button className="shadow-inset-hard p-2 rounded-full hover:shadow-inset-soft hover:text-blue transition-all duration-300"
+                  title={datum.path}
+                  onClick={() => {copyToClipboard(datum.path)}}>
+                    <AiOutlineLink />
+                  </button>
+                  <div className="shadow-inset-hard p-2 rounded-full text-gray-light cursor-not-allowed">
+                    <AiOutlineEye />
+                  </div>
+                </div>
+                <div className="flex justify-end items-center gap-2">
+                  <button className="shadow-inset-hard p-2 rounded-full hover:shadow-inset-soft hover:text-purple transition-all duration-300"
+                  title="Edit"
+                    onClick={() => changeComponent(AdminComponents.AssetModify, {
+                      docLocation: `${dbLocation}${datum.id != undefined ? '/' + datum.id : ''}`
+                    })}>
+                    <AiOutlineEdit />
+                  </button>
+                  {dbLocation !== FirestoreLocation.Parameters &&
+                    <button className="shadow-inset-hard p-2 rounded-full hover:shadow-inset-soft hover:text-orange transition-all duration-300"
+                    title="Delete"
+                      onClick={
+                        () => void deleteDoc(datum.id)
+                      }>
+                      <AiOutlineDelete />
+                    </button>
+                  }
                 </div>
               </div>
-              <div className="flex justify-end items-center gap-2">
-                <button className="shadow-inset-hard p-2 rounded-full hover:shadow-inset-soft hover:text-purple transition-all duration-300"
-                title="Edit"
-                  onClick={() => changeComponent(AdminComponents.AssetModify, {
-                    docLocation: `${dbLocation}${datum.id != undefined ? '/' + datum.id : ''}`
-                  })}>
-                  <AiOutlineEdit />
-                </button>
-                {dbLocation !== FirestoreLocation.Parameters &&
-                  <button className="shadow-inset-hard p-2 rounded-full hover:shadow-inset-soft hover:text-orange transition-all duration-300"
-                  title="Delete"
-                    onClick={
-                      () => void deleteDoc(datum.id)
-                    }>
-                    <AiOutlineDelete />
-                  </button>
-                }
-              </div>
             </div>
-          </div>
-        )
-      });
+          )
+        });
+      } else {
+        return dbData.map(data => {
+          return (
+            <>
+              <div key={data.armature}>
+                {data['owner']}
+              </div>
+            </>
+          )
+        })
+      }
     }
   }
 
@@ -188,13 +206,9 @@ export default function AssetList({ campaign, changeComponent }: AssetListProps)
             <>
               <div className="flex flex-wrap justify-between">
                 {
-                  dbLocation === '/' ?
-                  <div>parameters</div>
-                  :
                   renderInfo()
                 }
               </div>
-              <div>{dbLocation}</div>
             </>
             : <AGText type="th2" side="center">No data to show</AGText>
         }
