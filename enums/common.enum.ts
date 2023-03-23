@@ -59,6 +59,7 @@ export enum Module {
   Editor = 'AvatarEditor',
   CommonUtil = 'CommonUtil',
   CollectionComponent = 'CollectionComponent',
+  ExporterUtil = 'ExporterUtil',
 }
 
 export enum EmailResult {
