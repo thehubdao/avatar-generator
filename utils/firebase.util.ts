@@ -295,8 +295,8 @@ export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlo
 
 export async function DeleteDoc(location: FirestoreLocation, docId: string, campaign?: string) {
   const {deleteDoc, doc} = await import('@firebase/firestore');
-  const campaignLocation = campaign ? `${campaign}/` : '';
-  await deleteDoc(doc(await FirebaseUtil.Instance().DB(), `${campaignLocation}${location}/${docId}`))
+  
+  await deleteDoc(doc(await FirebaseUtil.Instance().DB(), `${CampaignLocation(campaign)}${location}/${docId}`))
   return docId;
 }
 

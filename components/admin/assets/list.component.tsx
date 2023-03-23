@@ -85,7 +85,7 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
   }
 
   async function deleteDoc(docId: string) {
-    const result = await DeleteDoc(dbLocation, docId);
+    const result = await DeleteDoc(dbLocation, docId, campaign);
     alert(`Doc "${result}" has been deleted.`);
     await getDbInfo();
   }
