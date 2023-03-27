@@ -25,6 +25,7 @@ import {AddOrRemoveSlash, LogError, RandomPassword} from "./common.util";
 import {Result} from "../interfaces/common.interface";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
 import {SessionUserInfo} from "./common/session.util";
+import {ParameterNameType} from "../types/firebase.type";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -228,7 +229,7 @@ export async function GetFile(path: string, campaign?: string) {
   return stream.arrayBuffer();
 }
 
-export async function GetParameter<T>(campaign: string |  undefined, parameter: string | CampaignParameterName): Promise<T | undefined> {
+export async function GetParameter<T>(campaign: string | undefined, parameter: ParameterNameType): Promise<T | undefined> {
   if(parameter === CampaignParameterName.Missing) return undefined;
 
   const {doc, getDoc} = await import('@firebase/firestore');
@@ -236,12 +237,12 @@ export async function GetParameter<T>(campaign: string |  undefined, parameter: 
   const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}` : FirestoreGlobalLocation.ParametersV2;
   const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
   const leDoc = await getDoc(docRef);
-  
-    if (parameter !== CampaignParameterName.All) {
-      return leDoc.get(parameter as string) as T;
-    } else {
-      return leDoc.data() as T;
-    }
+
+  if (parameter !== CampaignParameterName.All) {
+    return leDoc.get(parameter as string) as T;
+  } else {
+    return leDoc.data() as T;
+  }
 }
 
 export async function GetParameters<T>(campaign?: string, ...parameters: (string | CampaignParameterName)[]): Promise<T[]> {
