@@ -4,37 +4,26 @@ import {GetParameter} from "../../../utils/firebase.util";
 import {FirestoreParameters} from "../../../enums/firebase.enum";
 import {CampaignParameters} from "../../../interfaces/common.interface";
 import {CampaignParameterName} from "../../../enums/common.enum";
-import {useEffect} from "react";
 import Layout from "../../../components/admin/_layout.component";
 
 interface AvatarCollectionPageProps {
   isCampaign: boolean;
   campaign: string;
   campaignParams: CampaignParameters | null;
-  start: string | undefined;
-  end: string | undefined;
-  single: string | undefined;
 }
 
-export default function AvatarCollectionPage({isCampaign, campaign, campaignParams, start, end, single}: AvatarCollectionPageProps) {
-  useEffect(() => {
-    console.log('Page', isCampaign, campaign, campaignParams, start, end, single);
-  }, []);
-  
+export default function AvatarCollectionPage({isCampaign, campaign, campaignParams}: AvatarCollectionPageProps) {
   return (
     <>
       { isCampaign ?
         <Layout setUserInfo={() => {}}
                 noCampaign
                 setCurrentCampaign={() => {}} >
-          <AvatarCollection start={start}
-                            end={end}
-                            single={single}
-                            campaign={campaign}
+          <AvatarCollection campaign={campaign}
                             avatarBasePath={campaignParams?.armature ?? ''}
                             featureList={campaignParams?.features ?? []}
                             defaultAnimation={campaignParams?.config?.defAnimation}
-                            skinColor={campaignParams?.config?.defSkinColor ?? '00ffff'}
+                            skinColor={campaignParams?.config?.defSkinColor ?? 'F2A47E'}
           />
         </Layout>
         :
@@ -45,7 +34,7 @@ export default function AvatarCollectionPage({isCampaign, campaign, campaignPara
 }
 
 export const getServerSideProps: GetServerSideProps<AvatarCollectionPageProps> = async (context) => {
-  const {collection, start, end, single} = context.query;
+  const {collection} = context.query;
 
   const leCampaign = collection as string;
 
@@ -60,10 +49,7 @@ export const getServerSideProps: GetServerSideProps<AvatarCollectionPageProps> =
   const returnProps: AvatarCollectionPageProps = {
     isCampaign,
     campaign: leCampaign,
-    campaignParams: campaignParameters ?? null,
-    start: start as string ?? null,
-    end: end as string ?? null,
-    single: single as string ?? null,
+    campaignParams: campaignParameters ?? null
   };
 
   return {

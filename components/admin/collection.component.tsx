@@ -1,27 +1,28 @@
 import {useEffect, useRef, useState} from "react";
-import {GlobalValues, Module} from "../../enums/common.enum";
+import {Module} from "../../enums/common.enum";
 import {FeatureBasic} from "../../interfaces/common.interface";
 import {AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
 import {GetAnimationListByCampaign, GetAssetsListByCampaign} from "../../utils/api.util";
-import AvatarBuilder, {ChangeFeature, ChangeSkinColor, SetFeaturesData} from "../avatar/builder.component";
+import AvatarBuilder, {
+  ChangeFeature,
+  ChangeSkinColor,
+  ChangeStartAnimation,
+  GetAvatarGLB,
+  SetFeaturesData
+} from "../avatar/builder.component";
 import AGLoading from "../common/ag-loading.component";
 import {Delay, LogError, LogWarning} from "../../utils/common.util";
 import {UpdateDocObject} from "../../utils/firebase.util";
 import {FirestoreLocation} from "../../enums/firebase.enum";
 import AGButton from "../common/ag-button.component";
-
-enum RangeType {
-  Single,
-  StartToEnd,
-  StartToMax,
-  MinToEnd,
-  MinToMax,
-}
+import {TakeCanvasPicture} from "../avatar/viewer.component";
+import {SaveFile} from "../../utils/exporter.util";
 
 let _reachedEnd: boolean = false;
-let _isRange: boolean = true;
 let _start: Map<number, number> | undefined;
 let _end: Map<number, number> | undefined;
+let _maxCombination: number = 0;
+let _multValues: number[] | undefined;
 
 let _currentIteration: Map<number, number> | undefined;
 const _minIndexValues: Map<number, number> = new Map();
@@ -31,97 +32,11 @@ const _featureOptionListData: Map<number, FeatureInterface[] | undefined> = new 
 let _animationListData: AnimationInterface[] | undefined;
 const _featureOptionToUpdate: Map<string, FeatureInterface> = new Map();
 
-function GetRangeType(single: string | undefined, start: string | undefined, end: string | undefined) {
-  if (single != undefined)
-    return RangeType.Single;
-
-  if (start != undefined) {
-    if (end != undefined)
-      return RangeType.StartToEnd;
-    else
-      return RangeType.StartToMax;
-  }
-
-  if (end != undefined)
-    return RangeType.MinToEnd;
-
-  return RangeType.MinToMax;
-}
-
-function IsRange(single: string | undefined, start: string | undefined, end: string | undefined, size: number) {
-  const rangeType = GetRangeType(single, start, end);
-  console.log('RangeType', RangeType[rangeType]);
-  switch (rangeType) {
-    case RangeType.Single:
-      const singleValues = GetIndexValues(single, size);
-      if (singleValues.valid) {
-        _start = new Map(singleValues.map);
-        _end = singleValues.map;
-        _isRange = false;
-      }
-      break;
-    case RangeType.StartToEnd:
-      const startValuesSTE = GetIndexValues(start, size);
-      const endValuesSTE = GetIndexValues(end, size);
-      if (startValuesSTE.valid && endValuesSTE.valid) {
-        _start = startValuesSTE.map;
-        _end = endValuesSTE.map;
-        _isRange = true;
-      }
-      break;
-    case RangeType.StartToMax:
-      const startValuesSTM = GetIndexValues(start, size);
-      if (startValuesSTM.valid) {
-        _start = startValuesSTM.map;
-        _end = _maxIndexValues;
-        _isRange = true;
-      }
-      break;
-    case RangeType.MinToEnd:
-      const endValuesMTE = GetIndexValues(end, size);
-      if (endValuesMTE.valid) {
-        _start = _minIndexValues;
-        _end = endValuesMTE.map;
-        _isRange = true;
-      }
-      break;
-    case RangeType.MinToMax:
-      _start = _minIndexValues;
-      _end = _maxIndexValues;
-      _isRange = true;
-      break;
-  }
-  
-  console.log('Ranges', _start, _end, _isRange);
-}
-
-function GetIndexValues(input: string | undefined, size: number): { map: Map<number, number> | undefined, valid: boolean } {
-  if (input == undefined) return {map: undefined, valid: false};
-
-  const result = new Map<number, number>();
-  const indexArray = input.split(GlobalValues.CollectorIndexSeparator);
-
-  for (const [index, value] of indexArray.entries()) {
-    const valueNum = Number(value);
-    if (valueNum >= 0) {
-      result.set(index, valueNum | 0);
-    }
-  }
-
-  return IsValidIndexValues(result, size);
-}
-
-function IsValidIndexValues(indexValues: Map<number, number>, size: number) {
-  if (indexValues.size !== size) return {map: undefined, valid: false};
-
-  for (const [key, value] of indexValues.entries()) {
-    const maxVal = _maxIndexValues.get(key);
-    if (maxVal == undefined || maxVal < value) {
-      return {map: undefined, valid: false};
-    }
-  }
-
-  return {map: indexValues, valid: true};
+// TODO: move logic that can be call anywhere to own util file
+function InitValues() {
+  _start = new Map(_minIndexValues);
+  _end = new Map(_maxIndexValues);
+  NextIteration(true);
 }
 
 function SetMinIndexValues(size: number) {
@@ -129,7 +44,7 @@ function SetMinIndexValues(size: number) {
     _minIndexValues.set(i, 0);
   }
   
-  console.log('MinValues', _minIndexValues);
+  // console.log('MinValues', _minIndexValues);
 }
 
 function SetMaxIndexValues(featureList: FeatureBasic[]) {
@@ -139,18 +54,18 @@ function SetMaxIndexValues(featureList: FeatureBasic[]) {
       _maxIndexValues.set(feature.index, optionList.length);
   }
   
-  console.log('MaxValues', _maxIndexValues);
+  // console.log('MaxValues', _maxIndexValues);
 }
 
-function NextIteration() {
-  if (_currentIteration == undefined) {
+function NextIteration(forceStart: boolean = false) {
+  if (_currentIteration == undefined || forceStart) {
     _currentIteration = new Map(_start);
-    console.log('CurrentIteration: ', _currentIteration);
+    // console.log('CurrentIteration first: ', _currentIteration);
     return;
   }
   
   LowerIteration(_currentIteration.size - 1);
-  console.log('CurrentIteration: ', _currentIteration);
+  // console.log('CurrentIteration follow: ', _currentIteration);
 }
 
 function LowerIteration(index: number) {
@@ -161,11 +76,12 @@ function LowerIteration(index: number) {
   
   const current = _currentIteration?.get(index);
   const max = _end?.get(index);
+  // console.log('current & max', current, max);
   if (current == undefined || max == undefined)
     return void LogError(Module.CollectionComponent, "Missing current and max index values!");
   
   if (current < max) {
-    _currentIteration?.set(index, max + 1);
+    _currentIteration?.set(index, current + 1);
   } else {
     const min = _start?.get(index);
     if(min == undefined) return void LogError(Module.CollectionComponent, "Missing min index value!");
@@ -208,7 +124,7 @@ function ReadjustFeatureIndexes(featureList: FeatureInterface[] | undefined) {
     }
   }
   
-  console.log('EndValues', _featureOptionListData, _featureOptionToUpdate, orderedList, missingIndexList);
+  // console.log('EndValues', _featureOptionListData, _featureOptionToUpdate, orderedList, missingIndexList);
 }
 
 async function UpdateNewIndexesOnDB(campaign: string) {
@@ -243,10 +159,83 @@ function IndexValuesToString(indexValues: Map<number, number> | undefined) {
   return result;
 }
 
+function MaxCombinationNum() {
+  let result = 1;
+
+  for (let i = 0; i < _maxIndexValues.size; i++) {
+    const value = _maxIndexValues.get(i);
+    result *= value ?? 1;
+  }
+
+  _maxCombination = result;
+  return result;
+}
+
+function IndexValuesToNumber(indexValues: Map<number, number> | undefined, maxValues: Map<number, number> = _maxIndexValues) {
+  if (indexValues == undefined)
+    return void LogError(Module.CollectionComponent, "No indexValues to work on!");
+  
+  if (indexValues.size !== maxValues.size)
+    return void LogError(Module.CollectionComponent, "Error parsing indexValues to number, out of range!");
+  
+  const multNums = GetMultiplyNums(maxValues);
+  if (multNums == undefined)
+    return void LogError(Module.CollectionComponent, "Error getting misshaped values for multiply nums!");
+  
+  let result = 0;
+  for (let i = 0; i < maxValues.size; i++) {
+    const indexVal = indexValues.get(i) ?? 0;
+    const newVal = indexVal * multNums[i + 1];
+    
+    result += newVal;
+  }
+  
+  return result;
+}
+
+function NumberToIndexValues(num: number, maxValues: Map<number, number> = _maxIndexValues) {
+  if (num < 0 || num > _maxCombination)
+    return void LogError(Module.CollectionComponent, "Number out of range!");
+  
+  const multNums = GetMultiplyNums(maxValues);
+  if (multNums == undefined)
+    return void LogError(Module.CollectionComponent, "Error getting misshaped values for multiply nums!");
+  
+  const result = new Map<number, number>();
+  let currentValue = num;
+  
+  for (let i = 0; i < maxValues.size; i++) {
+    const newIndexValue = (currentValue / multNums[i + 1]) | 0;
+    currentValue -= newIndexValue * multNums[i + 1];
+    result.set(i, newIndexValue);
+  }
+  
+  // console.log('CheckThis: ', _maxCombination, maxValues, multNums, IndexValuesToString(result));
+  return result;
+}
+
+function GetMultiplyNums(maxValues: Map<number, number>) {
+  if (_multValues != undefined)
+    return _multValues;
+  
+  const multNums: number[] = [];
+  for (let i = maxValues.size - 1; i > 0; i--) {
+    const multi = multNums[i + 1] ?? 1;
+    const val = maxValues.get(i);
+    // console.log('Iter: ', i, multi, val);
+    
+    if (val == undefined) return undefined;
+    
+    multNums[i] = val * multi;
+  }
+  multNums[maxValues.size] = 1;
+  
+  // console.log('MultiNums: ', multNums);
+  _multValues = {...multNums};
+  return multNums;
+}
+
 interface AvatarCollectionProps {
-  start: string | undefined;
-  end: string | undefined;
-  single: string | undefined;
   campaign: string;
   avatarBasePath: string;
   defaultAnimation: string | undefined;
@@ -254,34 +243,32 @@ interface AvatarCollectionProps {
   skinColor: string;
 }
 
-export default function AvatarCollection({start, end, single, campaign, avatarBasePath, featureList, skinColor}: AvatarCollectionProps) {
+export default function AvatarCollection({
+                                           campaign,
+                                           avatarBasePath,
+                                           featureList,
+                                           skinColor,
+                                           defaultAnimation}: AvatarCollectionProps) {
   const [loading, setLoading] = useState<boolean>(true);
-  const [uiEnd, setUiEnd] = useState<string>('');
+  const [maxCombination, setMaxCombination] = useState<number>(0);
+  const [currentIteration, setCurrentIteration] = useState<number>();
   
   const doCollection = useRef<boolean>(false);
-  const uiStart = useRef<string>('');
   const isDoable = avatarBasePath !== '' || featureList.length > 0;
-  const currentIteration: string = _currentIteration == undefined ? '' : IndexValuesToString(_currentIteration);
-
-  useEffect(() => {
-    const componentDidMount = async () => {
-      await Promise.all([
-        getFeatureList(featureList),
-        getAnimationList()
-      ]);
-      
-      setLoading(false);
-    };
-    
-    componentDidMount()
-      .catch(err => console.error(err));
-  }, []);
   
-  useEffect(() => {
-    console.log('CurrentIteration: ', currentIteration);
-  }, [currentIteration]);
+  
+  // useEffect(() => {
+  //   console.log('CurrentIteration: ', currentIteration);
+  // }, [currentIteration]);
   
   async function onCollectionReady() {
+    await Promise.all([
+      getFeatureList(featureList),
+      getAnimationList()
+    ]);
+
+    setLoading(false);
+    
     await ReadjustAllFeatureIndexes(featureList, campaign);
     // Get size from amount of features
     const size = featureList?.length;
@@ -289,23 +276,16 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
     SetMinIndexValues(size);
     // Set max index values base on db information
     SetMaxIndexValues(featureList);
+    InitValues();
+    
+    setMaxCombination(MaxCombinationNum());
 
-    IsRange(start, end, single, size);
-    UpdateUi();
-
-    NextIteration();
     await SetFeaturesData(featureList);
     await onRenderCurrentIteration();
     await ChangeSkinColor(skinColor);
-  }
-  
-  function UpdateUi() {
-    const newStart = IndexValuesToString(_start);
-    const newEnd = IndexValuesToString(_end);
-    
-    console.log('SomeText: ', newStart, newEnd, _start, _end);
-    uiStart.current = newStart;
-    setUiEnd(newEnd);
+
+    const startAnimation = _animationListData?.find(a => a.name == defaultAnimation) ?? _animationListData?.at(0);
+    await ChangeStartAnimation(startAnimation?.path);
   }
 
   async function getFeatureList(featureList: FeatureBasic[]) {
@@ -323,6 +303,8 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
   }
 
   async function onRenderCurrentIteration() {
+    // console.log('Current: ', _currentIteration, currentIteration);
+    
     if (_currentIteration == undefined)
       return LogError(Module.CollectionComponent, "Missing current iteration to render!");
 
@@ -338,9 +320,9 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
         void LogWarning(Module.CollectionComponent, `Missing item on key: ${index} index: ${val}`);
         continue;
       }
-      console.log('Item', item);
+      // console.log('Item', item);
       await ChangeFeature(item.id, item.path, item.name, item.type, featureList.find(sf => sf.id === item.type), skinColor);
-      // TODO: find ways to avoid this
+      // TODO: find ways to avoid this (SetFeaturesData)
       await SetFeaturesData(featureList);
       // addReplaceAttribute(selectedFeature, name);
     }
@@ -353,19 +335,33 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
   }
 
   async function onExport() {
-    console.log("Doing export!");
+    // console.log("Doing export!");
+    // Maybe add on iframe
+    const [picturePromise, modelPromise] = await Promise.all([
+      TakeCanvasPicture(),
+      GetAvatarGLB()
+    ]);
+    
+    await SaveFile(modelPromise, 'model.glb');
+    await SaveFile(picturePromise, 'picture.png');
   }
 
   async function processSingle() {
     await onRenderCurrentIteration();
+    await Delay(2500);
     await onExport();
     NextIteration();
+    setCurrentIteration(prev => {
+      if (prev == undefined) return IndexValuesToNumber(_currentIteration);
+      return prev + 1;
+    });
   }
 
   async function onStartCollection() {
     while (!_reachedEnd && doCollection.current) {
-      // await processSingle();
-      console.log("Doing while", _reachedEnd, doCollection.current);
+      // console.log('Started process single');
+      await processSingle();
+      // console.log("Doing while", _reachedEnd, doCollection.current);
       await Delay(1000);
     }
   }
@@ -375,7 +371,7 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
   }
   
   function onClickDoCollection() {
-    console.log('Pressed start')
+    // console.log('Pressed start')
     if (doCollection.current) return;
     
     doCollection.current = true;
@@ -383,8 +379,23 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
   }
   
   function onClickStopCollection() {
-    console.log('Pressed stop')
+    // console.log('Pressed stop')
     doCollection.current = false;
+  }
+  
+  function onChangeStartValue(newVal: number) {
+    if (newVal < 0)
+      newVal = 0;
+    
+    _start = NumberToIndexValues(newVal);
+    NextIteration(true);
+  }
+  
+  function onChangeEndValue(newVal: number) {
+    if (newVal > maxCombination)
+      newVal = maxCombination;
+    
+    _end = NumberToIndexValues(newVal);
   }
   
   function mahUi() {
@@ -393,8 +404,9 @@ export default function AvatarCollection({start, end, single, campaign, avatarBa
         <div>
           <p>Info</p>
           <p>Current: <span>{currentIteration}</span></p>
-          <p>Start: <span>{uiStart.current}</span></p>
-          <p>End: <span>{uiEnd}</span></p>
+          <p>Max Combination: <span>{maxCombination}</span></p>
+          <p>Start:</p><input type="number" min={0} max={maxCombination} onChange={(e) => onChangeStartValue(e.target.valueAsNumber)} />
+          <p>End:</p><input type="number" min={0} max={maxCombination} onChange={(e) => onChangeEndValue(e.target.valueAsNumber)} />
         </div>
         <AGButton onClickEvent={() => onClickDoCollection()}>Start</AGButton>
         <AGButton onClickEvent={() => onClickStopCollection()}>Stop</AGButton>
