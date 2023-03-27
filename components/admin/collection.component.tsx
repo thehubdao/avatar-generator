@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from "react";
+import {useRef, useState} from "react";
 import {Module} from "../../enums/common.enum";
 import {FeatureBasic} from "../../interfaces/common.interface";
 import {AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
@@ -18,10 +18,10 @@ import AGButton from "../common/ag-button.component";
 import {TakeCanvasPicture} from "../avatar/viewer.component";
 import {SaveFile} from "../../utils/exporter.util";
 
-let _reachedEnd: boolean = false;
+let _reachedEnd = false;
 let _start: Map<number, number> | undefined;
 let _end: Map<number, number> | undefined;
-let _maxCombination: number = 0;
+let _maxCombination = 0;
 let _multValues: number[] | undefined;
 
 let _currentIteration: Map<number, number> | undefined;
@@ -57,7 +57,7 @@ function SetMaxIndexValues(featureList: FeatureBasic[]) {
   // console.log('MaxValues', _maxIndexValues);
 }
 
-function NextIteration(forceStart: boolean = false) {
+function NextIteration(forceStart = false) {
   if (_currentIteration == undefined || forceStart) {
     _currentIteration = new Map(_start);
     // console.log('CurrentIteration first: ', _currentIteration);
@@ -308,7 +308,7 @@ export default function AvatarCollection({
     if (_currentIteration == undefined)
       return LogError(Module.CollectionComponent, "Missing current iteration to render!");
 
-    for (const [index, val] of _currentIteration?.entries()) {
+    for (const [index, val] of _currentIteration.entries()) {
       const listData = _featureOptionListData.get(index);
       if (listData == undefined) {
         void LogWarning(Module.CollectionComponent, "Missing list data to render!");

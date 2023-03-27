@@ -16,9 +16,7 @@ export default function AvatarCollectionPage({isCampaign, campaign, campaignPara
   return (
     <>
       { isCampaign ?
-        <Layout setUserInfo={() => {}}
-                noCampaign
-                setCurrentCampaign={() => {}} >
+        <Layout noCampaign >
           <AvatarCollection campaign={campaign}
                             avatarBasePath={campaignParams?.armature ?? ''}
                             featureList={campaignParams?.features ?? []}
