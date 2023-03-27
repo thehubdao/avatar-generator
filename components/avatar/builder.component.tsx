@@ -50,7 +50,7 @@ export async function ChangeFeature(id: string, featurePath: string, name: strin
   const replaceModel = await GetWearableOption(id, featurePath);
 
   await ReplaceModelFeatureOnly(_avatar.scene.children[0], replaceModel, _featureListData[selectedFeature], selectedFeatureData, skinColor);
-  console.log('Avatar:', _avatar);
+  // console.log('Avatar:', _avatar);
 }
 
 export async function ChangeAccessory(id: string, path: string, name: string, selectedAcc: string) {
