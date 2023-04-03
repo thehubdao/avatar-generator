@@ -1,5 +1,5 @@
 import {LogError} from "../../utils/common.util";
-import {Module} from "../../enums/common.enum";
+import {GlobalValues, Module} from "../../enums/common.enum";
 import {AnimationMixer} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {GetFeaturesData, GetGltfModel} from "../../utils/importer.util";
@@ -13,7 +13,7 @@ import {
 import {GetAmbientLights, GetTestLights} from "../../utils/test-scene.util";
 import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../../interfaces/common.interface";
 import {ExportModelGlb} from "../../utils/exporter.util";
-import AvatarViewer, {AddMixer, AddToScene} from "./viewer.component";
+import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene} from "./viewer.component";
 
 
 //#region Logic
@@ -64,6 +64,17 @@ export async function ChangeStartAnimation(startAnimation: string | undefined) {
   if (_mixer == undefined) return LogError(Module.Editor, "Missing animation mixer!");
 
   await SetAnimation(_mixer, startAnimation);
+}
+
+export async function SetEnvironment(path?: string) {
+  if (path == undefined) return;
+  
+  const environment = await GetWearableOption(GlobalValues.EnvironmentId, path);
+  AddToScene(environment.scene, GlobalValues.EnvironmentId);
+}
+
+export function RemoveEnvironment() {
+  RemoveFromScene(GlobalValues.EnvironmentId);
 }
 
 export async function SetFeaturesData(selectListFeatures: BasicData[]) {
