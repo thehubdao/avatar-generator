@@ -1,129 +1,326 @@
-import {LogError} from "../../utils/common.util";
-import {Module} from "../../enums/common.enum";
-import {AnimationMixer} from "three";
+import {useEffect, useState} from "react";
+import Head from "next/head";
+import {Vector3} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {GetFeaturesData, GetGltfModel} from "../../utils/importer.util";
-import {CreateAnimationMixer, SetAnimation} from "../../utils/threejs/animation.util";
 import {
-  ChangeObjectSkinColor,
-  ReplaceModelAccessory,
-  ReplaceModelFeatureOnly,
-  TransformObject3dToToonMaterial
-} from "../../utils/model.util";
-import {GetAmbientLights, GetTestLights} from "../../utils/test-scene.util";
-import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../../interfaces/common.interface";
-import {ExportModelGlb} from "../../utils/exporter.util";
-import AvatarViewer, {AddMixer, AddToScene} from "./viewer.component";
+  BasicData,
+  FeatureBasic,
+  CampaignConfig,
+  ExportInterface,
+  LookAtVectors
+} from "../../interfaces/common.interface";
+import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
+import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../../utils/iframe.util";
+import {ExportAttributeValues, GlobalValues, Module} from "../../enums/common.enum";
+import {FilterList, LogError, RandomArrayElement} from "../../utils/common.util";
+import {GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign} from "../../utils/api.util";
+import {SaveFile} from "../../utils/exporter.util";
+import AGLoading from "../common/ag-loading.component";
+import HudComponent from "./hud.component";
+import AvatarEditor, {
+  ChangeAccessory,
+  ChangeFeature, ChangeSkinColor,
+  ChangeStartAnimation,
+  GetAvatarGLB,
+  GetWearableOption,
+  SetFeaturesData
+} from "./editor.component";
+import {ChangeCamPosition, ChangeLookAtPosition, TakeCanvasPicture} from "./viewer.component";
 
-
-//#region Logic
-
-let _avatar: GLTF | undefined;
-let _mixer: AnimationMixer | undefined;
-
-const _savedModels: Record<string, GLTF> = {};
-const _accessoryListData: Record<string, AccessoryInfoInterface> = {};
-let _featureListData: Record<string, FeatureInfoInterface> | undefined;
-
-export async function ChangeSkinColor(newSkinColor: string) {
-  if (_avatar == undefined) return LogError(Module.Editor, "Missing armature for skin color change");
-
-  await ChangeObjectSkinColor(_avatar.scene, newSkinColor);
-}
-
-export async function GetWearableOption(id: string, optionPath: string) {
-  let replaceModel: GLTF;
-  if (_savedModels[id]) {
-    replaceModel = _savedModels[id];
-  } else {
-    replaceModel = await GetGltfModel(optionPath);
-    _savedModels[id] = replaceModel;
-  }
-
-  return replaceModel;
-}
-
-export async function ChangeFeature(id: string, featurePath: string, name: string, selectedFeature: string, selectedFeatureData: BasicData | undefined, skinColor?: string) {
-  if (_avatar == undefined) return LogError(Module.Editor, "Missing armature in order to change feature");
-  if (_featureListData == undefined) return LogError(Module.Editor, "Missing feature list data");
-
-  const replaceModel = await GetWearableOption(id, featurePath);
-
-  await ReplaceModelFeatureOnly(_avatar.scene.children[0], replaceModel, _featureListData[selectedFeature], selectedFeatureData, skinColor);
-  // console.log('Avatar:', _avatar);
-}
-
-export async function ChangeAccessory(id: string, path: string, name: string, selectedAcc: string) {
-  if (_avatar == undefined) return LogError(Module.Editor, "Missing armature in order to change accessory!");
-
-  const replaceModel = await GetWearableOption(id, path);
-  await ReplaceModelAccessory(_avatar.scene.children[0], replaceModel, _accessoryListData, selectedAcc);
-}
-
-export async function ChangeStartAnimation(startAnimation: string | undefined) {
-  if (_mixer == undefined) return LogError(Module.Editor, "Missing animation mixer!");
-
-  await SetAnimation(_mixer, startAnimation);
-}
-
-export async function SetFeaturesData(selectListFeatures: BasicData[]) {
-  if (_avatar == undefined) return LogError(Module.Editor, "Missing armature!");
-
-  _featureListData = await GetFeaturesData(_avatar.scene, selectListFeatures);
-}
-
-export async function GetAvatarGLB() {
-  if (_avatar == undefined) return void LogError(Module.Editor, "Missing Avatar for export!");
-
-  return ExportModelGlb(_avatar);
-}
-
-//#endregion
-
-//#region Component
-
-interface AvatarBuilderProps {
+interface AvatarEditorProps {
+  campaign?: string | null;
   avatarBasePath: string;
-  onReady: () => Promise<void>;
+  campaignConfig: CampaignConfig;
+  selectListFeatures: FeatureBasic[];
+  selectListAccessories: BasicData[];
+  attributeConfig: BasicData[] | null;
+  bgColor?: string;
+  onlyView: boolean;
 }
+
+let featureList: FeatureInterface[] | undefined;
+let accessoryList: AccessoryInterface[] | undefined;
+let animationList: AnimationInterface[] | undefined;
+
+const exportData: ExportInterface = {attributes: []};
+let onIFrame = false;
 
 /***
- * Component with all the feature and accessory switching.
- * Will hold the information and send it to a viewer.
- *
- * TODO:
- *  Rename to AvatarEditor at a later moment
- * @component
+ * Component with all the main logic used on the AvatarBuilder app.
+ * @constructor
  */
-export default function AvatarBuilder({avatarBasePath, onReady}: AvatarBuilderProps) {
-  async function onAvatarEditorReady() {
-    await initEditor();
+export default function AvatarBuilder({
+                                       selectListFeatures,
+                                       selectListAccessories,
+                                       onlyView,
+                                       campaign,
+                                       attributeConfig,
+                                       avatarBasePath,
+                                       campaignConfig,
+                                       bgColor
+                                     }: AvatarEditorProps) {
+  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].id : '');
+  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].id : '');
+  const [skinColor, setSkinColor] = useState<string>(campaignConfig.defSkinColor ?? 'F2A47E');
+  const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
+  const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [featureListShow, setFeatureListShow] = useState<FeatureInterface[]>();
+  const [accessoryListShow, setAccessoryListShow] = useState<AccessoryInterface[]>();
+  const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
 
-    await onReady();
+  useEffect(() => {
+    const componentDidMount = async () => {
+      if (!onlyView) setEditModeSelected(true);
+
+      await Promise.all([
+        getFeatureList(),
+        getAccessoryList(),
+        getAnimationList()
+      ]);
+    };
+
+    componentDidMount()
+      .catch(err => console.error(err));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function onAvatarBuilderReady() {
+    await SetFeaturesData(selectListFeatures);
+
+    await loadPreData();
+    await onClickChangeSkinColor();
+
+    const startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
+    await ChangeStartAnimation(startAnimation?.path);
+
+    setLoading(false);
+
+    IFrameReady(setOnIFrame);
   }
 
-  async function initEditor() {
-    for (const l of GetTestLights()) {
-      AddToScene(l);
+  const setOnIFrame = () => {
+    // console.log('IFrame Callback: ', onIFrame);
+    onIFrame = true;
+    SetIFrameEvents(changeFeatureFromIFrame, exportFromIFrame, changeSkinColorFromIFrame);
+  }
+
+  async function changeFeatureFromIFrame(params?: BasicData) {
+    if (!onIFrame) return LogError(Module.AvatarGenerator, "Not on IFrame, subscribe if you forgot!");
+    if (!params) return LogError(Module.AvatarGenerator, "Missing feature option!");
+
+    if (params.detail && params.detail.startsWith('http')) {
+      if (params.id.endsWith(GlobalValues.AccEnd)) {
+        await ChangeAccessory(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
+      } else {
+        await onChangeFeature(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
+      }
+    } else {
+      if (params.id.endsWith(GlobalValues.AccEnd)) {
+        const accessory = accessoryList?.find(a => a.type === params.id && a.name === params.val);
+
+        if (!accessory) return LogError(Module.AvatarGenerator, "Accessory option not found!");
+        await ChangeAccessory(accessory.id, accessory.path, accessory.name, accessory.type);
+      } else {
+        const feature = featureList?.find(p => p.type === params.id && p.name === params.val);
+
+        if (!feature) return LogError(Module.AvatarGenerator, "Feature option not found!");
+        await onChangeFeature(feature.id, feature.path, feature.name, feature.type);
+      }
+    }
+  }
+
+  const changeSkinColorFromIFrame = (newColor?: string) => {
+    return onClickChangeSkinColor(newColor);
+  }
+
+  const exportFromIFrame = () => {
+    return exportModel();
+  }
+
+  async function loadPreData() {
+    if (!(featureList && accessoryList))
+      return LogError(Module.AvatarGenerator, "No feature/accessory list!");
+
+    if (campaign && campaign !== GlobalValues.BaseCampaign) {
+      exportData?.attributes.push({id: ExportAttributeValues.Campaign, val: campaign});
     }
 
-    for (const l of GetAmbientLights()) {
-      AddToScene(l);
+    if (attributeConfig) {
+      for (const attribute of attributeConfig) {
+        // Is a feature
+        if (selectListFeatures.some(pl => pl.id === attribute.id)) {
+          const newFeature = featureList.find(p => p.name === attribute.val && p.type === attribute.id);
+          if (newFeature)
+            await onChangeFeature(newFeature.id, newFeature.path, newFeature.name, attribute.id);
+        }
+        // Is an accessory
+        else if (selectListAccessories.some(pl => pl.id === attribute.id)) {
+          const newAcc = accessoryList.find(p => p.name === attribute.val && p.type === attribute.id);
+          if (newAcc)
+            await ChangeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
+        }
+      }
+    } else {
+      const randomFeature: FeatureInterface[] = [];
+      const randomAccessory: AccessoryInterface[] = [];
+
+      // Load random features
+      for (const featureType of selectListFeatures) {
+        const randomFeatureOption = RandomArrayElement(featureList.filter(p => p.type === featureType.id));
+        if (randomFeatureOption)
+          randomFeature.push(randomFeatureOption);
+      }
+
+      for (const accType of selectListAccessories) {
+        const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.id));
+        if (randomAcc)
+          randomAccessory.push(randomAcc);
+      }
+
+      const modelPromises: Promise<GLTF>[] = [];
+      for (const feature of randomFeature)
+        modelPromises.push(GetWearableOption(feature.id, feature.path));
+      for (const acc of randomAccessory)
+        modelPromises.push(GetWearableOption(acc.id, acc.path));
+      await Promise.all([...modelPromises]);
+
+      for (const feature of randomFeature)
+        await onChangeFeature(feature.id, feature.path, feature.name, feature.type);
+      for (const acc of randomAccessory)
+        await ChangeAccessory(acc.id, acc.path, acc.name, acc.type);
+    }
+  }
+
+  async function getFeatureList() {
+    const {value: newAssetList} = await GetAssetsListByCampaign(campaign);
+    featureList = newAssetList;
+    setFeatureListShow(FilterList(featureList, "type", selectedFeature));
+  }
+
+  async function getAccessoryList() {
+    const {value: newAccList} = await GetAccessoryListByCampaign(campaign);
+    accessoryList = newAccList;
+    setAccessoryListShow(FilterList(accessoryList, "type", selectedAcc));
+  }
+
+  async function getAnimationList() {
+    const {value: newAnimationList} = await GetAnimationListByCampaign(campaign);
+    animationList = newAnimationList;
+  }
+
+  async function onClickChangeSkinColor(newSkinColor = skinColor) {
+    await ChangeSkinColor(newSkinColor);
+    setSkinColor(newSkinColor);
+  }
+
+  function onCategoryChange(value: string) {
+    setSelectedFeature(value);
+    setFeatureListShow(FilterList(featureList, "type", value));
+    setFeatureCamPosition(value, campaignConfig.featuresCamPos);
+  }
+
+  function onAccessoryChange(value: string) {
+    setSelectedAcc(value);
+    setAccessoryListShow(FilterList(accessoryList, "type", value));
+    setFeatureCamPosition(value, campaignConfig.accCamPos);
+  }
+
+  function setFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
+    const confRef = posLocation ? posLocation[index] : undefined;
+    if (confRef) {
+      ChangeCamPosition(new Vector3(confRef.pos?.x, confRef.pos?.y, confRef.pos?.z));
+      ChangeLookAtPosition(new Vector3(confRef.lookAt?.x, confRef.lookAt?.y, confRef.lookAt?.z));
+    }
+  }
+
+  async function onChangeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {
+    await ChangeFeature(id, featurePath, name, _selectedFeature, selectListFeatures.find(sf => sf.id === _selectedFeature), skinColor);
+    // TODO: find ways to avoid this
+    await SetFeaturesData(selectListFeatures);
+    addReplaceAttribute(selectedFeature, name);
+  }
+
+  async function onChangeAccessory(id: string, path: string, name: string, _selectedAcc: string = selectedAcc) {
+    await ChangeAccessory(id, path, name, _selectedAcc);
+    addReplaceAttribute(selectedAcc, name);
+  }
+
+  function addReplaceAttribute(addId: string, addValue: string) {
+    if (exportData && exportData.attributes.some(x => x.id === addId)) {
+      const oldAttribute = exportData.attributes.find(x => x.id === addId);
+      if (oldAttribute)
+        oldAttribute.val = addValue;
+
+      setSelectedOpc([...exportData.attributes]);
+      return;
     }
 
-    _avatar = await GetGltfModel(avatarBasePath);
+    exportData?.attributes.push({id: addId, val: addValue});
+    setSelectedOpc([...exportData.attributes]);
+  }
 
-    _mixer = CreateAnimationMixer(_avatar.scene);
-    await SetAnimation(_mixer, _avatar, undefined);
+  async function exportModel() {
+    exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
+    const [picturePromise, modelPromise] = await Promise.all([
+      TakeCanvasPicture(),
+      GetAvatarGLB()
+    ]);
+    exportData.picture = picturePromise;
+    exportData.model = modelPromise;
 
-    await TransformObject3dToToonMaterial(_avatar.scene);
-    AddToScene(_avatar.scene);
-    AddMixer(_mixer);
+    // eslint-disable-next-line no-console
+    console.log(exportData);
+    if (onIFrame) {
+      IFrameExportData(exportData);
+    } else {
+      if (exportData.model != undefined)
+        await SaveFile(exportData.model, 'model.glb');
+
+      await SaveFile(exportData.picture, 'picture.png');
+    }
   }
 
   return (
-    <AvatarViewer onReady={() => onAvatarEditorReady()}/>
+    <>
+      <Head>
+        <title>Avatar Generator</title>
+      </Head>
+      {/* LOADING */}
+      <AGLoading loading={loading} bgColor={bgColor}/>
+      {/* CANVAS WRAPPER */}
+      <div
+        className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+        {/* CANVAS BACKGROUND */}
+        <div style={{backgroundColor: `#${bgColor ?? '272727'}`}} className="w-full h-screen absolute"/>
+        {/* CANVAS */}
+        <AvatarEditor avatarBasePath={avatarBasePath}
+                      onReady={() => onAvatarBuilderReady()}/>
+      </div>
+      {loading ? <></> :
+        <>
+          {!onlyView &&
+              <HudComponent
+                  exportData={selectedOpc}
+                  editModeSelected={editModeSelected}
+                  selectListFeatures={selectListFeatures}
+                  featureList={featureListShow}
+                  selectedFeature={selectedFeature}
+                  selectListAccessories={selectListAccessories}
+                  accessoryList={accessoryListShow}
+                  selectedAcc={selectedAcc}
+                  skinColor={skinColor}
+                  changeView={() => setEditModeSelected(!editModeSelected)}
+                  changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
+                  onCategoryChange={(value: string) => onCategoryChange(value)}
+                  onAccessoryChange={(value: string) => onAccessoryChange(value)}
+                  onClickChangeSkinColor={(value: string) => void onClickChangeSkinColor(value)}
+                  exportModel={() => void exportModel()}
+              />
+          }
+        </>
+      }
+    </>
   );
 }
-
-//#endregion

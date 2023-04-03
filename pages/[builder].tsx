@@ -3,7 +3,7 @@ import {CampaignParameterName, ExportAttributeValues, GlobalValues} from "../enu
 import {FirestoreParameters} from "../enums/firebase.enum";
 import {BasicData, CampaignParameters} from "../interfaces/common.interface";
 import {GetParameter} from "../utils/firebase.util";
-import AvatarEditor from "../components/avatar/editor.component";
+import AvatarBuilder from "../components/avatar/builder.component";
 import {Base64ToObj} from "../utils/common.util";
 
 interface AvatarGeneratorProps {
@@ -22,14 +22,14 @@ export default function AvatarGenerator({
                                           bgColor,
                                         }: AvatarGeneratorProps) {
   return (<>
-    <AvatarEditor campaign={campaign}
-                  avatarBasePath={campaignParams?.armature ?? GlobalValues.AvatarBase}
-                  campaignConfig={campaignParams?.config ?? {}}
-                  selectListFeatures={campaignParams?.features ?? []}
-                  selectListAccessories={campaignParams?.accessories ?? []}
-                  attributeConfig={attributeConfig}
-                  onlyView={onlyView}
-                  bgColor={bgColor}
+    <AvatarBuilder campaign={campaign}
+                   avatarBasePath={campaignParams?.armature ?? GlobalValues.AvatarBase}
+                   campaignConfig={campaignParams?.config ?? {}}
+                   selectListFeatures={campaignParams?.features ?? []}
+                   selectListAccessories={campaignParams?.accessories ?? []}
+                   attributeConfig={attributeConfig}
+                   onlyView={onlyView}
+                   bgColor={bgColor}
     />
   </>);
 }

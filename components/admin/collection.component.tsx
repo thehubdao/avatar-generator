@@ -3,13 +3,13 @@ import {Module} from "../../enums/common.enum";
 import {FeatureBasic} from "../../interfaces/common.interface";
 import {AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
 import {GetAnimationListByCampaign, GetAssetsListByCampaign} from "../../utils/api.util";
-import AvatarBuilder, {
+import AvatarEditor, {
   ChangeFeature,
   ChangeSkinColor,
   ChangeStartAnimation,
   GetAvatarGLB,
   SetFeaturesData
-} from "../avatar/builder.component";
+} from "../avatar/editor.component";
 import AGLoading from "../common/ag-loading.component";
 import {Delay, LogError, LogWarning} from "../../utils/common.util";
 import {UpdateDocObject} from "../../utils/firebase.util";
@@ -446,8 +446,8 @@ export default function AvatarCollection({
       {isDoable ?
         <>
           {mahUi()}
-          <AvatarBuilder avatarBasePath={avatarBasePath}
-                         onReady={() => onCollectionReady()}/>
+          <AvatarEditor avatarBasePath={avatarBasePath}
+                        onReady={() => onCollectionReady()}/>
         </>
         :
         <h1>Missing info</h1>
