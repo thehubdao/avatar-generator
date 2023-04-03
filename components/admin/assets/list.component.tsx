@@ -114,7 +114,7 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
               {dbLocation !== FirestoreLocation.Parameters ?
                 <>
                   <a className="hover:cursor-pointer" title="delete" onClick={() => void deleteDoc(datum.id)}>👋</a>
-                  <a className="hover:cursor-copy" title="download" onClick={() => openFileLink(datum.path)}>👇</a>
+                  <a className="hover:cursor-copy" title="download" onClick={() => void openFileLink(datum.path)}>👇</a>
                 </>
                 : ''
               }
