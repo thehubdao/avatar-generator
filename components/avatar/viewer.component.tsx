@@ -17,6 +17,7 @@ let _camera: PerspectiveCamera | undefined;
 let _renderer: WebGLRenderer | undefined;
 let _controls: OrbitControls | undefined;
 const _mixers: AnimationMixer[] = [];
+const _sceneObjs: Map<string, number> = new Map();
 
 let _cameraPos: Vector3 = new Vector3();
 let _cameraLookAt: Vector3 = new Vector3();
@@ -44,12 +45,30 @@ function DoAnimation(delta: number) {
   }
 }
 
-export function AddToScene(toAdd: Object3D) {
+export function AddToScene(toAdd: Object3D, objName?: string) {
   if (_scene == undefined)
     return void LogError(Module.Viewer, "Scene not started yet on viewer!");
 
+  const addedPos = _scene.children.length;
+  
   FrustumCulledFalse(toAdd);
   _scene.add(toAdd);
+  
+  if (objName != undefined) _sceneObjs.set(objName, addedPos);
+}
+
+export function RemoveFromScene(toRemove: string) {
+  if (_scene == undefined)
+    return void LogError(Module.Viewer, "Scene not started yet on viewer!");
+  
+  const location = _sceneObjs.get(toRemove);
+  if (location == undefined) return;
+  
+  for (const [key, value] of _sceneObjs) {
+    if (value > location)
+      _sceneObjs.set(key, value - 1);
+  }
+  _scene?.children.splice(location, 1);
 }
 
 export function ChangeCamPosition(value: Vector3) {
