@@ -42,6 +42,7 @@ export interface CampaignConfig {
   defSkinColor?: string;
   defCam?: LookAtVectors;
   defAnimation?: string;
+  defEnvironment?: string;
   featuresCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
 }

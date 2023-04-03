@@ -9,11 +9,21 @@ import {
   ExportInterface,
   LookAtVectors
 } from "../../interfaces/common.interface";
-import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
+import {
+  AccessoryInterface,
+  AnimationInterface,
+  EnvironmentInterface,
+  FeatureInterface
+} from "../../interfaces/api.interface";
 import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../../utils/iframe.util";
 import {ExportAttributeValues, GlobalValues, Module} from "../../enums/common.enum";
 import {FilterList, LogError, RandomArrayElement} from "../../utils/common.util";
-import {GetAccessoryListByCampaign, GetAnimationListByCampaign, GetAssetsListByCampaign} from "../../utils/api.util";
+import {
+  GetAccessoryListByCampaign,
+  GetAnimationListByCampaign,
+  GetAssetsListByCampaign,
+  GetEnvironmentListByCampaign
+} from "../../utils/api.util";
 import {SaveFile} from "../../utils/exporter.util";
 import AGLoading from "../common/ag-loading.component";
 import HudComponent from "./hud.component";
@@ -23,6 +33,8 @@ import AvatarEditor, {
   ChangeStartAnimation,
   GetAvatarGLB,
   GetWearableOption,
+  RemoveEnvironment,
+  SetEnvironment,
   SetFeaturesData
 } from "./editor.component";
 import {ChangeCamPosition, ChangeLookAtPosition, TakeCanvasPicture} from "./viewer.component";
@@ -41,6 +53,7 @@ interface AvatarEditorProps {
 let featureList: FeatureInterface[] | undefined;
 let accessoryList: AccessoryInterface[] | undefined;
 let animationList: AnimationInterface[] | undefined;
+let environmentList: EnvironmentInterface[] | undefined;
 
 const exportData: ExportInterface = {attributes: []};
 let onIFrame = false;
@@ -76,7 +89,8 @@ export default function AvatarBuilder({
       await Promise.all([
         getFeatureList(),
         getAccessoryList(),
-        getAnimationList()
+        getAnimationList(),
+        getEnvironmentList()
       ]);
     };
 
@@ -209,6 +223,11 @@ export default function AvatarBuilder({
     const {value: newAnimationList} = await GetAnimationListByCampaign(campaign);
     animationList = newAnimationList;
   }
+  
+  async function getEnvironmentList() {
+    const {value: newEnvironmentList} = await GetEnvironmentListByCampaign(campaign);
+    environmentList = newEnvironmentList;
+  }
 
   async function onClickChangeSkinColor(newSkinColor = skinColor) {
     await ChangeSkinColor(newSkinColor);
@@ -282,6 +301,16 @@ export default function AvatarBuilder({
     }
   }
 
+  async function updateEnvironment(isEditMode: boolean) {
+    if(isEditMode) {
+      RemoveEnvironment();
+    }
+    else {
+      const defEnv = environmentList?.find(a => a.name == campaignConfig.defEnvironment);
+      await SetEnvironment(defEnv?.path);
+    }
+  }
+
   return (
     <>
       <Head>
@@ -311,7 +340,10 @@ export default function AvatarBuilder({
                   accessoryList={accessoryListShow}
                   selectedAcc={selectedAcc}
                   skinColor={skinColor}
-                  changeView={() => setEditModeSelected(!editModeSelected)}
+                  changeView={() => {
+                    setEditModeSelected(!editModeSelected);
+                    void updateEnvironment(!editModeSelected);
+                  }}
                   changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
                   onCategoryChange={(value: string) => onCategoryChange(value)}
                   onAccessoryChange={(value: string) => onAccessoryChange(value)}
