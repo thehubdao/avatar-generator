@@ -25,6 +25,7 @@ import {AddOrRemoveSlash, LogError, RandomPassword} from "./common.util";
 import {Result} from "../interfaces/common.interface";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
 import {SessionUserInfo} from "./common/session.util";
+import {ParameterNameType} from "../types/firebase.type";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -228,7 +229,7 @@ export async function GetFile(path: string, campaign?: string) {
   return stream.arrayBuffer();
 }
 
-export async function GetParameter<T>(campaign: string |  undefined, parameter: string | CampaignParameterName): Promise<T | undefined> {
+export async function GetParameter<T>(campaign: string | undefined, parameter: ParameterNameType): Promise<T | undefined> {
   if(parameter === CampaignParameterName.Missing) return undefined;
 
   const {doc, getDoc} = await import('@firebase/firestore');
@@ -236,12 +237,12 @@ export async function GetParameter<T>(campaign: string |  undefined, parameter: 
   const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}` : FirestoreGlobalLocation.ParametersV2;
   const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
   const leDoc = await getDoc(docRef);
-  
-    if (parameter !== CampaignParameterName.All) {
-      return leDoc.get(parameter as string) as T;
-    } else {
-      return leDoc.data() as T;
-    }
+
+  if (parameter !== CampaignParameterName.All) {
+    return leDoc.get(parameter as string) as T;
+  } else {
+    return leDoc.data() as T;
+  }
 }
 
 export async function GetParameters<T>(campaign?: string, ...parameters: (string | CampaignParameterName)[]): Promise<T[]> {
@@ -282,6 +283,7 @@ export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlo
         FirestoreGlobalLocation.Parameters;
     const newDocName = docName == undefined ? '' : `/${docName}`;
 
+    console.log('Update doc loc', newLocation, newDocName);
     const docRef = doc(await FirebaseUtil.Instance().DB(), `${newLocation}${newDocName}`);
     await setDoc(docRef, data, {merge: true});
     return {success: true, value: true};
@@ -294,8 +296,8 @@ export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlo
 
 export async function DeleteDoc(location: FirestoreLocation, docId: string, campaign?: string) {
   const {deleteDoc, doc} = await import('@firebase/firestore');
-  const campaignLocation = campaign ? `${campaign}/` : '';
-  await deleteDoc(doc(await FirebaseUtil.Instance().DB(), `${campaignLocation}${location}/${docId}`))
+  
+  await deleteDoc(doc(await FirebaseUtil.Instance().DB(), `${CampaignLocation(campaign)}${location}/${docId}`))
   return docId;
 }
 

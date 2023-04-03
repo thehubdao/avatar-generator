@@ -9,6 +9,10 @@ export async function LogError(origin: string | Module, message: string) {
   console.error(`${origin} - `, message);
 }
 
+export async function LogWarning(origin: string | Module, message: string) {
+  console.warn(`${origin} - `, message);
+}
+
 export function Delay(ms: number) {
   return new Promise<void>(resolve => {
     setTimeout(resolve, ms);
@@ -35,4 +39,10 @@ export function AddOrRemoveSlash(text: string) {
 
 export function Base64ToObj<T>(toParse: string) {
   return JSON.parse(Buffer.from(toParse, 'base64').toString('ascii')) as T;
+}
+
+export function FilterList<T>(list: T[] | undefined, key: keyof T, value: unknown) {
+  if(list == undefined) return void LogError(Module.CommonUtil, 'Missing list to filter!');
+  
+  return list?.filter(l => l[key] === value);
 }

@@ -213,20 +213,19 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
 
 export async function TransformObject3dToToonMaterial(object: Object3D, tone?: TextureTone) {
   object.traverse(async subObj => {
-    const skinnedRef = subObj as SkinnedMesh;
-    if (skinnedRef.isSkinnedMesh) {
-      await ChangeToToonMaterial(skinnedRef, tone);
+    if (IsSkinnedMesh(subObj)) {
+      await ChangeToToonMaterial(subObj, tone);
     }
   });
 }
 
 export async function ChangeObjectSkinColor(object: Object3D, skinColor: string, skinMatName: string = 'AvatarSkin_MAT') {
   object.traverse(subObject => {
-    const objectRef = subObject as SkinnedMesh;
-    if (objectRef.isSkinnedMesh) {
-      const matRef = objectRef.material as Material;
-      if (matRef.name.startsWith(skinMatName))
+    if (IsSkinnedMesh(subObject)) {
+      const matRef = subObject.material as Material;
+      if (matRef.name.startsWith(skinMatName)) {
         (matRef as MeshStandardMaterial).color.set(`#${skinColor}`);
+      }
     }
   });
 }

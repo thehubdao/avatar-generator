@@ -11,8 +11,8 @@ interface LayoutProps {
   children: JSX.Element | JSX.Element[] | boolean;
   userInfo?: UserInterface;
   currentCampaign?: string;
-  setUserInfo: (user?: UserInterface) => void;
-  setCurrentCampaign: (campaign?: string) => void;
+  setUserInfo?: (user?: UserInterface) => void;
+  setCurrentCampaign?: (campaign?: string) => void;
   noCampaign?: boolean;
 }
 
@@ -33,7 +33,7 @@ export default function Layout({
       await GoToPage(PageLocation.FirstSteps);
 
     setLoading(false);
-    setUserInfo(uInfo);
+    setUserInfo && setUserInfo(uInfo);
   }
   
   useEffect(() => {
@@ -78,7 +78,7 @@ export default function Layout({
                     <div className="ml-2 flex">
                         <p>🚩:</p>
                         <select className="ml-1" defaultValue={currentCampaign}
-                                onChange={e => setCurrentCampaign(e.target.value)}>
+                                onChange={e => setCurrentCampaign && setCurrentCampaign(e.target.value)}>
                             <option value=''>Select...</option>
                           {renderCampaignOptions()}
                         </select>

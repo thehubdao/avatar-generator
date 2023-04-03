@@ -30,7 +30,7 @@ export interface LookAtVectors {
   pos?: AGVector3;
 }
 
-interface AGVector3 {
+export interface AGVector3 {
   x: number;
   y: number;
   z: number;
@@ -52,9 +52,13 @@ export interface CampaignConfig {
 export interface CampaignParameters {
   owner: string;
   armature: string;
-  features?: BasicData[];
+  features?: FeatureBasic[];
   accessories?: BasicData[];
   config?: CampaignConfig;
+}
+
+export interface FeatureBasic extends Omit<BasicData, 'detail'> {
+  index: number;
 }
 
 export interface AdminComponentParams {

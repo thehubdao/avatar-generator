@@ -1,6 +1,7 @@
-﻿import {PerspectiveCamera, Scene, WebGLRenderer} from "three";
+﻿import {Object3D, PerspectiveCamera, Scene, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {SceneInterface} from "../../interfaces/scene.interface";
+import {AGVector3} from "../../interfaces/common.interface";
 
 export function InitSceneController(): SceneInterface {
   const camera = GetBaseCamera();
@@ -20,9 +21,9 @@ export function GetBaseScene(): Scene {
   return scene;
 }
 
-export function FrustumCulledFalse(scene: Scene) {
-  scene.traverse((object) => {
-    object.frustumCulled = false;
+export function FrustumCulledFalse(obj: Object3D) {
+  obj.traverse((sub) => {
+    sub.frustumCulled = false;
   });
 }
 
@@ -57,4 +58,8 @@ export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTM
   controls.enablePan = false;
   
   return controls;
+}
+
+export function SetCameraPosition(cam: PerspectiveCamera, {x, y, z}: AGVector3) {
+  cam.position.set(x, y, z);
 }

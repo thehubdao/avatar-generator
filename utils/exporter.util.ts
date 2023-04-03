@@ -1,7 +1,8 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
-import {Delay} from "./common.util";
+import {Delay, LogError} from "./common.util";
 import {CleanModelForExport} from "./model.util";
+import {Module} from "../enums/common.enum";
 
 class ExporterUtil {
   private static _instance: ExporterUtil;
@@ -48,7 +49,10 @@ export async function ExportModelGltf(model: GLTF) {
     await SaveString(jsonString, `exported.gltf`);
 }
 
-export async function SaveFile(blob: Blob, fileName: string) {
+export async function SaveFile(blob: Blob | undefined, fileName: string) {
+  if (blob == undefined)
+    return LogError(Module.ExporterUtil, "Missing blob to save as a file!");
+  
   const link = document.createElement('a');
   link.style.display = 'none';
   link.href = URL.createObjectURL(blob);
