@@ -1,7 +1,7 @@
 import {useEffect, useRef} from "react";
 import {AnimationMixer, Clock, Object3D, PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-import {LogError} from "../../utils/common.util";
+import {LogError, LogWarning} from "../../utils/common.util";
 import {Module} from "../../enums/common.enum";
 import {
   FrustumCulledFalse,
@@ -62,7 +62,8 @@ export function RemoveFromScene(toRemove: string) {
     return void LogError(Module.Viewer, "Scene not started yet on viewer!");
   
   const location = _sceneObjs.get(toRemove);
-  if (location == undefined) return;
+  if (location == undefined)
+    return void LogWarning(Module.Viewer, "Item on scene to remove doesn't exist!");
   
   for (const [key, value] of _sceneObjs) {
     if (value > location)
