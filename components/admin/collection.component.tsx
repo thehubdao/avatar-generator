@@ -76,14 +76,23 @@ function LowerIteration(index: number) {
   
   const current = _currentIteration?.get(index);
   const max = _end?.get(index);
-  // console.log('current & max', current, max);
+  
+  // console.log('current & max', { 
+  //   current,
+  //   max,
+  //   kek: IndexValuesToString(_currentIteration),
+  //   min: IndexValuesToString(_start),
+  //   max_m: IndexValuesToString(_end)
+  // });
+  
+  
   if (current == undefined || max == undefined)
     return void LogError(Module.CollectionComponent, "Missing current and max index values!");
   
   if (current < max) {
     _currentIteration?.set(index, current + 1);
   } else {
-    const min = _start?.get(index);
+    const min = _minIndexValues?.get(index);
     if(min == undefined) return void LogError(Module.CollectionComponent, "Missing min index value!");
     
     _currentIteration?.set(index, min);
@@ -356,14 +365,26 @@ export default function AvatarCollection({
       return prev + 1;
     });
   }
+  
+  function startOver() {
+    NextIteration(true);
+    setCurrentIteration(IndexValuesToNumber(_start));
+  }
 
   async function onStartCollection() {
+    if (_reachedEnd) {
+      _reachedEnd = false;
+      startOver();
+    }
+    
     while (!_reachedEnd && doCollection.current) {
       // console.log('Started process single');
       await processSingle();
       // console.log("Doing while", _reachedEnd, doCollection.current);
       await Delay(1000);
     }
+    
+    if (_reachedEnd) doCollection.current = false;
   }
   
   function onClickDoSingle() {
@@ -388,13 +409,17 @@ export default function AvatarCollection({
       newVal = 0;
     
     _start = NumberToIndexValues(newVal);
-    NextIteration(true);
+    startOver();
   }
   
   function onChangeEndValue(newVal: number) {
     if (newVal > maxCombination)
       newVal = maxCombination;
     
+    if (!_reachedEnd && currentIteration != undefined && currentIteration < newVal) {
+      _start = NumberToIndexValues(currentIteration);
+    }
+
     _end = NumberToIndexValues(newVal);
   }
   
