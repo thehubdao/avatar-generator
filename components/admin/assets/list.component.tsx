@@ -1,6 +1,6 @@
 ﻿import {useCallback, useEffect, useState} from "react";
 import {FirestoreLocation} from "../../../enums/firebase.enum";
-import {DeleteDoc, GetInfoDB} from "../../../utils/firebase.util";
+import {DeleteDoc, GetFileUrl, GetInfoDB} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
 import AGText from "../../../components/common/ag-text.component";
 import {AdminComponents} from "../../../enums/common.enum";
@@ -93,6 +93,13 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
     await getDbInfo();
   }
 
+  async function openFileLink(path: string) {
+    const fileLink = await GetFileUrl(path);
+    if (fileLink != undefined) {
+      window.open(fileLink, '_blank');
+    }
+  }
+
   function renderInfo() {
     if (dbData && dbHeaders) {
       return dbData.map(datum => {
@@ -105,7 +112,11 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
                   docLocation: `${dbLocation}${datum.id != undefined ? '/' + datum.id : ''}`
                 })}>🎏</a>
               {dbLocation !== FirestoreLocation.Parameters ?
-                <a className="hover:cursor-pointer" title="delete" onClick={() => void deleteDoc(datum.id)}>👋</a> : ''
+                <>
+                  <a className="hover:cursor-pointer" title="delete" onClick={() => void deleteDoc(datum.id)}>👋</a>
+                  <a className="hover:cursor-copy" title="download" onClick={() => openFileLink(datum.path)}>👇</a>
+                </>
+                : ''
               }
             </td>
             {
