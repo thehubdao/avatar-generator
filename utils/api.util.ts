@@ -1,4 +1,10 @@
-import {AccessoryInterface, AnimationInterface, ApiResponse, FeatureInterface} from "../interfaces/api.interface";
+import {
+  AccessoryInterface,
+  AnimationInterface,
+  ApiResponse,
+  EnvironmentInterface,
+  FeatureInterface
+} from "../interfaces/api.interface";
 import {LogError} from "./common.util";
 import {Result} from "../interfaces/common.interface";
 import {Module} from "../enums/common.enum";
@@ -56,6 +62,10 @@ export async function GetAccessoryListByCampaign(campaign?: string | null) {
 
 export async function GetAnimationListByCampaign(campaign?: string | null) {
   return GetRequest<AnimationInterface[]>('/api/getAnimations' + (campaign ? ('?campaign=' + campaign) : ''));
+}
+
+export async function GetEnvironmentListByCampaign(campaign?: string | null) {
+  return GetRequest<EnvironmentInterface[]>('/api/getEnvironments' + (campaign ? ('?campaign=' + campaign) : ''));
 }
 
 export async function PostUpdateAdminCampaigns() {
