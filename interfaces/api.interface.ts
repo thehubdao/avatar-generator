@@ -25,3 +25,7 @@ export interface AccessoryInterface extends AssetInterface {
 export interface AnimationInterface extends Omit<AssetInterface, 'type' | 'index'> {
   id: string;
 }
+
+export interface EnvironmentInterface extends Omit<AssetInterface, 'type' | 'index'> {
+  id: string;
+}

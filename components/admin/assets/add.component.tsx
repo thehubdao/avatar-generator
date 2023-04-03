@@ -21,7 +21,7 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
   const [typeOptions, setTypeOptions] = useState<BasicData[]>([]);
   const [formData, setFormData] = useState<Partial<AssetInterface>>({});
   const [selectedStorage, setSelectedStorage] = useState<StorageLocation>(StorageLocation.AvatarBase);
-  const [animation, setAnimation] = useState<boolean>();
+  const [simpleForm, setSimpleForm] = useState<boolean>();
 
   const fileToUpload = useRef<HTMLInputElement>(null);
   const thumbToUpload = useRef<HTMLInputElement>(null);
@@ -50,7 +50,7 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
   }, [campaign, dbLocation])
 
   async function getTypeOptionsByCampaign(leCampaign: string | undefined = campaign) {
-    if (animation) return;
+    if (simpleForm) return;
     if (leCampaign == undefined) {
       await LogError(Module.AssetAdd, "Missing campaign");
       return setMessage("Missing campaign!");
@@ -84,6 +84,7 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
 
   function renderUploadType() {
     switch (dbLocation) {
+      case FirestoreLocation.Environments:
       case FirestoreLocation.Animations:
       case FirestoreLocation.Accessories:
       case FirestoreLocation.Features:
@@ -105,7 +106,7 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
                      value={formData.name ?? ''}
                      onChange={(e) => setFormData({...formData, name: e.target.value})}/>
             </div>
-            {!animation &&
+            {!simpleForm &&
                 <div className="flex my-2">
                     <p className="mx-2 w-20 text-right">Type:</p>
                     <select className="w-52 rounded border-2 border-slate-600" required
@@ -116,7 +117,7 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
                     </select>
                 </div>}
 
-            {!animation &&
+            {!simpleForm &&
                 <div className="flex my-2">
                     <p className="mx-2 w-20 text-right my-2">Thumb:</p>
                     <input className="ml-2 my-2" type="file" accept=".jpg,.png" ref={thumbToUpload} required/>
@@ -162,6 +163,8 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
         return StorageLocation.Accessory;
       case FirestoreLocation.Animations:
         return StorageLocation.Animation;
+      case FirestoreLocation.Environments:
+        return StorageLocation.Environment;
       default:
         return StorageLocation.Missing;
     }
@@ -204,6 +207,11 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
     alert("File uploaded");
   }
 
+  function simpleFormType(value: string) {
+    return value === FirestoreLocation.Animations ||
+      value === FirestoreLocation.Environments;
+  }
+
   return (
     <div className='flex justify-center'>
       <div className='w-2/3'>
@@ -216,7 +224,7 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
                     value={dbLocation}
                     onChange={e => {
                       setDbLocation(e.target.value as FirestoreLocation);
-                      setAnimation(e.target.value === FirestoreLocation.Animations);
+                      setSimpleForm(simpleFormType(e.target.value));
                     }}>
               {renderLocationOptions()}
             </select>
