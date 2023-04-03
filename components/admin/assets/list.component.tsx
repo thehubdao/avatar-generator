@@ -1,17 +1,18 @@
 ﻿import {useCallback, useEffect, useState} from "react";
 import {FirestoreLocation} from "../../../enums/firebase.enum";
-import {DeleteDoc, GetInfoDB} from "../../../utils/firebase.util";
+import {DeleteDoc, GetFileUrl, GetInfoDB} from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
 import AGText from "../../../components/common/ag-text.component";
 import {AdminComponents} from "../../../enums/common.enum";
 import {ChangeComponentFunction} from "../../../interfaces/common.interface";
-import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../../interfaces/api.interface";
 import {
   AccessoryInterfaceProps,
   AnimationInterfaceProps,
   CampaignInterfaceProps,
+  EnvironmentInterfaceProps,
   FeatureInterfaceProps
 } from "../../../constants/obj-props.constant";
+import {AssetType} from "../../../types/asset.type";
 
 interface AssetListProps {
   campaign?: string;
@@ -20,7 +21,7 @@ interface AssetListProps {
 
 export default function AssetList({campaign, changeComponent}: AssetListProps) {
   const [dbLocation, setDbLocation] = useState<FirestoreLocation>(FirestoreLocation.Features);
-  const [dbData, setDbData] = useState<(FeatureInterface | AccessoryInterface | AnimationInterface)[]>();
+  const [dbData, setDbData] = useState<AssetType[]>();
   const [dbHeaders, setDbHeaders] = useState<string[]>();
 
   const locationOptions: string[] = Object.keys(FirestoreLocation);
@@ -35,12 +36,14 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
         return AnimationInterfaceProps;
       case FirestoreLocation.Parameters:
         return CampaignInterfaceProps;
+      case FirestoreLocation.Environments:
+        return EnvironmentInterfaceProps;
     }
   }, [dbLocation]);
   
   const getDbInfo = useCallback(async (location: FirestoreLocation = dbLocation) => {
     // const data = await SessionDBInfo(location, campaign, forceUpdate);
-    const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface>(location, campaign);
+    const data = await GetInfoDB<AssetType>(location, campaign);
     setDbData(data);
   }, [dbLocation, campaign]);
   
@@ -90,19 +93,30 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
     await getDbInfo();
   }
 
+  async function openFileLink(path: string) {
+    const fileLink = await GetFileUrl(path);
+    if (fileLink != undefined) {
+      window.open(fileLink, '_blank');
+    }
+  }
+
   function renderInfo() {
     if (dbData && dbHeaders) {
       return dbData.map(datum => {
         let acc = 0;
         return (
-          <tr key={datum['id']}>
+          <tr key={datum['id'] ?? 'param_id'}>
             <td className="px-1 border-t-2 border-yellow-400 flex justify-evenly hover:cursor-pointer">
               <a
                 onClick={() => changeComponent(AdminComponents.AssetModify, {
                   docLocation: `${dbLocation}${datum.id != undefined ? '/' + datum.id : ''}`
                 })}>🎏</a>
               {dbLocation !== FirestoreLocation.Parameters ?
-                <a className="hover:cursor-pointer" title="delete" onClick={() => void deleteDoc(datum.id)}>👋</a> : ''
+                <>
+                  <a className="hover:cursor-pointer" title="delete" onClick={() => void deleteDoc(datum.id)}>👋</a>
+                  <a className="hover:cursor-copy" title="download" onClick={() => void openFileLink(datum.path)}>👇</a>
+                </>
+                : ''
               }
             </td>
             {

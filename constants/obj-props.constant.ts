@@ -26,3 +26,9 @@ export const CampaignInterfaceProps: ObjProp[] = [
   {prop: 'accessories'},
   {prop: 'config'},
 ];
+
+export const EnvironmentInterfaceProps: ObjProp[] = [
+  {prop: 'name'},
+  {prop: 'path'},
+  {prop: 'thumb'},
+];
