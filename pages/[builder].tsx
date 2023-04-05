@@ -36,9 +36,9 @@ export default function AvatarGenerator({
 
 export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = async (context) => {
   const {builder, config, bg, ov} = context.query;
-  
+
   let parsedConfig: BasicData[] | null = null;
-  
+
   let leCampaign = (builder as string).toLowerCase() ?? GlobalValues.BaseCampaign;
 
   if (config) {
@@ -52,13 +52,13 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
 
   const campaigns = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
   const isCampaign = campaigns == undefined ? false : campaigns.some(c => c === leCampaign);
-  
+
   // TODO: either show base campaign (which is what I'm going to do here) or send user to another page (404 or something)
-  if(!isCampaign)
+  if (!isCampaign)
     leCampaign = GlobalValues.BaseCampaign;
-  
+
   const campaignParameters = await GetParameter<CampaignParameters>(leCampaign, CampaignParameterName.All);
-  
+
   const returnProps: AvatarGeneratorProps = {
     campaign: leCampaign,
     campaignParams: campaignParameters ?? null,
@@ -66,7 +66,7 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
     bgColor: bg as string ?? null,
     onlyView: ov != undefined ? (ov as string).toLowerCase() === 'true' : false,
   };
-  
+
   return {
     props: returnProps
   };

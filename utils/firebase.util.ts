@@ -404,11 +404,8 @@ export async function GetCurrentUser() {
 }
 
 export async function GetFileUrl(imagePath?: string) {
-  // TODO: replace with LogError
-  if(imagePath == undefined || imagePath === '') {
-    // console.error('Missing image location');
-    return undefined;
-  }
+  if(imagePath == undefined || imagePath === '')
+    return void LogError(Module.FirebaseUtil, "Missing image location");
   
   try {
     const {ref, getDownloadURL} = await import('@firebase/storage');
