@@ -31,7 +31,7 @@ export function RandomPassword() {
 }
 
 export function AddOrRemoveSlash(text: string) {
-  if(text.charAt(0) === '/')
+  if (text.charAt(0) === '/')
     return text.substring(1);
 
   return `/${text}`;
@@ -42,7 +42,13 @@ export function Base64ToObj<T>(toParse: string) {
 }
 
 export function FilterList<T>(list: T[] | undefined, key: keyof T, value: unknown) {
-  if(list == undefined) return void LogError(Module.CommonUtil, 'Missing list to filter!');
-  
+  if (list == undefined) return void LogError(Module.CommonUtil, 'Missing list to filter!');
+
   return list?.filter(l => l[key] === value);
+}
+
+export function SetMapToMap<TKey, TValue>(leMap: Map<TKey, TValue>, toAdd: Map<TKey, TValue>) {
+  for (const [key, value] of toAdd) {
+    leMap.set(key, value);
+  }
 }
