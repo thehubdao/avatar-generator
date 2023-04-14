@@ -52,3 +52,20 @@ export function SetMapToMap<TKey, TValue>(leMap: Map<TKey, TValue>, toAdd: Map<T
     leMap.set(key, value);
   }
 }
+
+export function CastStringToInteger(toCast: string) {
+  const num = +toCast;
+  return num ? num | 0 : undefined;
+}
+
+export function RandomNumBetween(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+export function RandomIntBetween(min: number, max: number) {
+  return Math.floor(RandomNumBetween(min, max));
+}
+
+export function RandomIntMax(max: number) {
+  return RandomIntBetween(0, max);
+}
