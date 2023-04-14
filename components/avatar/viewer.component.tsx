@@ -116,6 +116,8 @@ export default function AvatarViewer({onReady}: AvatarViewerProps) {
 
     componentDidMount()
       .catch(err => console.error(err));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function initScene() {
