@@ -5,4 +5,5 @@ export const enum DefaultApiResponse {
   PostSuccess = 'Post request successful',
   MissingInfo = 'Missing info to process request',
   WrongInput = 'Request input not relevant on database',
+  ErrorProcessingInfo = 'Error processing information on backend',
 }
