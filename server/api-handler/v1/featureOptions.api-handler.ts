@@ -6,7 +6,7 @@ import {FirestoreLocation} from "../../../enums/firebase.enum";
 import {RequestResponse} from "../request.api-handler";
 import {DefaultApiResponse} from "../../enums/api.enum";
 
-async function GetData(campaign?: string, type?: string) {
+export async function GetData(campaign?: string, type?: string) {
   const realCampaign = campaign ?? GlobalValues.BaseCampaign;
 
   return GetInfoDB<FeatureInterface>(FirestoreLocation.Features, realCampaign, {
