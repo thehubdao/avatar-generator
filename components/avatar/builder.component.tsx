@@ -291,6 +291,7 @@ export default function AvatarBuilder({
 
     // eslint-disable-next-line no-console
     console.log(exportData);
+    
     if (onIFrame) {
       IFrameExportData(exportData);
     } else {
@@ -306,7 +307,7 @@ export default function AvatarBuilder({
       RemoveEnvironment();
     }
     else {
-      const defEnv = environmentList?.find(a => a.name == campaignConfig.defEnvironment);
+      const defEnv = environmentList?.find(env => env.name == campaignConfig.defEnvironment);
       await SetEnvironment(defEnv?.path);
     }
   }
