@@ -29,3 +29,12 @@ export interface AnimationInterface extends Omit<AssetInterface, 'type' | 'index
 export interface EnvironmentInterface extends Omit<AssetInterface, 'type' | 'index'> {
   id: string;
 }
+
+interface IndexFeatureInterface {
+  index: number;
+  val: FeatureInterface;
+}
+
+export interface SingleInterface {
+  features: IndexFeatureInterface[];
+}
