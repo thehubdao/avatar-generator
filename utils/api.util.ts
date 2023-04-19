@@ -3,19 +3,22 @@ import {
   AnimationInterface,
   ApiResponse,
   EnvironmentInterface,
-  FeatureInterface
+  FeatureInterface,
+  SingleInterface,
 } from "../interfaces/api.interface";
 import {LogError} from "./common.util";
 import {Result} from "../interfaces/common.interface";
 import {Module} from "../enums/common.enum";
+import {ApiRoutesV1} from "../enums/api.enum";
 
+//#region Generic
 const GET_PARAMS: RequestInit = {
   method: 'GET'
 };
 
-async function GetRequest<T>(url: string): Promise<Result<T>> {
+async function GetRequest<T>(url: string | ApiRoutesV1, query?: string): Promise<Result<T>> {
   try {
-    const jsonResult: ApiResponse<T> = await fetch(url, GET_PARAMS).then(res => res.json());
+    const jsonResult: ApiResponse<T> = await fetch(url + (query ?? ''), GET_PARAMS).then(res => res.json());
     if (jsonResult.success)
       return {success: true, value: jsonResult.data};
     else
@@ -52,22 +55,28 @@ async function PostRequest<T>(url: string, obj?: object): Promise<Result<T>> {
   }
 }
 
+//#endregion
+
 export async function GetAssetsListByCampaign(campaign?: string | null) {
-  return GetRequest<FeatureInterface[]>('/api/getFeatureOptions' + (campaign ? ('?campaign=' + campaign) : ''));
+  return GetRequest<FeatureInterface[]>(ApiRoutesV1.FeatureOptions,campaign ? ('?campaign=' + campaign) : undefined);
 }
 
 export async function GetAccessoryListByCampaign(campaign?: string | null) {
-  return GetRequest<AccessoryInterface[]>('/api/getAccessoryOptions' + (campaign ? ('?campaign=' + campaign) : ''));
+  return GetRequest<AccessoryInterface[]>(ApiRoutesV1.AccessoryOptions, campaign ? ('?campaign=' + campaign) : undefined);
 }
 
 export async function GetAnimationListByCampaign(campaign?: string | null) {
-  return GetRequest<AnimationInterface[]>('/api/getAnimations' + (campaign ? ('?campaign=' + campaign) : ''));
+  return GetRequest<AnimationInterface[]>(ApiRoutesV1.Animations, campaign ? ('?campaign=' + campaign) : undefined);
 }
 
 export async function GetEnvironmentListByCampaign(campaign?: string | null) {
-  return GetRequest<EnvironmentInterface[]>('/api/getEnvironments' + (campaign ? ('?campaign=' + campaign) : ''));
+  return GetRequest<EnvironmentInterface[]>(ApiRoutesV1.Environments, campaign ? ('?campaign=' + campaign) : undefined);
 }
 
 export async function PostUpdateAdminCampaigns() {
-  return PostRequest<void>('api/updateAdminCampaigns');
+  return PostRequest<void>(ApiRoutesV1.AdminCampaigns);
+}
+
+export async function GetAvatarSingleByCampaignCombination(campaign: string, combination?: number) {
+  return GetRequest<SingleInterface>(ApiRoutesV1.Single, `/${campaign}/${combination}`);
 }
