@@ -36,7 +36,6 @@ const _maxIndexValues: Map<number, number> = new Map();
 const _featureOptionListData: Map<number, FeatureInterface[] | undefined> = new Map();
 let _animationListData: AnimationInterface[] | undefined;
 
-// TODO: move logic that can be call anywhere to own util file
 function InitValues() {
   _start = new Map(_minIndexValues);
   _end = new Map(_maxIndexValues);
@@ -179,7 +178,7 @@ export default function AvatarCollection({
         continue;
       }
       // console.log('Item', item);
-      await ChangeFeature(item.id, item.path, item.name, item.type, featureList.find(sf => sf.id === item.type), skinColor);
+      await ChangeFeature(item.id, item.path, item.name, item.type, skinColor);
       // TODO: find ways to avoid this (SetFeaturesData)
       await SetFeaturesData(featureList);
       // addReplaceAttribute(selectedFeature, name);

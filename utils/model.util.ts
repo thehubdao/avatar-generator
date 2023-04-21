@@ -4,9 +4,8 @@ import {Group, Material, MeshStandardMaterial, MeshToonMaterial, Object3D, Skele
 import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
 import {TextureTone, TextureUtil} from "./texture.util";
 import {LogError} from "./common.util";
-import {Module} from "../enums/common.enum";
+import {GlobalValues, Module} from "../enums/common.enum";
 import {LoadGltfModel} from "./importer.util";
-import {GlobalValues} from "../enums/common.enum";
 
 type MaterialFunction = (obj: SkinnedMesh, tone?: TextureTone) => void;
 
@@ -52,17 +51,19 @@ function GetSkeleton(skeletonModel: Object3D, index: number) {
   return leSkelly;
 }
 
-export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel: GLTF, featureInfo?: FeatureInfoInterface, selectedFeature?: BasicData, skinColor?: string) {
-  if(featureInfo == undefined) return LogError(Module.ModelUtil, "Missing feature on armature.");
+export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel: GLTF, selectedFeature: string, allFeatureInfo: Record<string, FeatureInfoInterface>, skinColor?: string) {
+  if(allFeatureInfo == undefined) return LogError(Module.ModelUtil, "Missing feature on armature.");
   if(selectedFeature == undefined)
     return LogError(Module.ModelUtil, "There is no selected feature to replace on base model.");
   
-  const changeMesh: Object3D | null = await GetMatchPiece(replaceModel, selectedFeature.val);
+  const featureInfo = allFeatureInfo[selectedFeature];
+  
+  const changeMesh: Object3D | null = await GetMatchPiece(replaceModel, featureInfo.name);
   if(changeMesh == null)
-    return LogError(Module.ModelUtil, `Piece not found: '${selectedFeature.val}' not found on replace model, please verify the glb file.`);
+    return LogError(Module.ModelUtil, `Piece not found: '${featureInfo.name}' not found on replace model, please verify the glb file.`);
   
   const newFeature: Object3D = SkeletonUtils.clone(changeMesh);
-  const baseSkeleton = GetSkeleton(baseModel, featureInfo.featureIndex);
+  const baseSkeleton = GetSkeleton(baseModel, featureInfo.index);
   if (baseSkeleton == undefined)
     return LogError(Module.ModelUtil, "Skeleton missing from base_mesh some of the features have weird components.")
 
@@ -73,8 +74,18 @@ export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel:
   }
 
   newFeature.frustumCulled = false;
-  baseModel.children.splice(featureInfo.featureIndex, 1);
+  
+  // update all feature info
+  for (const fI of Object.values(allFeatureInfo)) {
+    if (fI.index > featureInfo.index)
+      fI.index -= 1;
+  }
+  
+  baseModel.children.splice(featureInfo.index, 1);
   baseModel.add(newFeature);
+  
+  featureInfo.index = baseModel.children.length;
+  featureInfo.ref = newFeature;
 }
 
 async function GetMatchPiece(object: GLTF, match?: string) {
@@ -232,4 +243,24 @@ export async function ChangeObjectSkinColor(object: Object3D, skinColor: string,
 
 export function CleanModelForExport(model: GLTF) {
   // TODO: something
+}
+
+export async function GetFeaturesData(baseModel: Group, featureList: BasicData[], update: boolean = false) {
+  return new Promise<Record<string, FeatureInfoInterface>>(resolve => {
+    const baseFeatures = baseModel.children[0];
+    let result: Record<string, FeatureInfoInterface> = {};
+
+    for (const [index, feature] of baseFeatures.children.entries()) {
+      if (featureList.some(x => feature.name.startsWith(x.val))) {
+        const foundFeature = featureList.find(x => x.val === feature.name);
+        result[foundFeature!.id] = {
+          index: index,
+          ref: update ? result[foundFeature!.id].ref : feature.clone(),
+          name: foundFeature!.val
+        };
+      }
+    }
+
+    resolve(result);
+  });
 }

@@ -255,7 +255,7 @@ export default function AvatarBuilder({
   }
 
   async function onChangeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {
-    await ChangeFeature(id, featurePath, name, _selectedFeature, selectListFeatures.find(sf => sf.id === _selectedFeature), skinColor);
+    await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor);
     // TODO: find ways to avoid this
     await SetFeaturesData(selectListFeatures);
     addReplaceAttribute(selectedFeature, name);

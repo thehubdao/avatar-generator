@@ -62,6 +62,7 @@ export enum Module {
   CollectionComponent = 'CollectionComponent',
   ExporterUtil = 'ExporterUtil',
   CollectionUtil = 'CollectionUtil',
+  Single = 'SingleComponent', 
 }
 
 export enum EmailResult {
