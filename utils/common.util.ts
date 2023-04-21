@@ -53,6 +53,16 @@ export function SetMapToMap<TKey, TValue>(leMap: Map<TKey, TValue>, toAdd: Map<T
   }
 }
 
+export function RemoveUndefinedProperties<T>(obj: T)  {
+  const clone = {...obj};
+  for (let k in clone) {
+    if (clone[k] == undefined)
+      delete clone[k];
+  }
+  
+  return clone;
+}
+
 export function CastStringToInteger(toCast: string) {
   const num = +toCast;
   return num ? num | 0 : undefined;
