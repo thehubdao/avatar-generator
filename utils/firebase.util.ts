@@ -207,13 +207,16 @@ async function AccessoryConstraints(constraintsValues: AGQueryConstraints) {
 
 async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
   const constraints: QueryConstraint[] = [];
-  const {campaign} = constraintsValues;
+  const {campaign, name} = constraintsValues;
   const {orderBy, where} = await import('@firebase/firestore');
 
   if (campaign)
     constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
 
-  constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
+  if (name)
+    constraints.push(where(FirestoreFilterValues.Name, "==", name));
+  else
+    constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
 
   return constraints;
 }

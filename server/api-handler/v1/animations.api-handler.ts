@@ -7,10 +7,12 @@ import {RequestResponse} from "../request.api-handler";
 import {DefaultApiResponse} from "../../enums/api.enum";
 
 export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<AnimationInterface[]>>) {
-  const {campaign} = req.query;
+  const {campaign, name} = req.query;
   const realCampaign = campaign as string ?? GlobalValues.BaseCampaign;
 
-  const data = await GetInfoDB<AnimationInterface>(FirestoreLocation.Animations, realCampaign);
+  let data = await GetInfoDB<AnimationInterface>(FirestoreLocation.Animations, realCampaign, {
+    name: name as string
+  });
 
   return RequestResponse(res, "Successful", true, DefaultApiResponse.GetSuccess, data);
 }
