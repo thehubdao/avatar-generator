@@ -6,12 +6,13 @@ export default function AvatarSingleRootPage() {
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const {campaign, combination} = context.query;
 
   if (campaign == undefined) return { notFound: true };
   
-  let leCampaign = campaign;
+  let leCampaign = campaign as string;
   if (typeof campaign !== 'string')
     leCampaign = campaign.at(0) ?? '';
     
