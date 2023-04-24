@@ -1,8 +1,8 @@
-﻿import {DefaultApiResponses} from "../enums/api.enum";
+﻿import {DefaultApiResponse} from "../server/enums/api.enum";
 
 export interface ApiResponse<T> {
   success: boolean,
-  message: string | DefaultApiResponses,
+  message: string | DefaultApiResponse,
   data?: T,
 }
 
@@ -28,4 +28,13 @@ export interface AnimationInterface extends Omit<AssetInterface, 'type' | 'index
 
 export interface EnvironmentInterface extends Omit<AssetInterface, 'type' | 'index'> {
   id: string;
+}
+
+interface IndexFeatureInterface {
+  index: number;
+  val: FeatureInterface;
+}
+
+export interface SingleInterface {
+  features: IndexFeatureInterface[];
 }

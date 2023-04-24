@@ -133,7 +133,7 @@ export async function GetInfoDB<T>(dbLocation: FirestoreLocation | FirestoreGlob
   }
 }
 
-async function GetDocument<T>(dbLocation: FirestoreLocation | string) {
+async function GetDocument<T>(dbLocation: string) {
   const {doc, getDoc} = await import('@firebase/firestore');
   const docRef = doc(await FirebaseUtil.Instance().DB(), dbLocation);
   const leDoc = await getDoc(docRef);
@@ -142,7 +142,7 @@ async function GetDocument<T>(dbLocation: FirestoreLocation | string) {
   return data ? [data] : [];
 }
 
-async function GetDocuments<T>(dbLocation: FirestoreLocation | string, constraintsValues?: AGQueryConstraints) {
+async function GetDocuments<T>(dbLocation: string, constraintsValues?: AGQueryConstraints) {
   const constraints = await GetConstraints(dbLocation, constraintsValues);
 
   const {collection, getDocs, query} = await import('@firebase/firestore');
@@ -155,11 +155,13 @@ async function GetDocuments<T>(dbLocation: FirestoreLocation | string, constrain
   });
 }
 
-function GetConstraints(dbLocation: FirestoreLocation | string, constraintsValues?: AGQueryConstraints) {
+function GetConstraints(dbLocation: string, constraintsValues?: AGQueryConstraints) {
   if (!constraintsValues)
     return [];
 
-  switch (dbLocation) {
+  const location = dbLocation.split('/').pop();
+
+  switch (location) {
     case FirestoreLocation.Features:
       return FeatureConstraints(constraintsValues);
     case FirestoreLocation.Accessories:
@@ -191,7 +193,7 @@ async function AccessoryConstraints(constraintsValues: AGQueryConstraints) {
   const constraints: QueryConstraint[] = [];
   const {type, campaign} = constraintsValues;
   const {orderBy, where} = await import('@firebase/firestore');
-
+  
   if (campaign)
     constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
 
@@ -205,13 +207,16 @@ async function AccessoryConstraints(constraintsValues: AGQueryConstraints) {
 
 async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
   const constraints: QueryConstraint[] = [];
-  const {campaign} = constraintsValues;
+  const {campaign, name} = constraintsValues;
   const {orderBy, where} = await import('@firebase/firestore');
 
   if (campaign)
     constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
 
-  constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
+  if (name)
+    constraints.push(where(FirestoreFilterValues.Name, "==", name));
+  else
+    constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
 
   return constraints;
 }
@@ -404,11 +409,8 @@ export async function GetCurrentUser() {
 }
 
 export async function GetFileUrl(imagePath?: string) {
-  // TODO: replace with LogError
-  if(imagePath == undefined || imagePath === '') {
-    // console.error('Missing image location');
-    return undefined;
-  }
+  if(imagePath == undefined || imagePath === '')
+    return void LogError(Module.FirebaseUtil, "Missing image location");
   
   try {
     const {ref, getDownloadURL} = await import('@firebase/storage');

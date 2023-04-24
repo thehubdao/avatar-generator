@@ -2,10 +2,11 @@ import {LogError} from "../../utils/common.util";
 import {GlobalValues, Module} from "../../enums/common.enum";
 import {AnimationMixer} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {GetFeaturesData, GetGltfModel} from "../../utils/importer.util";
+import {GetGltfModel} from "../../utils/importer.util";
 import {CreateAnimationMixer, SetAnimation} from "../../utils/threejs/animation.util";
 import {
   ChangeObjectSkinColor,
+  GetFeaturesData,
   ReplaceModelAccessory,
   ReplaceModelFeatureOnly,
   TransformObject3dToToonMaterial
@@ -43,13 +44,13 @@ export async function GetWearableOption(id: string, optionPath: string) {
   return replaceModel;
 }
 
-export async function ChangeFeature(id: string, featurePath: string, name: string, selectedFeature: string, selectedFeatureData: BasicData | undefined, skinColor?: string) {
+export async function ChangeFeature(id: string, featurePath: string, name: string, selectedFeature: string, skinColor?: string) {
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature in order to change feature");
   if (_featureListData == undefined) return LogError(Module.Editor, "Missing feature list data");
 
   const replaceModel = await GetWearableOption(id, featurePath);
 
-  await ReplaceModelFeatureOnly(_avatar.scene.children[0], replaceModel, _featureListData[selectedFeature], selectedFeatureData, skinColor);
+  await ReplaceModelFeatureOnly(_avatar.scene.children[0], replaceModel, selectedFeature, _featureListData, skinColor);
   // console.log('Avatar:', _avatar);
 }
 

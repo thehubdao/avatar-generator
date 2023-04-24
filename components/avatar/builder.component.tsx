@@ -255,7 +255,7 @@ export default function AvatarBuilder({
   }
 
   async function onChangeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {
-    await ChangeFeature(id, featurePath, name, _selectedFeature, selectListFeatures.find(sf => sf.id === _selectedFeature), skinColor);
+    await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor);
     // TODO: find ways to avoid this
     await SetFeaturesData(selectListFeatures);
     addReplaceAttribute(selectedFeature, name);
@@ -291,6 +291,7 @@ export default function AvatarBuilder({
 
     // eslint-disable-next-line no-console
     console.log(exportData);
+    
     if (onIFrame) {
       IFrameExportData(exportData);
     } else {
@@ -306,7 +307,7 @@ export default function AvatarBuilder({
       RemoveEnvironment();
     }
     else {
-      const defEnv = environmentList?.find(a => a.name == campaignConfig.defEnvironment);
+      const defEnv = environmentList?.find(env => env.name == campaignConfig.defEnvironment);
       await SetEnvironment(defEnv?.path);
     }
   }

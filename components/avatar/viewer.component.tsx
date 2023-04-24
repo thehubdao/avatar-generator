@@ -10,6 +10,7 @@ import {
   GetBaseRenderer,
   GetBaseScene
 } from "../../utils/threejs/scene.util";
+import {AGVector3} from "../../interfaces/common.interface";
 
 //#region Logic
 let _scene: Scene | undefined;
@@ -80,9 +81,17 @@ export function ChangeCamPosition(value: Vector3) {
   _cameraPos = value;
 }
 
+export function AGChangeCamPosition(value: AGVector3) {
+  ChangeCamPosition(new Vector3(value.x, value.y, value.z));
+}
+
 export function ChangeLookAtPosition(value: Vector3) {
   if (_controls == undefined) return void LogError(Module.Viewer, "Missing viewer Controls!");
   _controls.target = value;
+}
+
+export function AGChangeLookAtPosition(value: AGVector3) {
+  ChangeLookAtPosition(new Vector3(value.x, value.y, value.z));
 }
 
 export function TakeCanvasPicture(mimeType = 'image/png') {
@@ -116,6 +125,8 @@ export default function AvatarViewer({onReady}: AvatarViewerProps) {
 
     componentDidMount()
       .catch(err => console.error(err));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function initScene() {

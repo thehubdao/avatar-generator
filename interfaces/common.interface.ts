@@ -9,8 +9,9 @@ export interface BasicData {
 }
 
 export interface FeatureInfoInterface {
-  featureIndex: number;
-  featureBase?: Object3D;
+  index: number;
+  name: string;
+  ref?: Object3D;
 }
 
 export interface AccessoryInfoInterface {

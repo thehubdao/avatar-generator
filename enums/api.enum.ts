@@ -1,15 +1,8 @@
-export enum RequestMethod {
-  Get = 'GET',
-  Post = 'POST',
-  Put = 'PUT',
-  Patch = 'PATCH',
-  Delete = 'DELETE',
-  Options = 'OPTIONS',
-}
-
-export enum DefaultApiResponses {
-  GetSuccess = 'Data retrieve successfully',
-  GetFailure = 'Errors retrieving data',
-  BadRequest = 'Wrong request',
-  PostSuccess = 'Post request successful',
+﻿export enum ApiRoutesV1 {
+  FeatureOptions = '/api/v1/featureOptions',
+  AccessoryOptions = '/api/v1/accessoryOptions',
+  Animations = '/api/v1/animations',
+  Environments = '/api/v1/environments',
+  AdminCampaigns = 'api/v1/adminCampaigns',
+  Single = '/api/v1/single',
 }

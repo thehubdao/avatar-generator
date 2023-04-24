@@ -4,6 +4,7 @@ import {Timestamp} from "@firebase/firestore";
 export interface AGQueryConstraints {
   campaign?: string;
   type?: string;
+  name?: string;
 }
 
 export interface LogInInterface {
