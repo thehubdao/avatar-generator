@@ -1,8 +1,8 @@
 import {GetParameter, UpdateDocObject} from "./firebase.util";
 import {FirestoreLocation} from "../enums/firebase.enum";
 import {FeatureInterface} from "../interfaces/api.interface";
-import {LogError, SetMapToMap} from "./common.util";
-import {CampaignParameterName, Module} from "../enums/common.enum";
+import {CastStringToInteger, LogError, SetMapToMap} from "./common.util";
+import {CampaignParameterName, GlobalValues, Module} from "../enums/common.enum";
 import {FeatureBasic} from "../interfaces/common.interface";
 import {GetData} from "../server/api-handler/v1/featureOptions.api-handler";
 
@@ -100,26 +100,50 @@ async function UpdateNewIndexesOnDB(campaign: string, featureOptionToUpdate: Map
 
 export function IndexValuesToNumber(indexValues: Map<number, number> | undefined, maxValues: Map<number, number>, multiplyNums?: number[]) {
   if (indexValues == undefined)
-    return void LogError(Module.CollectionComponent, "No indexValues to work on!");
+    return void LogError(Module.CollectionUtil, "No indexValues to work on!");
 
   if (indexValues.size !== maxValues.size)
-    return void LogError(Module.CollectionComponent, "Error parsing indexValues to number, out of range!");
+    return void LogError(Module.CollectionUtil, "Error parsing indexValues to number, out of range!");
 
   if (multiplyNums == undefined)
     multiplyNums = GetMultiplyNums(maxValues);
   
   const multNums = multiplyNums;
   if (multNums == undefined)
-    return void LogError(Module.CollectionComponent, "Error getting misshaped values for multiply nums!");
+    return void LogError(Module.CollectionUtil, "Error getting misshaped values for multiply nums!");
 
   let result = 0;
   for (let i = 0; i < maxValues.size; i++) {
     const indexVal = indexValues.get(i) ?? 0;
+    if (indexVal >= (maxValues.get(i) ?? 0))
+      return void LogError(Module.CollectionUtil, "Error index values higher than maximum values!");
+      
     const newVal = indexVal * multNums[i + 1];
 
     result += newVal;
   }
 
+  return result;
+}
+
+export function IndexValuesStringToNumber(indexValuesString: string | undefined, maxValues: Map<number, number>, multiplyNums?: number[]) {
+    if (indexValuesString == undefined)
+      return void LogError(Module.CollectionComponent, "No indexValues to work on!");
+    
+    const realIndexValues = StringToIndexValues(indexValuesString);
+    return IndexValuesToNumber(realIndexValues, maxValues, multiplyNums);
+}
+
+export function StringToIndexValues(input: string) {
+  const inputArray = input.split(GlobalValues.CollectorIndexSeparator);  
+  const result: Map<number, number> = new Map();
+  
+  for (const [key, value] of inputArray.entries()) {
+    const realValue = CastStringToInteger(value);
+    if (realValue != undefined)
+      result.set(key, realValue);
+  }
+  
   return result;
 }
 

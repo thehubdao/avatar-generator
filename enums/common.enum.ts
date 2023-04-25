@@ -5,7 +5,7 @@
   AccEnd = 'Acc',
   AccGroup = 'Accessories.AG',
   AvatarBase = 'base_mesh/MetaAvatarHub.glb',
-  CollectorIndexSeparator = '_',
+  CollectorIndexSeparator = '-',
   EnvironmentId = 'environment',
 }
 
