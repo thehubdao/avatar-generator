@@ -1,14 +1,15 @@
-import {GetServerSideProps} from "next";
+﻿import {GetServerSideProps} from "next";
 import {BasicData, CampaignParameters, LookAtVectors} from "../../interfaces/common.interface";
 import AvatarSingle from "../../components/avatar/single.component";
-import {RemoveUndefinedProperties} from "../../utils/common.util";
+import {CastStringToInteger, RemoveUndefinedProperties} from "../../utils/common.util";
 import {CampaignParameterName, GlobalValues} from "../../enums/common.enum";
 import {GetParameter} from "../../utils/firebase.util";
 import {FirestoreParameters} from "../../enums/firebase.enum";
 
-interface AvatarSinglePageProps {
+
+interface AvatarSimplePageProps {
   campaign: string;
-  combination?: string;
+  combination?: number;
   featureList: BasicData[];
   avatarBasePath: string;
   defaultAnimation?: string;
@@ -16,18 +17,18 @@ interface AvatarSinglePageProps {
   defaultCamPos?: LookAtVectors;
 }
 
-export default function AvatarSinglePage({
+export default function AvatarSimplePage({
                                            campaign,
                                            combination,
                                            featureList,
                                            avatarBasePath,
                                            defaultAnimation,
                                            defaultSkinTone
-                                         }: AvatarSinglePageProps) {
+                                         }: AvatarSimplePageProps) {
   return (
     <>
       <AvatarSingle campaign={campaign}
-                    combinationString={combination}
+                    combination={combination}
                     featureList={featureList}
                     avatarBasePath={avatarBasePath}
                     defaultAnimation={defaultAnimation}
@@ -36,9 +37,9 @@ export default function AvatarSinglePage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps<AvatarSinglePageProps> = async (context) => {
-  const {single} = context.query;
-  const [campaign, combination] = single as (string | undefined)[];
+export const getServerSideProps: GetServerSideProps<AvatarSimplePageProps> = async (context) => {
+  const {simple} = context.query;
+  const [campaign, combination] = simple as (string | undefined)[];
   
   // if campaign is not campaign throw 404
   if (campaign == undefined) return { notFound: true };
@@ -46,13 +47,16 @@ export const getServerSideProps: GetServerSideProps<AvatarSinglePageProps> = asy
   const campaigns = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
   const isCampaign = campaigns == undefined ? false : campaigns.some(c => c === campaign);
   if (!isCampaign) return { notFound: true };
-
+  
+  // Parse combination to number
+  const parsedCombination = combination != undefined ? CastStringToInteger(combination) : undefined;
+  
   // Get campaign configuration
   const campaignParameters = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
 
-  const returnProps: AvatarSinglePageProps = {
+  const returnProps: AvatarSimplePageProps = {
     campaign,
-    combination,
+    combination: parsedCombination,
     featureList: campaignParameters?.features ?? [],
     avatarBasePath: campaignParameters?.armature ?? GlobalValues.AvatarBase,
     defaultAnimation: campaignParameters?.config?.defAnimation,

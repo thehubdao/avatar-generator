@@ -1,7 +1,7 @@
 ﻿import {useRef} from "react";
 import {
   GetAnimationByCampaignAndName,
-  GetAvatarSingleByCampaignCombination
+  GetAvatarSingleByCampaignCombination, GetAvatarSingleByCampaignCombinationString
 } from "../../utils/api.util";
 import AvatarEditor, {ChangeFeature, ChangeSkinColor, ChangeStartAnimation, SetFeaturesData} from "./editor.component";
 import {BasicData, LookAtVectors} from "../../interfaces/common.interface";
@@ -13,6 +13,7 @@ import {Module} from "../../enums/common.enum";
 interface AvatarSingleProps {
   campaign: string;
   combination?: number;
+  combinationString?: string;
   featureList: BasicData[];
   avatarBasePath: string;
   defaultAnimation?: string;
@@ -22,7 +23,8 @@ interface AvatarSingleProps {
 
 export default function AvatarSingle({
                                        campaign,
-                                       combination,
+                                       combination, 
+                                       combinationString,
                                        featureList,
                                        avatarBasePath,
                                        defaultSkinTone,
@@ -54,8 +56,17 @@ export default function AvatarSingle({
   }
 
   async function getSingleData() {
-    const {value: reqSingleData} = await GetAvatarSingleByCampaignCombination(campaign, combination);
-    singleData.current = reqSingleData;
+    let result: SingleInterface | undefined;
+    if (combinationString != undefined) {
+      const {value: reqSingleData} = await GetAvatarSingleByCampaignCombinationString(campaign, combinationString);
+      result = reqSingleData;
+    }
+    else {
+      const {value: reqSingleData} = await GetAvatarSingleByCampaignCombination(campaign, combination);
+      result = reqSingleData;
+    }
+    
+    singleData.current = result;
   }
 
   async function getAnimation() {

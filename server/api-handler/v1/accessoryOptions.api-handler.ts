@@ -23,10 +23,11 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
   return RequestResponse(res, "Successful", true, DefaultApiResponse.GetSuccess, data);
 }
 
-export async function GetByCampaignApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<AccessoryInterface[]>>) {
-  const {campaign} = req.query;
+export async function GetUriApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<AccessoryInterface[]>>) {
+  const {options} = req.query;
+  const [campaign, type] = options as string[];
   
-  const data = await GetData(campaign as string);
+  const data = await GetData(campaign, type);
   
   return RequestResponse(res, "Successful", true, DefaultApiResponse.GetSuccess, data);
 }

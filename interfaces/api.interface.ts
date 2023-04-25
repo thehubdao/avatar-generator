@@ -36,5 +36,6 @@ interface IndexFeatureInterface {
 }
 
 export interface SingleInterface {
+  random: boolean;
   features: IndexFeatureInterface[];
 }

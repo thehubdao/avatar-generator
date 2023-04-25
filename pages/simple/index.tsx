@@ -1,4 +1,4 @@
-import {GetServerSideProps} from "next";
+﻿import {GetServerSideProps} from "next";
 
 export default function AvatarSingleRootPage() {
   return (
@@ -11,12 +11,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const {campaign, combination} = context.query;
 
   if (campaign == undefined) return { notFound: true };
-  
+
   let leCampaign = campaign as string;
   if (typeof campaign !== 'string')
     leCampaign = campaign.at(0) ?? '';
-    
-  
+
+
   let leCombination = '';
   if (combination != undefined) {
     if (typeof combination === 'string')
@@ -24,7 +24,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
     else
       leCombination = combination.at(0) ?? '';
   }
-  
+
   return {
     redirect: {
       destination: `/${leCampaign}/${leCombination}`,
