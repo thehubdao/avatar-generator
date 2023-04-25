@@ -65,7 +65,7 @@ export function RemoveUndefinedProperties<T>(obj: T)  {
 
 export function CastStringToInteger(toCast: string) {
   const num = +toCast;
-  return num ? num | 0 : undefined;
+  return isNaN(num) ? undefined : num | 0;
 }
 
 export function RandomNumBetween(min: number, max: number) {
