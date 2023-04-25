@@ -6,10 +6,9 @@ import {CampaignParameterName, GlobalValues} from "../../enums/common.enum";
 import {GetParameter} from "../../utils/firebase.util";
 import {FirestoreParameters} from "../../enums/firebase.enum";
 
-
 interface AvatarSinglePageProps {
   campaign: string;
-  combination?: number;
+  combination?: string;
   featureList: BasicData[];
   avatarBasePath: string;
   defaultAnimation?: string;
@@ -28,7 +27,7 @@ export default function AvatarSinglePage({
   return (
     <>
       <AvatarSingle campaign={campaign}
-                    combination={combination}
+                    combinationString={combination}
                     featureList={featureList}
                     avatarBasePath={avatarBasePath}
                     defaultAnimation={defaultAnimation}
@@ -47,16 +46,13 @@ export const getServerSideProps: GetServerSideProps<AvatarSinglePageProps> = asy
   const campaigns = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
   const isCampaign = campaigns == undefined ? false : campaigns.some(c => c === campaign);
   if (!isCampaign) return { notFound: true };
-  
-  // Parse combination to number
-  const parsedCombination = combination != undefined ? CastStringToInteger(combination) : undefined;
-  
+
   // Get campaign configuration
   const campaignParameters = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
 
   const returnProps: AvatarSinglePageProps = {
     campaign,
-    combination: parsedCombination,
+    combination,
     featureList: campaignParameters?.features ?? [],
     avatarBasePath: campaignParameters?.armature ?? GlobalValues.AvatarBase,
     defaultAnimation: campaignParameters?.config?.defAnimation,
