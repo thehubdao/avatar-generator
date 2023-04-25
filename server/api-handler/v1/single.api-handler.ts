@@ -21,7 +21,7 @@ async function CheckCampaign(campaign: string) {
 }
 
 function ProcessCombination(combination: string, maxValues: Map<number, number>) {
-  if (combination.includes(GlobalValues.CollectorIndexSeparator)) {
+  if (combination != undefined && combination.includes(GlobalValues.CollectorIndexSeparator)) {
     return IndexValuesStringToNumber(combination, maxValues);
   }
   
@@ -81,8 +81,9 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
   return await ProcessAndGetData(res, campaign as string, combination as string);
 }
 
-export async function GetByCampaignApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<any>>) {
-  const {campaign} = req.query;
+export async function GetUriApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<any>>) {
+  const {single} = req.query;
+  const [campaign, combination] = single as string[];
 
-  return await ProcessAndGetData(res, campaign as string, undefined);
+  return await ProcessAndGetData(res, campaign, combination);
 }

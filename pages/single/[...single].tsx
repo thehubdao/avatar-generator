@@ -1,7 +1,7 @@
 import {GetServerSideProps} from "next";
 import {BasicData, CampaignParameters, LookAtVectors} from "../../interfaces/common.interface";
 import AvatarSingle from "../../components/avatar/single.component";
-import {CastStringToInteger, RemoveUndefinedProperties} from "../../utils/common.util";
+import {RemoveUndefinedProperties} from "../../utils/common.util";
 import {CampaignParameterName, GlobalValues} from "../../enums/common.enum";
 import {GetParameter} from "../../utils/firebase.util";
 import {FirestoreParameters} from "../../enums/firebase.enum";
