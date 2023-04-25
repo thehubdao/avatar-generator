@@ -106,3 +106,7 @@ export async function PostUpdateAdminCampaigns() {
 export async function GetAvatarSingleByCampaignCombination(campaign: string, combination?: number) {
   return GetRequest<SingleInterface>(ApiRoutesV1.Single, [campaign, combination]);
 }
+
+export async function GetAvatarSingleByCampaignCombinationString(campaign: string, combination?: string) {
+  return GetRequest<SingleInterface>(ApiRoutesV1.Single, [campaign, combination]);
+}
