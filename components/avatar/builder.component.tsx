@@ -85,19 +85,14 @@ export default function AvatarBuilder({
   const startPromises = useRef<Promise<unknown>>();
 
   useEffect(() => {
-    const componentDidMount = async () => {
-      if (!onlyView) setEditModeSelected(true);
+    if (!onlyView) setEditModeSelected(true);
 
-      startPromises.current = Promise.all([
-        getFeatureList(),
-        getAccessoryList(),
-        getAnimationList(),
-        getEnvironmentList()
-      ]);
-    };
-
-    componentDidMount()
-      .catch(err => console.error(err));
+    startPromises.current = Promise.all([
+      getFeatureList(),
+      getAccessoryList(),
+      getAnimationList(),
+      getEnvironmentList()
+    ]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
