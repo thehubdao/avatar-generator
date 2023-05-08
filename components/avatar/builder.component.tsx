@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Head from "next/head";
 import {Vector3} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
@@ -81,12 +81,14 @@ export default function AvatarBuilder({
   const [featureListShow, setFeatureListShow] = useState<FeatureInterface[]>();
   const [accessoryListShow, setAccessoryListShow] = useState<AccessoryInterface[]>();
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
+  
+  const startPromises = useRef<Promise<unknown>>();
 
   useEffect(() => {
     const componentDidMount = async () => {
       if (!onlyView) setEditModeSelected(true);
 
-      await Promise.all([
+      startPromises.current = Promise.all([
         getFeatureList(),
         getAccessoryList(),
         getAnimationList(),
@@ -101,6 +103,7 @@ export default function AvatarBuilder({
   }, []);
 
   async function onAvatarBuilderReady() {
+    await startPromises.current;
     await SetFeaturesData(selectListFeatures);
 
     await loadPreData();
