@@ -123,7 +123,7 @@ async function CheckServerSide() {
 
 export async function GetInfoDB<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints) {
   const newLocation = campaign != undefined ?
-    `${FirestoreGlobalLocation.Campaign}/${campaign}${AddOrRemoveSlash(dbLocation)}` :
+    `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}${AddOrRemoveSlash(dbLocation)}` :
     dbLocation;
 
   if (newLocation.split('/').length % 2 === 0) {
