@@ -336,11 +336,12 @@ export async function InsertDoc(jsonData: string, location: string = FirestoreLo
   }
 }
 
-export async function InsertDocWithId(newDocId: string, data: {}, location: FirestoreLocation | FirestoreGlobalLocation, campaign?: string): Promise<Result<string>> {
+export async function InsertDocWithId(newDocId: string, data: {}, location: FirestoreLocation | FirestoreGlobalLocation, campaign?: string, lowerCase: boolean = true): Promise<Result<string>> {
   const {setDoc, doc} = await import('@firebase/firestore');
 
   try {
-    const newDoc = doc(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location, newDocId.trim().toLowerCase());
+    const docName = lowerCase ? newDocId.trim().toLowerCase() : newDocId.trim();
+    const newDoc = doc(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location, docName);
     await setDoc(newDoc, data);
     return {success: true, value: newDocId};
   } catch (e) {
@@ -484,7 +485,7 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
   // Save user info on db
   if (leUser != undefined) {
     const realUser = ConvertObject<UserInterface>(newUser, ConvertType.UserInterface);
-    const insertedDoc = await InsertDocWithId(leUser.user.uid, realUser, FirestoreGlobalLocation.User);
+    const insertedDoc = await InsertDocWithId(leUser.user.uid, realUser, FirestoreGlobalLocation.User, undefined, false);
 
     if (!insertedDoc.success) {
       const {deleteUser} = await import('@firebase/auth');
