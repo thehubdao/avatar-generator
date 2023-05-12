@@ -124,7 +124,7 @@ export default function AvatarBuilder({
 
     if (params.detail && params.detail.startsWith('http')) {
       if (params.id.endsWith(GlobalValues.AccEnd)) {
-        await ChangeAccessory(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
+        await ChangeAccessory(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id, campaignConfig.changeMaterial);
       } else {
         await onChangeFeature(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
       }
@@ -133,7 +133,7 @@ export default function AvatarBuilder({
         const accessory = accessoryList?.find(a => a.type === params.id && a.name === params.val);
 
         if (!accessory) return LogError(Module.AvatarGenerator, "Accessory option not found!");
-        await ChangeAccessory(accessory.id, accessory.path, accessory.name, accessory.type);
+        await ChangeAccessory(accessory.id, accessory.path, accessory.name, accessory.type, campaignConfig.changeMaterial);
       } else {
         const feature = featureList?.find(p => p.type === params.id && p.name === params.val);
 
@@ -171,7 +171,7 @@ export default function AvatarBuilder({
         else if (selectListAccessories.some(pl => pl.id === attribute.id)) {
           const newAcc = accessoryList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newAcc)
-            await ChangeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
+            await ChangeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id, campaignConfig.changeMaterial);
         }
       }
     } else {
@@ -201,7 +201,7 @@ export default function AvatarBuilder({
       for (const feature of randomFeature)
         await onChangeFeature(feature.id, feature.path, feature.name, feature.type);
       for (const acc of randomAccessory)
-        await ChangeAccessory(acc.id, acc.path, acc.name, acc.type);
+        await ChangeAccessory(acc.id, acc.path, acc.name, acc.type, campaignConfig.changeMaterial);
     }
   }
 
@@ -253,14 +253,14 @@ export default function AvatarBuilder({
   }
 
   async function onChangeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {
-    await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor);
+    await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor, campaignConfig.changeMaterial);
     // TODO: find ways to avoid this
     await SetFeaturesData(selectListFeatures);
     addReplaceAttribute(selectedFeature, name);
   }
 
   async function onChangeAccessory(id: string, path: string, name: string, _selectedAcc: string = selectedAcc) {
-    await ChangeAccessory(id, path, name, _selectedAcc);
+    await ChangeAccessory(id, path, name, _selectedAcc, campaignConfig.changeMaterial);
     addReplaceAttribute(selectedAcc, name);
   }
 

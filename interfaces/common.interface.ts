@@ -1,6 +1,7 @@
 ﻿import {Object3D} from "three";
 import {ClientQuestion} from "../enums/campaign.enum";
 import {AdminComponents} from "../enums/common.enum";
+import {ChangeMaterialOption} from "../enums/model.enum";
 
 export interface BasicData {
   id: string;
@@ -39,6 +40,7 @@ export interface AGVector3 {
 
 export interface CampaignConfig {
   clientRequirements?: ClientQuestion[];
+  changeMaterial?: ChangeMaterialOption;
   defEyesColor?: string;
   defSkinColor?: string;
   defCam?: LookAtVectors;
