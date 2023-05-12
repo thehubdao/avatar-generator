@@ -223,7 +223,7 @@ async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
 
 export async function GetFile(path: string, campaign?: string) {
   const {getBlob, ref} = await import('@firebase/storage');
-  const campaignSection = campaign ? `${campaign}/` : '';
+  const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
   const baseMeshRef = ref(await FirebaseUtil.Instance().Storage(), campaignSection + path);
 
   // // Server Side
@@ -253,7 +253,7 @@ export async function GetParameter<T>(campaign: string | undefined, parameter: P
 export async function GetParameters<T>(campaign?: string, ...parameters: (string | CampaignParameterName)[]): Promise<T[]> {
   const {doc, getDoc} = await import('@firebase/firestore');
 
-  const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}` : FirestoreGlobalLocation.Parameters;
+  const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}` : FirestoreGlobalLocation.Parameters;
   const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
   const leDoc = await getDoc(docRef);
 
@@ -310,7 +310,7 @@ export async function ReplaceDoc(docLocation: string, jsonData?: string, campaig
   if (jsonData) {
     const {doc, updateDoc} = await import('@firebase/firestore');
     const newLocation = campaign ?
-      campaign + docLocation :
+      campaign.toLowerCase() + docLocation :
       docLocation !== '/' ?
         docLocation :
         FirestoreGlobalLocation.Parameters;
