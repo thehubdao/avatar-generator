@@ -22,6 +22,7 @@ import {
   GetMaxIndexValues,
   GetMinIndexValues, GetMaxCombinationNum
 } from "../../utils/collection.util";
+import {ChangeMaterialOption} from "../../enums/model.enum";
 
 let _reachedEnd = false;
 let _start: Map<number, number> | undefined;
@@ -97,6 +98,7 @@ interface AvatarCollectionProps {
   defaultAnimation: string | undefined;
   featureList: FeatureBasic[];
   skinColor: string;
+  changeMaterial?: ChangeMaterialOption;
 }
 
 export default function AvatarCollection({
@@ -104,7 +106,8 @@ export default function AvatarCollection({
                                            avatarBasePath,
                                            featureList,
                                            skinColor,
-                                           defaultAnimation
+                                           defaultAnimation, 
+                                           changeMaterial
                                          }: AvatarCollectionProps) {
   const [loading, setLoading] = useState<boolean>(true);
   const [maxCombination, setMaxCombination] = useState<number>(0);
@@ -178,7 +181,7 @@ export default function AvatarCollection({
         continue;
       }
       // console.log('Item', item);
-      await ChangeFeature(item.id, item.path, item.name, item.type, skinColor);
+      await ChangeFeature(item.id, item.path, item.name, item.type, skinColor, changeMaterial);
       // TODO: find ways to avoid this (SetFeaturesData)
       await SetFeaturesData(featureList);
       // addReplaceAttribute(selectedFeature, name);
@@ -297,7 +300,9 @@ export default function AvatarCollection({
         <>
           {mahUi()}
           <AvatarEditor avatarBasePath={avatarBasePath}
-                        onReady={() => onCollectionReady()}/>
+                        onReady={() => onCollectionReady()}
+                        changeMaterial={changeMaterial}
+          />
         </>
         :
         <h1>Missing info</h1>

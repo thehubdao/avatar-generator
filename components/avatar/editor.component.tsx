@@ -15,6 +15,7 @@ import {GetAmbientLights, GetTestLights} from "../../utils/test-scene.util";
 import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../../interfaces/common.interface";
 import {ExportModelGlb} from "../../utils/exporter.util";
 import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene} from "./viewer.component";
+import {ChangeMaterialOption} from "../../enums/model.enum";
 
 
 //#region Logic
@@ -44,21 +45,21 @@ export async function GetWearableOption(id: string, optionPath: string) {
   return replaceModel;
 }
 
-export async function ChangeFeature(id: string, featurePath: string, name: string, selectedFeature: string, skinColor?: string) {
+export async function ChangeFeature(id: string, featurePath: string, name: string, selectedFeature: string, skinColor?: string, changeMaterial?: ChangeMaterialOption) {
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature in order to change feature");
   if (_featureListData == undefined) return LogError(Module.Editor, "Missing feature list data");
 
   const replaceModel = await GetWearableOption(id, featurePath);
 
-  await ReplaceModelFeatureOnly(_avatar.scene.children[0], replaceModel, selectedFeature, _featureListData, skinColor);
+  await ReplaceModelFeatureOnly(_avatar.scene.children[0], replaceModel, selectedFeature, _featureListData, skinColor, changeMaterial);
   // console.log('Avatar:', _avatar);
 }
 
-export async function ChangeAccessory(id: string, path: string, name: string, selectedAcc: string) {
+export async function ChangeAccessory(id: string, path: string, name: string, selectedAcc: string, changeMaterial?: ChangeMaterialOption) {
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature in order to change accessory!");
 
   const replaceModel = await GetWearableOption(id, path);
-  await ReplaceModelAccessory(_avatar.scene.children[0], replaceModel, _accessoryListData, selectedAcc);
+  await ReplaceModelAccessory(_avatar.scene.children[0], replaceModel, _accessoryListData, selectedAcc, changeMaterial);
 }
 
 export async function ChangeStartAnimation(startAnimation: string | undefined) {
@@ -97,6 +98,7 @@ export async function GetAvatarGLB() {
 interface AvatarEditorProps {
   avatarBasePath: string;
   onReady: () => Promise<void>;
+  changeMaterial?: ChangeMaterialOption;
 }
 
 /***
@@ -104,7 +106,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({avatarBasePath, onReady}: AvatarEditorProps) {
+export default function AvatarEditor({avatarBasePath, onReady, changeMaterial}: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -125,7 +127,7 @@ export default function AvatarEditor({avatarBasePath, onReady}: AvatarEditorProp
     _mixer = CreateAnimationMixer(_avatar.scene);
     await SetAnimation(_mixer, _avatar, undefined);
 
-    await TransformObject3dToToonMaterial(_avatar.scene);
+    await TransformObject3dToToonMaterial(_avatar.scene, undefined, changeMaterial);
     AddToScene(_avatar.scene);
     AddMixer(_mixer);
   }

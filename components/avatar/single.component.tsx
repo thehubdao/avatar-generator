@@ -9,6 +9,7 @@ import {AnimationInterface, SingleInterface} from "../../interfaces/api.interfac
 import {AGChangeCamPosition, AGChangeLookAtPosition} from "./viewer.component";
 import {LogError} from "../../utils/common.util";
 import {Module} from "../../enums/common.enum";
+import {ChangeMaterialOption} from "../../enums/model.enum";
 
 interface AvatarSingleProps {
   campaign: string;
@@ -19,6 +20,7 @@ interface AvatarSingleProps {
   defaultAnimation?: string;
   defaultSkinTone?: string;
   defaultCameraPosition?: LookAtVectors;
+  changeMaterial?: ChangeMaterialOption;
 }
 
 export default function AvatarSingle({
@@ -29,7 +31,8 @@ export default function AvatarSingle({
                                        avatarBasePath,
                                        defaultSkinTone,
                                        defaultAnimation,
-                                       defaultCameraPosition
+                                       defaultCameraPosition, 
+                                       changeMaterial
                                      }: AvatarSingleProps) {
   const singleData = useRef<SingleInterface>();
   const defaultAnimationData = useRef<AnimationInterface>();
@@ -82,14 +85,16 @@ export default function AvatarSingle({
       
     for (const {val: {id, path, type, name}} of singleData.current.features) {
       // Set feature on model
-      await ChangeFeature(id, path, name, type, defaultSkinTone);
+      await ChangeFeature(id, path, name, type, defaultSkinTone, changeMaterial);
     }
   }
   
   return (
     <>
       <AvatarEditor avatarBasePath={avatarBasePath}
-                    onReady={() => onAvatarBuilderReady()}/>
+                    onReady={() => onAvatarBuilderReady()}
+                    changeMaterial={changeMaterial}
+      />
     </>
   );
 }

@@ -54,7 +54,8 @@ export function GetBaseRenderer(): WebGLRenderer {
 export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTMLCanvasElement) {
   let controls = new OrbitControls(camera, domElement);
   controls.target.set(0, 0.7, 0);
-  controls.enablePan = false;
+  // TODO: Remove for release
+  controls.enablePan = true;
   
   return controls;
 }

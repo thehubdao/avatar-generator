@@ -5,6 +5,7 @@ import {RemoveUndefinedProperties} from "../../utils/common.util";
 import {CampaignParameterName, GlobalValues} from "../../enums/common.enum";
 import {GetParameter} from "../../utils/firebase.util";
 import {FirestoreParameters} from "../../enums/firebase.enum";
+import {ChangeMaterialOption} from "../../enums/model.enum";
 
 interface AvatarSinglePageProps {
   campaign: string;
@@ -14,6 +15,7 @@ interface AvatarSinglePageProps {
   defaultAnimation?: string;
   defaultSkinTone?: string;
   defaultCamPos?: LookAtVectors;
+  changeMaterial?: ChangeMaterialOption;
 }
 
 export default function AvatarSinglePage({
@@ -22,7 +24,8 @@ export default function AvatarSinglePage({
                                            featureList,
                                            avatarBasePath,
                                            defaultAnimation,
-                                           defaultSkinTone
+                                           defaultSkinTone,
+                                           changeMaterial
                                          }: AvatarSinglePageProps) {
   return (
     <>
@@ -31,7 +34,9 @@ export default function AvatarSinglePage({
                     featureList={featureList}
                     avatarBasePath={avatarBasePath}
                     defaultAnimation={defaultAnimation}
-                    defaultSkinTone={defaultSkinTone} />
+                    defaultSkinTone={defaultSkinTone}
+                    changeMaterial={changeMaterial}
+      />
     </>
   );
 }
@@ -58,6 +63,7 @@ export const getServerSideProps: GetServerSideProps<AvatarSinglePageProps> = asy
     defaultAnimation: campaignParameters?.config?.defAnimation,
     defaultSkinTone: campaignParameters?.config?.defSkinColor,
     defaultCamPos: campaignParameters?.config?.defCam,
+    changeMaterial: campaignParameters?.config?.changeMaterial
   };
 
   return {

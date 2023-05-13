@@ -6,8 +6,8 @@ import {TextureTone, TextureUtil} from "./texture.util";
 import {LogError} from "./common.util";
 import {GlobalValues, Module} from "../enums/common.enum";
 import {LoadGltfModel} from "./importer.util";
-
-type MaterialFunction = (obj: SkinnedMesh, tone?: TextureTone) => void;
+import {MaterialFunction} from "../types/model.type";
+import {ChangeMaterialOption} from "../enums/model.enum";
 
 export async function ReplaceModelFeature(baseModel: GLTF, featureUrl: string, featureIndex: number) {
   const featureModel = await LoadGltfModel(featureUrl);
@@ -51,7 +51,7 @@ function GetSkeleton(skeletonModel: Object3D, index: number) {
   return leSkelly;
 }
 
-export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel: GLTF, selectedFeature: string, allFeatureInfo: Record<string, FeatureInfoInterface>, skinColor?: string) {
+export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel: GLTF, selectedFeature: string, allFeatureInfo: Record<string, FeatureInfoInterface>, skinColor?: string, changeMaterial?: ChangeMaterialOption) {
   if(allFeatureInfo == undefined) return LogError(Module.ModelUtil, "Missing feature on armature.");
   if(selectedFeature == undefined)
     return LogError(Module.ModelUtil, "There is no selected feature to replace on base model.");
@@ -67,7 +67,8 @@ export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel:
   if (baseSkeleton == undefined)
     return LogError(Module.ModelUtil, "Skeleton missing from base_mesh some of the features have weird components.")
 
-  await ChangeSkeleton(newFeature, baseSkeleton, ChangeToToonMaterial, "threeTone");
+  const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
+  await ChangeSkeleton(newFeature, baseSkeleton, changeMaterialFunction, "threeTone");
 
   if (skinColor) {
     await ChangeObjectSkinColor(newFeature, skinColor);
@@ -162,7 +163,16 @@ function FindOrCreateAccessoryGroup(baseModel: Object3D) {
   return accGroup;
 }
 
-export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLTF, allAccInfo: Record<string, AccessoryInfoInterface>, selectedAcc: string) {
+function GetChangeMaterialFunction(changeMaterial?: ChangeMaterialOption): MaterialFunction | undefined {
+  switch (changeMaterial) {
+    case ChangeMaterialOption.Toon:
+      return ChangeToToonMaterial;
+    default:
+      return undefined;
+  }
+}
+
+export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLTF, allAccInfo: Record<string, AccessoryInfoInterface>, selectedAcc: string, changeMaterial?: ChangeMaterialOption) {
   // Find valid accessory
   const leAcc = await GetMatchPiece(replaceAcc);
   if (leAcc == null) {
@@ -199,7 +209,9 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
     console.error('Missing skeleton');
     return;
   }
-  await ChangeSkeleton(newAcc, newSkeleton, ChangeToToonMaterial, "threeTone");
+  
+  const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
+  await ChangeSkeleton(newAcc, newSkeleton, changeMaterialFunction, "threeTone");
 
   // Add new one
   accessoryGroup.add(newAcc);
@@ -222,10 +234,13 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
   }
 }
 
-export async function TransformObject3dToToonMaterial(object: Object3D, tone?: TextureTone) {
+export async function TransformObject3dToToonMaterial(object: Object3D, tone?: TextureTone, changeMaterial?: ChangeMaterialOption) {
+  const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
+  if (changeMaterialFunction == undefined) return;
+  
   object.traverse(async subObj => {
     if (IsSkinnedMesh(subObj)) {
-      await ChangeToToonMaterial(subObj, tone);
+      await changeMaterialFunction(subObj, tone);
     }
   });
 }
