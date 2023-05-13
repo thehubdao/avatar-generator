@@ -92,7 +92,9 @@ export default function AvatarSingle({
   return (
     <>
       <AvatarEditor avatarBasePath={avatarBasePath}
-                    onReady={() => onAvatarBuilderReady()}/>
+                    onReady={() => onAvatarBuilderReady()}
+                    changeMaterial={changeMaterial}
+      />
     </>
   );
 }

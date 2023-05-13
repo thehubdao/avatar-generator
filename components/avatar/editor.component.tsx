@@ -98,6 +98,7 @@ export async function GetAvatarGLB() {
 interface AvatarEditorProps {
   avatarBasePath: string;
   onReady: () => Promise<void>;
+  changeMaterial?: ChangeMaterialOption;
 }
 
 /***
@@ -105,7 +106,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({avatarBasePath, onReady}: AvatarEditorProps) {
+export default function AvatarEditor({avatarBasePath, onReady, changeMaterial}: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -126,7 +127,7 @@ export default function AvatarEditor({avatarBasePath, onReady}: AvatarEditorProp
     _mixer = CreateAnimationMixer(_avatar.scene);
     await SetAnimation(_mixer, _avatar, undefined);
 
-    await TransformObject3dToToonMaterial(_avatar.scene);
+    await TransformObject3dToToonMaterial(_avatar.scene, undefined, changeMaterial);
     AddToScene(_avatar.scene);
     AddMixer(_mixer);
   }

@@ -234,10 +234,13 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
   }
 }
 
-export async function TransformObject3dToToonMaterial(object: Object3D, tone?: TextureTone) {
+export async function TransformObject3dToToonMaterial(object: Object3D, tone?: TextureTone, changeMaterial?: ChangeMaterialOption) {
+  const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
+  if (changeMaterialFunction == undefined) return;
+  
   object.traverse(async subObj => {
     if (IsSkinnedMesh(subObj)) {
-      await ChangeToToonMaterial(subObj, tone);
+      await changeMaterialFunction(subObj, tone);
     }
   });
 }

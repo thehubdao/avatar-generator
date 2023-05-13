@@ -324,7 +324,9 @@ export default function AvatarBuilder({
         <div style={{backgroundColor: `#${bgColor ?? '272727'}`}} className="w-full h-screen absolute"/>
         {/* CANVAS */}
         <AvatarEditor avatarBasePath={avatarBasePath}
-                      onReady={() => onAvatarBuilderReady()}/>
+                      onReady={() => onAvatarBuilderReady()}
+                      changeMaterial={campaignConfig.changeMaterial}
+        />
       </div>
       {loading ? <></> :
         <>

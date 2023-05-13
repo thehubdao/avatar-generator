@@ -300,7 +300,9 @@ export default function AvatarCollection({
         <>
           {mahUi()}
           <AvatarEditor avatarBasePath={avatarBasePath}
-                        onReady={() => onCollectionReady()}/>
+                        onReady={() => onCollectionReady()}
+                        changeMaterial={changeMaterial}
+          />
         </>
         :
         <h1>Missing info</h1>
