@@ -35,7 +35,7 @@ export default function Header({backBtn, backClickHandler}: HeaderProps) {
   }
 
   return (
-    <div className="fixed w-full flex justify-between p-5 top-0 left-0">
+    <div className="fixed w-full flex justify-between p-5 top-0 left-0 bg-bg">
       {
         backBtn &&
         <div className="flex">
