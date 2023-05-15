@@ -64,7 +64,7 @@ export default function UserAdd({changeComponent}: UserAddProps) {
         <p>Name</p>
         <input type="text" ref={userName} required />
         <p>User</p>
-        <input type="text" ref={userAccount} required />
+        <input type="text" ref={userName} required />
         <p>Password</p>
         <input type="password" ref={userPass} minLength={8} />
         <AGButton type="danger" form>Add</AGButton>
