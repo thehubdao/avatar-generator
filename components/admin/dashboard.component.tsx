@@ -46,7 +46,7 @@ function Card({ noCampaign, create, campaign, clickHandler }: CardProps) {
       }
       {create &&
         <>
-          <h2 className="text-center font-bold leading-none text-gray-normal">CREATE A<br />NEW CAMPAIGN</h2>
+          <h2 className="text-center font-poppins font-bold leading-none text-gray-normal">CREATE A<br />NEW CAMPAIGN</h2>
           <div>
             <div className="relative rounded-full border border-gray-light w-32 h-32 my-4">
               <div className="absolute w-3/5 h-[2px] bg-gray-light top-2/4 left-2/4 -translate-x-2/4"></div>
@@ -54,7 +54,7 @@ function Card({ noCampaign, create, campaign, clickHandler }: CardProps) {
             </div>
           </div>
           <AGButton nm onClickEvent={() => void clickHandler()} >
-            CREATE
+            Create
           </AGButton>
         </>
       }
@@ -62,12 +62,12 @@ function Card({ noCampaign, create, campaign, clickHandler }: CardProps) {
         <>
           <div className="w-full h-full bg-gray-dark p-2 flex flex-col justify-between">
             <div className="bg-bg w-fit px-5 py-2 rounded-xl flex justify-between items-center gap-6">
-              <p className="uppercase font-bold text-gray-normal">{campaign}</p>
+              <p className="uppercase font-poppins font-bold text-gray-normal">{campaign}</p>
               <div className="w-2 h-2 rounded-full bg-green-500"></div>
             </div>
             <div className="flex justify-end gap-2">
               <button className="bg-bg w-fit px-5 rounded-full" onClick={() => void clickHandler()}>
-                <p className="py-1">EDIT</p>
+                <p className="py-1">Edit</p>
               </button>
               <div className="bg-bg w-fit px-2 rounded-full flex justify-between items-center">
                 <AiOutlineLink />
@@ -190,7 +190,7 @@ export default function Dashboard({ userRole, campaignList }: DashboardProps) {
   }
 
   return (
-    <div>
+    <div className="font-work">
       <Header backBtn={!viewDashboard} backClickHandler={() => setviewDashboard(true)}/>
       {viewDashboard ?
         <>
