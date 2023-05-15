@@ -10,7 +10,8 @@
       extend: {
         fontFamily: {
           'work': ['var(--work-font)', 'sans-serif'],
-          'humane': ['var(--humane-font)', 'sans-serif']
+          'humane': ['var(--humane-font)', 'sans-serif'],
+          'poppins': ['var(--poppins-font)', 'sans-serif'],
         },
         colors: {
           gray: {

@@ -1,10 +1,11 @@
 import './../styles/globals.css';
-import { Work_Sans } from '@next/font/google';
+import { Work_Sans, Poppins } from '@next/font/google';
 import Humane from '@next/font/local';
 import {AppProps} from "next/app";
 
-const workSans = Work_Sans({ subsets: ['latin'] });
-const humane = Humane({ src: '../styles/fonts/Humane-Medium.woff2' });
+const workSans = Work_Sans({ subsets: ['latin'], display: 'block' });
+const poppins = Poppins({ subsets: ['latin'], display: 'block', weight: ['400', '500','600','700'] });
+const humane = Humane({ src: '../styles/fonts/Humane-Medium.woff2', display: 'block' });
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
@@ -13,6 +14,7 @@ export default function App({ Component, pageProps }: AppProps) {
           :root {
             --work-font: ${workSans.style.fontFamily};
             --humane-font: ${humane.style.fontFamily};
+            --poppins-font: ${poppins.style.fontFamily};
           }
         `}</style>
       <Component {...pageProps} />
