@@ -38,7 +38,7 @@ export default function CampaignAdd({ onCampaignCreated, campaignList }: NewCamp
         <div className="w-full h-full bg-gray-dark p-2 flex flex-col justify-end">
           <div className="flex justify-end gap-2">
             <label className="bg-bg w-fit px-5 rounded-full cursor-pointer" htmlFor="newCampaignBase">
-              <p className="py-1">UPLOAD</p>
+              <p className="py-1">Upload</p>
               <input type="file" id="newCampaignBase" ref={campaignBaseInput} className="hidden" accept=".glb" onChange={checkCampaignBase}/>
             </label>
           </div>
@@ -181,7 +181,7 @@ export default function CampaignAdd({ onCampaignCreated, campaignList }: NewCamp
       <div>
         <input
           ref={campaignNameInput}
-          className="font-bold text-7xl text-gray-normal uppercase bg-transparent border-l border-gray-light outline-none pl-2"
+          className="font-poppins font-bold text-7xl text-gray-normal uppercase bg-transparent border-l border-gray-light outline-none pl-2"
           type="text"
           name="newCampaignName"
           id="newCampaignName"
@@ -205,7 +205,7 @@ export default function CampaignAdd({ onCampaignCreated, campaignList }: NewCamp
           <Card />
           <div className="flex flex-col justify-between">
             <div>
-              <h2 className="text-2xl text-purple font-bold">AVATAR BASE (AB)</h2>
+              <h2 className="text-2xl text-purple font-poppins font-bold">AVATAR BASE (AB)</h2>
               <p>The <span className="text-purple font-bold">AB</span> is the reference for all of the avatar features.</p>
               <div className="relative bg-purple p-5 rounded-r-2xl rounded-bl-lg rounded-t- mt-5 flex gap-5">
                 <div className="absolute top-0 -left-3 border-8 border-l-transparent border-b-transparent border-purple"></div>
@@ -224,7 +224,7 @@ export default function CampaignAdd({ onCampaignCreated, campaignList }: NewCamp
             </div>
             { hasCampaignBase &&
               <AGButton nm align="start" onClickEvent={() => void checkCampaignBase()}>
-                CREATE
+                Create
               </AGButton>
             }
           </div>
