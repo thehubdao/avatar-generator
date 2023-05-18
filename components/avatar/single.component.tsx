@@ -85,7 +85,8 @@ export default function AvatarSingle({
       
     for (const {val: {id, path, type, name}} of singleData.current.features) {
       // Set feature on model
-      await ChangeFeature(id, path, name, type, defaultSkinTone, changeMaterial);
+      // TODO: add defSkin from campaign configuration
+      await ChangeFeature(id, path, name, type, defaultSkinTone, undefined, changeMaterial);
     }
   }
   

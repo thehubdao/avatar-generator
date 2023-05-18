@@ -181,7 +181,8 @@ export default function AvatarCollection({
         continue;
       }
       // console.log('Item', item);
-      await ChangeFeature(item.id, item.path, item.name, item.type, skinColor, changeMaterial);
+      // TODO: add skinName from configuration
+      await ChangeFeature(item.id, item.path, item.name, item.type, skinColor, undefined, changeMaterial);
       // TODO: find ways to avoid this (SetFeaturesData)
       await SetFeaturesData(featureList);
       // addReplaceAttribute(selectedFeature, name);
