@@ -27,14 +27,18 @@ export function FrustumCulledFalse(obj: Object3D) {
   });
 }
 
-export function GetBaseCamera(): PerspectiveCamera {
+export function GetBaseCamera(defPos?: AGVector3): PerspectiveCamera {
   let camera = new PerspectiveCamera(
     50,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
   );
-  camera.position.set(0.5, 0.5, 3.5);
+  
+  if (defPos != undefined)
+    camera.position.set(defPos.x, defPos.y, defPos.z);
+  else 
+    camera.position.set(0.5, 0.5, 3.5);
   
   return camera;
 }
@@ -51,9 +55,13 @@ export function GetBaseRenderer(): WebGLRenderer {
   return renderer;
 }
 
-export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTMLCanvasElement) {
+export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTMLCanvasElement, defLookAt?: AGVector3) {
   let controls = new OrbitControls(camera, domElement);
-  controls.target.set(0, 0.7, 0);
+  if (defLookAt != undefined)
+    controls.target.set(defLookAt.x, defLookAt.y, defLookAt.z);
+  else
+    controls.target.set(0, 0.7, 0);
+  
   // TODO: Remove for release
   controls.enablePan = true;
   

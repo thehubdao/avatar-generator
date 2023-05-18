@@ -246,10 +246,11 @@ export default function AvatarBuilder({
 
   function setFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
     const confRef = posLocation ? posLocation[index] : undefined;
-    if (confRef) {
-      ChangeCamPosition(new Vector3(confRef.pos?.x, confRef.pos?.y, confRef.pos?.z));
-      ChangeLookAtPosition(new Vector3(confRef.lookAt?.x, confRef.lookAt?.y, confRef.lookAt?.z));
-    }
+    
+    if (confRef == undefined) return;
+    
+    ChangeCamPosition(new Vector3(confRef.pos?.x, confRef.pos?.y, confRef.pos?.z));
+    ChangeLookAtPosition(new Vector3(confRef.lookAt?.x, confRef.lookAt?.y, confRef.lookAt?.z));
   }
 
   async function onChangeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {

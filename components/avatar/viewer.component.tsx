@@ -111,9 +111,11 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
 //#region Component
 interface AvatarViewerProps {
   onReady: () => Promise<void>;
+  defaultCamPos?: AGVector3;
+  defaultCamLookAt?: AGVector3;
 }
 
-export default function AvatarViewer({onReady}: AvatarViewerProps) {
+export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}: AvatarViewerProps) {
   const threeCanvas = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -133,9 +135,9 @@ export default function AvatarViewer({onReady}: AvatarViewerProps) {
     if (threeCanvas.current == null) return LogError(Module.AvatarGenerator, "Error initializing canvas!");
 
     _scene = GetBaseScene();
-    _camera = GetBaseCamera();
+    _camera = GetBaseCamera(defaultCamPos);
     _renderer = GetBaseRenderer();
-    _controls = GetBaseCameraControls(_camera, _renderer.domElement);
+    _controls = GetBaseCameraControls(_camera, _renderer.domElement, defaultCamLookAt);
 
     // mount scene
     threeCanvas.current.appendChild(_renderer.domElement);
