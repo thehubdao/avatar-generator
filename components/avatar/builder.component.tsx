@@ -228,7 +228,7 @@ export default function AvatarBuilder({
   }
 
   async function onClickChangeSkinColor(newSkinColor = skinColor) {
-    await ChangeSkinColor(newSkinColor);
+    await ChangeSkinColor(newSkinColor, campaignConfig.defSkin);
     setSkinColor(newSkinColor);
   }
 
@@ -253,7 +253,7 @@ export default function AvatarBuilder({
   }
 
   async function onChangeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {
-    await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor, campaignConfig.changeMaterial);
+    await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor, campaignConfig.defSkin, campaignConfig.changeMaterial);
     // TODO: find ways to avoid this
     await SetFeaturesData(selectListFeatures);
     addReplaceAttribute(selectedFeature, name);

@@ -43,6 +43,7 @@ export interface CampaignConfig {
   changeMaterial?: ChangeMaterialOption;
   defEyesColor?: string;
   defSkinColor?: string;
+  defSkin?: string;
   defCam?: LookAtVectors;
   defAnimation?: string;
   defEnvironment?: string;

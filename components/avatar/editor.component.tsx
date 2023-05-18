@@ -27,10 +27,10 @@ const _savedModels: Record<string, GLTF> = {};
 const _accessoryListData: Record<string, AccessoryInfoInterface> = {};
 let _featureListData: Record<string, FeatureInfoInterface> | undefined;
 
-export async function ChangeSkinColor(newSkinColor: string) {
+export async function ChangeSkinColor(newSkinColor: string, skinName?: string) {
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature for skin color change");
 
-  await ChangeObjectSkinColor(_avatar.scene, newSkinColor);
+  await ChangeObjectSkinColor(_avatar.scene, newSkinColor, skinName);
 }
 
 export async function GetWearableOption(id: string, optionPath: string) {
@@ -45,13 +45,13 @@ export async function GetWearableOption(id: string, optionPath: string) {
   return replaceModel;
 }
 
-export async function ChangeFeature(id: string, featurePath: string, name: string, selectedFeature: string, skinColor?: string, changeMaterial?: ChangeMaterialOption) {
+export async function ChangeFeature(id: string, featurePath: string, name: string, selectedFeature: string, skinColor?: string, skinName?: string, changeMaterial?: ChangeMaterialOption) {
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature in order to change feature");
   if (_featureListData == undefined) return LogError(Module.Editor, "Missing feature list data");
 
   const replaceModel = await GetWearableOption(id, featurePath);
 
-  await ReplaceModelFeatureOnly(_avatar.scene.children[0], replaceModel, selectedFeature, _featureListData, skinColor, changeMaterial);
+  await ReplaceModelFeatureOnly(_avatar.scene.children[0], replaceModel, selectedFeature, _featureListData, skinColor, skinName, changeMaterial);
   // console.log('Avatar:', _avatar);
 }
 
