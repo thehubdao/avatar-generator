@@ -27,10 +27,10 @@ const _savedModels: Record<string, GLTF> = {};
 const _accessoryListData: Record<string, AccessoryInfoInterface> = {};
 let _featureListData: Record<string, FeatureInfoInterface> | undefined;
 
-export async function ChangeSkinColor(newSkinColor: string) {
+export async function ChangeSkinColor(newSkinColor: string, skinName?: string) {
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature for skin color change");
 
-  await ChangeObjectSkinColor(_avatar.scene, newSkinColor);
+  await ChangeObjectSkinColor(_avatar.scene, newSkinColor, skinName);
 }
 
 export async function GetWearableOption(id: string, optionPath: string) {

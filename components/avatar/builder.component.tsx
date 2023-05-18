@@ -228,7 +228,7 @@ export default function AvatarBuilder({
   }
 
   async function onClickChangeSkinColor(newSkinColor = skinColor) {
-    await ChangeSkinColor(newSkinColor);
+    await ChangeSkinColor(newSkinColor, campaignConfig.defSkin);
     setSkinColor(newSkinColor);
   }
 
