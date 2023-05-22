@@ -51,7 +51,7 @@ function GetSkeleton(skeletonModel: Object3D, index: number) {
   return leSkelly;
 }
 
-export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel: GLTF, selectedFeature: string, allFeatureInfo: Record<string, FeatureInfoInterface>, skinColor?: string, changeMaterial?: ChangeMaterialOption) {
+export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel: GLTF, selectedFeature: string, allFeatureInfo: Record<string, FeatureInfoInterface>, skinColor?: string, skinName?: string, changeMaterial?: ChangeMaterialOption) {
   if(allFeatureInfo == undefined) return LogError(Module.ModelUtil, "Missing feature on armature.");
   if(selectedFeature == undefined)
     return LogError(Module.ModelUtil, "There is no selected feature to replace on base model.");
@@ -70,8 +70,8 @@ export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel:
   const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
   await ChangeSkeleton(newFeature, baseSkeleton, changeMaterialFunction, "threeTone");
 
-  if (skinColor) {
-    await ChangeObjectSkinColor(newFeature, skinColor);
+  if (skinColor != undefined) {
+    await ChangeObjectSkinColor(newFeature, skinColor, skinName);
   }
 
   newFeature.frustumCulled = false;
