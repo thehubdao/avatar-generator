@@ -1,6 +1,7 @@
 ﻿import {Object3D} from "three";
 import {ClientQuestion} from "../enums/campaign.enum";
 import {AdminComponents} from "../enums/common.enum";
+import {ChangeMaterialOption} from "../enums/model.enum";
 
 export interface BasicData {
   id: string;
@@ -9,8 +10,9 @@ export interface BasicData {
 }
 
 export interface FeatureInfoInterface {
-  featureIndex: number;
-  featureBase?: Object3D;
+  index: number;
+  name: string;
+  ref?: Object3D;
 }
 
 export interface AccessoryInfoInterface {
@@ -30,7 +32,7 @@ export interface LookAtVectors {
   pos?: AGVector3;
 }
 
-interface AGVector3 {
+export interface AGVector3 {
   x: number;
   y: number;
   z: number;
@@ -38,10 +40,13 @@ interface AGVector3 {
 
 export interface CampaignConfig {
   clientRequirements?: ClientQuestion[];
+  changeMaterial?: ChangeMaterialOption;
   defEyesColor?: string;
   defSkinColor?: string;
+  defSkin?: string;
   defCam?: LookAtVectors;
   defAnimation?: string;
+  defEnvironment?: string;
   featuresCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
 }
@@ -52,9 +57,13 @@ export interface CampaignConfig {
 export interface CampaignParameters {
   owner: string;
   armature: string;
-  features?: BasicData[];
+  features?: FeatureBasic[];
   accessories?: BasicData[];
   config?: CampaignConfig;
+}
+
+export interface FeatureBasic extends Omit<BasicData, 'detail'> {
+  index: number;
 }
 
 export interface AdminComponentParams {

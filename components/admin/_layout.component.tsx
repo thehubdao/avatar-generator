@@ -6,7 +6,10 @@ import AGLoading from "../common/ag-loading.component";
 interface LayoutProps {
   children: JSX.Element | JSX.Element[] | boolean;
   userInfo?: UserInterface;
-  setUserInfo: (user?: UserInterface) => void;
+  currentCampaign?: string;
+  setUserInfo?: (user?: UserInterface) => void;
+  setCurrentCampaign?: (campaign?: string) => void;
+  noCampaign?: boolean;
 }
 
 export default function Layout({
@@ -20,7 +23,7 @@ export default function Layout({
     const uInfo = await GetCurrentUserInfo();
 
     setLoading(false);
-    setUserInfo(uInfo);
+    setUserInfo && setUserInfo(uInfo);
   }
   
   useEffect(() => {
@@ -50,11 +53,35 @@ export default function Layout({
   return (
     <>
       <AGLoading loading={loading} transparency />
-      <div className="min-h-screen pt-[88px] px-5 bg-bg">
-        { !loading &&
-          children
-        }
+      <div className="bg-emerald-500 flex justify-between">
+        <div className="ml-3 mr-1 my-2 flex">
+          {userInfo &&
+              <div className="my-auto flex flex-col sm:flex-row">
+                  <p className="font-bold">{userInfo.name}</p>
+                  <p className="ml-2">
+                      <span>🧔‍♀️: </span>{userInfo.account}
+                  </p>
+                  <p className="ml-2">
+                      <span>👨‍🌾: </span>{userInfo.role != undefined ? UserRoleValues[userInfo.role] : 'missing'}
+                  </p>
+                {!noCampaign &&
+                    <div className="ml-2 flex">
+                        <p>🚩:</p>
+                        <select className="ml-1" defaultValue={currentCampaign}
+                                onChange={e => setCurrentCampaign && setCurrentCampaign(e.target.value)}>
+                            <option value=''>Select...</option>
+                          {renderCampaignOptions()}
+                        </select>
+                    </div>
+                }
+              </div>
+          }
+        </div>
+        <AGButton type="danger" onClickEvent={() => void LogOut()}>Log Out</AGButton>
       </div>
+      { !loading &&
+        children
+      }
     </>
   );
 }

@@ -1,7 +1,5 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
-import {Group} from "three";
 import {GetFile} from "./firebase.util";
-import {BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
 
 class ImporterUtil {
   private static _instance: ImporterUtil;
@@ -59,25 +57,6 @@ export async function GetGltfModel(path: string) {
     return FetchGltfModel(path);
   else
     return FirebaseGltfModel(path);
-}
-
-export async function GetFeaturesData(baseModel: Group, featureList: BasicData[], update: boolean = false) {
-  return new Promise<Record<string, FeatureInfoInterface>>(resolve => {
-    const baseFeatures = baseModel.children[0];
-    let result: Record<string, FeatureInfoInterface> = {};
-
-    for (const [index, feature] of baseFeatures.children.entries()) {
-      if (featureList.some(x => x.val === feature.name)) {
-        const foundFeature = featureList.find(x => x.val === feature.name);
-        result[foundFeature!.id] = {
-          featureIndex: index,
-          featureBase: update ? result[foundFeature!.id].featureBase : feature.clone()
-        };
-      }
-    }
-
-    resolve(result);
-  });
 }
 
 async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {

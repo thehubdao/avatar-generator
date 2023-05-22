@@ -25,6 +25,7 @@ import {AddOrRemoveSlash, LogError, RandomPassword} from "./common.util";
 import {Result} from "../interfaces/common.interface";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
 import {SessionUserInfo} from "./common/session.util";
+import {ParameterNameType} from "../types/firebase.type";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -122,7 +123,7 @@ async function CheckServerSide() {
 
 export async function GetInfoDB<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints) {
   const newLocation = campaign != undefined ?
-    `${FirestoreGlobalLocation.Campaign}/${campaign}${AddOrRemoveSlash(dbLocation)}` :
+    `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}${AddOrRemoveSlash(dbLocation)}` :
     dbLocation;
 
   if (newLocation.split('/').length % 2 === 0) {
@@ -132,7 +133,7 @@ export async function GetInfoDB<T>(dbLocation: FirestoreLocation | FirestoreGlob
   }
 }
 
-async function GetDocument<T>(dbLocation: FirestoreLocation | string) {
+async function GetDocument<T>(dbLocation: string) {
   const {doc, getDoc} = await import('@firebase/firestore');
   const docRef = doc(await FirebaseUtil.Instance().DB(), dbLocation);
   const leDoc = await getDoc(docRef);
@@ -141,7 +142,7 @@ async function GetDocument<T>(dbLocation: FirestoreLocation | string) {
   return data ? [data] : [];
 }
 
-async function GetDocuments<T>(dbLocation: FirestoreLocation | string, constraintsValues?: AGQueryConstraints) {
+async function GetDocuments<T>(dbLocation: string, constraintsValues?: AGQueryConstraints) {
   const constraints = await GetConstraints(dbLocation, constraintsValues);
 
   const {collection, getDocs, query} = await import('@firebase/firestore');
@@ -154,11 +155,13 @@ async function GetDocuments<T>(dbLocation: FirestoreLocation | string, constrain
   });
 }
 
-function GetConstraints(dbLocation: FirestoreLocation | string, constraintsValues?: AGQueryConstraints) {
+function GetConstraints(dbLocation: string, constraintsValues?: AGQueryConstraints) {
   if (!constraintsValues)
     return [];
 
-  switch (dbLocation) {
+  const location = dbLocation.split('/').pop();
+
+  switch (location) {
     case FirestoreLocation.Features:
       return FeatureConstraints(constraintsValues);
     case FirestoreLocation.Accessories:
@@ -190,7 +193,7 @@ async function AccessoryConstraints(constraintsValues: AGQueryConstraints) {
   const constraints: QueryConstraint[] = [];
   const {type, campaign} = constraintsValues;
   const {orderBy, where} = await import('@firebase/firestore');
-
+  
   if (campaign)
     constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
 
@@ -204,20 +207,23 @@ async function AccessoryConstraints(constraintsValues: AGQueryConstraints) {
 
 async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
   const constraints: QueryConstraint[] = [];
-  const {campaign} = constraintsValues;
+  const {campaign, name} = constraintsValues;
   const {orderBy, where} = await import('@firebase/firestore');
 
   if (campaign)
     constraints.push(where(FirestoreFilterValues.Campaign, "array-contains", campaign));
 
-  constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
+  if (name)
+    constraints.push(where(FirestoreFilterValues.Name, "==", name));
+  else
+    constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
 
   return constraints;
 }
 
 export async function GetFile(path: string, campaign?: string) {
   const {getBlob, ref} = await import('@firebase/storage');
-  const campaignSection = campaign ? `${campaign}/` : '';
+  const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
   const baseMeshRef = ref(await FirebaseUtil.Instance().Storage(), campaignSection + path);
 
   // // Server Side
@@ -228,26 +234,26 @@ export async function GetFile(path: string, campaign?: string) {
   return stream.arrayBuffer();
 }
 
-export async function GetParameter<T>(campaign: string |  undefined, parameter: string | CampaignParameterName): Promise<T | undefined> {
+export async function GetParameter<T>(campaign: string | undefined, parameter: ParameterNameType): Promise<T | undefined> {
   if(parameter === CampaignParameterName.Missing) return undefined;
 
   const {doc, getDoc} = await import('@firebase/firestore');
 
-  const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}` : FirestoreGlobalLocation.ParametersV2;
+  const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}`.toLowerCase() : FirestoreGlobalLocation.ParametersV2;
   const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
   const leDoc = await getDoc(docRef);
-  
-    if (parameter !== CampaignParameterName.All) {
-      return leDoc.get(parameter as string) as T;
-    } else {
-      return leDoc.data() as T;
-    }
+
+  if (parameter !== CampaignParameterName.All) {
+    return leDoc.get(parameter as string) as T;
+  } else {
+    return leDoc.data() as T;
+  }
 }
 
 export async function GetParameters<T>(campaign?: string, ...parameters: (string | CampaignParameterName)[]): Promise<T[]> {
   const {doc, getDoc} = await import('@firebase/firestore');
 
-  const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}` : FirestoreGlobalLocation.Parameters;
+  const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}` : FirestoreGlobalLocation.Parameters;
   const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
   const leDoc = await getDoc(docRef);
 
@@ -282,6 +288,7 @@ export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlo
         FirestoreGlobalLocation.Parameters;
     const newDocName = docName == undefined ? '' : `/${docName}`;
 
+    console.log('Update doc loc', newLocation, newDocName);
     const docRef = doc(await FirebaseUtil.Instance().DB(), `${newLocation}${newDocName}`);
     await setDoc(docRef, data, {merge: true});
     return {success: true, value: true};
@@ -294,8 +301,8 @@ export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlo
 
 export async function DeleteDoc(location: FirestoreLocation, docId: string, campaign?: string) {
   const {deleteDoc, doc} = await import('@firebase/firestore');
-  const campaignLocation = campaign ? `${campaign}/` : '';
-  await deleteDoc(doc(await FirebaseUtil.Instance().DB(), `${campaignLocation}${location}/${docId}`))
+  
+  await deleteDoc(doc(await FirebaseUtil.Instance().DB(), `${CampaignLocation(campaign)}${location}/${docId}`))
   return docId;
 }
 
@@ -303,7 +310,7 @@ export async function ReplaceDoc(docLocation: string, jsonData?: string, campaig
   if (jsonData) {
     const {doc, updateDoc} = await import('@firebase/firestore');
     const newLocation = campaign ?
-      campaign + docLocation :
+      campaign.toLowerCase() + docLocation :
       docLocation !== '/' ?
         docLocation :
         FirestoreGlobalLocation.Parameters;
@@ -329,11 +336,12 @@ export async function InsertDoc(jsonData: string, location: string = FirestoreLo
   }
 }
 
-export async function InsertDocWithId(newDocId: string, data: {}, location: FirestoreLocation | FirestoreGlobalLocation, campaign?: string): Promise<Result<string>> {
+export async function InsertDocWithId(newDocId: string, data: {}, location: FirestoreLocation | FirestoreGlobalLocation, campaign?: string, lowerCase: boolean = true): Promise<Result<string>> {
   const {setDoc, doc} = await import('@firebase/firestore');
 
   try {
-    const newDoc = doc(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location, newDocId.trim().toLowerCase());
+    const docName = lowerCase ? newDocId.trim().toLowerCase() : newDocId.trim();
+    const newDoc = doc(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location, docName);
     await setDoc(newDoc, data);
     return {success: true, value: newDocId};
   } catch (e) {
@@ -402,11 +410,8 @@ export async function GetCurrentUser() {
 }
 
 export async function GetFileUrl(imagePath?: string) {
-  // TODO: replace with LogError
-  if(imagePath == undefined || imagePath === '') {
-    // console.error('Missing image location');
-    return undefined;
-  }
+  if(imagePath == undefined || imagePath === '')
+    return void LogError(Module.FirebaseUtil, "Missing image location");
   
   try {
     const {ref, getDownloadURL} = await import('@firebase/storage');
@@ -480,7 +485,7 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
   // Save user info on db
   if (leUser != undefined) {
     const realUser = ConvertObject<UserInterface>(newUser, ConvertType.UserInterface);
-    const insertedDoc = await InsertDocWithId(leUser.user.uid, realUser, FirestoreGlobalLocation.User);
+    const insertedDoc = await InsertDocWithId(leUser.user.uid, realUser, FirestoreGlobalLocation.User, undefined, false);
 
     if (!insertedDoc.success) {
       const {deleteUser} = await import('@firebase/auth');

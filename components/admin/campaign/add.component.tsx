@@ -1,5 +1,6 @@
-import { FormEvent, useRef, useState } from "react";
-import { BasicData, CampaignParameters } from "../../../interfaces/common.interface";
+import AGText from "../../common/ag-text.component";
+import {FormEvent, useRef, useState} from "react";
+import {BasicData, CampaignParameters, FeatureBasic} from "../../../interfaces/common.interface";
 import AGButton from "../../common/ag-button.component";
 import {
   GetCurrentUser,
@@ -26,7 +27,7 @@ export default function CampaignAdd({ onCampaignCreated, campaignList }: NewCamp
   const [message, setMessage] = useState<string>();
   const [featuresNum, setFeatureNum] = useState<number>();
   const [accessoriesNum, setAccessoryNum] = useState<number>();
-  const [featureList, setFeatureList] = useState<BasicData[]>([]);
+  const [featureList, setFeatureList] = useState<FeatureBasic[]>([]);
   const [accessoryList, setAccessoryList] = useState<BasicData[]>([]);
 
   const [hasCampaignName, setHasCampaignName] = useState<boolean>(false);

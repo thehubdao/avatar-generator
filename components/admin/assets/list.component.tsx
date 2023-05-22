@@ -1,19 +1,30 @@
 ﻿import { useCallback, useEffect, useState } from "react";
 import Image from 'next/image';
 import { FirestoreLocation } from "../../../enums/firebase.enum";
-import { DeleteDoc, GetFileUrl, GetInfoDB } from "../../../utils/firebase.util";
+import { DeleteDoc, GetFileUrl, GetFileUrl, GetInfoDB } from "../../../utils/firebase.util";
 import AGButton from "../../../components/common/ag-button.component";
 import AGText from "../../../components/common/ag-text.component";
 import { AdminComponents } from "../../../enums/common.enum";
 import { ChangeComponentFunction } from "../../../interfaces/common.interface";
 import { AccessoryInterface, AnimationInterface, FeatureInterface } from "../../../interfaces/api.interface";
 import { CampaignParameters } from '../../../interfaces/common.interface'
+import {AdminComponents} from "../../../enums/common.enum";
+import {ChangeComponentFunction} from "../../../interfaces/common.interface";
 import {
   AccessoryInterfaceProps,
   AnimationInterfaceProps,
   CampaignInterfaceProps,
+  EnvironmentInterfaceProps,
   FeatureInterfaceProps
 } from "../../../constants/obj-props.constant";
+import {AssetType} from "../../../types/asset.type";
+
+// Icons
+import { AiOutlineLink, AiOutlineEye, AiOutlineEdit, AiOutlineDelete, AiOutlineHome, AiOutlineCloudDownload, AiOutlineCloudUpload, AiOutlinePauseCircle, AiOutlineVideoCamera } from "react-icons/ai";
+import { IoMdAddCircleOutline } from 'react-icons/io';
+import { IoSettingsOutline } from "react-icons/io5";
+import { MdKeyboardArrowDown, MdOutlineColorLens } from 'react-icons/md';
+import { RxAvatar } from 'react-icons/rx';
 
 // Icons
 import { AiOutlineLink, AiOutlineEye, AiOutlineEdit, AiOutlineDelete, AiOutlineHome, AiOutlineCloudDownload, AiOutlineCloudUpload, AiOutlinePauseCircle, AiOutlineVideoCamera } from "react-icons/ai";
@@ -202,7 +213,7 @@ function ColorPicker({ color, id, specificPalette, colorList }: ColorPickerProps
 
 export default function AssetList({ campaign, changeComponent }: AssetListProps) {
   const [dbLocation, setDbLocation] = useState<FirestoreLocation>(FirestoreLocation.Parameters);
-  const [dbData, setDbData] = useState<(FeatureInterface | AccessoryInterface | AnimationInterface | CampaignParameters)[]>();
+  const [dbData, setDbData] = useState<AssetType[]>();
   const [dbHeaders, setDbHeaders] = useState<string[]>();
 
   const locationOptions: string[] = Object.keys(FirestoreLocation);
@@ -217,12 +228,14 @@ export default function AssetList({ campaign, changeComponent }: AssetListProps)
         return AnimationInterfaceProps;
       case FirestoreLocation.Parameters:
         return CampaignInterfaceProps;
+      case FirestoreLocation.Environments:
+        return EnvironmentInterfaceProps;
     }
   }, [dbLocation]);
 
   const getDbInfo = useCallback(async (location: FirestoreLocation = dbLocation) => {
     // const data = await SessionDBInfo(location, campaign, forceUpdate);
-    const data = await GetInfoDB<FeatureInterface | AccessoryInterface | AnimationInterface | CampaignParameters>(location, campaign);
+    const data = await GetInfoDB<AssetType>(location, campaign);
     setDbData(data);
   }, [dbLocation, campaign]);
 
@@ -265,7 +278,7 @@ export default function AssetList({ campaign, changeComponent }: AssetListProps)
   }
 
   async function deleteDoc(docId: string) {
-    const result = await DeleteDoc(dbLocation, docId);
+    const result = await DeleteDoc(dbLocation, docId, campaign);
     alert(`Doc "${result}" has been deleted.`);
     await getDbInfo();
   }
@@ -286,6 +299,13 @@ export default function AssetList({ campaign, changeComponent }: AssetListProps)
         </div>
       </div>
     )
+  }
+  
+  async function openFileLink(path: string) {
+    const fileLink = await GetFileUrl(path);
+    if (fileLink != undefined) {
+      window.open(fileLink, '_blank');
+    }
   }
 
   function renderInfo() {

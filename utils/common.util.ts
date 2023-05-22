@@ -9,6 +9,10 @@ export async function LogError(origin: string | Module, message: string) {
   console.error(`${origin} - `, message);
 }
 
+export async function LogWarning(origin: string | Module, message: string) {
+  console.warn(`${origin} - `, message);
+}
+
 export function Delay(ms: number) {
   return new Promise<void>(resolve => {
     setTimeout(resolve, ms);
@@ -27,7 +31,7 @@ export function RandomPassword() {
 }
 
 export function AddOrRemoveSlash(text: string) {
-  if(text.charAt(0) === '/')
+  if (text.charAt(0) === '/')
     return text.substring(1);
 
   return `/${text}`;
@@ -35,4 +39,43 @@ export function AddOrRemoveSlash(text: string) {
 
 export function Base64ToObj<T>(toParse: string) {
   return JSON.parse(Buffer.from(toParse, 'base64').toString('ascii')) as T;
+}
+
+export function FilterList<T>(list: T[] | undefined, key: keyof T, value: unknown) {
+  if (list == undefined) return void LogError(Module.CommonUtil, 'Missing list to filter!');
+
+  return list?.filter(l => l[key] === value);
+}
+
+export function SetMapToMap<TKey, TValue>(leMap: Map<TKey, TValue>, toAdd: Map<TKey, TValue>) {
+  for (const [key, value] of toAdd) {
+    leMap.set(key, value);
+  }
+}
+
+export function RemoveUndefinedProperties<T>(obj: T)  {
+  const clone = {...obj};
+  for (let k in clone) {
+    if (clone[k] == undefined)
+      delete clone[k];
+  }
+  
+  return clone;
+}
+
+export function CastStringToInteger(toCast: string) {
+  const num = +toCast;
+  return isNaN(num) ? undefined : num | 0;
+}
+
+export function RandomNumBetween(min: number, max: number) {
+  return Math.random() * (max - min) + min;
+}
+
+export function RandomIntBetween(min: number, max: number) {
+  return Math.floor(RandomNumBetween(min, max));
+}
+
+export function RandomIntMax(max: number) {
+  return RandomIntBetween(0, max);
 }

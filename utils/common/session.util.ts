@@ -1,5 +1,5 @@
 import {UserInterface} from "../../interfaces/firebase.interface";
-import {GetInfoDB, GetParameter, GetParameters, GetUserInfo} from "../firebase.util";
+import {GetInfoDB, GetParameter, GetUserInfo} from "../firebase.util";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
 import {FirestoreLocation} from "../../enums/firebase.enum";
 import {BasicData} from "../../interfaces/common.interface";
@@ -60,25 +60,6 @@ async function GetData<T>(forceUpdate: boolean, key: SessionConstant, findData: 
     data.set(leKey, value);
     datum = value;
   }
-
-  return datum as T;
-}
-
-async function GetAndReplaceData<T>(key: SessionConstant, replaceData: (prev?: T) => Promise<T>, ...params: any[]) {
-  const data = SessionUtil.Instance().Data();
-  
-  const request: SessionRequest = {
-    sessionId: key,
-    params
-  };
-  const leKey = keyToString(request);
-  let datum = data.get(leKey);
-  
-  const value = await replaceData(datum);
-  data.set(leKey, value);
-  
-  if (datum == undefined)
-    datum = value;
 
   return datum as T;
 }

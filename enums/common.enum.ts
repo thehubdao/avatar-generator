@@ -5,6 +5,8 @@
   AccEnd = 'Acc',
   AccGroup = 'Accessories.AG',
   AvatarBase = 'base_mesh/MetaAvatarHub.glb',
+  CollectorIndexSeparator = '-',
+  EnvironmentId = 'environment',
 }
 
 export enum ExportAttributeValues {
@@ -54,6 +56,13 @@ export enum Module {
   ApiUtil = 'ApiUtil',
   CampaignAdd = 'CampaignAdd',
   AnimationUtil = 'AnimationUtil',
+  Viewer = 'ThreeViewer',
+  Editor = 'AvatarEditor',
+  CommonUtil = 'CommonUtil',
+  CollectionComponent = 'CollectionComponent',
+  ExporterUtil = 'ExporterUtil',
+  CollectionUtil = 'CollectionUtil',
+  Single = 'SingleComponent', 
 }
 
 export enum EmailResult {
