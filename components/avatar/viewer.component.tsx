@@ -196,7 +196,7 @@ export default function AvatarViewer({onReady}: AvatarViewerProps) {
 
   return (
     <>
-      <div className="relative h-full" ref={threeCanvas}/>
+      <div className="relative h-full w-full xl:w-[42%] xl:overflow-hidden xl:flex xl:justify-center" ref={threeCanvas}/>
     </>
   );
 }
