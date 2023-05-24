@@ -2,6 +2,7 @@
 import {ClientQuestion} from "../enums/campaign.enum";
 import {AdminComponents} from "../enums/common.enum";
 import {ChangeMaterialOption} from "../enums/model.enum";
+import {ConfigLight} from "./light.interface";
 
 export interface BasicData {
   id: string;
@@ -45,6 +46,8 @@ export interface CampaignConfig {
   defSkinColor?: string;
   defSkin?: string;
   defCam?: LookAtVectors;
+  defBg?: string;
+  lights?: ConfigLight[],
   defAnimation?: string;
   defEnvironment?: string;
   featuresCamPos?: Record<string, LookAtVectors>;
