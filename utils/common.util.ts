@@ -79,3 +79,10 @@ export function RandomIntBetween(min: number, max: number) {
 export function RandomIntMax(max: number) {
   return RandomIntBetween(0, max);
 }
+
+export function ColorStringToHexString(color: string | undefined) {
+  if (color == undefined) return undefined;
+  if (color.length !== 6) return undefined;
+  
+  return `#${color}`;
+}
