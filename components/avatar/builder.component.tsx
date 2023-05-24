@@ -45,7 +45,7 @@ interface AvatarEditorProps {
   campaignConfig: CampaignConfig;
   selectListFeatures: FeatureBasic[];
   selectListAccessories: BasicData[];
-  attributeConfig: BasicData[] | null;
+  attributeConfig?: BasicData[];
   bgColor?: string;
   onlyView: boolean;
 }
@@ -326,6 +326,7 @@ export default function AvatarBuilder({
         <AvatarEditor avatarBasePath={avatarBasePath}
                       onReady={() => onAvatarBuilderReady()}
                       changeMaterial={campaignConfig.changeMaterial}
+                      lights={campaignConfig.lights}
         />
       </div>
       {loading ? <></> :
