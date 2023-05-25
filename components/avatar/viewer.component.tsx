@@ -23,6 +23,7 @@ const _sceneObjs: Map<string, number> = new Map();
 let _cameraPos: Vector3 = new Vector3();
 let _cameraLookAt: Vector3 = new Vector3();
 let _doCameraMovement = false;
+let _doCameraLookAt = false;
 
 const _clock: Clock = new Clock();
 
@@ -81,16 +82,23 @@ export function ChangeCamPosition(value: Vector3) {
   _cameraPos = value;
 }
 
-export function AGChangeCamPosition(value: AGVector3) {
+export function AGChangeCamPosition(value: AGVector3 | undefined) {
+  if (value == undefined) return;
+  
   ChangeCamPosition(new Vector3(value.x, value.y, value.z));
 }
 
 export function ChangeLookAtPosition(value: Vector3) {
   if (_controls == undefined) return void LogError(Module.Viewer, "Missing viewer Controls!");
-  _controls.target = value;
+  
+  _doCameraLookAt = true;
+  // _controls.target = value;
+  _cameraLookAt = value;
 }
 
-export function AGChangeLookAtPosition(value: AGVector3) {
+export function AGChangeLookAtPosition(value: AGVector3 | undefined) {
+  if (value == undefined) return;
+  
   ChangeLookAtPosition(new Vector3(value.x, value.y, value.z));
 }
 
@@ -111,9 +119,11 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
 //#region Component
 interface AvatarViewerProps {
   onReady: () => Promise<void>;
+  defaultCamPos?: AGVector3;
+  defaultCamLookAt?: AGVector3;
 }
 
-export default function AvatarViewer({onReady}: AvatarViewerProps) {
+export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}: AvatarViewerProps) {
   const threeCanvas = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -133,9 +143,9 @@ export default function AvatarViewer({onReady}: AvatarViewerProps) {
     if (threeCanvas.current == null) return LogError(Module.AvatarGenerator, "Error initializing canvas!");
 
     _scene = GetBaseScene();
-    _camera = GetBaseCamera();
+    _camera = GetBaseCamera(defaultCamPos);
     _renderer = GetBaseRenderer();
-    _controls = GetBaseCameraControls(_camera, _renderer.domElement);
+    _controls = GetBaseCameraControls(_camera, _renderer.domElement, defaultCamLookAt);
 
     // mount scene
     threeCanvas.current.appendChild(_renderer.domElement);
@@ -149,6 +159,11 @@ export default function AvatarViewer({onReady}: AvatarViewerProps) {
 
     window.addEventListener('resize', onWindowResize, false);
     Animate();
+  }
+
+  function stopCamMovement() {
+    _doCameraLookAt = false;
+    _doCameraMovement = false;
   }
 
   const onWindowResize = () => {
@@ -187,16 +202,20 @@ export default function AvatarViewer({onReady}: AvatarViewerProps) {
     if (_camera.position.distanceTo(_cameraPos) < 0.1) {
       _doCameraMovement = false;
     }
+    
+    if (_controls.target.distanceTo(_cameraLookAt) < 0.1) {
+      _doCameraLookAt = false;
+    }
 
-    if (_doCameraMovement)
-      _camera.position.lerp(_cameraPos, delta);
+    if (_doCameraMovement) _camera.position.lerp(_cameraPos, delta);
+    if (_doCameraLookAt) _controls.target.lerp(_cameraLookAt, delta);
 
     _renderer.render(_scene, _camera);
   };
 
   return (
     <>
-      <div className="relative h-full" ref={threeCanvas}/>
+      <div className="relative h-full" ref={threeCanvas} onMouseDown={() => stopCamMovement()}/>
     </>
   );
 }

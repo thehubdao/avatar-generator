@@ -11,7 +11,12 @@ import {
   ReplaceModelFeatureOnly,
   TransformObject3dToToonMaterial
 } from "../../utils/model.util";
-import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../../interfaces/common.interface";
+import {
+  AccessoryInfoInterface,
+  BasicData,
+  FeatureInfoInterface,
+  LookAtVectors
+} from "../../interfaces/common.interface";
 import {ExportModelGlb} from "../../utils/exporter.util";
 import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene} from "./viewer.component";
 import {ChangeMaterialOption} from "../../enums/model.enum";
@@ -101,6 +106,7 @@ interface AvatarEditorProps {
   onReady: () => Promise<void>;
   changeMaterial?: ChangeMaterialOption;
   lights?: ConfigLight[];
+  defaultCamera?: LookAtVectors;
 }
 
 /***
@@ -108,7 +114,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights}: AvatarEditorProps) {
+export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera}: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -132,7 +138,10 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
   }
 
   return (
-    <AvatarViewer onReady={() => onAvatarEditorReady()}/>
+    <AvatarViewer onReady={() => onAvatarEditorReady()}
+                  defaultCamPos={defaultCamera?.pos}
+                  defaultCamLookAt={defaultCamera?.lookAt}
+    />
   );
 }
 

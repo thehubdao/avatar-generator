@@ -50,10 +50,7 @@ export default function AvatarSingle({
 
     // Set skin tone
     defaultSkinTone != undefined && await ChangeSkinColor(defaultSkinTone);
-    // Set camera position and lookAt
-    defaultCameraPosition?.pos != undefined && AGChangeCamPosition(defaultCameraPosition.pos);
-    defaultCameraPosition?.lookAt != undefined && AGChangeLookAtPosition(defaultCameraPosition.lookAt);
-    
+        
     // Set animation
     await ChangeStartAnimation(defaultAnimationData.current?.path);
   }
@@ -95,6 +92,7 @@ export default function AvatarSingle({
       <AvatarEditor avatarBasePath={avatarBasePath}
                     onReady={() => onAvatarBuilderReady()}
                     changeMaterial={changeMaterial}
+                    defaultCamera={defaultCameraPosition}
       />
     </>
   );
