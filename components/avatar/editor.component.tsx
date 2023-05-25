@@ -11,11 +11,17 @@ import {
   ReplaceModelFeatureOnly,
   TransformObject3dToToonMaterial
 } from "../../utils/model.util";
-import {GetAmbientLights, GetTestLights} from "../../utils/test-scene.util";
-import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../../interfaces/common.interface";
+import {
+  AccessoryInfoInterface,
+  BasicData,
+  FeatureInfoInterface,
+  LookAtVectors
+} from "../../interfaces/common.interface";
 import {ExportModelGlb} from "../../utils/exporter.util";
 import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene} from "./viewer.component";
 import {ChangeMaterialOption} from "../../enums/model.enum";
+import {ConfigLight} from "../../interfaces/light.interface";
+import {GetLights} from "../../utils/threejs/light.util";
 
 
 //#region Logic
@@ -99,6 +105,8 @@ interface AvatarEditorProps {
   avatarBasePath: string;
   onReady: () => Promise<void>;
   changeMaterial?: ChangeMaterialOption;
+  lights?: ConfigLight[];
+  defaultCamera?: LookAtVectors;
 }
 
 /***
@@ -106,7 +114,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({avatarBasePath, onReady, changeMaterial}: AvatarEditorProps) {
+export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera}: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -114,12 +122,9 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial}: 
   }
 
   async function initEditor() {
-    for (const l of GetTestLights()) {
-      AddToScene(l);
-    }
-
-    for (const l of GetAmbientLights()) {
-      AddToScene(l);
+    const leLights = GetLights(lights);
+    for (const light of leLights) {
+      AddToScene(light);
     }
 
     _avatar = await GetGltfModel(avatarBasePath);
@@ -133,7 +138,10 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial}: 
   }
 
   return (
-    <AvatarViewer onReady={() => onAvatarEditorReady()}/>
+    <AvatarViewer onReady={() => onAvatarEditorReady()}
+                  defaultCamPos={defaultCamera?.pos}
+                  defaultCamLookAt={defaultCamera?.lookAt}
+    />
   );
 }
 

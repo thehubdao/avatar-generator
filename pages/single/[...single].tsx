@@ -24,7 +24,8 @@ export default function AvatarSinglePage({
                                            featureList,
                                            avatarBasePath,
                                            defaultAnimation,
-                                           defaultSkinTone,
+                                           defaultSkinTone, 
+                                           defaultCamPos,
                                            changeMaterial
                                          }: AvatarSinglePageProps) {
   return (
@@ -35,6 +36,7 @@ export default function AvatarSinglePage({
                     avatarBasePath={avatarBasePath}
                     defaultAnimation={defaultAnimation}
                     defaultSkinTone={defaultSkinTone}
+                    defaultCameraPosition={defaultCamPos}
                     changeMaterial={changeMaterial}
       />
     </>

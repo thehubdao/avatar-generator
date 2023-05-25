@@ -4,12 +4,12 @@ import {FirestoreParameters} from "../enums/firebase.enum";
 import {BasicData, CampaignParameters} from "../interfaces/common.interface";
 import {GetParameter} from "../utils/firebase.util";
 import AvatarBuilder from "../components/avatar/builder.component";
-import {Base64ToObj} from "../utils/common.util";
+import {Base64ToObj, RemoveUndefinedProperties} from "../utils/common.util";
 
 interface AvatarGeneratorProps {
   campaign: string;
-  campaignParams: CampaignParameters | null;
-  attributeConfig: BasicData[] | null;
+  campaignParams?: CampaignParameters;
+  attributeConfig?: BasicData[];
   onlyView: boolean;
   bgColor?: string;
 }
@@ -37,7 +37,7 @@ export default function AvatarGenerator({
 export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = async (context) => {
   const {builder, config, bg, ov} = context.query;
 
-  let parsedConfig: BasicData[] | null = null;
+  let parsedConfig: BasicData[] | undefined = undefined;
 
   let leCampaign = (builder as string).toLowerCase() ?? GlobalValues.BaseCampaign;
 
@@ -61,13 +61,13 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
 
   const returnProps: AvatarGeneratorProps = {
     campaign: leCampaign,
-    campaignParams: campaignParameters ?? null,
+    campaignParams: campaignParameters,
     attributeConfig: parsedConfig,
-    bgColor: bg as string ?? null,
+    bgColor: bg != undefined ? bg as string : campaignParameters?.config?.defBg,
     onlyView: ov != undefined ? (ov as string).toLowerCase() === 'true' : false,
   };
 
   return {
-    props: returnProps
+    props: RemoveUndefinedProperties(returnProps)
   };
 }
