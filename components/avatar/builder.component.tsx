@@ -1,6 +1,5 @@
 import {useEffect, useRef, useState} from "react";
 import Head from "next/head";
-import {Vector3} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {
   BasicData,
@@ -37,7 +36,7 @@ import AvatarEditor, {
   SetEnvironment,
   SetFeaturesData
 } from "./editor.component";
-import {ChangeCamPosition, ChangeLookAtPosition, TakeCanvasPicture} from "./viewer.component";
+import {AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture} from "./viewer.component";
 
 interface AvatarEditorProps {
   campaign?: string | null;
@@ -246,11 +245,10 @@ export default function AvatarBuilder({
 
   function setFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
     const confRef = posLocation ? posLocation[index] : undefined;
-    
     if (confRef == undefined) return;
     
-    ChangeCamPosition(new Vector3(confRef.pos?.x, confRef.pos?.y, confRef.pos?.z));
-    ChangeLookAtPosition(new Vector3(confRef.lookAt?.x, confRef.lookAt?.y, confRef.lookAt?.z));
+    AGChangeCamPosition(confRef.pos);
+    AGChangeLookAtPosition(confRef.lookAt);
   }
 
   async function onChangeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {

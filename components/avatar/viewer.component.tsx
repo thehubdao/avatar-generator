@@ -81,7 +81,9 @@ export function ChangeCamPosition(value: Vector3) {
   _cameraPos = value;
 }
 
-export function AGChangeCamPosition(value: AGVector3) {
+export function AGChangeCamPosition(value: AGVector3 | undefined) {
+  if (value == undefined) return;
+  
   ChangeCamPosition(new Vector3(value.x, value.y, value.z));
 }
 
@@ -90,7 +92,9 @@ export function ChangeLookAtPosition(value: Vector3) {
   _controls.target = value;
 }
 
-export function AGChangeLookAtPosition(value: AGVector3) {
+export function AGChangeLookAtPosition(value: AGVector3 | undefined) {
+  if (value == undefined) return;
+  
   ChangeLookAtPosition(new Vector3(value.x, value.y, value.z));
 }
 
