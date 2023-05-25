@@ -23,6 +23,7 @@ const _sceneObjs: Map<string, number> = new Map();
 let _cameraPos: Vector3 = new Vector3();
 let _cameraLookAt: Vector3 = new Vector3();
 let _doCameraMovement = false;
+let _doCameraLookAt = false;
 
 const _clock: Clock = new Clock();
 
@@ -89,7 +90,10 @@ export function AGChangeCamPosition(value: AGVector3 | undefined) {
 
 export function ChangeLookAtPosition(value: Vector3) {
   if (_controls == undefined) return void LogError(Module.Viewer, "Missing viewer Controls!");
-  _controls.target = value;
+  
+  _doCameraLookAt = true;
+  // _controls.target = value;
+  _cameraLookAt = value;
 }
 
 export function AGChangeLookAtPosition(value: AGVector3 | undefined) {
@@ -193,9 +197,13 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}:
     if (_camera.position.distanceTo(_cameraPos) < 0.1) {
       _doCameraMovement = false;
     }
+    
+    if (_controls.target.distanceTo(_cameraLookAt) < 0.1) {
+      _doCameraLookAt = false;
+    }
 
-    if (_doCameraMovement)
-      _camera.position.lerp(_cameraPos, delta);
+    if (_doCameraMovement) _camera.position.lerp(_cameraPos, delta);
+    if (_doCameraLookAt) _controls.target.lerp(_cameraLookAt, delta);
 
     _renderer.render(_scene, _camera);
   };
