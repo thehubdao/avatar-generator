@@ -161,6 +161,11 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}:
     Animate();
   }
 
+  function stopCamMovement() {
+    _doCameraLookAt = false;
+    _doCameraMovement = false;
+  }
+
   const onWindowResize = () => {
     if (_scene == undefined) return void LogError(Module.Viewer, "Missing scene on resize!");
     if (_renderer == undefined) return void LogError(Module.Viewer, "Missing Renderer on resize!");
@@ -210,7 +215,7 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}:
 
   return (
     <>
-      <div className="relative h-full" ref={threeCanvas}/>
+      <div className="relative h-full" ref={threeCanvas} onMouseDown={() => stopCamMovement()}/>
     </>
   );
 }
