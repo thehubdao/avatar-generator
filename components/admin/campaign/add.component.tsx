@@ -1,7 +1,7 @@
-import AGText from "../../common/ag-text.component";
+import AGText from "../../../ui/common/ag-text.component";
 import {FormEvent, useRef, useState} from "react";
 import {BasicData, CampaignParameters, FeatureBasic} from "../../../interfaces/common.interface";
-import AGButton from "../../common/ag-button.component";
+import AGButton from "../../../ui/common/ag-button.component";
 import {
   GetCurrentUser,
   HandleNotLoggedIn,

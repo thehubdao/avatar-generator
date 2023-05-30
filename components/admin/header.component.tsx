@@ -1,6 +1,6 @@
 import {LogOut} from "../../utils/firebase.util";
 
-import AGButton from "../common/ag-button.component";
+import AGButton from "../../ui/common/ag-button.component";
 
 import { IoMdLogOut, IoMdArrowBack } from 'react-icons/io';
 import { useState } from "react";

@@ -1,7 +1,7 @@
 import {FormEvent, useRef} from "react";
 import {AuthValues, UserRoleValues} from "../../../enums/firebase.enum";
-import AGButton from "../../common/ag-button.component";
-import AGText from "../../common/ag-text.component";
+import AGButton from "../../../ui/common/ag-button.component";
+import AGText from "../../../ui/common/ag-text.component";
 import {UserWithPass} from "../../../interfaces/firebase.interface";
 import {CreateNewUser} from "../../../utils/firebase.util";
 import {Delay, IsEmail, LogError} from "../../../utils/common.util";

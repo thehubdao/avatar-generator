@@ -5,8 +5,8 @@ import {AdminComponentParams} from "../../interfaces/common.interface";
 
 //#region Components
 //  Common
-import AGButton from "../common/ag-button.component";
-import AGText from "../common/ag-text.component";
+import AGButton from "../../ui/common/ag-button.component";
+import AGText from "../../ui/common/ag-text.component";
 //  Assets
 import AssetList from "./assets/list.component";
 import AssetAdd from "./assets/add.component";

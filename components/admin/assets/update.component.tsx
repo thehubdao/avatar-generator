@@ -1,11 +1,11 @@
 ﻿import {useEffect, useState} from "react";
 import {GetInfoDB, ReplaceDoc} from "../../../utils/firebase.util";
-import AGButton from "../../../components/common/ag-button.component";
+import AGButton from "../../../ui/common/ag-button.component";
 import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../../interfaces/api.interface";
 import {AdminComponents} from "../../../enums/common.enum";
 import {ChangeComponentFunction} from "../../../interfaces/common.interface";
 import {FirestoreGlobalLocation} from "../../../enums/firebase.enum";
-import AGText from "../../common/ag-text.component";
+import AGText from "../../../ui/common/ag-text.component";
 import {AddOrRemoveSlash} from "../../../utils/common.util";
 
 interface AssetUpdateProps {

@@ -1,12 +1,12 @@
 ﻿import {useEffect, useRef, useState} from "react";
 import {InsertDoc, UpdateDoc, UploadFile} from "../../../utils/firebase.util";
 import {FirestoreLocation, StorageLocation} from "../../../enums/firebase.enum";
-import AGButton from "../../../components/common/ag-button.component";
+import AGButton from "../../../ui/common/ag-button.component";
 import {AssetInterface} from "../../../interfaces/api.interface";
 import {BasicData, ChangeComponentFunction} from "../../../interfaces/common.interface";
 import {AdminComponents, CampaignParameterName, Module} from "../../../enums/common.enum";
 import {LogError} from "../../../utils/common.util";
-import AGText from "../../common/ag-text.component";
+import AGText from "../../../ui/common/ag-text.component";
 import {SessionCampaignParameter} from "../../../utils/common/session.util";
 
 interface AssetAddProps {
