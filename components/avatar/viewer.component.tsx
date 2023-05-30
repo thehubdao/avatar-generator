@@ -121,9 +121,10 @@ interface AvatarViewerProps {
   onReady: () => Promise<void>;
   defaultCamPos?: AGVector3;
   defaultCamLookAt?: AGVector3;
+  editMode?: boolean
 }
 
-export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}: AvatarViewerProps) {
+export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, editMode}: AvatarViewerProps) {
   const threeCanvas = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -215,7 +216,7 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}:
 
   return (
     <>
-      <div className="relative h-full w-full xl:w-[42%] xl:overflow-hidden xl:flex xl:justify-center" ref={threeCanvas} onMouseDown={() => stopCamMovement()}/>
+      <div className={`relative h-full w-full ${editMode ? 'xl:w-[42%]':''} xl:overflow-hidden xl:flex xl:justify-center`} ref={threeCanvas} onMouseDown={() => stopCamMovement()}/>
     </>
   );
 }
