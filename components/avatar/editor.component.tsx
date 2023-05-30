@@ -107,6 +107,7 @@ interface AvatarEditorProps {
   changeMaterial?: ChangeMaterialOption;
   lights?: ConfigLight[];
   defaultCamera?: LookAtVectors;
+  editMode?: boolean
 }
 
 /***
@@ -114,7 +115,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera}: AvatarEditorProps) {
+export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera, editMode}: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -141,6 +142,7 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     <AvatarViewer onReady={() => onAvatarEditorReady()}
                   defaultCamPos={defaultCamera?.pos}
                   defaultCamLookAt={defaultCamera?.lookAt}
+                  editMode={editMode}
     />
   );
 }
