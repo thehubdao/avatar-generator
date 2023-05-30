@@ -24,8 +24,8 @@ import {
   GetEnvironmentListByCampaign
 } from "../../utils/api.util";
 import {SaveFile} from "../../utils/exporter.util";
-import AGLoading from "../common/ag-loading.component";
-import HudComponent from "./hud.component";
+import AGLoading from "../../ui/common/ag-loading.component";
+import HudComponent from "../../ui/avatar/hud.component";
 import AvatarEditor, {
   ChangeAccessory,
   ChangeFeature, ChangeSkinColor,
@@ -326,6 +326,7 @@ export default function AvatarBuilder({
                       onReady={() => onAvatarBuilderReady()}
                       changeMaterial={campaignConfig.changeMaterial}
                       lights={campaignConfig.lights}
+                      editMode={editModeSelected}
         />
       </div>
       {loading ? <></> :
