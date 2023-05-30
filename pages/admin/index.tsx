@@ -2,7 +2,7 @@
 import Head from "next/head";
 import { UserInterface } from "../../interfaces/firebase.interface";
 import Layout from "../../components/admin/_layout.component";
-import AGLoading from "../../components/common/ag-loading.component";
+import AGLoading from "../../ui/common/ag-loading.component";
 import Dashboard from "../../components/admin/dashboard.component";
 
 export default function Admin() {
