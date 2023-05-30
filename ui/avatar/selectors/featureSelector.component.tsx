@@ -1,7 +1,7 @@
 import Image from "next/image";
-import { FeatureInterface } from "../../interfaces/api.interface";
-import { BasicData } from "../../interfaces/common.interface";
 import { useEffect } from "react";
+import { FeatureInterface } from "../../../interfaces/api.interface";
+import { BasicData } from "../../../interfaces/common.interface";
 
 interface FeatureSelectorProps {
   list?: FeatureInterface[] | BasicData[];
@@ -16,8 +16,8 @@ interface OptionSelectorProps {
 
 function OptionSelector({ item, isActive }: OptionSelectorProps) {
   return (
-    <div className={`w-[100px] h-[100px] flex justify-center items-center bg-bg rounded-xl shadow-flat-hard cursor-pointer ${isActive ? 'bg-accent shadow-inset-hard' : ''}`} title={item.id}>
-      <Image alt={item.id} width={70} height={70} src={'/resources/icons/features/Chest.svg'} />
+    <div className={`w-[100px] h-[100px] flex justify-center items-center bg-bg rounded-xl cursor-pointer ${isActive ? 'bg-accent shadow-inset-hard' : 'shadow-flat-hard'}`} title={item.id}>
+      <Image alt={item.id} width={70} height={70} src={'/resources/icons/features/Chest.svg'} priority />
     </div>
   )
 }
@@ -28,16 +28,6 @@ export default function FeatureSelector({ list, activeOpc, handleClick }: Featur
     e.preventDefault();
     handleClick(id);
   }
-
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log("list: ", list)
-  }, [list]);
-
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log("Active Feature: ", activeOpc)
-  }, [activeOpc]);
 
   return (
     <div>

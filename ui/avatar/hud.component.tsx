@@ -3,14 +3,14 @@ import { BsArrowRight } from 'react-icons/bs';
 import { CiEdit, CiSaveUp2 } from 'react-icons/ci';
 import { AccessoryInterface, FeatureInterface } from "../../interfaces/api.interface";
 import { BasicData } from "../../interfaces/common.interface";
-import MobileOptionSelectorComponent from "../selectors/optionSelector.component";
-import MobileFeatureSelectorComponent from "../selectors/featureSelector.component";
-import MobileColorSelectorComponent from "../selectors/colorSelector.component";
-import Image from "next/image";
+import MobileOptionSelectorComponent from "./selectors/mobile/optionSelector.component";
+import MobileFeatureSelectorComponent from "./selectors/mobile/featureSelector.component";
+import MobileColorSelectorComponent from "./selectors/mobile/colorSelector.component";
 import { useEffect, useState } from "react";
-import FeatureSelector from "../hud/featureSelector.component";
-import OptionSelector from "../hud/optionSelector.component";
-import ColorSelector from "../hud/colorSelector.component";
+import Image from 'next/image';
+import FeatureSelector from "./selectors/featureSelector.component";
+import OptionSelector from "./selectors/optionSelector.component";
+import ColorSelector from "./selectors/colorSelector.component";
 
 interface Props {
   editModeSelected: boolean;
@@ -58,6 +58,7 @@ export default function HudComponent({ editModeSelected,
 
   return (
     <>
+      {/* MOBILE UI */}
       <div className="fixed xl:hidden">
         <div onClick={() => changeView()}>
           {editModeSelected ?
@@ -188,14 +189,22 @@ export default function HudComponent({ editModeSelected,
                 {/* TITLE SECTION */}
                 <div className="text-gray-normal">
                   <div className="flex justify-end pb-6 pt-12">
-                    <AGButton onClickEvent={() => changeView()}>
-                      <p className="text-center">SAVE</p>
+                    <AGButton nm onClickEvent={() => changeView()}>
+                      <p className="font-poppins text-center w-[240px] py-2">SAVE</p>
                     </AGButton>
                   </div>
                   <div>
                     <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
                     <h2 className="font-work font-bold text-6xl uppercase">{selectedFeature}</h2>
                   </div>
+                </div>
+                {/* SKIN COLOR SECTION */}
+                <div className="pt-4">
+                  <ColorSelector
+                    list={['F8B290', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
+                    activeColor={skinColor}
+                    handleClick={(value: string) => void onClickChangeSkinColor(value)}
+                  />
                 </div>
                 {/* OPTION SECTION */}
                 <div className="h-full pt-8">
@@ -219,14 +228,14 @@ export default function HudComponent({ editModeSelected,
           </div>
           :
           <div className="fixed pt-8 pl-8 w-fit h-fit flex">
-            <AGButton onClickEvent={() => exportModel()}>
-              <div className="flex items-center justify-between">
-                <p className="text-sm">EXPORT</p>
-              </div>
-            </AGButton>
             <AGButton onClickEvent={() => changeView()}>
               <div className="flex items-center justify-between">
-                <p className="text-sm">EDIT</p>
+                <p className="font-poppins text-center w-[120px] py-2">EDIT</p>
+              </div>
+            </AGButton>
+            <AGButton onClickEvent={() => exportModel()}>
+              <div className="flex items-center justify-between">
+                <p className="font-poppins text-center w-[120px] py-2">EXPORT</p>
               </div>
             </AGButton>
           </div>

@@ -1,10 +1,10 @@
 import {Swiper, SwiperSlide} from 'swiper/react';
 import Image from 'next/image';
-import {FeatureInterface} from "../../interfaces/api.interface";
+import {FeatureInterface} from "../../../../interfaces/api.interface";
 import 'swiper/css';
-import {BasicData} from '../../interfaces/common.interface';
+import {BasicData} from '../../../../interfaces/common.interface';
 import {useEffect, MouseEvent, useState} from 'react';
-import {GetFileUrl} from "../../utils/firebase.util";
+import {GetFileUrl} from "../../../../utils/firebase.util";
 
 interface props {
   list?: FeatureInterface[];

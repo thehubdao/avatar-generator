@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { FeatureInterface } from "../../interfaces/api.interface";
-import { GetFileUrl } from "../../utils/firebase.util";
+import { FeatureInterface } from "../../../interfaces/api.interface";
+import { GetFileUrl } from "../../../utils/firebase.util";
 import Image from 'next/image';
-import { BasicData } from "../../interfaces/common.interface";
+import { BasicData } from "../../../interfaces/common.interface";
 
 interface OptionSelectorProps {
   list?: FeatureInterface[],
@@ -21,18 +21,19 @@ function GetOptionThumbnail({option}: OptionProps ) {
   useEffect(() => {
     (async () => {
       const newImage = await GetFileUrl(option.thumb);
-      setImageUrl(newImage ?? '/resources/icons/features/default.svg');
+      setImageUrl(newImage ?? undefined);
     })().catch(err => console.error(err));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [option])
 
   return (
     <>
       {imageUrl == undefined ?
         <div className="relative w-2/4 h-2/4">
-          <Image src={'/resources/icons/features/default.svg'} fill alt={option.name}/>
+          <Image src={'/resources/icons/features/default.svg'} fill sizes={'132px'} alt={option.name}/>
         </div>
         :
-        <Image placeholder="blur" blurDataURL={imageUrl} src={imageUrl} fill alt={option.name}/>
+        <Image placeholder="blur" blurDataURL={imageUrl} src={imageUrl} fill sizes={'132px'} alt={option.name}/>
       }
     </>
   );
