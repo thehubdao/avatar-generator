@@ -1,24 +1,21 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
-import {Group, Material, MeshStandardMaterial, MeshToonMaterial, Object3D, Skeleton, SkinnedMesh} from "three";
+import {
+  Group,
+  Material,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
+  MeshToonMaterial,
+  Object3D,
+  Skeleton,
+  SkinnedMesh
+} from "three";
 import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
-import {TextureTone, TextureUtil} from "./texture.util";
+import {GetToneTexture, TextureTone} from "./texture.util";
 import {LogError} from "./common.util";
 import {GlobalValues, Module} from "../enums/common.enum";
-import {LoadGltfModel} from "./importer.util";
 import {MaterialFunction} from "../types/model.type";
 import {ChangeMaterialOption} from "../enums/model.enum";
-
-export async function ReplaceModelFeature(baseModel: GLTF, featureUrl: string, featureIndex: number) {
-  const featureModel = await LoadGltfModel(featureUrl);
-
-  const chest = SkeletonUtils.clone(featureModel.scene.children[0].children[featureIndex]) as SkinnedMesh;
-  const oldSkeleton = SkeletonUtils.getBones((baseModel.scene.children[0].children[featureIndex] as SkinnedMesh).skeleton);
-
-  chest.skeleton.bones = oldSkeleton;
-
-  baseModel.scene.children[0].children[featureIndex] = chest;
-}
 
 function IsSkinnedMesh(obj: Object3D): obj is SkinnedMesh {
   return (obj as SkinnedMesh).isSkinnedMesh;
@@ -224,13 +221,28 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
     const mapClone = materialRef.map?.clone();
     const oldName = materialRef.name;
     const oldColor = materialRef.color.clone();
-    const _toneTexture = await TextureUtil.Instance().GetToneTexture(tone);
+    const _toneTexture = await GetToneTexture(tone);
     object.material = new MeshToonMaterial({
       map: mapClone,
       name: oldName,
       color: oldColor,
       gradientMap: _toneTexture,
       transparent: materialRef.transparent,
+    });
+  }
+}
+
+export async function ChangeToBasicMaterial(object: SkinnedMesh, tone?: TextureTone) {
+  const materialRef = object.material as MeshStandardMaterial;
+  if (materialRef.isMeshStandardMaterial) {
+    const mapClone = materialRef.map?.clone();
+    const oldName = materialRef.name;
+    const oldColor = materialRef.color.clone();
+    
+    object.material = new MeshBasicMaterial({
+      map: mapClone,
+      name: oldName,
+      color: oldColor,
     });
   }
 }
