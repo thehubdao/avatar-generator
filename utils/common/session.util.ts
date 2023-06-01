@@ -4,11 +4,13 @@ import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../in
 import {FirestoreLocation} from "../../enums/firebase.enum";
 import {BasicData} from "../../interfaces/common.interface";
 import {CampaignParameterName} from "../../enums/common.enum";
+import {GetToneTexture, TextureTone} from "../texture.util";
 
 enum SessionConstant {
   UserInfo,
   DBInfo,
   Parameter,
+  TextureTone,
 }
 
 interface SessionRequest {
@@ -77,4 +79,9 @@ export function SessionDBInfo(location: FirestoreLocation, campaign: string | un
 export function SessionCampaignParameter(campaign: string | undefined, param: CampaignParameterName, forceUpdate = false) {
   return GetData(forceUpdate, SessionConstant.Parameter, () => GetParameter<BasicData[]>(campaign, param),
     campaign, param);
+}
+
+export function SessionTextureTone(texture: TextureTone) {
+  return GetData(false, SessionConstant.TextureTone, () => GetToneTexture(texture),
+    texture);
 }
