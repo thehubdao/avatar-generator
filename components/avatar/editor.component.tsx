@@ -18,7 +18,7 @@ import {
   LookAtVectors
 } from "../../interfaces/common.interface";
 import {ExportModelGlb} from "../../utils/exporter.util";
-import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene} from "./viewer.component";
+import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene, SetEnvironmentMap} from "./viewer.component";
 import {ChangeMaterialOption} from "../../enums/model.enum";
 import {ConfigLight} from "../../interfaces/light.interface";
 import {GetLights} from "../../utils/threejs/light.util";
@@ -107,6 +107,7 @@ interface AvatarEditorProps {
   changeMaterial?: ChangeMaterialOption;
   lights?: ConfigLight[];
   defaultCamera?: LookAtVectors;
+  envMap?: string;
 }
 
 /***
@@ -114,7 +115,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera}: AvatarEditorProps) {
+export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera, envMap}: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -122,6 +123,8 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
   }
 
   async function initEditor() {
+    await SetEnvironmentMap(envMap);
+    
     const leLights = GetLights(lights);
     for (const light of leLights) {
       AddToScene(light);
