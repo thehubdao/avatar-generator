@@ -1,21 +1,21 @@
 import {useState} from "react";
-import {UserRoleValues} from "../../enums/firebase.enum";
-import {AdminComponents} from "../../enums/common.enum";
-import {AdminComponentParams} from "../../interfaces/common.interface";
+import {UserRoleValues} from "../../../enums/firebase.enum";
+import {AdminComponents} from "../../../enums/common.enum";
+import {AdminComponentParams} from "../../../interfaces/common.interface";
 
 //#region Components
 //  Common
-import AGButton from "../../ui/common/ag-button.component";
-import AGText from "../../ui/common/ag-text.component";
+import AGButton from "../../common/ag-button.component";
+import AGText from "../../common/ag-text.component";
 //  Assets
-import AssetList from "./assets/list.component";
-import AssetAdd from "./assets/add.component";
-import AssetUpdate from "./assets/update.component";
+import AssetList from "../assets/list.component";
+import AssetAdd from "../../../components/admin/assets/add.component";
+import AssetUpdate from "../../../components/admin/assets/update.component";
 //  User
-import UserAdd from "./user/add.component";
-import UserList from "./user/list.component";
+import UserAdd from "../../../components/admin/user/add.component";
+import UserList from "../../../components/admin/user/list.component";
 // Campaign
-import CampaignAdd from "./campaign/add.component";
+import CampaignAdd from "../../../components/admin/campaign/add.component";
 
 //#endregion Components
 
