@@ -1,7 +1,7 @@
 ﻿import { ChangeEvent, Component, FormEvent } from "react";
 import Head from "next/head";
-import AGButton from "../../components/common/ag-button.component";
-import AGLoading from "../../components/common/ag-loading.component";
+import AGButton from "../../ui/common/ag-button.component";
+import AGLoading from "../../ui/common/ag-loading.component";
 import { IsLogIn, LogIn } from "../../utils/firebase.util";
 import { PageLocation } from "../../enums/common.enum";
 import { FirebaseError } from "@firebase/util";
@@ -66,17 +66,17 @@ export default class Login extends Component<undefined, LoginState> {
           <div className="bg-bg p-28">
             <div className="flex flex-col justify-between h-full">
               <div>
-                <h1 className="font-humane text-right text-[10rem] text-gray-dark leading-[0.75]">META<br />AVATAR<br />BUILDER</h1>
+                <h1 className="font-humane text-right text-[10rem] text-gray-dark leading-[0.75]">THE<br />AVATAR<br />HUB</h1>
                 <p className="text-right text-gray-light">
                   by&nbsp;
-                  <a className="underline" href="https://www.metagamehub.io/" target="_blank" rel="noopener noreferrer">MetaGameHub DAO</a>
+                  <a className="underline" href="https://www.metagamehub.io/" target="_blank" rel="noopener noreferrer">The Hub DAO</a>
                 </p>
               </div>
               <div className="flex justify-end">
                 <form onSubmit={event => void this.handleSubmit(event)} className="w-2/3 max-w-xs">
-                  <input className="shadow-inset-medium rounded-full w-full py-2 px-4 mb-4" placeholder="User"
+                  <input className="shadow-inset-soft rounded-full w-full py-2 px-4 mb-4 bg-bg" placeholder="User"
                     type="text" required onChange={event => this.handleStateChange("user", event)} />
-                  <input className="shadow-inset-medium rounded-full w-full py-2 px-4 mb-4" placeholder="Password"
+                  <input className="shadow-inset-soft rounded-full w-full py-2 px-4 mb-4 bg-bg" placeholder="Password"
                     type="password" required onChange={event => this.handleStateChange("pass", event)} />
                   <AGButton form nm align="end">Log In</AGButton>
                 </form>
