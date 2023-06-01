@@ -1,7 +1,7 @@
-﻿import {useEffect, useState} from "react";
-import {GetCurrentUserInfo, HandleNotLoggedIn} from "../../utils/firebase.util";
-import {UserInterface} from "../../interfaces/firebase.interface";
-import AGLoading from "../common/ag-loading.component";
+﻿import { useEffect, useState } from "react";
+import { GetCurrentUserInfo, HandleNotLoggedIn } from "../../utils/firebase.util";
+import { UserInterface } from "../../interfaces/firebase.interface";
+import AGLoading from "../../ui/common/ag-loading.component";
 
 interface LayoutProps {
   children: JSX.Element | JSX.Element[] | boolean;
@@ -13,10 +13,10 @@ interface LayoutProps {
 }
 
 export default function Layout({
-                                 setUserInfo,
-                                 userInfo,
-                                 children
-                               }: LayoutProps) {
+  setUserInfo,
+  userInfo,
+  children
+}: LayoutProps) {
   const [loading, setLoading] = useState<boolean>(true);
 
   async function updateUserInfo() {
@@ -25,7 +25,7 @@ export default function Layout({
     setLoading(false);
     setUserInfo && setUserInfo(uInfo);
   }
-  
+
   useEffect(() => {
     const componentDidMount = async () => {
       const isNotLogIn = await HandleNotLoggedIn();
@@ -52,36 +52,12 @@ export default function Layout({
 
   return (
     <>
-      <AGLoading loading={loading} transparency />
-      <div className="bg-emerald-500 flex justify-between">
-        <div className="ml-3 mr-1 my-2 flex">
-          {userInfo &&
-              <div className="my-auto flex flex-col sm:flex-row">
-                  <p className="font-bold">{userInfo.name}</p>
-                  <p className="ml-2">
-                      <span>🧔‍♀️: </span>{userInfo.account}
-                  </p>
-                  <p className="ml-2">
-                      <span>👨‍🌾: </span>{userInfo.role != undefined ? UserRoleValues[userInfo.role] : 'missing'}
-                  </p>
-                {!noCampaign &&
-                    <div className="ml-2 flex">
-                        <p>🚩:</p>
-                        <select className="ml-1" defaultValue={currentCampaign}
-                                onChange={e => setCurrentCampaign && setCurrentCampaign(e.target.value)}>
-                            <option value=''>Select...</option>
-                          {renderCampaignOptions()}
-                        </select>
-                    </div>
-                }
-              </div>
-          }
-        </div>
-        <AGButton type="danger" onClickEvent={() => void LogOut()}>Log Out</AGButton>
+      <div className="flex justify-center min-h-screen mt-[88px] pb-16 bg-bg">
+        {!loading &&
+          children
+        }
       </div>
-      { !loading &&
-        children
-      }
+      <AGLoading loading={loading} />
     </>
   );
 }
