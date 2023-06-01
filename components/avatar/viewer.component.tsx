@@ -1,5 +1,15 @@
 import {useEffect, useRef} from "react";
-import {AnimationMixer, Clock, Object3D, PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
+import {
+  AnimationMixer,
+  Clock,
+  EquirectangularReflectionMapping,
+  Object3D,
+  PerspectiveCamera,
+  Scene,
+  SRGBColorSpace,
+  Vector3,
+  WebGLRenderer
+} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {LogError, LogWarning} from "../../utils/common.util";
 import {Module} from "../../enums/common.enum";
@@ -11,6 +21,7 @@ import {
   GetBaseScene
 } from "../../utils/threejs/scene.util";
 import {AGVector3} from "../../interfaces/common.interface";
+import {GetTextureFromFile} from "../../utils/texture.util";
 
 //#region Logic
 let _scene: Scene | undefined;
@@ -112,6 +123,19 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
       }
     }, mimeType);
   });
+}
+
+export async function SetEnvironmentMap(textureUrl: string | undefined) {
+  if (_scene == undefined) return void LogError(Module.Viewer, "Missing scene on set env map!");
+  
+  const texture = await GetTextureFromFile(textureUrl);
+  if (texture == undefined) return;
+  
+  texture.mapping = EquirectangularReflectionMapping;
+  texture.colorSpace = SRGBColorSpace;
+
+  _scene.background = texture;
+  _scene.environment = texture;
 }
 
 //#endregion
