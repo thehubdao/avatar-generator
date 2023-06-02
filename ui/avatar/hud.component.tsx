@@ -177,7 +177,7 @@ export default function HudComponent({ editModeSelected,
             {/* WRAPPER */}
             <div className="w-full h-full flex">
               {/* FEATURES SECTION */}
-              <div className="h-screen p-8">
+              <div className="h-screen">
                 <FeatureSelector
                   list={[...selectListFeatures, ...selectListAccessories]}
                   activeOpc={selectedFeature}
