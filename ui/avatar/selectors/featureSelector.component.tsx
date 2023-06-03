@@ -87,7 +87,6 @@ export default function FeatureSelector({ list, activeOpc, handleClick }: Featur
         slidesPerView='auto'
         spaceBetween={10}
         centeredSlides={true}
-        grabCursor={true}
         direction={"vertical"}
         loop={true}
         modules={[Mousewheel]}
