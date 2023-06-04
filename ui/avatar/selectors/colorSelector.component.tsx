@@ -21,29 +21,20 @@ interface ColorOptionProps {
 function ColorOption({ option, isActive, listStyle = 'Rectangular' }: ColorOptionProps) {
 
   // * Variables controlling the style of the selection buttons
-  const [activeStyle, setActiveStyle] = useState<string>('')
   const [optionStyle, setOptionStyle] = useState<string>('')
 
   //* List style control
   useEffect(() => {
     if (listStyle === 'Oval') {
-      setOptionStyle('w-8 h-8 shadow-flat-medium rounded-full p-[.4rem]')
+      setOptionStyle(`w-8 h-8 shadow-${isActive ? 'inset-medium' : 'flat-medium'} rounded-full p-${isActive ? '2' : '[.4rem]'}`)
     } else {
-      setOptionStyle('w-12 h-12 p-2 shadow-flat-medium rounded-lg')
+      setOptionStyle(`w-12 h-12 p-${isActive ? '4' : '2'} shadow-${isActive ? 'inset-medium' : 'flat-medium'} rounded-lg`)
     }
-  }, [listStyle])
-
-  // * Is active style control
-  useEffect(() => {
-    const rectangleStyle = (listStyle === 'Rectangular') ? 'p-4' : ''
-    isActive
-      ? setActiveStyle(`shadow-inset-medium ${rectangleStyle}`)
-      : setActiveStyle('')
-  }, [isActive])
+  }, [listStyle, isActive])
 
   return (
-    <div className={`${optionStyle} ${activeStyle}`} >
-      <div className={`w-full h-full ${listStyle === 'Oval' ? 'rounded-full' : ''} ${isActive ? 'rounded-full' : ''}`} style={{ backgroundColor: (`#${option}`) }}></div>
+    <div className={`${optionStyle}`} >
+      <div className={`w-full h-full ${listStyle === 'Oval' ? 'rounded-full' : ''} ${isActive ? 'rounded-full' : ''}`} style={{ backgroundColor: (`#${option}`) }}/>
     </div>
   )
 }
