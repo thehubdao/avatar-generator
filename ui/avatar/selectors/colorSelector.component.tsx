@@ -14,7 +14,7 @@ interface ColorOptionProps {
 }
 
 /** 
- * @params the same as the parent component
+ * @params the same as the parent component.
  * @param isActive A boolean value indicating whether the option is currently selected.
  */
 
@@ -34,14 +34,14 @@ function ColorOption({ option, isActive, listStyle = 'Rectangular' }: ColorOptio
 
   return (
     <div className={`${optionStyle}`} >
-      <div className={`w-full h-full ${listStyle === 'Oval' ? 'rounded-full' : ''} ${isActive ? 'rounded-full' : ''}`} style={{ backgroundColor: (`#${option}`) }}/>
+      <div className={`w-full h-full ${listStyle === 'Oval' ? 'rounded-full' : ''} ${isActive ? 'rounded-full' : ''}`} style={{ backgroundColor: (`#${option}`) }} />
     </div>
   )
 }
 
 /**
  * @param list An array of colors in hexadecimal format without the '#' symbol, e.g., ['FF0000'].
- * @param activeColor 
+ * @param activeColor hexadecimal string with the selected color.
  * @param handleClick The function enables us to select the color for a specific feature.
  * @param listStyle It allows us to choose between oval and rectangular styles from the color picker list.
  * 
@@ -53,7 +53,7 @@ export default function ColorSelector({ list, activeColor, handleClick, listStyl
     e.preventDefault();
     handleClick(color);
   }
-  
+
   const [barStyle, setBarStyle] = useState<string>('')
   // * List Style bar controller
   useEffect(() => {
@@ -65,16 +65,15 @@ export default function ColorSelector({ list, activeColor, handleClick, listStyl
   return (
     <div className={`flex gap-3 ${barStyle}`}>
       {
-        list ?
-          list.map(opt => {
+        list
+          ? list.map(opt => {
             return (
               <div key={opt} className={`cursor-pointer`} onClick={event => selectFeature(event, opt)}>
                 <ColorOption option={opt} isActive={activeColor && activeColor === opt ? true : false} listStyle={listStyle} />
               </div>
             )
           })
-          :
-          <p>no Color list</p>
+          : <p>no Color list</p>
       }
     </div>
   )
