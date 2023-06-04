@@ -198,12 +198,13 @@ export default function HudComponent({ editModeSelected,
                     <h2 className="font-work font-bold text-6xl uppercase">{selectedFeature}</h2>
                   </div>
                 </div>
-                {/* SKIN COLOR SECTION */}
+                {/* OPTION COLOR SECTION */}
                 <div className="pt-4">
                   <ColorSelector
                     list={['F8B290', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
                     activeColor={skinColor}
                     handleClick={(value: string) => void onClickChangeSkinColor(value)}
+                    listStyle="Oval"
                   />
                 </div>
                 {/* OPTION SECTION */}
