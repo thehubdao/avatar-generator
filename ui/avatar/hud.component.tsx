@@ -174,6 +174,19 @@ export default function HudComponent({ editModeSelected,
       {
         editModeSelected ?
           <div className="fixed inset-0 w-[58%] h-screen bg-bg hidden xl:block">
+            {/* CAMPAIGN HEADER SIGN */}
+            <div className="fixed flex right-0 top-0 justify-center items-center gap-1 py-3 px-8 max-w-lg">
+              <div className="-z-10 absolute -right-10 h-full w-[120%] skew-x-[45deg] bg-bg" />
+              <div className="w-10">
+                <svg width="40" height="40" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M488.965 246.055C488.965 246.055 431.971 203.262 420.619 182.483C409.267 161.705 402.515 88.5168 402.515 88.5168C337.294 -29.5056 174.507 -29.5056 109.551 88.5168C109.551 88.5168 102.799 161.705 91.4474 182.483C80.0957 203.262 22.8651 246.055 22.8651 246.055C-42.0905 364.325 39.0524 512 169.229 512C169.229 512 232.976 482.378 255.945 482.378C278.914 482.378 342.66 512 342.66 512C472.837 512 554.245 364.325 489.024 246.055H488.965ZM255.886 422.331C182.232 422.331 122.554 359.78 122.554 282.51C122.554 205.241 182.202 142.689 255.886 142.689C329.569 142.689 389.217 205.241 389.217 282.51C389.217 359.78 329.569 422.331 255.886 422.331Z" fill="#19BCF3" />
+                </svg>
+              </div>
+              <p className="font-black text-3xl">
+                {'Este es un texto de doble linea'?.toUpperCase()}
+                <span className="text-[#19BCF3]">.</span>
+              </p>
+            </div>
             {/* WRAPPER */}
             <div className="w-full h-full flex">
               {/* FEATURES SECTION */}
