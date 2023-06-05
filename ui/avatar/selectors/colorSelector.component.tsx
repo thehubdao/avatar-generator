@@ -26,14 +26,14 @@ function ColorOption({ option, isActive, listStyle = 'Rectangular' }: ColorOptio
   //* List style control
   useEffect(() => {
     if (listStyle === 'Oval') {
-      setOptionStyle(`w-8 h-8 shadow-${isActive ? 'inset-medium' : 'flat-medium'} rounded-full p-${isActive ? '2' : '[.4rem]'}`)
+      setOptionStyle(`w-8 h-8 shadow-${isActive ? 'inset-medium' : 'flat-medium'} rounded-full p-${isActive ? '2' : '1'}`)
     } else {
       setOptionStyle(`w-12 h-12 p-${isActive ? '4' : '2'} shadow-${isActive ? 'inset-medium' : 'flat-medium'} rounded-lg`)
     }
   }, [listStyle, isActive])
 
   return (
-    <div className={`${optionStyle}`} >
+    <div className={`${optionStyle} transition-all duration-150 ease-in-out`} >
       <div className={`w-full h-full ${listStyle === 'Oval' ? 'rounded-full' : ''} ${isActive ? 'rounded-full' : ''}`} style={{ backgroundColor: (`#${option}`) }} />
     </div>
   )
