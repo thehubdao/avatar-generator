@@ -13,6 +13,13 @@ interface ColorOptionProps {
   listStyle?: 'Oval' | 'Rectangular'
 }
 
+interface ColorOptionState {
+  width: string;
+  height: string;
+  rounded: string;
+  padding: string;
+}
+
 /** 
  * @params the same as the parent component.
  * @param isActive A boolean value indicating whether the option is currently selected.
@@ -21,20 +28,35 @@ interface ColorOptionProps {
 function ColorOption({ option, isActive, listStyle = 'Rectangular' }: ColorOptionProps) {
 
   // * Variables controlling the style of the selection buttons
-  const [optionStyle, setOptionStyle] = useState<string>('')
+  const [styleControl, setStyleControl] = useState<ColorOptionState>({ ...getOptionType() })
+
+  function getOptionType() {
+    switch (listStyle) {
+      case 'Oval':
+        return {
+          width: 'w-8',
+          height: 'h-8',
+          rounded: 'rounded-full',
+          padding: isActive ? 'p-2' : 'p-[.4rem]'
+        }
+      default: // Rectangle
+        return {
+          width: 'w-12',
+          height: 'h-12',
+          rounded: 'rounded-lg',
+          padding: isActive ? 'p-4' : 'p-2'
+        }
+    }
+  }
 
   //* List style control
   useEffect(() => {
-    if (listStyle === 'Oval') {
-      setOptionStyle(`w-8 h-8 shadow-${isActive ? 'inset-medium' : 'flat-medium'} rounded-full p-${isActive ? '2' : '1'}`)
-    } else {
-      setOptionStyle(`w-12 h-12 p-${isActive ? '4' : '2'} shadow-${isActive ? 'inset-medium' : 'flat-medium'} rounded-lg`)
-    }
+    setStyleControl({ ...getOptionType() })
   }, [listStyle, isActive])
 
   return (
-    <div className={`${optionStyle} transition-all duration-150 ease-in-out`} >
-      <div className={`w-full h-full ${listStyle === 'Oval' ? 'rounded-full' : ''} ${isActive ? 'rounded-full' : ''}`} style={{ backgroundColor: (`#${option}`) }} />
+    <div className={`${styleControl.width} ${styleControl.height} ${styleControl.rounded} ${styleControl.padding} ${isActive ? 'shadow-inset-medium' : 'shadow-flat-medium'} transition-all duration-150 ease-in-out`} >
+      <div className={`w-full h-full ${listStyle === 'Oval' || isActive ? 'rounded-full' : ''}`} style={{ backgroundColor: (`#${option}`) }} />
     </div>
   )
 }
@@ -69,7 +91,7 @@ export default function ColorSelector({ list, activeColor, handleClick, listStyl
           ? list.map(opt => {
             return (
               <div key={opt} className={`cursor-pointer`} onClick={event => selectFeature(event, opt)}>
-                <ColorOption option={opt} isActive={activeColor && activeColor === opt ? true : false} listStyle={listStyle} />
+                <ColorOption option={opt} isActive={activeColor === opt} listStyle={listStyle} />
               </div>
             )
           })
