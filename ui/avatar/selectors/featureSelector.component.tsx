@@ -37,7 +37,7 @@ const ScrollButton = ({ position = 'top' }: { position?: 'top' | 'bottom' }) => 
     <div className={`absolute h-fit ${boxStyle} z-10`}>
       <button
         onClick={handleClick}
-        className="bg-bg flex justify-center items-center w-[164px] h-[80px]"
+        className="bg-bg flex justify-center items-center w-[148px] h-[80px]"
       >
         <div className={`-rotate-[135deg] w-4 h-4 border-r-[5px] border-b-[5px]`} />
       </button>
@@ -56,13 +56,13 @@ function optionSelector({ list, activeOpc, handleClick, handleSlide }: OptionSel
   return list?.map((opt: any, index: number) => {
     const isActive: boolean = activeOpc && activeOpc === opt.id ? true : false
     return (
-      <SwiperSlide key={opt.id} style={{ height: '110px' }} className="px-8">
+      <SwiperSlide key={opt.id} style={{ height: '100px' }} className="px-8">
         <div
           onClick={event => {
             selectFeature(event, opt.id, index)
           }}
         >
-          <div className={`w-[100px] h-[100px] flex justify-center items-center bg-bg rounded-xl cursor-pointer ${isActive ? 'bg-accent shadow-inset-hard' : 'shadow-flat-hard'}`} title={opt.id}>
+          <div className={`w-[84px] h-[84px] flex justify-center items-center bg-bg rounded-xl cursor-pointer ${isActive ? 'bg-accent shadow-inset-hard' : 'shadow-flat-hard'}`} title={opt.id}>
             <Image alt={opt.id} width={70} height={70} src={'/resources/icons/features/Chest.svg'} priority />
           </div>
         </div>
