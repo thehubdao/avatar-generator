@@ -57,6 +57,7 @@ export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel:
     return LogError(Module.ModelUtil, "There is no selected feature to replace on base model.");
   
   const featureInfo = allFeatureInfo[selectedFeature];
+  if (featureInfo == undefined) return LogError(Module.ModelUtil, "Feature not found on avatar base!");
   
   const changeMesh: Object3D | null = await GetMatchPiece(replaceModel, featureInfo.name);
   if(changeMesh == null)
@@ -229,7 +230,7 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
       name: oldName,
       color: oldColor,
       gradientMap: _toneTexture,
-      transparent: true,
+      transparent: materialRef.transparent,
     });
   }
 }
