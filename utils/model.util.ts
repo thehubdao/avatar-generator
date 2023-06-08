@@ -225,12 +225,14 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
     const oldName = materialRef.name;
     const oldColor = materialRef.color.clone();
     const _toneTexture = await TextureUtil.Instance().GetToneTexture(tone);
+    // TODO: Remove console log
+    console.log(`New feature material transparency: ${materialRef.transparent}`);
     object.material = new MeshToonMaterial({
       map: mapClone,
       name: oldName,
       color: oldColor,
       gradientMap: _toneTexture,
-      transparent: materialRef.transparent,
+      transparent: true,
     });
   }
 }
