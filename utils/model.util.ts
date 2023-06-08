@@ -230,7 +230,7 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
       name: oldName,
       color: oldColor,
       gradientMap: _toneTexture,
-      transparent: true,
+      transparent: materialRef.transparent,
     });
   }
 }
