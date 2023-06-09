@@ -15,7 +15,7 @@ input[type="number"] {
 }
 
 select {
-	appearance: none;
+  appearance: none;
 }
 
 /* For Webkit-based browsers (Chrome, Safari and Opera) */
@@ -25,8 +25,10 @@ select {
 
 /* For IE, Edge and Firefox */
 .scrollbar-hide {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 /* LOADING */
@@ -69,8 +71,7 @@ select {
 
 .leap-frog__dot:nth-child(2) {
   transform: translateX(calc(var(--uib-size) * 0.4));
-  animation: leapFrog var(--uib-speed) ease calc(var(--uib-speed) / -1.5)
-    infinite;
+  animation: leapFrog var(--uib-speed) ease calc(var(--uib-speed) / -1.5) infinite;
 }
 
 .leap-frog__dot:nth-child(3) {
@@ -98,4 +99,19 @@ select {
   100% {
     transform: translateX(0) rotate(0deg);
   }
+}
+
+/* HUD animation */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.9s;
 }
