@@ -10,24 +10,26 @@ interface hudTitleProps {
  * @param {string} selectedFeature - The selected feature to display as the HUD title.
  */
 const HudTitle = ({ selectedFeature }: hudTitleProps) => {
-  // State for the current and next HUD titles
+  // * State for the current and next HUD titles
   const [currentTitle, setCurrentTitle] = useState('HUD');
   const [nextTitle, setNextTitle] = useState('HUD');
 
-  // State for controlling the animation
+  // * State for controlling the animation
   const [runAnimation, setRunAnimation] = useState(false);
 
   useEffect(() => {
-    // Update the nextTitle and trigger the animation
+    // * Update the nextTitle and trigger the animation
     setNextTitle(selectedFeature);
     setRunAnimation(true);
 
-    // After a delay, update the currentTitle and stop the animation
+    // * After a delay, update the currentTitle and stop the animation
     setTimeout(() => {
       setCurrentTitle(selectedFeature);
       setRunAnimation(false);
     }, 500);
   }, [selectedFeature]);
+
+  // TODO: improve the animation by doing the effect for each letter instead of taking the whole title.
 
   return (
     <div className="w-full h-[60px] relative overflow-hidden">
