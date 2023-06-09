@@ -174,6 +174,23 @@ export default function HudComponent({ editModeSelected,
       {
         editModeSelected ?
           <div className="fixed inset-0 w-[58%] h-screen bg-bg hidden xl:block">
+            {/* CAMPAIGN HEADER SIGN */}
+            <div className="fixed flex right-0 top-0 justify-center items-center gap-1 py-3 px-8 max-w-lg">
+              <div className="-z-10 absolute -left-10 h-full w-[180%] skew-x-[45deg] bg-bg" />
+              <Image
+                src={'/resources/images/the-hub-logo-web.svg'}
+                width={0}
+                height={0}
+                style={{
+                  width: 'auto',
+                  height: 'auto',
+                  maxHeight: '150px',
+                  maxWidth: '480px',
+                  minWidth: '200px'
+                }}
+                alt="Campaign icon"
+              />
+            </div>
             {/* WRAPPER */}
             <div className="w-full h-full flex">
               {/* FEATURES SECTION */}
