@@ -5,11 +5,11 @@ interface hudTitleProps {
 }
 
 /**
- * HUD Title component for controlling HUD title animation.
+ * HUD Feature Title component for controlling HUD title animation.
  * 
- * @param {string} selectedFeature - The selected feature to display as the HUD title.
+ * @param {string} selectedFeature - The selected feature to display as the HUD feature title.
  */
-const HudTitle = ({ selectedFeature }: hudTitleProps) => {
+const HudFeatureTitle = ({ selectedFeature }: hudTitleProps) => {
   // * State for the current and next HUD titles
   const [currentTitle, setCurrentTitle] = useState('HUD');
   const [nextTitle, setNextTitle] = useState('HUD');
@@ -33,12 +33,12 @@ const HudTitle = ({ selectedFeature }: hudTitleProps) => {
 
   return (
     <div className="w-full h-[60px] relative overflow-hidden">
-      {/* Current HUD title with animation */}
+      {/* Current HUD feature title with animation */}
       <h2 className={`absolute font-work font-bold text-6xl uppercase truncate ${runAnimation ? '-top-[60px] duration-500 transition-all' : 'top-0'}`}>{currentTitle}</h2>
-      {/* Next HUD title with animation */}
+      {/* Next HUD feature title with animation */}
       <h2 className={`absolute font-work font-bold text-6xl uppercase truncate ${runAnimation ? 'bottom-0 duration-500 transition-all' : '-bottom-[60px]'}`}>{nextTitle}</h2>
     </div>
   );
 };
 
-export default HudTitle;
+export default HudFeatureTitle;

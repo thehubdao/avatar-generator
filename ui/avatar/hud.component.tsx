@@ -11,7 +11,7 @@ import Image from 'next/image';
 import FeatureSelector from "./selectors/featureSelector.component";
 import OptionSelector from "./selectors/optionSelector.component";
 import ColorSelector from "./selectors/colorSelector.component";
-import HudTitle from "./common/hudTitle.component";
+import HudFeatureTitle from "./common/hudTitle.component";
 
 interface Props {
   editModeSelected: boolean;
@@ -196,7 +196,7 @@ export default function HudComponent({ editModeSelected,
                   </div>
                   <div className="w-full">
                     <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
-                    <HudTitle selectedFeature={selectedFeature}/>
+                    <HudFeatureTitle selectedFeature={selectedFeature}/>
                   </div>
                 </div>
                 {/* OPTION COLOR SECTION */}
