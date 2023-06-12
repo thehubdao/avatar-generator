@@ -4,7 +4,8 @@ import {AccessoryInterface, AnimationInterface, FeatureInterface} from "../../in
 import {FirestoreLocation} from "../../enums/firebase.enum";
 import {BasicData} from "../../interfaces/common.interface";
 import {CampaignParameterName} from "../../enums/common.enum";
-import {GetToneTexture, TextureTone} from "../texture.util";
+import {GetToneTexture} from "../threejs/texture.util";
+import {TextureTone} from "../../types/texture.type";
 
 enum SessionConstant {
   UserInfo,

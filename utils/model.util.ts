@@ -11,11 +11,12 @@ import {
   SkinnedMesh
 } from "three";
 import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
-import {GetToneTexture, TextureTone} from "./texture.util";
+import {GetToneTexture} from "./threejs/texture.util";
 import {LogError} from "./common.util";
 import {GlobalValues, Module} from "../enums/common.enum";
 import {MaterialFunction} from "../types/model.type";
 import {ChangeMaterialOption} from "../enums/model.enum";
+import {TextureTone} from "../types/texture.type";
 
 function IsSkinnedMesh(obj: Object3D): obj is SkinnedMesh {
   return (obj as SkinnedMesh).isSkinnedMesh;

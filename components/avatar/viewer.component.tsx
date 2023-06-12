@@ -21,7 +21,7 @@ import {
   GetBaseScene
 } from "../../utils/threejs/scene.util";
 import {AGVector3} from "../../interfaces/common.interface";
-import {GetTextureFromFile} from "../../utils/texture.util";
+import {GetTextureFromFile} from "../../utils/threejs/texture.util";
 
 //#region Logic
 let _scene: Scene | undefined;

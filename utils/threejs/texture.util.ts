@@ -1,9 +1,8 @@
 import {NearestFilter, TextureLoader} from "three";
-import {IsWebUrl, LogError} from "./common.util";
-import {GetFileUrl} from "./firebase.util";
-import {Module} from "../enums/common.enum";
-
-export type TextureTone = 'threeTone' | 'fourTone' | 'fiveTone';
+import {IsWebUrl, LogError} from "../common.util";
+import {GetFileUrl} from "../firebase.util";
+import {Module} from "../../enums/common.enum";
+import {TextureTone} from "../../types/texture.type";
 
 class TextureUtil {
   private static _instance: TextureUtil;
