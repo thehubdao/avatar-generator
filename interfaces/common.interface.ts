@@ -42,6 +42,7 @@ export interface AGVector3 {
 export interface CampaignConfig {
   clientRequirements?: ClientQuestion[];
   changeMaterial?: ChangeMaterialOption;
+  defStart?: number;
   defEyesColor?: string;
   defSkinColor?: string;
   defSkin?: string;
