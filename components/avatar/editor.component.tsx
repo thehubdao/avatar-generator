@@ -107,7 +107,6 @@ interface AvatarEditorProps {
   changeMaterial?: ChangeMaterialOption;
   lights?: ConfigLight[];
   defaultCamera?: LookAtVectors;
-  envMap?: string;
 }
 
 /***
@@ -115,7 +114,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera, envMap}: AvatarEditorProps) {
+export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera}: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -123,8 +122,6 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
   }
 
   async function initEditor() {
-    await SetEnvironmentMap(envMap);
-    
     const leLights = GetLights(lights);
     for (const light of leLights) {
       AddToScene(light);
