@@ -3,6 +3,7 @@ export enum FirestoreLocation {
     Accessories = 'accessories',
     Animations = 'animations',
     Environments = 'environments',
+    EnvMaps = 'env-maps',
     Parameters = '/',
 }
 
