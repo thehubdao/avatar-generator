@@ -5,4 +5,5 @@
   Environments = '/api/v1/environments',
   AdminCampaigns = 'api/v1/adminCampaigns',
   Single = '/api/v1/single',
+  EnvMaps = '/api/v1/envMaps',
 }

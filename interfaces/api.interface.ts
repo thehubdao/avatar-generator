@@ -39,3 +39,7 @@ export interface SingleInterface {
   random: boolean;
   features: IndexFeatureInterface[];
 }
+
+export interface EnvMapInterface extends Omit<AssetInterface, 'type' | 'index'>{
+  id: string;
+}
