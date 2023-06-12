@@ -51,6 +51,7 @@ export interface CampaignConfig {
   lights?: ConfigLight[],
   defAnimation?: string;
   defEnvironment?: string;
+  defEnvMap?: string;
   featuresCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
 }

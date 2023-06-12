@@ -3,6 +3,7 @@ export enum FirestoreLocation {
     Accessories = 'accessories',
     Animations = 'animations',
     Environments = 'environments',
+    EnvMaps = 'env_maps',
     Parameters = '/',
 }
 
@@ -25,6 +26,7 @@ export enum StorageLocation {
     Animation = 'animation',
     Missing = 'missing',
     Environment = 'environment',
+    EnvMap = 'env_map',
 }
 
 export enum FirestoreFilterValues {

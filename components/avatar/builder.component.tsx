@@ -13,7 +13,8 @@ import {
   AnimationInterface,
   EnvironmentInterface,
   FeatureInterface,
-  SingleInterface
+  SingleInterface,
+  EnvMapInterface
 } from "../../interfaces/api.interface";
 import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../../utils/iframe.util";
 import {ExportAttributeValues, GlobalValues, Module} from "../../enums/common.enum";
@@ -22,8 +23,9 @@ import {
   GetAccessoryListByCampaign,
   GetAnimationListByCampaign,
   GetAssetsListByCampaign,
+  GetEnvironmentListByCampaign,
   GetAvatarSingleByCampaignCombination,
-  GetEnvironmentListByCampaign
+  GetEnvMapListByCampaign
 } from "../../utils/api.util";
 import {SaveFile} from "../../utils/exporter.util";
 import AGLoading from "../common/ag-loading.component";
@@ -38,7 +40,7 @@ import AvatarEditor, {
   SetEnvironment,
   SetFeaturesData
 } from "./editor.component";
-import {AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture} from "./viewer.component";
+import {AGChangeCamPosition, AGChangeLookAtPosition, SetEnvironmentMap, TakeCanvasPicture} from "./viewer.component";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -55,6 +57,7 @@ let featureList: FeatureInterface[] | undefined;
 let accessoryList: AccessoryInterface[] | undefined;
 let animationList: AnimationInterface[] | undefined;
 let environmentList: EnvironmentInterface[] | undefined;
+let envMapList: EnvMapInterface[] | undefined;
 let singleData: SingleInterface | undefined;
 
 const exportData: ExportInterface = {attributes: []};
@@ -94,6 +97,7 @@ export default function AvatarBuilder({
       getAccessoryList(),
       getAnimationList(),
       getEnvironmentList(),
+      getEnvironmentMapList(),
       getSingleInfo()
     ]);
 
@@ -107,6 +111,9 @@ export default function AvatarBuilder({
     await loadPreData();
     await onClickChangeSkinColor();
 
+    const envMap = envMapList?.find(em => em.name === campaignConfig.defEnvMap) ?? envMapList?.at(0) ;
+    await SetEnvironmentMap(envMap?.path);
+    
     const startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
     await ChangeStartAnimation(startAnimation?.path);
 
@@ -242,6 +249,12 @@ export default function AvatarBuilder({
   async function getEnvironmentList() {
     const {value: newEnvironmentList} = await GetEnvironmentListByCampaign(campaign);
     environmentList = newEnvironmentList;
+  }
+  
+  async function getEnvironmentMapList() {
+    if (campaign == undefined) return;
+    const {value: newEnvMapList} = await GetEnvMapListByCampaign(campaign);
+    envMapList = newEnvMapList;
   }
   
   async function getSingleInfo() {

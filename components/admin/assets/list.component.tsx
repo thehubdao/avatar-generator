@@ -10,6 +10,7 @@ import {
   AnimationInterfaceProps,
   CampaignInterfaceProps,
   EnvironmentInterfaceProps,
+  EnvMapInterfaceProps,
   FeatureInterfaceProps
 } from "../../../constants/obj-props.constant";
 import {AssetType} from "../../../types/asset.type";
@@ -38,6 +39,8 @@ export default function AssetList({campaign, changeComponent}: AssetListProps) {
         return CampaignInterfaceProps;
       case FirestoreLocation.Environments:
         return EnvironmentInterfaceProps;
+      case FirestoreLocation.EnvMaps:
+        return EnvMapInterfaceProps;
     }
   }, [dbLocation]);
   
