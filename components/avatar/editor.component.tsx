@@ -9,7 +9,7 @@ import {
   GetFeaturesData,
   ReplaceModelAccessory,
   ReplaceModelFeatureOnly,
-  TransformObject3dToToonMaterial
+  TransformObject3dToNewMaterial
 } from "../../utils/model.util";
 import {
   AccessoryInfoInterface,
@@ -132,7 +132,7 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     _mixer = CreateAnimationMixer(_avatar.scene);
     await SetAnimation(_mixer, _avatar, undefined);
 
-    await TransformObject3dToToonMaterial(_avatar.scene, undefined, changeMaterial);
+    await TransformObject3dToNewMaterial(_avatar.scene, undefined, changeMaterial);
     AddToScene(_avatar.scene);
     AddMixer(_mixer);
   }

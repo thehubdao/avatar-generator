@@ -222,12 +222,12 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
     const mapClone = materialRef.map?.clone();
     const oldName = materialRef.name;
     const oldColor = materialRef.color.clone();
-    const _toneTexture = await GetToneTexture(tone);
+    const toneTexture = await GetToneTexture(tone);
     object.material = new MeshToonMaterial({
       map: mapClone,
       name: oldName,
       color: oldColor,
-      gradientMap: _toneTexture,
+      gradientMap: toneTexture,
       transparent: materialRef.transparent,
     });
   }
@@ -248,13 +248,13 @@ export async function ChangeToBasicMaterial(object: SkinnedMesh, tone?: TextureT
   }
 }
 
-export async function TransformObject3dToToonMaterial(object: Object3D, tone?: TextureTone, changeMaterial?: ChangeMaterialOption) {
+export async function TransformObject3dToNewMaterial(object: Object3D, tone?: TextureTone, changeMaterial?: ChangeMaterialOption) {
   const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
   if (changeMaterialFunction == undefined) return;
   
-  object.traverse(async subObj => {
+  object.traverse(subObj => {
     if (IsSkinnedMesh(subObj)) {
-      await changeMaterialFunction(subObj, tone);
+      changeMaterialFunction(subObj, tone);
     }
   });
 }
