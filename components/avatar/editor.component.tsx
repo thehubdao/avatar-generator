@@ -18,7 +18,7 @@ import {
   LookAtVectors
 } from "../../interfaces/common.interface";
 import {ExportModelGlb} from "../../utils/exporter.util";
-import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene, SetEnvironmentMap} from "./viewer.component";
+import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene} from "./viewer.component";
 import {ChangeMaterialOption} from "../../enums/model.enum";
 import {ConfigLight} from "../../interfaces/light.interface";
 import {GetLights} from "../../utils/threejs/light.util";
