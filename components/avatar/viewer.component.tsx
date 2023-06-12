@@ -21,7 +21,7 @@ import {
   GetBaseScene
 } from "../../utils/threejs/scene.util";
 import {AGVector3} from "../../interfaces/common.interface";
-import {GetTextureFromFile} from "../../utils/threejs/texture.util";
+import {GetTextureFromFile, GetToneTexture} from "../../utils/threejs/texture.util";
 
 //#region Logic
 let _scene: Scene | undefined;
@@ -162,6 +162,10 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}:
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
+  async function preload() {
+    await GetToneTexture();
+  }
 
   async function initScene() {
     if (threeCanvas.current == null) return LogError(Module.AvatarGenerator, "Error initializing canvas!");
@@ -180,6 +184,8 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}:
     // remember these initial values
     _tanFOV = Math.tan(((Math.PI / 180) * _camera.fov / 2));
     _windowHeight = window.innerHeight;
+    
+    await preload();
 
     window.addEventListener('resize', onWindowResize, false);
     Animate();
