@@ -5,7 +5,7 @@ import {Module} from "../enums/common.enum";
 
 export type TextureTone = 'threeTone' | 'fourTone' | 'fiveTone';
 
-export class TextureUtil {
+class TextureUtil {
   private static _instance: TextureUtil;
   private _textureLoader: TextureLoader | undefined;
 
