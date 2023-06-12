@@ -84,6 +84,7 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
 
   function renderUploadType() {
     switch (dbLocation) {
+      case FirestoreLocation.EnvMaps:
       case FirestoreLocation.Environments:
       case FirestoreLocation.Animations:
       case FirestoreLocation.Accessories:
@@ -165,6 +166,8 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
         return StorageLocation.Animation;
       case FirestoreLocation.Environments:
         return StorageLocation.Environment;
+      case FirestoreLocation.EnvMaps:
+        return StorageLocation.EnvMap;
       default:
         return StorageLocation.Missing;
     }
@@ -208,8 +211,11 @@ export default function AssetAdd({campaign, changeComponent}: AssetAddProps) {
   }
 
   function simpleFormType(value: string) {
-    return value === FirestoreLocation.Animations ||
-      value === FirestoreLocation.Environments;
+    return (
+      value === FirestoreLocation.Animations ||
+      value === FirestoreLocation.Environments ||
+      value === FirestoreLocation.EnvMaps
+    );
   }
 
   return (
