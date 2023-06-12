@@ -1,4 +1,4 @@
-import {NearestFilter, TextureLoader} from "three";
+import {NearestFilter, Texture, TextureLoader} from "three";
 import {IsWebUrl, LogError} from "../common.util";
 import {GetFileUrl} from "../firebase.util";
 import {Module} from "../../enums/common.enum";
@@ -7,6 +7,7 @@ import {TextureTone} from "../../types/texture.type";
 class TextureUtil {
   private static _instance: TextureUtil;
   private _textureLoader: TextureLoader | undefined;
+  private _textureDb: Record<string, Texture> | undefined;
 
   private constructor() {
     this._textureLoader = undefined;
@@ -25,14 +26,25 @@ class TextureUtil {
     
     return this._textureLoader;
   }
+  
+  public async GetToneTexture(tone: TextureTone) {
+    if (this._textureDb && this._textureDb[tone])
+      return this._textureDb[tone].clone();
+
+    if (this._textureDb === undefined) this._textureDb = {};
+    
+    const toneTexture = await TextureUtil.Instance().TextureLoader().loadAsync(`/resources/tones/${tone}.jpg`);
+    toneTexture.minFilter = NearestFilter;
+    toneTexture.magFilter = NearestFilter;
+
+    this._textureDb[tone] = toneTexture.clone();
+    
+    return toneTexture;
+  }
 }
 
 export async function GetToneTexture(tone: TextureTone = 'threeTone' ) {
-  const toneTexture = await TextureUtil.Instance().TextureLoader().loadAsync(`/resources/tones/${tone}.jpg`);
-  toneTexture.minFilter = NearestFilter;
-  toneTexture.magFilter = NearestFilter;
-
-  return toneTexture;
+  return TextureUtil.Instance().GetToneTexture(tone);
 }
 
 export async function GetTextureFromFile(url: string | undefined) {
