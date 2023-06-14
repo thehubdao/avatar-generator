@@ -2,7 +2,7 @@ import { IoAlert } from "react-icons/io5";
 import AGButton from "../../../common/ag-button.component";
 import { useSwiper } from "swiper/react";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useState } from "react";
 
 import { useAppSelector, useAppDispatch } from './../../../../store/hooks';
 import { setFeatures } from "../../../../store/addCampaignSlice";
