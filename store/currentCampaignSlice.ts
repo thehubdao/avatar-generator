@@ -40,12 +40,6 @@ export const fetchData = createAsyncThunk(
   'currentCampaign/fetchData',
 
   async ({ campaign, location }: { campaign: string, location: FirestoreLocation }) => {
-    // let res;
-    // if (location === FirestoreLocation.Parameters) {
-    //   res = await GetInfoDB<CampaignParameters>(location, campaign);
-    // } else {
-    //   res = await GetInfoDB<AssetType>(location, campaign);
-    // }
     const res = await GetInfoDB(location, campaign);
     return {
       res,
