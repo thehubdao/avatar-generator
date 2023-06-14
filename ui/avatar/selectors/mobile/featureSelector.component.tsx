@@ -1,9 +1,9 @@
 import {Swiper, SwiperSlide} from 'swiper/react';
 import Image from 'next/image';
-import {FeatureInterface} from "../../interfaces/api.interface";
 import {MouseEvent} from "react";
 import 'swiper/css';
-import { BasicData } from '../../interfaces/common.interface';
+import { FeatureInterface } from '../../../../interfaces/api.interface';
+import { BasicData } from '../../../../interfaces/common.interface';
 
 interface props {
   list: FeatureInterface[] | BasicData[];
