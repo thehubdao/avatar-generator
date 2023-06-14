@@ -18,8 +18,6 @@ export const authSlice = createSlice({
   initialState,
   reducers: {
     connect: (state, { payload }) => {
-      // eslint-disable-next-line no-console
-      console.log('payload: ', payload);
       state.connected = true;
     },
     disconnect: () => initialState,
