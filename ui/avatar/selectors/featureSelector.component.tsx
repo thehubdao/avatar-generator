@@ -74,12 +74,18 @@ function optionSelector({ list, activeOpc, handleClick, handleSlide }: OptionSel
 export default function FeatureSelector({ list, activeOpc, handleClick }: FeatureSelectorProps) {
   const swiperRef = useRef<SwiperRef | null>(null);
 
+  const listLenght: number = list?.length ?? 0
+
   const handleSlide = (id: number) => {
     if (swiperRef.current && swiperRef.current.swiper) {
       swiperRef.current.swiper.slideToLoop(id, 1000);
     }
   };
 
+
+  const handle = () => {
+
+  }
 
   return (
     <div className="relative h-fit">
@@ -88,12 +94,20 @@ export default function FeatureSelector({ list, activeOpc, handleClick }: Featur
         spaceBetween={10}
         centeredSlides={true}
         direction={"vertical"}
-        loop={true}
+        loop={listLenght >= 5}
         modules={[Mousewheel]}
         mousewheel={true}
         ref={swiperRef}
-        // onSlideChange={() => console.log('slide change')}
-        // onSwiper={(swiper) => console.log(swiper)}
+        breakpoints={{
+          1280: {
+            loop: listLenght >= 5,
+            initialSlide: listLenght >= 5 ? 0 : Math.floor(listLenght / 2)
+          },
+          1440: {
+            loop: listLenght >= 7,
+            initialSlide: listLenght >= 7 ? 0 : Math.floor(listLenght / 2)
+          }
+        }}
         className='!pb-2 !pt-3 h-screen'
       >
         {optionSelector({ list, activeOpc, handleClick, handleSlide })}
