@@ -66,7 +66,10 @@ export interface CampaignParameters {
 }
 
 export interface FeatureBasic extends Omit<BasicData, 'detail'> {
-  index: number;
+  index: number,
+  hasCustomIcon: boolean,
+  iconUrl: string,
+  isMulticolor: boolean
 }
 
 export interface AdminComponentParams {

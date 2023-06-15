@@ -1,32 +1,51 @@
-﻿import { useState } from "react";
+﻿import { useEffect, useState } from "react";
 import Head from "next/head";
 import { UserInterface } from "../../interfaces/firebase.interface";
-import Layout from "../../components/admin/_layout.component";
+import Layout from "../../ui/admin/admin.layout";
 import AGLoading from "../../ui/common/ag-loading.component";
-import Dashboard from "../../ui/admin/dashboard/dashboard.component";
+import { GetCurrentUserInfo, HandleNotLoggedIn } from "../../utils/firebase.util";
+import Campaigns from "../../ui/admin/campaign/editCampaign/campaignList.ui";
 
 export default function Admin() {
   const [loading, setLoading] = useState<boolean>(true);
-  const [userInfo, setUserInfo] = useState<UserInterface>();
+  const [userInfo, setUserInfo] = useState<UserInterface>({
+    role: 0,
+    name: '',
+    account: '',
+    email: '',
+    campaign: []
+  });
 
-  function updateUserInfo(user?: UserInterface) {
+  async function updateUserInfo() {
+    const uInfo = await GetCurrentUserInfo();
     setLoading(false);
-    setUserInfo(user);
+    uInfo && setUserInfo(uInfo);
   }
+
+  useEffect(() => {
+    const componentDidMount = async () => {
+      const isNotLogIn = await HandleNotLoggedIn();
+      if (isNotLogIn)
+        return;
+
+      await updateUserInfo();
+    };
+
+    componentDidMount()
+      .catch(err => console.error(err));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
       <Head>
         <title>Admin Dashboard</title>
       </Head>
-      <AGLoading loading={loading} transparency />
-      <Layout userInfo={userInfo}
-        setUserInfo={(user) => updateUserInfo(user)}>
-        {!loading &&
-          <Dashboard userRole={userInfo?.role} campaignList={userInfo?.campaign}>
-          </Dashboard>
-        }
+      <Layout>
+        <Campaigns userInfo={userInfo} />
       </Layout>
+      <AGLoading loading={loading} bgColor="F1F5F9" />
     </>
   );
 }
