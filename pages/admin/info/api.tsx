@@ -1,5 +1,5 @@
 ﻿import Head from "next/head";
-import AGText from "../../../components/common/ag-text.component";
+import AGText from "../../../ui/common/ag-text.component";
 
 export default function ApiInfo() {
   const url = 'https://avatar-generator-git-testing-dap-frontend.vercel.app/api/v1';
