@@ -82,11 +82,6 @@ export default function FeatureSelector({ list, activeOpc, handleClick }: Featur
     }
   };
 
-
-  const handle = () => {
-
-  }
-
   return (
     <div className="relative h-fit">
       <Swiper
