@@ -1,7 +1,7 @@
 import {FormEvent, useRef} from "react";
 import {AuthValues, UserRoleValues} from "../../../enums/firebase.enum";
-import AGButton from "../../common/ag-button.component";
-import AGText from "../../common/ag-text.component";
+import AGButton from "../../../ui/common/ag-button.component";
+import AGText from "../../../ui/common/ag-text.component";
 import {UserWithPass} from "../../../interfaces/firebase.interface";
 import {CreateNewUser} from "../../../utils/firebase.util";
 import {Delay, IsEmail, LogError} from "../../../utils/common.util";
@@ -64,7 +64,7 @@ export default function UserAdd({changeComponent}: UserAddProps) {
         <p>Name</p>
         <input type="text" ref={userName} required />
         <p>User</p>
-        <input type="text" ref={userAccount} required />
+        <input type="text" ref={userName} required />
         <p>Password</p>
         <input type="password" ref={userPass} minLength={8} />
         <AGButton type="danger" form>Add</AGButton>

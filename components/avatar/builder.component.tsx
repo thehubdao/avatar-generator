@@ -28,8 +28,8 @@ import {
   GetEnvMapListByCampaign
 } from "../../utils/api.util";
 import {SaveFile} from "../../utils/exporter.util";
-import AGLoading from "../common/ag-loading.component";
-import HudComponent from "./hud.component";
+import AGLoading from "../../ui/common/ag-loading.component";
+import HudComponent from "../../ui/avatar/hud.component";
 import AvatarEditor, {
   ChangeAccessory,
   ChangeFeature, ChangeSkinColor,
@@ -293,7 +293,7 @@ export default function AvatarBuilder({
     await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor, campaignConfig.defSkin, campaignConfig.changeMaterial);
     // TODO: find ways to avoid this
     await SetFeaturesData(selectListFeatures);
-    addReplaceAttribute(selectedFeature, name);
+    addReplaceAttribute(_selectedFeature, name);
   }
 
   async function onChangeAccessory(id: string, path: string, name: string, _selectedAcc: string = selectedAcc) {
@@ -356,7 +356,7 @@ export default function AvatarBuilder({
       <AGLoading loading={loading} bgColor={bgColor}/>
       {/* CANVAS WRAPPER */}
       <div
-        className="fixed left-[50%] translate-x-[-50%] flex justify-center items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+        className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
         {/* CANVAS BACKGROUND */}
         <div style={{backgroundColor: `#${bgColor ?? '272727'}`}} className="w-full h-screen absolute"/>
         {/* CANVAS */}
@@ -364,6 +364,7 @@ export default function AvatarBuilder({
                       onReady={() => onAvatarBuilderReady()}
                       changeMaterial={campaignConfig.changeMaterial}
                       lights={campaignConfig.lights}
+                      editMode={editModeSelected}
         />
       </div>
       {loading ? <></> :

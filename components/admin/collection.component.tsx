@@ -10,9 +10,9 @@ import AvatarEditor, {
   GetAvatarGLB,
   SetFeaturesData
 } from "../avatar/editor.component";
-import AGLoading from "../common/ag-loading.component";
+import AGLoading from "../../ui/common/ag-loading.component";
 import {Delay, LogError, LogWarning, SetMapToMap} from "../../utils/common.util";
-import AGButton from "../common/ag-button.component";
+import AGButton from "../../ui/common/ag-button.component";
 import {TakeCanvasPicture} from "../avatar/viewer.component";
 import {SaveFile} from "../../utils/exporter.util";
 import {

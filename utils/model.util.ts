@@ -259,7 +259,7 @@ export async function TransformObject3dToNewMaterial(object: Object3D, tone?: Te
   });
 }
 
-export async function ChangeObjectSkinColor(object: Object3D, skinColor: string, skinMatName: string = 'AvatarSkin_MAT') {
+export async function ChangeObjectSkinColor(object: Object3D, skinColor: string, skinMatName: string = 'Skin _Mat_MAH') {
   object.traverse(subObject => {
     if (IsSkinnedMesh(subObject)) {
       const matRef = subObject.material as Material;
