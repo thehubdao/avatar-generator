@@ -11,7 +11,8 @@ interface CampaignStateInterface {
     features?: AssetType[],
     accessories?: AssetType[],
     animations?: AssetType[],
-    environments?: AssetType[]
+    environments?: AssetType[],
+    env_maps?: AssetType[]
   },
   isLoading: boolean,
   error?: string,
@@ -30,7 +31,8 @@ const initialState: CampaignStateInterface = {
     features: undefined,
     accessories: undefined,
     animations: undefined,
-    environments: undefined
+    environments: undefined,
+    env_maps: undefined
   },
   isLoading: false,
   error: undefined
