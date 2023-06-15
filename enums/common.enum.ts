@@ -36,6 +36,8 @@ export enum PageLocation {
   AssetList = '/admin/assets/list',
   Login = '/admin/login',
   FirstSteps = '/admin/firstSteps',
+  AdminCampaign = '/admin/campaign',
+  AssetCreate = '/admin/campaign/createAsset',
 }
 
 export enum AdminComponents {

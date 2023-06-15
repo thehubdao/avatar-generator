@@ -31,8 +31,6 @@ interface Props {
   exportModel: () => void;
 }
 
-
-
 export default function HudComponent({ editModeSelected,
   selectListFeatures,
   featureList,
@@ -172,76 +170,89 @@ export default function HudComponent({ editModeSelected,
         }
       </div>
       {/* DESKTOP UI */}
-      {
-        editModeSelected ?
-          <div className="fixed inset-0 w-[58%] h-screen bg-bg hidden xl:block">
-            {/* WRAPPER */}
-            <div className="w-full h-full flex">
-              {/* FEATURES SECTION */}
-              <div className="h-screen">
-                <FeatureSelector
-                  list={[...selectListFeatures, ...selectListAccessories]}
-                  activeOpc={selectedFeature}
-                  handleClick={(value: string) => onCategoryChange(value)}
-                />
+      <div className={`fixed inset-0 ${editModeSelected ? 'w-[58%]' : 'w-0'} overflow-hidden h-screen bg-bg hidden xl:block transition-all duration-300`}>
+        {/* CAMPAIGN HEADER SIGN */}
+        <div className="fixed flex right-0 top-0 justify-center items-center gap-1 py-3 px-8 max-w-lg">
+          <div className="-z-10 absolute -left-10 h-full w-[180%] skew-x-[45deg] bg-bg" />
+          <Image
+            src={'/resources/images/the-hub-logo-web.svg'}
+            width={0}
+            height={0}
+            style={{
+              width: 'auto',
+              height: 'auto',
+              maxHeight: '150px',
+              maxWidth: '480px',
+              minWidth: '200px'
+            }}
+            alt="Campaign icon"
+            />
+          </div>
+        {/* WRAPPER */}
+        <div className={`w-full h-full flex ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 duration-200'} transition-all`}>
+          {/* FEATURES SECTION */}
+          <div className="h-screen">
+            <FeatureSelector
+              list={[...selectListFeatures, ...selectListAccessories]}
+              activeOpc={selectedFeature}
+              handleClick={(value: string) => onCategoryChange(value)}
+            />
+          </div>
+          {/* EDIT SECTION */}
+          <div className="flex flex-col justify-between w-full px-8">
+            {/* TITLE SECTION */}
+            <div className="text-gray-normal">
+              <div className="flex justify-end pb-6 pt-12">
+                <AGButton nm onClickEvent={() => changeView()}>
+                  <p className="font-poppins text-center w-[240px] py-2">SAVE</p>
+                </AGButton>
               </div>
-              {/* EDIT SECTION */}
-              <div className="flex flex-col justify-between w-full px-8">
-                {/* TITLE SECTION */}
-                <div className="text-gray-normal">
-                  <div className="flex justify-end pb-6 pt-12">
-                    <AGButton nm onClickEvent={() => changeView()}>
-                      <p className="font-poppins text-center w-[240px] py-2">SAVE</p>
-                    </AGButton>
-                  </div>
-                  <div className="w-full">
-                    <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
-                    <HudFeatureTitle selectedFeature={selectedFeature}/>
-                  </div>
-                </div>
-                {/* OPTION COLOR SECTION */}
-                <div className="pt-4">
-                  <ColorSelector
-                    list={['F8B290', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
-                    activeColor={skinColor}
-                    handleClick={(value: string) => void onClickChangeSkinColor(value)}
-                    listStyle="Oval"
-                  />
-                </div>
-                {/* OPTION SECTION */}
-                <div className="h-full pt-8">
-                  <OptionSelector
-                    list={featureList}
-                    activeOption={exportData.find(e => e.id === selectedFeature)}
-                    handleClick={(id: string, path: string, name: string) => changeFeature(id, path, name)}
-                  />
-                </div>
-                {/* SKIN COLOR SECTION */}
-                <div className="py-8">
-                  <h2 className="font-poppins pb-2">SKIN COLOR</h2>
-                  <ColorSelector
-                    list={['F8B290', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
-                    activeColor={skinColor}
-                    handleClick={(value: string) => void onClickChangeSkinColor(value)}
-                  />
-                </div>
+              <div className="w-full">
+                <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
+                <HudFeatureTitle selectedFeature={selectedFeature}/>
               </div>
             </div>
+            {/* OPTION COLOR SECTION */}
+            <div className="pt-4">
+              <ColorSelector
+                list={['F8B290', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
+                activeColor={skinColor}
+                handleClick={(value: string) => void onClickChangeSkinColor(value)}
+                listStyle="Oval"
+              />
+            </div>
+            {/* OPTION SECTION */}
+            <div className="h-full pt-8">
+              <OptionSelector
+                list={featureList}
+                activeOption={exportData.find(e => e.id === selectedFeature)}
+                handleClick={(id: string, path: string, name: string) => changeFeature(id, path, name)}
+              />
+            </div>
+            {/* SKIN COLOR SECTION */}
+            <div className="py-8">
+              <h2 className="font-poppins pb-2">SKIN COLOR</h2>
+              <ColorSelector
+                list={['F8B290', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
+                activeColor={skinColor}
+                handleClick={(value: string) => void onClickChangeSkinColor(value)}
+              />
+            </div>
           </div>
-          :
-          <div className="fixed pt-8 pl-8 w-fit h-fit flex">
-            <AGButton onClickEvent={() => changeView()}>
-              <div className="flex items-center justify-between">
-                <p className="font-poppins text-center w-[120px] py-2">EDIT</p>
-              </div>
-            </AGButton>
-            <AGButton onClickEvent={() => exportModel()}>
-              <div className="flex items-center justify-between">
-                <p className="font-poppins text-center w-[120px] py-2">EXPORT</p>
-              </div>
-            </AGButton>
+        </div>
+      </div>
+      {!editModeSelected && <div className="fixed pt-8 pl-8 w-fit h-fit flex">
+        <AGButton onClickEvent={() => changeView()}>
+          <div className="flex items-center justify-between">
+            <p className="font-poppins text-center w-[120px] py-2">EDIT</p>
           </div>
-      }
+        </AGButton>
+        <AGButton onClickEvent={() => exportModel()}>
+          <div className="flex items-center justify-between">
+            <p className="font-poppins text-center w-[120px] py-2">EXPORT</p>
+          </div>
+        </AGButton>
+      </div>}
     </>
   )
 }

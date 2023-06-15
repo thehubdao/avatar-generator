@@ -3,15 +3,40 @@ import {LogOut} from "../../../utils/firebase.util";
 import AGButton from "../../common/ag-button.component";
 
 import { IoMdLogOut, IoMdArrowBack } from 'react-icons/io';
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { useAppSelector } from "../../../store/hooks";
+import { PageLocation } from "../../../enums/common.enum";
+import { GoToPage } from "../../../utils/router.util";
 
-interface HeaderProps {
-  backBtn: boolean;
-  backClickHandler: () => void;
-}
-
-export default function Header({backBtn, backClickHandler}: HeaderProps) {
+export default function Header() {
+  const currentCampaign = useAppSelector(state => state.currentCampaign.name);
+  const [backBtn, setBackBtn] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if(router.pathname !== PageLocation.Admin) {
+      setBackBtn(true);
+      if (router.pathname !== PageLocation.FirstSteps && currentCampaign === '') {
+        void GoToPage(PageLocation.Admin);
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
+ 
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (router.pathname !== PageLocation.Admin) setBackBtn(true);
+    }
+ 
+    router.events.on('routeChangeComplete', handleRouteChange)
+
+    return () => {
+      router.events.off('routeChangeComplete', handleRouteChange)
+    }
+  }, [router])
 
   function Modal () {
     return (
@@ -35,11 +60,11 @@ export default function Header({backBtn, backClickHandler}: HeaderProps) {
   }
 
   return (
-    <div className="fixed w-full flex justify-between p-5 top-0 left-0 bg-bg">
+    <div className="fixed w-full flex justify-between p-5 top-0 left-0 bg-bg z-50">
       {
         backBtn &&
         <div className="flex">
-          <AGButton nm fit onClickEvent={() => void backClickHandler()}>
+          <AGButton nm fit onClickEvent={() => router.back()}>
             <IoMdArrowBack />
           </AGButton>
         </div>

@@ -23,7 +23,7 @@
           bg: '#F1F5F9',
           accent: '#19D8F3',
           purple: '#7f3eae',
-          orange: '#d85b00',
+          orange: '#F38630',
           blue: '#006cad',
           red: '#fa5953',
           light: 'rgba(255,255,255,0.4)'
