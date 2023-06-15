@@ -55,7 +55,7 @@ function ColorOption({ option, isActive, listStyle = 'Rectangular' }: ColorOptio
   }, [listStyle, isActive])
 
   return (
-    <div className={`${styleControl.width} ${styleControl.height} ${styleControl.rounded} ${styleControl.padding} ${isActive ? 'shadow-inset-medium' : 'shadow-flat-medium'} transition-all duration-150 ease-in-out`} >
+    <div className={`${styleControl.width} ${styleControl.height} ${styleControl.rounded} ${styleControl.padding} ${isActive ? 'shadow-inset-medium' : 'shadow-flat-soft hover:shadow-flat-hard'} transition-all duration-150 ease-in-out`} >
       <div className={`w-full h-full ${listStyle === 'Oval' || isActive ? 'rounded-full' : ''}`} style={{ backgroundColor: (`#${option}`) }} />
     </div>
   )
