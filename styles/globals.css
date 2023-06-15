@@ -35,7 +35,7 @@ input[type="number"] {
 }
 
 select {
-	appearance: none;
+  appearance: none;
 }
 
 /* LOADING */
@@ -78,8 +78,7 @@ select {
 
 .leap-frog__dot:nth-child(2) {
   transform: translateX(calc(var(--uib-size) * 0.4));
-  animation: leapFrog var(--uib-speed) ease calc(var(--uib-speed) / -1.5)
-    infinite;
+  animation: leapFrog var(--uib-speed) ease calc(var(--uib-speed) / -1.5) infinite;
 }
 
 .leap-frog__dot:nth-child(3) {
