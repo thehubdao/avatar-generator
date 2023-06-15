@@ -1,24 +1,22 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
-import {Group, Material, MeshStandardMaterial, MeshToonMaterial, Object3D, Skeleton, SkinnedMesh} from "three";
+import {
+  Group,
+  Material,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
+  MeshToonMaterial,
+  Object3D,
+  Skeleton,
+  SkinnedMesh
+} from "three";
 import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
-import {TextureTone, TextureUtil} from "./texture.util";
+import {GetToneTexture} from "./threejs/texture.util";
 import {LogError} from "./common.util";
 import {GlobalValues, Module} from "../enums/common.enum";
-import {LoadGltfModel} from "./importer.util";
 import {MaterialFunction} from "../types/model.type";
 import {ChangeMaterialOption} from "../enums/model.enum";
-
-export async function ReplaceModelFeature(baseModel: GLTF, featureUrl: string, featureIndex: number) {
-  const featureModel = await LoadGltfModel(featureUrl);
-
-  const chest = SkeletonUtils.clone(featureModel.scene.children[0].children[featureIndex]) as SkinnedMesh;
-  const oldSkeleton = SkeletonUtils.getBones((baseModel.scene.children[0].children[featureIndex] as SkinnedMesh).skeleton);
-
-  chest.skeleton.bones = oldSkeleton;
-
-  baseModel.scene.children[0].children[featureIndex] = chest;
-}
+import {TextureTone} from "../types/texture.type";
 
 function IsSkinnedMesh(obj: Object3D): obj is SkinnedMesh {
   return (obj as SkinnedMesh).isSkinnedMesh;
@@ -57,6 +55,7 @@ export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel:
     return LogError(Module.ModelUtil, "There is no selected feature to replace on base model.");
   
   const featureInfo = allFeatureInfo[selectedFeature];
+  if (featureInfo == undefined) return LogError(Module.ModelUtil, "Feature not found on avatar base!");
   
   const changeMesh: Object3D | null = await GetMatchPiece(replaceModel, featureInfo.name);
   if(changeMesh == null)
@@ -223,24 +222,39 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
     const mapClone = materialRef.map?.clone();
     const oldName = materialRef.name;
     const oldColor = materialRef.color.clone();
-    const _toneTexture = await TextureUtil.Instance().GetToneTexture(tone);
+    const toneTexture = await GetToneTexture(tone);
     object.material = new MeshToonMaterial({
       map: mapClone,
       name: oldName,
       color: oldColor,
-      gradientMap: _toneTexture,
-      transparent: true,
+      gradientMap: toneTexture,
+      transparent: materialRef.transparent,
     });
   }
 }
 
-export async function TransformObject3dToToonMaterial(object: Object3D, tone?: TextureTone, changeMaterial?: ChangeMaterialOption) {
+export async function ChangeToBasicMaterial(object: SkinnedMesh, tone?: TextureTone) {
+  const materialRef = object.material as MeshStandardMaterial;
+  if (materialRef.isMeshStandardMaterial) {
+    const mapClone = materialRef.map?.clone();
+    const oldName = materialRef.name;
+    const oldColor = materialRef.color.clone();
+    
+    object.material = new MeshBasicMaterial({
+      map: mapClone,
+      name: oldName,
+      color: oldColor,
+    });
+  }
+}
+
+export async function TransformObject3dToNewMaterial(object: Object3D, tone?: TextureTone, changeMaterial?: ChangeMaterialOption) {
   const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
   if (changeMaterialFunction == undefined) return;
   
-  object.traverse(async subObj => {
+  object.traverse(subObj => {
     if (IsSkinnedMesh(subObj)) {
-      await changeMaterialFunction(subObj, tone);
+      changeMaterialFunction(subObj, tone);
     }
   });
 }

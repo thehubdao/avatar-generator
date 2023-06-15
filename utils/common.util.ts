@@ -86,3 +86,7 @@ export function ColorStringToHexString(color: string | undefined) {
   
   return `#${color}`;
 }
+
+export function IsWebUrl(url: string) {
+  return url.startsWith('http');
+}

@@ -3,6 +3,7 @@ import {
   AnimationInterface,
   ApiResponse,
   EnvironmentInterface,
+  EnvMapInterface,
   FeatureInterface,
   SingleInterface,
 } from "../interfaces/api.interface";
@@ -97,6 +98,10 @@ export async function GetAnimationByCampaignAndName(campaign?: string | null, na
 
 export async function GetEnvironmentListByCampaign(campaign?: string | null) {
   return GetRequest<EnvironmentInterface[]>(ApiRoutesV1.Environments, undefined, {campaign});
+}
+
+export async function GetEnvMapListByCampaign(campaign: string) {
+  return GetRequest<EnvMapInterface[]>(ApiRoutesV1.EnvMaps, undefined, {campaign});
 }
 
 export async function PostUpdateAdminCampaigns() {

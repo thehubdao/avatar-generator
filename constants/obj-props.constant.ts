@@ -32,3 +32,9 @@ export const EnvironmentInterfaceProps: ObjProp[] = [
   {prop: 'path'},
   {prop: 'thumb'},
 ];
+
+export const EnvMapInterfaceProps: ObjProp[] = [
+  {prop: 'name'},
+  {prop: 'path'},
+  {prop: 'thumb'},
+];

@@ -6,7 +6,6 @@ import {
 import AvatarEditor, {ChangeFeature, ChangeSkinColor, ChangeStartAnimation, SetFeaturesData} from "./editor.component";
 import {BasicData, LookAtVectors} from "../../interfaces/common.interface";
 import {AnimationInterface, SingleInterface} from "../../interfaces/api.interface";
-import {AGChangeCamPosition, AGChangeLookAtPosition} from "./viewer.component";
 import {LogError} from "../../utils/common.util";
 import {Module} from "../../enums/common.enum";
 import {ChangeMaterialOption} from "../../enums/model.enum";
