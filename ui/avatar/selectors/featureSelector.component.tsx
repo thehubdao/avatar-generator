@@ -62,7 +62,7 @@ function optionSelector({ list, activeOpc, handleClick, handleSlide }: OptionSel
             selectFeature(event, opt.id, index)
           }}
         >
-          <div className={`w-[84px] h-[84px] flex justify-center items-center bg-bg rounded-xl cursor-pointer ${isActive ? 'bg-accent shadow-inset-hard' : 'shadow-flat-hard'}`} title={opt.id}>
+          <div className={`w-[84px] h-[84px] flex justify-center items-center rounded-xl cursor-pointer ${isActive ? 'bg-accent bg-opacity-80 shadow-inset-hard' : 'bg-bg shadow-flat-soft hover:shadow-flat-hard'} transition-all duration-500`} title={opt.id}>
             <Image alt={opt.id} width={70} height={70} src={'/resources/icons/features/Chest.svg'} priority />
           </div>
         </div>
