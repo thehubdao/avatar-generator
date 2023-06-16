@@ -60,7 +60,7 @@ export default function OptionSelector({ list, activeOption, handleClick }: Opti
   }
 
   return (
-    <div className="flex flex-wrap gap-7">
+    <div className="flex flex-wrap flex-col gap-3 content-start overflow-x-auto h-[190px] min-[1440px]:h-[390px]">
       {
         list ?
           list.map(opt => {
