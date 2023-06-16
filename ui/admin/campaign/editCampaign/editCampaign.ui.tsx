@@ -8,19 +8,34 @@ import { fetchData } from "../../../../store/currentCampaignSlice";
 import { PageLocation } from "../../../../enums/common.enum";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { GoToPage } from "../../../../utils/router.util";
+import AvatarSingle from "../../../../components/avatar/single.component";
+import { BasicData } from "../../../../interfaces/common.interface";
+import ConfigCampaign from "./configCampaign.ui";
 
 export default function EditCampaignUI() {
   // GET DATA FROM REDUX STORE
   const campaignName = useAppSelector(state => state.currentCampaign.name);
+  const campaignParameters = useAppSelector(state => state.currentCampaign.parameters);
   const dispatch = useAppDispatch();
 
   const navBarOptions: string[] = Object.keys(FirestoreLocation);
   const [navBarOptionSelected, setNavBarOptionSelected] = useState<FirestoreLocation>(FirestoreLocation.Parameters);
+  const [viewSingle, setViewSimple] = useState<boolean>(false);
+  const [viewConfig, setViewConfig] = useState<boolean>(false);
 
   useEffect(() => {
-    void dispatch(fetchData({campaign: campaignName, location: navBarOptionSelected}));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    void dispatch(fetchData({ campaign: campaignName, location: navBarOptionSelected }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navBarOptionSelected]);
+
+  useEffect(() => {
+    if (campaignName.length != 0 && campaignParameters.features) {
+      setViewSimple(true);
+      if (campaignParameters.config) {
+        setViewConfig(true);
+      }
+    }
+  }, [campaignName, campaignParameters])
 
   return (
     <>
@@ -57,13 +72,22 @@ export default function EditCampaignUI() {
           </div>
         </div>
         {/* ASSETS LIST */}
-        <div className="mt-6">
+        <div className="relative mt-6">
           {
             navBarOptionSelected === FirestoreLocation.Parameters ?
-            <p>edit campaign parameters</p>
-            :
-            <AssetList activedOption={navBarOptionSelected} />
-
+              <>
+                <div className="w-full h-[calc(1216px_*_9_/_16)] bg-gradient-to-r from-gray-dark to-gray-dark/95 rounded-2xl">
+                  {viewSingle &&
+                    <AvatarSingle campaign={campaignName} avatarBasePath={campaignParameters.armature} featureList={campaignParameters.features as BasicData[]} />
+                  }
+                </div>
+                {
+                  viewConfig &&
+                  <ConfigCampaign configData={campaignParameters.config}/>
+                }
+              </>
+              :
+              <AssetList activedOption={navBarOptionSelected} />
           }
         </div>
       </div>
