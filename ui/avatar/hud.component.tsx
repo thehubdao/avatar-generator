@@ -58,6 +58,7 @@ export default function HudComponent({ editModeSelected,
   
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
 
+  // * This function allows us to know if the page has a width greater than 1536px.
   useEffect(() => {
     const handleResize = () => {
       setIsWindowGreaterThan1536(window.innerWidth > 1536);
