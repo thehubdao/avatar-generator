@@ -65,7 +65,7 @@ export default function HudComponent({ editModeSelected,
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); // Verificar el tamaño inicial de la pantalla
+    handleResize(); // * Verify the initial screen size
 
     return () => {
       window.removeEventListener('resize', handleResize);
