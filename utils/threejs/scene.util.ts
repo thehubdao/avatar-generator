@@ -55,15 +55,14 @@ export function GetBaseRenderer(): WebGLRenderer {
   return renderer;
 }
 
-export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTMLCanvasElement, defLookAt?: AGVector3) {
+export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTMLCanvasElement, defLookAt?: AGVector3, pan: boolean = false) {
   let controls = new OrbitControls(camera, domElement);
   if (defLookAt != undefined)
     controls.target.set(defLookAt.x, defLookAt.y, defLookAt.z);
   else
     controls.target.set(0, 0.7, 0);
   
-  // TODO: Remove for release
-  controls.enablePan = true;
+  controls.enablePan = pan;
   
   return controls;
 }
