@@ -12,6 +12,7 @@
   tooltip?: string;
 }
 
+// **Represents the state of the AGButton component.
 interface AGButtonState {
   color: string;
   borderColor: string;
@@ -20,12 +21,33 @@ interface AGButtonState {
   side: string;
 }
 
+/**
+ ** AGButton is a customizable button component.
+ * @param type - The type of the button.
+ * @param align - The alignment of the button content.
+ * @param {Function} onClickEvent - The click event handler for the button.
+ * @param children - The content of the button - it can be a string or a JSX element.
+ * @param {boolean} form - Indicates if the button is part of a form.
+ * @param {boolean} nm - Indicates whether the button uses the neomorphism style.
+ * @param {boolean} selected - Indicates if the button is selected.
+ * @param {boolean} fit - Indicates whether the button should fit its content width.
+ * @param {boolean} full - Indicates whether the button should take up the full width.
+ * @param {boolean} circle - Indicates whether the button should be displayed as a circle.
+ * @param {string} tooltip - The tooltip text for the button.
+ * 
+ * @returns The Avatar Generator Button as a tsx component.
+ */
+
 export default function AGButton({ type, align, form, nm, selected, fit, full, circle, onClickEvent, tooltip, children }: AGButtonProps) {
   const vD: AGButtonState = {
     ...getBtnType(),
     side: getSide()
   };
 
+  /**
+   ** Retrieves the button type styles based on the specified type.
+   * @returns The button type styles.
+   */
   function getBtnType() {
     switch (type) {
       case 'secondary':
