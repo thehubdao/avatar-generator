@@ -4,6 +4,15 @@ interface AGLoadingProps {
   bgColor?: string;
 }
 
+/**
+ ** AGLoading is a component that displays a loading animation overlay.
+ *
+ * @param {boolean} loading Indicates whether the loading animation should be displayed.
+ * @param {boolean} transparency Indicates whether the loading overlay should have transparency.
+ * @param {string} bgColor The background color of the loading overlay.
+ * 
+ * @returns Avatar Generator Loader as tsx component
+ */
 export default function AGLoading({loading, bgColor, transparency}: AGLoadingProps) {
   return (
     <>
