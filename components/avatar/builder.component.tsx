@@ -12,7 +12,8 @@ import {
   AccessoryInterface,
   AnimationInterface,
   EnvironmentInterface,
-  FeatureInterface
+  FeatureInterface,
+  SingleInterface
 } from "../../interfaces/api.interface";
 import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../../utils/iframe.util";
 import {ExportAttributeValues, GlobalValues, Module} from "../../enums/common.enum";
@@ -21,6 +22,7 @@ import {
   GetAccessoryListByCampaign,
   GetAnimationListByCampaign,
   GetAssetsListByCampaign,
+  GetAvatarSingleByCampaignCombination,
   GetEnvironmentListByCampaign
 } from "../../utils/api.util";
 import {SaveFile} from "../../utils/exporter.util";
@@ -38,8 +40,8 @@ import AvatarEditor, {
 } from "./editor.component";
 import {AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture} from "./viewer.component";
 
-interface AvatarEditorProps {
-  campaign?: string | null;
+interface AvatarBuilderProps {
+  campaign: string;
   avatarBasePath: string;
   campaignConfig: CampaignConfig;
   selectListFeatures: FeatureBasic[];
@@ -53,6 +55,7 @@ let featureList: FeatureInterface[] | undefined;
 let accessoryList: AccessoryInterface[] | undefined;
 let animationList: AnimationInterface[] | undefined;
 let environmentList: EnvironmentInterface[] | undefined;
+let singleData: SingleInterface | undefined;
 
 const exportData: ExportInterface = {attributes: []};
 let onIFrame = false;
@@ -70,7 +73,7 @@ export default function AvatarBuilder({
                                        avatarBasePath,
                                        campaignConfig,
                                        bgColor
-                                     }: AvatarEditorProps) {
+                                     }: AvatarBuilderProps) {
   const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].id : '');
   const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].id : '');
   const [skinColor, setSkinColor] = useState<string>(campaignConfig.defSkinColor ?? 'F2A47E');
@@ -90,7 +93,8 @@ export default function AvatarBuilder({
       getFeatureList(),
       getAccessoryList(),
       getAnimationList(),
-      getEnvironmentList()
+      getEnvironmentList(),
+      getSingleInfo()
     ]);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -151,6 +155,11 @@ export default function AvatarBuilder({
   }
 
   async function loadPreData() {
+    if (campaignConfig.defStart != undefined && singleData != undefined) {
+      await updateAvatarSingleData();
+      return;
+    }
+    
     if (!(featureList && accessoryList))
       return LogError(Module.AvatarGenerator, "No feature/accessory list!");
 
@@ -204,6 +213,15 @@ export default function AvatarBuilder({
     }
   }
 
+  async function updateAvatarSingleData() {
+    if (singleData == undefined) return void LogError(Module.AvatarGenerator, "Missing single data!");
+    
+    for (const {val: {id, path, type, name}} of singleData.features) {
+      // Set feature on model
+      await onChangeFeature(id, path, name, type);
+    }
+  }
+
   async function getFeatureList() {
     const {value: newAssetList} = await GetAssetsListByCampaign(campaign);
     featureList = newAssetList;
@@ -225,6 +243,13 @@ export default function AvatarBuilder({
     const {value: newEnvironmentList} = await GetEnvironmentListByCampaign(campaign);
     environmentList = newEnvironmentList;
   }
+  
+  async function getSingleInfo() {
+    if (campaignConfig.defStart == undefined) return;
+    
+    const {value: reqSingleData} = await GetAvatarSingleByCampaignCombination(campaign, campaignConfig.defStart);
+    singleData = reqSingleData;
+  }
 
   async function onClickChangeSkinColor(newSkinColor = skinColor) {
     await ChangeSkinColor(newSkinColor, campaignConfig.defSkin);
@@ -234,16 +259,16 @@ export default function AvatarBuilder({
   function onCategoryChange(value: string) {
     setSelectedFeature(value);
     setFeatureListShow(FilterList(featureList, "type", value));
-    setFeatureCamPosition(value, campaignConfig.featuresCamPos);
+    updateFeatureCamPosition(value, campaignConfig.featuresCamPos);
   }
 
   function onAccessoryChange(value: string) {
     setSelectedAcc(value);
     setAccessoryListShow(FilterList(accessoryList, "type", value));
-    setFeatureCamPosition(value, campaignConfig.accCamPos);
+    updateFeatureCamPosition(value, campaignConfig.accCamPos);
   }
 
-  function setFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
+  function updateFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
     const confRef = posLocation ? posLocation[index] : undefined;
     if (confRef == undefined) return;
     
