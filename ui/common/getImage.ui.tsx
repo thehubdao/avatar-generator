@@ -11,7 +11,7 @@ interface GetImageUiInterface {
  * @param {string} imageUrl - The URL of the image to be displayed.
  * @param {string} alt The alternative text for the image. @default 'imagen'
  * 
- * @returns {JSX.Element} - The rendered GetImageUI component.
+ * @returns {TSX.Element} - The rendered GetImageUI component.
  */
 export default function GetImageUI({ imageUrl, alt = 'imagen' }: GetImageUiInterface): JSX.Element {
   return (

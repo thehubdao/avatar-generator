@@ -11,7 +11,7 @@ interface AGLoadingProps {
  * @param {boolean} transparency Indicates whether the loading overlay should have transparency.
  * @param {string} bgColor The background color of the loading overlay.
  * 
- * @returns Avatar Generator Loader as tsx component
+ * @returns {TSX.Element} - Avatar Generator Loader as tsx component
  */
 export default function AGLoading({loading, bgColor, transparency}: AGLoadingProps) {
   return (

@@ -35,7 +35,7 @@ interface AGButtonState {
  * @param {boolean} circle - Indicates whether the button should be displayed as a circle.
  * @param {string} tooltip - The tooltip text for the button.
  * 
- * @returns The Avatar Generator Button as a tsx component.
+ * @returns {TSX.Element} - The Avatar Generator Button as a tsx component.
  */
 
 export default function AGButton({ type, align, form, nm, selected, fit, full, circle, onClickEvent, tooltip, children }: AGButtonProps) {

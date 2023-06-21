@@ -67,7 +67,7 @@ function ColorOption({ option, isActive, listStyle = 'Rectangular' }: ColorOptio
  * @param handleClick The function enables us to select the color for a specific feature.
  * @param listStyle It allows us to choose between oval and rectangular styles from the color picker list.
  * 
- * @return color selector component
+ * @return {TSX.Element} - color selector component
  */
 
 export default function ColorSelector({ list, activeColor, handleClick, listStyle = 'Rectangular' }: ColorSelectorProps) {
