@@ -165,6 +165,7 @@ export default function AvatarBuilder({
   async function loadPreData() {
     if (campaignConfig.defStart != undefined && singleData != undefined) {
       await updateAvatarSingleData();
+      await SetRandomAccessories();
       return;
     }
     
@@ -219,6 +220,27 @@ export default function AvatarBuilder({
       for (const acc of randomAccessory)
         await ChangeAccessory(acc.id, acc.path, acc.name, acc.type, campaignConfig.changeMaterial);
     }
+  }
+  
+  async function SetRandomAccessories()  {
+    if (!accessoryList)
+      return LogError(Module.AvatarGenerator, "No feature/accessory list!");
+    
+    const randomAccessory: AccessoryInterface[] = [];
+
+    for (const accType of selectListAccessories) {
+      const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.id));
+      if (randomAcc)
+        randomAccessory.push(randomAcc);
+    }
+
+    const modelPromises: Promise<GLTF>[] = [];
+    for (const acc of randomAccessory)
+      modelPromises.push(GetWearableOption(acc.id, acc.path));
+    await Promise.all([...modelPromises]);
+
+    for (const acc of randomAccessory)
+      await ChangeAccessory(acc.id, acc.path, acc.name, acc.type, campaignConfig.changeMaterial);
   }
 
   async function updateAvatarSingleData() {
