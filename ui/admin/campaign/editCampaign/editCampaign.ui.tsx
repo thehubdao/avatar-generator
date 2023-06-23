@@ -18,8 +18,8 @@ export default function EditCampaignUI() {
   const [navBarOptionSelected, setNavBarOptionSelected] = useState<FirestoreLocation>(FirestoreLocation.Parameters);
 
   useEffect(() => {
-    void dispatch(fetchData({campaign: campaignName, location: navBarOptionSelected}));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    void dispatch(fetchData({ campaign: campaignName, location: navBarOptionSelected }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navBarOptionSelected]);
 
   return (
@@ -33,9 +33,14 @@ export default function EditCampaignUI() {
             navBarOptions.map(x => {
               const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
               return <div className={`${x === 'Parameters' ? 'order-1 text-2xl' : 'order-2'}`} key={x}>
-                <AGButton nm selected={navBarOptionSelected == val ? true : false} fit={x === 'Parameters' ? true : false} onClickEvent={() => setNavBarOptionSelected(val)}>
+                <AGButton
+                  nm
+                  selected={navBarOptionSelected == val ? true : false}
+                  fit={x === 'Parameters' ? true : false}
+                  onClickEvent={() => setNavBarOptionSelected(val)}
+                >
                   <div className={`flex items-center gap-2 p-2`}>
-                    <div className={`font-poppins uppercase ${navBarOptionSelected == val ? ' font-semibold' : ''}`}>
+                    <div className={`font-poppins uppercase ${navBarOptionSelected == val ? '' : ''}`}>
                       {x === 'Parameters' ?
                         <AiOutlineHome />
                         :
@@ -60,9 +65,9 @@ export default function EditCampaignUI() {
         <div className="mt-6">
           {
             navBarOptionSelected === FirestoreLocation.Parameters ?
-            <p>edit campaign parameters</p>
-            :
-            <AssetList activedOption={navBarOptionSelected} />
+              <p>edit campaign parameters</p>
+              :
+              <AssetList activedOption={navBarOptionSelected} />
 
           }
         </div>
