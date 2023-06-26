@@ -27,10 +27,12 @@ export default function AssetList({ activedOption }: AssetListInterface) {
   const [searchByTagValue, setSearchByTagValue] = useState<string[]>([]);
   const [selectedItem, setSelectedItem] = useState<number>(-1);
   const [searchFilteredList, setSearchFilteredList] = useState<AssetType[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 
   // *Event handler for searching assets by name
   const handleSearchByName = (event: React.FormEvent<HTMLInputElement>) => {
     event.preventDefault()
+    setShowSuggestions(true)
     setSearchByNameValue(event.currentTarget.value)
   }
 
@@ -88,6 +90,14 @@ export default function AssetList({ activedOption }: AssetListInterface) {
     return listOfItemsByTag
   }
 
+  //* Hides the search suggestions in blur these components.
+  const handleBlur = () => {
+    //* Applies await delay if an on click is executed on an internal suggestion.
+    setTimeout(() => {
+      setShowSuggestions(false)
+    }, 300)
+  }
+
   //* Updates the filtered list of items based on the search and tag filters using the useEffect hook.
   useEffect(() => {
     const filterItems = (campaignAssets[activedOption as keyof CampaignAssetsInterface] as FeatureInterface[])?.filter(item => {
@@ -106,36 +116,39 @@ export default function AssetList({ activedOption }: AssetListInterface) {
   return (
     <>
       {/* Feature filter search bar */}
-      {activedOption === 'features' && <div className="flex w-full h-full mb-10 justify-between">
+      {activedOption === 'features' && <div className="flex w-full h-full mb-10 justify-between mx-2">
         {/* By Name Searcher */}
-        <div className="relative w-fit mr-5">
+        <div className="relative w-fit mr-5 text-sm">
           <input
             type="text"
             value={searchByNameValue}
             onChange={handleSearchByName}
-            className="border-none outline-none w-72 p-1 px-3 rounded-md nm-inset-slate-50-sm selection:border-none"
+            className="border-none outline-none w-72 p-1 px-3 rounded-md nm-inset-slate-100-sm selection:border-none"
             onKeyDown={handleKeyDown}
             placeholder="Search by name..."
+            onBlur={handleBlur}
           />
-          <div
-            className={`absolute z-10 m-4 bg-white w-64 p-2 rounded-md shadow-2xl
+          {showSuggestions && <div
+            className={`absolute z-10 m-4 bg-slate-50 w-64 py-2 rounded-md shadow-2xl
             ${searchFilteredList.length == 0 ? 'hidden' : ''}`}
+            onBlur={handleBlur}
           >
             {searchFilteredList.map((item, index) => {
               return <div
                 onClick={() => handleOnClickSuggestionSearch(item.name)}
-                className={`${selectedItem === index ? 'bg-slate-200' : ''}`}
+                onMouseEnter={() => {setSelectedItem(index)}}
+                className={`px-2 ${selectedItem === index ? 'bg-orange' : ''}`}
                 key={item.id}
               >{item.name}</div>
             })}
-          </div>
+          </div>}
         </div>
         {/* By Tag Searcher */}
         <div className="flex flex-wrap gap-3 w-full">
           {campaignFeatures?.map((feature: FeatureBasic) => {
             return <button
-              className={`px-2 rounded-md
-              ${searchByTagValue.includes(feature.id) ? 'nm-inset-slate-300-sm' : 'nm-flat-slate-50-sm'}
+              className={`px-2 rounded-md text-sm
+              ${searchByTagValue.includes(feature.id) ? 'nm-inset-orange-sm font-semibold' : 'nm-flat-slate-100-sm'}
               transition-colors duration-300`}
               onClick={() => { handleSearchByTag(feature.id) }}
               key={feature.id}
