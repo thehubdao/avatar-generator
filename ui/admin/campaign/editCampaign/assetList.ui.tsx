@@ -137,7 +137,7 @@ export default function AssetList({ activedOption }: AssetListInterface) {
               return <div
                 onClick={() => handleOnClickSuggestionSearch(item.name)}
                 onMouseEnter={() => {setSelectedItem(index)}}
-                className={`px-2 ${selectedItem === index ? 'bg-orange' : ''}`}
+                className={`px-2 ${selectedItem === index ? 'bg-orange  ' : ''}`}
                 key={item.id}
               >{item.name}</div>
             })}

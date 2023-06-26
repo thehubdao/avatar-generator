@@ -24,11 +24,11 @@ export default function EditCampaignUI() {
 
   return (
     <>
-      <div className="w-full">
+      <div>
         {/* TITLE */}
         <h1 className="font-humane text-9xl text-gray-normal uppercase">{campaignName}</h1>
         {/* NAVIGATION BUTTONS */}
-        <div className="flex w-full">
+        <div className="flex">
           {
             navBarOptions.map(x => {
               const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
@@ -55,7 +55,7 @@ export default function EditCampaignUI() {
           </div>
         </div>
         {/* ASSETS LIST */}
-        <div className="mt-6 w-full">
+        <div className="mt-6">
           {navBarOptionSelected === FirestoreLocation.Parameters
             ? <p>edit campaign parameters</p>
             : <AssetList activedOption={navBarOptionSelected} />}
