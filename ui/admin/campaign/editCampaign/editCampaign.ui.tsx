@@ -10,12 +10,20 @@ import { IoMdAddCircleOutline } from "react-icons/io";
 import { GoToPage } from "../../../../utils/router.util";
 
 export default function EditCampaignUI() {
-  // GET DATA FROM REDUX STORE
+  //* GET DATA FROM REDUX STORE
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const dispatch = useAppDispatch();
 
   const navBarOptions: string[] = Object.keys(FirestoreLocation);
   const [navBarOptionSelected, setNavBarOptionSelected] = useState<FirestoreLocation>(FirestoreLocation.Parameters);
+
+  //* Function is responsible for determining the background color based on the given Firestore location value.
+  const getBgColorOfFirestoreLocationValue = (val: FirestoreLocation) => {
+    if (val === 'features' || val === 'accessories') return 'bg-amber-500'
+    if (val === 'animations') return 'bg-blue'
+    //* If none of the above conditions are met, return the default background color
+    return 'bg-cyan-400'
+  }
 
   useEffect(() => {
     void dispatch(fetchData({ campaign: campaignName, location: navBarOptionSelected }));
@@ -35,12 +43,16 @@ export default function EditCampaignUI() {
               return <div className={`${x === 'Parameters' ? 'order-1 text-2xl' : 'order-2'}`} key={x}>
                 <AGButton
                   nm
-                  selected={navBarOptionSelected == val ? true : false}
-                  fit={x === 'Parameters' ? true : false}
+                  selected={{
+                    isSelected: navBarOptionSelected === val,
+                    color: getBgColorOfFirestoreLocationValue(val),
+                    textColor: val === 'animations' ? 'text-slate-100' : ''
+                  }}
+                  fit={x === 'Parameters'}
                   onClickEvent={() => setNavBarOptionSelected(val)}
                 >
                   <div className={`flex items-center gap-2 p-2`}>
-                    <div className={`font-poppins uppercase ${navBarOptionSelected == val ? '' : ''}`}>
+                    <div className={`font-poppins uppercase`}>
                       {x === 'Parameters' ?
                         <AiOutlineHome />
                         :
@@ -54,7 +66,7 @@ export default function EditCampaignUI() {
           }
           <div className="order-2">
             <AGButton nm onClickEvent={() => void GoToPage(PageLocation.AssetCreate)}>
-              <div className={`flex items-center gap-2 p-2 font-poppins text-blue`}>
+              <div className={`flex items-center gap-2 p-2 font-poppins`}>
                 <IoMdAddCircleOutline className="text-2xl" />
                 <p>Add Element</p>
               </div>
