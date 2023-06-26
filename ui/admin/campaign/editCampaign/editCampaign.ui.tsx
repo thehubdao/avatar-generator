@@ -18,17 +18,17 @@ export default function EditCampaignUI() {
   const [navBarOptionSelected, setNavBarOptionSelected] = useState<FirestoreLocation>(FirestoreLocation.Parameters);
 
   useEffect(() => {
-    void dispatch(fetchData({campaign: campaignName, location: navBarOptionSelected}));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    void dispatch(fetchData({ campaign: campaignName, location: navBarOptionSelected }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navBarOptionSelected]);
 
   return (
     <>
-      <div>
+      <div className="w-full">
         {/* TITLE */}
         <h1 className="font-humane text-9xl text-gray-normal uppercase">{campaignName}</h1>
         {/* NAVIGATION BUTTONS */}
-        <div className="flex">
+        <div className="flex w-full">
           {
             navBarOptions.map(x => {
               const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
@@ -36,11 +36,9 @@ export default function EditCampaignUI() {
                 <AGButton nm selected={navBarOptionSelected == val ? true : false} fit={x === 'Parameters' ? true : false} onClickEvent={() => setNavBarOptionSelected(val)}>
                   <div className={`flex items-center gap-2 p-2`}>
                     <div className={`font-poppins uppercase ${navBarOptionSelected == val ? ' font-semibold' : ''}`}>
-                      {x === 'Parameters' ?
-                        <AiOutlineHome />
-                        :
-                        x
-                      }
+                      {x === 'Parameters'
+                        ? <AiOutlineHome />
+                        : x}
                     </div>
                   </div>
                 </AGButton>
@@ -57,14 +55,10 @@ export default function EditCampaignUI() {
           </div>
         </div>
         {/* ASSETS LIST */}
-        <div className="mt-6">
-          {
-            navBarOptionSelected === FirestoreLocation.Parameters ?
-            <p>edit campaign parameters</p>
-            :
-            <AssetList activedOption={navBarOptionSelected} />
-
-          }
+        <div className="mt-6 w-full">
+          {navBarOptionSelected === FirestoreLocation.Parameters
+            ? <p>edit campaign parameters</p>
+            : <AssetList activedOption={navBarOptionSelected} />}
         </div>
       </div>
     </>
