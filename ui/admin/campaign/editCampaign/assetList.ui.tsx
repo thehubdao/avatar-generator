@@ -53,15 +53,12 @@ export default function AssetList({ activedOption }: AssetListInterface) {
   //* Event handler for keyboard events
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'ArrowUp' && selectedItem >= 0) {
-      //* If ArrowUp key is pressed and selectedItem is greater than or equal to 0
       event.preventDefault();
       setSelectedItem(prev => (prev - 1));
     } else if (event.key === 'ArrowDown') {
-      //* If ArrowDown key is pressed
       event.preventDefault();
       setSelectedItem(prev => (prev + 1) % searchFilteredList.length);
     } else if (event.key === 'Enter') {
-      //* If Enter key is pressed
       event.preventDefault();
       //* Get the name from the selected suggestion in the searchFilteredList or use the current searchByNameValue
       const name = searchFilteredList[selectedItem]?.name ?? searchByNameValue;
