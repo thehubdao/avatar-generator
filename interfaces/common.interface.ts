@@ -63,11 +63,13 @@ export interface CampaignParameters {
   owner: string;
   armature: string;
   features?: FeatureBasic[];
-  accessories?: BasicData[];
+  accessories?: FeatureBasic[];
   config?: CampaignConfig;
 }
 
-export interface FeatureBasic extends Omit<BasicData, 'detail'> {
+export interface FeatureBasic {
+  meshName: string,
+  displayName: string,
   index: number,
   hasCustomIcon: boolean,
   iconUrl: string,
