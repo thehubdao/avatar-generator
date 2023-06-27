@@ -15,25 +15,25 @@ interface OptionProps {
   isActive?: boolean
 }
 
-function GetOptionThumbnail({option}: OptionProps ) {
+function GetOptionThumbnail({ option }: OptionProps) {
   const [imageUrl, setImageUrl] = useState<string>();
-  
+
   useEffect(() => {
     (async () => {
       const newImage = await GetFileUrl(option.thumb);
       setImageUrl(newImage ?? undefined);
     })().catch(err => console.error(err));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [option])
 
   return (
     <>
       {imageUrl == undefined ?
         <div className="relative w-2/4 h-2/4">
-          <Image src={'/resources/icons/features/default.svg'} fill sizes={'132px'} alt={option.name}/>
+          <Image src={'/resources/icons/features/default.svg'} fill sizes={'132px'} alt={option.name} />
         </div>
         :
-        <Image placeholder="blur" blurDataURL={imageUrl} src={imageUrl} fill sizes={'132px'} alt={option.name}/>
+        <Image placeholder="blur" blurDataURL={imageUrl} src={imageUrl} fill sizes={'132px'} alt={option.name} />
       }
     </>
   );
@@ -60,19 +60,17 @@ export default function OptionSelector({ list, activeOption, handleClick }: Opti
   }
 
   return (
-    <div className="flex flex-wrap gap-7">
-      {
-        list ?
-          list.map(opt => {
-            return (
-              <div key={opt.id} onClick={event => selectFeature(event, opt)}>
-                <OptionCard option={opt} isActive={activeOption && activeOption.val === opt.name} />
-              </div>
-            )
-          })
-          :
-          <p>no options</p>
-      }
+    <div className="flex flex-wrap flex-col gap-3 content-start overflow-x-auto h-[190px] min-[1440px]:h-[390px]">
+      {list ?
+        list.map(opt => {
+          return (
+            <div key={opt.id} onClick={event => selectFeature(event, opt)}>
+              <OptionCard option={opt} isActive={activeOption && activeOption.val === opt.name} />
+            </div>
+          )
+        })
+        :
+        <p>no options</p>}
     </div>
   )
 }
