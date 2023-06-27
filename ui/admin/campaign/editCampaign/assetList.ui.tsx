@@ -132,7 +132,7 @@ export default function AssetList({ activedOption }: AssetListInterface) {
               type="text"
               value={searchByNameValue}
               onChange={handleSearchByName}
-              className="border-none outline-none w-72 p-1 px-3 pr-5 my-2 rounded-md nm-inset-slate-100-sm selection:border-none"
+              className="border-none outline-none w-72 p-1 px-3 pr-7 my-2 rounded-md nm-inset-slate-100-sm selection:border-none"
               onKeyDown={handleKeyDown}
               placeholder="Search by name..."
               onBlur={handleBlur}
@@ -158,7 +158,7 @@ export default function AssetList({ activedOption }: AssetListInterface) {
           </div>}
         </div>
         {/* By Tag Searcher */}
-        <div className="flex flex-wrap gap-3 w-full">
+        <div className="flex flex-wrap w-full">
           {campaignTags?.map((tag: FeatureBasic) => {
             return <AGButton
               nm
@@ -168,7 +168,7 @@ export default function AssetList({ activedOption }: AssetListInterface) {
             ><p className="group-hover/button:font-medium">{tag.val}</p></AGButton>
           })}
           {(campaignTags?.length ?? 0) > 0 && <AGButton nm onClickEvent={() => handleResetTags()}>
-            <p className="text-blue">Clear tags</p>
+            <p className="text-blue group-hover/button:font-medium">Clear tags</p>
           </AGButton>}
         </div>
       </div>
