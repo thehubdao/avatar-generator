@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import GetImage from "../../../../components/commons/getImage.component";
 import AGButton from "../../../common/ag-button.component";
-import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineCloudUpload, AiOutlineDelete, AiOutlineEdit, AiOutlineLink } from "react-icons/ai";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineCloudUpload, AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import { IoImageOutline } from "react-icons/io5";
 import { DeleteDoc } from "../../../../utils/firebase.util";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { fetchData } from "../../../../store/currentCampaignSlice";
+import UpdateAsset from "../../../../components/admin/assets/updateAsset.component";
 
 interface AssetCardInterface {
   id: string,
@@ -17,89 +18,149 @@ interface AssetCardInterface {
 
 export default function AssetCard({ id, name, thumb, location }: AssetCardInterface) {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
+
+  const filesForm = useRef<HTMLFormElement>(null);
+
+  const currentName = useRef<string>(name);
+  const currentFile = useRef<HTMLInputElement>(null);
+  const currentThumb = useRef<HTMLInputElement>(null);
+
   const [onDelete, setOnDelete] = useState<boolean>(false);
   const [onEdit, setOnEdit] = useState<boolean>(false);
+  const [hasFile, setHasFile] = useState<boolean>(false);
+  const [hasThumb, setHasThumb] = useState<boolean>(false);
+  const [updateAsset, setUpdateAsset] = useState<boolean>(false);
+
+
 
   const dispatch = useAppDispatch();
+
+  const checkAssetFile = () => {
+    const fileLength = currentFile.current?.files?.length;
+    const thumbLength = currentThumb.current?.files?.length;
+    if (!fileLength || fileLength < 1) {
+      setHasFile(false);
+    } else {
+      setHasFile(true);
+    }
+
+    if (!thumbLength || thumbLength < 1) {
+      setHasThumb(false);
+    } else {
+      setHasThumb(true);
+    }
+  }
+
+  const resetFiles = () => {
+    currentName.current = name;
+    setHasFile(false);
+    setHasThumb(false);
+    filesForm.current?.reset();
+  }
 
   async function deleteDoc(docId: string) {
     const result = await DeleteDoc(location, docId, campaignName);
     alert(`Doc "${result}" has been deleted.`);
-    void dispatch(fetchData({campaign: campaignName, location: location}));
+    void dispatch(fetchData({ campaign: campaignName, location: location }));
   }
 
   return (
-    <div className="relative w-56 p-4 shadow-flat-soft overflow-hidden bg-bg rounded-lg hover:shadow-flat-hard transition-all duration-300 cursor-pointer group">
-      {/* DATA */}
-      <div className="pb-2">
-        {name && <p className="font-poppins font-medium text-xl text-gray-normal uppercase truncate max-w-full">{name}</p>}
-      </div>
-      {/* THUMBNAIL */}
-      <div className="relative w-[192px] h-[192px] flex justify-center items-center bg-[#3d3d3d]">
-        <GetImage url={thumb} alt={name} />
-      </div>
-      {/* ACTION BUTTONS */}
-      <div className="flex justify-between items-center text-xl absolute bottom-0 left-0 w-56 p-2 min-h-[64px] bg-bg opacity-0 group-hover:opacity-100 animation-opacity duration-300">
-        {
-          onDelete ?
-            <div className="flex items-center justify-between w-full">
-              <p className="pl-2 text-sm">Are you sure?</p>
-              <div className="flex">
-                <AGButton nm fit onClickEvent={() => void deleteDoc(id)}>
-                  <AiOutlineCheckCircle />
-                </AGButton>
-                <AGButton nm fit onClickEvent={() => setOnDelete(false)}>
-                  <AiOutlineCloseCircle />
-                </AGButton>
+    <>
+      <div className="relative w-56 p-4 shadow-flat-soft overflow-hidden bg-bg rounded-lg hover:shadow-flat-hard transition-all duration-300 cursor-pointer group">
+        {/* DATA */}
+        <div className="pb-2">
+          {name && <p className="font-poppins font-medium text-xl text-gray-normal uppercase truncate max-w-full">{name}</p>}
+        </div>
+        {/* THUMBNAIL */}
+        <div className="relative w-[192px] h-[192px] flex justify-center items-center bg-[#3d3d3d]">
+          <GetImage url={thumb} alt={name} />
+        </div>
+        {/* ACTION BUTTONS */}
+        <div className={`flex justify-between items-center text-xl absolute bottom-0 left-0 w-56 p-2 min-h-[64px] bg-bg ${onEdit || onDelete ? '' : 'opacity-0'} group-hover:opacity-100 animation-opacity duration-300`}>
+          {
+            onDelete ?
+              <div className="flex items-center justify-between w-full">
+                <p className="pl-2 text-sm">Are you sure?</p>
+                <div className="flex">
+                  <AGButton nm fit onClickEvent={() => void deleteDoc(id)}>
+                    <AiOutlineCheckCircle className="group-hover/button:text-green-600 transition-all duration-300" />
+                  </AGButton>
+                  <AGButton nm fit onClickEvent={() => setOnDelete(false)}>
+                    <AiOutlineCloseCircle className="group-hover/button:text-red transition-all duration-300" />
+                  </AGButton>
+                </div>
               </div>
-            </div>
-            : onEdit ?
-              <>
-                <div className="w-full">
-                  <label htmlFor="" className="text-sm">Name: </label>
-                  <input type="text" className="shadow-inset-soft hover:shadow-inset-medium px-2 py-1 my-2 min-h-[48px] w-full rounded-lg text-center bg-bg" min='5' max='20' defaultValue={name} />
-                  <div className="flex justify-between">
-                    <div className="flex">
-                      <AGButton nm fit onClickEvent={() => {
-                        setOnEdit(false);
-                      }}>
-                        <AiOutlineCloudUpload />
-                      </AGButton>
-                      <AGButton nm fit onClickEvent={() => {
-                        setOnEdit(false);
-                      }}>
-                        <IoImageOutline />
-                      </AGButton>
-                    </div>
-                    <div className="flex">
-                      <AGButton nm fit onClickEvent={() => setOnEdit(false)}>
-                        <AiOutlineCloseCircle />
-                      </AGButton>
-                      <AGButton nm fit onClickEvent={() => null}>
-                        <AiOutlineCheckCircle />
-                      </AGButton>
+              : onEdit ?
+                <>
+                  <div className="w-full">
+                    <label htmlFor="" className="text-sm">Name: </label>
+                    <input
+                      type="text"
+                      className="shadow-inset-soft hover:shadow-inset-medium px-2 py-1 my-2 min-h-[48px] w-full rounded-lg text-center bg-bg" min='5' max='20'
+                      defaultValue={currentName.current}
+                      onChange={e => {
+                        currentName.current = e.target.value
+                      }} />
+                    <div className="flex justify-between">
+                      <form ref={filesForm} className="flex gap-4 px-2">
+                        <label
+                          className={`flex justify-center items-center my-2 w-9 shadow-flat-soft hover:shadow-flat-medium rounded-lg cursor-pointer transition-all duration-200 ${hasFile ? 'bg-green-400 text-white' : ''}`}
+                          htmlFor={`editGLBAsset-${id}`}>
+                          <AiOutlineCloudUpload />
+                          <input type="file" id={`editGLBAsset-${id}`} name={`editGLBAsset-${id}`} className="hidden" accept=".glb" ref={currentFile} onChange={() => {
+                            checkAssetFile();
+                          }} />
+                        </label>
+                        <label
+                          className={`flex justify-center items-center my-2 w-9 shadow-flat-soft hover:shadow-flat-medium rounded-lg cursor-pointer transition-all duration-200 ${hasThumb ? 'bg-green-400 text-white' : ''}`}
+                          htmlFor={`editThumbAsset-${id}`}>
+                          <IoImageOutline />
+                          <input type="file" id={`editThumbAsset-${id}`} name={`editThumbAsset-${id}`} className="hidden" accept="image/png, image/jpeg" ref={currentThumb} onChange={() => {
+                            checkAssetFile();
+                          }} />
+                        </label>
+                      </form>
+                      <div className="flex">
+                        <AGButton nm fit onClickEvent={() => {
+                          resetFiles();
+                          setOnEdit(false);
+                        }}>
+                          <AiOutlineCloseCircle className="group-hover/button:text-red transition-all duration-300" />
+                        </AGButton>
+                        <AGButton nm fit onClickEvent={() => {
+                          setUpdateAsset(true);
+                        }}>
+                          <AiOutlineCheckCircle className="group-hover/button:text-green-600 transition-all duration-300" />
+                        </AGButton>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </>
-              :
-              <>
-                <div className="flex">
-                  <AGButton nm fit onClickEvent={() => null}>
-                    <AiOutlineLink />
-                  </AGButton>
-                </div>
-                <div className="flex justify-end items-center">
+                </>
+                :
+                <div className="flex justify-end items-center w-full">
                   <AGButton nm fit onClickEvent={() => setOnEdit(true)}>
-                    <AiOutlineEdit />
+                    <AiOutlineEdit className="group-hover/button:text-purple transition-all duration-300" />
                   </AGButton>
                   <AGButton nm fit onClickEvent={() => setOnDelete(true)}>
-                    <AiOutlineDelete />
+                    <AiOutlineDelete className="group-hover/button:text-red transition-all duration-300" />
                   </AGButton>
                 </div>
-              </>
-        }
+          }
+        </div>
       </div>
-    </div>
+      <UpdateAsset
+        objectFile={currentFile.current?.files?.item(0)}
+        thumbnailFile={currentThumb.current?.files?.item(0)}
+        name={currentName.current}
+        id={id}
+        location={location}
+        assetReady={updateAsset}
+        onUpdated={() => {
+          resetFiles();
+          setOnEdit(false);
+          setUpdateAsset(false);
+          void dispatch(fetchData({ campaign: campaignName, location: location }));
+        }} />
+    </>
   )
 }
