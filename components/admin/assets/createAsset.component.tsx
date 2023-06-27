@@ -23,17 +23,24 @@ export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetIn
   const dispatch = useAppDispatch();
 
   async function submitAsset() {
-    const uploadFileTo = uploadTo();
-    const leFile = objectFile;
-    const leThumb = thumbnailFile;
+    let newFile, newThumb;
 
     const formData: Partial<AssetInterface> = {};
 
     formData.name = assetName;
     formData.type = assetStorage;
 
-    formData.thumb = await UploadFile(leThumb, StorageLocation.Thumbnail, formData.type, campaignName) as string;
-    formData.path = await UploadFile(leFile, uploadFileTo, formData.type, campaignName) as string;
+    if (objectFile) {
+      newFile = await UploadFile(objectFile, uploadTo(), formData.type, campaignName);
+      if (newFile) formData.path = newFile
+      else return alert('Model upload failed!');
+    }
+
+    if (thumbnailFile) {
+      newThumb = await UploadFile(thumbnailFile, StorageLocation.Thumbnail, formData.type, campaignName);
+      if (newThumb) formData.thumb = newThumb
+      else return alert('Thumbnail upload failed!');
+    }
 
     await insertDB(JSON.stringify(formData));
   }
