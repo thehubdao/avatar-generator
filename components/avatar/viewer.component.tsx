@@ -145,10 +145,11 @@ interface AvatarViewerProps {
   onReady: () => Promise<void>;
   defaultCamPos?: AGVector3;
   defaultCamLookAt?: AGVector3;
-  editMode?: boolean
+  editMode?: boolean;
+  enablePan?: boolean;
 }
 
-export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, editMode}: AvatarViewerProps) {
+export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, editMode, enablePan}: AvatarViewerProps) {
   const threeCanvas = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -174,7 +175,7 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, 
     _scene = GetBaseScene();
     _camera = GetBaseCamera(defaultCamPos);
     _renderer = GetBaseRenderer();
-    _controls = GetBaseCameraControls(_camera, _renderer.domElement, defaultCamLookAt);
+    _controls = GetBaseCameraControls(_camera, _renderer.domElement, defaultCamLookAt, enablePan);
 
     // mount scene
     threeCanvas.current.appendChild(_renderer.domElement);

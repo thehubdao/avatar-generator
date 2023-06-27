@@ -51,6 +51,7 @@ interface AvatarBuilderProps {
   attributeConfig?: BasicData[];
   bgColor?: string;
   onlyView: boolean;
+  enablePan?: boolean;
 }
 
 let featureList: FeatureInterface[] | undefined;
@@ -68,14 +69,15 @@ let onIFrame = false;
  * @constructor
  */
 export default function AvatarBuilder({
-                                       selectListFeatures,
-                                       selectListAccessories,
-                                       onlyView,
-                                       campaign,
-                                       attributeConfig,
-                                       avatarBasePath,
-                                       campaignConfig,
-                                       bgColor
+                                        selectListFeatures,
+                                        selectListAccessories,
+                                        onlyView,
+                                        campaign,
+                                        attributeConfig,
+                                        avatarBasePath,
+                                        campaignConfig,
+                                        bgColor,
+                                        enablePan
                                      }: AvatarBuilderProps) {
   const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].id : '');
   const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].id : '');
@@ -365,6 +367,7 @@ export default function AvatarBuilder({
                       changeMaterial={campaignConfig.changeMaterial}
                       lights={campaignConfig.lights}
                       editMode={editModeSelected}
+                      enablePan={enablePan}
         />
       </div>
       {loading ? <></> :
