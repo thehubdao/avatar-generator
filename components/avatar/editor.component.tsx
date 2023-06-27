@@ -13,7 +13,7 @@ import {
 } from "../../utils/model.util";
 import {
   AccessoryInfoInterface,
-  BasicData,
+  FeatureBasic,
   FeatureInfoInterface,
   LookAtVectors
 } from "../../interfaces/common.interface";
@@ -85,7 +85,7 @@ export function RemoveEnvironment() {
   RemoveFromScene(GlobalValues.EnvironmentId);
 }
 
-export async function SetFeaturesData(selectListFeatures: BasicData[]) {
+export async function SetFeaturesData(selectListFeatures: FeatureBasic[]) {
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature!");
 
   _featureListData = await GetFeaturesData(_avatar.scene, selectListFeatures);

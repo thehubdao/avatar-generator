@@ -20,11 +20,11 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
 
   for (const feature of featureList) {
     if (feature.index == undefined) {
-      void LogError(Module.CollectionUtil, `Missing index on ${feature.id} feature type!`);
+      void LogError(Module.CollectionUtil, `Missing index on ${feature.meshName} feature type!`);
       continue;
     }
 
-    featureOptionListData.set(feature.index, featureData.filter(f => f.type === feature.id));
+    featureOptionListData.set(feature.index, featureData.filter(f => f.type === feature.meshName));
   }
 
   const featureOptionsToUpdate: Map<string, FeatureInterface> = new Map();

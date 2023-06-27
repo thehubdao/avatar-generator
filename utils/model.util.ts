@@ -10,7 +10,7 @@ import {
   Skeleton,
   SkinnedMesh
 } from "three";
-import {AccessoryInfoInterface, BasicData, FeatureInfoInterface} from "../interfaces/common.interface";
+import {AccessoryInfoInterface, FeatureBasic, FeatureInfoInterface} from "../interfaces/common.interface";
 import {GetToneTexture} from "./threejs/texture.util";
 import {LogError} from "./common.util";
 import {GlobalValues, Module} from "../enums/common.enum";
@@ -277,20 +277,20 @@ export function CleanModelForExport(model: GLTF) {
   // TODO: something
 }
 
-export async function GetFeaturesData(baseModel: Group, featureList: BasicData[], update: boolean = false) {
+export async function GetFeaturesData(baseModel: Group, featureList: FeatureBasic[], update: boolean = false) {
   return new Promise<Record<string, FeatureInfoInterface>>(resolve => {
     const baseFeatures = baseModel.children[0];
     let result: Record<string, FeatureInfoInterface> = {};
 
     for (const [index, feature] of baseFeatures.children.entries()) {
-      if (featureList.some(x => feature.name.startsWith(x.val))) {
-        const foundFeature = featureList.find(x => x.val === feature.name);
+      if (featureList.some(x => feature.name.startsWith(x.displayName))) {
+        const foundFeature = featureList.find(x => x.displayName === feature.name);
         
         if (foundFeature != undefined) {
-          result[foundFeature.id] = {
+          result[foundFeature.meshName] = {
             index: index,
-            ref: update ? result[foundFeature!.id].ref : feature.clone(),
-            name: foundFeature!.val
+            ref: update ? result[foundFeature!.meshName].ref : feature.clone(),
+            name: foundFeature!.displayName
           };
         }
       }

@@ -2,7 +2,7 @@ import AGButton from "../common/ag-button.component";
 import { BsArrowRight } from 'react-icons/bs';
 import { CiEdit, CiSaveUp2 } from 'react-icons/ci';
 import { AccessoryInterface, FeatureInterface } from "../../interfaces/api.interface";
-import { BasicData } from "../../interfaces/common.interface";
+import { BasicData, FeatureBasic } from "../../interfaces/common.interface";
 import MobileOptionSelectorComponent from "./selectors/mobile/optionSelector.component";
 import MobileFeatureSelectorComponent from "./selectors/mobile/featureSelector.component";
 import MobileColorSelectorComponent from "./selectors/mobile/colorSelector.component";
@@ -15,10 +15,10 @@ import HudFeatureTitle from "./common/hudTitle.component";
 
 interface Props {
   editModeSelected: boolean;
-  selectListFeatures: BasicData[],
+  selectListFeatures: FeatureBasic[],
   featureList: FeatureInterface[] | undefined;
   selectedFeature: string;
-  selectListAccessories: BasicData[];
+  selectListAccessories: FeatureBasic[];
   accessoryList: AccessoryInterface[] | undefined;
   selectedAcc: string;
   skinColor: string;

@@ -118,7 +118,7 @@ export default function AddAssetUI() {
                 {
                   typeOptions &&
                   typeOptions.map(x => {
-                    return <option value={x.id} key={x.id}>{x.val}</option>
+                    return <option value={x.meshName} key={x.meshName}>{x.displayName}</option>
                   })
                 }
               </select>

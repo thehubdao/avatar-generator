@@ -47,7 +47,7 @@ interface AvatarBuilderProps {
   avatarBasePath: string;
   campaignConfig: CampaignConfig;
   selectListFeatures: FeatureBasic[];
-  selectListAccessories: BasicData[];
+  selectListAccessories: FeatureBasic[];
   attributeConfig?: BasicData[];
   bgColor?: string;
   onlyView: boolean;
@@ -79,8 +79,8 @@ export default function AvatarBuilder({
                                         bgColor,
                                         enablePan
                                      }: AvatarBuilderProps) {
-  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].id : '');
-  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].id : '');
+  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].meshName : '');
+  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].meshName : '');
   const [skinColor, setSkinColor] = useState<string>(campaignConfig.defSkinColor ?? 'F2A47E');
   const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
   const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
@@ -179,13 +179,13 @@ export default function AvatarBuilder({
     if (attributeConfig) {
       for (const attribute of attributeConfig) {
         // Is a feature
-        if (selectListFeatures.some(pl => pl.id === attribute.id)) {
+        if (selectListFeatures.some(pl => pl.meshName === attribute.id)) {
           const newFeature = featureList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newFeature)
             await onChangeFeature(newFeature.id, newFeature.path, newFeature.name, attribute.id);
         }
         // Is an accessory
-        else if (selectListAccessories.some(pl => pl.id === attribute.id)) {
+        else if (selectListAccessories.some(pl => pl.meshName === attribute.id)) {
           const newAcc = accessoryList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newAcc)
             await ChangeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id, campaignConfig.changeMaterial);
@@ -197,13 +197,13 @@ export default function AvatarBuilder({
 
       // Load random features
       for (const featureType of selectListFeatures) {
-        const randomFeatureOption = RandomArrayElement(featureList.filter(p => p.type === featureType.id));
+        const randomFeatureOption = RandomArrayElement(featureList.filter(p => p.type === featureType.meshName));
         if (randomFeatureOption)
           randomFeature.push(randomFeatureOption);
       }
 
       for (const accType of selectListAccessories) {
-        const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.id));
+        const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.meshName));
         if (randomAcc)
           randomAccessory.push(randomAcc);
       }
