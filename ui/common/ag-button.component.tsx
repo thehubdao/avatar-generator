@@ -74,7 +74,13 @@ export default function AGButton({ type, align, form, nm, selected, fit, full, c
   return (
     <div className={`my-2 flex ${vD.side ?? ''}`}>
       <button type={form ? 'submit' : undefined}
-        className={`mx-2 w-auto min-h-[32px] my-auto rounded py-1 border-1 ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor} ${nm ? 'shadow-flat-soft rounded-lg' : ''} ${nm && selected ? '!shadow-inset-soft rounded-lg' : ''} ${fit ? 'w-fit' : 'min-w-[100px]'} ${full ? '!w-full mx-0' : ''} ${circle ? 'rounded-full' : ''} transition-all duration-300`}
+        className={`mx-2 w-auto min-h-[32px] my-auto rounded py-1 border-1
+        ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor}
+        ${nm ? 'shadow-flat-soft rounded-lg' : ''}
+        ${nm && selected ? '!shadow-inset-soft rounded-lg underline underline-offset-2 decoration-blue decoration-2' : ''}
+        ${fit ? 'w-fit' : 'min-w-[100px]'}
+        ${full ? '!w-full mx-0' : ''}
+        ${circle ? 'rounded-full' : ''} transition-all duration-300`}
         onClick={onClickEvent} title={tooltip}>
         <div className='px-2'>{children}</div>
       </button>
