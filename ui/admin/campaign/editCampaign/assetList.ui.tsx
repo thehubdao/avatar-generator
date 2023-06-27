@@ -20,7 +20,11 @@ interface CampaignAssetsInterface {
 export default function AssetList({ activedOption }: AssetListInterface) {
   //* Fetching campaign assets and features using custom hooks
   const campaignAssets = useAppSelector(state => state.currentCampaign.assets);
-  const campaignFeatures = useAppSelector(state => state.currentCampaign.parameters.features);
+  const campaignTags = useAppSelector(state => {
+    if (activedOption === ('features' || 'accessories'))
+      return state.currentCampaign.parameters[activedOption]
+    return []
+  });
 
   //* State variables for search and filtering
   const [searchByNameValue, setSearchByNameValue] = useState<string>('');
@@ -45,6 +49,11 @@ export default function AssetList({ activedOption }: AssetListInterface) {
       ? deepTagCopyArray = deepTagCopyArray.filter((item) => item !== tag)
       : deepTagCopyArray.push(tag)
     setSearchByTagValue(deepTagCopyArray)
+  }
+
+  //* handle reset search by tag value
+  const handleResetTags = () => {
+    setSearchByTagValue([])
   }
 
   //* Event handler for clicking on a suggested search item
@@ -113,18 +122,24 @@ export default function AssetList({ activedOption }: AssetListInterface) {
   return (
     <>
       {/* Feature filter search bar */}
-      {activedOption === 'features' && <div className="flex w-full h-full mb-10 justify-between mx-2">
+      <div className="flex w-full h-full mb-10 justify-between mx-2">
         {/* By Name Searcher */}
         <div className="relative w-fit mr-5 text-sm">
-          <input
-            type="text"
-            value={searchByNameValue}
-            onChange={handleSearchByName}
-            className="border-none outline-none w-72 p-1 px-3 rounded-md nm-inset-slate-100-sm selection:border-none"
-            onKeyDown={handleKeyDown}
-            placeholder="Search by name..."
-            onBlur={handleBlur}
-          />
+          <div className="relative w-fit h-fit">
+            <input
+              type="text"
+              value={searchByNameValue}
+              onChange={handleSearchByName}
+              className="border-none outline-none w-72 p-1 px-3 pr-5 rounded-md nm-inset-slate-100-sm selection:border-none"
+              onKeyDown={handleKeyDown}
+              placeholder="Search by name..."
+              onBlur={handleBlur}
+            />
+            <div
+              className="absolute flex justify-center items-center right-0 top-0 p-1 px-2 text-red cursor-pointer hover:font-bold transition-all duration-100"
+              onClick={() => { setSearchByNameValue('') }}
+            >x</div>
+          </div>
           {showSuggestions && <div
             className={`absolute z-10 m-4 bg-slate-50 w-64 py-2 rounded-md shadow-2xl
             ${searchFilteredList.length == 0 ? 'hidden' : ''}`}
@@ -133,7 +148,7 @@ export default function AssetList({ activedOption }: AssetListInterface) {
             {searchFilteredList.map((item, index) => {
               return <div
                 onClick={() => handleOnClickSuggestionSearch(item.name)}
-                onMouseEnter={() => {setSelectedItem(index)}}
+                onMouseEnter={() => { setSelectedItem(index) }}
                 className={`px-2 ${selectedItem === index ? 'bg-orange  ' : ''}`}
                 key={item.id}
               >{item.name}</div>
@@ -142,17 +157,21 @@ export default function AssetList({ activedOption }: AssetListInterface) {
         </div>
         {/* By Tag Searcher */}
         <div className="flex flex-wrap gap-3 w-full">
-          {campaignFeatures?.map((feature: FeatureBasic) => {
+          {campaignTags?.map((tag: FeatureBasic) => {
             return <button
               className={`px-2 rounded-md text-sm
-              ${searchByTagValue.includes(feature.id) ? 'nm-inset-orange-sm font-semibold' : 'nm-flat-slate-100-sm'}
+              ${searchByTagValue.includes(tag.id) ? 'nm-inset-orange-sm font-semibold' : 'nm-flat-slate-100-sm'}
               transition-colors duration-300`}
-              onClick={() => { handleSearchByTag(feature.id) }}
-              key={feature.id}
-            >{feature.val}</button>
+              onClick={() => { handleSearchByTag(tag.id) }}
+              key={tag.id}
+            >{tag.val}</button>
           })}
+          {(campaignTags?.length ?? 0) > 0 && <button
+            className={`px-2 rounded-md text-sm nm-flat-slate-100-sm transition-colors duration-300`}
+            onClick={() => { handleResetTags() }}
+          >Clear tags</button>}
         </div>
-      </div>}
+      </div>
 
       {/* Display list of assets */}
       <div className="flex flex-wrap gap-6 w-full">
