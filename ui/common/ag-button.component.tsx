@@ -80,7 +80,7 @@ export default function AGButton({ type, align, form, nm, selected, fit, full, c
         ${nm && selected ? '!shadow-inset-soft rounded-lg underline underline-offset-2 decoration-blue decoration-2' : ''}
         ${fit ? 'w-fit' : 'min-w-[100px]'}
         ${full ? '!w-full mx-0' : ''}
-        ${circle ? 'rounded-full' : ''} transition-all duration-300`}
+        ${circle ? 'rounded-full' : ''} group/button transition-all duration-300`}
         onClick={onClickEvent} title={tooltip}>
         <div className='px-2'>{children}</div>
       </button>

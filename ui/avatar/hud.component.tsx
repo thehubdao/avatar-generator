@@ -55,6 +55,23 @@ export default function HudComponent({ editModeSelected,
     // console.log("selected feature: ", selectedFeature)
   }, [skinColor, exportData]);
 
+  
+  const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
+
+  // * This function allows us to know if the page has a width greater than 1536px.
+  useEffect(() => {
+    const handleResize = () => {
+      setIsWindowGreaterThan1536(window.innerWidth > 1536);
+    };
+
+    window.addEventListener('resize', handleResize);
+    handleResize(); // * Verify the initial screen size
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
     <>
       {/* MOBILE UI */}
@@ -189,7 +206,7 @@ export default function HudComponent({ editModeSelected,
             />
           </div>
         {/* WRAPPER */}
-        <div className={`w-full h-full flex ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 duration-200'} transition-all`}>
+        <div className={`w-full h-full grid grid-cols-[148px_minmax(100px,_1fr)] ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 duration-200'} transition-all`}>
           {/* FEATURES SECTION */}
           <div className="h-screen">
             <FeatureSelector
@@ -201,9 +218,9 @@ export default function HudComponent({ editModeSelected,
           {/* EDIT SECTION */}
           <div className="flex flex-col justify-between w-full px-8">
             {/* TITLE SECTION */}
-            <div className="text-gray-normal">
-              <div className="flex justify-end pb-6 pt-12">
-                <AGButton nm onClickEvent={() => changeView()}>
+            <div className="text-gray-normal pt-10 2xl:pt-0">
+              <div className="fixed right-0 bottom-0 flex justify-end pb-6 pt-12 2xl:static">
+                <AGButton onClickEvent={() => changeView()} nm={isWindowGreaterThan1536}>
                   <p className="font-poppins text-center w-[240px] py-2">SAVE</p>
                 </AGButton>
               </div>
