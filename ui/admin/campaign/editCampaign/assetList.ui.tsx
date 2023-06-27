@@ -5,6 +5,8 @@ import { AssetType } from "../../../../types/asset.type";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
 import { FeatureBasic } from "../../../../interfaces/common.interface";
 import { FeatureInterface } from "../../../../interfaces/api.interface";
+import { AiOutlineCloseCircle } from "react-icons/ai";
+import AGButton from "../../../common/ag-button.component";
 
 interface AssetListInterface {
   activedOption: FirestoreLocation,
@@ -124,21 +126,21 @@ export default function AssetList({ activedOption }: AssetListInterface) {
       {/* Feature filter search bar */}
       <div className="flex w-full h-full mb-10 justify-between mx-2">
         {/* By Name Searcher */}
-        <div className="relative w-fit mr-5 text-sm">
+        <div className="relative w-fit mr-5">
           <div className="relative w-fit h-fit">
             <input
               type="text"
               value={searchByNameValue}
               onChange={handleSearchByName}
-              className="border-none outline-none w-72 p-1 px-3 pr-5 rounded-md nm-inset-slate-100-sm selection:border-none"
+              className="border-none outline-none w-72 p-1 px-3 pr-5 my-2 rounded-md nm-inset-slate-100-sm selection:border-none"
               onKeyDown={handleKeyDown}
               placeholder="Search by name..."
               onBlur={handleBlur}
             />
             <div
-              className="absolute flex justify-center items-center right-0 top-0 p-1 px-2 text-red cursor-pointer hover:font-bold transition-all duration-100"
+              className="absolute h-full flex justify-center items-center right-0 top-0 p-1 px-2 text-red cursor-pointer hover:scale-110 transition-all duration-100"
               onClick={() => { setSearchByNameValue('') }}
-            >x</div>
+            ><AiOutlineCloseCircle /></div>
           </div>
           {showSuggestions && <div
             className={`absolute z-10 m-4 bg-slate-50 w-64 py-2 rounded-md shadow-2xl
@@ -158,18 +160,16 @@ export default function AssetList({ activedOption }: AssetListInterface) {
         {/* By Tag Searcher */}
         <div className="flex flex-wrap gap-3 w-full">
           {campaignTags?.map((tag: FeatureBasic) => {
-            return <button
-              className={`px-2 rounded-md text-sm
-              ${searchByTagValue.includes(tag.id) ? 'nm-inset-orange-sm font-semibold' : 'nm-flat-slate-100-sm'}
-              transition-colors duration-300`}
-              onClick={() => { handleSearchByTag(tag.id) }}
+            return <AGButton
+              nm
+              selected={searchByTagValue.includes(tag.id)}
               key={tag.id}
-            >{tag.val}</button>
+              onClickEvent={() => handleSearchByTag(tag.id)}
+            ><p className="group-hover/button:font-medium">{tag.val}</p></AGButton>
           })}
-          {(campaignTags?.length ?? 0) > 0 && <button
-            className={`px-2 rounded-md text-sm nm-flat-slate-100-sm transition-colors duration-300`}
-            onClick={() => { handleResetTags() }}
-          >Clear tags</button>}
+          {(campaignTags?.length ?? 0) > 0 && <AGButton nm onClickEvent={() => handleResetTags()}>
+            <p className="text-blue">Clear tags</p>
+          </AGButton>}
         </div>
       </div>
 
