@@ -29,17 +29,17 @@ export default function AssetList({ activedOption }: AssetListInterface) {
   });
 
   //* State variables for search and filtering
+  const [selectedItem, setSelectedItem] = useState<number>(-1);
   const [searchByNameValue, setSearchByNameValue] = useState<string>('');
   const [searchByTagValue, setSearchByTagValue] = useState<string[]>([]);
-  const [selectedItem, setSelectedItem] = useState<number>(-1);
-  const [searchFilteredList, setSearchFilteredList] = useState<AssetType[]>([]);
+  const [searchSuggestionList, setSearchSuggestionList] = useState<AssetType[]>([]);
   const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
 
   // *Event handler for searching assets by name
   const handleSearchByName = (event: React.FormEvent<HTMLInputElement>) => {
     event.preventDefault()
     setShowSuggestions(true)
-    setSearchByNameValue(event.currentTarget.value)
+    updateFilteredListData(event.currentTarget.value, searchByTagValue)
   }
 
   //* Updates the searchByTagValue state based on the provided tag.
@@ -50,16 +50,14 @@ export default function AssetList({ activedOption }: AssetListInterface) {
     deepTagCopyArray.includes(tag)
       ? deepTagCopyArray = deepTagCopyArray.filter((item) => item !== tag)
       : deepTagCopyArray.push(tag)
-    setSearchByTagValue(deepTagCopyArray)
+    updateFilteredListData(searchByNameValue, deepTagCopyArray)
   }
 
   //* handle reset search by tag value
-  const handleResetTags = () => {
-    setSearchByTagValue([])
-  }
+  const handleResetTags = () => { updateFilteredListData(searchByNameValue, []) }
 
   //* Event handler for clicking on a suggested search item
-  const handleOnClickSuggestionSearch = (itemName: string) => { setSearchByNameValue(itemName) }
+  const handleOnClickSuggestionSearch = (itemName: string) => { updateFilteredListData(itemName, searchByTagValue) }
 
   //* Event handler for keyboard events
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -68,11 +66,11 @@ export default function AssetList({ activedOption }: AssetListInterface) {
       setSelectedItem(prev => (prev - 1));
     } else if (event.key === 'ArrowDown') {
       event.preventDefault();
-      setSelectedItem(prev => (prev + 1) % searchFilteredList.length);
+      setSelectedItem(prev => (prev + 1) % searchSuggestionList.length);
     } else if (event.key === 'Enter') {
       event.preventDefault();
       //* Get the name from the selected suggestion in the searchFilteredList or use the current searchByNameValue
-      const name = searchFilteredList[selectedItem]?.name ?? searchByNameValue;
+      const name = searchSuggestionList[selectedItem]?.name ?? searchByNameValue;
       handleOnClickSuggestionSearch(name);
       setSelectedItem(-1);
     } else {
@@ -99,27 +97,29 @@ export default function AssetList({ activedOption }: AssetListInterface) {
   }
 
   //* Hides the search suggestions in blur these components.
-  const handleBlur = () => {
+  const handleBlur = (switchShowSuggestTo: boolean) => {
     //* Applies await delay if an on click is executed on an internal suggestion.
     setTimeout(() => {
-      setShowSuggestions(false)
-    }, 300)
+      setShowSuggestions(switchShowSuggestTo)
+    }, 100)
   }
 
-  //* Updates the filtered list of items based on the search and tag filters using the useEffect hook.
-  useEffect(() => {
+  //* Updates the filtered list of items based on the search and tag filters.
+  const updateFilteredListData = (currentNameFilter: string, currentTagFilter: string[]) => {
     const filterItems = (campaignAssets[activedOption as keyof CampaignAssetsInterface] as FeatureInterface[])?.filter(item => {
-      if (searchByTagValue.length > 0)
-        return (searchByTagValue.includes(item.type))
+      if (currentTagFilter.length > 0)
+        return (currentTagFilter.includes(item.type))
       return true
     }).filter(item => {
-      const searchTerm = searchByNameValue.toLowerCase()
+      const searchTerm = currentNameFilter.toLowerCase()
       const itemName = item.name.toLowerCase()
       return searchTerm && itemName.includes(searchTerm) && itemName !== searchTerm
     }).slice(0, 10)
-
-    setSearchFilteredList(filterItems ?? [])
-  }, [searchByNameValue, searchByTagValue])
+    
+    setSearchByTagValue(currentTagFilter);
+    setSearchByNameValue(currentNameFilter);
+    setSearchSuggestionList(filterItems ?? []);
+  }
 
   return (
     <>
@@ -135,19 +135,19 @@ export default function AssetList({ activedOption }: AssetListInterface) {
               className="border-none outline-none w-72 p-1 px-3 pr-7 my-2 rounded-md nm-inset-slate-100-sm selection:border-none"
               onKeyDown={handleKeyDown}
               placeholder="Search by name..."
-              onBlur={handleBlur}
+              onBlur={() => handleBlur(false)}
+              onFocus={() => handleBlur(true)}
             />
             <div
               className="absolute h-full flex justify-center items-center right-0 top-0 p-1 px-2 text-red cursor-pointer hover:scale-110 transition-all duration-100"
-              onClick={() => { setSearchByNameValue('') }}
+              onClick={() => { updateFilteredListData('', searchByTagValue) }}
             ><AiOutlineCloseCircle /></div>
           </div>
           {showSuggestions && <div
             className={`absolute z-10 m-4 bg-slate-50 w-64 py-2 rounded-md shadow-2xl
-            ${searchFilteredList.length == 0 ? 'hidden' : ''}`}
-            onBlur={handleBlur}
+            ${searchSuggestionList.length == 0 ? 'hidden' : ''}`}
           >
-            {searchFilteredList.map((item, index) => {
+            {searchSuggestionList.map((item, index) => {
               return <div
                 onClick={() => handleOnClickSuggestionSearch(item.name)}
                 onMouseEnter={() => { setSelectedItem(index) }}
