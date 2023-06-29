@@ -1,18 +1,21 @@
 import { useState } from "react";
 import { RxAvatar } from "react-icons/rx";
 import AGButton from "../../../common/ag-button.component";
-import { AiOutlineCloudDownload, AiOutlineEye, AiOutlinePauseCircle, AiOutlineVideoCamera } from "react-icons/ai";
+import { AiOutlineCloudDownload, AiOutlineCloudUpload, AiOutlineEye, AiOutlinePauseCircle, AiOutlineVideoCamera } from "react-icons/ai";
 import { MdKeyboardArrowDown, MdOutlineColorLens } from "react-icons/md";
 import ColorPicker from "./colorPicker.ui";
 import { IoSettingsOutline } from "react-icons/io5";
 import { BsLightbulb } from "react-icons/bs";
 import { CampaignConfig } from "../../../../interfaces/common.interface";
+import { useAppSelector } from "../../../../store/hooks";
 
 interface ConfigCampaignProps {
-  configData?: CampaignConfig
+  configData?: CampaignConfig,
+  downloadFile: (path:string) => void,
 }
 
-export default function ConfigCampaign({configData}: ConfigCampaignProps) {
+export default function ConfigCampaign({ configData, downloadFile }: ConfigCampaignProps) {
+  const baseMeshLink = useAppSelector(state => state.currentCampaign.parameters)
   const [openConfig, setOpenConfig] = useState<boolean>(false);
   const [configOption, setConfigOption] = useState<string>('base');
 
@@ -33,7 +36,7 @@ export default function ConfigCampaign({configData}: ConfigCampaignProps) {
 
     setConfigOption(destiny);
   }
-  
+
   return (
     <>
       {/* AVATAR GENERAL INFO */}
@@ -57,74 +60,25 @@ export default function ConfigCampaign({configData}: ConfigCampaignProps) {
                     </div>
                     <div className="flex mt-5">
                       <AGButton fit nm>
-                        <div className="flex items-center p-2 gap-2">
+                        <div className="flex items-center p-2 gap-2 cursor-not-allowed">
                           <AiOutlineEye />
                           <p>View Armature</p>
                         </div>
                       </AGButton>
-                      <AGButton fit nm>
+                      <AGButton fit nm onClickEvent={() => downloadFile(baseMeshLink.armature)}>
                         <div className="flex items-center p-2 gap-2">
                           <AiOutlineCloudDownload />
                           <p>Download</p>
                         </div>
                       </AGButton>
-                      {/* <AGButton fit nm>
-                        <div className="flex items-center p-2 gap-2">
+                    </div>
+                    <div>
+                      <AGButton nm full >
+                        <div className="flex items-center p-2 gap-2 cursor-not-allowed">
                           <AiOutlineCloudUpload />
-                          <p>Update</p>
-                        </div>
-                      </AGButton> */}
-                    </div>
-                    <p className="font-poppins font-medium text-purple pt-4 px-2">Default animation:</p>
-                    <div className="flex justify-between">
-                      <AGButton fit nm>
-                        <div className="py-3 px-2">
-                          {/* <AiOutlinePlayCircle /> */}
-                          <AiOutlinePauseCircle />
+                          <p>Update Avatar Base</p>
                         </div>
                       </AGButton>
-                      <div className="relative mt-2 w-[81.5%] cursor-pointer pr-2">
-                        <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
-                          <MdKeyboardArrowDown />
-                        </div>
-                        <select name="" id="" className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer">
-                          <option defaultValue={'animation'} className="bg-bg py-2 px-4">animation</option>
-                        </select>
-                      </div>
-                    </div>
-                    <p className="font-poppins font-medium text-purple pt-4 px-2">Default environment:</p>
-                    <div className="flex justify-between">
-                      <AGButton fit nm>
-                        <div className="py-3 px-2">
-                          {/* <AiOutlineEyeInvisible /> */}
-                          <AiOutlineEye />
-                        </div>
-                      </AGButton>
-                      <div className="relative mt-2 w-[81.5%] cursor-pointer pr-2">
-                        <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
-                          <MdKeyboardArrowDown />
-                        </div>
-                        <select name="" id="" className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer">
-                          <option defaultValue={'env-1'} className="bg-bg py-2 px-4">env-1</option>
-                        </select>
-                      </div>
-                    </div>
-                    <p className="font-poppins font-medium text-purple pt-4 px-2">Default skybox:</p>
-                    <div className="flex justify-between">
-                      <AGButton fit nm>
-                        <div className="py-3 px-2">
-                          {/* <AiOutlineEyeInvisible /> */}
-                          <AiOutlineEye />
-                        </div>
-                      </AGButton>
-                      <div className="relative mt-2 w-[81.5%] cursor-pointer pr-2">
-                        <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
-                          <MdKeyboardArrowDown />
-                        </div>
-                        <select name="" id="" className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer">
-                          <option defaultValue={'env-1'} className="bg-bg py-2 px-4">skybox-1</option>
-                        </select>
-                      </div>
                     </div>
                   </div>
                 }
@@ -250,44 +204,17 @@ export default function ConfigCampaign({configData}: ConfigCampaignProps) {
               <div onClick={e => changeConfigOption(e, 'base')} className={`w-10 h-10 text-2xl bg-white rounded-full flex justify-center items-center cursor-pointer text-purple bg-opacity-100 shadow-none`}>
                 <RxAvatar className="pointer-events-none" />
               </div>
-              <div onClick={e => changeConfigOption(e, 'color')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer">
+              <div onClick={e => changeConfigOption(e, 'color')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer hidden">
                 <MdOutlineColorLens className="pointer-events-none" />
               </div>
-              <div onClick={e => changeConfigOption(e, 'camera')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer">
+              <div onClick={e => changeConfigOption(e, 'camera')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer hidden">
                 <AiOutlineVideoCamera className="pointer-events-none" />
               </div>
-              <div onClick={e => changeConfigOption(e, 'light')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer">
+              <div onClick={e => changeConfigOption(e, 'light')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer hidden">
                 <BsLightbulb className="pointer-events-none" />
               </div>
             </div>
           </div>
-          {/* COUNT INFO */}
-          {/* <div className="flex gap-4">
-                    <div className="flex items-center gap-2 p-2 text-sm rounded-full bg-orange">
-                      <p className="text-white pl-2">Features</p>
-                      <div className="flex justify-center items-center w-6 h-6 rounded-full shadow-inset-hard bg-bg">
-                        <p className="font-bold text-orange">{data.features.length}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 text-sm rounded-full bg-orange">
-                      <p className="text-white pl-2">Accessories</p>
-                      <div className="flex justify-center items-center w-6 h-6 rounded-full shadow-inset-hard bg-bg">
-                        <p className="font-bold text-orange">{data.accessories.length}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 text-sm rounded-full bg-blue">
-                      <p className="text-white pl-2">Animations</p>
-                      <div className="flex justify-center items-center w-6 h-6 rounded-full shadow-inset-hard bg-bg">
-                        <p className="font-bold text-blue">!</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 p-2 text-sm rounded-full bg-blue">
-                      <p className="text-white pl-2">Environments</p>
-                      <div className="flex justify-center items-center w-6 h-6 rounded-full shadow-inset-hard bg-bg">
-                        <p className="font-bold text-blue">!</p>
-                      </div>
-                    </div>
-                  </div> */}
         </div >
       </div >
     </>
