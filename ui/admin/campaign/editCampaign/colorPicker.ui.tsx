@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AGButton from "../../../common/ag-button.component";
 import { MdKeyboardArrowDown } from "react-icons/md";
 
@@ -10,58 +10,34 @@ interface ColorPickerProps {
 }
 
 const colorArr = [
-  '#F00000',
-  '#FF0000',
-  '#F00000',
-  '#FF0000',
-  '#F00000',
-  '#FF0000',
-  '#F00000',
-  '#FF0000',
-  '#F00000',
-  '#FF0000',
-  '#F00000',
-  '#FF0000',
-  '#F00000',
-  '#FF0000',
-  '#F00000',
-  '#FF0000',
-  '#F00000',
-  '#FF0000',
-  '#F00000',
-  '#FF0000'
+  '#55efc4',
+  '#81ecec',
+  '#74b9ff',
+  '#a29bfe',
+  '#dfe6e9',
+  '#ffeaa7',
+  '#fab1a0',
+  '#ff7675',
+  '#fd79a8',
+  '#636e72',
+  '#00b894',
+  '#00cec9',
+  '#0984e3',
+  '#6c5ce7',
+  '#b2bec3',
+  '#fdcb6e',
+  '#e17055',
+  '#d63031',
+  '#e84393',
+  '#2d3436'
 ]
 
 export default function ColorPicker({ color, id, specificPalette, colorList }: ColorPickerProps) {
   const [defaultColor, setDefaultColor] = useState<string>(color);
   const [paletteSelector, setPaletteSelector] = useState<boolean>(specificPalette);
-  const [paletteLength, setPaletteLength] = useState<number>(colorList?.length || 0);
+  const [paletteLength, setPaletteLength] = useState<number>(colorList?.length || 20);
   const [paletteColors, setPaletteColors] = useState<string[]>(colorList || colorArr);
   const [defaultPaletteColor, setDefaultPaletteColor] = useState<string>('1');
-
-  useEffect(() => {
-    //* function to set default color on data base here
-    // eslint-disable-next-line no-console
-    console.log(id + ' default color: ', defaultColor);
-  }, [id, defaultColor]);
-
-  useEffect(() => {
-    //* function to set paletteSelector on data base here
-    // eslint-disable-next-line no-console
-    console.log('with picker: ', paletteSelector);
-  }, [paletteSelector]);
-
-  useEffect(() => {
-    //* function to set palette colors on data base here
-    // eslint-disable-next-line no-console
-    console.log('palette colors: ', paletteColors);
-  }, [paletteColors]);
-
-  useEffect(() => {
-    //* function to set palette colors on data base here
-    // eslint-disable-next-line no-console
-    console.log('default palette color: ', defaultPaletteColor);
-  }, [defaultPaletteColor]);
 
   const setNewPalette = () => {
     let newArray = [...paletteColors];
