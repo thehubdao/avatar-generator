@@ -11,8 +11,13 @@ import { GoToPage } from "../../../../utils/router.util";
 import AvatarSingle from "../../../../components/avatar/single.component";
 import { BasicData } from "../../../../interfaces/common.interface";
 import ConfigCampaign from "./configCampaign.ui";
+import CampaignStats from "./campaignStats.ui";
 
-export default function EditCampaignUI() {
+interface EditCampaignUIProps {
+  downloadFile: (path: string) => void,
+}
+
+export default function EditCampaignUI({ downloadFile }: EditCampaignUIProps) {
   // GET DATA FROM REDUX STORE
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const campaignParameters = useAppSelector(state => state.currentCampaign.parameters);
@@ -83,7 +88,15 @@ export default function EditCampaignUI() {
                 </div>
                 {
                   viewConfig &&
-                  <ConfigCampaign configData={campaignParameters.config}/>
+                  <>
+                    <ConfigCampaign configData={campaignParameters.config} downloadFile={(path: string) => downloadFile(path)} />
+                    <CampaignStats
+                      featuresCount={campaignParameters.features?.length ?? 0}
+                      accessoriesCount={campaignParameters.accessories?.length ?? 0}
+                      defAnimation={campaignParameters.config?.defAnimation}
+                      defScene={campaignParameters.config?.defEnvironment}
+                      defEnvironment={campaignParameters.config?.defEnvMap} />
+                  </>
                 }
               </>
               :
