@@ -37,7 +37,7 @@ export default function ColorPicker({ color, id, specificPalette, colorList }: C
   const [paletteSelector, setPaletteSelector] = useState<boolean>(specificPalette);
   const [paletteLength, setPaletteLength] = useState<number>(colorList?.length || 20);
   const [paletteColors, setPaletteColors] = useState<string[]>(colorList || colorArr);
-  const [defaultPaletteColor, setDefaultPaletteColor] = useState<string>('1');
+  const [defaultPaletteColor, setDefaultPaletteColor] = useState<number>(1);
 
   const setNewPalette = () => {
     let newArray = [...paletteColors];
@@ -85,7 +85,7 @@ export default function ColorPicker({ color, id, specificPalette, colorList }: C
                     <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
                       <MdKeyboardArrowDown />
                     </div>
-                    <select name="" id="" className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" onChange={e => setDefaultPaletteColor(e.target.value)}>
+                    <select name="" id="" className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" onChange={e => setDefaultPaletteColor(parseInt(e.target.value))}>
                       {
                         paletteColors.map((el, index) => {
                           return (
@@ -97,7 +97,7 @@ export default function ColorPicker({ color, id, specificPalette, colorList }: C
                       }
                     </select>
                   </div>
-                  <div className="w-20 h-12 m-2 rounded-lg" style={{ background: paletteColors[parseInt(defaultPaletteColor) - 1] }}></div>
+                  <div className="w-20 h-12 m-2 rounded-lg" style={{ background: paletteColors[defaultPaletteColor - 1] }}></div>
                 </div>
               </div>
               <p className="font-poppins font-medium text-purple pb-2 mt-2">Palette:</p>
