@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AssetCard from "./assetCard.ui";
 import { useAppSelector } from "../../../../store/hooks";
 import { AssetType } from "../../../../types/asset.type";
@@ -193,9 +193,7 @@ export default function AssetList({ activedOption }: AssetListInterface) {
                 <p>Create a new asset</p>
               </div>
             </AGButton>
-          </div>
-
-        }
+          </div>}
       </div>
     </>
   )
