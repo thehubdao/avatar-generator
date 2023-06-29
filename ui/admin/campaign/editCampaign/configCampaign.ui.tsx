@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { RxAvatar } from "react-icons/rx";
 import AGButton from "../../../common/ag-button.component";
-import { AiOutlineCloudDownload, AiOutlineCloudUpload, AiOutlineEye, AiOutlinePauseCircle, AiOutlineVideoCamera } from "react-icons/ai";
+import { AiOutlineCloudDownload, AiOutlineCloudUpload, AiOutlineEye, AiOutlineVideoCamera } from "react-icons/ai";
 import { MdKeyboardArrowDown, MdOutlineColorLens } from "react-icons/md";
 import ColorPicker from "./colorPicker.ui";
 import { IoSettingsOutline } from "react-icons/io5";
