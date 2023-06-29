@@ -20,7 +20,7 @@ export default function ConfigCampaign({ configData, downloadFile }: ConfigCampa
   const [configOption, setConfigOption] = useState<string>('base');
 
   const changeConfigOption = (e: React.MouseEvent, destiny: string) => {
-    const target = e.target as HTMLElement;
+    const target = e.currentTarget as HTMLElement;
     const elements = target.parentNode?.childNodes;
 
     if (elements) {
