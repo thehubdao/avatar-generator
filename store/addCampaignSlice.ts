@@ -2,11 +2,11 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { FeatureBasic } from '../interfaces/common.interface';
 
 interface CampaignStateInterface {
-  name: string,
-  features: FeatureBasic[],
-  ready: boolean,
-  isUploading: boolean,
-  error?: string
+  name: string;
+  features: FeatureBasic[];
+  ready: boolean;
+  isUploading: boolean;
+  error?: string;
 }
 
 const initialState: CampaignStateInterface = {

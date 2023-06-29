@@ -5,9 +5,9 @@ import { useState } from "react";
 import { IoMdArrowBack } from "react-icons/io";
 
 interface SecondStepInterface {
-  ready: boolean,
-  handleNextStep: (value: number) => void,
-  handleBackStep: () => void,
+  ready: boolean;
+  handleNextStep: (value: number) => void;
+  handleBackStep: () => void;
 }
 
 export default function SecondStep({ ready = false, handleNextStep, handleBackStep }: SecondStepInterface) {

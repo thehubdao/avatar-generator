@@ -5,8 +5,8 @@ import { useSwiper } from "swiper/react";
 import { IoMdArrowBack } from "react-icons/io";
 
 interface EndStepInterface {
-  ready: boolean,
-  handleNextStep: () => void,
+  ready: boolean;
+  handleNextStep: () => void;
 }
 
 export default function EndStep({ ready = false, handleNextStep }: EndStepInterface) {

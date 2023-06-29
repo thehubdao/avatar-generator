@@ -3,7 +3,7 @@ import AGButton from "../../../common/ag-button.component";
 import { useSwiper } from "swiper/react";
 
 interface FirstStepInterface {
-  ready: boolean,
+  ready: boolean;
   handleNextStep: () => void;
 }
 

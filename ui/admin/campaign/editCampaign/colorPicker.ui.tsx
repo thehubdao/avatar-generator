@@ -3,10 +3,10 @@ import AGButton from "../../../common/ag-button.component";
 import { MdKeyboardArrowDown } from "react-icons/md";
 
 interface ColorPickerProps {
-  color: string,
-  id: string,
-  specificPalette: boolean,
-  colorList?: string[]
+  color: string;
+  id: string;
+  specificPalette: boolean;
+  colorList?: string[];
 }
 
 const colorArr = [

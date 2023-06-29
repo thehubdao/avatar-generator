@@ -4,14 +4,14 @@ import { AssetType } from "../../../../types/asset.type";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
 
 interface AssetListInterface {
-  activedOption: FirestoreLocation,
+  activedOption: FirestoreLocation;
 }
 
 interface CampaignAssetsInterface {
-  features: AssetType[],
-  accessories: AssetType[],
-  animations: AssetType[],
-  environments: AssetType[]
+  features: AssetType[];
+  accessories: AssetType[];
+  animations: AssetType[];
+  environments: AssetType[];
 }
 
 export default function AssetList({ activedOption }: AssetListInterface) {

@@ -11,8 +11,8 @@ import { FeatureBasic } from "../../../../interfaces/common.interface";
 
 
 interface ThirdStepInterface {
-  ready: boolean,
-  featuresCount: number
+  ready: boolean;
+  featuresCount: number;
 }
 
 const featureBase = {

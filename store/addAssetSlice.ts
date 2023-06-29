@@ -2,12 +2,12 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { FirestoreLocation } from '../enums/firebase.enum';
 
 interface AssetStateInterface {
-  location: string,
-  storage: string,
-  name: string,
-  ready: boolean,
-  isUploading: boolean,
-  error?: string
+  location: string;
+  storage: string;
+  name: string;
+  ready: boolean;
+  isUploading: boolean;
+  error?: string;
 }
 
 const initialState: AssetStateInterface = {

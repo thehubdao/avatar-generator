@@ -12,7 +12,7 @@ import { setUserInfo } from "../../../store/authSlice";
 import { modal } from "../../../utils/modal.util";
 
 interface CreateCampaignInterface {
-  baseMeshFile?: File | null,
+  baseMeshFile?: File | null;
 }
 
 export default function CreateCampaign({ baseMeshFile }: CreateCampaignInterface) {

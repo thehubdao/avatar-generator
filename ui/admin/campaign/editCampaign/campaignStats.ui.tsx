@@ -1,9 +1,9 @@
 interface CampaignStatsProps {
-  featuresCount: number,
-  accessoriesCount: number,
-  defAnimation?: string,
-  defScene?: string,
-  defEnvironment?: string
+  featuresCount: number;
+  accessoriesCount: number;
+  defAnimation?: string;
+  defScene?: string;
+  defEnvironment?: string;
 }
 
 export default function CampaignStats({ featuresCount, accessoriesCount, defAnimation, defScene, defEnvironment }: CampaignStatsProps) {

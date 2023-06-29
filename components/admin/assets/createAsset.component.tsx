@@ -10,8 +10,8 @@ import { GoToPage } from "../../../utils/router.util";
 import { modal } from "../../../utils/modal.util";
 
 interface CreateAssetInterface {
-  objectFile?: File | null,
-  thumbnailFile?: File | null,
+  objectFile?: File | null;
+  thumbnailFile?: File | null;
 }
 
 export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetInterface) {

@@ -10,8 +10,8 @@ import { CampaignConfig } from "../../../../interfaces/common.interface";
 import { useAppSelector } from "../../../../store/hooks";
 
 interface ConfigCampaignProps {
-  configData?: CampaignConfig,
-  downloadFile: (path:string) => void,
+  configData?: CampaignConfig;
+  downloadFile: (path:string) => void;
 }
 
 export default function ConfigCampaign({ configData, downloadFile }: ConfigCampaignProps) {

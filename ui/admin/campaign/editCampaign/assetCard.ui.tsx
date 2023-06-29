@@ -10,10 +10,10 @@ import { fetchData } from "../../../../store/currentCampaignSlice";
 import { modal } from "../../../../utils/modal.util";
 
 interface AssetCardInterface {
-  id: string,
-  name: string,
-  thumb?: string,
-  location: FirestoreLocation
+  id: string;
+  name: string;
+  thumb?: string;
+  location: FirestoreLocation;
 }
 
 export default function AssetCard({ id, name, thumb, location }: AssetCardInterface) {

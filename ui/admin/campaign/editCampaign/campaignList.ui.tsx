@@ -8,7 +8,7 @@ import { UserInterface } from "../../../../interfaces/firebase.interface";
 import { setUserInfo } from "../../../../store/authSlice";
 
 interface CampaignListInterface {
-  userInfo: UserInterface,
+  userInfo: UserInterface;
 }
 
 export default function CampaignList({userInfo} : CampaignListInterface) {
