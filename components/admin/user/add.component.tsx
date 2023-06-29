@@ -7,6 +7,7 @@ import {CreateNewUser} from "../../../utils/firebase.util";
 import {Delay, IsEmail, LogError} from "../../../utils/common.util";
 import {AdminComponents, EmailResult, Module} from "../../../enums/common.enum";
 import {ChangeComponentFunction} from "../../../interfaces/common.interface";
+import { modal } from "../../../utils/modal.util";
 
 interface UserAddProps {
   changeComponent: ChangeComponentFunction;
@@ -34,10 +35,10 @@ export default function UserAdd({changeComponent}: UserAddProps) {
 
     const result = await CreateNewUser(newUser);
     if (!result.success) {
-      alert(result.errMessage);
+      modal(result.errMessage ?? 'No message');
     }
     else {
-      alert("User created successfully!");
+      modal("User created successfully!");
       await Delay(2000);
       changeComponent(AdminComponents.UserList);
     }
@@ -52,7 +53,7 @@ export default function UserAdd({changeComponent}: UserAddProps) {
       case EmailResult.GoodEmail:
         return account;
       case EmailResult.BadEmail:
-        alert("Wrong email, please insert a valid email or account");
+        modal("Wrong email, please insert a valid email or account");
         return void LogError(Module.UserAdd, "Wrong email, please insert a valid email or account");
     }
   }

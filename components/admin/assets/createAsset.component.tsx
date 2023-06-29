@@ -7,6 +7,7 @@ import { LogError } from "../../../utils/common.util";
 import { Module, PageLocation } from "../../../enums/common.enum";
 import { reset } from "../../../store/addAssetSlice";
 import { GoToPage } from "../../../utils/router.util";
+import { modal } from "../../../utils/modal.util";
 
 interface CreateAssetInterface {
   objectFile?: File | null,
@@ -44,12 +45,12 @@ export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetIn
     if (assetLocation !== FirestoreLocation.Parameters) {
       await InsertDoc(_jsonData, assetLocation, campaignName);
       dispatch(reset());
-      alert('Done inserting');
+      modal('Done inserting');
       void GoToPage(PageLocation.AdminCampaign);
     } else {
       await UpdateDoc(_jsonData, assetLocation, campaignName);
       dispatch(reset());
-      alert('Done updating');
+      modal('Done updating');
       void GoToPage(PageLocation.AdminCampaign);
     }
   }

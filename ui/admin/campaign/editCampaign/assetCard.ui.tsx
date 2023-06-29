@@ -7,6 +7,7 @@ import { DeleteDoc } from "../../../../utils/firebase.util";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { fetchData } from "../../../../store/currentCampaignSlice";
+import { modal } from "../../../../utils/modal.util";
 
 interface AssetCardInterface {
   id: string,
@@ -24,7 +25,7 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardInterf
 
   async function deleteDoc(docId: string) {
     const result = await DeleteDoc(location, docId, campaignName);
-    alert(`Doc "${result}" has been deleted.`);
+    modal(`Doc "${result}" has been deleted.`);
     void dispatch(fetchData({campaign: campaignName, location: location}));
   }
 

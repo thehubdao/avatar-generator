@@ -3,10 +3,11 @@ import Layout from "../../../ui/admin/admin.layout"
 import AGLoading from "../../../ui/common/ag-loading.component"
 import EditCampaignUI from "../../../ui/admin/campaign/editCampaign/editCampaign.ui"
 import { GetFileUrl } from "../../../utils/firebase.util";
+import { modal } from "../../../utils/modal.util";
 
 async function downloadFIle(path: string) {
   const fileLink = await GetFileUrl(path);
-  if (fileLink === undefined) return alert('error on file download, file link is undefined.')
+  if (fileLink === undefined) return modal('error on file download, file link is undefined.');
   window.open(fileLink, '_blank');
 }
 
