@@ -190,7 +190,7 @@ export default function AssetList({ activedOption }: AssetListInterface) {
             <AGButton nm onClickEvent={() => void GoToPage(PageLocation.AssetCreate)}>
               <div className={`flex items-center gap-2 p-2 font-poppins text-blue`}>
                 <IoMdAddCircleOutline className="text-2xl" />
-                <p>Create a new asset</p>
+                <p>Add element</p>
               </div>
             </AGButton>
           </div>}
