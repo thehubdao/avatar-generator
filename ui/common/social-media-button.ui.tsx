@@ -1,5 +1,6 @@
 import AGButton from "./ag-button.component"
 import { SocialMediaDataProps } from "../../interfaces/common.interface"
+import Link from "next/link"
 
 /**
  ** Represents Social Media Button that redirect us to a link
@@ -7,12 +8,10 @@ import { SocialMediaDataProps } from "../../interfaces/common.interface"
  */
 export default function SocialMediaButton({ link, icon }: SocialMediaDataProps) {
   return (
-    <AGButton nm fit>
-      <a
-        href={link}
-        className="cursor-pointer"
-        target="_blank"
-      >{icon}</a>
-    </AGButton>
+    <Link href={link} target="_blank">
+      <AGButton nm fit>
+        <>{icon}</>
+      </AGButton>
+    </Link>
   )
 }
