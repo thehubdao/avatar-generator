@@ -10,11 +10,8 @@ import {
   FaMedium,
   FaEnvelope
 } from "react-icons/fa";
-
-interface SocialMediaDataProps {
-  link: string;
-  icon: React.ReactNode;
-}
+import SocialMediaButton from "../../common/social-media-button.ui";
+import { SocialMediaDataProps } from "../../../interfaces/common.interface";
 
 //* Social Media Data as a Object
 const socialMediaData: Record<SocialMedia, SocialMediaDataProps> = {
@@ -27,22 +24,6 @@ const socialMediaData: Record<SocialMedia, SocialMediaDataProps> = {
   [SocialMedia.Etherscan]: { link: 'https://etherscan.io/token/0x8765b1a0eb57ca49be7eacd35b24a574d0203656', icon: <FaEthereum className="social-media-icon" /> },
   [SocialMedia.Mail]: { link: 'mailto:info@thedac.info', icon: <FaEnvelope className="social-media-icon" /> },
 };
-
-/**
- ** Represents Social Media Button that redirect us to a link
- * @returns {TSX.Element} The social media button component.
- */
-const SocialMediaButton = ({ link, icon }: SocialMediaDataProps) => {
-  return (
-    <AGButton nm fit>
-      <a
-        href={link}
-        className="cursor-pointer"
-        target="_blank"
-      >{icon}</a>
-    </AGButton>
-  )
-}
 
 /**
  ** Represents the mobile is building alert UI.
