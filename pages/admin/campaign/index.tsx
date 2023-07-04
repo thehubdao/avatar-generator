@@ -1,15 +1,8 @@
-import Head from "next/head"
-import Layout from "../../../ui/admin/admin.layout"
-import AGLoading from "../../../ui/common/ag-loading.component"
-import EditCampaignUI from "../../../ui/admin/campaign/editCampaign/editCampaign.ui"
-import { GetFileUrl } from "../../../utils/firebase.util";
-import { modal } from "../../../utils/modal.util";
+import Head from "next/head";
+import Layout from "../../../ui/admin/admin.layout";
+import EditCampaign from "../../../components/admin/campaign/editCampaign.component";
 
-async function downloadFIle(path: string) {
-  const fileLink = await GetFileUrl(path);
-  if (fileLink === undefined) return modal('error on file download, file link is undefined.');
-  window.open(fileLink, '_blank');
-}
+
 
 export default function Campaign() {
   return (
@@ -18,9 +11,8 @@ export default function Campaign() {
         <title>Admin - Campaign</title>
       </Head>
       <Layout>
-        <EditCampaignUI downloadFile={(path: string) => void downloadFIle(path)} />
+        <EditCampaign />
       </Layout>
-      <AGLoading loading={false} bgColor="F1F5F9" />
     </>
   )
 }
