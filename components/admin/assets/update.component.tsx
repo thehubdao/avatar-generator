@@ -7,7 +7,7 @@ import {ChangeComponentFunction} from "../../../interfaces/common.interface";
 import {FirestoreGlobalLocation} from "../../../enums/firebase.enum";
 import AGText from "../../../ui/common/ag-text.component";
 import {AddOrRemoveSlash} from "../../../utils/common.util";
-import { modal } from "../../../utils/modal.util";
+import { ShowModal } from "../../../utils/modal.util";
 
 interface AssetUpdateProps {
   campaign?: string;
@@ -59,10 +59,10 @@ export default function AssetUpdate({docLocation, campaign, changeComponent}: As
   }
 
   async function updateData() {
-    if (docLocation == undefined) return modal('Missing document location to update!');
+    if (docLocation == undefined) return ShowModal('Missing document location to update!');
 
     await ReplaceDoc(doc, jsonData);
-    modal(`Doc "${doc}" has been updated`);
+    ShowModal(`Doc "${doc}" has been updated`);
   }
 
   return (

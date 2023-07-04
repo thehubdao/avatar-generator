@@ -8,7 +8,7 @@ import AGLoading from "../../../ui/common/ag-loading.component";
 import LoginUI from "../../../ui/admin/login/login.ui";
 import { Provider } from "react-redux";
 import store from "../../../store/store";
-import { modal } from "../../../utils/modal.util";
+import { ShowModal } from "../../../utils/modal.util";
 
 export default function Login() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -26,7 +26,7 @@ export default function Login() {
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!(user && pass)) {
-      modal('Please insert a User and password.');
+      ShowModal('Please insert a User and password.');
       return;
     }
 
@@ -38,7 +38,7 @@ export default function Login() {
     catch (err) {
       const error = err as FirebaseError;
       setLoading(false);
-      modal(`LogIn error: ${error.code}`);
+      ShowModal(`LogIn error: ${error.code}`);
     }
   }
 
