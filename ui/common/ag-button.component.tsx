@@ -77,7 +77,7 @@ export default function AGButton({ type, align, form, nm, selected, fit, full, c
         className={`mx-2 w-auto min-h-[32px] my-auto rounded py-1 border-1
         ${vD.hover} ${vD.textColor} ${vD.color} ${vD.borderColor}
         ${nm ? 'shadow-flat-soft rounded-lg' : ''}
-        ${nm && selected ? '!shadow-inset-soft rounded-lg underline underline-offset-2 decoration-blue decoration-2' : ''}
+        ${nm && selected ? '!shadow-inset-soft rounded-lg underline underline-offset-2 decoration-blue decoration-2 !text-blue' : ''}
         ${fit ? 'w-fit' : 'min-w-[100px]'}
         ${full ? '!w-full mx-0' : ''}
         ${circle ? 'rounded-full' : ''} group/button transition-all duration-300`}
