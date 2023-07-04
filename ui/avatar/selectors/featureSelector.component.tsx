@@ -89,20 +89,10 @@ export default function FeatureSelector({ list, activeOpc, handleClick }: Featur
         spaceBetween={10}
         centeredSlides={true}
         direction={"vertical"}
-        loop={listLenght >= 5}
         modules={[Mousewheel]}
         mousewheel={true}
         ref={swiperRef}
-        breakpoints={{
-          1280: {
-            loop: listLenght >= 5,
-            initialSlide: listLenght >= 5 ? 0 : Math.floor(listLenght / 2)
-          },
-          1440: {
-            loop: listLenght >= 7,
-            initialSlide: listLenght >= 7 ? 0 : Math.floor(listLenght / 2)
-          }
-        }}
+        initialSlide={Math.floor(listLenght / 2)}
         className='!pb-2 !pt-3 h-screen'
       >
         {optionSelector({ list, activeOpc, handleClick, handleSlide })}
