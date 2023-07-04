@@ -1,10 +1,9 @@
 import { AiOutlineHome } from "react-icons/ai";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { useAppSelector } from "../../../../store/hooks";
 import AGButton from "../../../common/ag-button.component";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AssetList from "./assetList.ui";
-import { fetchData } from "../../../../store/currentCampaignSlice";
 import { PageLocation } from "../../../../enums/common.enum";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { GoToPage } from "../../../../utils/router.util";
@@ -20,17 +19,10 @@ export default function EditCampaignUI({ downloadFile }: EditCampaignUIProps) {
   // GET DATA FROM REDUX STORE
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const campaignParameters = useAppSelector(state => state.currentCampaign.parameters);
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
 
   const navBarOptions: string[] = Object.keys(FirestoreLocation);
   const [navBarOptionSelected, setNavBarOptionSelected] = useState<FirestoreLocation>(FirestoreLocation.Parameters);
-  // const [viewSingle, setViewSimple] = useState<boolean>(false);
-  // const [viewConfig, setViewConfig] = useState<boolean>(false);
-
-  useEffect(() => {
-    void dispatch(fetchData({ campaign: campaignName, location: navBarOptionSelected }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navBarOptionSelected]);
 
   return (
     <>
