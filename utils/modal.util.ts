@@ -1,3 +1,3 @@
-export function modal(text: string) {
+export function ShowModal(text: string) {
   return alert(text);
 }
