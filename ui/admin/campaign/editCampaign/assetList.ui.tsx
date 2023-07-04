@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AssetCard from "./assetCard.ui";
 import { useAppSelector } from "../../../../store/hooks";
 import { AssetType } from "../../../../types/asset.type";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
+import { IoMdAddCircleOutline } from "react-icons/io";
+import { GoToPage } from "../../../../utils/router.util";
+import { PageLocation } from "../../../../enums/common.enum";
 import { FeatureBasic } from "../../../../interfaces/common.interface";
 import { FeatureInterface } from "../../../../interfaces/api.interface";
 import { AiOutlineCloseCircle } from "react-icons/ai";
@@ -101,7 +104,7 @@ export default function AssetList({ activedOption }: AssetListInterface) {
     //* Applies await delay if an on click is executed on an internal suggestion.
     setTimeout(() => {
       setShowSuggestions(switchShowSuggestTo)
-    }, 100)
+    }, 500)
   }
 
   //* Updates the filtered list of items based on the search and tag filters.
@@ -115,7 +118,7 @@ export default function AssetList({ activedOption }: AssetListInterface) {
       const itemName = item.name.toLowerCase()
       return searchTerm && itemName.includes(searchTerm) && itemName !== searchTerm
     }).slice(0, 10)
-    
+
     setSearchByTagValue(currentTagFilter);
     setSearchByNameValue(currentNameFilter);
     setSearchSuggestionList(filterItems ?? []);
@@ -123,66 +126,74 @@ export default function AssetList({ activedOption }: AssetListInterface) {
 
   return (
     <>
-      {/* Feature filter search bar */}
-      <div className="flex w-full h-full mb-10 justify-between mx-2">
-        {/* By Name Searcher */}
-        <div className="relative w-fit mr-5">
-          <div className="relative w-fit h-fit">
-            <input
-              type="text"
-              value={searchByNameValue}
-              onChange={handleSearchByName}
-              className="border-none outline-none w-72 p-1 px-3 pr-7 my-2 rounded-md nm-inset-slate-100-sm selection:border-none"
-              onKeyDown={handleKeyDown}
-              placeholder="Search by name..."
-              onBlur={() => handleBlur(false)}
-              onFocus={() => handleBlur(true)}
-            />
-            <div
-              className="absolute h-full flex justify-center items-center right-0 top-0 p-1 px-2 text-red cursor-pointer hover:scale-110 transition-all duration-100"
-              onClick={() => { updateFilteredListData('', searchByTagValue) }}
-            ><AiOutlineCloseCircle /></div>
-          </div>
-          {showSuggestions && <div
-            className={`absolute z-10 m-4 bg-slate-50 w-64 py-2 rounded-md shadow-2xl
-            ${searchSuggestionList.length == 0 ? 'hidden' : ''}`}
-          >
-            {searchSuggestionList.map((item, index) => {
-              return <div
-                onClick={() => handleOnClickSuggestionSearch(item.name)}
-                onMouseEnter={() => { setSelectedItem(index) }}
-                className={`px-2 ${selectedItem === index ? 'bg-orange  ' : ''}`}
-                key={item.id}
-              >{item.name}</div>
-            })}
-          </div>}
-        </div>
-        {/* By Tag Searcher */}
-        <div className="flex flex-wrap w-full">
-          {campaignTags?.map((tag: FeatureBasic) => {
-            return <AGButton
-              nm
-              selected={searchByTagValue.includes(tag.id)}
-              key={tag.id}
-              onClickEvent={() => handleSearchByTag(tag.id)}
-            ><p className="group-hover/button:font-medium">{tag.val}</p></AGButton>
-          })}
-          {(campaignTags?.length ?? 0) > 0 && <AGButton nm onClickEvent={() => handleResetTags()}>
-            <p className="text-blue group-hover/button:font-medium">Clear tags</p>
-          </AGButton>}
-        </div>
-      </div>
-
       {/* Display list of assets */}
       <div className="flex flex-wrap gap-6 w-full">
         {campaignAssets[activedOption as keyof CampaignAssetsInterface]
-          ? handleFilterItems().map((asset: AssetType) => {
-            return (
-              <div key={asset.id}>
-                <AssetCard id={asset.id} name={asset.name} thumb={asset.thumb} location={activedOption} />
+          && (campaignAssets[activedOption as keyof CampaignAssetsInterface] as AssetType[]).length > 0
+          ? <>
+            {/* Feature filter search bar */}
+            <div className="flex w-full h-full mb-10 justify-between mx-2">
+              {/* By Name Searcher */}
+              <div className="relative w-fit mr-5">
+                <div className="relative w-fit h-fit">
+                  <input
+                    type="text"
+                    value={searchByNameValue}
+                    onChange={handleSearchByName}
+                    className="border-none outline-none w-72 p-1 px-3 pr-7 my-2 rounded-md nm-inset-slate-100-sm selection:border-none"
+                    onKeyDown={handleKeyDown}
+                    placeholder="Search by name..."
+                    onBlur={() => handleBlur(false)}
+                    onFocus={() => handleBlur(true)}
+                  />
+                  <div
+                    className="absolute h-full flex justify-center items-center right-0 top-0 p-1 px-2 text-red cursor-pointer hover:scale-110 transition-all duration-100"
+                    onClick={() => { updateFilteredListData('', searchByTagValue) }}
+                  ><AiOutlineCloseCircle /></div>
+                </div>
+                {showSuggestions && <div className={`absolute z-10 m-4 bg-slate-50 w-64 py-2 rounded-md shadow-2xl ${searchSuggestionList.length == 0 ? 'hidden' : ''}`}>
+                  {searchSuggestionList.map((item, index) => {
+                    return <div
+                      onClick={() => handleOnClickSuggestionSearch(item.name)}
+                      onMouseEnter={() => { setSelectedItem(index) }}
+                      className={`px-2 ${selectedItem === index ? 'bg-orange  ' : ''}`}
+                      key={item.id}
+                    >{item.name}</div>
+                  })}
+                </div>}
               </div>
-            )
-          }) : <p>No Data to show</p>}
+              {/* By Tag Searcher */}
+              <div className="flex flex-wrap w-full">
+                {campaignTags?.map((tag: FeatureBasic) => {
+                  return <AGButton
+                    nm
+                    selected={searchByTagValue.includes(tag.id)}
+                    key={tag.id}
+                    onClickEvent={() => handleSearchByTag(tag.id)}
+                  ><p className="group-hover/button:font-medium">{tag.val}</p></AGButton>
+                })}
+                {(campaignTags?.length ?? 0) > 0 && <AGButton nm onClickEvent={() => handleResetTags()}>
+                  <p className="text-blue group-hover/button:font-medium">Clear tags</p>
+                </AGButton>}
+              </div>
+            </div>
+            {handleFilterItems().map((asset: AssetType) => {
+              return (
+                <div key={asset.id}>
+                  <AssetCard id={asset.id} name={asset.name} thumb={asset.thumb} location={activedOption} />
+                </div>
+              )
+            })}
+          </>
+          : <div className="w-full mx-2 flex items-center gap-5">
+            <p>{`No ${activedOption} to show`}</p>
+            <AGButton nm onClickEvent={() => void GoToPage(PageLocation.AssetCreate)}>
+              <div className={`flex items-center gap-2 p-2 font-poppins text-blue`}>
+                <IoMdAddCircleOutline className="text-2xl" />
+                <p>Add element</p>
+              </div>
+            </AGButton>
+          </div>}
       </div>
     </>
   )
