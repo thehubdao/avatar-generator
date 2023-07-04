@@ -11,7 +11,7 @@ import { useAppSelector } from "../../../../store/hooks";
 
 interface ConfigCampaignProps {
   configData?: CampaignConfig;
-  downloadFile: (path:string) => void;
+  downloadFile: ((path: string) => void) | ((path: string) => Promise<void>);
 }
 
 export default function ConfigCampaign({ configData, downloadFile }: ConfigCampaignProps) {
