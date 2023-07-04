@@ -13,7 +13,7 @@ import ConfigCampaign from "./configCampaign.ui";
 import CampaignStats from "./campaignStats.ui";
 
 interface EditCampaignUIProps {
-  downloadFile: (path: string) => void;
+  downloadFile: ((path: string) => void) | ((path: string) => Promise<void>);
 }
 
 export default function EditCampaignUI({ downloadFile }: EditCampaignUIProps) {
