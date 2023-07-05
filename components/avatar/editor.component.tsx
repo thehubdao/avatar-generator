@@ -74,15 +74,15 @@ export async function ChangeStartAnimation(startAnimation: string | undefined) {
   await SetAnimation(_mixer, startAnimation);
 }
 
-export async function SetEnvironment(path?: string) {
+export async function SetScenario(path?: string) {
   if (path == undefined) return;
   
-  const environment = await GetWearableOption(GlobalValues.EnvironmentId, path);
-  AddToScene(environment.scene, GlobalValues.EnvironmentId);
+  const scenario = await GetWearableOption(GlobalValues.ScenarioId, path);
+  AddToScene(scenario.scene, GlobalValues.ScenarioId);
 }
 
-export function RemoveEnvironment() {
-  RemoveFromScene(GlobalValues.EnvironmentId);
+export function RemoveScenario() {
+  RemoveFromScene(GlobalValues.ScenarioId);
 }
 
 export async function SetFeaturesData(selectListFeatures: BasicData[]) {
