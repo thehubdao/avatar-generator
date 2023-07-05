@@ -167,10 +167,10 @@ export default function AssetList({ activedOption }: AssetListProps) {
                 {campaignTags?.map((tag: FeatureBasic) => {
                   return <AGButton
                     nm
-                    selected={searchByTagValue.includes(tag.id)}
-                    key={tag.id}
-                    onClickEvent={() => handleSearchByTag(tag.id)}
-                  ><p className="group-hover/button:font-medium">{tag.val}</p></AGButton>
+                    selected={searchByTagValue.includes(tag.meshName)}
+                    key={tag.meshName}
+                    onClickEvent={() => handleSearchByTag(tag.meshName)}
+                  ><p className="group-hover/button:font-medium">{tag.displayName}</p></AGButton>
                 })}
                 {(campaignTags?.length ?? 0) > 0 && <AGButton nm onClickEvent={() => handleResetTags()}>
                   <p className="text-blue group-hover/button:font-medium">Clear tags</p>
