@@ -21,7 +21,7 @@ export default function EditCampaign() {
     void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Features }));
     void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Accessories }));
     void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Animations }));
-    void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Environments }));
+    void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Scenarios }));
     void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.EnvMaps }));
   }
 
