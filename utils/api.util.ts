@@ -2,7 +2,7 @@ import {
   AccessoryInterface,
   AnimationInterface,
   ApiResponse,
-  EnvironmentInterface,
+  ScenarioInterface,
   EnvMapInterface,
   FeatureInterface,
   SingleInterface,
@@ -96,8 +96,8 @@ export async function GetAnimationByCampaignAndName(campaign?: string | null, na
   return GetRequest<AnimationInterface[]>(ApiRoutesV1.Animations, undefined, {campaign, name});
 }
 
-export async function GetEnvironmentListByCampaign(campaign?: string | null) {
-  return GetRequest<EnvironmentInterface[]>(ApiRoutesV1.Environments, undefined, {campaign});
+export async function GetScenarioListByCampaign(campaign?: string | null) {
+  return GetRequest<ScenarioInterface[]>(ApiRoutesV1.Scenarios, undefined, {campaign});
 }
 
 export async function GetEnvMapListByCampaign(campaign: string) {
