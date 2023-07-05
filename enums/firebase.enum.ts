@@ -2,7 +2,7 @@ export enum FirestoreLocation {
     Features = 'features',
     Accessories = 'accessories',
     Animations = 'animations',
-    Environments = 'environments',
+    Scenarios = 'scenarios',
     EnvMaps = 'env_maps',
     Parameters = '/',
 }
@@ -25,7 +25,7 @@ export enum StorageLocation {
     Thumbnail = 'thumb',
     Animation = 'animation',
     Missing = 'missing',
-    Environment = 'environment',
+    Scenario = 'scenario',
     EnvMap = 'env_map',
 }
 
