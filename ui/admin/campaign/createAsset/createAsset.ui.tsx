@@ -55,8 +55,6 @@ export default function AddAssetUI() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasAssetFile, hasThumbFile, selectedStorage, assetName, dbLocation])
 
-  hasAssetFile && hasThumbFile && selectedStorage !== '' && assetName !== ''
-
   function checkAssetFile() {
     const fileLength = assetFile.current?.files?.length;
     if (!fileLength || fileLength < 1) {

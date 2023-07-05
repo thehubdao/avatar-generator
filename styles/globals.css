@@ -8,7 +8,7 @@ body {
 
 /* Change Autocomplete styles in Chrome*/
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
+input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 textarea:-webkit-autofill,
 textarea:-webkit-autofill:hover,
@@ -106,4 +106,45 @@ select {
   100% {
     transform: translateX(0) rotate(0deg);
   }
+}
+
+
+/* Styles for the scrollbar in WebKit browsers */
+::-webkit-scrollbar {
+  width: 2px;
+  /* Scrollbar width */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #bbb;
+  /* Thumb color (scrollbar movable part) */
+  border-radius: 4px;
+  /* Thumb border radius */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #999;
+  /* Thumb color on hover */
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+  /* Track color (scrollbar fixed part) */
+  border-radius: 4px;
+  /* Track border radius */
+}
+
+::-webkit-scrollbar-track:hover {
+  background-color: #ddd;
+  /* Track color on hover */
+}
+
+/* Styles for the scrollbar in non-WebKit browsers */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: #bbb #f1f1f1;
+}
+
+html:hover {
+  scrollbar-color: #999 #ddd;
 }

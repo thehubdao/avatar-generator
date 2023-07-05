@@ -62,7 +62,7 @@ function optionSelector({ list, activeOpc, handleClick, handleSlide }: OptionSel
             selectFeature(event, opt.id, index)
           }}
         >
-          <div className={`w-[84px] h-[84px] flex justify-center items-center bg-bg rounded-xl cursor-pointer ${isActive ? 'bg-accent shadow-inset-hard' : 'shadow-flat-hard'}`} title={opt.id}>
+          <div className={`w-[84px] h-[84px] flex justify-center items-center rounded-xl cursor-pointer ${isActive ? 'bg-accent bg-opacity-80 shadow-inset-hard' : 'bg-bg shadow-flat-soft hover:shadow-flat-hard'} transition-all duration-500`} title={opt.id}>
             <Image alt={opt.id} width={70} height={70} src={'/resources/icons/features/Chest.svg'} priority />
           </div>
         </div>
@@ -89,20 +89,10 @@ export default function FeatureSelector({ list, activeOpc, handleClick }: Featur
         spaceBetween={10}
         centeredSlides={true}
         direction={"vertical"}
-        loop={listLenght >= 5}
         modules={[Mousewheel]}
         mousewheel={true}
         ref={swiperRef}
-        breakpoints={{
-          1280: {
-            loop: listLenght >= 5,
-            initialSlide: listLenght >= 5 ? 0 : Math.floor(listLenght / 2)
-          },
-          1440: {
-            loop: listLenght >= 7,
-            initialSlide: listLenght >= 7 ? 0 : Math.floor(listLenght / 2)
-          }
-        }}
+        initialSlide={Math.floor(listLenght / 2)}
         className='!pb-2 !pt-3 h-screen'
       >
         {optionSelector({ list, activeOpc, handleClick, handleSlide })}

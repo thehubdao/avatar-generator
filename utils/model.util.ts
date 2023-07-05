@@ -67,11 +67,7 @@ export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel:
     return LogError(Module.ModelUtil, "Skeleton missing from base_mesh some of the features have weird components.")
 
   const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
-  await ChangeSkeleton(newFeature, baseSkeleton, changeMaterialFunction, "threeTone");
-
-  if (skinColor != undefined) {
-    await ChangeObjectSkinColor(newFeature, skinColor, skinName);
-  }
+  await ChangeSkeleton(newFeature, baseSkeleton, changeMaterialFunction, "threeTone", skinColor, skinName);
 
   newFeature.frustumCulled = false;
   
@@ -121,12 +117,19 @@ async function GetMatchPiece(object: GLTF, match?: string) {
   });
 }
 
-async function ChangeSkeleton(newFeature: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone) {
+async function ChangeSkeleton(newFeature: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone, skinColor?: string, skinMatName: string = 'Skin _Mat_MAH') {
   newFeature.traverse(async object => {
     if (IsSkinnedMesh(object)) {
       object.skeleton = baseSkeleton.clone();
       if (changeMaterial && tone)
         await changeMaterial(object, tone);
+
+      if (skinColor) {
+        const matRef = object.material as MeshStandardMaterial;
+        if (matRef.name.startsWith(skinMatName)) {
+          matRef.color.set(`#${skinColor}`);
+        }
+      }
     }
 
     object.frustumCulled = false;
@@ -262,9 +265,9 @@ export async function TransformObject3dToNewMaterial(object: Object3D, tone?: Te
 export async function ChangeObjectSkinColor(object: Object3D, skinColor: string, skinMatName: string = 'Skin _Mat_MAH') {
   object.traverse(subObject => {
     if (IsSkinnedMesh(subObject)) {
-      const matRef = subObject.material as Material;
+      const matRef = subObject.material as MeshStandardMaterial;
       if (matRef.name.startsWith(skinMatName)) {
-        (matRef as MeshStandardMaterial).color.set(`#${skinColor}`);
+        matRef.color.set(`#${skinColor}`);
       }
     }
   });

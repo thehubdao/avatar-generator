@@ -31,24 +31,20 @@ export default function EditCampaignUI({ downloadFile }: EditCampaignUIProps) {
         <h1 className="font-humane text-9xl text-gray-normal uppercase">{campaignName}</h1>
         {/* NAVIGATION BUTTONS */}
         <div className="flex">
-          {
-            navBarOptions.map(x => {
-              const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
-              return <div className={`${x === 'Parameters' ? 'order-1 text-2xl' : 'order-2'}`} key={x}>
-                <AGButton nm selected={navBarOptionSelected == val ? true : false} fit={x === 'Parameters' ? true : false} onClickEvent={() => setNavBarOptionSelected(val)}>
-                  <div className={`flex items-center gap-2 p-2`}>
-                    <div className={`font-poppins uppercase ${navBarOptionSelected == val ? ' font-semibold' : ''}`}>
-                      {x === 'Parameters' ?
-                        <AiOutlineHome />
-                        :
-                        x
-                      }
-                    </div>
+          {navBarOptions.map(x => {
+            const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
+            return <div className={`${x === 'Parameters' ? 'order-1 text-2xl' : 'order-2'}`} key={x}>
+              <AGButton nm selected={navBarOptionSelected == val ? true : false} fit={x === 'Parameters' ? true : false} onClickEvent={() => setNavBarOptionSelected(val)}>
+                <div className={`flex items-center gap-2 p-2`}>
+                  <div className={`font-poppins uppercase ${navBarOptionSelected == val ? ' font-semibold' : ''}`}>
+                    {x === 'Parameters'
+                      ? <AiOutlineHome />
+                      : x}
                   </div>
-                </AGButton>
-              </div>
-            })
-          }
+                </div>
+              </AGButton>
+            </div>
+          })}
           <div className="order-2">
             <AGButton nm onClickEvent={() => void GoToPage(PageLocation.AssetCreate)}>
               <div className={`flex items-center gap-2 p-2 font-poppins text-blue`}>
