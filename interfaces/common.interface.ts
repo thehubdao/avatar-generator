@@ -92,3 +92,8 @@ export interface Result<T> {
 export interface ObjProp {
   prop: string;
 }
+
+export interface SocialMediaDataProps {
+  link: string;
+  icon: React.ReactNode;
+}

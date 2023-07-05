@@ -91,7 +91,7 @@ export default function AssetList({ activedOption }: AssetListProps) {
     })
 
     const listOfItems = listOfItemsByTag.filter((asset: AssetType) => {
-      return asset.name.toLowerCase() === searchByNameValue.toLowerCase()
+      return asset.name.toLowerCase().includes(searchByNameValue.toLowerCase())
     })
 
     if (listOfItems.length > 0)
@@ -164,25 +164,25 @@ export default function AssetList({ activedOption }: AssetListProps) {
               </div>
               {/* By Tag Searcher */}
               <div className="flex flex-wrap w-full">
-                {campaignTags?.map((tag: FeatureBasic) => {
-                  return <AGButton
-                    nm
-                    selected={searchByTagValue.includes(tag.meshName)}
-                    key={tag.meshName}
-                    onClickEvent={() => handleSearchByTag(tag.meshName)}
-                  ><p className="group-hover/button:font-medium">{tag.displayName}</p></AGButton>
-                })}
-                {(campaignTags?.length ?? 0) > 0 && <AGButton nm onClickEvent={() => handleResetTags()}>
-                  <p className="text-blue group-hover/button:font-medium">Clear tags</p>
-                </AGButton>}
+                {(campaignTags && campaignTags?.length > 0) && <>
+                  {campaignTags?.map((tag: FeatureBasic) => {
+                    return <AGButton
+                      nm
+                      selected={searchByTagValue.includes(tag.meshName)}
+                      key={tag.meshName}
+                      onClickEvent={() => handleSearchByTag(tag.meshName)}
+                    ><p className="group-hover/button:font-medium">{tag.displayName}</p></AGButton>
+                  })}
+                  <AGButton nm onClickEvent={() => handleResetTags()}>
+                    <p className="text-blue group-hover/button:font-medium">Clear tags</p>
+                  </AGButton>
+                </>}
               </div>
             </div>
             {handleFilterItems().map((asset: AssetType) => {
-              return (
-                <div key={asset.id}>
-                  <AssetCard id={asset.id} name={asset.name} thumb={asset.thumb} location={activedOption} />
-                </div>
-              )
+              return (<div key={asset.id}>
+                <AssetCard id={asset.id} name={asset.name} thumb={asset.thumb} location={activedOption} />
+              </div>)
             })}
           </>
           : <div className="w-full mx-2 flex items-center gap-5">
