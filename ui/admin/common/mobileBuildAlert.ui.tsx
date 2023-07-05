@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import SocialMediaButton from "../../common/social-media-button.ui";
 import { SocialMediaDataProps } from "../../../interfaces/common.interface";
+import { ExternalLink } from "../../../enums/external-links.enum";
 
 //* Social Media Data as a Object
 const socialMediaData: Record<SocialMedia, SocialMediaDataProps> = {
@@ -35,11 +36,11 @@ export default function MobileBuildAlert() {
       <h1 className="font-humane text-9xl text-gray-normal">COMMING SOON</h1>
       <p className="text-center">We are working on the mobile version, while we finalize the details we invite you to visit us on desktop version. If you want to learn more about us, we invite you to contact us through our social networks.</p>
       <div className="w-fit">
-        <AGButton nm full onClickEvent={() => { window.open('https://thehubdao.xyz/', "_blank");}}>
+        <AGButton nm full onClickEvent={() => { window.open(ExternalLink.TheHubWebLanding, "_blank"); }}>
           <p className="font-bold">Go to The HUB Website</p>
         </AGButton>
         <div className="flex flex-row items-center justify-center flex-wrap pt-3 sm:pt-6">
-          {Object.values(SocialMedia).map(item => <SocialMediaButton link={socialMediaData[item].link} icon={socialMediaData[item].icon} />)}
+          {Object.values(SocialMedia).map((item, index) => <SocialMediaButton key={index} link={socialMediaData[item].link} icon={socialMediaData[item].icon} />)}
         </div>
       </div>
     </div>
