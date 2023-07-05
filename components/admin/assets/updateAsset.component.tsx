@@ -2,15 +2,8 @@ import { useEffect } from "react";
 import { ReplaceDoc, UploadFile } from "../../../utils/firebase.util";
 import { useAppSelector } from "../../../store/hooks";
 import { FirestoreGlobalLocation, FirestoreLocation, StorageLocation } from "../../../enums/firebase.enum";
-import { AssetType } from "../../../types/asset.type";
 import { AssetInterface } from "../../../interfaces/api.interface";
-
-interface CampaignAssetsInterface {
-  features: AssetType[],
-  accessories: AssetType[],
-  animations: AssetType[],
-  environments: AssetType[]
-}
+import { CampaignAssets } from "../../../interfaces/common.interface";
 
 interface UpdateAssetProps {
   objectFile?: File | null,
@@ -29,7 +22,7 @@ export default function UpdateAsset({ objectFile, thumbnailFile, name, id, locat
   async function updateData() {
     if (location == undefined) return alert('Missing document location to update!');
 
-    const currentAsset: Partial<AssetInterface> = { ...campaignAssets[location as keyof CampaignAssetsInterface]?.find(el => el.id === id) };
+    const currentAsset: Partial<AssetInterface> = { ...campaignAssets[location as keyof CampaignAssets]?.find(el => el.id === id) };
     let newFile, newThumb;
 
     if (name && name.length > 0) {
@@ -67,8 +60,8 @@ export default function UpdateAsset({ objectFile, thumbnailFile, name, id, locat
         return StorageLocation.Accessory;
       case FirestoreLocation.Animations:
         return StorageLocation.Animation;
-      case FirestoreLocation.Environments:
-        return StorageLocation.Environment;
+      case FirestoreLocation.Scenarios:
+        return StorageLocation.Scenario;
       default:
         return StorageLocation.Missing;
     }
