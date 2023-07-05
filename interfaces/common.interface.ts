@@ -72,7 +72,7 @@ export interface CampaignAssets {
   features: FeatureInterface[],
   accessories: AccessoryInterface[],
   animations: AnimationInterface[],
-  scenes: ScenarioInterface[],
+  scenarios: ScenarioInterface[],
   env_maps: EnvMapInterface[]
 }
 
