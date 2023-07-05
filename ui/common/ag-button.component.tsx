@@ -1,7 +1,7 @@
 ﻿interface AGButtonProps {
   type?: 'primary' | 'secondary' | 'alert' | 'danger';
   align?: 'center' | 'start' | 'end';
-  onClickEvent?: () => void;
+  onClickEvent?: (() => void) | (() => Promise<void>);
   children?: string | JSX.Element;
   form?: boolean;
   nm?: boolean;

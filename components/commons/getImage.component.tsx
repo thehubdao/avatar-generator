@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import GetImageUI from "../../ui/common/getImage.ui";
 import { GetFileUrl } from "../../utils/firebase.util";
 
-interface GetImageInterface {
+interface GetImageProps {
   url?: string;
   alt?: string;
 }
 
-export default function GetImage({ url, alt }: GetImageInterface) {
+export default function GetImage({ url, alt }: GetImageProps) {
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
 
   useEffect(() => {

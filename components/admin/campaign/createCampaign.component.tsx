@@ -9,12 +9,13 @@ import { LogError } from "../../../utils/common.util";
 import { CampaignParameters } from "../../../interfaces/common.interface";
 import { UserInterface } from "../../../interfaces/firebase.interface";
 import { setUserInfo } from "../../../store/authSlice";
+import { ShowModal } from "../../../utils/modal.util";
 
-interface CreateCampaignInterface {
-  baseMeshFile?: File | null,
+interface CreateCampaignProps {
+  baseMeshFile?: File | null;
 }
 
-export default function CreateCampaign({ baseMeshFile }: CreateCampaignInterface) {
+export default function CreateCampaign({ baseMeshFile }: CreateCampaignProps) {
   const campaignName = useAppSelector(state => state.addCampaign.name);
   const campaignFeatures = useAppSelector(state => state.addCampaign.features);
   const campaignReady = useAppSelector(state => state.addCampaign.ready);
@@ -59,7 +60,7 @@ export default function CreateCampaign({ baseMeshFile }: CreateCampaignInterface
             const {role, name, account, email, campaign} = uInfo;
             void dispatch(setUserInfo({role, name, account, email, campaign}));
           }
-          alert("Campaign created successfully");
+          ShowModal("Campaign created successfully");
         }
         else
           void LogError(Module.CampaignAdd, result.errMessage ?? 'Unknow error.');

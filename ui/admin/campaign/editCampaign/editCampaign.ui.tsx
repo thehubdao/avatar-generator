@@ -1,26 +1,28 @@
 import { AiOutlineHome } from "react-icons/ai";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { useAppSelector } from "../../../../store/hooks";
 import AGButton from "../../../common/ag-button.component";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AssetList from "./assetList.ui";
-import { fetchData } from "../../../../store/currentCampaignSlice";
 import { PageLocation } from "../../../../enums/common.enum";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { GoToPage } from "../../../../utils/router.util";
+import AvatarSingle from "../../../../components/avatar/single.component";
+import ConfigCampaign from "./configCampaign.ui";
+import CampaignStats from "./campaignStats.ui";
 
-export default function EditCampaignUI() {
+interface EditCampaignUIProps {
+  downloadFile: ((path: string) => void) | ((path: string) => Promise<void>);
+}
+
+export default function EditCampaignUI({ downloadFile }: EditCampaignUIProps) {
   // GET DATA FROM REDUX STORE
   const campaignName = useAppSelector(state => state.currentCampaign.name);
-  const dispatch = useAppDispatch();
+  const campaignParameters = useAppSelector(state => state.currentCampaign.parameters);
+  // const dispatch = useAppDispatch();
 
   const navBarOptions: string[] = Object.keys(FirestoreLocation);
   const [navBarOptionSelected, setNavBarOptionSelected] = useState<FirestoreLocation>(FirestoreLocation.Parameters);
-
-  useEffect(() => {
-    void dispatch(fetchData({ campaign: campaignName, location: navBarOptionSelected }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [navBarOptionSelected]);
 
   return (
     <>
@@ -53,10 +55,29 @@ export default function EditCampaignUI() {
           </div>
         </div>
         {/* ASSETS LIST */}
-        <div className="mt-6">
-          {navBarOptionSelected === FirestoreLocation.Parameters
-            ? <p>edit campaign parameters</p>
-            : <AssetList activedOption={navBarOptionSelected} />}
+        <div className="relative mt-6">
+          {
+            navBarOptionSelected === FirestoreLocation.Parameters ?
+              <>
+                {
+                  campaignParameters.features &&
+                  <>
+                    <div className="w-full h-[calc(1216px_*_9_/_16)] bg-gradient-to-r from-gray-dark to-gray-dark/95 rounded-2xl">
+                      <AvatarSingle campaign={campaignName} avatarBasePath={campaignParameters.armature} featureList={campaignParameters.features} />
+                    </div>
+                    <ConfigCampaign configData={campaignParameters.config} downloadFile={(path: string) => downloadFile(path)} />
+                    <CampaignStats
+                      featuresCount={campaignParameters.features?.length ?? 0}
+                      accessoriesCount={campaignParameters.accessories?.length ?? 0}
+                      defAnimation={campaignParameters.config?.defAnimation}
+                      defScene={campaignParameters.config?.defEnvironment}
+                      defEnvironment={campaignParameters.config?.defEnvMap} />
+                  </>
+                }
+              </>
+              :
+              <AssetList activedOption={navBarOptionSelected} />
+          }
         </div>
       </div>
     </>

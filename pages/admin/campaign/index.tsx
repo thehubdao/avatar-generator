@@ -1,7 +1,8 @@
-import Head from "next/head"
-import Layout from "../../../ui/admin/admin.layout"
-import AGLoading from "../../../ui/common/ag-loading.component"
-import EditCampaignUI from "../../../ui/admin/campaign/editCampaign/editCampaign.ui"
+import Head from "next/head";
+import Layout from "../../../ui/admin/admin.layout";
+import EditCampaign from "../../../components/admin/campaign/editCampaign.component";
+
+
 
 export default function Campaign() {
   return (
@@ -10,9 +11,8 @@ export default function Campaign() {
         <title>Admin - Campaign</title>
       </Head>
       <Layout>
-        <EditCampaignUI />
+        <EditCampaign />
       </Layout>
-      <AGLoading loading={false} bgColor="F1F5F9" />
     </>
   )
 }

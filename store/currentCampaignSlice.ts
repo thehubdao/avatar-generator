@@ -5,17 +5,17 @@ import { FirestoreLocation } from '../enums/firebase.enum';
 import { CampaignParameters } from '../interfaces/common.interface';
 
 interface CampaignStateInterface {
-  name: string,
-  parameters: CampaignParameters,
+  name: string;
+  parameters: CampaignParameters;
   assets: {
-    features?: AssetType[],
-    accessories?: AssetType[],
-    animations?: AssetType[],
-    environments?: AssetType[],
-    env_maps?: AssetType[]
-  },
-  isLoading: boolean,
-  error?: string,
+    features?: AssetType[];
+    accessories?: AssetType[];
+    animations?: AssetType[];
+    environments?: AssetType[];
+    env_maps?: AssetType[];
+  };
+  isLoading: boolean;
+  error?: string;
 }
 
 const initialState: CampaignStateInterface = {

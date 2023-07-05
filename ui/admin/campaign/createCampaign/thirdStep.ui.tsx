@@ -10,9 +10,9 @@ import { IoMdArrowBack } from "react-icons/io";
 import { FeatureBasic } from "../../../../interfaces/common.interface";
 
 
-interface ThirdStepInterface {
-  ready: boolean,
-  featuresCount: number
+interface ThirdStepProps {
+  ready: boolean;
+  featuresCount: number;
 }
 
 const featureBase = {
@@ -27,7 +27,7 @@ const featureBase = {
 type FeatureStringOption = keyof Omit<FeatureBasic, 'hasCustomIcon' | 'isMulticolor'>;
 type FeatureBooleanOption = keyof Omit<FeatureBasic, 'meshName' | 'displayName' | 'index' | 'iconUrl'>;
 
-export default function ThirdStep({ ready = false, featuresCount }: ThirdStepInterface) {
+export default function ThirdStep({ ready = false, featuresCount }: ThirdStepProps) {
   const swiper = useSwiper();
   const [featureSelected, setFeatureSelected] = useState<number>(0);
   const features = useAppSelector(state => state.addCampaign.features);

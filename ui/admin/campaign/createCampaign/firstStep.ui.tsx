@@ -2,12 +2,12 @@ import { IoAlert } from "react-icons/io5";
 import AGButton from "../../../common/ag-button.component";
 import { useSwiper } from "swiper/react";
 
-interface FirstStepInterface {
-  ready: boolean,
+interface FirstStepProps {
+  ready: boolean;
   handleNextStep: () => void;
 }
 
-export default function FirstStep({ ready = false, handleNextStep }: FirstStepInterface) {
+export default function FirstStep({ ready = false, handleNextStep }: FirstStepProps) {
   const swiper = useSwiper();
   return (
     <div className="flex flex-col justify-between px-5">

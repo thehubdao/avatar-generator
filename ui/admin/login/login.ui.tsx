@@ -1,13 +1,13 @@
 import { FormEvent } from "react";
 import AGButton from "../../common/ag-button.component";
 
-interface LoginInterface {
+interface LoginProps {
   handleSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
   setUser: (value: string) => void;
   setPass: (value: string) => void;
 }
 
-export default function Login({handleSubmit, setUser, setPass} : LoginInterface) {
+export default function Login({handleSubmit, setUser, setPass} : LoginProps) {
   return (
     <main className="w-full h-screen grid grid-cols-[65%_1fr] font-work">
       <div className="bg-gray-900">

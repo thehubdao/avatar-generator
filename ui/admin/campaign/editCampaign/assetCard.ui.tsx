@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import GetImage from "../../../../components/commons/getImage.component";
+import UpdateAsset from "../../../../components/admin/assets/updateAsset.component";
 import AGButton from "../../../common/ag-button.component";
 import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineCloudUpload, AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import { IoImageOutline } from "react-icons/io5";
@@ -7,16 +8,16 @@ import { DeleteDoc } from "../../../../utils/firebase.util";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { fetchData } from "../../../../store/currentCampaignSlice";
-import UpdateAsset from "../../../../components/admin/assets/updateAsset.component";
+import { ShowModal } from "../../../../utils/modal.util";
 
-interface AssetCardInterface {
-  id: string,
-  name: string,
-  thumb?: string,
-  location: FirestoreLocation
+interface AssetCardProps {
+  id: string;
+  name: string;
+  thumb?: string;
+  location: FirestoreLocation;
 }
 
-export default function AssetCard({ id, name, thumb, location }: AssetCardInterface) {
+export default function AssetCard({ id, name, thumb, location }: AssetCardProps) {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
 
   const filesForm = useRef<HTMLFormElement>(null);
@@ -60,7 +61,7 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardInterf
 
   async function deleteDoc(docId: string) {
     const result = await DeleteDoc(location, docId, campaignName);
-    alert(`Doc "${result}" has been deleted.`);
+    ShowModal(`Doc "${result}" has been deleted.`);
     void dispatch(fetchData({ campaign: campaignName, location: location }));
   }
 

@@ -1,11 +1,11 @@
 import Image from "next/image";
 
-interface GetImageUiInterface {
+interface GetImageUiProps {
   imageUrl?: string,
   alt?: string,
 }
 
-export default function GetImageUI({ imageUrl, alt = 'imagen' }: GetImageUiInterface) {
+export default function GetImageUI({ imageUrl, alt = 'imagen' }: GetImageUiProps) {
   return (
     <>
       {imageUrl == undefined ?

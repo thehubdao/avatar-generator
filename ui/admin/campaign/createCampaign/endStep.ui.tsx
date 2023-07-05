@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useSwiper } from "swiper/react";
 import { IoMdArrowBack } from "react-icons/io";
 
-interface EndStepInterface {
-  ready: boolean,
-  handleNextStep: () => void,
+interface EndStepProps {
+  ready: boolean;
+  handleNextStep: () => void;
 }
 
-export default function EndStep({ ready = false, handleNextStep }: EndStepInterface) {
+export default function EndStep({ ready = false, handleNextStep }: EndStepProps) {
   const swiper = useSwiper();
   return (
     <div className="flex flex-col justify-between px-5">

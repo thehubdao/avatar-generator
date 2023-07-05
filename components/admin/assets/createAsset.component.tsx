@@ -7,13 +7,14 @@ import { LogError } from "../../../utils/common.util";
 import { Module, PageLocation } from "../../../enums/common.enum";
 import { reset } from "../../../store/addAssetSlice";
 import { GoToPage } from "../../../utils/router.util";
+import { ShowModal } from "../../../utils/modal.util";
 
-interface CreateAssetInterface {
-  objectFile?: File | null,
-  thumbnailFile?: File | null,
+interface CreateAssetProps {
+  objectFile?: File | null;
+  thumbnailFile?: File | null;
 }
 
-export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetInterface) {
+export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetProps) {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const assetName = useAppSelector(state => state.addAsset.name);
   const assetLocation = useAppSelector(state => state.addAsset.location);
@@ -51,12 +52,12 @@ export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetIn
     if (assetLocation !== FirestoreLocation.Parameters) {
       await InsertDoc(_jsonData, assetLocation, campaignName);
       dispatch(reset());
-      alert('Done inserting');
+      ShowModal('Done inserting');
       void GoToPage(PageLocation.AdminCampaign);
     } else {
       await UpdateDoc(_jsonData, assetLocation, campaignName);
       dispatch(reset());
-      alert('Done updating');
+      ShowModal('Done updating');
       void GoToPage(PageLocation.AdminCampaign);
     }
   }
