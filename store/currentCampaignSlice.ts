@@ -1,19 +1,13 @@
 import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { AssetType } from '../types/asset.type';
 import { GetInfoDB } from '../utils/firebase.util';
 import { FirestoreLocation } from '../enums/firebase.enum';
-import { CampaignParameters } from '../interfaces/common.interface';
+import { CampaignAssets, CampaignParameters } from '../interfaces/common.interface';
+import { AccessoryInterface, AnimationInterface, EnvMapInterface, FeatureInterface, ScenarioInterface } from '../interfaces/api.interface';
 
 interface CampaignStateInterface {
   name: string;
   parameters: CampaignParameters;
-  assets: {
-    features?: AssetType[];
-    accessories?: AssetType[];
-    animations?: AssetType[];
-    environments?: AssetType[];
-    env_maps?: AssetType[];
-  };
+  assets: Partial<CampaignAssets>;
   isLoading: boolean;
   error?: string;
 }
@@ -31,7 +25,7 @@ const initialState: CampaignStateInterface = {
     features: undefined,
     accessories: undefined,
     animations: undefined,
-    environments: undefined,
+    scenarios: undefined,
     env_maps: undefined
   },
   isLoading: false,
@@ -65,9 +59,31 @@ export const currentCampaignSlice = createSlice({
     })
     builder.addCase(fetchData.fulfilled, (state, action) => {
       state.isLoading = false;
-      if (action.payload.location === FirestoreLocation.Parameters) state.parameters = action.payload.res[0] as CampaignParameters;
-      else state.assets[action.payload.location] = action.payload.res as AssetType[];
-      state.error = 'everything is done!';
+      state.error = `${FirestoreLocation.Parameters} info saved!`;
+      switch (action.payload.location) {
+        case FirestoreLocation.Parameters:
+          state.parameters = action.payload.res[0] as CampaignParameters;
+          break;
+        case FirestoreLocation.Features:
+          state.assets.features = action.payload.res as FeatureInterface[];
+          break;
+        case FirestoreLocation.Accessories:
+          state.assets.accessories = action.payload.res as AccessoryInterface[];
+          break;
+        case FirestoreLocation.Animations:
+          state.assets.animations = action.payload.res as AnimationInterface[];
+          break;
+        case FirestoreLocation.Scenarios:
+          state.assets.scenarios = action.payload.res as ScenarioInterface[];
+          break;
+        case FirestoreLocation.EnvMaps:
+          state.assets.env_maps = action.payload.res as EnvMapInterface[];
+          break;
+
+        default:
+          state.error = 'location dont match to fetch data';
+          break;
+      }
     })
     builder.addCase(fetchData.rejected, (state, action) => {
       state.isLoading = false;
