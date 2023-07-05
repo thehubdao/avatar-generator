@@ -7,11 +7,11 @@ import CampaignCard from "./campaignCard.ui";
 import { UserInterface } from "../../../../interfaces/firebase.interface";
 import { setUserInfo } from "../../../../store/authSlice";
 
-interface CampaignListInterface {
+interface CampaignListProps {
   userInfo: UserInterface;
 }
 
-export default function CampaignList({userInfo} : CampaignListInterface) {
+export default function CampaignList({userInfo} : CampaignListProps) {
   const campaignsList = useAppSelector(state => state.auth.userInfo?.campaign);
   const dispatch = useAppDispatch();
 

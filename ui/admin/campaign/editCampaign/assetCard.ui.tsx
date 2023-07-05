@@ -10,14 +10,14 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { fetchData } from "../../../../store/currentCampaignSlice";
 import { ShowModal } from "../../../../utils/modal.util";
 
-interface AssetCardInterface {
+interface AssetCardProps {
   id: string;
   name: string;
   thumb?: string;
   location: FirestoreLocation;
 }
 
-export default function AssetCard({ id, name, thumb, location }: AssetCardInterface) {
+export default function AssetCard({ id, name, thumb, location }: AssetCardProps) {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
 
   const filesForm = useRef<HTMLFormElement>(null);

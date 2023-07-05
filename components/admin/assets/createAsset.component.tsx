@@ -9,12 +9,12 @@ import { reset } from "../../../store/addAssetSlice";
 import { GoToPage } from "../../../utils/router.util";
 import { ShowModal } from "../../../utils/modal.util";
 
-interface CreateAssetInterface {
+interface CreateAssetProps {
   objectFile?: File | null;
   thumbnailFile?: File | null;
 }
 
-export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetInterface) {
+export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetProps) {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const assetName = useAppSelector(state => state.addAsset.name);
   const assetLocation = useAppSelector(state => state.addAsset.location);

@@ -12,7 +12,7 @@ interface CampaignAssetsInterface {
   environments: AssetType[]
 }
 
-interface UpdateAssetInterface {
+interface UpdateAssetProps {
   objectFile?: File | null,
   thumbnailFile?: File | null,
   id: string,
@@ -22,7 +22,7 @@ interface UpdateAssetInterface {
   onUpdated: () => void
 }
 
-export default function UpdateAsset({ objectFile, thumbnailFile, name, id, location, assetReady, onUpdated }: UpdateAssetInterface) {
+export default function UpdateAsset({ objectFile, thumbnailFile, name, id, location, assetReady, onUpdated }: UpdateAssetProps) {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const campaignAssets = useAppSelector(state => state.currentCampaign.assets);
 

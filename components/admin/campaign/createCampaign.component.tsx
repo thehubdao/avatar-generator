@@ -11,11 +11,11 @@ import { UserInterface } from "../../../interfaces/firebase.interface";
 import { setUserInfo } from "../../../store/authSlice";
 import { ShowModal } from "../../../utils/modal.util";
 
-interface CreateCampaignInterface {
+interface CreateCampaignProps {
   baseMeshFile?: File | null;
 }
 
-export default function CreateCampaign({ baseMeshFile }: CreateCampaignInterface) {
+export default function CreateCampaign({ baseMeshFile }: CreateCampaignProps) {
   const campaignName = useAppSelector(state => state.addCampaign.name);
   const campaignFeatures = useAppSelector(state => state.addCampaign.features);
   const campaignReady = useAppSelector(state => state.addCampaign.ready);

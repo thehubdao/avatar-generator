@@ -2,11 +2,11 @@ import { Provider } from "react-redux";
 import store from "../../store/store";
 import Header from "./common/header.ui";
 
-interface AdminLayoutInterface {
+interface AdminLayoutProps {
   children: JSX.Element | JSX.Element[] | boolean;
 }
 
-export default function Layout({ children }: AdminLayoutInterface) {
+export default function Layout({ children }: AdminLayoutProps) {
   return (
     <Provider store={store}>
       <header>

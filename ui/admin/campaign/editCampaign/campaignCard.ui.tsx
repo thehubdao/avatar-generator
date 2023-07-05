@@ -1,14 +1,14 @@
 import { AiOutlineLink } from "react-icons/ai";
 import AGButton from "../../../common/ag-button.component";
 
-interface CampaignCardInterface {
+interface CampaignCardProps {
 	noCampaign?: boolean;
 	create?: boolean;
 	campaign?: string;
 	clickHandler: () => void;
 }
 
-export default function CampaignCard({ noCampaign, create, campaign, clickHandler }: CampaignCardInterface) {
+export default function CampaignCard({ noCampaign, create, campaign, clickHandler }: CampaignCardProps) {
 	return (
 		<div className={`justify-self-center rounded-2xl h-96 w-72 flex flex-col justify-center items-center ${noCampaign ? 'shadow-inset-medium hover:shadow-inset-hard' : 'shadow-flat-soft hover:shadow-flat-hard'} overflow-hidden transition-all`}>
 			{noCampaign &&

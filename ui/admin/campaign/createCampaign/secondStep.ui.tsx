@@ -4,13 +4,13 @@ import { useSwiper } from "swiper/react";
 import { useState } from "react";
 import { IoMdArrowBack } from "react-icons/io";
 
-interface SecondStepInterface {
+interface SecondStepProps {
   ready: boolean;
   handleNextStep: (value: number) => void;
   handleBackStep: () => void;
 }
 
-export default function SecondStep({ ready = false, handleNextStep, handleBackStep }: SecondStepInterface) {
+export default function SecondStep({ ready = false, handleNextStep, handleBackStep }: SecondStepProps) {
   const swiper = useSwiper();
   const [featuresCount, setFeaturesCount] = useState<number>(1);
   return (

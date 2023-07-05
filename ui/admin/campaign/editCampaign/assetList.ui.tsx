@@ -11,7 +11,7 @@ import { FeatureInterface } from "../../../../interfaces/api.interface";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import AGButton from "../../../common/ag-button.component";
 
-interface AssetListInterface {
+interface AssetListProps {
   activedOption: FirestoreLocation;
 }
 
@@ -22,7 +22,7 @@ interface CampaignAssetsInterface {
   environments: AssetType[];
 }
 
-export default function AssetList({ activedOption }: AssetListInterface) {
+export default function AssetList({ activedOption }: AssetListProps) {
   //* Fetching campaign assets and features using custom hooks
   const campaignAssets = useAppSelector(state => state.currentCampaign.assets);
   const campaignTags = useAppSelector(state => {
