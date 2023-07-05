@@ -1,9 +1,9 @@
 import {
   AccessoryInterface,
   AnimationInterface,
-  EnvironmentInterface,
+  ScenarioInterface,
   EnvMapInterface,
   FeatureInterface
 } from "../interfaces/api.interface";
 
-export type AssetType = FeatureInterface | AccessoryInterface | AnimationInterface| EnvironmentInterface | EnvMapInterface;
+export type AssetType = FeatureInterface | AccessoryInterface | AnimationInterface| ScenarioInterface | EnvMapInterface;
