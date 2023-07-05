@@ -164,7 +164,7 @@ export default function AssetList({ activedOption }: AssetListInterface) {
               </div>
               {/* By Tag Searcher */}
               <div className="flex flex-wrap w-full">
-                {(campaignTags?.length ?? 0 > 0) && <>
+                {(campaignTags && campaignTags?.length > 0) && <>
                   {campaignTags?.map((tag: FeatureBasic) => {
                     return <AGButton
                       nm
