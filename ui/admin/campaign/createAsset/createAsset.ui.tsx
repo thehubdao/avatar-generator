@@ -119,9 +119,12 @@ export default function AddAssetUI() {
                 onChange={e => { setSelectedStorage(e.target.value) }}
               >
                 <option value=''>Select...</option>
-                {typeOptions && typeOptions.map(x => {
-                  return <option value={x.id} key={x.id}>{x.val}</option>
-                })}
+                {
+                  typeOptions &&
+                  typeOptions.map(x => {
+                    return <option value={x.meshName} key={x.meshName}>{x.displayName}</option>
+                  })
+                }
               </select>
             </div>
           </div>

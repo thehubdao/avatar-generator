@@ -2,7 +2,7 @@ import AGButton from "../common/ag-button.component";
 import { BsArrowRight } from 'react-icons/bs';
 import { CiEdit, CiSaveUp2 } from 'react-icons/ci';
 import { AccessoryInterface, FeatureInterface } from "../../interfaces/api.interface";
-import { BasicData } from "../../interfaces/common.interface";
+import { BasicData, FeatureBasic } from "../../interfaces/common.interface";
 import MobileOptionSelectorComponent from "./selectors/mobile/optionSelector.component";
 import MobileFeatureSelectorComponent from "./selectors/mobile/featureSelector.component";
 import MobileColorSelectorComponent from "./selectors/mobile/colorSelector.component";
@@ -13,12 +13,13 @@ import OptionSelector from "./selectors/optionSelector.component";
 import ColorSelector from "./selectors/colorSelector.component";
 import HudFeatureTitle from "./common/hudTitle.component";
 
-interface Props {
+interface HudComponentProps {
   editModeSelected: boolean;
-  selectListFeatures: BasicData[],
+  selectListFeatures: FeatureBasic[],
   featureList: FeatureInterface[] | undefined;
   selectedFeature: string;
-  selectListAccessories: BasicData[];
+  selectedFeatureDisplayName: string;
+  selectListAccessories: FeatureBasic[];
   accessoryList: AccessoryInterface[] | undefined;
   selectedAcc: string;
   skinColor: string;
@@ -35,6 +36,7 @@ export default function HudComponent({ editModeSelected,
   selectListFeatures,
   featureList,
   selectedFeature,
+  selectedFeatureDisplayName,
   selectListAccessories,
   accessoryList,
   selectedAcc,
@@ -46,16 +48,9 @@ export default function HudComponent({ editModeSelected,
   onAccessoryChange,
   onClickChangeSkinColor,
   exportModel
-}: Props) {
+}: HudComponentProps) {
   const [selectorOption, setSelectorOption] = useState<number>(1);
 
-  useEffect(() => {
-    // console.log("color: ", skinColor)
-    // console.log("data: ", exportData)
-    // console.log("selected feature: ", selectedFeature)
-  }, [skinColor, exportData]);
-
-  
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
 
   // * This function allows us to know if the page has a width greater than 1536px.
@@ -226,7 +221,7 @@ export default function HudComponent({ editModeSelected,
               </div>
               <div className="w-full">
                 <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
-                <HudFeatureTitle selectedFeature={selectedFeature}/>
+                <HudFeatureTitle selectedFeature={selectedFeatureDisplayName}/>
               </div>
             </div>
             {/* OPTION COLOR SECTION */}
