@@ -3,6 +3,7 @@ import {ClientQuestion} from "../enums/campaign.enum";
 import {AdminComponents} from "../enums/common.enum";
 import {ChangeMaterialOption} from "../enums/model.enum";
 import {ConfigLight} from "./light.interface";
+import { UserInterface } from "./firebase.interface";
 
 export interface BasicData {
   id: string;
@@ -89,4 +90,10 @@ export interface Result<T> {
 
 export interface ObjProp {
   prop: string;
+}
+
+export interface AuthStateInterface {
+  connected: boolean;
+  address?: string;
+  userInfo?: UserInterface;
 }
