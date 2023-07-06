@@ -3,7 +3,7 @@ import {ClientQuestion} from "../enums/campaign.enum";
 import {AdminComponents} from "../enums/common.enum";
 import {ChangeMaterialOption} from "../enums/model.enum";
 import {ConfigLight} from "./light.interface";
-import { AccessoryInterface, AnimationInterface,  EnvMapInterface,  FeatureInterface, ScenarioInterface } from "./api.interface";
+import { AccessoryInterface, AnimationInterface,  EnvMapInterface,  FeatureInterface, StageInterface } from "./api.interface";
 
 export interface BasicData {
   id: string;
@@ -51,7 +51,7 @@ export interface CampaignConfig {
   defBg?: string;
   lights?: ConfigLight[],
   defAnimation?: string;
-  defScenario?: string;
+  defStage?: string;
   defEnvMap?: string;
   featuresCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
@@ -72,7 +72,7 @@ export interface CampaignAssets {
   features: FeatureInterface[],
   accessories: AccessoryInterface[],
   animations: AnimationInterface[],
-  scenarios: ScenarioInterface[],
+  stages: StageInterface[],
   env_maps: EnvMapInterface[]
 }
 

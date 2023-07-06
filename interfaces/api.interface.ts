@@ -26,7 +26,7 @@ export interface AnimationInterface extends Omit<AssetInterface, 'type' | 'index
   id: string;
 }
 
-export interface ScenarioInterface extends Omit<AssetInterface, 'type' | 'index'> {
+export interface StageInterface extends Omit<AssetInterface, 'type' | 'index'> {
   id: string;
 }
 

@@ -60,8 +60,8 @@ export default function UpdateAsset({ objectFile, thumbnailFile, name, id, locat
         return StorageLocation.Accessory;
       case FirestoreLocation.Animations:
         return StorageLocation.Animation;
-      case FirestoreLocation.Scenarios:
-        return StorageLocation.Scenario;
+      case FirestoreLocation.Stages:
+        return StorageLocation.Stage;
       default:
         return StorageLocation.Missing;
     }

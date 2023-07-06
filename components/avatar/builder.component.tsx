@@ -11,7 +11,7 @@ import {
 import {
   AccessoryInterface,
   AnimationInterface,
-  ScenarioInterface,
+  StageInterface,
   FeatureInterface,
   SingleInterface,
   EnvMapInterface
@@ -25,7 +25,7 @@ import {
   GetAssetsListByCampaign,
   GetAvatarSingleByCampaignCombination,
   GetEnvMapListByCampaign,
-  GetScenarioListByCampaign
+  GetStageListByCampaign
 } from "../../utils/api.util";
 import {SaveFile} from "../../utils/exporter.util";
 import AGLoading from "../../ui/common/ag-loading.component";
@@ -36,8 +36,8 @@ import AvatarEditor, {
   ChangeStartAnimation,
   GetAvatarGLB,
   GetWearableOption,
-  RemoveScenario,
-  SetScenario,
+  RemoveStage,
+  SetStage,
   SetFeaturesData
 } from "./editor.component";
 import {AGChangeCamPosition, AGChangeLookAtPosition, SetEnvironmentMap, TakeCanvasPicture} from "./viewer.component";
@@ -57,7 +57,7 @@ interface AvatarBuilderProps {
 let featureList: FeatureInterface[] | undefined;
 let accessoryList: AccessoryInterface[] | undefined;
 let animationList: AnimationInterface[] | undefined;
-let scenarioList: ScenarioInterface[] | undefined;
+let stageList: StageInterface[] | undefined;
 let envMapList: EnvMapInterface[] | undefined;
 let singleData: SingleInterface | undefined;
 
@@ -98,7 +98,7 @@ export default function AvatarBuilder({
       getFeatureList(),
       getAccessoryList(),
       getAnimationList(),
-      getScenarioList(),
+      getStageList(),
       getEnvironmentMapList(),
       getSingleInfo()
     ]);
@@ -248,9 +248,9 @@ export default function AvatarBuilder({
     animationList = newAnimationList;
   }
   
-  async function getScenarioList() {
-    const {value: newScenarioList} = await GetScenarioListByCampaign(campaign);
-    scenarioList = newScenarioList;
+  async function getStageList() {
+    const {value: newStageList} = await GetStageListByCampaign(campaign);
+    stageList = newStageList;
   }
   
   async function getEnvironmentMapList() {
@@ -339,13 +339,13 @@ export default function AvatarBuilder({
     }
   }
 
-  async function updateScenario(isEditMode: boolean) {
+  async function updateStage(isEditMode: boolean) {
     if(isEditMode) {
-      RemoveScenario();
+      RemoveStage();
     }
     else {
-      const defScenario = scenarioList?.find(scn => scn.name == campaignConfig.defScenario);
-      await SetScenario(defScenario?.path);
+      const defStage = stageList?.find(stg => stg.name == campaignConfig.defStage);
+      await SetStage(defStage?.path);
     }
   }
 
@@ -385,7 +385,7 @@ export default function AvatarBuilder({
                   skinColor={skinColor}
                   changeView={() => {
                     setEditModeSelected(!editModeSelected);
-                    void updateScenario(!editModeSelected);
+                    void updateStage(!editModeSelected);
                   }}
                   changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
                   onCategoryChange={(value: string) => onCategoryChange(value)}

@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { GetInfoDB } from '../utils/firebase.util';
 import { FirestoreLocation } from '../enums/firebase.enum';
 import { CampaignAssets, CampaignParameters } from '../interfaces/common.interface';
-import { AccessoryInterface, AnimationInterface, EnvMapInterface, FeatureInterface, ScenarioInterface } from '../interfaces/api.interface';
+import { AccessoryInterface, AnimationInterface, EnvMapInterface, FeatureInterface, StageInterface } from '../interfaces/api.interface';
 
 interface CampaignStateInterface {
   name: string;
@@ -25,7 +25,7 @@ const initialState: CampaignStateInterface = {
     features: undefined,
     accessories: undefined,
     animations: undefined,
-    scenarios: undefined,
+    stages: undefined,
     env_maps: undefined
   },
   isLoading: false,
@@ -73,8 +73,8 @@ export const currentCampaignSlice = createSlice({
         case FirestoreLocation.Animations:
           state.assets.animations = action.payload.res as AnimationInterface[];
           break;
-        case FirestoreLocation.Scenarios:
-          state.assets.scenarios = action.payload.res as ScenarioInterface[];
+        case FirestoreLocation.Stages:
+          state.assets.stages = action.payload.res as StageInterface[];
           break;
         case FirestoreLocation.EnvMaps:
           state.assets.env_maps = action.payload.res as EnvMapInterface[];

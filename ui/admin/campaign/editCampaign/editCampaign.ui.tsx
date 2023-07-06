@@ -70,7 +70,7 @@ export default function EditCampaignUI({ downloadFile }: EditCampaignUIProps) {
                       featuresCount={campaignParameters.features?.length ?? 0}
                       accessoriesCount={campaignParameters.accessories?.length ?? 0}
                       defAnimation={campaignParameters.config?.defAnimation}
-                      defScene={campaignParameters.config?.defScenario}
+                      defStage={campaignParameters.config?.defStage}
                       defEnvironment={campaignParameters.config?.defEnvMap} />
                   </>
                 }
