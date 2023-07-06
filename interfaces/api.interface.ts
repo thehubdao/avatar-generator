@@ -26,7 +26,11 @@ export interface AnimationInterface extends Omit<AssetInterface, 'type' | 'index
   id: string;
 }
 
-export interface EnvironmentInterface extends Omit<AssetInterface, 'type' | 'index'> {
+export interface StageInterface extends Omit<AssetInterface, 'type' | 'index'> {
+  id: string;
+}
+
+export interface EnvMapInterface extends Omit<AssetInterface, 'type' | 'index'>{
   id: string;
 }
 
@@ -38,8 +42,4 @@ interface IndexFeatureInterface {
 export interface SingleInterface {
   random: boolean;
   features: IndexFeatureInterface[];
-}
-
-export interface EnvMapInterface extends Omit<AssetInterface, 'type' | 'index'>{
-  id: string;
 }
