@@ -35,12 +35,12 @@ export default function EditCampaignUI({ downloadFile }: EditCampaignUIProps) {
             const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
             return <div className={`${x === 'Parameters' ? 'order-1 text-2xl' : 'order-2'}`} key={x}>
               <AGButton nm selected={navBarOptionSelected == val ? true : false} fit={x === 'Parameters' ? true : false} onClickEvent={() => setNavBarOptionSelected(val)}>
-                <div className={`flex items-center gap-2 p-2`}>
-                  <div className={`font-poppins uppercase ${navBarOptionSelected == val ? ' font-semibold' : ''}`}>
+                <div className={`flex justify-center items-center gap-2 p-2`}>
+                  <p className={`font-poppins uppercase ${navBarOptionSelected == val ? ' font-semibold' : ''}`}>
                     {x === 'Parameters'
                       ? <AiOutlineHome />
                       : x}
-                  </div>
+                  </p>
                 </div>
               </AGButton>
             </div>
@@ -70,7 +70,7 @@ export default function EditCampaignUI({ downloadFile }: EditCampaignUIProps) {
                       featuresCount={campaignParameters.features?.length ?? 0}
                       accessoriesCount={campaignParameters.accessories?.length ?? 0}
                       defAnimation={campaignParameters.config?.defAnimation}
-                      defScene={campaignParameters.config?.defEnvironment}
+                      defStage={campaignParameters.config?.defStage}
                       defEnvironment={campaignParameters.config?.defEnvMap} />
                   </>
                 }

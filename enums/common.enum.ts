@@ -6,7 +6,7 @@
   AccGroup = 'Accessories.AG',
   AvatarBase = 'base_mesh/MetaAvatarHub.glb',
   CollectorIndexSeparator = '-',
-  EnvironmentId = 'environment',
+  StageId = 'stage',
 }
 
 export enum ExportAttributeValues {

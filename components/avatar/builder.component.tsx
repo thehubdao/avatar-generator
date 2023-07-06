@@ -11,7 +11,7 @@ import {
 import {
   AccessoryInterface,
   AnimationInterface,
-  EnvironmentInterface,
+  StageInterface,
   FeatureInterface,
   SingleInterface,
   EnvMapInterface
@@ -23,9 +23,9 @@ import {
   GetAccessoryListByCampaign,
   GetAnimationListByCampaign,
   GetAssetsListByCampaign,
-  GetEnvironmentListByCampaign,
   GetAvatarSingleByCampaignCombination,
-  GetEnvMapListByCampaign
+  GetEnvMapListByCampaign,
+  GetStageListByCampaign
 } from "../../utils/api.util";
 import {SaveFile} from "../../utils/exporter.util";
 import AGLoading from "../../ui/common/ag-loading.component";
@@ -36,8 +36,8 @@ import AvatarEditor, {
   ChangeStartAnimation,
   GetAvatarGLB,
   GetWearableOption,
-  RemoveEnvironment,
-  SetEnvironment,
+  RemoveStage,
+  SetStage,
   SetFeaturesData
 } from "./editor.component";
 import {AGChangeCamPosition, AGChangeLookAtPosition, SetEnvironmentMap, TakeCanvasPicture} from "./viewer.component";
@@ -57,7 +57,7 @@ interface AvatarBuilderProps {
 let featureList: FeatureInterface[] | undefined;
 let accessoryList: AccessoryInterface[] | undefined;
 let animationList: AnimationInterface[] | undefined;
-let environmentList: EnvironmentInterface[] | undefined;
+let stageList: StageInterface[] | undefined;
 let envMapList: EnvMapInterface[] | undefined;
 let singleData: SingleInterface | undefined;
 
@@ -98,7 +98,7 @@ export default function AvatarBuilder({
       getFeatureList(),
       getAccessoryList(),
       getAnimationList(),
-      getEnvironmentList(),
+      getStageList(),
       getEnvironmentMapList(),
       getSingleInfo()
     ]);
@@ -248,9 +248,9 @@ export default function AvatarBuilder({
     animationList = newAnimationList;
   }
   
-  async function getEnvironmentList() {
-    const {value: newEnvironmentList} = await GetEnvironmentListByCampaign(campaign);
-    environmentList = newEnvironmentList;
+  async function getStageList() {
+    const {value: newStageList} = await GetStageListByCampaign(campaign);
+    stageList = newStageList;
   }
   
   async function getEnvironmentMapList() {
@@ -339,13 +339,13 @@ export default function AvatarBuilder({
     }
   }
 
-  async function updateEnvironment(isEditMode: boolean) {
+  async function updateStage(isEditMode: boolean) {
     if(isEditMode) {
-      RemoveEnvironment();
+      RemoveStage();
     }
     else {
-      const defEnv = environmentList?.find(env => env.name == campaignConfig.defEnvironment);
-      await SetEnvironment(defEnv?.path);
+      const defStage = stageList?.find(stg => stg.name == campaignConfig.defStage);
+      await SetStage(defStage?.path);
     }
   }
 
@@ -385,7 +385,7 @@ export default function AvatarBuilder({
                   skinColor={skinColor}
                   changeView={() => {
                     setEditModeSelected(!editModeSelected);
-                    void updateEnvironment(!editModeSelected);
+                    void updateStage(!editModeSelected);
                   }}
                   changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
                   onCategoryChange={(value: string) => onCategoryChange(value)}
