@@ -38,6 +38,7 @@ export enum PageLocation {
   FirstSteps = '/admin/firstSteps',
   AdminCampaign = '/admin/campaign',
   AssetCreate = '/admin/campaign/createAsset',
+  Account = '/admin/account'
 }
 
 export enum AdminComponents {
@@ -82,4 +83,9 @@ export enum CampaignParameterName {
   Config = 'Config',
   All = '',
   Missing = 'NaN',
+}
+
+export enum UserRol {
+  Admin = 0,
+  Client = 1
 }
