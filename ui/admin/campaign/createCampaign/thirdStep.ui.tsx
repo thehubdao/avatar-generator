@@ -16,8 +16,8 @@ interface ThirdStepProps {
 }
 
 const featureBase = {
-  id: '',
-  val: '',
+  meshName: '',
+  displayName: '',
   index: 1,
   hasCustomIcon: false,
   iconUrl: '',
@@ -107,15 +107,15 @@ export default function ThirdStep({ ready = false, featuresCount }: ThirdStepPro
           <div className="pt-4">
             <div className="flex items-center gap-2 w-full">
               <p className="whitespace-nowrap">Feature mesh Name:</p>
-              <input type="text" value={featureList[featureSelected]?.id || ''} className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg bg-bg"
-                onChange={(e) => updateStrings(e, 'id')} />
+              <input type="text" value={featureList[featureSelected]?.meshName || ''} className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg bg-bg"
+                onChange={(e) => updateStrings(e, 'meshName')} />
             </div>
           </div>
           <div className="flex justify-between gap-8">
             <div className="flex items-center gap-2 w-full">
               <p className="whitespace-nowrap">Display Name:</p>
-              <input type="text" value={featureList[featureSelected]?.val || ''} className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg bg-bg"
-                onChange={(e) => updateStrings(e, 'val')} />
+              <input type="text" value={featureList[featureSelected]?.displayName || ''} className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg bg-bg"
+                onChange={(e) => updateStrings(e, 'displayName')} />
             </div>
             <div className="flex items-center gap-2">
               <p>Index:</p>

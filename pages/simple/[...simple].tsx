@@ -1,5 +1,5 @@
 ﻿import {GetServerSideProps} from "next";
-import {BasicData, CampaignParameters, LookAtVectors} from "../../interfaces/common.interface";
+import {CampaignParameters, FeatureBasic, LookAtVectors} from "../../interfaces/common.interface";
 import AvatarSingle from "../../components/avatar/single.component";
 import {CastStringToInteger, RemoveUndefinedProperties} from "../../utils/common.util";
 import {CampaignParameterName, GlobalValues} from "../../enums/common.enum";
@@ -11,7 +11,7 @@ import {ChangeMaterialOption} from "../../enums/model.enum";
 interface AvatarSimplePageProps {
   campaign: string;
   combination?: number;
-  featureList: BasicData[];
+  featureList: FeatureBasic[];
   avatarBasePath: string;
   defaultAnimation?: string;
   defaultSkinTone?: string;

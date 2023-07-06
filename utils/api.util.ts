@@ -2,7 +2,7 @@ import {
   AccessoryInterface,
   AnimationInterface,
   ApiResponse,
-  EnvironmentInterface,
+  StageInterface,
   EnvMapInterface,
   FeatureInterface,
   SingleInterface,
@@ -96,8 +96,8 @@ export async function GetAnimationByCampaignAndName(campaign?: string | null, na
   return GetRequest<AnimationInterface[]>(ApiRoutesV1.Animations, undefined, {campaign, name});
 }
 
-export async function GetEnvironmentListByCampaign(campaign?: string | null) {
-  return GetRequest<EnvironmentInterface[]>(ApiRoutesV1.Environments, undefined, {campaign});
+export async function GetStageListByCampaign(campaign?: string | null) {
+  return GetRequest<StageInterface[]>(ApiRoutesV1.Stages, undefined, {campaign});
 }
 
 export async function GetEnvMapListByCampaign(campaign: string) {

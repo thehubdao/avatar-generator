@@ -6,20 +6,13 @@ import { FirestoreLocation } from "../../../../enums/firebase.enum";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { GoToPage } from "../../../../utils/router.util";
 import { PageLocation } from "../../../../enums/common.enum";
-import { FeatureBasic } from "../../../../interfaces/common.interface";
+import { CampaignAssets, FeatureBasic } from "../../../../interfaces/common.interface";
 import { FeatureInterface } from "../../../../interfaces/api.interface";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import AGButton from "../../../common/ag-button.component";
 
 interface AssetListProps {
   activedOption: FirestoreLocation;
-}
-
-interface CampaignAssetsInterface {
-  features: AssetType[];
-  accessories: AssetType[];
-  animations: AssetType[];
-  environments: AssetType[];
 }
 
 export default function AssetList({ activedOption }: AssetListProps) {
@@ -84,14 +77,14 @@ export default function AssetList({ activedOption }: AssetListProps) {
 
   //* Filters the items based on the search and tag filters.
   const handleFilterItems = () => {
-    const listOfItemsByTag = (campaignAssets[activedOption as keyof CampaignAssetsInterface] as FeatureInterface[]).filter((asset: FeatureInterface) => {
+    const listOfItemsByTag = (campaignAssets[activedOption as keyof CampaignAssets] as FeatureInterface[]).filter((asset: FeatureInterface) => {
       if (searchByTagValue.length > 0)
         return (searchByTagValue.includes(asset.type))
       return true
     })
 
     const listOfItems = listOfItemsByTag.filter((asset: AssetType) => {
-      return asset.name.toLowerCase() === searchByNameValue.toLowerCase()
+      return asset.name.toLowerCase().includes(searchByNameValue.toLowerCase())
     })
 
     if (listOfItems.length > 0)
@@ -109,7 +102,7 @@ export default function AssetList({ activedOption }: AssetListProps) {
 
   //* Updates the filtered list of items based on the search and tag filters.
   const updateFilteredListData = (currentNameFilter: string, currentTagFilter: string[]) => {
-    const filterItems = (campaignAssets[activedOption as keyof CampaignAssetsInterface] as FeatureInterface[])?.filter(item => {
+    const filterItems = (campaignAssets[activedOption as keyof CampaignAssets] as FeatureInterface[])?.filter(item => {
       if (currentTagFilter.length > 0)
         return (currentTagFilter.includes(item.type))
       return true
@@ -128,8 +121,8 @@ export default function AssetList({ activedOption }: AssetListProps) {
     <>
       {/* Display list of assets */}
       <div className="flex flex-wrap gap-6 w-full">
-        {campaignAssets[activedOption as keyof CampaignAssetsInterface]
-          && (campaignAssets[activedOption as keyof CampaignAssetsInterface] as AssetType[]).length > 0
+        {campaignAssets[activedOption as keyof CampaignAssets]
+          && (campaignAssets[activedOption as keyof CampaignAssets] as AssetType[]).length > 0
           ? <>
             {/* Feature filter search bar */}
             <div className="flex w-full h-full mb-10 justify-between mx-2">
@@ -164,25 +157,25 @@ export default function AssetList({ activedOption }: AssetListProps) {
               </div>
               {/* By Tag Searcher */}
               <div className="flex flex-wrap w-full">
-                {campaignTags?.map((tag: FeatureBasic) => {
-                  return <AGButton
-                    nm
-                    selected={searchByTagValue.includes(tag.id)}
-                    key={tag.id}
-                    onClickEvent={() => handleSearchByTag(tag.id)}
-                  ><p className="group-hover/button:font-medium">{tag.val}</p></AGButton>
-                })}
-                {(campaignTags?.length ?? 0) > 0 && <AGButton nm onClickEvent={() => handleResetTags()}>
-                  <p className="text-blue group-hover/button:font-medium">Clear tags</p>
-                </AGButton>}
+                {(campaignTags && campaignTags?.length > 0) && <>
+                  {campaignTags?.map((tag: FeatureBasic) => {
+                    return <AGButton
+                      nm
+                      selected={searchByTagValue.includes(tag.meshName)}
+                      key={tag.meshName}
+                      onClickEvent={() => handleSearchByTag(tag.meshName)}
+                    ><p className="group-hover/button:font-medium">{tag.displayName}</p></AGButton>
+                  })}
+                  <AGButton nm onClickEvent={() => handleResetTags()}>
+                    <p className="text-blue group-hover/button:font-medium">Clear tags</p>
+                  </AGButton>
+                </>}
               </div>
             </div>
             {handleFilterItems().map((asset: AssetType) => {
-              return (
-                <div key={asset.id}>
-                  <AssetCard id={asset.id} name={asset.name} thumb={asset.thumb} location={activedOption} />
-                </div>
-              )
+              return (<div key={asset.id}>
+                <AssetCard id={asset.id} name={asset.name} thumb={asset.thumb} location={activedOption} />
+              </div>)
             })}
           </>
           : <div className="w-full mx-2 flex items-center gap-5">

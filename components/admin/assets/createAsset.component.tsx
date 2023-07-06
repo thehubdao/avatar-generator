@@ -70,8 +70,8 @@ export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetPr
         return StorageLocation.Accessory;
       case FirestoreLocation.Animations:
         return StorageLocation.Animation;
-      case FirestoreLocation.Environments:
-        return StorageLocation.Environment;
+      case FirestoreLocation.Stages:
+        return StorageLocation.Stage;
       default:
         return StorageLocation.Missing;
     }

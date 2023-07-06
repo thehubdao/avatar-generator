@@ -1,9 +1,10 @@
-﻿import {Object3D} from "three";
-import {ClientQuestion} from "../enums/campaign.enum";
-import {AdminComponents} from "../enums/common.enum";
-import {ChangeMaterialOption} from "../enums/model.enum";
-import {ConfigLight} from "./light.interface";
+﻿import { Object3D } from "three";
+import { ClientQuestion } from "../enums/campaign.enum";
+import { AdminComponents } from "../enums/common.enum";
+import { ChangeMaterialOption } from "../enums/model.enum";
+import { ConfigLight } from "./light.interface";
 import { UserInterface } from "./firebase.interface";
+import { AccessoryInterface, AnimationInterface, EnvMapInterface, FeatureInterface, StageInterface } from "./api.interface";
 
 export interface BasicData {
   id: string;
@@ -51,7 +52,7 @@ export interface CampaignConfig {
   defBg?: string;
   lights?: ConfigLight[],
   defAnimation?: string;
-  defEnvironment?: string;
+  defStage?: string;
   defEnvMap?: string;
   featuresCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
@@ -64,11 +65,21 @@ export interface CampaignParameters {
   owner: string;
   armature: string;
   features?: FeatureBasic[];
-  accessories?: BasicData[];
+  accessories?: FeatureBasic[];
   config?: CampaignConfig;
 }
 
-export interface FeatureBasic extends Omit<BasicData, 'detail'> {
+export interface CampaignAssets {
+  features: FeatureInterface[],
+  accessories: AccessoryInterface[],
+  animations: AnimationInterface[],
+  stages: StageInterface[],
+  env_maps: EnvMapInterface[]
+}
+
+export interface FeatureBasic {
+  meshName: string,
+  displayName: string,
   index: number,
   hasCustomIcon: boolean,
   iconUrl: string,
@@ -96,4 +107,9 @@ export interface AuthStateInterface {
   connected: boolean;
   address?: string;
   userInfo?: UserInterface;
+}
+
+export interface SocialMediaDataProps {
+  link: string;
+  icon: React.ReactNode;
 }

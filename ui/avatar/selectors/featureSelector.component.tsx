@@ -1,18 +1,17 @@
 import Image from "next/image";
 import { Swiper, SwiperRef, SwiperSlide, useSwiper } from 'swiper/react';
 import { Mousewheel } from 'swiper'
-import { FeatureInterface } from "../../../interfaces/api.interface";
-import { BasicData } from "../../../interfaces/common.interface";
+import { FeatureBasic } from "../../../interfaces/common.interface";
 import { useRef } from "react";
 
 interface FeatureSelectorProps {
-  list?: FeatureInterface[] | BasicData[];
+  list?: FeatureBasic[];
   activeOpc?: string;
   handleClick: (id: string) => void;
 }
 
 interface OptionSelectorProps {
-  list?: FeatureInterface[] | BasicData[];
+  list?: FeatureBasic[];
   activeOpc?: string
   handleClick: (id: string) => void;
   handleSlide: (id: number) => void;
@@ -53,17 +52,17 @@ function optionSelector({ list, activeOpc, handleClick, handleSlide }: OptionSel
     handleSlide(index);
   }
 
-  return list?.map((opt: any, index: number) => {
-    const isActive: boolean = activeOpc && activeOpc === opt.id ? true : false
+  return list?.map((opt: FeatureBasic, index: number) => {
+    const isActive: boolean = activeOpc && activeOpc === opt.meshName ? true : false
     return (
-      <SwiperSlide key={opt.id} style={{ height: '100px' }} className="px-8">
+      <SwiperSlide key={opt.meshName} style={{ height: '100px' }} className="px-8">
         <div
           onClick={event => {
-            selectFeature(event, opt.id, index)
+            selectFeature(event, opt.meshName, index)
           }}
         >
-          <div className={`w-[84px] h-[84px] flex justify-center items-center rounded-xl cursor-pointer ${isActive ? 'bg-accent bg-opacity-80 shadow-inset-hard' : 'bg-bg shadow-flat-soft hover:shadow-flat-hard'} transition-all duration-500`} title={opt.id}>
-            <Image alt={opt.id} width={70} height={70} src={'/resources/icons/features/Chest.svg'} priority />
+          <div className={`w-[84px] h-[84px] flex justify-center items-center rounded-xl cursor-pointer ${isActive ? 'bg-accent bg-opacity-80 shadow-inset-hard' : 'bg-bg shadow-flat-soft hover:shadow-flat-hard'} transition-all duration-500`} title={opt.displayName}>
+            <Image alt={opt.displayName} width={70} height={70} src={'/resources/icons/features/Chest.svg'} priority />
           </div>
         </div>
       </SwiperSlide>

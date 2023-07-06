@@ -154,11 +154,11 @@ export default function AvatarCollection({
 
     for (const feature of featureList) {
       if (feature.index == undefined) {
-        void LogError(Module.CollectionComponent, `Missing index on ${feature.id} feature type!`);
+        void LogError(Module.CollectionComponent, `Missing index on ${feature.meshName} feature type!`);
         continue;
       }
 
-      _featureOptionListData.set(feature.index, featureData.value?.filter(f => f.type === feature.id));
+      _featureOptionListData.set(feature.index, featureData.value?.filter(f => f.type === feature.meshName));
     }
   }
 

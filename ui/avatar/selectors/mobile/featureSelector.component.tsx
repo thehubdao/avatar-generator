@@ -2,11 +2,10 @@ import {Swiper, SwiperSlide} from 'swiper/react';
 import Image from 'next/image';
 import {MouseEvent} from "react";
 import 'swiper/css';
-import { FeatureInterface } from '../../../../interfaces/api.interface';
-import { BasicData } from '../../../../interfaces/common.interface';
+import { FeatureBasic } from '../../../../interfaces/common.interface';
 
 interface props {
-  list: FeatureInterface[] | BasicData[];
+  list: FeatureBasic[];
   activeOpc: string;
   handleClick: (id: string) => void;
 }
@@ -20,15 +19,15 @@ function optionList({list, activeOpc, handleClick}: props) {
 
   return list?.map((opt) => {
     return (
-      <SwiperSlide className='flex flex-col items-center' key={opt.id}>
+      <SwiperSlide className='flex flex-col items-center' key={opt.meshName}>
         <div
-          className={'rounded-md transition duration-200 ease-in-out w-[40px] h-[40px] flex items-center justify-center' + (activeOpc == opt.id ? ' nm-flat-slate-100' : '')}
-          onClick={(event: MouseEvent) => selectFeature(event, opt.id)}>
-          <Image src={'/resources/icons/features/' + opt.id + '.svg'} width={25} height={25} alt={'test'}
+          className={'rounded-md transition duration-200 ease-in-out w-[40px] h-[40px] flex items-center justify-center' + (activeOpc == opt.meshName ? ' nm-flat-slate-100' : '')}
+          onClick={(event: MouseEvent) => selectFeature(event, opt.meshName)}>
+          <Image src={'/resources/icons/features/' + opt.meshName + '.svg'} width={25} height={25} alt={opt.displayName}
                  className='opacity-80'/>
         </div>
         <p
-          className={'text-[10px] pt-1 opacity-50' + (activeOpc == opt.id ? ' opacity-90 text-slate-700' : '')}>{opt.id}</p>
+          className={'text-[10px] pt-1 opacity-50' + (activeOpc == opt.meshName ? ' opacity-90 text-slate-700' : '')}>{opt.displayName}</p>
       </SwiperSlide>
     )
   });

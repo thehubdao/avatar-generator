@@ -11,7 +11,7 @@ import {
 import {
   AccessoryInterface,
   AnimationInterface,
-  EnvironmentInterface,
+  StageInterface,
   FeatureInterface,
   SingleInterface,
   EnvMapInterface
@@ -23,9 +23,9 @@ import {
   GetAccessoryListByCampaign,
   GetAnimationListByCampaign,
   GetAssetsListByCampaign,
-  GetEnvironmentListByCampaign,
   GetAvatarSingleByCampaignCombination,
-  GetEnvMapListByCampaign
+  GetEnvMapListByCampaign,
+  GetStageListByCampaign
 } from "../../utils/api.util";
 import {SaveFile} from "../../utils/exporter.util";
 import AGLoading from "../../ui/common/ag-loading.component";
@@ -36,8 +36,8 @@ import AvatarEditor, {
   ChangeStartAnimation,
   GetAvatarGLB,
   GetWearableOption,
-  RemoveEnvironment,
-  SetEnvironment,
+  RemoveStage,
+  SetStage,
   SetFeaturesData
 } from "./editor.component";
 import {AGChangeCamPosition, AGChangeLookAtPosition, SetEnvironmentMap, TakeCanvasPicture} from "./viewer.component";
@@ -47,7 +47,7 @@ interface AvatarBuilderProps {
   avatarBasePath: string;
   campaignConfig: CampaignConfig;
   selectListFeatures: FeatureBasic[];
-  selectListAccessories: BasicData[];
+  selectListAccessories: FeatureBasic[];
   attributeConfig?: BasicData[];
   bgColor?: string;
   onlyView: boolean;
@@ -57,7 +57,7 @@ interface AvatarBuilderProps {
 let featureList: FeatureInterface[] | undefined;
 let accessoryList: AccessoryInterface[] | undefined;
 let animationList: AnimationInterface[] | undefined;
-let environmentList: EnvironmentInterface[] | undefined;
+let stageList: StageInterface[] | undefined;
 let envMapList: EnvMapInterface[] | undefined;
 let singleData: SingleInterface | undefined;
 
@@ -79,8 +79,9 @@ export default function AvatarBuilder({
                                         bgColor,
                                         enablePan
                                      }: AvatarBuilderProps) {
-  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].id : '');
-  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].id : '');
+  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].meshName : '');
+  const [selectedFeatureDisplayName, setSelectedFeatureDisplayName] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
+  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].meshName : '');
   const [skinColor, setSkinColor] = useState<string>(campaignConfig.defSkinColor ?? 'F2A47E');
   const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
   const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
@@ -98,7 +99,7 @@ export default function AvatarBuilder({
       getFeatureList(),
       getAccessoryList(),
       getAnimationList(),
-      getEnvironmentList(),
+      getStageList(),
       getEnvironmentMapList(),
       getSingleInfo()
     ]);
@@ -125,7 +126,6 @@ export default function AvatarBuilder({
   }
 
   const setOnIFrame = () => {
-    // console.log('IFrame Callback: ', onIFrame);
     onIFrame = true;
     SetIFrameEvents(changeFeatureFromIFrame, exportFromIFrame, changeSkinColorFromIFrame);
   }
@@ -179,13 +179,13 @@ export default function AvatarBuilder({
     if (attributeConfig) {
       for (const attribute of attributeConfig) {
         // Is a feature
-        if (selectListFeatures.some(pl => pl.id === attribute.id)) {
+        if (selectListFeatures.some(pl => pl.meshName === attribute.id)) {
           const newFeature = featureList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newFeature)
             await onChangeFeature(newFeature.id, newFeature.path, newFeature.name, attribute.id);
         }
         // Is an accessory
-        else if (selectListAccessories.some(pl => pl.id === attribute.id)) {
+        else if (selectListAccessories.some(pl => pl.meshName === attribute.id)) {
           const newAcc = accessoryList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newAcc)
             await ChangeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id, campaignConfig.changeMaterial);
@@ -197,13 +197,13 @@ export default function AvatarBuilder({
 
       // Load random features
       for (const featureType of selectListFeatures) {
-        const randomFeatureOption = RandomArrayElement(featureList.filter(p => p.type === featureType.id));
+        const randomFeatureOption = RandomArrayElement(featureList.filter(p => p.type === featureType.meshName));
         if (randomFeatureOption)
           randomFeature.push(randomFeatureOption);
       }
 
       for (const accType of selectListAccessories) {
-        const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.id));
+        const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.meshName));
         if (randomAcc)
           randomAccessory.push(randomAcc);
       }
@@ -248,9 +248,9 @@ export default function AvatarBuilder({
     animationList = newAnimationList;
   }
   
-  async function getEnvironmentList() {
-    const {value: newEnvironmentList} = await GetEnvironmentListByCampaign(campaign);
-    environmentList = newEnvironmentList;
+  async function getStageList() {
+    const {value: newStageList} = await GetStageListByCampaign(campaign);
+    stageList = newStageList;
   }
   
   async function getEnvironmentMapList() {
@@ -273,6 +273,10 @@ export default function AvatarBuilder({
 
   function onCategoryChange(value: string) {
     setSelectedFeature(value);
+    const categoryName = selectListFeatures.filter(val => {
+      return val.meshName == value
+    });
+    setSelectedFeatureDisplayName(categoryName[0].displayName);
     setFeatureListShow(FilterList(featureList, "type", value));
     updateFeatureCamPosition(value, campaignConfig.featuresCamPos);
   }
@@ -325,9 +329,6 @@ export default function AvatarBuilder({
     ]);
     exportData.picture = picturePromise;
     exportData.model = modelPromise;
-
-    // eslint-disable-next-line no-console
-    console.log(exportData);
     
     if (onIFrame) {
       IFrameExportData(exportData);
@@ -339,13 +340,13 @@ export default function AvatarBuilder({
     }
   }
 
-  async function updateEnvironment(isEditMode: boolean) {
+  async function updateStage(isEditMode: boolean) {
     if(isEditMode) {
-      RemoveEnvironment();
+      RemoveStage();
     }
     else {
-      const defEnv = environmentList?.find(env => env.name == campaignConfig.defEnvironment);
-      await SetEnvironment(defEnv?.path);
+      const defStage = stageList?.find(stg => stg.name == campaignConfig.defStage);
+      await SetStage(defStage?.path);
     }
   }
 
@@ -379,13 +380,14 @@ export default function AvatarBuilder({
                   selectListFeatures={selectListFeatures}
                   featureList={featureListShow}
                   selectedFeature={selectedFeature}
+                  selectedFeatureDisplayName={selectedFeatureDisplayName}
                   selectListAccessories={selectListAccessories}
                   accessoryList={accessoryListShow}
                   selectedAcc={selectedAcc}
                   skinColor={skinColor}
                   changeView={() => {
                     setEditModeSelected(!editModeSelected);
-                    void updateEnvironment(!editModeSelected);
+                    void updateStage(!editModeSelected);
                   }}
                   changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
                   onCategoryChange={(value: string) => onCategoryChange(value)}
