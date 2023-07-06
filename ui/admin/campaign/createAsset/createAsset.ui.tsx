@@ -6,6 +6,8 @@ import { FirestoreLocation } from "../../../../enums/firebase.enum";
 import { setLocation, setStorage, setName, setReady } from "../../../../store/addAssetSlice";
 import AGButton from "../../../common/ag-button.component";
 import CreateAsset from "../../../../components/admin/assets/createAsset.component";
+import { AiOutlineCheckCircle, AiOutlineCloudUpload } from "react-icons/ai";
+import { IoImageOutline } from "react-icons/io5";
 
 export default function AddAssetUI() {
   const currentCampaignParams = useAppSelector(state => state.currentCampaign.parameters);
@@ -99,28 +101,27 @@ export default function AddAssetUI() {
                 }
                 setDbLocation(e.target.value as FirestoreLocation);
               }}>
-                {
-                  locationOptions.map(x => {
-                    const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
-                    return <option value={val} key={x}>{x}</option>
-                  })
-                }
+                {locationOptions.map(x => {
+                  const val = FirestoreLocation[x as keyof typeof FirestoreLocation];
+                  return <option value={val} key={x}>{x}</option>
+                })}
               </select>
             </div>
             <div className="relative mt-5 w-full cursor-pointer">
               <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
                 <MdKeyboardArrowDown />
               </div>
-              <select name="" id="" className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" value={selectedStorage} onChange={e => {
-                setSelectedStorage(e.target.value)
-              }}>
+              <select
+                name=""
+                id=""
+                className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer"
+                value={selectedStorage}
+                onChange={e => { setSelectedStorage(e.target.value) }}
+              >
                 <option value=''>Select...</option>
-                {
-                  typeOptions &&
-                  typeOptions.map(x => {
-                    return <option value={x.id} key={x.id}>{x.val}</option>
-                  })
-                }
+                {typeOptions && typeOptions.map(x => {
+                  return <option value={x.id} key={x.id}>{x.val}</option>
+                })}
               </select>
             </div>
           </div>
@@ -131,13 +132,35 @@ export default function AddAssetUI() {
             }} />
           </div>
           <div className="flex gap-4 pt-4">
-            <label className="flex justify-center items-center w-full shadow-flat-soft hover:shadow-flat-medium rounded-lg cursor-pointer transition-all duration-200" htmlFor="createNewGLBAsset">
-              <p className="text-center p-2">File</p>
-              <input type="file" id="createNewGLBAsset" name="createNewGLBAsset" className="hidden" accept=".glb" ref={assetFile} onChange={checkAssetFile} />
+            <label className="relative mt-5 bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[40px] py-2 px-4 rounded-lg cursor-pointer" htmlFor="createNewGLBAsset">
+              <p className="text-start">File</p>
+              {hasAssetFile
+                ? <AiOutlineCheckCircle className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none text-green-600" />
+                : <AiOutlineCloudUpload className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none" />}
+              <input
+                type="file"
+                id="createNewGLBAsset"
+                name="createNewGLBAsset"
+                className="hidden"
+                accept=".glb"
+                ref={assetFile}
+                onChange={checkAssetFile}
+              />
+              {hasAssetFile && <div className="absolute w-11/12 flex gap-2 mt-3 whitespace-nowrap">
+                <p>File updated:</p>
+                <p className="truncate">{assetFile.current?.files?.item(0)?.name}</p>
+              </div>}
             </label>
-            <label className="flex justify-center items-center w-full shadow-flat-soft hover:shadow-flat-medium rounded-lg cursor-pointer transition-all duration-200" htmlFor="createNewImageAsset">
-              <p className="text-center p-2">Thumbnail</p>
+            <label className="relative mt-5 bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[40px] py-2 px-4 rounded-lg cursor-pointer" htmlFor="createNewImageAsset">
+              <p className="text-start">Thumbnail</p>
+              {hasThumbFile
+                ? <AiOutlineCheckCircle className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none text-green-600" />
+                : <IoImageOutline className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none" />}
               <input type="file" id="createNewImageAsset" name="createNewImageAsset" className="hidden" accept="image/png, image/jpeg" ref={thumbFile} onChange={checkThumbFile} />
+              {hasThumbFile && <div className="absolute w-11/12 flex gap-2 mt-3 whitespace-nowrap">
+                <p>File updated:</p>
+                <p className="truncate">{thumbFile.current?.files?.item(0)?.name}</p>
+              </div>}
             </label>
           </div>
           {
