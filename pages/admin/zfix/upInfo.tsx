@@ -63,7 +63,7 @@ export default function UpInfoPage() {
       if (isNotLogIn)
         return;
       
-      await onInit();
+      // await onInit();
     })().catch(err => console.error(err));
   }, []);
   
