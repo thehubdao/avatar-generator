@@ -6,10 +6,10 @@ import 'swiper/css';
 
 import { AiOutlineCheckCircle, AiOutlineCloudUpload } from "react-icons/ai";
 
-import FirstStep from "./firstStep.ui";
-import SecondStep from "./secondStep.ui";
-import ThirdStep from "./thirdStep.ui";
-import EndStep from "./endStep.ui";
+import AvatarBaseStep from "./avatarBaseStep.ui";
+import AssetsCountStep from "./assetsCountStep.ui";
+import FeaturesConfig from "./featuresConfigStep.ui";
+import ConfirmationStep from "./confirmationStep.ui";
 
 import CreateCampaign from "../../../../components/admin/campaign/createCampaign.component";
 
@@ -68,9 +68,8 @@ export default function AddCampaign() {
           />
           {hasCampaignName ?
             <p>Campaigns are the container for a personalization system. A campaign is formed by
-              <span className="text-purple font-bold"> AVATAR BASE</span>,
-              <span className="text-orange font-bold"> FEATURES</span> and
-              <span className="text-blue font-bold"> ANIMATIONS</span>.</p>
+              <span className="text-purple font-bold"> AVATAR BASE</span> and
+              <span className="text-orange font-bold"> FEATURES</span> initially.</p>
             :
             <label htmlFor="newCampaignName" className="block text-gray-light cursor-pointer">Set the campaign&apos;s name.</label>
           }
@@ -101,19 +100,19 @@ export default function AddCampaign() {
                 className="min-h-96"
               >
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <FirstStep ready={hasCampaignName && hasCampaignBase} handleNextStep={() => {
+                  <AvatarBaseStep ready={hasCampaignName && hasCampaignBase} handleNextStep={() => {
                     dispatch(setName(campaignNameInput.current?.value || ''));
                     setEditName(false);
                   }}/>
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <SecondStep ready={true} handleNextStep={(value) => setFeaturesCount(value)} handleBackStep={() => setEditName(true)} />
+                  <AssetsCountStep ready={true} handleNextStep={(value) => setFeaturesCount(value)} handleBackStep={() => setEditName(true)} />
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <ThirdStep ready={true} featuresCount={featuresCount} />
+                  <FeaturesConfig ready={true} featuresCount={featuresCount} />
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <EndStep ready={true} handleNextStep={() => {
+                  <ConfirmationStep ready={true} handleNextStep={() => {
                     onSubmit();
                   }}/>
                 </SwiperSlide>
