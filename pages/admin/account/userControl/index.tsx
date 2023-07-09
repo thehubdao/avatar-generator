@@ -72,7 +72,7 @@ export default function UserControlView() {
   return (
     <>
       <Head>
-        <title>Admin Account</title>
+        <title>Admin User Control</title>
       </Head>
       <Layout>
         <UserControl userList={userList ?? []} handleCreateNewUser={handleCreateNewUser} />
