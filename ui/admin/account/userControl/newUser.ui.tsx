@@ -1,0 +1,72 @@
+import { MutableRefObject, useRef } from "react";
+import AGButton from "../../../common/ag-button.component";
+
+interface NewUserButtonProps {
+  label: string,
+  handleEvent: () => void;
+  form?: boolean
+}
+
+interface NewUserProps {
+  handleCreateNewUser: (userAccount: MutableRefObject<HTMLInputElement | null>,
+    userName: MutableRefObject<HTMLInputElement | null>,
+    userPass: MutableRefObject<HTMLInputElement | null>) => void;
+}
+
+const NewUserButton = ({ label, handleEvent, form }: NewUserButtonProps) => {
+  return (
+    <div className="w-1/2">
+      <AGButton full form={form} nm onClickEvent={() => { handleEvent(); }}>
+        <p className="text-gray-normal py-1">{label}</p>
+      </AGButton>
+    </div>
+  )
+}
+
+export default function NewUser({ handleCreateNewUser }: NewUserProps) {
+  const userName = useRef<HTMLInputElement>(null);
+  const userAccount = useRef<HTMLInputElement>(null);
+  const userPass = useRef<HTMLInputElement>(null);
+  const userForm = useRef<HTMLFormElement>(null);
+
+  const handleAddEvent = () => {
+    if (!userForm.current) return;
+    userForm.current.reportValidity();
+    if (!userForm.current.checkValidity()) return;
+    handleCreateNewUser(userAccount, userName, userPass);
+  }
+  const handleCancelEvent = () => {
+    if (!userName.current || !userAccount.current || !userPass.current) return
+    userName.current.value = ''
+    userAccount.current.value = ''
+    userPass.current.value = ''
+  }
+
+  return (
+    <>
+      <h1 className="font-humane text-9xl">NEW USER:</h1>
+      <form onSubmit={event => { event.preventDefault(); }} className="flex w-full flex-wrap font-poppins font-bold" ref={userForm}>
+        {/* Name Input */}
+        <div className="w-1/3 px-2">
+          <p>Name:</p>
+          <input type="text" ref={userName} required className="w-full nm-inset-bg-sm rounded-lg p-2 font-normal" />
+        </div>
+        {/* User Input */}
+        <div className="w-1/3 px-2">
+          <p>User:</p>
+          <input type="text" ref={userAccount} required className="w-full nm-inset-bg-sm rounded-lg p-2 font-normal" />
+        </div>
+        {/* Password Input */}
+        <div className="w-1/3 px-2">
+          <p>Password:</p>
+          <input type="password" minLength={8} ref={userPass} required className="w-full nm-inset-bg-sm rounded-lg p-2 font-normal" />
+        </div>
+      </form>
+      <div className="w-full flex flex-wrap mt-3 font-poppins font-bold">
+        <NewUserButton label="Add" form handleEvent={handleAddEvent} />
+        <NewUserButton label="Cancel" handleEvent={handleCancelEvent} />
+      </div>
+
+    </>
+  )
+}
