@@ -19,7 +19,7 @@ export default function Header() {
   useEffect(() => {
     if (router.pathname !== PageLocation.Admin) {
       setBackBtn(true);
-      if (router.pathname !== PageLocation.Account && router.pathname !== PageLocation.FirstSteps && currentCampaign === '') {
+      if (router.pathname !== PageLocation.Account && router.pathname !== PageLocation.UserControl && router.pathname !== PageLocation.FirstSteps && currentCampaign === '') {
         void GoToPage(PageLocation.Admin);
       }
     }
