@@ -4,8 +4,10 @@ import { PageLocation, UserRol } from "../../../enums/common.enum";
 import AGButton from "../../common/ag-button.component";
 import { GoToPage } from "../../../utils/router.util";
 
+//** Represents the admin account component.
 export default function AdminAccount() {
-  const userData: AuthStateInterface = useAppSelector(state => state.auth)
+  //** Retrieves the user data from the app state.
+  const userData: AuthStateInterface = useAppSelector(state => state.auth);
 
   return (
     <>
@@ -13,21 +15,27 @@ export default function AdminAccount() {
 
       <div className="mt-10">
         <p className="font-poppins font-bold text-3xl text-gray-normal mb-4">
-          {userData.userInfo?.name ?? 'User'}
+          {/* Displays the user name or 'User' if it's undefined. */}
+          {userData.userInfo?.name ?? 'Not User Data'}
+          {/* Displays the user address if available. */}
           {userData.address && <span className="ml-6">({userData.address})</span>}
         </p>
-        {userData.userInfo && <div className="text-base text-gray-normal">
-          <p><b>Rol:</b> {UserRol[userData.userInfo.role ?? 1]}</p>
-          <p><b>Account:</b> {userData.userInfo.account}</p>
-          <p><b>Email:</b> {userData.userInfo.email}</p>
-        </div>}
 
-        {userData.userInfo?.role === 0 && <AGButton nm onClickEvent={() => { GoToPage(PageLocation.UserControl) }}>
-          <p className="m-2">
-            Users Control
-          </p>
-        </AGButton>}
+        {userData.userInfo && (
+          <div className="text-base text-gray-normal">
+            <p><b>Rol:</b> {UserRol[userData.userInfo.role ?? 1]}</p>
+            <p><b>Account:</b> {userData.userInfo.account}</p>
+            <p><b>Email:</b> {userData.userInfo.email}</p>
+          </div>
+        )}
+
+        {/* Renders a button for users with role 0, which navigates to the User Control page on click. */}
+        {userData.userInfo?.role === 0 && (
+          <AGButton nm onClickEvent={() => { GoToPage(PageLocation.UserControl) }}>
+            <p className="m-2">Users Control</p>
+          </AGButton>
+        )}
       </div>
     </>
-  )
+  );
 }

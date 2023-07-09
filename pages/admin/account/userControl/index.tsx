@@ -9,6 +9,7 @@ import { Delay, IsEmail, LogError } from "../../../../utils/common.util";
 import { EmailResult, Module } from "../../../../enums/common.enum";
 import UserControl from "../../../../ui/admin/account/userControl/userControl.ui";
 
+//** Represents the UserControlView component for managing user control in the admin section.
 export default function UserControlView() {
   const [userList, setUserList] = useState<UserInterface[]>();
 
@@ -20,11 +21,18 @@ export default function UserControlView() {
     componentDidMount().catch(err => console.error(err));
   }, []);
 
+  //** Retrieves the user list data from Firebase.
   async function getUserListData() {
     const userData = await GetUserList();
     setUserList(userData ?? []);
   }
 
+  /**
+   ** Handles the creation of a new user.
+   * @param {MutableRefObject<HTMLInputElement | null>} userAccount - The user account input ref object.
+   * @param {MutableRefObject<HTMLInputElement | null>} userName - The user name input ref object.
+   * @param {MutableRefObject<HTMLInputElement | null>} userPass - The user password input ref object.
+   */
   async function handleCreateNewUser(
     userAccount: MutableRefObject<HTMLInputElement | null>,
     userName: MutableRefObject<HTMLInputElement | null>,
@@ -52,6 +60,11 @@ export default function UserControlView() {
     }
   }
 
+  /**
+   ** Generates a user email based on the provided account.
+   * @param {string} account - The user account.
+   * @returns {string | undefined} The generated user email.
+   */
   function userEmail(account?: string) {
     if (account == undefined) {
       ShowModal(`Missing account!`);
@@ -78,5 +91,5 @@ export default function UserControlView() {
         <UserControl userList={userList ?? []} handleCreateNewUser={handleCreateNewUser} />
       </Layout>
     </>
-  )
+  );
 }
