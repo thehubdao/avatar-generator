@@ -1,8 +1,6 @@
 import Head from "next/head";
 import Layout from "../../../ui/admin/admin.layout";
-import AGLoading from "../../../ui/common/ag-loading.component";
-import AdminAccount from "../../../ui/admin/admin.account";
-
+import AdminAccount from "../../../ui/admin/account/account.ui";
 
 export default function AccountView() {
 
@@ -14,7 +12,6 @@ export default function AccountView() {
       <Layout>
         <AdminAccount />
       </Layout>
-      <AGLoading loading={false} bgColor="F1F5F9" />
     </>
   )
 }
