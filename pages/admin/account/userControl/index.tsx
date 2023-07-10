@@ -19,6 +19,7 @@ export default function UserControlView() {
     };
 
     componentDidMount().catch(err => console.error(err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   //** Retrieves the user list data from Firebase.

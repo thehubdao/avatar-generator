@@ -32,6 +32,8 @@ export default function UserControl({ userList, handleCreateNewUser }: UserContr
     };
 
     componentDidMount()
+    
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
