@@ -5,7 +5,7 @@ import { UserInterface, UserWithPass } from "../../../../interfaces/firebase.int
 import { CreateNewUser, GetUserList } from "../../../../utils/firebase.util";
 import { AuthValues, UserRoleValues } from "../../../../enums/firebase.enum";
 import { ShowModal } from "../../../../utils/modal.util";
-import { Delay, IsEmail, LogError } from "../../../../utils/common.util";
+import { IsEmail, LogError } from "../../../../utils/common.util";
 import { EmailResult, Module } from "../../../../enums/common.enum";
 import UserControl from "../../../../ui/admin/account/userControl/userControl.ui";
 
@@ -55,7 +55,6 @@ export default function UserControlView() {
       ShowModal(result.errMessage ?? 'No message');
     } else {
       ShowModal("User created successfully!");
-      await Delay(2000);
       await getUserListData();
     }
   }

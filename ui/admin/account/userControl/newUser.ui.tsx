@@ -14,7 +14,7 @@ interface NewUserProps {
     userAccount: MutableRefObject<HTMLInputElement | null>,
     userName: MutableRefObject<HTMLInputElement | null>,
     userPass: MutableRefObject<HTMLInputElement | null>
-  ) => void;
+  ) => Promise<void>;
 }
 
 /**

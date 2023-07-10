@@ -16,6 +16,14 @@ const UserCard = ({ user }: { user: UserInterface }) => {
       <p className="truncate"><b>Name:</b> {user.name}</p>
       <p className="truncate"><b>Account:</b> {user.account}</p>
       <p className="truncate"><b>Email:</b> {user.email}</p>
+      <div className="truncate">
+        <p><b>Campaings:</b></p>
+        <div className="overflow-x-auto flex gap-3">
+          {user.campaign && user.campaign.map((item, index) => {
+            return <p className="" key={index}>| {item} |</p>
+          })}
+        </div>
+      </div>
       <p className="truncate"><b>Role:</b> {UserRol[user.role ?? 1]} ({user.role})</p>
     </div>
   );
