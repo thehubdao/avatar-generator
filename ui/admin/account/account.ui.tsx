@@ -5,7 +5,7 @@ import AGButton from "../../common/ag-button.component";
 import { GoToPage } from "../../../utils/router.util";
 
 //** Represents the admin account component.
-export default function AdminAccount() {
+export default function AdminAccountUI() {
   //** Retrieves the user data from the app state.
   const userData: AuthStateInterface = useAppSelector(state => state.auth);
 

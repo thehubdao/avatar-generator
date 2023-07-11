@@ -1,11 +1,11 @@
 import { MutableRefObject, useEffect } from "react";
 import { UserInterface } from "../../../../interfaces/firebase.interface";
-import NewUser from "./newUser.ui";
-import UserList from "./userList.ui";
 import { AuthStateInterface } from "../../../../interfaces/common.interface";
 import { useAppSelector } from "../../../../store/hooks";
 import { GoToPage } from "../../../../utils/router.util";
 import { PageLocation } from "../../../../enums/common.enum";
+import UserListUI from "./userList.ui";
+import NewUserUI from "./newUser.ui";
 
 //** Represents the props for the UserControl component.
 interface UserControlProps {
@@ -21,7 +21,7 @@ interface UserControlProps {
  ** Represents the UserControl component.
  * @param {UserControlProps} props - The props for the UserControl component.
  */
-export default function UserControl({ userList, handleCreateNewUser }: UserControlProps) {
+export default function UserControlUI({ userList, handleCreateNewUser }: UserControlProps) {
   //** Retrieves the user data from the app state.
   const userData: AuthStateInterface = useAppSelector(state => state.auth);
 
@@ -39,10 +39,10 @@ export default function UserControl({ userList, handleCreateNewUser }: UserContr
   return (
     <div className="text-gray-normal">
       {/* Renders the NewUser component and passes the handleCreateNewUser function as a prop. */}
-      <NewUser handleCreateNewUser={handleCreateNewUser} />
+      <NewUserUI handleCreateNewUser={handleCreateNewUser} />
 
       {/* Renders the UserList component and passes the userList array as a prop. */}
-      <UserList userList={userList} />
+      <UserListUI userList={userList} />
     </div>
   );
 }

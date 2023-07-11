@@ -35,7 +35,7 @@ const NewUserButton = ({ label, handleEvent, form }: NewUserButtonProps) => {
  ** Represents the NewUser component for creating a new user.
  * @param {NewUserProps} props - The props for the NewUser component.
  */
-export default function NewUser({ handleCreateNewUser }: NewUserProps) {
+export default function NewUserUI({ handleCreateNewUser }: NewUserProps) {
   const userName = useRef<HTMLInputElement>(null);
   const userAccount = useRef<HTMLInputElement>(null);
   const userPass = useRef<HTMLInputElement>(null);
