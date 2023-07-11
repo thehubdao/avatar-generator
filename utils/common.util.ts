@@ -1,4 +1,4 @@
-﻿import {EmailResult, Module} from "../enums/common.enum";
+﻿import {EmailResult, GlobalValues, Module} from "../enums/common.enum";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
@@ -55,7 +55,7 @@ export function SetMapToMap<TKey, TValue>(leMap: Map<TKey, TValue>, toAdd: Map<T
 
 export function RemoveUndefinedProperties<T>(obj: T)  {
   const clone = {...obj};
-  for (let k in clone) {
+  for (const k in clone) {
     if (clone[k] == undefined)
       delete clone[k];
   }
@@ -89,4 +89,15 @@ export function ColorStringToHexString(color: string | undefined) {
 
 export function IsWebUrl(url: string) {
   return url.startsWith('http');
+}
+
+export function MixArrays<T>(arr1: T[] | undefined, arr2: T[] | undefined) {
+  const mixed: T[] = [...(arr1 ?? []), ...(arr2 ?? [])];
+  return mixed;
+}
+
+export function RemovedAcc(text: string) {
+  if (!text.endsWith(GlobalValues.AccEnd)) return text;
+  
+  return text.slice(0, - GlobalValues.AccEnd.length);
 }

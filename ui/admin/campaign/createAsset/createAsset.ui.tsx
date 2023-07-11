@@ -3,7 +3,7 @@ import { CampaignParameters, FeatureBasic } from "../../../../interfaces/common.
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { useEffect, useRef, useState } from "react";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
-import { setLocation, setStorage, setName, setReady } from "../../../../store/addAssetSlice";
+import { setLocation, setType, setName, setReady } from "../../../../store/addAssetSlice";
 import AGButton from "../../../common/ag-button.component";
 import CreateAsset from "../../../../components/admin/assets/createAsset.component";
 import { AiOutlineCheckCircle, AiOutlineCloudUpload } from "react-icons/ai";
@@ -16,7 +16,7 @@ export default function AddAssetUI() {
   const [typeOptions, setTypeOptions] = useState<FeatureBasic[]>(currentCampaignParams.features as FeatureBasic[]);
   const locationOptions: string[] = Object.keys(FirestoreLocation);
   const [dbLocation, setDbLocation] = useState<FirestoreLocation>(FirestoreLocation.Features);
-  const [selectedStorage, setSelectedStorage] = useState<string>('');
+  const [assetType, setAssetType] = useState<string>('');
   const [assetName, setAssetName] = useState<string>('');
   const [hasAssetFile, setHasAssetFile] = useState<boolean>(false);
   const [hasThumbFile, setHasThumbFile] = useState<boolean>(false);
@@ -26,15 +26,15 @@ export default function AddAssetUI() {
 
   useEffect(() => {
     dispatch(setLocation(dbLocation));
-    dispatch(setStorage(''));
-    setSelectedStorage('');
+    dispatch(setType(''));
+    setAssetType('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbLocation])
 
   useEffect(() => {
-    dispatch(setStorage(selectedStorage));
+    dispatch(setType(assetType));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedStorage])
+  }, [assetType])
 
   useEffect(() => {
     dispatch(setName(assetName));
@@ -44,7 +44,7 @@ export default function AddAssetUI() {
   useEffect(() => {
     const needStorage: boolean = dbLocation === FirestoreLocation.Features || dbLocation === FirestoreLocation.Accessories;
     if (needStorage) {
-      if (hasAssetFile && hasThumbFile && selectedStorage !== '' && assetName !== '') {
+      if (hasAssetFile && hasThumbFile && assetType !== '' && assetName !== '') {
         setShowCreateBtn(true);
       } else {
         setShowCreateBtn(false);
@@ -55,7 +55,7 @@ export default function AddAssetUI() {
       setShowCreateBtn(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hasAssetFile, hasThumbFile, selectedStorage, assetName, dbLocation])
+  }, [hasAssetFile, hasThumbFile, assetType, assetName, dbLocation])
 
   function checkAssetFile() {
     const fileLength = assetFile.current?.files?.length;
@@ -115,14 +115,14 @@ export default function AddAssetUI() {
                 name=""
                 id=""
                 className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer"
-                value={selectedStorage}
-                onChange={e => { setSelectedStorage(e.target.value) }}
+                value={assetType}
+                onChange={e => { setAssetType(e.target.value) }}
               >
                 <option value=''>Select...</option>
                 {
                   typeOptions &&
-                  typeOptions.map(x => {
-                    return <option value={x.meshName} key={x.meshName}>{x.displayName}</option>
+                  typeOptions.map((x: FeatureBasic, index: number) => {
+                    return <option value={x.displayName} key={index}>{x.displayName}</option>
                   })
                 }
               </select>
