@@ -11,19 +11,21 @@ interface UserListProps {
  * @param {UserInterface} user - The user object to display.
  */
 const UserCard = ({ user }: { user: UserInterface }) => {
+  const _randomColors = ['bg-[#1abc9c]', 'bg-[#2ecc71]', 'bg-[#3498db]', 'bg-[#9b59b6]', 'bg-[#f1c40f]', 'bg-[#e67e22]', 'bg-[#e74c3c]']
+
   return (
     <div className="nm-flat-bg w-72 p-5 rounded-xl whitespace-nowrap">
       <p className="truncate"><b>Name:</b> {user.name}</p>
       <p className="truncate"><b>Account:</b> {user.account}</p>
       <p className="truncate"><b>Email:</b> {user.email}</p>
-      <div className="truncate">
+      {user.campaign && user.campaign.length > 0 && <div className="truncate">
         <p><b>Campaings:</b></p>
         <div className="overflow-x-auto flex gap-3">
-          {user.campaign && user.campaign.map((item, index) => {
-            return <p className="" key={index}>| {item} |</p>
+          {user.campaign.map((item, index) => {
+            return <p className={`${_randomColors[Math.floor(Math.random() * _randomColors.length)]} rounded-md px-2 mb-1 text-black`} key={index}>{item}</p>
           })}
         </div>
-      </div>
+      </div>}
       <p className="truncate"><b>Role:</b> {UserRol[user.role ?? 1]} ({user.role})</p>
     </div>
   );
