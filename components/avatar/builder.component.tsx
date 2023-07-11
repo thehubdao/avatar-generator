@@ -229,7 +229,7 @@ export default function AvatarBuilder({
     const randomAccessory: AccessoryInterface[] = [];
 
     for (const accType of selectListAccessories) {
-      const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.id));
+      const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.displayName));
       if (randomAcc)
         randomAccessory.push(randomAcc);
     }
