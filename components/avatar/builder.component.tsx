@@ -18,7 +18,7 @@ import {
 } from "../../interfaces/api.interface";
 import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../../utils/iframe.util";
 import {ExportAttributeValues, GlobalValues, Module} from "../../enums/common.enum";
-import {FilterList, LogError, RandomArrayElement} from "../../utils/common.util";
+import {FilterList, LogError, RandomArrayElement, MixArrays} from "../../utils/common.util";
 import {
   GetAccessoryListByCampaign,
   GetAnimationListByCampaign,
@@ -54,8 +54,9 @@ interface AvatarBuilderProps {
   enablePan?: boolean;
 }
 
+let optionList: FeatureInterface[] | undefined;
 let featureList: FeatureInterface[] | undefined;
-let accessoryList: AccessoryInterface[] | undefined;
+let accessoryList: FeatureInterface[] | undefined;
 let animationList: AnimationInterface[] | undefined;
 let stageList: StageInterface[] | undefined;
 let envMapList: EnvMapInterface[] | undefined;
@@ -81,12 +82,14 @@ export default function AvatarBuilder({
                                      }: AvatarBuilderProps) {
   const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
   const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].displayName : '');
+  const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
   const [skinColor, setSkinColor] = useState<string>(campaignConfig.defSkinColor ?? 'F2A47E');
   const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
-  const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
+  // const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
   const [featureListShow, setFeatureListShow] = useState<FeatureInterface[]>();
-  const [accessoryListShow, setAccessoryListShow] = useState<AccessoryInterface[]>();
+  const [accessoryListShow, setAccessoryListShow] = useState<FeatureInterface[]>();
+  const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>();
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
   
   const startPromises = useRef<Promise<unknown>>();
@@ -108,6 +111,7 @@ export default function AvatarBuilder({
 
   async function onAvatarBuilderReady() {
     await startPromises.current;
+    optionList = MixArrays(optionList, accessoryList);
     await SetFeaturesData(selectListFeatures);
 
     await loadPreData();
@@ -188,7 +192,7 @@ export default function AvatarBuilder({
         else if (selectListAccessories.some(pl => pl.meshName === attribute.id)) {
           const newAcc = accessoryList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newAcc)
-            await ChangeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id, campaignConfig.changeMaterial);
+            await onChangeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
         }
       }
     } else {
@@ -218,7 +222,7 @@ export default function AvatarBuilder({
       for (const feature of randomFeature)
         await onChangeFeature(feature.id, feature.path, feature.name, feature.type);
       for (const acc of randomAccessory)
-        await ChangeAccessory(acc.id, acc.path, acc.name, acc.type, campaignConfig.changeMaterial);
+        await onChangeAccessory(acc.id, acc.path, acc.name, acc.type);
     }
   }
   
@@ -240,7 +244,7 @@ export default function AvatarBuilder({
     await Promise.all([...modelPromises]);
 
     for (const acc of randomAccessory)
-      await ChangeAccessory(acc.id, acc.path, acc.name, acc.type, campaignConfig.changeMaterial);
+      await onChangeAccessory(acc.id, acc.path, acc.name, acc.type);
   }
 
   async function updateAvatarSingleData() {
@@ -255,7 +259,9 @@ export default function AvatarBuilder({
   async function getFeatureList() {
     const {value: newAssetList} = await GetAssetsListByCampaign(campaign);
     featureList = newAssetList;
+    optionList = MixArrays(optionList, featureList);
     setFeatureListShow(FilterList(featureList, "type", selectedFeature));
+    setOptionListShow(FilterList(featureList, "type", selectedCategory));
   }
 
   async function getAccessoryList() {
@@ -292,16 +298,22 @@ export default function AvatarBuilder({
     setSkinColor(newSkinColor);
   }
 
-  function onCategoryChange(value: string) {
+  function onFeatureTypeChange(value: string) {
     setSelectedFeature(value);
     setFeatureListShow(FilterList(featureList, "type", value));
     updateFeatureCamPosition(value, campaignConfig.featuresCamPos);
   }
 
-  function onAccessoryChange(value: string) {
+  function onAccessoryTypeChange(value: string) {
     setSelectedAcc(value);
     setAccessoryListShow(FilterList(accessoryList, "type", value));
     updateFeatureCamPosition(value, campaignConfig.accCamPos);
+  }
+
+  function onCategoryTypeChange(value: string) {
+    setSelectedCategory(value);
+    setOptionListShow(FilterList(optionList, "type", value));
+    updateFeatureCamPosition(value, {...campaignConfig.featuresCamPos, ...campaignConfig.accCamPos});
   }
 
   function updateFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
@@ -322,6 +334,18 @@ export default function AvatarBuilder({
   async function onChangeAccessory(id: string, path: string, name: string, _selectedAcc: string = selectedAcc) {
     await ChangeAccessory(id, path, name, _selectedAcc, campaignConfig.changeMaterial);
     addReplaceAttribute(selectedAcc, name);
+  }
+
+  async function onOptionChange(id: string, path: string, name: string, _selectedCategory: string = selectedCategory) {
+    // If Accessory
+    if (_selectedCategory.endsWith(GlobalValues.AccEnd))
+      await ChangeAccessory(id, path, name, _selectedCategory, campaignConfig.changeMaterial);
+    // If Feature
+    else
+      await ChangeFeature(id, path, name, _selectedCategory, skinColor, campaignConfig.defSkin, campaignConfig.changeMaterial);
+
+
+    addReplaceAttribute(_selectedCategory, name);
   }
 
   function addReplaceAttribute(addId: string, addValue: string) {
@@ -392,24 +416,42 @@ export default function AvatarBuilder({
         <>
           {!onlyView &&
               <HudComponent
-                  exportData={selectedOpc}
+                  selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
+
                   editModeSelected={editModeSelected}
-                  selectListFeatures={selectListFeatures}
-                  featureList={featureListShow}
-                  selectedFeature={selectedFeature}
-                  selectedFeatureDisplayName={selectedFeature}
-                  selectListAccessories={selectListAccessories}
-                  accessoryList={accessoryListShow}
-                  selectedAcc={selectedAcc}
+
+                  selectListCategory={[...selectListFeatures, ...selectListAccessories]}
+                  // selectListFeatures={[...selectListFeatures, ...selectListAccessories]}
+                  // selectListAccessories={selectListAccessories}
+                  
+                  // optionList
+                  optionList = {optionListShow}
+                  // featureList={featureListShow}
+                  // accessoryList={accessoryListShow}
+
+                  // selectedCategory
+                  selectedCategory = {selectedCategory}
+                  // selectedFeature={selectedFeature}
+                  // selectedAcc={selectedAcc}
+                  
                   skinColor={skinColor}
                   changeView={() => {
                     setEditModeSelected(!editModeSelected);
                     void updateStage(!editModeSelected);
                   }}
-                  changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
-                  onCategoryChange={(value: string) => onCategoryChange(value)}
-                  onAccessoryChange={(value: string) => onAccessoryChange(value)}
-                  onClickChangeSkinColor={(value: string) => void onClickChangeSkinColor(value)}
+
+                  // changeCategory
+                  onOptionChange={(id: string, path: string, name: string) => void onOptionChange(id, path, name)}
+                  // changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
+                  // changeAccessory={(id: string, path: string, name: string) => void onChangeAccessory(id, path, name)}
+
+                  // onCategoryChange
+                  onCategoryTypeChange={(value: string) => onCategoryTypeChange(value)}
+                  // onFeatureTypeChange={(value: string) => onFeatureTypeChange(value)}
+                  // onAccessoryTypeChange={(value: string) => onAccessoryTypeChange(value)}
+
+
+                  onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
                   exportModel={() => void exportModel()}
               />
           }
