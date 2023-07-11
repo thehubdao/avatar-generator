@@ -53,12 +53,12 @@ function optionSelector({ list, activeOpc, handleClick, handleSlide }: OptionSel
   }
 
   return list?.map((opt: FeatureBasic, index: number) => {
-    const isActive: boolean = activeOpc && activeOpc === opt.meshName ? true : false
+    const isActive: boolean = activeOpc && activeOpc === opt.displayName ? true : false
     return (
-      <SwiperSlide key={opt.meshName} style={{ height: '100px' }} className="px-8">
+      <SwiperSlide key={index} style={{ height: '100px' }} className="px-8">
         <div
           onClick={event => {
-            selectFeature(event, opt.meshName, index)
+            selectFeature(event, opt.displayName, index)
           }}
         >
           <div className={`w-[84px] h-[84px] flex justify-center items-center rounded-xl cursor-pointer ${isActive ? 'bg-accent bg-opacity-80 shadow-inset-hard' : 'bg-bg shadow-flat-soft hover:shadow-flat-hard'} transition-all duration-500`} title={opt.displayName}>

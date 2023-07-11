@@ -285,12 +285,11 @@ export async function GetFeaturesData(baseModel: Group, featureList: FeatureBasi
     for (const [index, feature] of baseFeatures.children.entries()) {
       if (featureList.some(x => feature.name.startsWith(x.meshName))) {
         const foundFeature = featureList.find(x => x.meshName === feature.name);
-        
         if (foundFeature != undefined) {
-          result[foundFeature.meshName] = {
+          result[foundFeature.displayName] = {
             index: index,
-            ref: update ? result[foundFeature!.meshName].ref : feature.clone(),
-            name: foundFeature!.meshName
+            ref: update ? result[foundFeature.displayName].ref : feature.clone(),
+            name: foundFeature.meshName
           };
         }
       }

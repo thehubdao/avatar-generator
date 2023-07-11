@@ -79,9 +79,8 @@ export default function AvatarBuilder({
                                         bgColor,
                                         enablePan
                                      }: AvatarBuilderProps) {
-  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].meshName : '');
-  const [selectedFeatureDisplayName, setSelectedFeatureDisplayName] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
-  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].meshName : '');
+  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
+  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].displayName : '');
   const [skinColor, setSkinColor] = useState<string>(campaignConfig.defSkinColor ?? 'F2A47E');
   const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
   const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
@@ -273,10 +272,6 @@ export default function AvatarBuilder({
 
   function onCategoryChange(value: string) {
     setSelectedFeature(value);
-    const categoryName = selectListFeatures.filter(val => {
-      return val.meshName == value
-    });
-    setSelectedFeatureDisplayName(categoryName[0].displayName);
     setFeatureListShow(FilterList(featureList, "type", value));
     updateFeatureCamPosition(value, campaignConfig.featuresCamPos);
   }
@@ -380,7 +375,7 @@ export default function AvatarBuilder({
                   selectListFeatures={selectListFeatures}
                   featureList={featureListShow}
                   selectedFeature={selectedFeature}
-                  selectedFeatureDisplayName={selectedFeatureDisplayName}
+                  selectedFeatureDisplayName={selectedFeature}
                   selectListAccessories={selectListAccessories}
                   accessoryList={accessoryListShow}
                   selectedAcc={selectedAcc}
