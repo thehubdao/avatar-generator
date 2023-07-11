@@ -158,12 +158,12 @@ export default function AssetList({ activedOption }: AssetListProps) {
               {/* By Tag Searcher */}
               <div className="flex flex-wrap w-full">
                 {(campaignTags && campaignTags?.length > 0) && <>
-                  {campaignTags?.map((tag: FeatureBasic) => {
+                  {campaignTags?.map((tag: FeatureBasic, index: number) => {
                     return <AGButton
                       nm
-                      selected={searchByTagValue.includes(tag.meshName)}
-                      key={tag.meshName}
-                      onClickEvent={() => handleSearchByTag(tag.meshName)}
+                      selected={searchByTagValue.includes(tag.displayName)}
+                      key={index}
+                      onClickEvent={() => handleSearchByTag(tag.displayName)}
                     ><p className="group-hover/button:font-medium">{tag.displayName}</p></AGButton>
                   })}
                   <AGButton nm onClickEvent={() => handleResetTags()}>
