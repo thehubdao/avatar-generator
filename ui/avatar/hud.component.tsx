@@ -1,7 +1,7 @@
 import AGButton from "../common/ag-button.component";
 import { BsArrowRight } from 'react-icons/bs';
 import { CiEdit, CiSaveUp2 } from 'react-icons/ci';
-import { AccessoryInterface, FeatureInterface } from "../../interfaces/api.interface";
+import { FeatureInterface } from "../../interfaces/api.interface";
 import { BasicData, FeatureBasic } from "../../interfaces/common.interface";
 import MobileOptionSelectorComponent from "./selectors/mobile/optionSelector.component";
 import MobileFeatureSelectorComponent from "./selectors/mobile/featureSelector.component";
@@ -12,41 +12,51 @@ import FeatureSelector from "./selectors/featureSelector.component";
 import OptionSelector from "./selectors/optionSelector.component";
 import ColorSelector from "./selectors/colorSelector.component";
 import HudFeatureTitle from "./common/hudTitle.component";
+import { RemovedAcc } from "../../utils/common.util";
 
 interface HudComponentProps {
-  editModeSelected: boolean;
-  selectListFeatures: FeatureBasic[],
-  featureList: FeatureInterface[] | undefined;
-  selectedFeature: string;
-  selectedFeatureDisplayName: string;
-  selectListAccessories: FeatureBasic[];
-  accessoryList: AccessoryInterface[] | undefined;
-  selectedAcc: string;
+
+  selectListCategory: FeatureBasic[];
+  // selectListFeatures: FeatureBasic[];
+  // selectListAccessories: FeatureBasic[];
+
+  optionList: FeatureInterface[] | undefined;
+  // featureList: FeatureInterface[] | undefined;
+  // accessoryList: AccessoryInterface[] | undefined;
+
+  selectedCategory: string;
+  // selectedFeature: string;
+  // selectedAcc: string;
+
+  onOptionChange: (id: string, path: string, name: string) => void;
+  // changeFeature: (id: string, path: string, name: string) => void;
+  // changeAccessory: (id: string, path: string, name: string) => void;
+
+  onCategoryTypeChange: (value: string) => void;
+  // onFeatureTypeChange: (value: string) => void;
+  // onAccessoryTypeChange: (value: string) => void;
+  
+  selectedOption: BasicData | undefined;
+
   skinColor: string;
-  exportData: BasicData[];
+  onSkinColorChange: (value: string) => void;
+  
+  editModeSelected: boolean;
   changeView: () => void;
-  changeFeature: (id: string, path: string, name: string) => void;
-  onCategoryChange: (value: string) => void;
-  onAccessoryChange: (value: string) => void;
-  onClickChangeSkinColor: (value: string) => void;
   exportModel: () => void;
 }
 
-export default function HudComponent({ editModeSelected,
-  selectListFeatures,
-  featureList,
-  selectedFeature,
-  selectedFeatureDisplayName,
-  selectListAccessories,
-  accessoryList,
-  selectedAcc,
+export default function HudComponent({
+  selectListCategory,
+  optionList,
+  selectedCategory,
+  onOptionChange,
+  onCategoryTypeChange,
+  selectedOption,
   skinColor,
-  exportData,
+  onSkinColorChange,
+  editModeSelected,
   changeView,
-  changeFeature,
-  onCategoryChange,
-  onAccessoryChange,
-  onClickChangeSkinColor,
   exportModel
 }: HudComponentProps) {
   const [selectorOption, setSelectorOption] = useState<number>(1);
@@ -95,47 +105,50 @@ export default function HudComponent({ editModeSelected,
               {
                 selectorOption == 1 &&
                 <>
-                  <MobileOptionSelectorComponent list={featureList}
-                    activeOption={exportData.find(e => e.id === selectedFeature)}
-                    handleClick={(id: string, path: string, name: string) => changeFeature(id, path, name)} />
+                  <MobileOptionSelectorComponent list={optionList}
+                    activeOption={selectedOption}
+                    handleClick={(id: string, path: string, name: string) => onOptionChange(id, path, name)} />
                 </>
               }
-              {
+              {/* {
                 selectorOption == 2 &&
+                <>
                 <MobileOptionSelectorComponent list={accessoryList}
-                  activeOption={exportData.find(e => e.id === selectedAcc)}
-                  handleClick={(id: string, path: string, name: string) => changeFeature(id, path, name)} />
-              }
+                  activeOption={selectedOption}
+                  handleClick={(id: string, path: string, name: string) => changeAccessory(id, path, name)} />
+                  <div>holis</div>
+                  </>
+              } */}
             </div>
             {/* FEATURES SELECTOR */}
             <div className="w-full bg-slate-100 flex">
               <div className="w-[calc(100%_-_60px)]">
                 {selectorOption == 1 &&
                   <MobileFeatureSelectorComponent
-                    list={selectListFeatures}
-                    activeOpc={selectedFeature}
-                    handleClick={(value: string) => onCategoryChange(value)}
+                    list={selectListCategory}
+                    activeOpc={selectedCategory}
+                    handleClick={(value: string) => onCategoryTypeChange(value)}
                   />
                 }
-                {
+                {/* {
                   selectorOption == 2 &&
                   <MobileFeatureSelectorComponent
                     list={selectListAccessories}
                     activeOpc={selectedAcc}
-                    handleClick={(value: string) => onAccessoryChange(value)}
+                    handleClick={(value: string) => onAccessoryTypeChange(value)}
                   />
-                }
+                } */}
                 {
-                  selectorOption == 3 &&
+                  selectorOption == 2 &&
                   <MobileColorSelectorComponent list={['F6C89B', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
                     activeColor={skinColor}
-                    handleClick={(value: string) => void onClickChangeSkinColor(value)} />
+                    handleClick={(value: string) => void onSkinColorChange(value)} />
                 }
               </div>
-              <div className="w-[60px] pt-3 cursor-pointer" onClick={() => setSelectorOption(selectorOption >= 3 ? 1 : selectorOption + 1)}>
+              <div className="w-[60px] pt-3 cursor-pointer" onClick={() => setSelectorOption(selectorOption >= 2 ? 1 : selectorOption + 1)}>
                 <div className="border-l border-slate-400 text-center flex flex-col items-center">
                   <div className={"rounded-md w-[40px] h-[40px] flex justify-center items-center"}>
-                    {selectorOption == 1 &&
+                    {/* {selectorOption == 1 &&
                       <Image
                         src='/resources/icons/buttons/accessories.svg'
                         width={30}
@@ -143,8 +156,8 @@ export default function HudComponent({ editModeSelected,
                         alt={'Color button'}
                         className='opacity-70'
                       />
-                    }
-                    {selectorOption == 2 &&
+                    } */}
+                    {selectorOption == 1 &&
                       <Image
                         src='/resources/icons/buttons/head.svg'
                         width={30}
@@ -153,7 +166,7 @@ export default function HudComponent({ editModeSelected,
                         className='opacity-70'
                       />
                     }
-                    {selectorOption == 3 &&
+                    {selectorOption == 2 &&
                       <Image
                         src='/resources/icons/buttons/features.svg'
                         width={30}
@@ -164,9 +177,9 @@ export default function HudComponent({ editModeSelected,
                     }
                   </div>
                   <p className='text-[10px] pt-1 opacity-50 w-[40px]'>
-                    {selectorOption == 1 && 'Accessor.'}
-                    {selectorOption == 2 && 'Skin'}
-                    {selectorOption == 3 && 'Features'}
+                    {/* {selectorOption == 1 && 'Accessor.'} */}
+                    {selectorOption == 1 && 'Skin'}
+                    {selectorOption == 2 && 'Features'}
                   </p>
                 </div>
               </div>
@@ -205,9 +218,9 @@ export default function HudComponent({ editModeSelected,
           {/* FEATURES SECTION */}
           <div className="h-screen">
             <FeatureSelector
-              list={[...selectListFeatures, ...selectListAccessories]}
-              activeOpc={selectedFeature}
-              handleClick={(value: string) => onCategoryChange(value)}
+              list={selectListCategory}
+              activeOpc={selectedCategory}
+              onCategoryChange={(value: string) => onCategoryTypeChange(value)}
             />
           </div>
           {/* EDIT SECTION */}
@@ -221,7 +234,7 @@ export default function HudComponent({ editModeSelected,
               </div>
               <div className="w-full">
                 <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
-                <HudFeatureTitle selectedFeature={selectedFeatureDisplayName}/>
+                <HudFeatureTitle selectedFeature={RemovedAcc(selectedCategory)}/>
               </div>
             </div>
             {/* OPTION COLOR SECTION */}
@@ -229,16 +242,16 @@ export default function HudComponent({ editModeSelected,
               <ColorSelector
                 list={['F8B290', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
                 activeColor={skinColor}
-                handleClick={(value: string) => void onClickChangeSkinColor(value)}
+                handleClick={(value: string) => void onSkinColorChange(value)}
                 listStyle="Oval"
               />
             </div>
             {/* OPTION SECTION */}
             <div className="h-full pt-8">
               <OptionSelector
-                list={featureList}
-                activeOption={exportData.find(e => e.id === selectedFeature)}
-                handleClick={(id: string, path: string, name: string) => changeFeature(id, path, name)}
+                list={optionList}
+                activeOption={selectedOption}
+                handleClick={(id: string, path: string, name: string) => onOptionChange(id, path, name)}
               />
             </div>
             {/* SKIN COLOR SECTION */}
@@ -247,13 +260,13 @@ export default function HudComponent({ editModeSelected,
               <ColorSelector
                 list={['F8B290', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
                 activeColor={skinColor}
-                handleClick={(value: string) => void onClickChangeSkinColor(value)}
+                handleClick={(value: string) => void onSkinColorChange(value)}
               />
             </div>
           </div>
         </div>
       </div>
-      {!editModeSelected && <div className="fixed pt-8 pl-8 w-fit h-fit flex">
+      {!editModeSelected && <div className="fixed pt-8 pl-8 w-fit h-fit hidden xl:flex">
         <AGButton onClickEvent={() => changeView()}>
           <div className="flex items-center justify-between">
             <p className="font-poppins text-center w-[120px] py-2">EDIT</p>
