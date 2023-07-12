@@ -4,9 +4,8 @@ import {
   GetAvatarSingleByCampaignCombination, GetAvatarSingleByCampaignCombinationString
 } from "../../utils/api.util";
 import AvatarEditor, {ChangeFeature, ChangeSkinColor, ChangeStartAnimation, SetFeaturesData} from "./editor.component";
-import {BasicData, LookAtVectors} from "../../interfaces/common.interface";
+import {FeatureBasic, LookAtVectors} from "../../interfaces/common.interface";
 import {AnimationInterface, SingleInterface} from "../../interfaces/api.interface";
-import {AGChangeCamPosition, AGChangeLookAtPosition} from "./viewer.component";
 import {LogError} from "../../utils/common.util";
 import {Module} from "../../enums/common.enum";
 import {ChangeMaterialOption} from "../../enums/model.enum";
@@ -15,7 +14,7 @@ interface AvatarSingleProps {
   campaign: string;
   combination?: number;
   combinationString?: string;
-  featureList: BasicData[];
+  featureList: FeatureBasic[];
   avatarBasePath: string;
   defaultAnimation?: string;
   defaultSkinTone?: string;

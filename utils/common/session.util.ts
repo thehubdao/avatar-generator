@@ -9,6 +9,7 @@ enum SessionConstant {
   UserInfo,
   DBInfo,
   Parameter,
+  TextureTone,
 }
 
 interface SessionRequest {

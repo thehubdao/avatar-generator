@@ -1,5 +1,6 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {GetFile} from "./firebase.util";
+import {IsWebUrl} from "./common.util";
 
 class ImporterUtil {
   private static _instance: ImporterUtil;
@@ -53,7 +54,7 @@ export async function FirebaseGltfModel(path: string, campaign?: string): Promis
 }
 
 export async function GetGltfModel(path: string) {
-  if (path.startsWith('http'))
+  if (IsWebUrl(path))
     return FetchGltfModel(path);
   else
     return FirebaseGltfModel(path);

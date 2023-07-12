@@ -9,11 +9,11 @@ import {
   GetFeaturesData,
   ReplaceModelAccessory,
   ReplaceModelFeatureOnly,
-  TransformObject3dToToonMaterial
+  TransformObject3dToNewMaterial
 } from "../../utils/model.util";
 import {
   AccessoryInfoInterface,
-  BasicData,
+  FeatureBasic,
   FeatureInfoInterface,
   LookAtVectors
 } from "../../interfaces/common.interface";
@@ -74,18 +74,18 @@ export async function ChangeStartAnimation(startAnimation: string | undefined) {
   await SetAnimation(_mixer, startAnimation);
 }
 
-export async function SetEnvironment(path?: string) {
+export async function SetStage(path?: string) {
   if (path == undefined) return;
   
-  const environment = await GetWearableOption(GlobalValues.EnvironmentId, path);
-  AddToScene(environment.scene, GlobalValues.EnvironmentId);
+  const stage = await GetWearableOption(GlobalValues.StageId, path);
+  AddToScene(stage.scene, GlobalValues.StageId);
 }
 
-export function RemoveEnvironment() {
-  RemoveFromScene(GlobalValues.EnvironmentId);
+export function RemoveStage() {
+  RemoveFromScene(GlobalValues.StageId);
 }
 
-export async function SetFeaturesData(selectListFeatures: BasicData[]) {
+export async function SetFeaturesData(selectListFeatures: FeatureBasic[]) {
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature!");
 
   _featureListData = await GetFeaturesData(_avatar.scene, selectListFeatures);
@@ -107,6 +107,8 @@ interface AvatarEditorProps {
   changeMaterial?: ChangeMaterialOption;
   lights?: ConfigLight[];
   defaultCamera?: LookAtVectors;
+  editMode?: boolean;
+  enablePan?: boolean;
 }
 
 /***
@@ -114,7 +116,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera}: AvatarEditorProps) {
+export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera, editMode, enablePan}: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -132,7 +134,7 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     _mixer = CreateAnimationMixer(_avatar.scene);
     await SetAnimation(_mixer, _avatar, undefined);
 
-    await TransformObject3dToToonMaterial(_avatar.scene, undefined, changeMaterial);
+    await TransformObject3dToNewMaterial(_avatar.scene, undefined, changeMaterial);
     AddToScene(_avatar.scene);
     AddMixer(_mixer);
   }
@@ -141,6 +143,8 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     <AvatarViewer onReady={() => onAvatarEditorReady()}
                   defaultCamPos={defaultCamera?.pos}
                   defaultCamLookAt={defaultCamera?.lookAt}
+                  editMode={editMode}
+                  enablePan={enablePan}
     />
   );
 }

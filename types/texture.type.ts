@@ -1,0 +1,1 @@
+﻿export type TextureTone = 'threeTone' | 'fourTone' | 'fiveTone';

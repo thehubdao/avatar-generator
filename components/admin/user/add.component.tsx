@@ -1,12 +1,13 @@
 import {FormEvent, useRef} from "react";
 import {AuthValues, UserRoleValues} from "../../../enums/firebase.enum";
-import AGButton from "../../common/ag-button.component";
-import AGText from "../../common/ag-text.component";
+import AGButton from "../../../ui/common/ag-button.component";
+import AGText from "../../../ui/common/ag-text.component";
 import {UserWithPass} from "../../../interfaces/firebase.interface";
 import {CreateNewUser} from "../../../utils/firebase.util";
 import {Delay, IsEmail, LogError} from "../../../utils/common.util";
 import {AdminComponents, EmailResult, Module} from "../../../enums/common.enum";
 import {ChangeComponentFunction} from "../../../interfaces/common.interface";
+import { ShowModal } from "../../../utils/modal.util";
 
 interface UserAddProps {
   changeComponent: ChangeComponentFunction;
@@ -34,10 +35,10 @@ export default function UserAdd({changeComponent}: UserAddProps) {
 
     const result = await CreateNewUser(newUser);
     if (!result.success) {
-      alert(result.errMessage);
+      ShowModal(result.errMessage ?? 'No message');
     }
     else {
-      alert("User created successfully!");
+      ShowModal("User created successfully!");
       await Delay(2000);
       changeComponent(AdminComponents.UserList);
     }
@@ -52,7 +53,7 @@ export default function UserAdd({changeComponent}: UserAddProps) {
       case EmailResult.GoodEmail:
         return account;
       case EmailResult.BadEmail:
-        alert("Wrong email, please insert a valid email or account");
+        ShowModal("Wrong email, please insert a valid email or account");
         return void LogError(Module.UserAdd, "Wrong email, please insert a valid email or account");
     }
   }
@@ -64,7 +65,7 @@ export default function UserAdd({changeComponent}: UserAddProps) {
         <p>Name</p>
         <input type="text" ref={userName} required />
         <p>User</p>
-        <input type="text" ref={userAccount} required />
+        <input type="text" ref={userName} required />
         <p>Password</p>
         <input type="password" ref={userPass} minLength={8} />
         <AGButton type="danger" form>Add</AGButton>

@@ -4,7 +4,7 @@ import {GetParameter} from "../../../utils/firebase.util";
 import {FirestoreParameters} from "../../../enums/firebase.enum";
 import {CampaignParameters} from "../../../interfaces/common.interface";
 import {CampaignParameterName} from "../../../enums/common.enum";
-import Layout from "../../../components/admin/_layout.component";
+import Layout from "../../../components/admin/_layout.component.deprecated";
 
 interface AvatarCollectionPageProps {
   isCampaign: boolean;

@@ -12,6 +12,7 @@ interface AvatarGeneratorProps {
   attributeConfig?: BasicData[];
   onlyView: boolean;
   bgColor?: string;
+  enablePan?: boolean;
 }
 
 export default function AvatarGenerator({
@@ -19,7 +20,8 @@ export default function AvatarGenerator({
                                           campaignParams,
                                           attributeConfig,
                                           onlyView,
-                                          bgColor,
+                                          bgColor, 
+                                          enablePan
                                         }: AvatarGeneratorProps) {
   return (<>
     <AvatarBuilder campaign={campaign}
@@ -30,12 +32,13 @@ export default function AvatarGenerator({
                    attributeConfig={attributeConfig}
                    onlyView={onlyView}
                    bgColor={bgColor}
+                   enablePan={enablePan}
     />
   </>);
 }
 
 export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = async (context) => {
-  const {builder, config, bg, ov} = context.query;
+  const {builder, config, bg, ov, ep} = context.query;
 
   let parsedConfig: BasicData[] | undefined = undefined;
 
@@ -65,6 +68,7 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
     attributeConfig: parsedConfig,
     bgColor: bg != undefined ? bg as string : campaignParameters?.config?.defBg,
     onlyView: ov != undefined ? (ov as string).toLowerCase() === 'true' : false,
+    enablePan: ep == undefined ? undefined : (ep as string).toLowerCase() === 't',
   };
 
   return {

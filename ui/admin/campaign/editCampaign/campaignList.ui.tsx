@@ -1,0 +1,51 @@
+import { useEffect } from "react";
+import { PageLocation } from "../../../../enums/common.enum";
+import { reset, setName } from "../../../../store/currentCampaignSlice";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { GoToPage } from "../../../../utils/router.util";
+import CampaignCard from "./campaignCard.ui";
+import { UserInterface } from "../../../../interfaces/firebase.interface";
+import { setUserInfo } from "../../../../store/authSlice";
+
+interface CampaignListProps {
+  userInfo: UserInterface;
+}
+
+export default function CampaignList({userInfo} : CampaignListProps) {
+  const campaignsList = useAppSelector(state => state.auth.userInfo?.campaign);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    dispatch(reset());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[]);
+
+  useEffect(() => {
+    const {role, name, account, email, campaign} = userInfo;
+    dispatch(setUserInfo({role, name, account, email, campaign}));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userInfo])
+
+  return (
+    <>
+      <h1 className="font-humane text-9xl text-gray-normal">CAMPAIGNS</h1>
+      <div className="pt-10 flex flex-wrap gap-5">
+        <CampaignCard create clickHandler={() => {
+          void GoToPage(PageLocation.FirstSteps)
+        }} />
+        {campaignsList === undefined || campaignsList?.length === 0 ?
+          <CampaignCard noCampaign clickHandler={() => 0} />
+          :
+          campaignsList.map((x: string) => {
+            return (
+              <CampaignCard campaign={x} key={x} clickHandler={() => {
+                dispatch(setName(x));
+                void GoToPage(PageLocation.AdminCampaign);
+              }} />
+            )
+          })
+        }
+      </div>
+    </>
+  )
+}

@@ -1,7 +1,7 @@
 ﻿import {Component} from "react";
 import Head from "next/head";
 import Image from "next/image";
-import AGText from "../../../components/common/ag-text.component";
+import AGText from "../../../ui/common/ag-text.component";
 import {IFrameEvents, IFrameValues} from "../../../enums/common.enum";
 
 import replitAvatarIFramePic from '../../../public/resources/images/info/replitAvatarIFrame.jpg';

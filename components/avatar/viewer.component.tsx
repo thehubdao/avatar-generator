@@ -1,5 +1,15 @@
 import {useEffect, useRef} from "react";
-import {AnimationMixer, Clock, Object3D, PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
+import {
+  AnimationMixer,
+  Clock,
+  EquirectangularReflectionMapping,
+  Object3D,
+  PerspectiveCamera,
+  Scene,
+  SRGBColorSpace,
+  Vector3,
+  WebGLRenderer
+} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {LogError, LogWarning} from "../../utils/common.util";
 import {Module} from "../../enums/common.enum";
@@ -11,6 +21,7 @@ import {
   GetBaseScene
 } from "../../utils/threejs/scene.util";
 import {AGVector3} from "../../interfaces/common.interface";
+import {GetTextureFromFile, GetToneTexture} from "../../utils/threejs/texture.util";
 
 //#region Logic
 let _scene: Scene | undefined;
@@ -114,6 +125,19 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
   });
 }
 
+export async function SetEnvironmentMap(textureUrl: string | undefined) {
+  if (_scene == undefined) return void LogError(Module.Viewer, "Missing scene on set env map!");
+  
+  const texture = await GetTextureFromFile(textureUrl);
+  if (texture == undefined) return;
+  
+  texture.mapping = EquirectangularReflectionMapping;
+  texture.colorSpace = SRGBColorSpace;
+
+  _scene.background = texture;
+  _scene.environment = texture;
+}
+
 //#endregion
 
 //#region Component
@@ -121,9 +145,11 @@ interface AvatarViewerProps {
   onReady: () => Promise<void>;
   defaultCamPos?: AGVector3;
   defaultCamLookAt?: AGVector3;
+  editMode?: boolean;
+  enablePan?: boolean;
 }
 
-export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}: AvatarViewerProps) {
+export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, editMode, enablePan}: AvatarViewerProps) {
   const threeCanvas = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -138,6 +164,10 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}:
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
+  async function preload() {
+    await GetToneTexture();
+  }
 
   async function initScene() {
     if (threeCanvas.current == null) return LogError(Module.AvatarGenerator, "Error initializing canvas!");
@@ -145,7 +175,7 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}:
     _scene = GetBaseScene();
     _camera = GetBaseCamera(defaultCamPos);
     _renderer = GetBaseRenderer();
-    _controls = GetBaseCameraControls(_camera, _renderer.domElement, defaultCamLookAt);
+    _controls = GetBaseCameraControls(_camera, _renderer.domElement, defaultCamLookAt, enablePan);
 
     // mount scene
     threeCanvas.current.appendChild(_renderer.domElement);
@@ -156,6 +186,8 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}:
     // remember these initial values
     _tanFOV = Math.tan(((Math.PI / 180) * _camera.fov / 2));
     _windowHeight = window.innerHeight;
+    
+    await preload();
 
     window.addEventListener('resize', onWindowResize, false);
     Animate();
@@ -215,7 +247,7 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt}:
 
   return (
     <>
-      <div className="relative h-full" ref={threeCanvas} onMouseDown={() => stopCamMovement()}/>
+      <div className={`relative h-full w-full ${editMode ? 'xl:w-[42%]':''} xl:overflow-hidden xl:flex xl:justify-center transition-all duration-300`} ref={threeCanvas} onMouseDown={() => stopCamMovement()}/>
     </>
   );
 }

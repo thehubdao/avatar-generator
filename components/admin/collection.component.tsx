@@ -10,9 +10,9 @@ import AvatarEditor, {
   GetAvatarGLB,
   SetFeaturesData
 } from "../avatar/editor.component";
-import AGLoading from "../common/ag-loading.component";
+import AGLoading from "../../ui/common/ag-loading.component";
 import {Delay, LogError, LogWarning, SetMapToMap} from "../../utils/common.util";
-import AGButton from "../common/ag-button.component";
+import AGButton from "../../ui/common/ag-button.component";
 import {TakeCanvasPicture} from "../avatar/viewer.component";
 import {SaveFile} from "../../utils/exporter.util";
 import {
@@ -154,11 +154,11 @@ export default function AvatarCollection({
 
     for (const feature of featureList) {
       if (feature.index == undefined) {
-        void LogError(Module.CollectionComponent, `Missing index on ${feature.id} feature type!`);
+        void LogError(Module.CollectionComponent, `Missing index on ${feature.meshName} feature type!`);
         continue;
       }
 
-      _featureOptionListData.set(feature.index, featureData.value?.filter(f => f.type === feature.id));
+      _featureOptionListData.set(feature.index, featureData.value?.filter(f => f.type === feature.meshName));
     }
   }
 

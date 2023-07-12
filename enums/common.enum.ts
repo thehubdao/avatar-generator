@@ -6,7 +6,7 @@
   AccGroup = 'Accessories.AG',
   AvatarBase = 'base_mesh/MetaAvatarHub.glb',
   CollectorIndexSeparator = '-',
-  EnvironmentId = 'environment',
+  StageId = 'stage',
 }
 
 export enum ExportAttributeValues {
@@ -36,6 +36,8 @@ export enum PageLocation {
   AssetList = '/admin/assets/list',
   Login = '/admin/login',
   FirstSteps = '/admin/firstSteps',
+  AdminCampaign = '/admin/campaign',
+  AssetCreate = '/admin/campaign/createAsset',
 }
 
 export enum AdminComponents {
@@ -62,7 +64,8 @@ export enum Module {
   CollectionComponent = 'CollectionComponent',
   ExporterUtil = 'ExporterUtil',
   CollectionUtil = 'CollectionUtil',
-  Single = 'SingleComponent', 
+  Single = 'SingleComponent',
+  TextureUtil = 'TextureUtil', 
 }
 
 export enum EmailResult {

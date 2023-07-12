@@ -1,36 +1,51 @@
-﻿import {useState} from "react";
+﻿import { useEffect, useState } from "react";
 import Head from "next/head";
-import {UserInterface} from "../../interfaces/firebase.interface";
-import Layout from "../../components/admin/_layout.component";
-import Navbar from "../../components/admin/navbar.component";
-import AGLoading from "../../components/common/ag-loading.component";
+import { UserInterface } from "../../interfaces/firebase.interface";
+import Layout from "../../ui/admin/admin.layout";
+import AGLoading from "../../ui/common/ag-loading.component";
+import { GetCurrentUserInfo, HandleNotLoggedIn } from "../../utils/firebase.util";
+import Campaigns from "../../ui/admin/campaign/editCampaign/campaignList.ui";
 
 export default function Admin() {
   const [loading, setLoading] = useState<boolean>(true);
-  const [userInfo, setUserInfo] = useState<UserInterface>();
-  const [selectedCampaign, setSelectedCampaign] = useState<string>();
+  const [userInfo, setUserInfo] = useState<UserInterface>({
+    role: 0,
+    name: '',
+    account: '',
+    email: '',
+    campaign: []
+  });
 
-  function updateUserInfo(user?: UserInterface) {
+  async function updateUserInfo() {
+    const uInfo = await GetCurrentUserInfo();
     setLoading(false);
-    setUserInfo(user);
-    setSelectedCampaign(user?.campaign?.at(0));
+    uInfo && setUserInfo(uInfo);
   }
+
+  useEffect(() => {
+    const componentDidMount = async () => {
+      const isNotLogIn = await HandleNotLoggedIn();
+      if (isNotLogIn)
+        return;
+
+      await updateUserInfo();
+    };
+
+    componentDidMount()
+      .catch(err => console.error(err));
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
       <Head>
         <title>Admin Dashboard</title>
       </Head>
-      <AGLoading loading={loading} transparency/>
-      <Layout userInfo={userInfo}
-              currentCampaign={selectedCampaign}
-              setUserInfo={(user) => updateUserInfo(user)}
-              setCurrentCampaign={(campaign) => setSelectedCampaign(campaign)}>
-        {!loading &&
-            <Navbar userRole={userInfo?.role} campaign={selectedCampaign} campaignList={userInfo?.campaign}>
-            </Navbar>
-        }
+      <Layout>
+        <Campaigns userInfo={userInfo} />
       </Layout>
+      <AGLoading loading={loading} bgColor="F1F5F9" />
     </>
   );
 }
