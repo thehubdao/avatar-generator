@@ -6,7 +6,7 @@ import { IoMdArrowBack } from "react-icons/io";
 
 interface ConfirmationStepUIProps {
   ready: boolean;
-  handleNextStep: () => void;
+  handleNextStep: () => Promise<void>;
 }
 
 export default function ConfirmationStepUI({ ready = false, handleNextStep }: ConfirmationStepUIProps) {
@@ -41,9 +41,7 @@ export default function ConfirmationStepUI({ ready = false, handleNextStep }: Co
           }}>
             <IoMdArrowBack />
           </AGButton>
-          <AGButton nm align="start" onClickEvent={() => {
-            handleNextStep();
-          }}>
+          <AGButton nm align="start" onClickEvent={() => handleNextStep()}>
             Create
           </AGButton>
         </div>
