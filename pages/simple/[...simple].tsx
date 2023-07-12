@@ -65,7 +65,7 @@ export const getServerSideProps: GetServerSideProps<AvatarSimplePageProps> = asy
     featureList: campaignParameters?.features ?? [],
     avatarBasePath: campaignParameters?.armature ?? GlobalValues.AvatarBase,
     defaultAnimation: campaignParameters?.config?.defAnimation,
-    defaultSkinTone: campaignParameters?.config?.defSkinColor,
+    defaultSkinTone: campaignParameters?.config?.skin?.defColor,
     defaultCamPos: campaignParameters?.config?.defCam,
     changeMaterial: campaignParameters?.config?.changeMaterial,
   };
