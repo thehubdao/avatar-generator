@@ -96,8 +96,8 @@ export function MixArrays<T>(arr1: T[] | undefined, arr2: T[] | undefined) {
   return mixed;
 }
 
-export function RemovedAcc(text: string) {
-  if (!text.endsWith(GlobalValues.AccEnd)) return text;
+export function RemovedAcc(text: string | undefined) {
+  if (text == undefined || !text.endsWith(GlobalValues.AccEnd)) return text;
   
   return text.slice(0, - GlobalValues.AccEnd.length);
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 
 interface hudTitleProps {
-  selectedFeature: string
+  selectedFeature: string | undefined
 }
 
 /**
@@ -11,8 +11,8 @@ interface hudTitleProps {
  */
 const HudFeatureTitle = ({ selectedFeature }: hudTitleProps) => {
   // * State for the current and next HUD titles
-  const [currentTitle, setCurrentTitle] = useState('HUD');
-  const [nextTitle, setNextTitle] = useState('HUD');
+  const [currentTitle, setCurrentTitle] = useState<string>();
+  const [nextTitle, setNextTitle] = useState<string>();
 
   // * State for controlling the animation
   const [runAnimation, setRunAnimation] = useState(false);
