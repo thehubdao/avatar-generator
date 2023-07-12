@@ -11,11 +11,13 @@ import AssetsCountStep from "./assetsCountStep.ui";
 import FeaturesConfig from "./featuresConfigStep.ui";
 import ConfirmationStep from "./confirmationStep.ui";
 
-import CreateCampaign from "../../../../components/admin/campaign/createCampaign.component";
+import { setName } from "../../../../store/addCampaignSlice";
 
-import { setName, setReady } from "../../../../store/addCampaignSlice";
+interface AddCampaignProps {
+  setAvatarBaseFile: (file: File | null) => Promise<void>;
+}
 
-export default function AddCampaign() {
+export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
   const name = useAppSelector(state => state.addCampaign.name);
   const dispatch = useAppDispatch();
   
@@ -44,8 +46,8 @@ export default function AddCampaign() {
     }
   }
 
-  function onSubmit() {
-    dispatch(setReady(true));
+  async function onSubmit() {
+    await setAvatarBaseFile(campaignBaseInput.current?.files?.item(0) ?? null);
   }
 
   return (
@@ -112,16 +114,13 @@ export default function AddCampaign() {
                   <FeaturesConfig ready={true} featuresCount={featuresCount} />
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <ConfirmationStep ready={true} handleNextStep={() => {
-                    onSubmit();
-                  }}/>
+                  <ConfirmationStep ready={true} handleNextStep={() => onSubmit()}/>
                 </SwiperSlide>
               </Swiper>
             </div>
           </div>
         }
       </div>
-      <CreateCampaign baseMeshFile={campaignBaseInput.current?.files?.item(0)} />
     </>
   )
 }
