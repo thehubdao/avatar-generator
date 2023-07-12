@@ -80,7 +80,7 @@ export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel:
   baseModel.children.splice(featureInfo.index, 1);
   baseModel.add(newFeature);
   
-  featureInfo.index = baseModel.children.length;
+  featureInfo.index = baseModel.children.length - 1;
   featureInfo.ref = newFeature;
 }
 
