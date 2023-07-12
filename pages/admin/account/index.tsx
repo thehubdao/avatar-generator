@@ -1,6 +1,6 @@
 import Head from "next/head";
 import Layout from "../../../ui/admin/admin.layout";
-import AdminAccount from "../../../ui/admin/account/account.ui";
+import AdminAccountComponent from "../../../components/admin/account/account.component";
 
 export default function AccountView() {
 
@@ -10,7 +10,7 @@ export default function AccountView() {
         <title>Admin Account</title>
       </Head>
       <Layout>
-        <AdminAccount />
+        <AdminAccountComponent />
       </Layout>
     </>
   )
