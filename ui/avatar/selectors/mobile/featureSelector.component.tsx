@@ -17,17 +17,17 @@ function optionList({list, activeOpc, handleClick}: props) {
     handleClick(id);
   }
 
-  return list?.map((opt) => {
+  return list?.map((opt: FeatureBasic, index: number) => {
     return (
-      <SwiperSlide className='flex flex-col items-center' key={opt.meshName}>
+      <SwiperSlide className='flex flex-col items-center justify-center' key={index}>
         <div
-          className={'rounded-md transition duration-200 ease-in-out w-[40px] h-[40px] flex items-center justify-center' + (activeOpc == opt.meshName ? ' nm-flat-slate-100' : '')}
-          onClick={(event: MouseEvent) => selectFeature(event, opt.meshName)}>
-          <Image src={'/resources/icons/features/' + opt.meshName + '.svg'} width={25} height={25} alt={opt.displayName}
+          className={'rounded-md m-auto transition duration-200 ease-in-out w-[40px] h-[40px] flex items-center justify-center' + (activeOpc == opt.displayName ? ' nm-flat-slate-100' : '')}
+          onClick={(event: MouseEvent) => selectFeature(event, opt.displayName)}>
+          <Image src={'/resources/icons/features/' + opt.displayName + '.svg'} width={25} height={25} alt={opt.displayName}
                  className='opacity-80'/>
         </div>
         <p
-          className={'text-[10px] pt-1 opacity-50' + (activeOpc == opt.meshName ? ' opacity-90 text-slate-700' : '')}>{opt.displayName}</p>
+          className={'text-[10px] text-center pt-1 opacity-50' + (activeOpc == opt.displayName ? ' opacity-90 text-slate-700' : '')}>{opt.displayName}</p>
       </SwiperSlide>
     )
   });

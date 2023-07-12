@@ -18,7 +18,7 @@ export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetPr
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const assetName = useAppSelector(state => state.addAsset.name);
   const assetLocation = useAppSelector(state => state.addAsset.location);
-  const assetStorage = useAppSelector(state => state.addAsset.storage);
+  const assetType = useAppSelector(state => state.addAsset.type);
   const assetReady = useAppSelector(state => state.addAsset.ready);
 
   const dispatch = useAppDispatch();
@@ -29,7 +29,7 @@ export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetPr
     const formData: Partial<AssetInterface> = {};
 
     formData.name = assetName;
-    formData.type = assetStorage;
+    formData.type = assetType;
 
     if (objectFile) {
       newFile = await UploadFile(objectFile, uploadTo(), formData.type, campaignName);
