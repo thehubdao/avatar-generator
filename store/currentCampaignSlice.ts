@@ -19,7 +19,7 @@ const initialState: CampaignStateInterface = {
     armature: '',
     features: undefined,
     accessories: undefined,
-    config: undefined
+    config: {}
   },
   assets: {
     features: undefined,
