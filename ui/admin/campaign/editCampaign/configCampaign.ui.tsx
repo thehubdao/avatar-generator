@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
 import AGButton from "../../../common/ag-button.component";
 import { AiOutlineCloudDownload, AiOutlineCloudUpload, AiOutlineEye, AiOutlineVideoCamera } from "react-icons/ai";
@@ -6,18 +6,20 @@ import { MdKeyboardArrowDown, MdOutlineColorLens } from "react-icons/md";
 import ColorPicker from "./colorPicker.ui";
 import { IoSettingsOutline } from "react-icons/io5";
 import { BsLightbulb } from "react-icons/bs";
-import { CampaignConfig } from "../../../../interfaces/common.interface";
-import { useAppSelector } from "../../../../store/hooks";
+import { CampaignConfig, ColorConfig } from "../../../../interfaces/common.interface";
 
 interface ConfigCampaignProps {
   configData?: CampaignConfig;
-  downloadFile: ((path: string) => void) | ((path: string) => Promise<void>);
+  downloadAvatarBase: (() => void) | (() => Promise<void>);
+  updateColorConfig: (element: string, colorConfig: ColorConfig) => Promise<void>;
 }
 
-export default function ConfigCampaign({ configData, downloadFile }: ConfigCampaignProps) {
-  const baseMeshLink = useAppSelector(state => state.currentCampaign.parameters)
+export default function ConfigCampaign({ configData, downloadAvatarBase, updateColorConfig }: ConfigCampaignProps) {
   const [openConfig, setOpenConfig] = useState<boolean>(false);
   const [configOption, setConfigOption] = useState<string>('base');
+  const [colorOption, setColorOption] = useState<string>('avatarHubSkin');
+
+  const colorConfig = useRef<HTMLSelectElement>(null);
 
   const changeConfigOption = (e: React.MouseEvent, destiny: string) => {
     const target = e.currentTarget as HTMLElement;
@@ -35,6 +37,10 @@ export default function ConfigCampaign({ configData, downloadFile }: ConfigCampa
     target.classList.add('opacity-100', 'text-purple', 'bg-opacity-100', 'shadow-none');
 
     setConfigOption(destiny);
+  }
+
+  const changeColorConfigOption = () => {
+    setColorOption(colorConfig.current?.value ?? '');
   }
 
   return (
@@ -65,7 +71,7 @@ export default function ConfigCampaign({ configData, downloadFile }: ConfigCampa
                           <p>View Armature</p>
                         </div>
                       </AGButton>
-                      <AGButton fit nm onClickEvent={() => downloadFile(baseMeshLink.armature)}>
+                      <AGButton fit nm onClickEvent={() => downloadAvatarBase()}>
                         <div className="flex items-center p-2 gap-2">
                           <AiOutlineCloudDownload />
                           <p>Download</p>
@@ -96,13 +102,24 @@ export default function ConfigCampaign({ configData, downloadFile }: ConfigCampa
                       <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
                         <MdKeyboardArrowDown />
                       </div>
-                      <select name="" id="" className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer">
-                        <option defaultValue={'Skin color'} className="bg-bg py-2 px-4">Skin color</option>
+                      <select ref={colorConfig} className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" onChange={() => changeColorConfigOption()}>
+                        <option value={'avatarHubSkin'} className="bg-bg py-2 px-4" >Skin color</option>
+                        {/* put here the features and accessories filtered by isMulticolor boolean data */}
                       </select>
                     </div>
-                    <div className="px-2">
-                      <ColorPicker color="#ff0000" id="skin" specificPalette />
-                    </div>
+                    {
+                      colorOption === 'avatarHubSkin' &&
+                      <div className="px-2">
+                        <ColorPicker
+                          materialName={configData?.skin?.materialName ?? ''}
+                          color={configData?.skin?.defColor ?? 'FFFFFF'}
+                          id="configColorPicker"
+                          usePalette={configData?.skin?.usePalette ?? false}
+                          colorList={configData?.skin?.colorPalette}
+                          updateColorConfig={(colorConfig: ColorConfig) => updateColorConfig(colorOption, colorConfig)}
+                        />
+                      </div>
+                    }
                   </div>
                 }
                 {/* CAMERA CONFIG */}
@@ -204,7 +221,7 @@ export default function ConfigCampaign({ configData, downloadFile }: ConfigCampa
               <div onClick={e => changeConfigOption(e, 'base')} className={`w-10 h-10 text-2xl bg-white rounded-full flex justify-center items-center cursor-pointer text-purple bg-opacity-100 shadow-none`}>
                 <RxAvatar className="pointer-events-none" />
               </div>
-              <div onClick={e => changeConfigOption(e, 'color')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer hidden">
+              <div onClick={e => changeConfigOption(e, 'color')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer">
                 <MdOutlineColorLens className="pointer-events-none" />
               </div>
               <div onClick={e => changeConfigOption(e, 'camera')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer hidden">
