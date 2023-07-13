@@ -434,6 +434,7 @@ export default function AvatarBuilder({
                   // selectedFeature={selectedFeature}
                   // selectedAcc={selectedAcc}
                   
+                  campaignSkinColorConfig={campaignConfig.skin || {}}
                   skinColor={skinColor}
                   changeView={() => {
                     setEditModeSelected(!editModeSelected);
