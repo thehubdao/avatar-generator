@@ -13,9 +13,11 @@
           'work': ['var(--work-font)', 'sans-serif'],
           'humane': ['var(--humane-font)', 'sans-serif'],
           'poppins': ['var(--poppins-font)', 'sans-serif'],
+          'featuresIcons': ['var(--features-icons-font)', 'sans-serif'],
         },
         colors: {
           gray: {
+            extralight: '#E4E7EB',
             light: '#A3AFBD',
             normal: '#54575C',
             dark: '#111111'
