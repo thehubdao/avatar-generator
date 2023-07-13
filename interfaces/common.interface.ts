@@ -62,6 +62,10 @@ export interface CampaignConfig {
   accCamPos?: Record<string, LookAtVectors>;
   featuresSkin?: Record<string, ColorConfig>;
   accSkin?: Record<string, ColorConfig>;
+
+  // @deprecated: Data is replaced by skin: ColorConfig
+  defSkin?: string,
+  defSkinColor?: string,
 }
 
 
@@ -74,7 +78,7 @@ export interface CampaignParameters {
   armature: string;
   features?: FeatureBasic[];
   accessories?: FeatureBasic[];
-  config?: CampaignConfig;
+  config: CampaignConfig;
 }
 
 export interface CampaignAssets {
