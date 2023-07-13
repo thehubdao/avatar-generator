@@ -1,135 +1,166 @@
 import { useState } from "react";
 import AGButton from "../../../common/ag-button.component";
 import { MdKeyboardArrowDown } from "react-icons/md";
-
+import { ColorConfig } from "../../../../interfaces/common.interface";
+import { EXAMPLE_PALETTES } from "../../../../constants/colorPalettes.constant";
+ 
 interface ColorPickerProps {
+  materialName: string;
   color: string;
   id: string;
-  specificPalette: boolean;
+  usePalette: boolean;
   colorList?: string[];
+  updateColorConfig: (colorConfig: ColorConfig) => Promise<void>;
 }
 
-const colorArr = [
-  '#55efc4',
-  '#81ecec',
-  '#74b9ff',
-  '#a29bfe',
-  '#dfe6e9',
-  '#ffeaa7',
-  '#fab1a0',
-  '#ff7675',
-  '#fd79a8',
-  '#636e72',
-  '#00b894',
-  '#00cec9',
-  '#0984e3',
-  '#6c5ce7',
-  '#b2bec3',
-  '#fdcb6e',
-  '#e17055',
-  '#d63031',
-  '#e84393',
-  '#2d3436'
-]
+export default function ColorPicker({ materialName, color, id, usePalette, colorList, updateColorConfig }: ColorPickerProps) {
+  const maxColorsLength = 10;
 
-export default function ColorPicker({ color, id, specificPalette, colorList }: ColorPickerProps) {
+  const [defaultMaterialName, setDefaultMaterialName] = useState<string>(materialName);
   const [defaultColor, setDefaultColor] = useState<string>(color);
-  const [paletteSelector, setPaletteSelector] = useState<boolean>(specificPalette);
-  const [paletteLength, setPaletteLength] = useState<number>(colorList?.length || 20);
-  const [paletteColors, setPaletteColors] = useState<string[]>(colorList || colorArr);
-  const [defaultPaletteColor, setDefaultPaletteColor] = useState<number>(1);
+  const [paletteSelector, setPaletteSelector] = useState<boolean>(usePalette);
+  const [paletteLength, setPaletteLength] = useState<number>(colorList?.length || maxColorsLength);
+  const [paletteColors, setPaletteColors] = useState<string[]>(colorList || [...EXAMPLE_PALETTES]);
+  const [defaultPaletteColor, setDefaultPaletteColor] = useState<number>(paletteColors.indexOf(defaultColor));
 
-  const setNewPalette = () => {
+  const changePalette = (value = paletteLength) => {
     let newArray = [...paletteColors];
-    if (newArray.length > paletteLength) {
-      newArray = newArray.slice(0, paletteLength);
-    } else if (newArray.length < paletteLength) {
-      const newItemsLength = paletteLength - newArray.length;
+    if (newArray.length > value) {
+      newArray = newArray.slice(0, value);
+    } else if (newArray.length < value) {
+      const newItemsLength = value - newArray.length;
       for (let index = 0; index < newItemsLength; index++) {
-        newArray.push('#FF0000');
+        newArray.push('FF0000');
       }
     }
     setPaletteColors(newArray);
   }
 
+  const sendNewColorConfig = async () => {
+    const newColorConfig = {
+      materialName: defaultMaterialName,
+      defColor: paletteSelector ? paletteColors[defaultPaletteColor] : defaultColor,
+      colorPalette: paletteSelector ? paletteColors : [],
+      usePalette: paletteSelector,
+    }
+    await updateColorConfig(newColorConfig)
+  }
+
+  function onChangePaletteLength(value: number) {
+    let newLength = value;
+    if (value == undefined || value < 1) newLength = 1;
+    if (value > maxColorsLength) newLength = maxColorsLength;
+
+    changePalette(newLength);
+    setPaletteLength(newLength);
+  }
+
   return (
     <>
       <div className="my-2">
-        <div className="pt-3 pb-4 flex gap-2">
-          <label htmlFor={id + '-colorselector'} className="relative w-6 h-6 shadow-inset-soft bg-bg rounded-lg flex justify-center items-center cursor-pointer">
-            <div className={`w-3 h-3 bg-purple rounded-full ${paletteSelector ? '' : 'hidden'}`}></div>
-            <p className="absolute left-[120%] whitespace-nowrap select-none">with specific palette</p>
-          </label>
-          <input type="checkbox" id={id + '-colorselector'} checked={paletteSelector} onChange={e => { setPaletteSelector(e.target.checked) }} className="absolute hidden" />
-        </div>
+        <p className="font-poppins font-medium text-purple pb-2 mt-6">Material:</p>
+        <input type="text" className="shadow-inset-soft hover:shadow-inset-medium px-4 py-2 min-h-[48px] w-full rounded-lg bg-bg"
+          defaultValue={defaultMaterialName}
+          onChange={ e => {
+            setDefaultMaterialName(e.currentTarget.value);
+          }}/>
         {
-          paletteSelector ?
-            <div>
-              <div>
-                <p className="font-poppins font-medium text-purple mt-2">Colors number:</p>
-                <div className="flex items-center gap-2">
-                  <input type="number" className="shadow-inset-soft hover:shadow-inset-medium px-4 py-2 min-h-[48px] w-20 rounded-lg text-center bg-bg" min='5' max='20' defaultValue={paletteLength} onChange={e => {
-                    setPaletteLength(parseInt(e.target.value));
-                  }} />
-                  <AGButton nm onClickEvent={() => {
-                    setNewPalette();
-                  }}>
-                    <p className="py-2">Set</p>
-                  </AGButton>
-                </div>
+          defaultMaterialName.length > 0 ?
+            <>
+              <div className="pt-3 pb-4 flex gap-2">
+                <label htmlFor={id + '-colorselector'} className="relative w-6 h-6 shadow-inset-soft bg-bg rounded-lg flex justify-center items-center cursor-pointer">
+                  <div className={`w-3 h-3 bg-purple rounded-full ${paletteSelector ? '' : 'hidden'}`}></div>
+                  <p className="absolute left-[120%] whitespace-nowrap select-none">with specific palette</p>
+                </label>
+                <input type="checkbox" id={id + '-colorselector'} checked={paletteSelector} onChange={e => { setPaletteSelector(e.target.checked) }} className="absolute hidden" />
               </div>
-              <div>
-                <p className="font-poppins font-medium text-purple mt-2">Default color:</p>
-                <div className="flex items-center gap-2">
-                  <div className="relative w-[80px] cursor-pointer">
-                    <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
-                      <MdKeyboardArrowDown />
-                    </div>
-                    <select name="" id="" className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" onChange={e => setDefaultPaletteColor(parseInt(e.target.value))}>
-                      {
-                        paletteColors.map((el, index) => {
-                          return (
-                            <option key={index + 1} value={index + 1} className="relative bg-bg py-2 px-4 h-12">
-                              {index + 1}
-                            </option>
-                          )
-                        })
-                      }
-                    </select>
-                  </div>
-                  <div className="w-20 h-12 m-2 rounded-lg" style={{ background: paletteColors[defaultPaletteColor - 1] }}></div>
-                </div>
-              </div>
-              <p className="font-poppins font-medium text-purple pb-2 mt-2">Palette:</p>
-              <div className="grid grid-cols-10 gap-2">
-                {
-                  paletteColors.map((color, index) => {
-                    return (
-                      <div key={index} className="relative w-7 h-7 overflow-hidden rounded-full">
-                        <input type="color" name="" id={`${id}-color-${index}`} value={color} className="absolute top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 w-12 h-12" onChange={e => {
-                          const arr = [...paletteColors];
-                          arr[index] = e.target.value;
-                          setPaletteColors(arr);
-                        }} />
-                        <div className="absolute bg-bg w-4 h-4 rounded-full top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 flex justify-center items-center pointer-events-none">
-                          <p className="font-normal text-xs">{index + 1}</p>
+              {
+                paletteSelector ?
+                  <div>
+                    {/* default palette color section */}
+                    <div>
+                      <p className="font-poppins font-medium text-purple">Default color:</p>
+                      <div className="flex items-center gap-2">
+                        <div className="relative w-[80px] cursor-pointer">
+                          <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
+                            <MdKeyboardArrowDown />
+                          </div>
+                          <select name="" id=""
+                            defaultValue={defaultPaletteColor}
+                            onChange={e => setDefaultPaletteColor(parseInt(e.target.value))}
+                            className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" >
+                            {
+                              paletteColors.map((el, index) => {
+                                return (
+                                  <option key={index} value={index} className="relative bg-bg py-2 px-4 h-12">
+                                    {index + 1}
+                                  </option>
+                                )
+                              })
+                            }
+                          </select>
                         </div>
+                        <div className="w-20 h-12 m-2 rounded-lg" style={{ background: `#${paletteColors[defaultPaletteColor]}` }}></div>
                       </div>
-                    )
-                  })
-                }
+                    </div>
+                    {/* set the number of colors */}
+                    <div>
+                      <p className="font-poppins font-medium text-purple mt-2">Colors number:</p>
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          className="shadow-inset-soft hover:shadow-inset-medium px-4 py-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
+                          defaultValue={paletteLength}
+                          value={paletteLength}
+                          onChange={e => onChangePaletteLength(e.currentTarget.valueAsNumber)}
+                        />
+                      </div>
+                    </div>
+                    {/* palette */}
+                    <div>
+                      <p className="font-poppins font-medium text-purple pb-2 mt-2">Palette:</p>
+                      <div className="grid grid-cols-5 gap-2">
+                        {
+                          paletteColors.map((color, index) => {
+                            return (
+                              <div key={index} className="relative w-9 h-9 overflow-hidden rounded-full">
+                                <input type="color" name="" id={`${id}-color-${index}`} value={`#${color}`}
+                                  className="absolute top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 w-12 h-12"
+                                  onChange={e => {
+                                    const arr = [...paletteColors];
+                                    arr[index] = e.target.value.substring(1);
+                                    setPaletteColors(arr);
+                                  }}
+                                />
+                                <div className="absolute bg-bg w-4 h-4 rounded-full top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 flex justify-center items-center pointer-events-none">
+                                  <p className="font-normal text-xs">{index + 1}</p>
+                                </div>
+                              </div>
+                            )
+                          })
+                        }
+                      </div>
+                    </div>
+                  </div>
+                  :
+                  <div>
+                    <p className="font-poppins font-medium text-purple pb-2">Default color:</p>
+                    <div className="relative rounded-full overflow-hidden w-full h-12">
+                      <input type="color" name="" id={id + '-picker'} value={`#${defaultColor}`} className="absolute -top-2 -left-2 w-[130%] h-[130%]"
+                        onChange={e => { setDefaultColor(e.target.value.substring(1)) }} />
+                      <div className="absolute bottom-2 left-2/4 -translate-x-2/4 rounded-full bg-bg shadow-inset-hard w-16 flex justify-center items-center">
+                        <p className="text-xs">{defaultColor}</p>
+                      </div>
+                    </div>
+                  </div>
+              }
+              <div className="pt-4">
+                <AGButton nm full onClickEvent={() => sendNewColorConfig()}>
+                  <p className="py-2">Update</p>
+                </AGButton>
               </div>
-            </div>
-            :
-            <div>
-              <p className="font-poppins font-medium text-purple pb-2">Default color:</p>
-              <div className="relative rounded-full overflow-hidden w-full h-12">
-                <input type="color" name="" id={id + '-picker'} value={defaultColor} className="absolute -top-2 -left-2 w-[130%] h-[130%]" onChange={e => { setDefaultColor(e.target.value) }} />
-                <div className="absolute bottom-2 left-2/4 -translate-x-2/4 rounded-full bg-bg shadow-inset-hard w-16 flex justify-center items-center">
-                  <p className="text-xs">{defaultColor}</p>
-                </div>
-              </div>
-            </div>
+            </>
+            : <p className="text-xs pt-1 max-w-[252px]"> <span className="font-bold text-purple">*</span>Define a material name to start!, remember that the name must be the same material name on <span className="font-bold text-purple">Avatar Base (AB)</span></p>
         }
       </div>
     </>
