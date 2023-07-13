@@ -14,7 +14,7 @@ import ConfirmationStep from "./confirmationStep.ui";
 import { setName } from "../../../../store/addCampaignSlice";
 
 interface AddCampaignProps {
-  setAvatarBaseFile: (file: File | null) => Promise<void>;
+  setAvatarBaseFile: (file: File | undefined) => Promise<void>;
 }
 
 export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
@@ -47,7 +47,7 @@ export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
   }
 
   async function onSubmit() {
-    await setAvatarBaseFile(campaignBaseInput.current?.files?.item(0) ?? null);
+    await setAvatarBaseFile(campaignBaseInput.current?.files?.item(0) ?? undefined);
   }
 
   return (

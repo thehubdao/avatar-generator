@@ -19,7 +19,7 @@ export default function CreateCampaign() {
   const campaignList = useAppSelector(state => state.auth.userInfo?.campaign);
   const dispatch = useAppDispatch();
 
-  async function submitCampaign(avatarBaseFile: File | null) {
+  async function submitCampaign(avatarBaseFile: File | undefined) {
     const userInfo = await GetCurrentUser();
     if (userInfo == null) {
       dispatch(reset());
@@ -64,6 +64,6 @@ export default function CreateCampaign() {
   }
 
   return (
-    <CreateCampaignUI setAvatarBaseFile={(file: File | null) => submitCampaign(file)} />
+    <CreateCampaignUI setAvatarBaseFile={(file: File | undefined) => submitCampaign(file)} />
   )
 }
