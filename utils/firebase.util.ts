@@ -282,7 +282,7 @@ export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlo
 
   try {
     const newLocation = campaign ?
-      `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}/${location}` :
+      `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}${AddOrRemoveSlash(location)}` :
       location !== '/' ?
         location :
         FirestoreGlobalLocation.Parameters;
