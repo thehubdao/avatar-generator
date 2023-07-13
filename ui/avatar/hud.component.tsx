@@ -2,7 +2,7 @@ import AGButton from "../common/ag-button.component";
 import { BsArrowRight } from 'react-icons/bs';
 import { CiEdit, CiSaveUp2 } from 'react-icons/ci';
 import { FeatureInterface } from "../../interfaces/api.interface";
-import { BasicData, FeatureBasic } from "../../interfaces/common.interface";
+import { BasicData, ColorConfig, FeatureBasic } from "../../interfaces/common.interface";
 import MobileOptionSelectorComponent from "./selectors/mobile/optionSelector.component";
 import MobileFeatureSelectorComponent from "./selectors/mobile/featureSelector.component";
 import MobileColorSelectorComponent from "./selectors/mobile/colorSelector.component";
@@ -35,12 +35,13 @@ interface HudComponentProps {
   onCategoryTypeChange: (value: string) => void;
   // onFeatureTypeChange: (value: string) => void;
   // onAccessoryTypeChange: (value: string) => void;
-  
+
   selectedOption: BasicData | undefined;
 
+  campaignSkinColorConfig: ColorConfig;
   skinColor: string;
   onSkinColorChange: (value: string) => void;
-  
+
   editModeSelected: boolean;
   changeView: () => void;
   exportModel: () => void;
@@ -53,6 +54,7 @@ export default function HudComponent({
   onOptionChange,
   onCategoryTypeChange,
   selectedOption,
+  campaignSkinColorConfig,
   skinColor,
   onSkinColorChange,
   editModeSelected,
@@ -211,8 +213,8 @@ export default function HudComponent({
               minWidth: '200px'
             }}
             alt="Campaign icon"
-            />
-          </div>
+          />
+        </div>
         {/* WRAPPER */}
         <div className={`w-full h-full grid grid-cols-[148px_minmax(100px,_1fr)] ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 duration-200'} transition-all`}>
           {/* FEATURES SECTION */}
@@ -234,11 +236,12 @@ export default function HudComponent({
               </div>
               <div className="w-full">
                 <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
-                <HudFeatureTitle selectedFeature={RemovedAcc(selectedCategory)}/>
+                <HudFeatureTitle selectedFeature={RemovedAcc(selectedCategory)} />
               </div>
             </div>
             {/* OPTION COLOR SECTION */}
-            <div className="pt-4">
+            {/* TODO Add features or option color change behavior */}
+            <div className="pt-4 invisible">
               <ColorSelector
                 list={['F8B290', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
                 activeColor={skinColor}
@@ -255,14 +258,15 @@ export default function HudComponent({
               />
             </div>
             {/* SKIN COLOR SECTION */}
-            <div className="py-8">
+            <div className={`py-8 ${campaignSkinColorConfig.usePalette ? '' : 'invisible'}`}>
               <h2 className="font-poppins pb-2">SKIN COLOR</h2>
               <ColorSelector
-                list={['F8B290', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
+                list={campaignSkinColorConfig.colorPalette}
                 activeColor={skinColor}
                 handleClick={(value: string) => void onSkinColorChange(value)}
               />
             </div>
+
           </div>
         </div>
       </div>

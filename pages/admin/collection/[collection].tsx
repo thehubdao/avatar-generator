@@ -21,7 +21,7 @@ export default function AvatarCollectionPage({isCampaign, campaign, campaignPara
                             avatarBasePath={campaignParams?.armature ?? ''}
                             featureList={campaignParams?.features ?? []}
                             defaultAnimation={campaignParams?.config?.defAnimation}
-                            skinColor={campaignParams?.config?.defSkinColor ?? 'F2A47E'}
+                            skinColor={campaignParams?.config?.skin?.defColor ?? 'FFFFFF'}
                             changeMaterial={campaignParams?.config?.changeMaterial}
           />
         </Layout>

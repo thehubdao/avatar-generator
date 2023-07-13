@@ -83,7 +83,7 @@ export default function AvatarBuilder({
   const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
   const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].displayName : '');
   const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
-  const [skinColor, setSkinColor] = useState<string>(campaignConfig.defSkinColor ?? 'F2A47E');
+  const [skinColor, setSkinColor] = useState<string>(campaignConfig.skin?.defColor ?? 'FFFFFF');
   const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
   // const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(true);
@@ -167,7 +167,7 @@ export default function AvatarBuilder({
   }
 
   async function loadPreData() {
-    if (campaignConfig.defStart != undefined && singleData != undefined) {
+    if (campaignConfig.defAvatarCombination != undefined && singleData != undefined) {
       await updateAvatarSingleData();
       await SetRandomAccessories();
       return;
@@ -287,14 +287,14 @@ export default function AvatarBuilder({
   }
   
   async function getSingleInfo() {
-    if (campaignConfig.defStart == undefined) return;
+    if (campaignConfig.defAvatarCombination == undefined) return;
     
-    const {value: reqSingleData} = await GetAvatarSingleByCampaignCombination(campaign, campaignConfig.defStart);
+    const {value: reqSingleData} = await GetAvatarSingleByCampaignCombination(campaign, campaignConfig.defAvatarCombination);
     singleData = reqSingleData;
   }
 
   async function onClickChangeSkinColor(newSkinColor = skinColor) {
-    await ChangeSkinColor(newSkinColor, campaignConfig.defSkin);
+    await ChangeSkinColor(newSkinColor, campaignConfig.skin?.materialName);
     setSkinColor(newSkinColor);
   }
 
@@ -325,7 +325,7 @@ export default function AvatarBuilder({
   }
 
   async function onChangeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {
-    await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor, campaignConfig.defSkin, campaignConfig.changeMaterial);
+    await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor, campaignConfig.skin?.materialName, campaignConfig.changeMaterial);
     // TODO: find ways to avoid this
     await SetFeaturesData(selectListFeatures);
     addReplaceAttribute(_selectedFeature, name);
@@ -342,7 +342,7 @@ export default function AvatarBuilder({
       await ChangeAccessory(id, path, name, _selectedCategory, campaignConfig.changeMaterial);
     // If Feature
     else
-      await ChangeFeature(id, path, name, _selectedCategory, skinColor, campaignConfig.defSkin, campaignConfig.changeMaterial);
+      await ChangeFeature(id, path, name, _selectedCategory, skinColor, campaignConfig.skin?.materialName, campaignConfig.changeMaterial);
 
 
     addReplaceAttribute(_selectedCategory, name);
@@ -434,6 +434,7 @@ export default function AvatarBuilder({
                   // selectedFeature={selectedFeature}
                   // selectedAcc={selectedAcc}
                   
+                  campaignSkinColorConfig={campaignConfig.skin || {}}
                   skinColor={skinColor}
                   changeView={() => {
                     setEditModeSelected(!editModeSelected);

@@ -29,6 +29,13 @@ export interface ExportInterface {
   model?: Blob;
 }
 
+export interface ColorConfig {
+  materialName?: string;
+  defColor?: string;
+  colorPalette?: string[];
+  usePalette?: boolean;
+}
+
 export interface LookAtVectors {
   lookAt?: AGVector3;
   pos?: AGVector3;
@@ -43,19 +50,25 @@ export interface AGVector3 {
 export interface CampaignConfig {
   clientRequirements?: ClientQuestion[];
   changeMaterial?: ChangeMaterialOption;
-  defStart?: number;
-  defEyesColor?: string;
-  defSkinColor?: string;
-  defSkin?: string;
-  defCam?: LookAtVectors;
+  defAvatarCombination?: number;
   defBg?: string;
   lights?: ConfigLight[],
+  defCam?: LookAtVectors;
   defAnimation?: string;
   defStage?: string;
   defEnvMap?: string;
+  skin?: ColorConfig;
   featuresCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
+  featuresSkin?: Record<string, ColorConfig>;
+  accSkin?: Record<string, ColorConfig>;
+
+  // @deprecated: Data is replaced by skin: ColorConfig
+  defSkin?: string,
+  defSkinColor?: string,
 }
+
+
 
 /***
  * Update CampaignParameterName enum as well, when changing names on this interface
@@ -65,7 +78,7 @@ export interface CampaignParameters {
   armature: string;
   features?: FeatureBasic[];
   accessories?: FeatureBasic[];
-  config?: CampaignConfig;
+  config: CampaignConfig;
 }
 
 export interface CampaignAssets {

@@ -3,14 +3,13 @@ import AGButton from "../../../common/ag-button.component";
 import { useSwiper } from "swiper/react";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { ChangeEvent, useState } from "react";
-
-import { useAppSelector, useAppDispatch } from './../../../../store/hooks';
+import { useAppSelector, useAppDispatch } from '../../../../store/hooks';
 import { setFeatures } from "../../../../store/addCampaignSlice";
 import { IoMdArrowBack } from "react-icons/io";
 import { FeatureBasic } from "../../../../interfaces/common.interface";
 
 
-interface ThirdStepProps {
+interface FeaturesConfigStepUIProps {
   ready: boolean;
   featuresCount: number;
 }
@@ -27,7 +26,7 @@ const featureBase = {
 type FeatureStringOption = keyof Omit<FeatureBasic, 'hasCustomIcon' | 'isMulticolor'>;
 type FeatureBooleanOption = keyof Omit<FeatureBasic, 'meshName' | 'displayName' | 'index' | 'iconUrl'>;
 
-export default function ThirdStep({ ready = false, featuresCount }: ThirdStepProps) {
+export default function FeaturesConfigStepUI({ ready = false, featuresCount }: FeaturesConfigStepUIProps) {
   const swiper = useSwiper();
   const [featureSelected, setFeatureSelected] = useState<number>(0);
   const features = useAppSelector(state => state.addCampaign.features);

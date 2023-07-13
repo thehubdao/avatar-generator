@@ -1,7 +1,6 @@
 import Head from "next/head";
 import Layout from "../../../ui/admin/admin.layout";
-import AGLoading from "../../../ui/common/ag-loading.component";
-import CreateCampaignUI from "../../../ui/admin/campaign/createCampaign/createCampaign.ui";
+import CreateCampaign from "../../../components/admin/campaign/createCampaign.component";
 
 export default function FirstSteps() {
   return (
@@ -10,9 +9,8 @@ export default function FirstSteps() {
         <title>Admin - Create campaign</title>
       </Head>
       <Layout>
-        <CreateCampaignUI />
+        <CreateCampaign />
       </Layout>
-      <AGLoading loading={false} bgColor="F1F5F9" />
     </>
   )
 }
