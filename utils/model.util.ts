@@ -277,6 +277,7 @@ export function CleanModelForExport(model: GLTF) {
   // TODO: something
 }
 
+// TODO Review meshName
 export async function GetFeaturesData(baseModel: Group, featureList: FeatureBasic[], update: boolean = false) {
   return new Promise<Record<string, FeatureInfoInterface>>(resolve => {
     const baseFeatures = baseModel.children[0];

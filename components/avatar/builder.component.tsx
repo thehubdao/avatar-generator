@@ -172,7 +172,6 @@ export default function AvatarBuilder({
       await SetRandomAccessories();
       return;
     }
-    
     if (!(featureList && accessoryList))
       return LogError(Module.AvatarGenerator, "No feature/accessory list!");
 
@@ -183,13 +182,13 @@ export default function AvatarBuilder({
     if (attributeConfig) {
       for (const attribute of attributeConfig) {
         // Is a feature
-        if (selectListFeatures.some(pl => pl.meshName === attribute.id)) {
+        if (selectListFeatures.some(pl => pl.displayName === attribute.id)) {
           const newFeature = featureList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newFeature)
             await onChangeFeature(newFeature.id, newFeature.path, newFeature.name, attribute.id);
         }
         // Is an accessory
-        else if (selectListAccessories.some(pl => pl.meshName === attribute.id)) {
+        else if (selectListAccessories.some(pl => pl.displayName === attribute.id)) {
           const newAcc = accessoryList.find(p => p.name === attribute.val && p.type === attribute.id);
           if (newAcc)
             await onChangeAccessory(newAcc.id, newAcc.path, newAcc.name, attribute.id);
@@ -201,13 +200,13 @@ export default function AvatarBuilder({
 
       // Load random features
       for (const featureType of selectListFeatures) {
-        const randomFeatureOption = RandomArrayElement(featureList.filter(p => p.type === featureType.meshName));
+        const randomFeatureOption = RandomArrayElement(featureList.filter(p => p.type === featureType.displayName));
         if (randomFeatureOption)
           randomFeature.push(randomFeatureOption);
       }
 
       for (const accType of selectListAccessories) {
-        const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.meshName));
+        const randomAcc = RandomArrayElement(accessoryList.filter(a => a.type === accType.displayName));
         if (randomAcc)
           randomAccessory.push(randomAcc);
       }

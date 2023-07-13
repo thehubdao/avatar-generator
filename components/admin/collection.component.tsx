@@ -148,7 +148,8 @@ export default function AvatarCollection({
     await ChangeStartAnimation(startAnimation?.path);
   }
 
-  async function getFeatureList(featureList: FeatureBasic[]) {
+  // TODO review meshName
+  async function getFeatureList(featureList: FeatureBasic[]) { 
     const featureData = await GetAssetsListByCampaign(campaign);
     if (!featureData.success) return LogError(Module.CollectionComponent, "Could not retrieve feature option data!");
 
