@@ -1,25 +1,30 @@
 import { useRef, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
-import AGButton from "../../../common/ag-button.component";
+import AGButton from "../../../../common/ag-button.component";
 import { AiOutlineCloudDownload, AiOutlineCloudUpload, AiOutlineEye, AiOutlineVideoCamera } from "react-icons/ai";
 import { MdKeyboardArrowDown, MdOutlineColorLens } from "react-icons/md";
-import ColorPicker from "./colorPicker.ui";
+import ColorConfigUI from "./colorConfig.ui";
 import { IoSettingsOutline } from "react-icons/io5";
 import { BsLightbulb } from "react-icons/bs";
-import { CampaignConfig, ColorConfig } from "../../../../interfaces/common.interface";
+import { CampaignConfig, ColorConfig, LookAtVectors } from "../../../../../interfaces/common.interface";
+import { CampaignConfigOption } from "../../../../../enums/campaign.enum";
+import CameraConfigUI from "./cameraConfig.ui";
 
 interface ConfigCampaignProps {
   configData?: CampaignConfig;
   downloadAvatarBase: (() => void) | (() => Promise<void>);
   updateColorConfig: (element: string, colorConfig: ColorConfig) => Promise<void>;
+  updateCameraConfig: (element: string, colorConfig: LookAtVectors) => Promise<void>;
 }
 
-export default function ConfigCampaign({ configData, downloadAvatarBase, updateColorConfig }: ConfigCampaignProps) {
+export default function ConfigCampaign({ configData, downloadAvatarBase, updateColorConfig, updateCameraConfig }: ConfigCampaignProps) {
   const [openConfig, setOpenConfig] = useState<boolean>(false);
-  const [configOption, setConfigOption] = useState<string>('base');
+  const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin');
+  const [camOption, setCamOption] = useState<string>('defCam');
 
   const colorConfig = useRef<HTMLSelectElement>(null);
+  const camConfig = useRef<HTMLSelectElement>(null);
 
   const changeConfigOption = (e: React.MouseEvent, destiny: string) => {
     const target = e.currentTarget as HTMLElement;
@@ -43,6 +48,10 @@ export default function ConfigCampaign({ configData, downloadAvatarBase, updateC
     setColorOption(colorConfig.current?.value ?? '');
   }
 
+  const changeCamConfigOption = () => {
+    setCamOption(camConfig.current?.value ?? '');
+  }
+
   return (
     <>
       {/* AVATAR GENERAL INFO */}
@@ -54,9 +63,9 @@ export default function ConfigCampaign({ configData, downloadAvatarBase, updateC
             <div className="relative bg-purple p-5 rounded-2xl">
               {/* CONFIG BOXES */}
               <div className="flex flex-col gap-4">
-                {/* SPECIFIC AVATAR CONFIG */}
+                {/* BASE CONFIG */}
                 {
-                  configOption === 'base' &&
+                  configOption === CampaignConfigOption.Base &&
                   <div className="bg-bg shadow-inset-hard rounded-xl p-4 h-fit">
                     <div className="flex gap-2 items-center">
                       <div className="w-8 h-8 text-base bg-purple text-white rounded-full flex justify-center items-center">
@@ -90,7 +99,7 @@ export default function ConfigCampaign({ configData, downloadAvatarBase, updateC
                 }
                 {/* COLOR CONFIG */}
                 {
-                  configOption === 'color' &&
+                  configOption === CampaignConfigOption.Color &&
                   <div className="bg-bg shadow-inset-hard rounded-xl p-4 h-fit min-w-[300px]">
                     <div className="flex gap-2 items-center">
                       <div className="w-8 h-8 text-base bg-purple text-white rounded-full flex justify-center items-center">
@@ -110,7 +119,7 @@ export default function ConfigCampaign({ configData, downloadAvatarBase, updateC
                     {
                       colorOption === 'avatarHubSkin' &&
                       <div className="px-2">
-                        <ColorPicker
+                        <ColorConfigUI
                           materialName={configData?.skin?.materialName ?? ''}
                           color={configData?.skin?.defColor ?? 'FFFFFF'}
                           id="configColorPicker"
@@ -124,7 +133,7 @@ export default function ConfigCampaign({ configData, downloadAvatarBase, updateC
                 }
                 {/* CAMERA CONFIG */}
                 {
-                  configOption === 'camera' &&
+                  configOption === CampaignConfigOption.Camera &&
                   <div className="bg-bg shadow-inset-hard rounded-xl p-4 w-fit">
                     <div className="flex gap-2 items-center">
                       <div className="w-8 h-8 text-base bg-purple text-white rounded-full flex justify-center items-center">
@@ -136,45 +145,23 @@ export default function ConfigCampaign({ configData, downloadAvatarBase, updateC
                       <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
                         <MdKeyboardArrowDown />
                       </div>
-                      <select name="" id="" className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer">
-                        <option defaultValue={'Skin color'} className="bg-bg py-2 px-4">Default camera</option>
+                      <select ref={camConfig} className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" onChange={() => changeCamConfigOption()}>
+                        <option defaultValue={'defCam'} className="bg-bg py-2 px-4">Default camera</option>
+                        {/* put here the features and accessories */}
                       </select>
                     </div>
-                    <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">Camera position:</p>
-                    <div className="flex gap-4 px-2">
-                      <div className="flex items-center gap-2">
-                        <p>X:</p>
-                        <input type="number" className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg" defaultValue={configData?.defCam?.pos?.x} />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <p>Y:</p>
-                        <input type="number" className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg" defaultValue={configData?.defCam?.pos?.y} />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <p>Z:</p>
-                        <input type="number" className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg" defaultValue={configData?.defCam?.pos?.z} />
-                      </div>
-                    </div>
-                    <p className="font-poppins font-medium text-purple pt-4 px-2">Camera look at:</p>
-                    <div className="flex gap-4 px-2">
-                      <div className="flex items-center gap-2">
-                        <p>X:</p>
-                        <input type="number" className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg" defaultValue={configData?.defCam?.lookAt?.x} />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <p>Y:</p>
-                        <input type="number" className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg" defaultValue={configData?.defCam?.lookAt?.y} />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <p>Z:</p>
-                        <input type="number" className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg" defaultValue={configData?.defCam?.lookAt?.z} />
-                      </div>
-                    </div>
+                    {
+                      camOption === 'defCam' &&
+                      <CameraConfigUI
+                        camConfig={configData?.defCam}
+                        updateCameraConfig={(camConfig: LookAtVectors) => updateCameraConfig(camOption, camConfig)}
+                      />
+                    }
                   </div>
                 }
                 {/* SPECIFIC LIGHT CONFIG */}
                 {
-                  configOption === 'light' &&
+                  configOption === CampaignConfigOption.Light &&
                   <div className="bg-bg shadow-inset-hard rounded-xl p-4 w-fit">
                     <div className="flex gap-2 items-center">
                       <div className="w-8 h-8 text-base bg-purple text-white rounded-full flex justify-center items-center">
@@ -218,16 +205,16 @@ export default function ConfigCampaign({ configData, downloadAvatarBase, updateC
               <IoSettingsOutline className="pointer-events-none" />
             </div>
             <div className="mt-4 flex flex-col gap-2">
-              <div onClick={e => changeConfigOption(e, 'base')} className={`w-10 h-10 text-2xl bg-white rounded-full flex justify-center items-center cursor-pointer text-purple bg-opacity-100 shadow-none`}>
+              <div onClick={e => changeConfigOption(e, CampaignConfigOption.Base)} className={`w-10 h-10 text-2xl bg-white rounded-full flex justify-center items-center cursor-pointer text-purple bg-opacity-100 shadow-none`}>
                 <RxAvatar className="pointer-events-none" />
               </div>
-              <div onClick={e => changeConfigOption(e, 'color')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer">
+              <div onClick={e => changeConfigOption(e, CampaignConfigOption.Color)} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer">
                 <MdOutlineColorLens className="pointer-events-none" />
               </div>
-              <div onClick={e => changeConfigOption(e, 'camera')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer hidden">
+              <div onClick={e => changeConfigOption(e, CampaignConfigOption.Camera)} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer">
                 <AiOutlineVideoCamera className="pointer-events-none" />
               </div>
-              <div onClick={e => changeConfigOption(e, 'light')} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer hidden">
+              <div onClick={e => changeConfigOption(e, CampaignConfigOption.Light)} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer hidden">
                 <BsLightbulb className="pointer-events-none" />
               </div>
             </div>
