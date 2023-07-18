@@ -1,8 +1,8 @@
 import { useState } from "react";
-import AGButton from "../../../common/ag-button.component";
+import AGButton from "../../../../common/ag-button.component";
 import { MdKeyboardArrowDown } from "react-icons/md";
-import { ColorConfig } from "../../../../interfaces/common.interface";
-import { EXAMPLE_PALETTES } from "../../../../constants/colorPalettes.constant";
+import { ColorConfig } from "../../../../../interfaces/common.interface";
+import { EXAMPLE_PALETTES } from "../../../../../constants/colorPalettes.constant";
  
 interface ColorPickerProps {
   materialName: string;
@@ -13,7 +13,7 @@ interface ColorPickerProps {
   updateColorConfig: (colorConfig: ColorConfig) => Promise<void>;
 }
 
-export default function ColorPicker({ materialName, color, id, usePalette, colorList, updateColorConfig }: ColorPickerProps) {
+export default function ColorConfigUI({ materialName, color, id, usePalette, colorList, updateColorConfig }: ColorPickerProps) {
   const maxColorsLength = 10;
 
   const [defaultMaterialName, setDefaultMaterialName] = useState<string>(materialName);
@@ -110,7 +110,6 @@ export default function ColorPicker({ materialName, color, id, usePalette, color
                         <input
                           type="number"
                           className="shadow-inset-soft hover:shadow-inset-medium px-4 py-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-                          defaultValue={paletteLength}
                           value={paletteLength}
                           onChange={e => onChangePaletteLength(e.currentTarget.valueAsNumber)}
                         />
