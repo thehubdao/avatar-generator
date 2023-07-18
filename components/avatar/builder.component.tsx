@@ -409,6 +409,7 @@ export default function AvatarBuilder({
                       lights={campaignConfig.lights}
                       editMode={editModeSelected}
                       enablePan={enablePan}
+                      defaultCamera={campaignConfig.defCam}
         />
       </div>
       {loading ? <></> :
