@@ -17,7 +17,7 @@ interface ConfigCampaignProps {
   updateCameraConfig: (element: string, colorConfig: LookAtVectors) => Promise<void>;
 }
 
-export default function ConfigCampaign({ configData, downloadAvatarBase, updateColorConfig, updateCameraConfig }: ConfigCampaignProps) {
+export default function ConfigCampaignUI({ configData, downloadAvatarBase, updateColorConfig, updateCameraConfig }: ConfigCampaignProps) {
   const [openConfig, setOpenConfig] = useState<boolean>(false);
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin');
