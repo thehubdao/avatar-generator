@@ -6,6 +6,7 @@ import { ShowModal } from "../../../utils/modal.util";
 import { fetchData } from "../../../store/currentCampaignSlice";
 import { FirestoreLocation } from "../../../enums/firebase.enum";
 import { CampaignParameters, ColorConfig, LookAtVectors } from "../../../interfaces/common.interface";
+import { CameraConfigOption } from "../../../enums/campaign.enum";
 
 export default function EditCampaign() {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
@@ -33,9 +34,22 @@ export default function EditCampaign() {
   }
 
   const updateCameraConfig = async (element: string, config: LookAtVectors) => {
-    const newParameters: Partial<CampaignParameters> = { config: { defCam: config } };
+    let newParameters: Partial<CampaignParameters>;
+    if (element != CameraConfigOption.DefCam) {
+      const newConfig = {[element]: config};
+      newParameters = { config: { featuresCamPos: newConfig } };
+    } else {
+      newParameters = { config: { defCam: config } };
+    }
+    // console.log(newParameters, location);
     const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
-    result.success ? ShowModal(`Update ${element} camera config sucessful`) : ShowModal(`Update ${element} camera config failed`);
+
+    if (result.success) {
+      ShowModal(`Update ${element} camera config sucessful`)
+      void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Parameters }));
+    } else {
+      ShowModal(`Update ${element} camera config failed`);
+    }
   }
 
   useEffect(() => {

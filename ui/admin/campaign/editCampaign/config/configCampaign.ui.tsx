@@ -6,22 +6,23 @@ import { MdKeyboardArrowDown, MdOutlineColorLens } from "react-icons/md";
 import ColorConfigUI from "./colorConfig.ui";
 import { IoSettingsOutline } from "react-icons/io5";
 import { BsLightbulb } from "react-icons/bs";
-import { CampaignConfig, ColorConfig, LookAtVectors } from "../../../../../interfaces/common.interface";
-import { CampaignConfigOption } from "../../../../../enums/campaign.enum";
+import { CampaignConfig, ColorConfig, FeatureBasic, LookAtVectors } from "../../../../../interfaces/common.interface";
+import { CameraConfigOption, CampaignConfigOption } from "../../../../../enums/campaign.enum";
 import CameraConfigUI from "./cameraConfig.ui";
 
 interface ConfigCampaignProps {
   configData?: CampaignConfig;
+  featuresList?: FeatureBasic[];
   downloadAvatarBase: (() => void) | (() => Promise<void>);
   updateColorConfig: (element: string, colorConfig: ColorConfig) => Promise<void>;
   updateCameraConfig: (element: string, colorConfig: LookAtVectors) => Promise<void>;
 }
 
-export default function ConfigCampaignUI({ configData, downloadAvatarBase, updateColorConfig, updateCameraConfig }: ConfigCampaignProps) {
+export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig }: ConfigCampaignProps) {
   const [openConfig, setOpenConfig] = useState<boolean>(false);
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
-  const [colorOption, setColorOption] = useState<string>('avatarHubSkin');
-  const [camOption, setCamOption] = useState<string>('defCam');
+  const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
+  const [camOption, setCamOption] = useState<string>(CameraConfigOption.DefCam);
 
   const colorConfig = useRef<HTMLSelectElement>(null);
   const camConfig = useRef<HTMLSelectElement>(null);
@@ -146,17 +147,19 @@ export default function ConfigCampaignUI({ configData, downloadAvatarBase, updat
                         <MdKeyboardArrowDown />
                       </div>
                       <select ref={camConfig} className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" onChange={() => changeCamConfigOption()}>
-                        <option defaultValue={'defCam'} className="bg-bg py-2 px-4">Default camera</option>
-                        {/* put here the features and accessories */}
+                        <option value={'defCam'} className="bg-bg py-2 px-4">Default camera</option>
+                        {
+                          featuresList ?
+                            featuresList?.map((feature, index) => <option key={index} value={feature.displayName} className="bg-bg py-2 px-4">{feature.displayName}</option>)
+                            : <option value='no features' className="bg-bg py-2 px-4" disabled>no features</option>
+                        }
                       </select>
                     </div>
-                    {
-                      camOption === 'defCam' &&
-                      <CameraConfigUI
-                        camConfig={configData?.defCam}
-                        updateCameraConfig={(camConfig: LookAtVectors) => updateCameraConfig(camOption, camConfig)}
-                      />
-                    }
+                    <CameraConfigUI
+                      key={camOption}
+                      camConfig={camOption === CameraConfigOption.DefCam ? configData?.defCam : configData?.featuresCamPos ? configData?.featuresCamPos[camOption] : undefined}
+                      updateCameraConfig={(camConfig: LookAtVectors) => updateCameraConfig(camOption, camConfig)}
+                    />
                   </div>
                 }
                 {/* SPECIFIC LIGHT CONFIG */}

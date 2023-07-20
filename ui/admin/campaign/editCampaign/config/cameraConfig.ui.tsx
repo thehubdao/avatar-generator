@@ -28,7 +28,7 @@ export default function CameraConfigUI({ camConfig, updateCameraConfig }: Camera
           <input
             type="number"
             className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-            defaultValue={camPos.current.x}
+            defaultValue={camConfig?.pos?.x}
             onChange={e => camPos.current = {x: e.currentTarget.valueAsNumber, y: camPos.current.y, z: camPos.current.z}}
           />
         </div>
@@ -37,7 +37,7 @@ export default function CameraConfigUI({ camConfig, updateCameraConfig }: Camera
           <input
             type="number"
             className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-            defaultValue={camPos.current.y}
+            defaultValue={camConfig?.pos?.y}
             onChange={e => camPos.current = {x: camPos.current.x, y: e.currentTarget.valueAsNumber, z: camPos.current.z}}
           />
         </div>
@@ -46,7 +46,7 @@ export default function CameraConfigUI({ camConfig, updateCameraConfig }: Camera
           <input
             type="number"
             className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-            defaultValue={camPos.current.z}
+            defaultValue={camConfig?.pos?.z}
             onChange={e => camPos.current = {x: camPos.current.x, y: camPos.current.y, z: e.currentTarget.valueAsNumber}}
           />
         </div>
@@ -58,7 +58,7 @@ export default function CameraConfigUI({ camConfig, updateCameraConfig }: Camera
           <input
             type="number"
             className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-            defaultValue={camLookAt.current.x}
+            defaultValue={camConfig?.lookAt?.x}
             onChange={e => camLookAt.current = {x: e.currentTarget.valueAsNumber, y: camLookAt.current.y, z: camLookAt.current.z}}
           />
         </div>
@@ -67,7 +67,7 @@ export default function CameraConfigUI({ camConfig, updateCameraConfig }: Camera
           <input
             type="number"
             className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-            defaultValue={camLookAt.current.y}
+            defaultValue={camConfig?.lookAt?.y}
             onChange={e => camLookAt.current = {x: camLookAt.current.x, y: e.currentTarget.valueAsNumber, z: camLookAt.current.z}}
           />
         </div>
@@ -76,7 +76,7 @@ export default function CameraConfigUI({ camConfig, updateCameraConfig }: Camera
           <input
             type="number"
             className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-            defaultValue={camLookAt.current.z}
+            defaultValue={camConfig?.lookAt?.z}
             onChange={e => camLookAt.current = {x: camLookAt.current.x, y: camLookAt.current.y, z: e.currentTarget.valueAsNumber}}
           />
         </div>
