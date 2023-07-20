@@ -1,4 +1,4 @@
-﻿import {EmailResult, GlobalValues, Module} from "../enums/common.enum";
+﻿import {Breadcrumb, EmailResult, GlobalValues, Module} from "../enums/common.enum";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
@@ -100,4 +100,10 @@ export function RemovedAcc(text: string | undefined) {
   if (text == undefined || !text.endsWith(GlobalValues.AccEnd)) return text;
   
   return text.slice(0, - GlobalValues.AccEnd.length);
+}
+
+export function GetKeyByValue<E extends object>(value: string, enumRef: E): keyof E | undefined {
+  const indexOfS = Object.values(enumRef).indexOf(value);
+  const key = Object.keys(enumRef)[indexOfS];
+  return key as unknown as keyof E;
 }
