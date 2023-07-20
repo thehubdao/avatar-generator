@@ -73,6 +73,7 @@ export default function EditCampaignUI({ downloadFile, updateColorConfig, update
                     </div>
                     <ConfigCampaignUI
                       configData={campaignParameters.config}
+                      featuresList={campaignParameters.features}
                       downloadAvatarBase={() => downloadAvatarBase()}
                       updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
                       updateCameraConfig={(Element: string, config: LookAtVectors) => updateCameraConfig(Element, config)}
