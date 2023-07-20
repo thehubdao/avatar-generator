@@ -95,8 +95,6 @@ export default function AvatarBuilder({
   const startPromises = useRef<Promise<unknown>>();
 
   useEffect(() => {
-    if (!onlyView) setEditModeSelected(true);
-
     startPromises.current = Promise.all([
       getFeatureList(),
       getAccessoryList(),
