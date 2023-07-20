@@ -10,3 +10,7 @@ export enum CampaignConfigOption {
     Camera = 'camera',
     Light = 'light',
 }
+
+export enum CameraConfigOption {
+    DefCam = 'defCam',
+}
