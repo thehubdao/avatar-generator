@@ -84,6 +84,10 @@ export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetPr
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assetReady])
 
+  useEffect(() => {
+    if (campaignName.length <= 0) void GoToPage(PageLocation.Admin);
+  }, [])
+
   return (
     <></>
   )

@@ -1,5 +1,5 @@
 import Head from "next/head";
-import Layout from "../../../ui/admin/admin.layout";
+import Layout from "../../../layouts/admin.layout";
 import CreateCampaign from "../../../components/admin/campaign/createCampaign.component";
 
 export default function FirstSteps() {

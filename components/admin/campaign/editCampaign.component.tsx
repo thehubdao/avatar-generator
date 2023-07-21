@@ -7,6 +7,8 @@ import { fetchData } from "../../../store/currentCampaignSlice";
 import { FirestoreLocation } from "../../../enums/firebase.enum";
 import { CampaignParameters, ColorConfig, LookAtVectors } from "../../../interfaces/common.interface";
 import { CameraConfigOption } from "../../../enums/campaign.enum";
+import { GoToPage } from "../../../utils/router.util";
+import { PageLocation } from "../../../enums/common.enum";
 
 export default function EditCampaign() {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
@@ -53,7 +55,7 @@ export default function EditCampaign() {
   }
 
   useEffect(() => {
-    fetchAllCampaignData();
+    campaignName.length > 0 ? fetchAllCampaignData() : void GoToPage(PageLocation.Admin);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

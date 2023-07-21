@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from "react";
-import { GetCurrentUserInfo, HandleNotLoggedIn } from "../../utils/firebase.util";
-import { UserInterface } from "../../interfaces/firebase.interface";
-import AGLoading from "../../ui/common/ag-loading.component";
+import { GetCurrentUserInfo, HandleNotLoggedIn } from "../utils/firebase.util";
+import { UserInterface } from "../interfaces/firebase.interface";
+import AGLoading from "../ui/common/ag-loading.component";
 
 interface LayoutProps {
   children: JSX.Element | JSX.Element[] | boolean;

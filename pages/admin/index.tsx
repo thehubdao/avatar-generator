@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from "react";
 import Head from "next/head";
 import { UserInterface } from "../../interfaces/firebase.interface";
-import Layout from "../../ui/admin/admin.layout";
+import Layout from "../../layouts/admin.layout";
 import AGLoading from "../../ui/common/ag-loading.component";
 import { GetCurrentUserInfo, HandleNotLoggedIn } from "../../utils/firebase.util";
 import Campaigns from "../../ui/admin/campaign/editCampaign/campaignList.ui";
