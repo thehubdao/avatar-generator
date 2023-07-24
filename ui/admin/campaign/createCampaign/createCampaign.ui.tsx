@@ -114,7 +114,7 @@ export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
                   <FeaturesConfig ready={true} featuresCount={featuresCount} />
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <ConfirmationStep ready={true} handleNextStep={() => onSubmit()}/>
+                  <ConfirmationStep handleNextStep={() => onSubmit()}/>
                 </SwiperSlide>
               </Swiper>
             </div>
