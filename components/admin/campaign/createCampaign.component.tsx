@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { GoToPage } from "../../../utils/router.util";
 import { Module, PageLocation } from "../../../enums/common.enum";
-import { reset } from "../../../store/addCampaignSlice";
+import { reset, setIsLoading } from "../../../store/addCampaignSlice";
 import { GetCurrentUser, GetCurrentUserInfo, HandleNotLoggedIn, InsertDocWithId, UpdateDocObject, UploadFile } from "../../../utils/firebase.util";
 import { FirestoreGlobalLocation, StorageLocation } from "../../../enums/firebase.enum";
 import { LogError } from "../../../utils/common.util";
@@ -11,16 +11,24 @@ import { setUserInfo } from "../../../store/authSlice";
 import { ShowModal } from "../../../utils/modal.util";
 
 import CreateCampaignUI from "../../../ui/admin/campaign/createCampaign/createCampaign.ui"
+import { useEffect } from "react";
 
 export default function CreateCampaign() {
   const campaignName = useAppSelector(state => state.addCampaign.name);
   const campaignFeatures = useAppSelector(state => state.addCampaign.features);
   const campaignConfig = useAppSelector(state => state.addCampaign.config);
+  const isLoading = useAppSelector(state => state.addCampaign.isLoading);
   const campaignList = useAppSelector(state => state.auth.userInfo?.campaign);
   const dispatch = useAppDispatch();
 
+  useEffect(() => {
+    if (isLoading) dispatch(reset());
+  }, []);
+
   async function submitCampaign(avatarBaseFile: File | undefined) {
+    if (isLoading) return;
     const userInfo = await GetCurrentUser();
+    dispatch(setIsLoading(true));
     if (userInfo == null) {
       dispatch(reset());
       return void HandleNotLoggedIn();
@@ -39,8 +47,6 @@ export default function CreateCampaign() {
 
       // Upload information to DB
       const result = await InsertDocWithId(campaignName, docData, FirestoreGlobalLocation.Campaign);
-      dispatch(reset());
-      void GoToPage(PageLocation.Admin);
 
       // Update user info
       const newUserInfo: Partial<UserInterface> = {
@@ -57,6 +63,8 @@ export default function CreateCampaign() {
           void dispatch(setUserInfo({ role, name, account, email, campaign }));
         }
         ShowModal("Campaign created successfully");
+        dispatch(reset());
+        void GoToPage(PageLocation.Admin);
       }
       else
         void LogError(Module.CampaignAdd, result.errMessage ?? 'Unknow error.');

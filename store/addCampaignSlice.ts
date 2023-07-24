@@ -5,7 +5,7 @@ interface CampaignStateInterface {
   name: string;
   features: FeatureBasic[];
   config: Partial<CampaignConfig>;
-  isUploading: boolean;
+  isLoading: boolean;
   error?: string;
 }
 
@@ -18,7 +18,7 @@ const initialState: CampaignStateInterface = {
       pos: { x: 0, y: 1, z: 3.5 },
     }
   },
-  isUploading: false,
+  isLoading: false,
   error: undefined
 }
 
@@ -35,9 +35,12 @@ export const addCampaignSlice = createSlice({
     },
     setSkin: (state, action: PayloadAction<Partial<ColorConfig>>) => {
       state.config.skin = action.payload
+    },
+    setIsLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload
     }
   }
 })
 
-export const { reset, setName, setFeatures, setSkin } = addCampaignSlice.actions
+export const { reset, setName, setFeatures, setSkin, setIsLoading } = addCampaignSlice.actions
 export default addCampaignSlice.reducer
