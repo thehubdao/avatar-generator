@@ -34,7 +34,7 @@ export default function ConfirmationStepUI({ handleNextStep }: ConfirmationStepU
                 </p>
                 <p>
                   <b>Remember: </b> you can&nbsp;
-                  <Link href={'https://sage-buckaroo-fa0.notion.site/Avatar-Hub-Administrator-22b48109f53648d3b5f004942e3b1fb7?pvs=4'} target="_blank" className="underline cursor-pointer font-bold">
+                  <Link href={ExternalLink.Documentation} target="_blank" className="underline cursor-pointer font-bold">
                     visit the docs.
                   </Link>
                 </p>
