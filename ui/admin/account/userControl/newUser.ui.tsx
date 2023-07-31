@@ -1,12 +1,5 @@
 import { MutableRefObject, useRef } from "react";
-import AGButton from "../../../common/ag-button.component";
-
-//** Represents the props for the NewUserButton component.
-interface NewUserButtonProps {
-  label: string;
-  handleEvent: () => void;
-  form?: boolean;
-}
+import NewUserButtonUI from "./NewUserButton.ui";
 
 //** Represents the props for the NewUser component.
 interface NewUserProps {
@@ -16,20 +9,6 @@ interface NewUserProps {
     userPass: MutableRefObject<HTMLInputElement | null>
   ) => Promise<void>;
 }
-
-/**
- ** Represents a button component for adding or canceling a new user.
- * @param {NewUserButtonProps} props - The props for the NewUserButton component.
- */
-const NewUserButton = ({ label, handleEvent, form }: NewUserButtonProps) => {
-  return (
-    <div className="w-1/2">
-      <AGButton full form={form} nm onClickEvent={() => { handleEvent(); }}>
-        <p className="text-gray-normal py-1">{label}</p>
-      </AGButton>
-    </div>
-  );
-};
 
 /**
  ** Represents the NewUser component for creating a new user.
@@ -77,8 +56,8 @@ export default function NewUserUI({ handleCreateNewUser }: NewUserProps) {
       </form>
       <div className="w-full flex flex-wrap mt-3 font-poppins font-bold">
         {/* Renders a NewUserButton component for adding and canceling a new user. */}
-        <NewUserButton label="Add" form handleEvent={handleAddEvent} />
-        <NewUserButton label="Cancel" handleEvent={handleCancelEvent} />
+        <NewUserButtonUI label="Add" form handleEvent={handleAddEvent} />
+        <NewUserButtonUI label="Cancel" handleEvent={handleCancelEvent} />
       </div>
     </>
   );
