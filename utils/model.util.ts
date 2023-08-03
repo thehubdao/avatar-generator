@@ -1,6 +1,7 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import {
+  Bone,
   Group,
   MeshBasicMaterial,
   MeshStandardMaterial,
@@ -298,4 +299,21 @@ export async function GetFeaturesData(baseModel: Group, featureList: FeatureBasi
 
     resolve(result);
   });
+}
+
+function IsBone(obj: Object3D): obj is Bone {
+  return (obj as Bone).isBone;
+}
+
+export function bonesFirst(children: Object3D<THREE.Event>[]) {
+  let bones: Object3D[] = [];
+  let others: Object3D[] = [];
+  for (const child of children) {
+    if (IsBone(child)) {
+      bones.push(child);
+    } else {
+      others.push(child);
+    }
+  }
+  return bones.concat(others);
 }

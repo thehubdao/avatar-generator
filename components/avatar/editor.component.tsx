@@ -9,7 +9,8 @@ import {
   GetFeaturesData,
   ReplaceModelAccessory,
   ReplaceModelFeatureOnly,
-  TransformObject3dToNewMaterial
+  TransformObject3dToNewMaterial,
+  bonesFirst
 } from "../../utils/model.util";
 import {
   AccessoryInfoInterface,
@@ -123,24 +124,6 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     await onReady();
   }
 
-  function IsBone(obj: Object3D): obj is Bone {
-    return (obj as Bone).isBone;
-  }
-
-  function bonesFirst(_avatar: GLTF) {
-    let bones: Object3D[] = [];
-    let others: Object3D[] = [];
-    const children = _avatar.scene.children[0].children;
-    for (const child of children) {
-      if (IsBone(child)) {
-        bones.push(child);
-      } else {
-        others.push(child);
-      }
-    }
-    return bones.concat(others);
-  }
-  
   async function initEditor() {
     const leLights = GetLights(lights);
     for (const light of leLights) {
@@ -148,7 +131,7 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     }
 
     _avatar = await GetGltfModel(avatarBasePath);
-    _avatar.scene.children[0].children = bonesFirst(_avatar);
+    _avatar.scene.children[0].children = bonesFirst(_avatar.scene.children[0].children);
     _mixer = CreateAnimationMixer(_avatar.scene);
     await SetAnimation(_mixer, _avatar, undefined);
 
