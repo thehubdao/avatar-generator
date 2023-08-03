@@ -1,6 +1,6 @@
 import {LogError} from "../../utils/common.util";
 import {GlobalValues, Module} from "../../enums/common.enum";
-import {AnimationMixer} from "three";
+import {AnimationMixer, Object3D} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {GetGltfModel} from "../../utils/importer.util";
 import {CreateAnimationMixer, SetAnimation} from "../../utils/threejs/animation.util";
@@ -123,6 +123,19 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     await onReady();
   }
 
+  function bonesFirst(_avatar: GLTF) {
+    const bones: Object3D[] = [];
+    const others: Object3D[] = [];
+    _avatar.scene.children[0].children.forEach((child) => {
+      if (child.type === "Bone") {
+        bones.push(child);
+      } else {
+        others.push(child);
+      }
+    })
+    return bones.concat(others);
+  }
+  
   async function initEditor() {
     const leLights = GetLights(lights);
     for (const light of leLights) {
@@ -130,7 +143,7 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     }
 
     _avatar = await GetGltfModel(avatarBasePath);
-
+    _avatar.scene.children[0].children = bonesFirst(_avatar);
     _mixer = CreateAnimationMixer(_avatar.scene);
     await SetAnimation(_mixer, _avatar, undefined);
 
