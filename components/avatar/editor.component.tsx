@@ -1,6 +1,6 @@
 import {LogError} from "../../utils/common.util";
 import {GlobalValues, Module} from "../../enums/common.enum";
-import {AnimationMixer, Bone, Object3D} from "three";
+import {AnimationMixer} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {GetGltfModel} from "../../utils/importer.util";
 import {CreateAnimationMixer, SetAnimation} from "../../utils/threejs/animation.util";
