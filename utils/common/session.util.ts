@@ -14,12 +14,12 @@ enum SessionConstant {
 
 interface SessionRequest {
   sessionId: SessionConstant;
-  params?: any[];
+  params?: (string | number | undefined)[];
 }
 
 class SessionUtil {
   private static _instance: SessionUtil;
-  private _dataMap: Map<string, any> | null;
+  private _dataMap: Map<string, unknown> | null;
 
   constructor() {
     this._dataMap = null;
@@ -34,31 +34,31 @@ class SessionUtil {
 
   public Data() {
     if (this._dataMap == null) {
-      this._dataMap = new Map<string, any>();
+      this._dataMap = new Map<string, unknown>();
     }
 
     return this._dataMap;
   }
 }
 
-function keyToString(request: SessionRequest) {
+function KeyToString(request: SessionRequest) {
   const arrayToString = JSON.stringify(request.params);
   return `${request.sessionId}-${arrayToString}`;
 }
 
-async function GetData<T>(forceUpdate: boolean, key: SessionConstant, findData: () => Promise<T | undefined>, ...params: any[]): Promise<T | undefined> {
-  const data = SessionUtil.Instance().Data();
+async function GetData<T>(forceUpdate: boolean, key: SessionConstant, findData: () => Promise<T | undefined>, ...params: (string | number | undefined)[]): Promise<T | undefined> {
+  const storage = SessionUtil.Instance().Data();
 
   const request: SessionRequest = {
     sessionId: key,
     params
   };
-  const leKey = keyToString(request);
+  const leKey = KeyToString(request);
   
-  let datum = data.get(leKey);
+  let datum = storage.get(leKey);
   if (datum == undefined || forceUpdate) {
     const value = await findData();
-    data.set(leKey, value);
+    storage.set(leKey, value);
     datum = value;
   }
 

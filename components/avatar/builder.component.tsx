@@ -63,7 +63,7 @@ let envMapList: EnvMapInterface[] | undefined;
 let singleData: SingleInterface | undefined;
 
 const exportData: ExportInterface = {attributes: []};
-let onIFrame = false;
+let isOnIFrame = false;
 
 /***
  * Component with all the main logic used on the AvatarBuilder app.
@@ -84,9 +84,9 @@ export default function AvatarBuilder({
   const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].displayName : '');
   const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
   const [skinColor, setSkinColor] = useState<string>(campaignConfig.skin?.defColor ?? 'FFFFFF');
-  const [editModeSelected, setEditModeSelected] = useState<boolean>(false);
+  const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false);
   // const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [featureListShow, setFeatureListShow] = useState<FeatureInterface[]>();
   const [accessoryListShow, setAccessoryListShow] = useState<FeatureInterface[]>();
   const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>();
@@ -121,18 +121,18 @@ export default function AvatarBuilder({
     const startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
     await ChangeStartAnimation(startAnimation?.path);
 
-    setLoading(false);
+    setIsLoading(false);
 
     IFrameReady(setOnIFrame);
   }
 
   const setOnIFrame = () => {
-    onIFrame = true;
+    isOnIFrame = true;
     SetIFrameEvents(changeFeatureFromIFrame, exportFromIFrame, changeSkinColorFromIFrame);
   }
 
   async function changeFeatureFromIFrame(params?: BasicData) {
-    if (!onIFrame) return LogError(Module.AvatarGenerator, "Not on IFrame, subscribe if you forgot!");
+    if (!isOnIFrame) return LogError(Module.AvatarGenerator, "Not on IFrame, subscribe if you forgot!");
     if (!params) return LogError(Module.AvatarGenerator, "Missing feature option!");
 
     if (params.detail && params.detail.startsWith('http')) {
@@ -167,7 +167,7 @@ export default function AvatarBuilder({
   async function loadPreData() {
     if (campaignConfig.defAvatarCombination != undefined && singleData != undefined) {
       await updateAvatarSingleData();
-      await SetRandomAccessories();
+      await setRandomAccessories();
       return;
     }
     if (!(featureList && accessoryList))
@@ -223,7 +223,7 @@ export default function AvatarBuilder({
     }
   }
   
-  async function SetRandomAccessories()  {
+  async function setRandomAccessories()  {
     if (!accessoryList)
       return LogError(Module.AvatarGenerator, "No feature/accessory list!");
     
@@ -368,7 +368,7 @@ export default function AvatarBuilder({
     exportData.picture = picturePromise;
     exportData.model = modelPromise;
     
-    if (onIFrame) {
+    if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
       if (exportData.model != undefined)
@@ -394,7 +394,7 @@ export default function AvatarBuilder({
         <title>Avatar Generator</title>
       </Head>
       {/* LOADING */}
-      <AGLoading loading={loading} bgColor={bgColor}/>
+      <AGLoading loading={isLoading} bgColor={bgColor}/>
       {/* CANVAS WRAPPER */}
       <div
         className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
@@ -405,18 +405,18 @@ export default function AvatarBuilder({
                       onReady={() => onAvatarBuilderReady()}
                       changeMaterial={campaignConfig.changeMaterial}
                       lights={campaignConfig.lights}
-                      editMode={editModeSelected}
+                      editMode={isEditModeSelected}
                       enablePan={enablePan}
                       defaultCamera={campaignConfig.defCam}
         />
       </div>
-      {loading ? <></> :
+      {isLoading ? <></> :
         <>
           {!onlyView &&
               <HudComponent
                   selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
 
-                  editModeSelected={editModeSelected}
+                  editModeSelected={isEditModeSelected}
 
                   selectListCategory={[...selectListFeatures, ...selectListAccessories]}
                   // selectListFeatures={[...selectListFeatures, ...selectListAccessories]}
@@ -435,8 +435,8 @@ export default function AvatarBuilder({
                   campaignSkinColorConfig={campaignConfig.skin || {}}
                   skinColor={skinColor}
                   changeView={() => {
-                    setEditModeSelected(!editModeSelected);
-                    void updateStage(!editModeSelected);
+                    setIsEditModeSelected(!isEditModeSelected);
+                    void updateStage(!isEditModeSelected);
                   }}
 
                   // changeCategory

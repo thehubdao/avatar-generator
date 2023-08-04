@@ -3,7 +3,7 @@ import {AccessoryInterface, ApiResponse} from "../../../../interfaces/api.interf
 import {RequestApiHandler} from "../../../../server/api-handler/request.api-handler";
 import {GetApiHandler} from "../../../../server/api-handler/v1/accessoryOptions.api-handler";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<AccessoryInterface[]>>) {
+export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<AccessoryInterface[]>>) {
   return RequestApiHandler(req, res, {
     Get: GetApiHandler
   });

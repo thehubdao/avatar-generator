@@ -2,7 +2,7 @@
 import {PageLocation} from "../enums/common.enum";
 import {UrlObject} from "url";
 
-export async function GoToPage(url: PageLocation, params?: {}) {
+export async function GoToPage(url: PageLocation, params?: string) {
   const newRoute: UrlObject = {
     pathname: url,
     query: params

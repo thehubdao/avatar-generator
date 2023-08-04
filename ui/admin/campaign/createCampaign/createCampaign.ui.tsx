@@ -26,7 +26,7 @@ export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
   const [hasCampaignName, setHasCampaignName] = useState<boolean>(false);
   const [hasCampaignBase, setHasCampaignBase] = useState<boolean>(false);
 
-  const [editName, setEditName] = useState<boolean>(true)
+  const [shouldEditName, setShouldEditName] = useState<boolean>(true)
   const [featuresCount, setFeaturesCount] = useState<number>(1);
 
   function checkCampaignName() {
@@ -66,7 +66,7 @@ export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
             autoComplete="off"
             placeholder="NAME"
             onChange={checkCampaignName}
-            disabled={!editName}
+            disabled={!shouldEditName}
           />
           {hasCampaignName ?
             <p>Campaigns are the container for a personalization system. A campaign is formed by
@@ -104,11 +104,11 @@ export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
                 <SwiperSlide style={{ minHeight: 384 }}>
                   <AvatarBaseStep ready={hasCampaignName && hasCampaignBase} handleNextStep={() => {
                     dispatch(setName(campaignNameInput.current?.value || ''));
-                    setEditName(false);
+                    setShouldEditName(false);
                   }}/>
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <AssetsCountStep ready={true} handleNextStep={(value) => setFeaturesCount(value)} handleBackStep={() => setEditName(true)} />
+                  <AssetsCountStep ready={true} handleNextStep={(value) => setFeaturesCount(value)} handleBackStep={() => setShouldEditName(true)} />
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
                   <FeaturesConfig ready={true} featuresCount={featuresCount} />

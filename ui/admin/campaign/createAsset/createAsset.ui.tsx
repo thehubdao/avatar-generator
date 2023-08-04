@@ -20,7 +20,7 @@ export default function AddAssetUI() {
   const [assetName, setAssetName] = useState<string>('');
   const [hasAssetFile, setHasAssetFile] = useState<boolean>(false);
   const [hasThumbFile, setHasThumbFile] = useState<boolean>(false);
-  const [showCreateBtn, setShowCreateBtn] = useState<boolean>(false);
+  const [shouldShowCreateBtn, setShouldShowCreateBtn] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
 
@@ -42,17 +42,17 @@ export default function AddAssetUI() {
   }, [assetName])
 
   useEffect(() => {
-    const needStorage: boolean = dbLocation === FirestoreLocation.Features || dbLocation === FirestoreLocation.Accessories;
-    if (needStorage) {
+    const willNeedStorage: boolean = dbLocation === FirestoreLocation.Features || dbLocation === FirestoreLocation.Accessories;
+    if (willNeedStorage) {
       if (hasAssetFile && hasThumbFile && assetType !== '' && assetName !== '') {
-        setShowCreateBtn(true);
+        setShouldShowCreateBtn(true);
       } else {
-        setShowCreateBtn(false);
+        setShouldShowCreateBtn(false);
       }
     } else if (hasAssetFile && hasThumbFile && assetName !== '') {
-      setShowCreateBtn(true);
+      setShouldShowCreateBtn(true);
     } else {
-      setShowCreateBtn(false);
+      setShouldShowCreateBtn(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasAssetFile, hasThumbFile, assetType, assetName, dbLocation])
@@ -167,7 +167,7 @@ export default function AddAssetUI() {
             </label>
           </div>
           {
-            showCreateBtn &&
+            shouldShowCreateBtn &&
             <div className="w-2/4 m-auto pt-12">
               <AGButton nm full onClickEvent={() => {
                 dispatch(setReady(true));

@@ -3,7 +3,7 @@ import Layout from "../../../../layouts/admin.layout"
 import AGLoading from "../../../../ui/common/ag-loading.component"
 import CreateAssetUI from "../../../../ui/admin/campaign/createAsset/createAsset.ui"
 
-export default function newAsset() {
+export default function NewAsset() {
   return (
     <>
       <Head>
