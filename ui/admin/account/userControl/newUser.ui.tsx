@@ -4,9 +4,9 @@ import AGButton from "../../../common/ag-button.component";
 //** Represents the props for the NewUser component.
 interface NewUserProps {
   handleCreateNewUser: (
-    userAccount: MutableRefObject<HTMLInputElement | null>,
-    userName: MutableRefObject<HTMLInputElement | null>,
-    userPass: MutableRefObject<HTMLInputElement | null>
+    userAccount: string,
+    userName: string,
+    userPass: string
   ) => Promise<void>;
 }
 
@@ -24,7 +24,7 @@ export default function NewUserUI({ handleCreateNewUser }: NewUserProps) {
     if (!userForm.current) return;
     userForm.current.reportValidity();
     if (!userForm.current.checkValidity()) return;
-    handleCreateNewUser(userAccount, userName, userPass);
+    handleCreateNewUser(userAccount.current?.value ?? '', userName.current?.value ?? '', userPass.current?.value ?? '');
   };
 
   const handleCancelEvent = () => {

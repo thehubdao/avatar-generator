@@ -1,9 +1,5 @@
-import { MutableRefObject, useEffect } from "react";
+import { MutableRefObject } from "react";
 import { UserInterface } from "../../../../interfaces/firebase.interface";
-import { AuthStateInterface } from "../../../../interfaces/common.interface";
-import { useAppSelector } from "../../../../store/hooks";
-import { GoToPage } from "../../../../utils/router.util";
-import { PageLocation } from "../../../../enums/common.enum";
 import UserListUI from "./userList.ui";
 import NewUserUI from "./newUser.ui";
 
@@ -11,9 +7,9 @@ import NewUserUI from "./newUser.ui";
 interface UserControlProps {
   userList: UserInterface[];
   handleCreateNewUser: (
-    userAccount: MutableRefObject<HTMLInputElement | null>,
-    userName: MutableRefObject<HTMLInputElement | null>,
-    userPass: MutableRefObject<HTMLInputElement | null>
+    userAccount: string,
+    userName: string,
+    userPass: string
   ) => Promise<void>;
 }
 
@@ -23,18 +19,6 @@ interface UserControlProps {
  */
 export default function UserControlUI({ userList, handleCreateNewUser }: UserControlProps) {
   //** Retrieves the user data from the app state.
-  const userData: AuthStateInterface = useAppSelector(state => state.auth);
-
-  useEffect(() => {
-    const componentDidMount = () => {
-      //** Only User Admin Control
-      if (userData.userInfo?.role !== 0) { GoToPage(PageLocation.Account) }
-    };
-
-    componentDidMount()
-    
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
 
   return (
     <div className="text-gray-normal">

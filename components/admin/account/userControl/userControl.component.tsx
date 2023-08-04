@@ -4,13 +4,19 @@ import { CreateNewUser, GetUserList } from "../../../../utils/firebase.util";
 import { AuthValues, UserRoleValues } from "../../../../enums/firebase.enum";
 import { ShowModal } from "../../../../utils/modal.util";
 import { IsEmail, LogError } from "../../../../utils/common.util";
-import { EmailResult, Module } from "../../../../enums/common.enum";
+import { EmailResult, Module, PageLocation } from "../../../../enums/common.enum";
 import UserControlUI from "../../../../ui/admin/account/userControl/userControl.ui";
+import { AuthStateInterface } from "../../../../interfaces/common.interface";
+import { useAppSelector } from "../../../../store/hooks";
+import { GoToPage } from "../../../../utils/router.util";
 
 export default function UserControlComponent() {
+  const userData: AuthStateInterface = useAppSelector(state => state.auth);
   const [userList, setUserList] = useState<UserInterface[]>();
 
   useEffect(() => {
+    if (userData.userInfo?.role !== 0) GoToPage(PageLocation.Account)
+
     const componentDidMount = async () => {
       await getUserListData();
     };
@@ -27,23 +33,23 @@ export default function UserControlComponent() {
 
   /**
    ** Handles the creation of a new user.
-   * @param {MutableRefObject<HTMLInputElement | null>} userAccount - The user account input ref object.
-   * @param {MutableRefObject<HTMLInputElement | null>} userName - The user name input ref object.
-   * @param {MutableRefObject<HTMLInputElement | null>} userPass - The user password input ref object.
+   * @param {string} userAccount - The user account input.
+   * @param {string} userName - The user name input.
+   * @param {string} userPass - The user password input.
    */
   async function handleCreateNewUser(
-    userAccount: MutableRefObject<HTMLInputElement | null>,
-    userName: MutableRefObject<HTMLInputElement | null>,
-    userPass: MutableRefObject<HTMLInputElement | null>
+    userAccount: string,
+    userName: string,
+    userPass: string
   ) {
-    const newEmail = userEmail(userAccount?.current?.value);
+    const newEmail = userEmail(userAccount);
     if (newEmail == undefined) return;
 
     const newUser: Partial<UserWithPass> = {
-      account: userAccount?.current?.value,
+      account: userAccount,
       email: newEmail,
-      name: userName?.current?.value,
-      password: userPass?.current?.value,
+      name: userName,
+      password: userPass,
       role: UserRoleValues.admin,
       campaign: [],
     };
