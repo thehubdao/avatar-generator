@@ -131,7 +131,7 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     }
 
     _avatar = await GetGltfModel(avatarBasePath);
-    _avatar.scene.children[0].children = bonesFirst(_avatar.scene.children[0].children);
+    bonesFirst(_avatar);
     _mixer = CreateAnimationMixer(_avatar.scene);
     await SetAnimation(_mixer, _avatar, undefined);
 

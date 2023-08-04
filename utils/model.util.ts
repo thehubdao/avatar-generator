@@ -305,15 +305,18 @@ function IsBone(obj: Object3D): obj is Bone {
   return (obj as Bone).isBone;
 }
 
-export function bonesFirst(children: Object3D<THREE.Event>[]) {
-  let bones: Object3D[] = [];
-  let others: Object3D[] = [];
-  for (const child of children) {
+export function bonesFirst(avatar: GLTF) {
+  const root = avatar.scene.children.at(0);
+  if (root == undefined) {
+    LogError(Module.ModelUtil, "Avatar scene children at position 0 is undefined");
+    return;
+  }
+  for (const child of root.children) {
     if (IsBone(child)) {
-      bones.push(child);
-    } else {
-      others.push(child);
+      const boneIndex = root.children.indexOf(child) + 1;
+      root.children.splice(0, 0, child);
+      root.children.splice(boneIndex, 1);
+      return;
     }
   }
-  return bones.concat(others);
 }
