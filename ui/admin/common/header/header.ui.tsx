@@ -17,7 +17,7 @@ interface HeaderUIProps {
 }
 
 export default function HeaderUI({homeButton, breadCrumbs}: HeaderUIProps) {
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const [shouldShowModal, setShouldShowModal] = useState<boolean>(false);
 
   return (
     <div className="fixed w-full flex justify-between p-5 top-0 left-0 bg-bg z-50">
@@ -39,13 +39,13 @@ export default function HeaderUI({homeButton, breadCrumbs}: HeaderUIProps) {
           Account
         </AGButton>
         <div className="relative">
-          <AGButton nm fit onClickEvent={() => setShowModal(true)}>
+          <AGButton nm fit onClickEvent={() => setShouldShowModal(true)}>
             <IoMdLogOut />
           </AGButton>
           {
-            showModal &&
+            shouldShowModal &&
             <div className="absolute top-full right-0">
-              <ModalUI closeModal={() => setShowModal(false)} />
+              <ModalUI closeModal={() => setShouldShowModal(false)} />
             </div>
           }
         </div>

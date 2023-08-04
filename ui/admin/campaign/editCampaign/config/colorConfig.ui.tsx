@@ -18,7 +18,7 @@ export default function ColorConfigUI({ materialName, color, id, usePalette, col
 
   const [defaultMaterialName, setDefaultMaterialName] = useState<string>(materialName);
   const [defaultColor, setDefaultColor] = useState<string>(color);
-  const [paletteSelector, setPaletteSelector] = useState<boolean>(usePalette);
+  const [hasPaletteSelector, setHasPaletteSelector] = useState<boolean>(usePalette);
   const [paletteLength, setPaletteLength] = useState<number>(colorList?.length || maxColorsLength);
   const [paletteColors, setPaletteColors] = useState<string[]>(colorList || [...EXAMPLE_PALETTES]);
   const [defaultPaletteColor, setDefaultPaletteColor] = useState<number>(paletteColors.indexOf(defaultColor));
@@ -39,9 +39,9 @@ export default function ColorConfigUI({ materialName, color, id, usePalette, col
   const sendNewColorConfig = async () => {
     const newColorConfig = {
       materialName: defaultMaterialName,
-      defColor: paletteSelector ? paletteColors[defaultPaletteColor] : defaultColor,
-      colorPalette: paletteSelector ? paletteColors : [],
-      usePalette: paletteSelector,
+      defColor: hasPaletteSelector ? paletteColors[defaultPaletteColor] : defaultColor,
+      colorPalette: hasPaletteSelector ? paletteColors : [],
+      usePalette: hasPaletteSelector,
     }
     await updateColorConfig(newColorConfig)
   }
@@ -69,13 +69,13 @@ export default function ColorConfigUI({ materialName, color, id, usePalette, col
             <>
               <div className="pt-3 pb-4 flex gap-2">
                 <label htmlFor={id + '-colorselector'} className="relative w-6 h-6 shadow-inset-soft bg-bg rounded-lg flex justify-center items-center cursor-pointer">
-                  <div className={`w-3 h-3 bg-purple rounded-full ${paletteSelector ? '' : 'hidden'}`}></div>
+                  <div className={`w-3 h-3 bg-purple rounded-full ${hasPaletteSelector ? '' : 'hidden'}`}></div>
                   <p className="absolute left-[120%] whitespace-nowrap select-none">with specific palette</p>
                 </label>
-                <input type="checkbox" id={id + '-colorselector'} checked={paletteSelector} onChange={e => { setPaletteSelector(e.target.checked) }} className="absolute hidden" />
+                <input type="checkbox" id={id + '-colorselector'} checked={hasPaletteSelector} onChange={e => { setHasPaletteSelector(e.target.checked) }} className="absolute hidden" />
               </div>
               {
-                paletteSelector ?
+                hasPaletteSelector ?
                   <div>
                     {/* default palette color section */}
                     <div>

@@ -6,7 +6,7 @@ import {BasicData} from '../../../../interfaces/common.interface';
 import {useEffect, MouseEvent, useState} from 'react';
 import {GetFileUrl} from "../../../../utils/firebase.util";
 
-interface props {
+interface Props {
   list?: FeatureInterface[];
   activeOption?: BasicData;
   handleClick: (id: string, path: string, name: string) => void;
@@ -43,7 +43,7 @@ function OptionThumbnail({opt}: OptionProps) {
   );
 }
 
-function OptionList({list, activeOption, handleClick}: props) {
+function OptionList({list, activeOption, handleClick}: Props) {
   function selectFeature(e: MouseEvent, opt: FeatureInterface) {
     e.preventDefault();
     handleClick(opt.id, opt.path, opt.name);
@@ -64,7 +64,7 @@ function OptionList({list, activeOption, handleClick}: props) {
     }) : <></>;
 }
 
-export default function OptionSelectorComponent(props: props) {
+export default function OptionSelectorComponent(props: Props) {
   const itemsLength = props.list?.length ? props.list.length : 1;
   const itemsPerView = 4;
   return (

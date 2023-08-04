@@ -19,7 +19,7 @@ interface ConfigCampaignProps {
 }
 
 export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig }: ConfigCampaignProps) {
-  const [openConfig, setOpenConfig] = useState<boolean>(false);
+  const [shouldOpenConfig, setShouldOpenConfig] = useState<boolean>(false);
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
   const [camOption, setCamOption] = useState<string>(CameraConfigOption.DefCam);
@@ -58,7 +58,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
       {/* AVATAR GENERAL INFO */}
       <div className="absolute w-fit h-fit inset-0 p-4 flex flex-col justify-between">
         {
-          openConfig &&
+          shouldOpenConfig &&
           <div className="pl-16">
             {/* CONFIG */}
             <div className="relative bg-purple p-5 rounded-2xl">
@@ -203,8 +203,8 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
         }
         {/* CONFIG MENU */}
         <div className="absolute inset-4 w-fit h-fit flex gap-4" >
-          <div className={`w-12 bg-purple rounded-full p-1 overflow-hidden ${openConfig ? 'h-fit' : 'h-12'}`}>
-            <div onClick={() => setOpenConfig(!openConfig)} className="w-10 h-10 text-2xl text-purple bg-white rounded-full flex justify-center items-center cursor-pointer">
+          <div className={`w-12 bg-purple rounded-full p-1 overflow-hidden ${shouldOpenConfig ? 'h-fit' : 'h-12'}`}>
+            <div onClick={() => setShouldOpenConfig(!shouldOpenConfig)} className="w-10 h-10 text-2xl text-purple bg-white rounded-full flex justify-center items-center cursor-pointer">
               <IoSettingsOutline className="pointer-events-none" />
             </div>
             <div className="mt-4 flex flex-col gap-2">

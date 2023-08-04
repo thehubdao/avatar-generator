@@ -17,12 +17,12 @@ export default function Layout({
   userInfo,
   children
 }: LayoutProps) {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   async function updateUserInfo() {
     const uInfo = await GetCurrentUserInfo();
 
-    setLoading(false);
+    setIsLoading(false);
     setUserInfo && setUserInfo(uInfo);
   }
 
@@ -53,11 +53,11 @@ export default function Layout({
   return (
     <>
       <div className="flex justify-center min-h-screen mt-[88px] pb-16 bg-bg">
-        {!loading &&
+        {!isLoading &&
           children
         }
       </div>
-      <AGLoading loading={loading} />
+      <AGLoading loading={isLoading} />
     </>
   );
 }

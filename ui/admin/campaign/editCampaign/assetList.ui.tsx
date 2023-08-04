@@ -29,19 +29,19 @@ export default function AssetList({ activedOption }: AssetListProps) {
   const [searchByNameValue, setSearchByNameValue] = useState<string>('');
   const [searchByTagValue, setSearchByTagValue] = useState<string[]>([]);
   const [searchSuggestionList, setSearchSuggestionList] = useState<AssetType[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState<boolean>(false);
+  const [shouldShowSuggestions, setShouldShowSuggestions] = useState<boolean>(false);
 
   // *Event handler for searching assets by name
   const handleSearchByName = (event: React.FormEvent<HTMLInputElement>) => {
     event.preventDefault()
-    setShowSuggestions(true)
+    setShouldShowSuggestions(true)
     updateFilteredListData(event.currentTarget.value, searchByTagValue)
   }
 
   //* Updates the searchByTagValue state based on the provided tag.
   const handleSearchByTag = (tag: string) => {
     //* Create a deep copy of the searchByTagValue array
-    let deepTagCopyArray: string[] = JSON.parse(JSON.stringify(searchByTagValue));
+    let deepTagCopyArray = JSON.parse(JSON.stringify(searchByTagValue)) as string[];
     //* Check if the tag already exists in the tag array
     deepTagCopyArray.includes(tag)
       ? deepTagCopyArray = deepTagCopyArray.filter((item) => item !== tag)
@@ -96,7 +96,7 @@ export default function AssetList({ activedOption }: AssetListProps) {
   const handleBlur = (switchShowSuggestTo: boolean) => {
     //* Applies await delay if an on click is executed on an internal suggestion.
     setTimeout(() => {
-      setShowSuggestions(switchShowSuggestTo)
+      setShouldShowSuggestions(switchShowSuggestTo)
     }, 500)
   }
 
@@ -144,7 +144,7 @@ export default function AssetList({ activedOption }: AssetListProps) {
                     onClick={() => { updateFilteredListData('', searchByTagValue) }}
                   ><AiOutlineCloseCircle /></div>
                 </div>
-                {showSuggestions && <div className={`absolute z-10 m-4 bg-slate-50 w-64 py-2 rounded-md shadow-2xl ${searchSuggestionList.length == 0 ? 'hidden' : ''}`}>
+                {shouldShowSuggestions && <div className={`absolute z-10 m-4 bg-slate-50 w-64 py-2 rounded-md shadow-2xl ${searchSuggestionList.length == 0 ? 'hidden' : ''}`}>
                   {searchSuggestionList.map((item, index) => {
                     return <div
                       onClick={() => handleOnClickSuggestionSearch(item.name)}

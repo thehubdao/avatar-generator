@@ -2,7 +2,6 @@
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import {
   Group,
-  Material,
   MeshBasicMaterial,
   MeshStandardMaterial,
   MeshToonMaterial,
@@ -67,7 +66,7 @@ export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel:
     return LogError(Module.ModelUtil, "Skeleton missing from base_mesh some of the features have weird components.")
 
   const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
-  await ChangeSkeleton(newFeature, baseSkeleton, changeMaterialFunction, "threeTone", skinColor, skinName);
+  ChangeSkeleton(newFeature, baseSkeleton, changeMaterialFunction, "threeTone", skinColor, skinName);
 
   newFeature.frustumCulled = false;
   
@@ -96,9 +95,9 @@ async function GetMatchPiece(object: GLTF, match?: string) {
     }
 
     if (retObj == null) {
-      let objectFound = false;
+      let didFoundObject = false;
       object.scene.traverse(m => {
-        if (objectFound) return;
+        if (didFoundObject) return;
 
         const skinnedMesh = m as SkinnedMesh;
         if (skinnedMesh.isSkinnedMesh) {
@@ -107,7 +106,7 @@ async function GetMatchPiece(object: GLTF, match?: string) {
           else
             retObj = skinnedMesh;
 
-          objectFound = true;
+          didFoundObject = true;
           return;
         }
       });
@@ -117,7 +116,7 @@ async function GetMatchPiece(object: GLTF, match?: string) {
   });
 }
 
-async function ChangeSkeleton(newFeature: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone, skinColor?: string, skinMatName: string = 'Skin _Mat_MAH') {
+function ChangeSkeleton(newFeature: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone, skinColor?: string, skinMatName = 'Skin _Mat_MAH') {
   newFeature.traverse(async object => {
     if (IsSkinnedMesh(object)) {
       object.skeleton = baseSkeleton.clone();
@@ -213,7 +212,7 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
   }
   
   const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
-  await ChangeSkeleton(newAcc, newSkeleton, changeMaterialFunction, "threeTone");
+  ChangeSkeleton(newAcc, newSkeleton, changeMaterialFunction, "threeTone");
 
   // Add new one
   accessoryGroup.add(newAcc);
@@ -236,7 +235,7 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
   }
 }
 
-export async function ChangeToBasicMaterial(object: SkinnedMesh, tone?: TextureTone) {
+export function ChangeToBasicMaterial(object: SkinnedMesh) {
   const materialRef = object.material as MeshStandardMaterial;
   if (materialRef.isMeshStandardMaterial) {
     const mapClone = materialRef.map?.clone();
@@ -251,18 +250,18 @@ export async function ChangeToBasicMaterial(object: SkinnedMesh, tone?: TextureT
   }
 }
 
-export async function TransformObject3dToNewMaterial(object: Object3D, tone?: TextureTone, changeMaterial?: ChangeMaterialOption) {
+export function TransformObject3dToNewMaterial(object: Object3D, tone?: TextureTone, changeMaterial?: ChangeMaterialOption) {
   const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
   if (changeMaterialFunction == undefined) return;
   
   object.traverse(subObj => {
     if (IsSkinnedMesh(subObj)) {
-      changeMaterialFunction(subObj, tone);
+      void changeMaterialFunction(subObj, tone);
     }
   });
 }
 
-export async function ChangeObjectSkinColor(object: Object3D, skinColor: string, skinMatName: string = 'Skin _Mat_MAH') {
+export function ChangeObjectSkinColor(object: Object3D, skinColor: string, skinMatName = 'Skin _Mat_MAH') {
   object.traverse(subObject => {
     if (IsSkinnedMesh(subObject)) {
       const matRef = subObject.material as MeshStandardMaterial;
@@ -273,15 +272,16 @@ export async function ChangeObjectSkinColor(object: Object3D, skinColor: string,
   });
 }
 
-export function CleanModelForExport(model: GLTF) {
-  // TODO: something
-}
+// TODO: use at some point
+// export function CleanModelForExport(model: GLTF) {
+//   // something
+// }
 
 // TODO Review meshName
-export async function GetFeaturesData(baseModel: Group, featureList: FeatureBasic[], update: boolean = false) {
+export async function GetFeaturesData(baseModel: Group, featureList: FeatureBasic[], update = false) {
   return new Promise<Record<string, FeatureInfoInterface>>(resolve => {
     const baseFeatures = baseModel.children[0];
-    let result: Record<string, FeatureInfoInterface> = {};
+    const result: Record<string, FeatureInfoInterface> = {};
 
     for (const [index, feature] of baseFeatures.children.entries()) {
       if (featureList.some(x => feature.name.startsWith(x.meshName))) {

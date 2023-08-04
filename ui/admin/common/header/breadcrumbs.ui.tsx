@@ -2,21 +2,21 @@ import { IoChevronForwardSharp } from "react-icons/io5";
 import { Breadcrumb, PageLocation } from "../../../../enums/common.enum";
 import Link from "next/link";
 
-const BreadcrumbLinks: Record<Breadcrumb, PageLocation> = {
+const BREADCRUMB_LINKS: Record<Breadcrumb, PageLocation> = {
   [Breadcrumb.Login]: PageLocation.Login,
   [Breadcrumb.FirstSteps]: PageLocation.FirstSteps,
   [Breadcrumb.AdminCampaign]: PageLocation.AdminCampaign,
   [Breadcrumb.AssetCreate]: PageLocation.AssetCreate,
   [Breadcrumb.Missing]: PageLocation.Admin,
-}
+};
 
-const BreadcrumbTitles: Record<Breadcrumb, string> = {
+const BREADCRUMB_TITLES: Record<Breadcrumb, string> = {
   [Breadcrumb.Login]: 'Login',
   [Breadcrumb.FirstSteps]: 'Create Campaign',
   [Breadcrumb.AdminCampaign]: 'Campaign Configuration',
   [Breadcrumb.AssetCreate]: 'Create Asset',
   [Breadcrumb.Missing]: 'Missing Crumb',
-}
+};
 
 interface BreadcrumbsProps {
   paths: Breadcrumb[];
@@ -36,11 +36,11 @@ export default function BreadcrumbsUI({ paths }: BreadcrumbsProps) {
               {
                 index === paths.length - 1 ?
                   <p>
-                    {BreadcrumbTitles[path]}
+                    {BREADCRUMB_TITLES[path]}
                   </p>
                   :
-                  <Link className={'hover:underline'} href={BreadcrumbLinks[path]}>
-                    {BreadcrumbTitles[path]}
+                  <Link className={'hover:underline'} href={BREADCRUMB_LINKS[path]}>
+                    {BREADCRUMB_TITLES[path]}
                   </Link>
               }
             </div>
