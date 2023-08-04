@@ -10,7 +10,7 @@ import {
   ReplaceModelAccessory,
   ReplaceModelFeatureOnly,
   TransformObject3dToNewMaterial,
-  bonesFirst
+  BonesFirst
 } from "../../utils/model.util";
 import {
   AccessoryInfoInterface,
@@ -131,7 +131,7 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     }
 
     _avatar = await GetGltfModel(avatarBasePath);
-    bonesFirst(_avatar);
+    await BonesFirst(_avatar);
     _mixer = CreateAnimationMixer(_avatar.scene);
     await SetAnimation(_mixer, _avatar, undefined);
 
