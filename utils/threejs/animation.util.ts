@@ -27,9 +27,9 @@ export async function SetAnimation(mixer: AnimationMixer, animation: GLTF | stri
   }
 }
 
-export function StopAnimation(mixer: AnimationMixer) {
+export function StopAnimation(mixer: AnimationMixer | undefined) {
   if(mixer == undefined)
-    return LogError(Module.AnimationUtil, "Missing animation mixer!");
+    return void LogError(Module.AnimationUtil, "Missing animation mixer!");
 
   mixer.stopAllAction();
 }

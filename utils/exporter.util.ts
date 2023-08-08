@@ -2,8 +2,6 @@
 import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
 import {Delay, LogError} from "./common.util";
 import {Module} from "../enums/common.enum";
-import { StopAnimation } from "./threejs/animation.util";
-import { AnimationMixer } from "three";
 
 class ExporterUtil {
   private static _instance: ExporterUtil;
@@ -29,15 +27,14 @@ class ExporterUtil {
   }
 }
 
-export async function ExportModelGlb(model: GLTF, mixer: AnimationMixer) {
+export async function ExportModelGlb(model: GLTF) {
     const exporter = ExporterUtil.Instance().GltfExporter();
     // CleanModelForExport(model); // TODO: use at some point
-    StopAnimation(mixer);
     const out = await exporter.parseAsync(model.scene, {
         animations: model.animations,
         binary: true,
     });
-
+    
     return new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
 }
 

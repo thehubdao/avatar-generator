@@ -3,7 +3,7 @@ import {GlobalValues, Module} from "../../enums/common.enum";
 import {AnimationMixer} from "three";
 import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {GetGltfModel} from "../../utils/importer.util";
-import {CreateAnimationMixer, SetAnimation} from "../../utils/threejs/animation.util";
+import {CreateAnimationMixer, SetAnimation, StopAnimation} from "../../utils/threejs/animation.util";
 import {
   ChangeObjectSkinColor,
   GetFeaturesData,
@@ -93,9 +93,8 @@ export async function SetFeaturesData(selectListFeatures: FeatureBasic[]) {
 
 export async function GetAvatarGLB() {
   if (_avatar == undefined) return void LogError(Module.Editor, "Missing Avatar for export!");
-  if (_mixer == undefined) return void LogError(Module.Editor, "Missing Mixer for export!");
-
-  return ExportModelGlb(_avatar, _mixer);
+  void StopAnimation(_mixer);
+  return ExportModelGlb(_avatar);
 }
 
 //#endregion
