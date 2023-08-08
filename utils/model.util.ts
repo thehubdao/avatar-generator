@@ -1,6 +1,7 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import {
+  Bone,
   Group,
   MeshBasicMaterial,
   MeshStandardMaterial,
@@ -298,4 +299,24 @@ export async function GetFeaturesData(baseModel: Group, featureList: FeatureBasi
 
     resolve(result);
   });
+}
+
+function IsBone(obj: Object3D): obj is Bone {
+  return (obj as Bone).isBone;
+}
+
+export function BonesFirst(avatar: GLTF) {
+  const root = avatar.scene.children.at(0);
+  
+  if (root == undefined)
+    return void LogError(Module.ModelUtil, "Avatar scene children at position 0 is undefined");
+
+  for (const child of root.children) {
+    if (IsBone(child)) {
+      const boneIndex = root.children.indexOf(child) + 1;
+      root.children.splice(0, 0, child);
+      root.children.splice(boneIndex, 1);
+      return;
+    }
+  }
 }
