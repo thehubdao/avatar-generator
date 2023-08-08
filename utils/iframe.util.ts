@@ -41,10 +41,10 @@ function ChangeSkinColor(onChangeSkin?: (newSkinColor?: string) => Promise<void>
 }
 
 function InBoundEventListener<T>(event: IFrameEvents, onFunc?: ((data?: T) => Promise<void>) | ((data?: T) => void )) {
-  window.addEventListener(IFrameValues.Event, ({data, source}) => {
+  window.addEventListener(IFrameValues.Event, ({data}) => {
     const {target, eventName, payload} = data as IFrameInBound<T>;
     if(onFunc && target === IFrameValues.Project && eventName === event)
-      onFunc(payload);
+      void onFunc(payload);
   });
 }
 

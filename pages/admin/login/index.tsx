@@ -11,14 +11,14 @@ import store from "../../../store/store";
 import { ShowModal } from "../../../utils/modal.util";
 
 export default function Login() {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [user, setUser] = useState<string>('');
   const [pass, setPass] = useState<string>('');
 
   const getLogin = useCallback(async () => {
-    const data = await IsLogIn();
-    setLoading(data);
-    if (data) {
+    const isLogged = await IsLogIn();
+    setIsLoading(isLogged);
+    if (isLogged) {
       await GoToPage(PageLocation.Admin);
     }
   }, []);
@@ -37,7 +37,7 @@ export default function Login() {
     }
     catch (err) {
       const error = err as FirebaseError;
-      setLoading(false);
+      setIsLoading(false);
       ShowModal(`LogIn error: ${error.code}`);
     }
   }
@@ -60,7 +60,7 @@ export default function Login() {
       <Provider store={store}>
         <LoginUI handleSubmit={onSubmit} setUser={setUser} setPass={setPass} />
       </Provider>
-      <AGLoading loading={loading} bgColor="F1F5F9" />
+      <AGLoading loading={isLoading} bgColor="F1F5F9" />
     </>
   )
 }

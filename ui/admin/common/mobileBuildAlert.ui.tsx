@@ -36,7 +36,7 @@ export default function MobileBuildAlert() {
       <h1 className="font-humane text-9xl text-gray-normal">COMMING SOON</h1>
       <p className="text-center">We are working on the mobile version, while we finalize the details we invite you to visit us on desktop version. If you want to learn more about us, we invite you to contact us through our social networks.</p>
       <div className="w-fit">
-        <AGButton nm full onClickEvent={() => { window.open(ExternalLink.TheHubWebLanding, "_blank"); }}>
+        <AGButton nm full onClickEvent={() => { window.open(ExternalLink.TheHub, "_blank"); }}>
           <p className="font-bold">Go to The HUB Website</p>
         </AGButton>
         <div className="flex flex-row items-center justify-center flex-wrap pt-3 sm:pt-6">

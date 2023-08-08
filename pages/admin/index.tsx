@@ -1,13 +1,13 @@
 ﻿import { useEffect, useState } from "react";
 import Head from "next/head";
 import { UserInterface } from "../../interfaces/firebase.interface";
-import Layout from "../../ui/admin/admin.layout";
+import Layout from "../../layouts/admin.layout";
 import AGLoading from "../../ui/common/ag-loading.component";
 import { GetCurrentUserInfo, HandleNotLoggedIn } from "../../utils/firebase.util";
 import Campaigns from "../../ui/admin/campaign/editCampaign/campaignList.ui";
 
 export default function Admin() {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [userInfo, setUserInfo] = useState<UserInterface>({
     role: 0,
     name: '',
@@ -18,7 +18,7 @@ export default function Admin() {
 
   async function updateUserInfo() {
     const uInfo = await GetCurrentUserInfo();
-    setLoading(false);
+    setIsLoading(false);
     uInfo && setUserInfo(uInfo);
   }
 
@@ -45,7 +45,7 @@ export default function Admin() {
       <Layout>
         <Campaigns userInfo={userInfo} />
       </Layout>
-      <AGLoading loading={loading} bgColor="F1F5F9" />
+      <AGLoading loading={isLoading} bgColor="F1F5F9" />
     </>
   );
 }

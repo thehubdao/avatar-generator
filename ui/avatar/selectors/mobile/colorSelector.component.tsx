@@ -4,13 +4,13 @@ import {MouseEvent} from "react";
 
 // REFERENCE PALETTE: https://www.colourlovers.com/palette/2543931/Cartoon_Skin_2
 
-interface props {
+interface Props {
   list: string[];
   activeColor: string | undefined;
   handleClick: (color: string) => void;
 }
 
-function optionList(props: props) {
+function OptionList(props: Props) {
 
   function selectFeature(e: MouseEvent, color: string) {
     e.preventDefault();
@@ -31,7 +31,7 @@ function optionList(props: props) {
   });
 }
 
-export default function ColorSelectorComponent(props: props) {
+export default function ColorSelectorComponent(props: Props) {
   const itemsLength = props.list?.length ? props.list.length : 1;
   const itemsPerView = 5;
   return (
@@ -48,7 +48,7 @@ export default function ColorSelectorComponent(props: props) {
         // onSwiper={(swiper) => console.log(swiper)}
         className='!pb-2 !pt-3 h-[79px]'
       >
-        {optionList(props)}
+        {OptionList(props)}
       </Swiper>
       <div
         className='absolute h-full w-[50px] top-0 right-0 bg-gradient-to-l from-slate-100 z-10 pointer-events-none'></div>

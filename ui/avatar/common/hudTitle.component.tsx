@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 
-interface hudTitleProps {
-  selectedFeature: string
+interface HudFeatureTitleProps {
+  selectedFeature: string | undefined;
 }
 
 /**
@@ -9,23 +9,23 @@ interface hudTitleProps {
  * 
  * @param {string} selectedFeature - The selected feature to display as the HUD feature title.
  */
-const HudFeatureTitle = ({ selectedFeature }: hudTitleProps) => {
+export default function HudFeatureTitle({ selectedFeature }: HudFeatureTitleProps) {
   // * State for the current and next HUD titles
-  const [currentTitle, setCurrentTitle] = useState('HUD');
-  const [nextTitle, setNextTitle] = useState('HUD');
+  const [currentTitle, setCurrentTitle] = useState<string>();
+  const [nextTitle, setNextTitle] = useState<string>();
 
   // * State for controlling the animation
-  const [runAnimation, setRunAnimation] = useState(false);
+  const [hasRunAnimation, setHasRunAnimation] = useState(false);
 
   useEffect(() => {
     // * Update the nextTitle and trigger the animation
     setNextTitle(selectedFeature);
-    setRunAnimation(true);
+    setHasRunAnimation(true);
 
     // * After a delay, update the currentTitle and stop the animation
     setTimeout(() => {
       setCurrentTitle(selectedFeature);
-      setRunAnimation(false);
+      setHasRunAnimation(false);
     }, 500);
   }, [selectedFeature]);
 
@@ -34,11 +34,9 @@ const HudFeatureTitle = ({ selectedFeature }: hudTitleProps) => {
   return (
     <div className="w-full h-[60px] relative overflow-hidden">
       {/* Current HUD feature title with animation */}
-      <h2 className={`absolute font-work font-bold text-6xl uppercase truncate ${runAnimation ? '-top-[60px] duration-500 transition-all' : 'top-0'}`}>{currentTitle}</h2>
+      <h2 className={`absolute font-work font-bold text-6xl uppercase truncate ${hasRunAnimation ? '-top-[60px] duration-500 transition-all' : 'top-0'}`}>{currentTitle}</h2>
       {/* Next HUD feature title with animation */}
-      <h2 className={`absolute font-work font-bold text-6xl uppercase truncate ${runAnimation ? 'bottom-0 duration-500 transition-all' : '-bottom-[60px]'}`}>{nextTitle}</h2>
+      <h2 className={`absolute font-work font-bold text-6xl uppercase truncate ${hasRunAnimation ? 'bottom-0 duration-500 transition-all' : '-bottom-[60px]'}`}>{nextTitle}</h2>
     </div>
   );
-};
-
-export default HudFeatureTitle;
+}

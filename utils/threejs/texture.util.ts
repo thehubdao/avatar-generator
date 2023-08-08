@@ -51,7 +51,7 @@ export async function GetTextureFromFile(url: string | undefined) {
   let realUrl: string | undefined = url;
   if (url != undefined && !IsWebUrl(url)) realUrl = await GetFileUrl(url);
   
-  if (realUrl == undefined) return void LogError(Module.TextureUtil, `Couldn't get texture from url: ${url}`);
+  if (realUrl == undefined) return void LogError(Module.TextureUtil, `Couldn't get texture from url: ${url ?? ''}`);
   
   return TextureUtil.Instance().TextureLoader().loadAsync(realUrl);
 }

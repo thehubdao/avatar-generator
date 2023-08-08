@@ -6,7 +6,7 @@ import {BasicData} from '../../../../interfaces/common.interface';
 import {useEffect, MouseEvent, useState} from 'react';
 import {GetFileUrl} from "../../../../utils/firebase.util";
 
-interface props {
+interface Props {
   list?: FeatureInterface[];
   activeOption?: BasicData;
   handleClick: (id: string, path: string, name: string) => void;
@@ -43,20 +43,16 @@ function OptionThumbnail({opt}: OptionProps) {
   );
 }
 
-function OptionList({list, activeOption, handleClick}: props) {
+function OptionList({list, activeOption, handleClick}: Props) {
   function selectFeature(e: MouseEvent, opt: FeatureInterface) {
     e.preventDefault();
     handleClick(opt.id, opt.path, opt.name);
   }
-
-  useEffect(() => {
-    // console.log("active option: ", activeOption);
-  }, [activeOption]);
   
   return list != undefined ? 
-    list.map((opt) => {
+    list.map((opt: FeatureInterface, index: number) => {
       return (
-        <SwiperSlide className={'flex justify-center items-center transition-transform' + (activeOption?.val === opt.name?' -translate-y-2':'')} key={opt.id}>
+        <SwiperSlide className={'flex justify-center items-center transition-transform' + (activeOption?.val === opt.name?' -translate-y-2':'')} key={index}>
           <p className='nm-flat-slate-100 hidden absolute'></p>
           <div className="rounded-md w-[75px] h-[75px] flex items-center justify-center relative overflow-hidden" onClick={event => selectFeature(event, opt)}>
             <OptionThumbnail opt={opt}/>
@@ -68,7 +64,7 @@ function OptionList({list, activeOption, handleClick}: props) {
     }) : <></>;
 }
 
-export default function OptionSelectorComponent(props: props) {
+export default function OptionSelectorComponent(props: Props) {
   const itemsLength = props.list?.length ? props.list.length : 1;
   const itemsPerView = 4;
   return (

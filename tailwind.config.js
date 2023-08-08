@@ -2,6 +2,7 @@
     plugins: [require('tailwindcss-neumorphism')],
     content: [
         './pages/**/*.{js,ts,jsx,tsx}',
+        './layouts/**/*.{js,ts,jsx,tsx}',
         './components/**/*.{js,ts,jsx,tsx}',
         './ui/**/*.{js,ts,jsx,tsx}',
         // For the best performance and to avoid false positives,
@@ -13,9 +14,11 @@
           'work': ['var(--work-font)', 'sans-serif'],
           'humane': ['var(--humane-font)', 'sans-serif'],
           'poppins': ['var(--poppins-font)', 'sans-serif'],
+          'featuresIcons': ['var(--features-icons-font)', 'sans-serif'],
         },
         colors: {
           gray: {
+            extralight: '#E4E7EB',
             light: '#A3AFBD',
             normal: '#54575C',
             dark: '#111111'

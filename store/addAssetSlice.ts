@@ -3,7 +3,7 @@ import { FirestoreLocation } from '../enums/firebase.enum';
 
 interface AssetStateInterface {
   location: string;
-  storage: string;
+  type: string;
   name: string;
   ready: boolean;
   isUploading: boolean;
@@ -12,7 +12,7 @@ interface AssetStateInterface {
 
 const initialState: AssetStateInterface = {
   location: '',
-  storage: '',
+  type: '',
   name: '',
   ready: false,
   isUploading: false,
@@ -27,8 +27,8 @@ export const addAssetSlice = createSlice({
     setLocation: (state, action: PayloadAction<FirestoreLocation>) => {
       state.location = action.payload
     },
-    setStorage: (state, action: PayloadAction<string>) => {
-      state.storage = action.payload
+    setType: (state, action: PayloadAction<string>) => {
+      state.type = action.payload
     },
     setName: (state, action: PayloadAction<string>) => {
       state.name = action.payload
@@ -39,5 +39,5 @@ export const addAssetSlice = createSlice({
   }
 })
 
-export const { reset, setName, setStorage, setLocation, setReady } = addAssetSlice.actions
+export const { reset, setName, setType, setLocation, setReady } = addAssetSlice.actions
 export default addAssetSlice.reducer

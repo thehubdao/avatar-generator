@@ -1,23 +1,20 @@
-import Image from "next/image";
 import { Swiper, SwiperRef, SwiperSlide, useSwiper } from 'swiper/react';
 import { Mousewheel } from 'swiper'
 import { FeatureBasic } from "../../../interfaces/common.interface";
 import { useRef } from "react";
+import FeatureItemSelectorUI from "./featureItemSelector.ui";
 
 interface FeatureSelectorProps {
   list?: FeatureBasic[];
   activeOpc?: string;
-  handleClick: (id: string) => void;
+  onCategoryChange: (name: string) => void;
+  // TODO: remove since the git history has it
+  // onChangeFeature: (name: string) => void;
+  // onChangeAccessory: (name: string) => void;
 }
 
-interface OptionSelectorProps {
-  list?: FeatureBasic[];
-  activeOpc?: string
-  handleClick: (id: string) => void;
-  handleSlide: (id: number) => void;
-}
-
-const ScrollButton = ({ position = 'top' }: { position?: 'top' | 'bottom' }) => {
+// TODO: move component to own file
+function ScrollButton({ position = 'top' }: { position?: 'top' | 'bottom' }) {
   const swiper = useSwiper();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -45,32 +42,7 @@ const ScrollButton = ({ position = 'top' }: { position?: 'top' | 'bottom' }) => 
   )
 }
 
-function optionSelector({ list, activeOpc, handleClick, handleSlide }: OptionSelectorProps) {
-  const selectFeature = (e: React.MouseEvent, id: string, index: number) => {
-    e.preventDefault();
-    handleClick(id);
-    handleSlide(index);
-  }
-
-  return list?.map((opt: FeatureBasic, index: number) => {
-    const isActive: boolean = activeOpc && activeOpc === opt.meshName ? true : false
-    return (
-      <SwiperSlide key={opt.meshName} style={{ height: '100px' }} className="px-8">
-        <div
-          onClick={event => {
-            selectFeature(event, opt.meshName, index)
-          }}
-        >
-          <div className={`w-[84px] h-[84px] flex justify-center items-center rounded-xl cursor-pointer ${isActive ? 'bg-accent bg-opacity-80 shadow-inset-hard' : 'bg-bg shadow-flat-soft hover:shadow-flat-hard'} transition-all duration-500`} title={opt.displayName}>
-            <Image alt={opt.displayName} width={70} height={70} src={'/resources/icons/features/Chest.svg'} priority />
-          </div>
-        </div>
-      </SwiperSlide>
-    )
-  })
-}
-
-export default function FeatureSelector({ list, activeOpc, handleClick }: FeatureSelectorProps) {
+export default function FeatureSelector({ list, activeOpc, onCategoryChange }: FeatureSelectorProps) {
   const swiperRef = useRef<SwiperRef | null>(null);
 
   const listLenght: number = list?.length ?? 0
@@ -94,7 +66,25 @@ export default function FeatureSelector({ list, activeOpc, handleClick }: Featur
         initialSlide={Math.floor(listLenght / 2)}
         className='!pb-2 !pt-3 h-screen'
       >
-        {optionSelector({ list, activeOpc, handleClick, handleSlide })}
+        {
+          list ?
+            list.map((item: FeatureBasic, index: number) => {
+              return (
+                <SwiperSlide key={index} style={{ height: '100px' }} className="px-8">
+                  <FeatureItemSelectorUI
+                    item={item}
+                    handleClick={(name: string) => {
+                      onCategoryChange(name);
+                      handleSlide(index);
+                    }}
+                    activeOpc={activeOpc}
+                  />
+                </SwiperSlide>
+              )
+            })
+            :
+            <p>no features</p>
+        }
         <ScrollButton position="top" />
         <ScrollButton position="bottom" />
       </Swiper>

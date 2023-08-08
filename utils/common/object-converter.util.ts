@@ -15,7 +15,7 @@ function NewUserInterface(): UserInterface {
   };
 }
 
-function GetNewObject<T>(type: ConvertType) {
+function GetNewObject(type: ConvertType) {
   switch (type) {
     case ConvertType.UserInterface:
       return NewUserInterface();
@@ -25,7 +25,7 @@ function GetNewObject<T>(type: ConvertType) {
 }
 
 export function ConvertObject<TDest>(origin: object, type: ConvertType): TDest {
-  const obj = GetNewObject<TDest>(type);
+  const obj = GetNewObject(type);
   if(obj == undefined) return {} as TDest;
   
   const newDest: unknown = Object.fromEntries(

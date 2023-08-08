@@ -1,14 +1,16 @@
-﻿import {EmailResult, Module} from "../enums/common.enum";
+﻿import {EmailResult, GlobalValues, Module} from "../enums/common.enum";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
 }
 
 // Maybe save a log at some point either through api or just firebase
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function LogError(origin: string | Module, message: string) {
   console.error(`${origin} - `, message);
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function LogWarning(origin: string | Module, message: string) {
   console.warn(`${origin} - `, message);
 }
@@ -22,6 +24,7 @@ export function Delay(ms: number) {
 export function IsEmail(text: string): EmailResult {
   if (!text.includes('@') && !text.includes('.')) return EmailResult.NoEmail;
 
+  // eslint-disable-next-line no-useless-escape
   const regExp = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
   return regExp.test(text.toLowerCase()) ? EmailResult.GoodEmail : EmailResult.BadEmail;
 }
@@ -55,7 +58,7 @@ export function SetMapToMap<TKey, TValue>(leMap: Map<TKey, TValue>, toAdd: Map<T
 
 export function RemoveUndefinedProperties<T>(obj: T)  {
   const clone = {...obj};
-  for (let k in clone) {
+  for (const k in clone) {
     if (clone[k] == undefined)
       delete clone[k];
   }
@@ -89,4 +92,21 @@ export function ColorStringToHexString(color: string | undefined) {
 
 export function IsWebUrl(url: string) {
   return url.startsWith('http');
+}
+
+export function MixArrays<T>(arr1: T[] | undefined, arr2: T[] | undefined) {
+  const mixed: T[] = [...(arr1 ?? []), ...(arr2 ?? [])];
+  return mixed;
+}
+
+export function RemovedAcc(text: string | undefined) {
+  if (text == undefined || !text.endsWith(GlobalValues.AccEnd)) return text;
+  
+  return text.slice(0, - GlobalValues.AccEnd.length);
+}
+
+export function GetKeyByValue<TEnum extends object>(value: string, enumRef: TEnum): keyof TEnum | undefined {
+  const indexOfS = Object.values(enumRef).indexOf(value);
+  const key = Object.keys(enumRef)[indexOfS];
+  return key as unknown as keyof TEnum;
 }

@@ -3,7 +3,7 @@ import {ApiResponse, EnvMapInterface} from "../../../../interfaces/api.interface
 import {RequestApiHandler} from "../../../../server/api-handler/request.api-handler";
 import {GetApiHandler} from "../../../../server/api-handler/v1/envMaps.api-handler";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<EnvMapInterface[]>>) {
+export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<EnvMapInterface[]>>) {
   return RequestApiHandler(req, res, {
     Get: GetApiHandler
   })

@@ -33,13 +33,20 @@ export enum IFrameEvents {
 
 export enum PageLocation {
   Admin = '/admin',
-  AssetList = '/admin/assets/list',
   Login = '/admin/login',
   FirstSteps = '/admin/firstSteps',
   AdminCampaign = '/admin/campaign',
   AssetCreate = '/admin/campaign/createAsset',
   Account = '/admin/account',
   UserControl = '/admin/account/userControl'
+}
+
+export enum Breadcrumb {
+  Login = 'login',
+  FirstSteps = 'firstSteps',
+  AdminCampaign = 'campaign',
+  AssetCreate = 'createAsset',
+  Missing = 'missingPage',
 }
 
 export enum AdminComponents {
