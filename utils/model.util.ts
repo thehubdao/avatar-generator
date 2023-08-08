@@ -305,12 +305,12 @@ function IsBone(obj: Object3D): obj is Bone {
   return (obj as Bone).isBone;
 }
 
-export async function BonesFirst(avatar: GLTF) {
+export function BonesFirst(avatar: GLTF) {
   const root = avatar.scene.children.at(0);
-  if (root == undefined) {
-    void LogError(Module.ModelUtil, "Avatar scene children at position 0 is undefined");
-    return;
-  }
+  
+  if (root == undefined)
+    return void LogError(Module.ModelUtil, "Avatar scene children at position 0 is undefined");
+
   for (const child of root.children) {
     if (IsBone(child)) {
       const boneIndex = root.children.indexOf(child) + 1;
