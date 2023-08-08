@@ -26,3 +26,10 @@ export async function SetAnimation(mixer: AnimationMixer, animation: GLTF | stri
       await onAnimationSet();
   }
 }
+
+export function StopAnimation(mixer: AnimationMixer) {
+  if(mixer == undefined)
+    return LogError(Module.AnimationUtil, "Missing animation mixer!");
+
+  mixer.stopAllAction();
+}

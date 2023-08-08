@@ -93,8 +93,9 @@ export async function SetFeaturesData(selectListFeatures: FeatureBasic[]) {
 
 export async function GetAvatarGLB() {
   if (_avatar == undefined) return void LogError(Module.Editor, "Missing Avatar for export!");
+  if (_mixer == undefined) return void LogError(Module.Editor, "Missing Mixer for export!");
 
-  return ExportModelGlb(_avatar);
+  return ExportModelGlb(_avatar, _mixer);
 }
 
 //#endregion
