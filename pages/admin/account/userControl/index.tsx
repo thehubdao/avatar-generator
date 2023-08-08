@@ -1,6 +1,6 @@
 import Head from "next/head";
-import Layout from "../../../../ui/admin/admin.layout";
 import UserControlComponent from "../../../../components/admin/account/userControl/userControl.component";
+import Layout from "../../../../layouts/admin.layout";
 
 //** Represents the UserControlView component for managing user control in the admin section.
 export default function UserControlView() {
