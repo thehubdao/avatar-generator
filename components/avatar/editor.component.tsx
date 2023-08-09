@@ -70,7 +70,7 @@ export async function ChangeAccessory(id: string, path: string, name: string, se
 
 export async function ChangeStartAnimation(startAnimation: string | undefined) {
   if (_mixer == undefined) return LogError(Module.Editor, "Missing animation mixer!");
-
+  console.log("ChangeStartAnimation")
   await SetAnimation(_mixer, startAnimation);
 }
 
@@ -94,7 +94,11 @@ export async function SetFeaturesData(selectListFeatures: FeatureBasic[]) {
 export async function GetAvatarGLB() {
   if (_avatar == undefined) return void LogError(Module.Editor, "Missing Avatar for export!");
   void StopAnimation(_mixer);
-  return ExportModelGlb(_avatar);
+  return ExportModelGlb(_avatar, async () => {
+    if(_mixer != undefined) {
+      await SetAnimation(_mixer, _avatar);
+    }
+  });
 }
 
 //#endregion

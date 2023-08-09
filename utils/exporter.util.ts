@@ -27,15 +27,25 @@ class ExporterUtil {
   }
 }
 
-export async function ExportModelGlb(model: GLTF) {
+export async function ExportModelGlb(model: GLTF, onExportComplete?: () => Promise<void>) {
     const exporter = ExporterUtil.Instance().GltfExporter();
     // CleanModelForExport(model); // TODO: use at some point
     const out = await exporter.parseAsync(model.scene, {
         animations: model.animations,
         binary: true,
     });
+
+    const blob = new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
     
-    return new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
+    await ExecuteAfterReturn(onExportComplete);
+
+    return blob;
+}
+
+async function ExecuteAfterReturn(action?: () => Promise<void>): Promise<void> {
+  if (action) {
+    await action();
+  }
 }
 
 export async function ExportModelGltf(model: GLTF) {
