@@ -37,15 +37,11 @@ export async function ExportModelGlb(model: GLTF, onExportComplete?: () => Promi
 
     const blob = new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
     
-    await ExecuteAfterReturn(onExportComplete);
+    if (onExportComplete) {
+      await onExportComplete();
+    }
 
     return blob;
-}
-
-async function ExecuteAfterReturn(action?: () => Promise<void>): Promise<void> {
-  if (action) {
-    await action();
-  }
 }
 
 export async function ExportModelGltf(model: GLTF) {

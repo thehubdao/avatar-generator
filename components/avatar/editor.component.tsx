@@ -22,6 +22,7 @@ import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene} from "./viewer.comp
 import {ChangeMaterialOption} from "../../enums/model.enum";
 import {ConfigLight} from "../../interfaces/light.interface";
 import {GetLights} from "../../utils/threejs/light.util";
+import { AnimationInterface } from "../../interfaces/api.interface";
 
 
 //#region Logic
@@ -91,12 +92,12 @@ export async function SetFeaturesData(selectListFeatures: FeatureBasic[]) {
   _featureListData = await GetFeaturesData(_avatar.scene, selectListFeatures);
 }
 
-export async function GetAvatarGLB() {
+export async function GetAvatarGLB(startAnimation: AnimationInterface | undefined) {
   if (_avatar == undefined) return void LogError(Module.Editor, "Missing Avatar for export!");
   void StopAnimation(_mixer);
   return ExportModelGlb(_avatar, async () => {
     if(_mixer != undefined) {
-      await SetAnimation(_mixer, _avatar);
+      await SetAnimation(_mixer, startAnimation?.path);
     }
   });
 }

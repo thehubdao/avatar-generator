@@ -36,6 +36,7 @@ const _maxIndexValues: Map<number, number> = new Map();
 
 const _featureOptionListData: Map<number, FeatureInterface[] | undefined> = new Map();
 let _animationListData: AnimationInterface[] | undefined;
+let startAnimation: AnimationInterface | undefined;
 
 function InitValues() {
   _start = new Map(_minIndexValues);
@@ -144,7 +145,7 @@ export default function AvatarCollection({
     await onRenderCurrentIteration();
     await ChangeSkinColor(skinColor);
 
-    const startAnimation = _animationListData?.find(a => a.name == defaultAnimation) ?? _animationListData?.at(0);
+    startAnimation = _animationListData?.find(a => a.name == defaultAnimation) ?? _animationListData?.at(0);
     await ChangeStartAnimation(startAnimation?.path);
   }
 
@@ -201,7 +202,7 @@ export default function AvatarCollection({
     // Maybe add on iframe
     const [picturePromise, modelPromise] = await Promise.all([
       TakeCanvasPicture(),
-      GetAvatarGLB()
+      GetAvatarGLB(startAnimation)
     ]);
 
     await SaveFile(modelPromise, 'model.glb');

@@ -61,6 +61,7 @@ let animationList: AnimationInterface[] | undefined;
 let stageList: StageInterface[] | undefined;
 let envMapList: EnvMapInterface[] | undefined;
 let singleData: SingleInterface | undefined;
+let startAnimation: AnimationInterface | undefined;
 
 const exportData: ExportInterface = {attributes: []};
 let isOnIFrame = false;
@@ -118,7 +119,7 @@ export default function AvatarBuilder({
     const envMap = envMapList?.find(em => em.name === campaignConfig.defEnvMap) ?? envMapList?.at(0) ;
     await SetEnvironmentMap(envMap?.path);
     
-    const startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
+    startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
     await ChangeStartAnimation(startAnimation?.path);
 
     setIsLoading(false);
@@ -363,7 +364,7 @@ export default function AvatarBuilder({
     exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
     const [picturePromise, modelPromise] = await Promise.all([
       TakeCanvasPicture(),
-      GetAvatarGLB()
+      GetAvatarGLB(startAnimation)
     ]);
     exportData.picture = picturePromise;
     exportData.model = modelPromise;
