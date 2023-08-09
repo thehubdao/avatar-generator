@@ -70,7 +70,7 @@ export async function ChangeAccessory(id: string, path: string, name: string, se
 
 export async function ChangeStartAnimation(startAnimation: string | undefined) {
   if (_mixer == undefined) return LogError(Module.Editor, "Missing animation mixer!");
-  console.log("ChangeStartAnimation")
+  
   await SetAnimation(_mixer, startAnimation);
 }
 
