@@ -1,8 +1,9 @@
 import { useAppSelector } from "../../../store/hooks";
 import { AuthStateInterface } from "../../../interfaces/common.interface";
-import { PageLocation, UserRol } from "../../../enums/common.enum";
+import { PageLocation } from "../../../enums/common.enum";
 import AGButton from "../../common/ag-button.component";
 import { GoToPage } from "../../../utils/router.util";
+import { UserRoleValues } from "../../../enums/firebase.enum";
 
 //** Represents the admin account component.
 export default function AdminAccountUI() {
@@ -23,7 +24,7 @@ export default function AdminAccountUI() {
 
         {userData.userInfo && (
           <div className="text-base text-gray-normal">
-            <p><b>Rol:</b> {UserRol[userData.userInfo.role ?? 1]}</p>
+            <p><b>Rol:</b> {UserRoleValues[userData.userInfo.role ?? 1]}</p>
             <p><b>Account:</b> {userData.userInfo.account}</p>
             <p><b>Email:</b> {userData.userInfo.email}</p>
           </div>

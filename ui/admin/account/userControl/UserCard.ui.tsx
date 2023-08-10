@@ -1,9 +1,6 @@
-import { UserRol } from "../../../../enums/common.enum";
-import { UserInterface } from "../../../../interfaces/firebase.interface";
 
-interface UserListProps {
-  userList: UserInterface[];
-}
+import { UserRoleValues } from "../../../../enums/firebase.enum";
+import { UserInterface } from "../../../../interfaces/firebase.interface";
 
 /**
  ** Represents a user card component.
@@ -29,7 +26,7 @@ export default function UserCardUI({ user }: { user: UserInterface }) {
           })}
         </div>
       </div>}
-      <p className="truncate"><b>Role:</b> {UserRol[user.role ?? 1]} ({user.role})</p>
+      <p className="truncate"><b>Role:</b> {UserRoleValues[user.role ?? 1]} ({user.role})</p>
     </div>
   );
 };

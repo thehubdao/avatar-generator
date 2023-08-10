@@ -92,8 +92,3 @@ export enum CampaignParameterName {
   All = '',
   Missing = 'NaN',
 }
-
-export enum UserRol {
-  Admin = 0,
-  Client = 1
-}
