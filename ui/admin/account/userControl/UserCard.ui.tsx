@@ -1,7 +1,8 @@
 
 import { UserRoleValues } from "../../../../enums/firebase.enum";
 import { UserInterface } from "../../../../interfaces/firebase.interface";
-import getRamdomClass from "../../../../utils/admin/colors.util";
+import { _randomColors } from "../../../../utils/admin/colors.util";
+import { RandomArrayElement } from "../../../../utils/common.util";
 
 /**
  ** Represents a user card component.
@@ -19,7 +20,7 @@ export default function UserCardUI({ user }: { user: UserInterface }) {
         <div className="overflow-x-auto flex gap-3">
           {user.campaign.map((item, index) => {
             return <p
-              className={`${getRamdomClass()} rounded-md px-2 py-1 my-1 text-bg text-sm`}
+              className={`${RandomArrayElement(_randomColors)} rounded-md px-2 py-1 my-1 text-bg text-sm`}
               key={index}>
               {item}
             </p>
