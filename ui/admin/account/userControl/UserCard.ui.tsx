@@ -15,7 +15,7 @@ export default function UserCardUI({ user }: { user: UserInterface }) {
       <p className="truncate"><b>Account:</b> {user.account}</p>
       <p className="truncate"><b>Email:</b> {user.email}</p>
       {user.campaign && user.campaign.length > 0 && <div className="truncate">
-        <p><b>Campaings:</b> {user.campaign.length}</p>
+        <p><b>Campaigns:</b> {user.campaign.length}</p>
         <div className="overflow-x-auto flex gap-3">
           {user.campaign.map((item, index) => {
             return <p
