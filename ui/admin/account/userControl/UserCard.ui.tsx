@@ -27,7 +27,7 @@ export default function UserCardUI({ user }: { user: UserInterface }) {
           })}
         </div>
       </div>}
-      <p className="truncate"><b>Role:</b> {UserRoleValues[user.role ?? 1]} ({user.role})</p>
+      <p className="truncate"><b>Role:</b> {UserRoleValues[user.role]} ({user.role})</p>
     </div>
   );
 };

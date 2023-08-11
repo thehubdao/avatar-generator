@@ -24,7 +24,7 @@ export default function AdminAccountUI() {
 
         {userData.userInfo && (
           <div className="text-base text-gray-normal">
-            <p><b>Rol:</b> {UserRoleValues[userData.userInfo.role ?? 1]}</p>
+            <p><b>Rol:</b> {UserRoleValues[userData.userInfo.role]}</p>
             <p><b>Account:</b> {userData.userInfo.account}</p>
             <p><b>Email:</b> {userData.userInfo.email}</p>
           </div>
