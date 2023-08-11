@@ -1,13 +1,13 @@
 
 import { UserRoleValues } from "../../../../enums/firebase.enum";
 import { UserInterface } from "../../../../interfaces/firebase.interface";
+import getRamdomClass from "../../../../utils/admin/colors.util";
 
 /**
  ** Represents a user card component.
  * @param {UserInterface} user - The user object to display.
  */
 export default function UserCardUI({ user }: { user: UserInterface }) {
-  const _randomColors = ['bg-[#1abc9c]', 'bg-[#2ecc71]', 'bg-[#3498db]', 'bg-[#9b59b6]', 'bg-[#f1c40f]', 'bg-[#e67e22]', 'bg-[#e74c3c]', 'bg-[#34495e]']
 
   return (
     <div className="nm-flat-bg w-72 p-5 rounded-xl whitespace-nowrap">
@@ -19,7 +19,7 @@ export default function UserCardUI({ user }: { user: UserInterface }) {
         <div className="overflow-x-auto flex gap-3">
           {user.campaign.map((item, index) => {
             return <p
-              className={`${_randomColors[Math.floor(Math.random() * _randomColors.length)]} rounded-md px-2 py-1 my-1 text-bg text-sm`}
+              className={`${getRamdomClass()} rounded-md px-2 py-1 my-1 text-bg text-sm`}
               key={index}>
               {item}
             </p>
