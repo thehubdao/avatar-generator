@@ -61,29 +61,25 @@ export default function Header() {
 
   return (
     <div className="fixed w-full flex justify-between p-5 top-0 left-0 bg-bg z-50">
-      {
-        backBtn &&
+      {backBtn &&
         <div className="flex">
           <AGButton nm fit onClickEvent={() => router.back()}>
             <IoMdArrowBack />
           </AGButton>
-        </div>
-      }
-      <div></div>
+        </div>}
       <div className="flex">
-        {router.pathname !== PageLocation.Account && <AGButton nm onClickEvent={() => GoToPage(PageLocation.Account)}>
-          Account
-        </AGButton>}
+        {router.pathname !== PageLocation.Account &&
+          <AGButton nm onClickEvent={() => GoToPage(PageLocation.Account)}>
+            Account
+          </AGButton>}
         <div className="relative">
           <AGButton nm fit onClickEvent={() => void setShowModal(true)}>
             <IoMdLogOut />
           </AGButton>
-          {
-            showModal &&
+          {showModal &&
             <div className="absolute top-full right-0">
               <Modal />
-            </div>
-          }
+            </div>}
         </div>
       </div>
     </div>
