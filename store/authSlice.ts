@@ -1,11 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { UserInterface } from '../interfaces/firebase.interface';
-
-interface AuthStateInterface {
-  connected: boolean;
-  address?: string;
-  userInfo?: UserInterface;
-}
+import { AuthStateInterface } from '../interfaces/common.interface';
 
 const initialState: AuthStateInterface = {
   connected: false,

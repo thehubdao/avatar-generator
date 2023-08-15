@@ -16,7 +16,7 @@ interface HeaderUIProps {
   breadCrumbs: Breadcrumb[];
 }
 
-export default function HeaderUI({homeButton, breadCrumbs}: HeaderUIProps) {
+export default function HeaderUI({ homeButton, breadCrumbs }: HeaderUIProps) {
   const [shouldShowModal, setShouldShowModal] = useState<boolean>(false);
 
   return (
@@ -35,7 +35,7 @@ export default function HeaderUI({homeButton, breadCrumbs}: HeaderUIProps) {
         </div>
       </div>
       <div className="flex">
-        <AGButton nm >
+        <AGButton nm onClickEvent={() => GoToPage(PageLocation.Account)}>
           Account
         </AGButton>
         <div className="relative">

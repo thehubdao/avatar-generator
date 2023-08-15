@@ -37,6 +37,8 @@ export enum PageLocation {
   FirstSteps = '/admin/firstSteps',
   AdminCampaign = '/admin/campaign',
   AssetCreate = '/admin/campaign/createAsset',
+  Account = '/admin/account',
+  UserControl = '/admin/account/userControl'
 }
 
 export enum Breadcrumb {

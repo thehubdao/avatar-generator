@@ -112,6 +112,7 @@ select {
 /* Styles for the scrollbar in WebKit browsers */
 ::-webkit-scrollbar {
   width: 2px;
+  height: 2px;
   /* Scrollbar width */
 }
 
