@@ -2,6 +2,9 @@
 import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
 import {Delay, LogError} from "./common.util";
 import {Module} from "../enums/common.enum";
+import {clone} from "three/examples/jsm/utils/SkeletonUtils";
+import {SetPose} from "./model.util";
+import {BoneMatrix} from "../types/model.type";
 
 class ExporterUtil {
   private static _instance: ExporterUtil;
@@ -36,6 +39,21 @@ export async function ExportModelGlb(model: GLTF) {
     });
 
     return new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
+}
+
+export async function ExportModelVrm(model: GLTF, pose?: Record<string, BoneMatrix | undefined>) {
+  const exporter = ExporterUtil.Instance().GltfExporter();
+  const sceneClone = clone(model.scene);
+  
+  SetPose(sceneClone, pose);
+  
+  // CleanModelForExport(model); // TODO: use at some point
+  const out = await exporter.parseAsync(sceneClone, {
+    animations: [],
+    binary: true,
+  });
+
+  return new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
 }
 
 export async function ExportModelGltf(model: GLTF) {
