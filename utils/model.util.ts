@@ -12,14 +12,18 @@ import {
 } from "three";
 import {AccessoryInfoInterface, FeatureBasic, FeatureInfoInterface} from "../interfaces/common.interface";
 import {GetToneTexture} from "./threejs/texture.util";
-import {LogError} from "./common.util";
+import {LogError, LogWarning} from "./common.util";
 import {GlobalValues, Module} from "../enums/common.enum";
-import {MaterialFunction} from "../types/model.type";
+import {BoneMatrix, MaterialFunction} from "../types/model.type";
 import {ChangeMaterialOption} from "../enums/model.enum";
 import {TextureTone} from "../types/texture.type";
 
 function IsSkinnedMesh(obj: Object3D): obj is SkinnedMesh {
   return (obj as SkinnedMesh).isSkinnedMesh;
+}
+
+function IsBone(obj: Object3D): obj is Bone {
+  return (obj as Bone).isBone;
 }
 
 function GetSkeleton(skeletonModel: Object3D, index: number) {
@@ -301,9 +305,6 @@ export async function GetFeaturesData(baseModel: Group, featureList: FeatureBasi
   });
 }
 
-function IsBone(obj: Object3D): obj is Bone {
-  return (obj as Bone).isBone;
-}
 
 export function BonesFirst(avatar: GLTF) {
   const root = avatar.scene.children.at(0);
@@ -319,4 +320,43 @@ export function BonesFirst(avatar: GLTF) {
       return;
     }
   }
+}
+
+export function SetPose(model: Object3D, pose: Record<string, BoneMatrix | undefined> | undefined) {
+  if (pose == undefined)
+    return void LogWarning(Module.ModelUtil, "Missing pose to update!");
+
+  let sharedSkeleton: Skeleton | undefined;
+  
+  model.traverse(obj => {
+    if (IsSkinnedMesh(obj)) {
+      if (sharedSkeleton == undefined)
+        sharedSkeleton = obj.skeleton;
+      else
+        obj.skeleton = sharedSkeleton;
+    }
+
+    const matrix = pose[obj.name];
+    if (matrix != undefined) {
+      obj.matrixAutoUpdate = false;
+      obj.position.copy(matrix.p);
+      obj.quaternion.copy(matrix.q);
+      obj.scale.copy(matrix.s);
+      obj.matrixAutoUpdate = true;
+    }
+  });
+}
+
+export function GetPose(model: Object3D) {
+  const pose: Record<string, BoneMatrix | undefined> = {};
+
+  model.traverse(obj => {
+    pose[obj.name] = {
+      p: obj.position.clone(),
+      q: obj.quaternion.clone(),
+      s: obj.scale.clone(),
+    }
+  });
+  
+  return pose;
 }
