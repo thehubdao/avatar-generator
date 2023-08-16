@@ -23,6 +23,7 @@ export default function CreateCampaign() {
 
   useEffect(() => {
     if (isLoading) dispatch(reset());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function submitCampaign(avatarBaseFile: File | undefined) {
