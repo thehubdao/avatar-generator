@@ -25,7 +25,7 @@ const featureBase = {
 };
 
 type FeatureStringOption = keyof Omit<FeatureBasic, 'hasCustomIcon' | 'isMulticolor'>;
-type FeatureBooleanOption = keyof Omit<FeatureBasic, 'meshName' | 'displayName' | 'index' | 'iconUrl'>;
+// type FeatureBooleanOption = keyof Omit<FeatureBasic, 'meshName' | 'displayName' | 'index' | 'iconUrl'>;
 
 export default function FeaturesConfigStepUI({ ready = false, featuresCount }: FeaturesConfigStepUIProps) {
   const swiper = useSwiper();
@@ -45,16 +45,16 @@ export default function FeaturesConfigStepUI({ ready = false, featuresCount }: F
     })
   }
 
-  function updateBoolean(value: boolean, key: FeatureBooleanOption) {
-    setFeatureList((prevState) => {
-      const oldState = [...prevState];
-      if (oldState[featureSelected] == undefined)
-        oldState[featureSelected] = { ...featureBase };
+  // function updateBoolean(value: boolean, key: FeatureBooleanOption) {
+  //   setFeatureList((prevState) => {
+  //     const oldState = [...prevState];
+  //     if (oldState[featureSelected] == undefined)
+  //       oldState[featureSelected] = { ...featureBase };
 
-      oldState[featureSelected] = { ...oldState[featureSelected], [key]: value };
-      return oldState;
-    })
-  }
+  //     oldState[featureSelected] = { ...oldState[featureSelected], [key]: value };
+  //     return oldState;
+  //   })
+  // }
 
   function updateNumber(value: number, key: FeatureStringOption) {
     setFeatureList((prevState) => {
