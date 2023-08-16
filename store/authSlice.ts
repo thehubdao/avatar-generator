@@ -12,11 +12,11 @@ export const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    connect: (state, { payload }) => {
+    connect: (state) => {
       state.connected = true;
     },
     disconnect: () => initialState,
-    setAddress: (state, action: PayloadAction<string> ) => {
+    setAddress: (state, action: PayloadAction<string>) => {
       state.address = action.payload
     },
     setUserInfo: (state, action: PayloadAction<UserInterface | undefined>) => {
