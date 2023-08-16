@@ -30,4 +30,4 @@ export default function UserCardUI({ user }: { user: UserInterface }) {
       <p className="truncate"><b>Role:</b> {UserRoleValues[user.role]} ({user.role})</p>
     </div>
   );
-};
+}
