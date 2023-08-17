@@ -1,5 +1,3 @@
-import { LogOut } from "../../../utils/firebase.util";
-
 import AGButton from "../../common/ag-button.component";
 
 import { IoMdLogOut, IoMdArrowBack } from 'react-icons/io';
@@ -8,31 +6,7 @@ import { useRouter } from "next/router";
 import { useAppSelector } from "../../../store/hooks";
 import { PageLocation } from "../../../enums/common.enum";
 import { GoToPage } from "../../../utils/router.util";
-
-interface ModalProps {
-  setShouldShowModal: React.Dispatch<React.SetStateAction<boolean>>
-}
-
-function Modal({ setShouldShowModal }: ModalProps) {
-  return (
-    <div className="bg-gray-dark w-80 p-6 rounded-2xl">
-      <div className="flex items-center pb-4 gap-4">
-        <div className="bg-white rounded-full w-10 h-10 text-2xl flex justify-center items-center">
-          <IoMdLogOut />
-        </div>
-        <p className="text-white">Are you sure you want to<br />log out?</p>
-      </div>
-      <div className="flex w-full justify-end">
-        <AGButton fit onClickEvent={() => void setShouldShowModal(false)}>
-          NO
-        </AGButton>
-        <AGButton fit onClickEvent={() => void LogOut()}>
-          YES
-        </AGButton>
-      </div>
-    </div>
-  )
-}
+import ModalUI from "./header/modal.ui";
 
 export default function Header() {
   const currentCampaign = useAppSelector(state => state.currentCampaign.name);
@@ -82,7 +56,7 @@ export default function Header() {
           </AGButton>
           {shouldShowModal &&
             <div className="absolute top-full right-0">
-              <Modal setShouldShowModal={setShouldShowModal} />
+              <ModalUI closeModal={() => setShouldShowModal(false)} />
             </div>}
         </div>
       </div>
