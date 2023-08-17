@@ -24,7 +24,7 @@ export default function NewUserUI({ handleCreateNewUser }: NewUserProps) {
     if (!userForm.current) return;
     userForm.current.reportValidity();
     if (!userForm.current.checkValidity()) return;
-    handleCreateNewUser(userAccount.current?.value ?? '', userName.current?.value ?? '', userPass.current?.value ?? '').catch(err => console.error(err));
+    void handleCreateNewUser(userAccount.current?.value ?? '', userName.current?.value ?? '', userPass.current?.value ?? '');
   };
 
   const handleCancelEvent = () => {

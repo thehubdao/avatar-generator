@@ -15,7 +15,7 @@ export default function UserControlComponent() {
   const [userList, setUserList] = useState<UserInterface[]>();
 
   useEffect(() => {
-    if (userData.userInfo?.role !== 0) GoToPage(PageLocation.Account).catch(err => console.error(err));
+    if (userData.userInfo?.role !== 0) void GoToPage(PageLocation.Account);
 
     const componentDidMount = async () => {
       await getUserListData();
