@@ -38,7 +38,8 @@ import AvatarEditor, {
   GetWearableOption,
   RemoveStage,
   SetStage,
-  SetFeaturesData
+  SetFeaturesData,
+  GetAvatarVRM
 } from "./editor.component";
 import {AGChangeCamPosition, AGChangeLookAtPosition, SetEnvironmentMap, TakeCanvasPicture} from "./viewer.component";
 
@@ -363,7 +364,8 @@ export default function AvatarBuilder({
     exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
     const [picturePromise, modelPromise] = await Promise.all([
       TakeCanvasPicture(),
-      GetAvatarGLB()
+      GetAvatarGLB(),
+      GetAvatarVRM()
     ]);
     exportData.picture = picturePromise;
     exportData.model = modelPromise;
