@@ -81,11 +81,12 @@ export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetPr
     if (isAssetReady) {
       void submitAsset();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAssetReady])
 
   useEffect(() => {
     if (campaignName.length <= 0) void GoToPage(PageLocation.Admin);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

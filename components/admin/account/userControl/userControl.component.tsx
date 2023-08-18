@@ -1,4 +1,4 @@
-import { MutableRefObject, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { UserInterface, UserWithPass } from "../../../../interfaces/firebase.interface";
 import { CreateNewUser, GetUserList } from "../../../../utils/firebase.util";
 import { AuthValues, UserRoleValues } from "../../../../enums/firebase.enum";
@@ -15,7 +15,7 @@ export default function UserControlComponent() {
   const [userList, setUserList] = useState<UserInterface[]>();
 
   useEffect(() => {
-    if (userData.userInfo?.role !== 0) GoToPage(PageLocation.Account)
+    if (userData.userInfo?.role !== 0) void GoToPage(PageLocation.Account);
 
     const componentDidMount = async () => {
       await getUserListData();

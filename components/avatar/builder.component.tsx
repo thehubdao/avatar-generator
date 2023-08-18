@@ -1,6 +1,6 @@
-import {useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 import Head from "next/head";
-import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import {
   BasicData,
   FeatureBasic,
@@ -16,9 +16,9 @@ import {
   SingleInterface,
   EnvMapInterface
 } from "../../interfaces/api.interface";
-import {IFrameExportData, IFrameReady, SetIFrameEvents} from "../../utils/iframe.util";
-import {ExportAttributeValues, GlobalValues, Module} from "../../enums/common.enum";
-import {FilterList, LogError, RandomArrayElement, MixArrays} from "../../utils/common.util";
+import { IFrameExportData, IFrameReady, SetIFrameEvents } from "../../utils/iframe.util";
+import { ExportAttributeValues, GlobalValues, Module } from "../../enums/common.enum";
+import { FilterList, LogError, RandomArrayElement, MixArrays } from "../../utils/common.util";
 import {
   GetAccessoryListByCampaign,
   GetAnimationListByCampaign,
@@ -27,7 +27,7 @@ import {
   GetEnvMapListByCampaign,
   GetStageListByCampaign
 } from "../../utils/api.util";
-import {SaveFile} from "../../utils/exporter.util";
+import { SaveFile } from "../../utils/exporter.util";
 import AGLoading from "../../ui/common/ag-loading.component";
 import HudComponent from "../../ui/avatar/hud.component";
 import AvatarEditor, {
@@ -40,7 +40,7 @@ import AvatarEditor, {
   SetStage,
   SetFeaturesData
 } from "./editor.component";
-import {AGChangeCamPosition, AGChangeLookAtPosition, SetEnvironmentMap, TakeCanvasPicture} from "./viewer.component";
+import { AGChangeCamPosition, AGChangeLookAtPosition, SetEnvironmentMap, TakeCanvasPicture } from "./viewer.component";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -62,7 +62,7 @@ let stageList: StageInterface[] | undefined;
 let envMapList: EnvMapInterface[] | undefined;
 let singleData: SingleInterface | undefined;
 
-const exportData: ExportInterface = {attributes: []};
+const exportData: ExportInterface = { attributes: [] };
 let isOnIFrame = false;
 
 /***
@@ -70,28 +70,28 @@ let isOnIFrame = false;
  * @constructor
  */
 export default function AvatarBuilder({
-                                        selectListFeatures,
-                                        selectListAccessories,
-                                        onlyView,
-                                        campaign,
-                                        attributeConfig,
-                                        avatarBasePath,
-                                        campaignConfig,
-                                        bgColor,
-                                        enablePan
-                                     }: AvatarBuilderProps) {
-  const [selectedFeature, setSelectedFeature] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
-  const [selectedAcc, setSelectedAcc] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].displayName : '');
+  selectListFeatures,
+  selectListAccessories,
+  onlyView,
+  campaign,
+  attributeConfig,
+  avatarBasePath,
+  campaignConfig,
+  bgColor,
+  enablePan
+}: AvatarBuilderProps) {
+  const [selectedFeature/* , setSelectedFeature */] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
+  const [selectedAcc/* , setSelectedAcc */] = useState<string>(selectListAccessories.length > 0 ? selectListAccessories[0].displayName : '');
   const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.length > 0 ? selectListFeatures[0].displayName : '');
   const [skinColor, setSkinColor] = useState<string>(campaignConfig.skin?.defColor ?? 'FFFFFF');
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false);
   // const [featuresSelected, setFeaturesSelected] = useState<boolean>(true);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [featureListShow, setFeatureListShow] = useState<FeatureInterface[]>();
-  const [accessoryListShow, setAccessoryListShow] = useState<FeatureInterface[]>();
+  // const [featureListShow, setFeatureListShow] = useState<FeatureInterface[]>();
+  // const [accessoryListShow, setAccessoryListShow] = useState<FeatureInterface[]>();
   const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>();
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
-  
+
   const startPromises = useRef<Promise<unknown>>();
 
   useEffect(() => {
@@ -115,9 +115,9 @@ export default function AvatarBuilder({
     await loadPreData();
     await onClickChangeSkinColor();
 
-    const envMap = envMapList?.find(em => em.name === campaignConfig.defEnvMap) ?? envMapList?.at(0) ;
+    const envMap = envMapList?.find(em => em.name === campaignConfig.defEnvMap) ?? envMapList?.at(0);
     await SetEnvironmentMap(envMap?.path);
-    
+
     const startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
     await ChangeStartAnimation(startAnimation?.path);
 
@@ -174,7 +174,7 @@ export default function AvatarBuilder({
       return LogError(Module.AvatarGenerator, "No feature/accessory list!");
 
     if (campaign && campaign !== GlobalValues.BaseCampaign) {
-      exportData?.attributes.push({id: ExportAttributeValues.Campaign, val: campaign});
+      exportData?.attributes.push({ id: ExportAttributeValues.Campaign, val: campaign });
     }
 
     if (attributeConfig) {
@@ -222,11 +222,11 @@ export default function AvatarBuilder({
         await onChangeAccessory(acc.id, acc.path, acc.name, acc.type);
     }
   }
-  
-  async function setRandomAccessories()  {
+
+  async function setRandomAccessories() {
     if (!accessoryList)
       return LogError(Module.AvatarGenerator, "No feature/accessory list!");
-    
+
     const randomAccessory: AccessoryInterface[] = [];
 
     for (const accType of selectListAccessories) {
@@ -246,47 +246,47 @@ export default function AvatarBuilder({
 
   async function updateAvatarSingleData() {
     if (singleData == undefined) return void LogError(Module.AvatarGenerator, "Missing single data!");
-    
-    for (const {val: {id, path, type, name}} of singleData.features) {
+
+    for (const { val: { id, path, type, name } } of singleData.features) {
       // Set feature on model
       await onChangeFeature(id, path, name, type);
     }
   }
 
   async function getFeatureList() {
-    const {value: newAssetList} = await GetAssetsListByCampaign(campaign);
+    const { value: newAssetList } = await GetAssetsListByCampaign(campaign);
     featureList = newAssetList;
     optionList = MixArrays(optionList, featureList);
-    setFeatureListShow(FilterList(featureList, "type", selectedFeature));
+    // setFeatureListShow(FilterList(featureList, "type", selectedFeature));
     setOptionListShow(FilterList(featureList, "type", selectedCategory));
   }
 
   async function getAccessoryList() {
-    const {value: newAccList} = await GetAccessoryListByCampaign(campaign);
+    const { value: newAccList } = await GetAccessoryListByCampaign(campaign);
     accessoryList = newAccList;
-    setAccessoryListShow(FilterList(accessoryList, "type", selectedAcc));
+    // setAccessoryListShow(FilterList(accessoryList, "type", selectedAcc));
   }
 
   async function getAnimationList() {
-    const {value: newAnimationList} = await GetAnimationListByCampaign(campaign);
+    const { value: newAnimationList } = await GetAnimationListByCampaign(campaign);
     animationList = newAnimationList;
   }
-  
+
   async function getStageList() {
-    const {value: newStageList} = await GetStageListByCampaign(campaign);
+    const { value: newStageList } = await GetStageListByCampaign(campaign);
     stageList = newStageList;
   }
-  
+
   async function getEnvironmentMapList() {
     if (campaign == undefined) return;
-    const {value: newEnvMapList} = await GetEnvMapListByCampaign(campaign);
+    const { value: newEnvMapList } = await GetEnvMapListByCampaign(campaign);
     envMapList = newEnvMapList;
   }
-  
+
   async function getSingleInfo() {
     if (campaignConfig.defAvatarCombination == undefined) return;
-    
-    const {value: reqSingleData} = await GetAvatarSingleByCampaignCombination(campaign, campaignConfig.defAvatarCombination);
+
+    const { value: reqSingleData } = await GetAvatarSingleByCampaignCombination(campaign, campaignConfig.defAvatarCombination);
     singleData = reqSingleData;
   }
 
@@ -295,28 +295,28 @@ export default function AvatarBuilder({
     setSkinColor(newSkinColor);
   }
 
-  function onFeatureTypeChange(value: string) {
-    setSelectedFeature(value);
-    setFeatureListShow(FilterList(featureList, "type", value));
-    updateFeatureCamPosition(value, campaignConfig.featuresCamPos);
-  }
+  // function onFeatureTypeChange(value: string) {
+  //   setSelectedFeature(value);
+  //   setFeatureListShow(FilterList(featureList, "type", value));
+  //   updateFeatureCamPosition(value, campaignConfig.featuresCamPos);
+  // }
 
-  function onAccessoryTypeChange(value: string) {
-    setSelectedAcc(value);
-    setAccessoryListShow(FilterList(accessoryList, "type", value));
-    updateFeatureCamPosition(value, campaignConfig.accCamPos);
-  }
+  // function onAccessoryTypeChange(value: string) {
+  //   setSelectedAcc(value);
+  //   setAccessoryListShow(FilterList(accessoryList, "type", value));
+  //   updateFeatureCamPosition(value, campaignConfig.accCamPos);
+  // }
 
   function onCategoryTypeChange(value: string) {
     setSelectedCategory(value);
     setOptionListShow(FilterList(optionList, "type", value));
-    updateFeatureCamPosition(value, {...campaignConfig.featuresCamPos, ...campaignConfig.accCamPos});
+    updateFeatureCamPosition(value, { ...campaignConfig.featuresCamPos, ...campaignConfig.accCamPos });
   }
 
   function updateFeatureCamPosition(index: string, posLocation?: Record<string, LookAtVectors>) {
     const confRef = posLocation ? posLocation[index] : undefined;
     if (confRef == undefined) return;
-    
+
     AGChangeCamPosition(confRef.pos);
     AGChangeLookAtPosition(confRef.lookAt);
   }
@@ -355,7 +355,7 @@ export default function AvatarBuilder({
       return;
     }
 
-    exportData?.attributes.push({id: addId, val: addValue});
+    exportData?.attributes.push({ id: addId, val: addValue });
     setSelectedOpc([...exportData.attributes]);
   }
 
@@ -367,7 +367,7 @@ export default function AvatarBuilder({
     ]);
     exportData.picture = picturePromise;
     exportData.model = modelPromise;
-    
+
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
@@ -379,7 +379,7 @@ export default function AvatarBuilder({
   }
 
   async function updateStage(isEditMode: boolean) {
-    if(isEditMode) {
+    if (isEditMode) {
       RemoveStage();
     }
     else {
@@ -394,65 +394,65 @@ export default function AvatarBuilder({
         <title>Avatar Generator</title>
       </Head>
       {/* LOADING */}
-      <AGLoading loading={isLoading} bgColor={bgColor}/>
+      <AGLoading loading={isLoading} bgColor={bgColor} />
       {/* CANVAS WRAPPER */}
       <div
         className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
         {/* CANVAS BACKGROUND */}
-        <div style={{backgroundColor: `#${bgColor ?? '272727'}`}} className="w-full h-screen absolute"/>
+        <div style={{ backgroundColor: `#${bgColor ?? '272727'}` }} className="w-full h-screen absolute" />
         {/* CANVAS */}
         <AvatarEditor avatarBasePath={avatarBasePath}
-                      onReady={() => onAvatarBuilderReady()}
-                      changeMaterial={campaignConfig.changeMaterial}
-                      lights={campaignConfig.lights}
-                      editMode={isEditModeSelected}
-                      enablePan={enablePan}
-                      defaultCamera={campaignConfig.defCam}
+          onReady={() => onAvatarBuilderReady()}
+          changeMaterial={campaignConfig.changeMaterial}
+          lights={campaignConfig.lights}
+          editMode={isEditModeSelected}
+          enablePan={enablePan}
+          defaultCamera={campaignConfig.defCam}
         />
       </div>
       {isLoading ? <></> :
         <>
           {!onlyView &&
-              <HudComponent
-                  selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
+            <HudComponent
+              selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
 
-                  editModeSelected={isEditModeSelected}
+              editModeSelected={isEditModeSelected}
 
-                  selectListCategory={[...selectListFeatures, ...selectListAccessories]}
-                  // selectListFeatures={[...selectListFeatures, ...selectListAccessories]}
-                  // selectListAccessories={selectListAccessories}
-                  
-                  // optionList
-                  optionList = {optionListShow}
-                  // featureList={featureListShow}
-                  // accessoryList={accessoryListShow}
+              selectListCategory={[...selectListFeatures, ...selectListAccessories]}
+              // selectListFeatures={[...selectListFeatures, ...selectListAccessories]}
+              // selectListAccessories={selectListAccessories}
 
-                  // selectedCategory
-                  selectedCategory = {selectedCategory}
-                  // selectedFeature={selectedFeature}
-                  // selectedAcc={selectedAcc}
-                  
-                  campaignSkinColorConfig={campaignConfig.skin || {}}
-                  skinColor={skinColor}
-                  changeView={() => {
-                    setIsEditModeSelected(!isEditModeSelected);
-                    void updateStage(!isEditModeSelected);
-                  }}
+              // optionList
+              optionList={optionListShow}
+              // featureList={featureListShow}
+              // accessoryList={accessoryListShow}
 
-                  // changeCategory
-                  onOptionChange={(id: string, path: string, name: string) => void onOptionChange(id, path, name)}
-                  // changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
-                  // changeAccessory={(id: string, path: string, name: string) => void onChangeAccessory(id, path, name)}
+              // selectedCategory
+              selectedCategory={selectedCategory}
+              // selectedFeature={selectedFeature}
+              // selectedAcc={selectedAcc}
 
-                  // onCategoryChange
-                  onCategoryTypeChange={(value: string) => onCategoryTypeChange(value)}
-                  // onFeatureTypeChange={(value: string) => onFeatureTypeChange(value)}
-                  // onAccessoryTypeChange={(value: string) => onAccessoryTypeChange(value)}
+              campaignSkinColorConfig={campaignConfig.skin || {}}
+              skinColor={skinColor}
+              changeView={() => {
+                setIsEditModeSelected(!isEditModeSelected);
+                void updateStage(!isEditModeSelected);
+              }}
+
+              // changeCategory
+              onOptionChange={(id: string, path: string, name: string) => void onOptionChange(id, path, name)}
+              // changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
+              // changeAccessory={(id: string, path: string, name: string) => void onChangeAccessory(id, path, name)}
+
+              // onCategoryChange
+              onCategoryTypeChange={(value: string) => onCategoryTypeChange(value)}
+              // onFeatureTypeChange={(value: string) => onFeatureTypeChange(value)}
+              // onAccessoryTypeChange={(value: string) => onAccessoryTypeChange(value)}
 
 
-                  onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
-                  exportModel={() => void exportModel()}
-              />
+              onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
+              exportModel={() => void exportModel()}
+            />
           }
         </>
       }

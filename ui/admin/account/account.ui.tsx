@@ -32,7 +32,7 @@ export default function AdminAccountUI() {
 
         {/* Renders a button for users with role 0, which navigates to the User Control page on click. */}
         {userData.userInfo?.role === 0 && (
-          <AGButton nm onClickEvent={() => { GoToPage(PageLocation.UserControl) }}>
+          <AGButton nm onClickEvent={() => { void GoToPage(PageLocation.UserControl) }}>
             <p className="m-2">Users Control</p>
           </AGButton>
         )}

@@ -1,4 +1,4 @@
-import { MutableRefObject, useRef } from "react";
+import { useRef } from "react";
 import AGButton from "../../../common/ag-button.component";
 
 //** Represents the props for the NewUser component.
@@ -24,7 +24,7 @@ export default function NewUserUI({ handleCreateNewUser }: NewUserProps) {
     if (!userForm.current) return;
     userForm.current.reportValidity();
     if (!userForm.current.checkValidity()) return;
-    handleCreateNewUser(userAccount.current?.value ?? '', userName.current?.value ?? '', userPass.current?.value ?? '');
+    void handleCreateNewUser(userAccount.current?.value ?? '', userName.current?.value ?? '', userPass.current?.value ?? '');
   };
 
   const handleCancelEvent = () => {

@@ -1,4 +1,3 @@
-import { MutableRefObject } from "react";
 import { UserInterface } from "../../../../interfaces/firebase.interface";
 import UserListUI from "./userList.ui";
 import NewUserUI from "./newUser.ui";

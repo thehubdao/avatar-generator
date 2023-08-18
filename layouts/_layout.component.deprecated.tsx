@@ -14,7 +14,7 @@ interface LayoutProps {
 
 export default function Layout({
   setUserInfo,
-  userInfo,
+  // userInfo,
   children
 }: LayoutProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
