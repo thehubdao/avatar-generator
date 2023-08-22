@@ -1,4 +1,4 @@
-﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
+﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
 import {Delay, LogError} from "./common.util";
 import {Module} from "../enums/common.enum";
@@ -44,6 +44,7 @@ export async function ExportModelGlb(model: GLTF) {
 
 export async function ExportModelVrm(model: GLTF, pose?: Record<string, BoneMatrix | undefined>) {
   const exporter = ExporterUtil.Instance().GltfExporter();
+  const loader = new GLTFLoader();
   const sceneClone = clone(model.scene);
   
   SetPose(sceneClone, pose);
@@ -56,40 +57,17 @@ export async function ExportModelVrm(model: GLTF, pose?: Record<string, BoneMatr
   const out_json = JSON.parse(JSON.stringify(out, null, 2));
 
   let extensionsArray: string[] = out_json["extensionsUsed"];
-  extensionsArray.push("VRMC_vrm");
+  extensionsArray.push("VRM");
   out_json["extensions"] = VRMData;
 
+  const modifiedVRM = await loader.parseAsync(out_json, "");
 
-  /**
-   * The next let me change node index 
-   * for each bone found in gltf nodes array 
-   * and set it in vrm humanbones nodes prop
-   */
+  const vrm = await exporter.parseAsync(modifiedVRM.scene, {
+    animations: [],
+    binary: true,
+  });
 
-  let mixamoBonesNotFound = [];
-  
-  for (const bone of Object.keys(VRMData.extensions.VRMC_vrm.humanoid.humanBones)) {
-    const boneIndex = findIndexByNameEndingWith(out_json["nodes"], bone);
-    if (boneIndex != -1) {
-      VRMData.extensions.VRMC_vrm.humanoid.humanBones[bone].node = boneIndex;
-    } else {
-      mixamoBonesNotFound.push({bone, boneIndex});
-      //TODO How to get index of bones not found by name in order to edit node prop in vrm humanbone
-    }
-  }
-    
-  //TODO Need to get the glb file again at this point
-  /**
-   * For some reason this function, creates an empty binary.
-   */
-  const modifiedVRM = new Uint8Array(out_json);
-
-  await SaveArrayBuffer(modifiedVRM, `exported.vrm`);
-}
-
-function findIndexByNameEndingWith(array: { matrix: number[]; name: string; extras: { name: string }}[], searchTerm: string): number {
-  searchTerm = searchTerm.toLowerCase();
-  return array.findIndex(obj => obj.name.toLowerCase().endsWith(searchTerm));
+  await SaveArrayBuffer(vrm as ArrayBuffer, `exported.vrm`);
 }
 
 export async function ExportModelGltf(model: GLTF) {

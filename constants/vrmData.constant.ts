@@ -1,98 +1,245 @@
 type HumanBone = {
-    node: number;
+    bone: string,
+    node: number,
+    useDefaultValues: boolean;
 };
 
-type HumanBones = {
-    [key: string]: HumanBone;
+type MaterialProperties = {
+    name: string,
+    shader: string,
+    keywordMap: {},
+    tagMap: {},
+    floatProperties: {},
+    vectorProperties: {},
+    textureProperties: {}
 };
 
 type VRMData = {
-    extensions: {
-        VRMC_vrm: {
-            humanoid: {
-                humanBones: HumanBones;
-            },
-            meta: {},
-            specVersion: string
-        };
+    VRM: {
+        materialProperties: MaterialProperties[],
+        exporterVersion: string,
+        specVersion: string,
+        meta: {},
+        humanoid: {
+            humanBones: HumanBone[],
+            armStretch: number,
+            legStretch: number,
+            upperArmTwist: number,
+            lowerArmTwist: number,
+            upperLegTwist: number,
+            lowerLegTwist: number,
+            feetSpacing: number,
+            hasTranslationDoF: boolean
+        },
     };
 };
+
 export let VRMData: VRMData = {
-    "extensions": {
-        "VRMC_vrm": {
-            "humanoid": {
-                "humanBones": {
-                    "chest": { "node": 5 },
-                    "head": { "node": 45 },
-                    "hips": { "node": 3 },
-                    "leftFoot": { "node": 132 },
-                    "leftHand": { "node": 86 },
-                    "leftIndexDistal": { "node": 90 },
-                    "leftIndexIntermediate": { "node": 89 },
-                    "leftIndexProximal": { "node": 88 },
-                    "leftLittleDistal": { "node": 105 },
-                    "leftLittleIntermediate": { "node": 104 },
-                    "leftLittleProximal": { "node": 103 },
-                    "leftLowerArm": { "node": 84 },
-                    "leftLowerLeg": { "node": 131 },
-                    "leftMiddleDistal": { "node": 97 },
-                    "leftMiddleIntermediate": { "node": 96 },
-                    "leftMiddleProximal": { "node": 95 },
-                    "leftRingDistal": { "node": 101 },
-                    "leftRingIntermediate": { "node": 100 },
-                    "leftRingProximal": { "node": 99 },
-                    "leftShoulder": { "node": 82 },
-                    "leftThumbDistal": { "node": 93 },
-                    "leftThumbMetacarpal": { "node": 91 },
-                    "leftThumbProximal": { "node": 92 },
-                    "leftToes": { "node": 134 },
-                    "leftUpperArm": { "node": 83 },
-                    "leftUpperLeg": { "node": 130 },
-                    "neck": { "node": 44 },
-                    "rightFoot": { "node": 139 },
-                    "rightHand": { "node": 110 },
-                    "rightIndexDistal": { "node": 114 },
-                    "rightIndexIntermediate": { "node": 113 },
-                    "rightIndexProximal": { "node": 112 },
-                    "rightLittleDistal": { "node": 129 },
-                    "rightLittleIntermediate": { "node": 128 },
-                    "rightLittleProximal": { "node": 127 },
-                    "rightLowerArm": { "node": 108 },
-                    "rightLowerLeg": { "node": 138 },
-                    "rightMiddleDistal": { "node": 121 },
-                    "rightMiddleIntermediate": { "node": 120 },
-                    "rightMiddleProximal": { "node": 119 },
-                    "rightRingDistal": { "node": 125 },
-                    "rightRingIntermediate": { "node": 124 },
-                    "rightRingProximal": { "node": 123 },
-                    "rightShoulder": { "node": 106 },
-                    "rightThumbDistal": { "node": 117 },
-                    "rightThumbMetacarpal": { "node": 115 },
-                    "rightThumbProximal": { "node": 116 },
-                    "rightToes": { "node": 141 },
-                    "rightUpperArm": { "node": 107 },
-                    "rightUpperLeg": { "node": 137 },
-                    "spine": { "node": 4 }
+    "VRM": {
+        "materialProperties": [
+            {
+                "name": "Eyelashes_Mat_MAH",
+                "shader": "VRM_USE_GLTFSHADER",
+                "keywordMap": {},
+                "tagMap": {},
+                "floatProperties": {},
+                "vectorProperties": {},
+                "textureProperties": {}
+            },
+            {
+                "name": "Skin _Mat_MAH",
+                "shader": "VRM_USE_GLTFSHADER",
+                "keywordMap": {},
+                "tagMap": {},
+                "floatProperties": {},
+                "vectorProperties": {},
+                "textureProperties": {}
+            },
+            {
+                "name": "Material_2",
+                "shader": "VRM_USE_GLTFSHADER",
+                "keywordMap": {},
+                "tagMap": {},
+                "floatProperties": {},
+                "vectorProperties": {},
+                "textureProperties": {}
+            },
+            {
+                "name": "Wearable_mat",
+                "shader": "VRM_USE_GLTFSHADER",
+                "keywordMap": {},
+                "tagMap": {},
+                "floatProperties": {},
+                "vectorProperties": {},
+                "textureProperties": {}
+            },
+            {
+                "name": "Eyebrows_Mat_MAH",
+                "shader": "VRM_USE_GLTFSHADER",
+                "keywordMap": {},
+                "tagMap": {},
+                "floatProperties": {},
+                "vectorProperties": {},
+                "textureProperties": {}
+            },
+            {
+                "name": "Eyes_Mat_MAH",
+                "shader": "VRM_USE_GLTFSHADER",
+                "keywordMap": {},
+                "tagMap": {},
+                "floatProperties": {},
+                "vectorProperties": {},
+                "textureProperties": {}
+            },
+            {
+                "name": "Hair_02_Mat_MAH",
+                "shader": "VRM_USE_GLTFSHADER",
+                "keywordMap": {},
+                "tagMap": {},
+                "floatProperties": {},
+                "vectorProperties": {},
+                "textureProperties": {}
+            },
+            {
+                "name": "GoldenSon",
+                "shader": "VRM_USE_GLTFSHADER",
+                "keywordMap": {},
+                "tagMap": {},
+                "floatProperties": {},
+                "vectorProperties": {},
+                "textureProperties": {}
+            },
+            {
+                "name": "GoldenSon.001",
+                "shader": "VRM_USE_GLTFSHADER",
+                "keywordMap": {},
+                "tagMap": {},
+                "floatProperties": {},
+                "vectorProperties": {},
+                "textureProperties": {}
+            },
+            {
+                "name": "Material.001",
+                "shader": "VRM_USE_GLTFSHADER",
+                "keywordMap": {},
+                "tagMap": {},
+                "floatProperties": {},
+                "vectorProperties": {},
+                "textureProperties": {}
+            }
+        ],
+        "exporterVersion": "saturday06_blender_vrm_exporter_experimental_2.17.7",
+        "specVersion": "0.0",
+        "meta": {
+            "title": "",
+            "version": "",
+            "author": "",
+            "contactInformation": "",
+            "reference": "",
+            "allowedUserName": "OnlyAuthor",
+            "violentUssageName": "Disallow",
+            "sexualUssageName": "Disallow",
+            "commercialUssageName": "Disallow",
+            "otherPermissionUrl": "",
+            "licenseName": "Redistribution_Prohibited",
+            "otherLicenseUrl": ""
+        },
+        "humanoid": {
+            "humanBones": [
+                {
+                    "bone": "hips",
+                    "node": 0,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "spine",
+                    "node": 1,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "chest",
+                    "node": 3,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "neck",
+                    "node": 4,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "head",
+                    "node": 5,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "leftUpperLeg",
+                    "node": 60,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "leftLowerLeg",
+                    "node": 61,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "leftFoot",
+                    "node": 62,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "rightUpperLeg",
+                    "node": 55,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "rightLowerLeg",
+                    "node": 56,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "rightFoot",
+                    "node": 57,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "leftUpperArm",
+                    "node": 8,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "leftLowerArm",
+                    "node": 9,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "leftHand",
+                    "node": 10,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "rightUpperArm",
+                    "node": 32,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "rightLowerArm",
+                    "node": 33,
+                    "useDefaultValues": true
+                },
+                {
+                    "bone": "rightHand",
+                    "node": 34,
+                    "useDefaultValues": true
                 }
-            },
-            "meta": {
-                "allowAntisocialOrHateUsage": true,
-                "allowExcessivelySexualUsage": true,
-                "allowExcessivelyViolentUsage": true,
-                "allowPoliticalOrReligiousUsage": true,
-                "allowRedistribution": true,
-                "authors": ["The Hub"],
-                "avatarPermission": "everyone",
-                "commercialUsage": "corporation",
-                "copyrightInformation": "The Hub",
-                "creditNotation": "required",
-                "licenseUrl": "https://vrm.dev/licenses/1.0/",
-                "modification": "allowModificationRedistribution",
-                "name": "The Hub VRM",
-                "thumbnailImage": 14,
-                "version": "1"
-            },
-            "specVersion": "1.0"
+            ],
+            "armStretch": 0.05000000074505806,
+            "legStretch": 0.05000000074505806,
+            "upperArmTwist": 0.5,
+            "lowerArmTwist": 0.5,
+            "upperLegTwist": 0.5,
+            "lowerLegTwist": 0.5,
+            "feetSpacing": 0,
+            "hasTranslationDoF": false
         }
     }
 }
