@@ -1,11 +1,12 @@
-﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
+﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
 import {Delay, LogError} from "./common.util";
 import {Module} from "../enums/common.enum";
 import {clone} from "three/examples/jsm/utils/SkeletonUtils";
 import {SetPose} from "./model.util";
 import {BoneMatrix} from "../types/model.type";
-import { VRMData } from "../constants/vrmData.constant";
+import { VRMObject } from "../types/vrm.types";
+import { vrmDataObject } from "../constants/vrmData.constant";
 
 class ExporterUtil {
   private static _instance: ExporterUtil;
@@ -42,9 +43,31 @@ export async function ExportModelGlb(model: GLTF) {
     return new Blob([out as ArrayBuffer], { type: 'application/octet-stream' });
 }
 
+function GetPaddedBufferSize( bufferSize: number) {
+	return Math.ceil( bufferSize / 4 ) * 4;
+}
+
+function GetPaddedArrayBuffer( arrayBuffer: ArrayBuffer, paddingByte = 0 ) {
+	const paddedLength = GetPaddedBufferSize( arrayBuffer.byteLength );
+	if ( paddedLength !== arrayBuffer.byteLength ) {
+		const array = new Uint8Array( paddedLength );
+		array.set( new Uint8Array( arrayBuffer ) );
+		if ( paddingByte !== 0 ) {
+			for ( let i = arrayBuffer.byteLength; i < paddedLength; i ++ ) {
+				array[ i ] = paddingByte;
+			}
+		}
+		return array.buffer;
+	}
+	return arrayBuffer;
+}
+
+function StringToArrayBuffer(text: string) {
+	return new TextEncoder().encode(text).buffer;
+}
+
 export async function ExportModelVrm(model: GLTF, pose?: Record<string, BoneMatrix | undefined>) {
   const exporter = ExporterUtil.Instance().GltfExporter();
-  const loader = new GLTFLoader();
   const sceneClone = clone(model.scene);
   
   SetPose(sceneClone, pose);
@@ -52,22 +75,55 @@ export async function ExportModelVrm(model: GLTF, pose?: Record<string, BoneMatr
   // CleanModelForExport(model); // TODO: use at some point
   const out = await exporter.parseAsync(sceneClone, {
     animations: [],
-  });
+  }) as VRMObject;
 
-  const out_json = JSON.parse(JSON.stringify(out, null, 2));
-
-  let extensionsArray: string[] = out_json["extensionsUsed"];
+  const extensionsArray = out["extensionsUsed"];
   extensionsArray.push("VRM");
-  out_json["extensions"] = VRMData;
+  out["extensions"] = vrmDataObject;
+  
+  const blob = new Blob([out.buffers], { type: 'application/octet-stream' });
 
-  const modifiedVRM = await loader.parseAsync(out_json, "");
+  const reader = new FileReader();
+	reader.readAsArrayBuffer( blob );
+	reader.onloadend = function () {
+		
+    // Binary chunk.
+		const binaryChunk = GetPaddedArrayBuffer(reader.result as ArrayBuffer);
+		const binaryChunkPrefix = new DataView(new ArrayBuffer(8));
+		binaryChunkPrefix.setUint32(0, binaryChunk.byteLength, true);
+		binaryChunkPrefix.setUint32(4, 0x004E4942, true);
+		
+    // JSON chunk.
+		const jsonChunk = GetPaddedArrayBuffer(StringToArrayBuffer(JSON.stringify(out) ), 0x20);
+		const jsonChunkPrefix = new DataView( new ArrayBuffer(8) );
+		jsonChunkPrefix.setUint32( 0, jsonChunk.byteLength, true );
+		jsonChunkPrefix.setUint32( 4, 0x4E4F534A, true );
+		
+    // GLB header.
+		const header = new ArrayBuffer(12);
+		const headerView = new DataView(header);
+		headerView.setUint32( 0, 0x46546C67, true );
+		headerView.setUint32( 4, 2, true );
 
-  const vrm = await exporter.parseAsync(modifiedVRM.scene, {
-    animations: [],
-    binary: true,
-  });
+		const totalByteLength = 12
+			+ jsonChunkPrefix.byteLength + jsonChunk.byteLength
+			+ binaryChunkPrefix.byteLength + binaryChunk.byteLength;
+		headerView.setUint32( 8, totalByteLength, true );
 
-  await SaveArrayBuffer(vrm as ArrayBuffer, `exported.vrm`);
+		const glbBlob = new Blob([
+			header,
+			jsonChunkPrefix,
+			jsonChunk,
+			binaryChunkPrefix,
+			binaryChunk
+		], { type: 'application/octet-stream' });
+		
+    const glbReader = new FileReader();
+		glbReader.readAsArrayBuffer(glbBlob);
+		glbReader.onloadend = async function () {
+      await SaveArrayBuffer(glbReader.result as ArrayBuffer, "vrm_model.vrm");          
+		};
+	};
 }
 
 export async function ExportModelGltf(model: GLTF) {

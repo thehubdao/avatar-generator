@@ -1,40 +1,6 @@
-type HumanBone = {
-    bone: string,
-    node: number,
-    useDefaultValues: boolean;
-};
+import { VRMData } from "../types/vrm.types";
 
-type MaterialProperties = {
-    name: string,
-    shader: string,
-    keywordMap: {},
-    tagMap: {},
-    floatProperties: {},
-    vectorProperties: {},
-    textureProperties: {}
-};
-
-type VRMData = {
-    VRM: {
-        materialProperties: MaterialProperties[],
-        exporterVersion: string,
-        specVersion: string,
-        meta: {},
-        humanoid: {
-            humanBones: HumanBone[],
-            armStretch: number,
-            legStretch: number,
-            upperArmTwist: number,
-            lowerArmTwist: number,
-            upperLegTwist: number,
-            lowerLegTwist: number,
-            feetSpacing: number,
-            hasTranslationDoF: boolean
-        },
-    };
-};
-
-export let VRMData: VRMData = {
+export const vrmDataObject: VRMData = {
     "VRM": {
         "materialProperties": [
             {
