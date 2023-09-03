@@ -1,12 +1,16 @@
 import { IoMdLogOut } from "react-icons/io";
 import AGButton from "../../../common/ag-button.component";
 import { LogOut } from "../../../../utils/firebase.util";
+import { useAppDispatch } from "../../../../store/hooks";
+import { disconnect } from "../../../../store/authSlice";
 
 interface ModalUIProps {
   closeModal: () => void;
 }
 
-export default function ModalUI({closeModal}: ModalUIProps) {
+export default function ModalUI({ closeModal }: ModalUIProps) {
+  const dispatch = useAppDispatch();
+
   return (
     <div className="bg-gray-dark w-80 p-6 rounded-2xl">
       <div className="flex items-center pb-4 gap-4">
@@ -19,7 +23,10 @@ export default function ModalUI({closeModal}: ModalUIProps) {
         <AGButton fit onClickEvent={() => closeModal()}>
           NO
         </AGButton>
-        <AGButton fit onClickEvent={() => LogOut()}>
+        <AGButton fit onClickEvent={() => {
+          void dispatch(disconnect());
+          void LogOut()
+        }}>
           YES
         </AGButton>
       </div>
