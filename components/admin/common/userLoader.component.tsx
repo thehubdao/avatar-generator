@@ -17,10 +17,7 @@ export default function UserLoader() {
       }
       const uInfo = await GetCurrentUserInfo(true);
       setIsLoading(false);
-      if (uInfo) {
-        const { role, name, account, email, campaign } = uInfo;
-        void dispatch(setUserInfo({ role, name, account, email, campaign }));
-      }
+      if (uInfo) { void dispatch(setUserInfo(uInfo)); }
     };
 
     componentDidMount().catch(err => console.error(err));

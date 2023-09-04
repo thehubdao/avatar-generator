@@ -25,7 +25,7 @@ export default function ModalUI({ closeModal }: ModalUIProps) {
         </AGButton>
         <AGButton fit onClickEvent={() => {
           void dispatch(disconnect());
-          void LogOut()
+          void LogOut();
         }}>
           YES
         </AGButton>
