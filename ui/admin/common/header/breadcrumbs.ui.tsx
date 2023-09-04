@@ -7,6 +7,8 @@ const BREADCRUMB_LINKS: Record<Breadcrumb, PageLocation> = {
   [Breadcrumb.FirstSteps]: PageLocation.FirstSteps,
   [Breadcrumb.AdminCampaign]: PageLocation.AdminCampaign,
   [Breadcrumb.AssetCreate]: PageLocation.AssetCreate,
+  [Breadcrumb.Account]: PageLocation.Account,
+  [Breadcrumb.UserControl]: PageLocation.UserControl,
   [Breadcrumb.Missing]: PageLocation.Admin,
 };
 
@@ -15,6 +17,8 @@ const BREADCRUMB_TITLES: Record<Breadcrumb, string> = {
   [Breadcrumb.FirstSteps]: 'Create Campaign',
   [Breadcrumb.AdminCampaign]: 'Campaign Configuration',
   [Breadcrumb.AssetCreate]: 'Create Asset',
+  [Breadcrumb.Account]: 'Account',
+  [Breadcrumb.UserControl]: 'User Control',
   [Breadcrumb.Missing]: 'Missing Crumb',
 };
 

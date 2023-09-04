@@ -46,7 +46,9 @@ export enum Breadcrumb {
   FirstSteps = 'firstSteps',
   AdminCampaign = 'campaign',
   AssetCreate = 'createAsset',
+  Account = 'account',
   Missing = 'missingPage',
+  UserControl = 'userControl',
 }
 
 export enum AdminComponents {
@@ -74,7 +76,7 @@ export enum Module {
   ExporterUtil = 'ExporterUtil',
   CollectionUtil = 'CollectionUtil',
   Single = 'SingleComponent',
-  TextureUtil = 'TextureUtil', 
+  TextureUtil = 'TextureUtil',
 }
 
 export enum EmailResult {
