@@ -1,8 +1,11 @@
+import Image from "next/image";
 import TransparentBox from "../../common/transparentBox.ui";
 
-export default function MainLuksoSectionUI() {
+export default function MainLuksoSectionUI({ hidden }: { hidden?: boolean }) {
+  const hiddenClass = hidden ? 'hidden' : 'flex'
+
   return (
-    <section className="h-full flex items-center justify-between ">
+    <section className={`${hiddenClass} h-full items-center justify-between`}>
       {/* Lukso Avatars */}
       <div className="w-[688px] h-[70%] flex flex-col gap-3">
         <TransparentBox
@@ -11,8 +14,14 @@ export default function MainLuksoSectionUI() {
           backgroundColorClass="bg-[#FFCBDE]"
           heightClass="grow"
         >
-          <h2>LUKSO AVATARS</h2>
-          <p>A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
+          <Image
+            src={'/resources/images/campaings/full-avatar-lukso.png'}
+            width={548}
+            height={308}
+            alt="lukso avatar full body view"
+          />
+          <h2 className="font-extrabold text-4xl pt-5">LUKSO AVATARS</h2>
+          <p className="text-center mx-20 pt-2">A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
         </TransparentBox>
 
         <TransparentBox
@@ -21,7 +30,7 @@ export default function MainLuksoSectionUI() {
           backgroundColorClass="bg-white"
           heightClass="h-[85px]"
         >
-          <p>Roll your Avatar</p>
+          <p className="text-black text-xl">Roll your Avatar <span>(icon)</span></p>
         </TransparentBox>
       </div>
 
@@ -35,7 +44,7 @@ export default function MainLuksoSectionUI() {
             backgroundColorClass="bg-[#FFCBDE]"
             heightClass="h-[125px]"
           >
-            <h3>EXCLUSIVE COLLECTION</h3>
+            <h3 className="font-extrabold text-2xl">EXCLUSIVE COLLECTION</h3>
             <p>Reamining: 15380</p>
           </TransparentBox>
           <TransparentBox
@@ -45,10 +54,12 @@ export default function MainLuksoSectionUI() {
             backgroundColorClass="bg-[#FFCBDE]"
             heightClass="grow"
           >
-            <h3>Features</h3>
-            <p>Feature one</p>
-            <p>Feature two</p>
-            <p>Feature three</p>
+            <h3 className="font-semibold text-2xl">Features</h3>
+            <div className="mt-5 text-lg underline">
+              <p>Feature one</p>
+              <p>Feature two</p>
+              <p>Feature three</p>
+            </div>
           </TransparentBox>
           <TransparentBox
             fullWidth
@@ -56,10 +67,12 @@ export default function MainLuksoSectionUI() {
             backgroundColorClass="bg-[#FFCBDE]"
             heightClass="grow"
           >
-            <h3>Features</h3>
-            <p>Feature one</p>
-            <p>Feature two</p>
-            <p>Feature three</p>
+            <h3 className="font-semibold text-2xl">Deluxe Avatars</h3>
+            <div className="mt-5 text-lg underline">
+              <p>Golden</p>
+              <p>Silver</p>
+              <p>Bronce</p>
+            </div>
           </TransparentBox>
         </div>
 
@@ -69,8 +82,16 @@ export default function MainLuksoSectionUI() {
             border
             backgroundColorClass="bg-[#FFCBDE]"
             heightClass="grow"
+            paddingClass="px-0"
+            justifyClass="justify-start"
           >
-            <p>Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.</p>
+            <Image
+              src={'/resources/images/campaings/close-avatar-lukso-without-borders.png'}
+              width={345}
+              height={380}
+              alt="lukso avatar selfie view"
+            />
+            <p className="grow flex items-center mx-14">Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.</p>
           </TransparentBox>
         </div>
       </div>

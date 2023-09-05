@@ -14,6 +14,7 @@ export default function LuksoComponent() {
         borderSizeClass="border-2"
         heightClass="h-14"
         paddingClass="px-11"
+        alignItemsClass="items-stretch"
       >
         <Image
           src='/resources/icons/campaigns/lukso.svg'
