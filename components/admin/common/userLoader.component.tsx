@@ -15,9 +15,13 @@ export default function UserLoader() {
       } else {
         dispatch(disconnect());
       }
+
       const uInfo = await GetCurrentUserInfo(true);
+      if (uInfo) {
+        const { role, name, account, email, campaign } = uInfo;
+        void dispatch(setUserInfo({ role, name, account, email, campaign }));
+      }
       setIsLoading(false);
-      if (uInfo) { void dispatch(setUserInfo(uInfo)); }
     };
 
     componentDidMount().catch(err => console.error(err));

@@ -56,7 +56,7 @@ export default function EditCampaign() {
   }
 
   useEffect(() => {
-    if (userData.connected) return
+    if (!userData.connected) return
     campaignName.length > 0 ? fetchAllCampaignData() : void GoToPage(PageLocation.Admin);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
