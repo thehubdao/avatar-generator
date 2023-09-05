@@ -4,27 +4,15 @@ import { reset, setName } from "../../../../store/currentCampaignSlice";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { GoToPage } from "../../../../utils/router.util";
 import CampaignCard from "./campaignCard.ui";
-import { UserInterface } from "../../../../interfaces/firebase.interface";
-import { setUserInfo } from "../../../../store/authSlice";
 
-interface CampaignListProps {
-  userInfo: UserInterface;
-}
-
-export default function CampaignList({userInfo} : CampaignListProps) {
+export default function CampaignList() {
   const campaignsList = useAppSelector(state => state.auth.userInfo?.campaign);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(reset());
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  },[]);
-
-  useEffect(() => {
-    const {role, name, account, email, campaign} = userInfo;
-    dispatch(setUserInfo({role, name, account, email, campaign}));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userInfo])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>

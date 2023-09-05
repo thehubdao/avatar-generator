@@ -5,13 +5,14 @@ import { GetFileUrl, UpdateDocObject } from "../../../utils/firebase.util";
 import { ShowModal } from "../../../utils/modal.util";
 import { fetchData } from "../../../store/currentCampaignSlice";
 import { FirestoreLocation } from "../../../enums/firebase.enum";
-import { CampaignParameters, ColorConfig, LookAtVectors } from "../../../interfaces/common.interface";
+import { AuthStateInterface, CampaignParameters, ColorConfig, LookAtVectors } from "../../../interfaces/common.interface";
 import { CameraConfigOption } from "../../../enums/campaign.enum";
 import { GoToPage } from "../../../utils/router.util";
 import { PageLocation } from "../../../enums/common.enum";
 
 export default function EditCampaign() {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
+  const userData: AuthStateInterface = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
 
   async function downloadFile(path: string) {
@@ -38,7 +39,7 @@ export default function EditCampaign() {
   const updateCameraConfig = async (element: string, config: LookAtVectors) => {
     let newParameters: Partial<CampaignParameters>;
     if (element != CameraConfigOption.DefCam) {
-      const newConfig = {[element]: config};
+      const newConfig = { [element]: config };
       newParameters = { config: { featuresCamPos: newConfig } };
     } else {
       newParameters = { config: { defCam: config } };
@@ -55,6 +56,7 @@ export default function EditCampaign() {
   }
 
   useEffect(() => {
+    if (userData.connected) return
     campaignName.length > 0 ? fetchAllCampaignData() : void GoToPage(PageLocation.Admin);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
