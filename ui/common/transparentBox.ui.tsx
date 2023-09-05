@@ -9,6 +9,8 @@ interface TransparentBoxProps {
   borderSizeClass?: string,
   borderColorClass?: string,
   aditionalClass?: string
+  justifyClass?: string,
+  alignItemsClass?: string
 }
 
 export default function TransparentBox({
@@ -20,7 +22,10 @@ export default function TransparentBox({
   paddingClass = 'px-11',
   border,
   borderSizeClass = 'border-2',
-  borderColorClass = 'border-white'
+  borderColorClass = 'border-white',
+  aditionalClass,
+  justifyClass = 'justify-center',
+  alignItemsClass = 'items-center'
 }: TransparentBoxProps) {
   const widthClass = fullWidth ? 'w-full' : 'w-fit'
   const borderClass = border ? `${borderColorClass} ${borderSizeClass}` : 'border-none'
@@ -34,13 +39,16 @@ export default function TransparentBox({
   return (
     <div
       className={`
-        flex flex-col justify-center items-center border-2 border-white 
+        flex flex-col border-2 border-white 
         ${widthClass}
         ${borderClass}
         ${getBgOpacity()}
         ${backgroundColorClass}
         ${heightClass}
         ${paddingClass}
+        ${aditionalClass}
+        ${justifyClass}
+        ${alignItemsClass}
       `}
     >{children}</div >
   )
