@@ -57,20 +57,20 @@ export default function AvatarSingle({
   async function getSingleData() {
     let result: SingleInterface | undefined;
     if (combinationString != undefined) {
-      const {value: reqSingleData} = await GetAvatarSingleByCampaignCombinationString(campaign, combinationString);
-      result = reqSingleData;
+      const mixStringResult = await GetAvatarSingleByCampaignCombinationString(campaign, combinationString);
+      result = mixStringResult.success ? mixStringResult.value : undefined;
     }
     else {
-      const {value: reqSingleData} = await GetAvatarSingleByCampaignCombination(campaign, combination);
-      result = reqSingleData;
+      const numResult = await GetAvatarSingleByCampaignCombination(campaign, combination);
+      result = numResult.success ? numResult.value : undefined;
     }
     
     singleData.current = result;
   }
 
   async function getAnimation() {
-    const {value} = await GetAnimationByCampaignAndName(campaign, defaultAnimation);
-    defaultAnimationData.current = value?.at(0);
+    const result = await GetAnimationByCampaignAndName(campaign, defaultAnimation);
+    defaultAnimationData.current = result.success ? result.value.at(0) : undefined;
   }
   
   async function loadSingleData() {

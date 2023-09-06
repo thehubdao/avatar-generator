@@ -254,40 +254,39 @@ export default function AvatarBuilder({
   }
 
   async function getFeatureList() {
-    const { value: newAssetList } = await GetAssetsListByCampaign(campaign);
-    featureList = newAssetList;
+    const result = await GetAssetsListByCampaign(campaign);
+    featureList = result.success ? result.value : undefined;
     optionList = MixArrays(optionList, featureList);
     // setFeatureListShow(FilterList(featureList, "type", selectedFeature));
     setOptionListShow(FilterList(featureList, "type", selectedCategory));
   }
 
   async function getAccessoryList() {
-    const { value: newAccList } = await GetAccessoryListByCampaign(campaign);
-    accessoryList = newAccList;
+    const result = await GetAccessoryListByCampaign(campaign);
+    accessoryList = result.success ? result.value : undefined;
     // setAccessoryListShow(FilterList(accessoryList, "type", selectedAcc));
   }
 
   async function getAnimationList() {
-    const { value: newAnimationList } = await GetAnimationListByCampaign(campaign);
-    animationList = newAnimationList;
+    const result = await GetAnimationListByCampaign(campaign);
+    animationList = result.success ? result.value : undefined;
   }
 
   async function getStageList() {
-    const { value: newStageList } = await GetStageListByCampaign(campaign);
-    stageList = newStageList;
+    const result = await GetStageListByCampaign(campaign);
+    stageList = result.success ? result.value : undefined;
   }
 
   async function getEnvironmentMapList() {
-    if (campaign == undefined) return;
-    const { value: newEnvMapList } = await GetEnvMapListByCampaign(campaign);
-    envMapList = newEnvMapList;
+    const result = await GetEnvMapListByCampaign(campaign);
+    envMapList = result.success ? result.value : undefined;
   }
 
   async function getSingleInfo() {
     if (campaignConfig.defAvatarCombination == undefined) return;
 
-    const { value: reqSingleData } = await GetAvatarSingleByCampaignCombination(campaign, campaignConfig.defAvatarCombination);
-    singleData = reqSingleData;
+    const result = await GetAvatarSingleByCampaignCombination(campaign, campaignConfig.defAvatarCombination);
+    singleData = result.success ? result.value : undefined;
   }
 
   async function onClickChangeSkinColor(newSkinColor = skinColor) {
