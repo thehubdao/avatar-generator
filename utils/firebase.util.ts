@@ -387,8 +387,9 @@ export async function LogIn(credentials: LogInInterface) {
 }
 
 export async function IsLogIn(): Promise<boolean> {
-  return new Promise<boolean>(async (resolve) => {
-    (await FirebaseUtil.Instance().Auth()).onAuthStateChanged((user) => {
+  const authFirebase = await FirebaseUtil.Instance().Auth(); 
+  return new Promise<boolean>(resolve => {
+    authFirebase.onAuthStateChanged((user) => {
       user != null ? resolve(true) : resolve(false);
     });
   });
