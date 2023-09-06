@@ -77,6 +77,7 @@ export enum Module {
   CollectionUtil = 'CollectionUtil',
   Single = 'SingleComponent',
   TextureUtil = 'TextureUtil',
+  EditCampaign = 'EditCampaignComponent',
 }
 
 export enum EmailResult {
