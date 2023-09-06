@@ -9,7 +9,9 @@ import {
   GetFeaturesData,
   ReplaceModelAccessory,
   ReplaceModelFeatureOnly,
-  TransformObject3dToNewMaterial
+  TransformObject3dToNewMaterial,
+  BonesFirst,
+  GetPose
 } from "../../utils/model.util";
 import {
   AccessoryInfoInterface,
@@ -17,11 +19,12 @@ import {
   FeatureInfoInterface,
   LookAtVectors
 } from "../../interfaces/common.interface";
-import {ExportModelGlb} from "../../utils/exporter.util";
+import {ExportModelGlb, ExportModelVrm} from "../../utils/exporter.util";
 import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene} from "./viewer.component";
 import {ChangeMaterialOption} from "../../enums/model.enum";
 import {ConfigLight} from "../../interfaces/light.interface";
 import {GetLights} from "../../utils/threejs/light.util";
+import {BoneMatrix} from "../../types/model.type";
 
 
 //#region Logic
@@ -32,11 +35,12 @@ let _mixer: AnimationMixer | undefined;
 const _savedModels: Record<string, GLTF> = {};
 const _accessoryListData: Record<string, AccessoryInfoInterface> = {};
 let _featureListData: Record<string, FeatureInfoInterface> | undefined;
+let _startPose: Record<string, BoneMatrix | undefined> | undefined;
 
 export async function ChangeSkinColor(newSkinColor: string, skinName?: string) {
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature for skin color change");
 
-  await ChangeObjectSkinColor(_avatar.scene, newSkinColor, skinName);
+  ChangeObjectSkinColor(_avatar.scene, newSkinColor, skinName);
 }
 
 export async function GetWearableOption(id: string, optionPath: string) {
@@ -97,6 +101,12 @@ export async function GetAvatarGLB() {
   return ExportModelGlb(_avatar);
 }
 
+export async function GetAvatarVRM() {
+  if (_avatar == undefined) return void LogError(Module.Editor, "Missing Avatar for export!");
+
+  return ExportModelVrm(_avatar, _startPose);
+}
+
 //#endregion
 
 //#region Component
@@ -130,11 +140,13 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
     }
 
     _avatar = await GetGltfModel(avatarBasePath);
-
+    BonesFirst(_avatar);
+    _startPose = GetPose(_avatar.scene);
+    
     _mixer = CreateAnimationMixer(_avatar.scene);
     await SetAnimation(_mixer, _avatar, undefined);
 
-    await TransformObject3dToNewMaterial(_avatar.scene, undefined, changeMaterial);
+    TransformObject3dToNewMaterial(_avatar.scene, undefined, changeMaterial);
     AddToScene(_avatar.scene);
     AddMixer(_mixer);
   }

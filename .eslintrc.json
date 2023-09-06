@@ -6,12 +6,46 @@
   "rules": {
     "no-console": ["error", {
       "allow": ["warn", "error"]
-    }]
+    }],
+    "@typescript-eslint/naming-convention": [
+      "error",
+      {
+        "selector": "function",
+        "format": ["PascalCase"],
+        "modifiers": ["global"]
+      },
+      {
+        "selector": "function",
+        "format": ["camelCase"]
+      },
+      {
+        "selector": "typeLike",
+        "format": ["PascalCase"]
+      },
+      {
+        "selector": "variable",
+        "format": ["UPPER_CASE", "camelCase"],
+        "modifiers": ["global", "const"],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": "variable",
+        "types": ["boolean"],
+        "format": ["PascalCase"],
+        "prefix": ["is", "should", "has", "can", "did", "will"],
+        "leadingUnderscore": "allow"
+      },
+      {
+        "selector": "typeParameter",
+        "format": ["PascalCase"],
+        "prefix": ["T"]
+      }
+    ]
   },
   "plugins": ["@typescript-eslint"],
   "extends": [
     "next/core-web-vitals",
-     "eslint:recommended",
+    "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking"
   ]

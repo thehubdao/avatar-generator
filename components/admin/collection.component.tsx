@@ -24,7 +24,7 @@ import {
 } from "../../utils/collection.util";
 import {ChangeMaterialOption} from "../../enums/model.enum";
 
-let _reachedEnd = false;
+let _didReachEnd = false;
 let _start: Map<number, number> | undefined;
 let _end: Map<number, number> | undefined;
 let _maxCombination = 0;
@@ -56,7 +56,7 @@ function NextIteration(forceStart = false) {
 
 function LowerIteration(index: number) {
   if (index < 0) {
-    _reachedEnd = true;
+    _didReachEnd = true;
     return void LogWarning(Module.CollectionComponent, "Reached end of the line");
   }
 
@@ -109,7 +109,7 @@ export default function AvatarCollection({
                                            defaultAnimation, 
                                            changeMaterial
                                          }: AvatarCollectionProps) {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [maxCombination, setMaxCombination] = useState<number>(0);
   const [currentIteration, setCurrentIteration] = useState<number>();
 
@@ -127,7 +127,7 @@ export default function AvatarCollection({
       getAnimationList()
     ]);
 
-    setLoading(false);
+    setIsLoading(false);
 
     await ReadjustAllFeatureIndexes(featureList, campaign);
     // Set min index values base on size
@@ -148,7 +148,8 @@ export default function AvatarCollection({
     await ChangeStartAnimation(startAnimation?.path);
   }
 
-  async function getFeatureList(featureList: FeatureBasic[]) {
+  // TODO review meshName
+  async function getFeatureList(featureList: FeatureBasic[]) { 
     const featureData = await GetAssetsListByCampaign(campaign);
     if (!featureData.success) return LogError(Module.CollectionComponent, "Could not retrieve feature option data!");
 
@@ -224,19 +225,19 @@ export default function AvatarCollection({
   }
 
   async function onStartCollection() {
-    if (_reachedEnd) {
-      _reachedEnd = false;
+    if (_didReachEnd) {
+      _didReachEnd = false;
       startOver();
     }
 
-    while (!_reachedEnd && doCollection.current) {
+    while (!_didReachEnd && doCollection.current) {
       // console.log('Started process single');
       await processSingle();
       // console.log("Doing while", _reachedEnd, doCollection.current);
       await Delay(1000);
     }
 
-    if (_reachedEnd) doCollection.current = false;
+    if (_didReachEnd) doCollection.current = false;
   }
 
   function onClickDoSingle() {
@@ -268,7 +269,7 @@ export default function AvatarCollection({
     if (newVal > maxCombination)
       newVal = maxCombination;
 
-    if (!_reachedEnd && currentIteration != undefined && currentIteration < newVal) {
+    if (!_didReachEnd && currentIteration != undefined && currentIteration < newVal) {
       _start = NumberToIndexValues(currentIteration, _maxCombination, _maxIndexValues, _multValues);
     }
 
@@ -296,7 +297,7 @@ export default function AvatarCollection({
 
   return (
     <>
-      <AGLoading loading={loading} transparency/>
+      <AGLoading loading={isLoading} transparency/>
       {isDoable ?
         <>
           {mahUi()}

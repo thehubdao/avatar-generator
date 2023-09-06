@@ -4,13 +4,13 @@ import {MouseEvent} from "react";
 import 'swiper/css';
 import { FeatureBasic } from '../../../../interfaces/common.interface';
 
-interface props {
+interface Props {
   list: FeatureBasic[];
   activeOpc: string;
   handleClick: (id: string) => void;
 }
 
-function optionList({list, activeOpc, handleClick}: props) {
+function OptionList({list, activeOpc, handleClick}: Props) {
 
   function selectFeature(e: MouseEvent, id: string) {
     e.preventDefault();
@@ -33,7 +33,7 @@ function optionList({list, activeOpc, handleClick}: props) {
   });
 }
 
-export default function FeatureSelectorComponent(props: props) {
+export default function FeatureSelectorComponent(props: Props) {
   const itemsLength = props.list?.length ? props.list.length : 1;
   const itemsPerView = 6;
   return (
@@ -50,7 +50,7 @@ export default function FeatureSelectorComponent(props: props) {
         // onSwiper={(swiper) => console.log(swiper)}
         className='!pb-2 !pt-3'
       >
-        {optionList(props)}
+        {OptionList(props)}
       </Swiper>
       <div
         className='absolute h-full w-[50px] top-0 right-0 bg-gradient-to-l from-slate-100 z-10 pointer-events-none'></div>

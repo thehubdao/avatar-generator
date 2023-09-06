@@ -1,5 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  eslint: {
+    dirs: [
+            'components',
+            'constants',
+            'enums',
+            'interfaces',
+            'layouts',
+            'pages',
+            'server',
+            'store',
+            'types',
+            'ui',
+            'utils'
+    ]
+  },
   reactStrictMode: false,
   images: {
     domains: ['firebasestorage.googleapis.com'],

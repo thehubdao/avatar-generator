@@ -33,11 +33,22 @@ export enum IFrameEvents {
 
 export enum PageLocation {
   Admin = '/admin',
-  AssetList = '/admin/assets/list',
   Login = '/admin/login',
   FirstSteps = '/admin/firstSteps',
   AdminCampaign = '/admin/campaign',
   AssetCreate = '/admin/campaign/createAsset',
+  Account = '/admin/account',
+  UserControl = '/admin/account/userControl'
+}
+
+export enum Breadcrumb {
+  Login = 'login',
+  FirstSteps = 'firstSteps',
+  AdminCampaign = 'campaign',
+  AssetCreate = 'createAsset',
+  Account = 'account',
+  Missing = 'missingPage',
+  UserControl = 'userControl',
 }
 
 export enum AdminComponents {
@@ -65,7 +76,7 @@ export enum Module {
   ExporterUtil = 'ExporterUtil',
   CollectionUtil = 'CollectionUtil',
   Single = 'SingleComponent',
-  TextureUtil = 'TextureUtil', 
+  TextureUtil = 'TextureUtil',
 }
 
 export enum EmailResult {

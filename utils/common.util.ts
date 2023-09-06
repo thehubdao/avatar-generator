@@ -5,10 +5,12 @@ export function RandomArrayElement<T>(array: T[]) {
 }
 
 // Maybe save a log at some point either through api or just firebase
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function LogError(origin: string | Module, message: string) {
   console.error(`${origin} - `, message);
 }
 
+// eslint-disable-next-line @typescript-eslint/require-await
 export async function LogWarning(origin: string | Module, message: string) {
   console.warn(`${origin} - `, message);
 }
@@ -22,6 +24,7 @@ export function Delay(ms: number) {
 export function IsEmail(text: string): EmailResult {
   if (!text.includes('@') && !text.includes('.')) return EmailResult.NoEmail;
 
+  // eslint-disable-next-line no-useless-escape
   const regExp = new RegExp(/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/);
   return regExp.test(text.toLowerCase()) ? EmailResult.GoodEmail : EmailResult.BadEmail;
 }
@@ -100,4 +103,10 @@ export function RemovedAcc(text: string | undefined) {
   if (text == undefined || !text.endsWith(GlobalValues.AccEnd)) return text;
   
   return text.slice(0, - GlobalValues.AccEnd.length);
+}
+
+export function GetKeyByValue<TEnum extends object>(value: string, enumRef: TEnum): keyof TEnum | undefined {
+  const indexOfS = Object.values(enumRef).indexOf(value);
+  const key = Object.keys(enumRef)[indexOfS];
+  return key as unknown as keyof TEnum;
 }

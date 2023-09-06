@@ -3,7 +3,7 @@ import {ApiResponse} from "../../../../interfaces/api.interface";
 import {RequestApiHandler} from "../../../../server/api-handler/request.api-handler";
 import {UpdateApiHandler} from "../../../../server/api-handler/v1/adminCampaigns.api-handler";
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<void>>) {
+export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<void>>) {
   return RequestApiHandler(req, res, {
     Post: UpdateApiHandler
   });

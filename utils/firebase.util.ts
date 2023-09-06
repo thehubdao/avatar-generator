@@ -1,7 +1,7 @@
 import {FirebaseApp, FirebaseOptions} from "@firebase/app";
 import {Firestore, QueryConstraint} from "@firebase/firestore";
 import {FirebaseStorage} from "@firebase/storage";
-import {Auth, User, UserCredential} from "@firebase/auth";
+import {Auth, UserCredential} from "@firebase/auth";
 import {FirebaseError} from "@firebase/util";
 
 import {
@@ -244,7 +244,7 @@ export async function GetParameter<T>(campaign: string | undefined, parameter: P
   const leDoc = await getDoc(docRef);
 
   if (parameter !== CampaignParameterName.All) {
-    return leDoc.get(parameter as string) as T;
+    return leDoc.get(parameter) as T;
   } else {
     return leDoc.data() as T;
   }
@@ -260,7 +260,7 @@ export async function GetParameters<T>(campaign?: string, ...parameters: (string
   const result: T[] = [];
   for (const parameter of parameters) {
     if (parameter !== CampaignParameterName.All) {
-      result.push(leDoc.get(parameter as string));
+      result.push(leDoc.get(parameter) as T);
     } else {
       result.push(leDoc.data() as T);
     }
@@ -274,27 +274,28 @@ function CampaignLocation(campaign?: string) {
 }
 
 export async function UpdateDoc(jsonData: string, location: FirestoreLocation, campaign?: string) {
-  return UpdateDocObject(location, JSON.parse(jsonData), campaign);
+  return UpdateDocObject(location, JSON.parse(jsonData) as object, campaign);
 }
 
-export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlobalLocation, data: {}, campaign?: string, docName?: string): Promise<Result<boolean>> {
+export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlobalLocation, data: object | null, campaign?: string, docName?: string): Promise<Result<boolean>> {
   const {doc, setDoc} = await import('@firebase/firestore');
 
   try {
     const newLocation = campaign ?
-      `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}/${location}` :
+      `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}${AddOrRemoveSlash(location)}` :
       location !== '/' ?
         location :
         FirestoreGlobalLocation.Parameters;
     const newDocName = docName == undefined ? '' : `/${docName}`;
 
+    // eslint-disable-next-line no-console
     console.log('Update doc loc', newLocation, newDocName);
     const docRef = doc(await FirebaseUtil.Instance().DB(), `${newLocation}${newDocName}`);
     await setDoc(docRef, data, {merge: true});
     return {success: true, value: true};
   } catch (e) {
     const err = e as FirebaseError;
-    void LogError(Module.FirebaseUtil, `Error updating doc: ${docName}, errMessage: ${err.message}`);
+    void LogError(Module.FirebaseUtil, `Error updating doc: ${docName ?? '--'}, errMessage: ${err.message}`);
     return {success: false, errMessage: err.message, errCode: err.code};
   }
 }
@@ -336,7 +337,7 @@ export async function InsertDoc(jsonData: string, location: string = FirestoreLo
   }
 }
 
-export async function InsertDocWithId(newDocId: string, data: {}, location: FirestoreLocation | FirestoreGlobalLocation, campaign?: string, lowerCase: boolean = true): Promise<Result<string>> {
+export async function InsertDocWithId(newDocId: string, data: object, location: FirestoreLocation | FirestoreGlobalLocation, campaign?: string, lowerCase = true): Promise<Result<string>> {
   const {setDoc, doc} = await import('@firebase/firestore');
 
   try {
@@ -346,7 +347,7 @@ export async function InsertDocWithId(newDocId: string, data: {}, location: Fire
     return {success: true, value: newDocId};
   } catch (e) {
     const err = e as FirebaseError;
-    LogError(Module.FirebaseUtil, `Error creating doc: ${newDocId}, at ${location} with message: ${err.message}`).then();
+    void LogError(Module.FirebaseUtil, `Error creating doc: ${newDocId}, at ${location} with message: ${err.message}`);
     return {success: false, errCode: err.code, errMessage: err.message};
   }
 }
@@ -381,12 +382,14 @@ export async function LogIn(credentials: LogInInterface) {
   return signInWithEmailAndPassword(await FirebaseUtil.Instance().Auth(), actualUser, credentials.pass);
 }
 
-export async function IsLogIn() {
-  return new Promise<boolean>(async (resolve) => {
-    (await FirebaseUtil.Instance().Auth()).onAuthStateChanged((user) => {
-      user ? resolve(true) : resolve(false);
-    });
-  });
+export async function IsLogIn(): Promise<boolean> {
+  return (await FirebaseUtil.Instance().Auth()).currentUser != null;
+  
+  // return new Promise<boolean>(async (resolve) => {
+  //   (await FirebaseUtil.Instance().Auth()).onAuthStateChanged((user) => {
+  //     user ? resolve(true) : resolve(false);
+  //   });
+  // });
 }
 
 export async function IsNotLogIn() {
@@ -395,18 +398,21 @@ export async function IsNotLogIn() {
 
 export async function LogOut() {
   const {signOut} = await import('@firebase/auth');
-  signOut(await FirebaseUtil.Instance().Auth())
+  
+  void signOut(await FirebaseUtil.Instance().Auth())
     .then(async () => {
       await GoToPage(PageLocation.Login);
     });
 }
 
 export async function GetCurrentUser() {
-  return new Promise<User | null>(async (resolve) => {
-    (await FirebaseUtil.Instance().Auth()).onAuthStateChanged((user) => {
-      resolve(user);
-    })
-  });
+  return (await FirebaseUtil.Instance().Auth()).currentUser;
+  
+  // return new Promise<User | null>(async (resolve) => {
+  //   (await FirebaseUtil.Instance().Auth()).onAuthStateChanged((user) => {
+  //     resolve(user);
+  //   })
+  // });
 }
 
 export async function GetFileUrl(imagePath?: string) {
@@ -427,12 +433,13 @@ export async function GetFileUrl(imagePath?: string) {
 }
 
 export async function HandleNotLoggedIn() {
-  const flag = await IsNotLogIn();
+  const isNotLogIn = await IsNotLogIn();
 
-  if (flag)
+  if (isNotLogIn) {
     await GoToPage(PageLocation.Login);
+  }
 
-  return flag;
+  return isNotLogIn;
 }
 
 export async function GetUserInfo(userUid: string) {
@@ -456,7 +463,7 @@ export async function GetCurrentUserInfo(forceUpdate = false) {
 
 export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Result<boolean>> {
   if (newUser.email == undefined) {
-    LogError(Module.FirebaseUtil, "Missing email on create user!").then();
+    void LogError(Module.FirebaseUtil, "Missing email on create user!");
     return {success: false, errMessage: 'Missing email on create user!'};
   }
 
@@ -477,7 +484,7 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
     result = {success: true, value: true};
   } catch (e) {
     const err = e as FirebaseError;
-    LogError(Module.FirebaseUtil, `Error on create User: ${err.message}`).then();
+    void LogError(Module.FirebaseUtil, `Error on create User: ${err.message}`);
     result = {success: false, errMessage: `Error on create User: ${err.message}`, errCode: err.code};
     return result;
   }
@@ -511,7 +518,7 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
       await sendPasswordResetEmail(await FirebaseUtil.Instance().Auth(), newUser.email);
     } catch (e) {
       const err = e as FirebaseError;
-      LogError(Module.FirebaseUtil, `Error resetting password for account ${newUser.email}`).then();
+      void LogError(Module.FirebaseUtil, `Error resetting password for account ${newUser.email}`);
       result = {
         success: false,
         errMessage: `Error resetting password for account ${newUser.email}: ${err.message}`,
@@ -543,10 +550,15 @@ export async function GetCollectionList(dbLocation: string | FirestoreGlobalLoca
   });
 }
 
+// TODO: add try/catch with return response
 export async function UpdateAdminCampaigns() {
   const {doc, setDoc, getDoc, Timestamp} = await import('@firebase/firestore');
 
-  const adminDocLocation = `${FirestoreGlobalLocation.User}/${process.env.AG_ADMIN_ID}`
+  const adminId = process.env.AG_ADMIN_ID;
+  if (adminId == undefined)
+    return void LogError(Module.FirebaseUtil, "Missing AdminId on env variables!");
+    
+  const adminDocLocation = `${FirestoreGlobalLocation.User}/${adminId}`;
   const docRef = doc(await FirebaseUtil.Instance().DB(), adminDocLocation);
 
   // Get admin account base on role and last update

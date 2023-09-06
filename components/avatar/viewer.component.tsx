@@ -33,8 +33,8 @@ const _sceneObjs: Map<string, number> = new Map();
 
 let _cameraPos: Vector3 = new Vector3();
 let _cameraLookAt: Vector3 = new Vector3();
-let _doCameraMovement = false;
-let _doCameraLookAt = false;
+let _willCameraMove = false;
+let _willCameraLookAt = false;
 
 const _clock: Clock = new Clock();
 
@@ -88,7 +88,7 @@ export function RemoveFromScene(toRemove: string) {
 export function ChangeCamPosition(value: Vector3) {
   if (_controls == undefined) return void LogError(Module.Viewer, "Missing viewer Controls!");
 
-  _doCameraMovement = true;
+  _willCameraMove = true;
   // _controls.autoRotate = false;
   _cameraPos = value;
 }
@@ -102,7 +102,7 @@ export function AGChangeCamPosition(value: AGVector3 | undefined) {
 export function ChangeLookAtPosition(value: Vector3) {
   if (_controls == undefined) return void LogError(Module.Viewer, "Missing viewer Controls!");
   
-  _doCameraLookAt = true;
+  _willCameraLookAt = true;
   // _controls.target = value;
   _cameraLookAt = value;
 }
@@ -194,8 +194,8 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, 
   }
 
   function stopCamMovement() {
-    _doCameraLookAt = false;
-    _doCameraMovement = false;
+    _willCameraLookAt = false;
+    _willCameraMove = false;
   }
 
   const onWindowResize = () => {
@@ -232,15 +232,15 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, 
     _controls.update();
 
     if (_camera.position.distanceTo(_cameraPos) < 0.1) {
-      _doCameraMovement = false;
+      _willCameraMove = false;
     }
     
     if (_controls.target.distanceTo(_cameraLookAt) < 0.1) {
-      _doCameraLookAt = false;
+      _willCameraLookAt = false;
     }
 
-    if (_doCameraMovement) _camera.position.lerp(_cameraPos, delta);
-    if (_doCameraLookAt) _controls.target.lerp(_cameraLookAt, delta);
+    if (_willCameraMove) _camera.position.lerp(_cameraPos, delta);
+    if (_willCameraLookAt) _controls.target.lerp(_cameraLookAt, delta);
 
     _renderer.render(_scene, _camera);
   };
