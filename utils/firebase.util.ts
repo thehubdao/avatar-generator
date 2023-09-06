@@ -387,13 +387,11 @@ export async function LogIn(credentials: LogInInterface) {
 }
 
 export async function IsLogIn(): Promise<boolean> {
-  return (await FirebaseUtil.Instance().Auth()).currentUser != null;
-  
-  // return new Promise<boolean>(async (resolve) => {
-  //   (await FirebaseUtil.Instance().Auth()).onAuthStateChanged((user) => {
-  //     user ? resolve(true) : resolve(false);
-  //   });
-  // });
+  return new Promise<boolean>(async (resolve) => {
+    (await FirebaseUtil.Instance().Auth()).onAuthStateChanged((user) => {
+      user != null ? resolve(true) : resolve(false);
+    });
+  });
 }
 
 export async function IsNotLogIn() {
