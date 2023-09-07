@@ -10,7 +10,7 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
   const {campaign, name} = req.query;
   const realCampaign = campaign as string ?? GlobalValues.BaseCampaign;
 
-  let data = await GetInfoDB<AnimationInterface>(FirestoreLocation.Animations, realCampaign, {
+  const data = await GetInfoDB<AnimationInterface>(FirestoreLocation.Animations, realCampaign, {
     name: name as string
   });
 

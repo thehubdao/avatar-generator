@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { FeaturesIcons } from "../../../enums/icons.enum";
 import { FeatureBasic } from "../../../interfaces/common.interface";
 
 interface FeatureItemSelectorUIProps {
@@ -21,7 +21,7 @@ export default function FeatureItemSelectorUI({ item, activeOpc, handleClick }: 
       }}
     >
       <div className={`w-[84px] h-[84px] flex justify-center items-center rounded-xl cursor-pointer ${isActive ? 'bg-accent bg-opacity-80 shadow-inset-hard' : 'bg-bg shadow-flat-soft hover:shadow-flat-hard'} transition-all duration-500`} title={item.displayName}>
-        <Image alt={item.displayName} width={70} height={70} src={'/resources/icons/features/Chest.svg'} priority />
+        <p className="font-featuresIcons text-6xl text-gray-extralight">{item.iconUrl && item.iconUrl.length > 0 ? item.iconUrl : FeaturesIcons.Shirt}</p>
       </div>
     </div>
   )

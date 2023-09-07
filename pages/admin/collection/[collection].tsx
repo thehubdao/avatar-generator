@@ -4,7 +4,7 @@ import {GetParameter} from "../../../utils/firebase.util";
 import {FirestoreParameters} from "../../../enums/firebase.enum";
 import {CampaignParameters} from "../../../interfaces/common.interface";
 import {CampaignParameterName} from "../../../enums/common.enum";
-import Layout from "../../../components/admin/_layout.component.deprecated";
+import Layout from "../../../layouts/_layout.component.deprecated";
 
 interface AvatarCollectionPageProps {
   isCampaign: boolean;
@@ -21,7 +21,7 @@ export default function AvatarCollectionPage({isCampaign, campaign, campaignPara
                             avatarBasePath={campaignParams?.armature ?? ''}
                             featureList={campaignParams?.features ?? []}
                             defaultAnimation={campaignParams?.config?.defAnimation}
-                            skinColor={campaignParams?.config?.defSkinColor ?? 'F2A47E'}
+                            skinColor={campaignParams?.config?.skin?.defColor ?? 'FFFFFF'}
                             changeMaterial={campaignParams?.config?.changeMaterial}
           />
         </Layout>

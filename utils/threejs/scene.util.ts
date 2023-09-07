@@ -17,7 +17,7 @@ export function InitSceneController(): SceneInterface {
 }
 
 export function GetBaseScene(): Scene {
-  let scene = new Scene();
+  const scene = new Scene();
   return scene;
 }
 
@@ -28,7 +28,7 @@ export function FrustumCulledFalse(obj: Object3D) {
 }
 
 export function GetBaseCamera(defPos?: AGVector3): PerspectiveCamera {
-  let camera = new PerspectiveCamera(
+  const camera = new PerspectiveCamera(
     50,
     window.innerWidth / window.innerHeight,
     0.1,
@@ -44,7 +44,7 @@ export function GetBaseCamera(defPos?: AGVector3): PerspectiveCamera {
 }
 
 export function GetBaseRenderer(): WebGLRenderer {
-  let renderer = new WebGLRenderer({
+  const renderer = new WebGLRenderer({
     alpha: true,
     antialias: true,
     preserveDrawingBuffer: true,
@@ -55,8 +55,8 @@ export function GetBaseRenderer(): WebGLRenderer {
   return renderer;
 }
 
-export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTMLCanvasElement, defLookAt?: AGVector3, pan: boolean = false) {
-  let controls = new OrbitControls(camera, domElement);
+export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTMLCanvasElement, defLookAt?: AGVector3, pan = false) {
+  const controls = new OrbitControls(camera, domElement);
   if (defLookAt != undefined)
     controls.target.set(defLookAt.x, defLookAt.y, defLookAt.z);
   else

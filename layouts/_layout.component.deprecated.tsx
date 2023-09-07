@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from "react";
-import { GetCurrentUserInfo, HandleNotLoggedIn } from "../../utils/firebase.util";
-import { UserInterface } from "../../interfaces/firebase.interface";
-import AGLoading from "../../ui/common/ag-loading.component";
+import { GetCurrentUserInfo, HandleNotLoggedIn } from "../utils/firebase.util";
+import { UserInterface } from "../interfaces/firebase.interface";
+import AGLoading from "../ui/common/ag-loading.component";
 
 interface LayoutProps {
   children: JSX.Element | JSX.Element[] | boolean;
@@ -14,15 +14,15 @@ interface LayoutProps {
 
 export default function Layout({
   setUserInfo,
-  userInfo,
+  // userInfo,
   children
 }: LayoutProps) {
-  const [loading, setLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   async function updateUserInfo() {
     const uInfo = await GetCurrentUserInfo();
 
-    setLoading(false);
+    setIsLoading(false);
     setUserInfo && setUserInfo(uInfo);
   }
 
@@ -53,11 +53,11 @@ export default function Layout({
   return (
     <>
       <div className="flex justify-center min-h-screen mt-[88px] pb-16 bg-bg">
-        {!loading &&
+        {!isLoading &&
           children
         }
       </div>
-      <AGLoading loading={loading} />
+      <AGLoading loading={isLoading} />
     </>
   );
 }

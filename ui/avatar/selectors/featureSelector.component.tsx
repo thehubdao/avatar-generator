@@ -8,11 +8,13 @@ interface FeatureSelectorProps {
   list?: FeatureBasic[];
   activeOpc?: string;
   onCategoryChange: (name: string) => void;
+  // TODO: remove since the git history has it
   // onChangeFeature: (name: string) => void;
   // onChangeAccessory: (name: string) => void;
 }
 
-const ScrollButton = ({ position = 'top' }: { position?: 'top' | 'bottom' }) => {
+// TODO: move component to own file
+function ScrollButton({ position = 'top' }: { position?: 'top' | 'bottom' }) {
   const swiper = useSwiper();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {

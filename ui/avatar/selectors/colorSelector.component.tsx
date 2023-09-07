@@ -51,7 +51,8 @@ function ColorOption({ option, isActive, listStyle = 'Rectangular' }: ColorOptio
 
   //* List style control
   useEffect(() => {
-    setStyleControl({ ...getOptionType() })
+    setStyleControl({ ...getOptionType() });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listStyle, isActive])
 
   return (

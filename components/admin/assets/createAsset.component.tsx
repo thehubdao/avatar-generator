@@ -19,7 +19,7 @@ export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetPr
   const assetName = useAppSelector(state => state.addAsset.name);
   const assetLocation = useAppSelector(state => state.addAsset.location);
   const assetType = useAppSelector(state => state.addAsset.type);
-  const assetReady = useAppSelector(state => state.addAsset.ready);
+  const isAssetReady = useAppSelector(state => state.addAsset.ready);
 
   const dispatch = useAppDispatch();
 
@@ -78,11 +78,16 @@ export default function CreateAsset({ objectFile, thumbnailFile }: CreateAssetPr
   }
 
   useEffect(() => {
-    if (assetReady) {
+    if (isAssetReady) {
       void submitAsset();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [assetReady])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAssetReady])
+
+  useEffect(() => {
+    if (campaignName.length <= 0) void GoToPage(PageLocation.Admin);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <></>

@@ -6,16 +6,18 @@ import 'swiper/css';
 
 import { AiOutlineCheckCircle, AiOutlineCloudUpload } from "react-icons/ai";
 
-import FirstStep from "./firstStep.ui";
-import SecondStep from "./secondStep.ui";
-import ThirdStep from "./thirdStep.ui";
-import EndStep from "./endStep.ui";
+import AvatarBaseStep from "./avatarBaseStep.ui";
+import AssetsCountStep from "./assetsCountStep.ui";
+import FeaturesConfig from "./featuresConfigStep.ui";
+import ConfirmationStep from "./confirmationStep.ui";
 
-import CreateCampaign from "../../../../components/admin/campaign/createCampaign.component";
+import { setName } from "../../../../store/addCampaignSlice";
 
-import { setName, setReady } from "../../../../store/addCampaignSlice";
+interface AddCampaignProps {
+  setAvatarBaseFile: (file: File | undefined) => Promise<void>;
+}
 
-export default function AddCampaign() {
+export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
   const name = useAppSelector(state => state.addCampaign.name);
   const dispatch = useAppDispatch();
   
@@ -24,7 +26,7 @@ export default function AddCampaign() {
   const [hasCampaignName, setHasCampaignName] = useState<boolean>(false);
   const [hasCampaignBase, setHasCampaignBase] = useState<boolean>(false);
 
-  const [editName, setEditName] = useState<boolean>(true)
+  const [shouldEditName, setShouldEditName] = useState<boolean>(true)
   const [featuresCount, setFeaturesCount] = useState<number>(1);
 
   function checkCampaignName() {
@@ -44,8 +46,8 @@ export default function AddCampaign() {
     }
   }
 
-  function onSubmit() {
-    dispatch(setReady(true));
+  async function onSubmit() {
+    await setAvatarBaseFile(campaignBaseInput.current?.files?.item(0) ?? undefined);
   }
 
   return (
@@ -64,13 +66,12 @@ export default function AddCampaign() {
             autoComplete="off"
             placeholder="NAME"
             onChange={checkCampaignName}
-            disabled={!editName}
+            disabled={!shouldEditName}
           />
           {hasCampaignName ?
             <p>Campaigns are the container for a personalization system. A campaign is formed by
-              <span className="text-purple font-bold"> AVATAR BASE</span>,
-              <span className="text-orange font-bold"> FEATURES</span> and
-              <span className="text-blue font-bold"> ANIMATIONS</span>.</p>
+              <span className="text-purple font-bold"> AVATAR BASE</span> and
+              <span className="text-orange font-bold"> FEATURES</span> initially.</p>
             :
             <label htmlFor="newCampaignName" className="block text-gray-light cursor-pointer">Set the campaign&apos;s name.</label>
           }
@@ -101,28 +102,25 @@ export default function AddCampaign() {
                 className="min-h-96"
               >
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <FirstStep ready={hasCampaignName && hasCampaignBase} handleNextStep={() => {
+                  <AvatarBaseStep ready={hasCampaignName && hasCampaignBase} handleNextStep={() => {
                     dispatch(setName(campaignNameInput.current?.value || ''));
-                    setEditName(false);
+                    setShouldEditName(false);
                   }}/>
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <SecondStep ready={true} handleNextStep={(value) => setFeaturesCount(value)} handleBackStep={() => setEditName(true)} />
+                  <AssetsCountStep ready={true} handleNextStep={(value) => setFeaturesCount(value)} handleBackStep={() => setShouldEditName(true)} />
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <ThirdStep ready={true} featuresCount={featuresCount} />
+                  <FeaturesConfig ready={true} featuresCount={featuresCount} />
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <EndStep ready={true} handleNextStep={() => {
-                    onSubmit();
-                  }}/>
+                  <ConfirmationStep handleNextStep={() => onSubmit()}/>
                 </SwiperSlide>
               </Swiper>
             </div>
           </div>
         }
       </div>
-      <CreateCampaign baseMeshFile={campaignBaseInput.current?.files?.item(0)} />
     </>
   )
 }

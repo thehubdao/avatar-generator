@@ -81,7 +81,7 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
   return await ProcessAndGetData(res, campaign as string, combination as string);
 }
 
-export async function GetUriApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<any>>) {
+export async function GetUriApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<SingleInterface>>) {
   const {single} = req.query;
   const [campaign, combination] = single as string[];
 

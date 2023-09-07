@@ -8,7 +8,7 @@ export function CreateAnimationMixer(objScene: Object3D) {
   return new AnimationMixer(objScene);
 }
 
-export async function SetAnimation(mixer: AnimationMixer, animation: GLTF | string | undefined, campaign?: string, onAnimationSet?: Function) {
+export async function SetAnimation(mixer: AnimationMixer, animation: GLTF | string | undefined, campaign?: string, onAnimationSet?: () => Promise<void>) {
   if(animation == undefined)
     return LogError(Module.AnimationUtil, 'Missing animation to load');
   
@@ -17,7 +17,7 @@ export async function SetAnimation(mixer: AnimationMixer, animation: GLTF | stri
     animationFile = await FirebaseGltfModel(animation, campaign);
   }
   else {
-    animationFile = animation as GLTF;
+    animationFile = animation;
   }
   
   if(animationFile.animations.length > 0) {

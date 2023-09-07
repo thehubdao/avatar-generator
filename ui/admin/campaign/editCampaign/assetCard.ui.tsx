@@ -26,11 +26,11 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardProps)
   const currentFile = useRef<HTMLInputElement>(null);
   const currentThumb = useRef<HTMLInputElement>(null);
 
-  const [onDelete, setOnDelete] = useState<boolean>(false);
-  const [onEdit, setOnEdit] = useState<boolean>(false);
+  const [willDelete, setWillDelete] = useState<boolean>(false);
+  const [willEdit, setWillEdit] = useState<boolean>(false);
   const [hasFile, setHasFile] = useState<boolean>(false);
   const [hasThumb, setHasThumb] = useState<boolean>(false);
-  const [updateAsset, setUpdateAsset] = useState<boolean>(false);
+  const [willUpdateAsset, setWillUpdateAsset] = useState<boolean>(false);
 
 
 
@@ -77,21 +77,21 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardProps)
           <GetImage url={thumb} alt={name} />
         </div>
         {/* ACTION BUTTONS */}
-        <div className={`flex justify-between items-center text-xl absolute bottom-0 left-0 w-56 p-2 min-h-[64px] bg-bg ${onEdit || onDelete ? '' : 'opacity-0'} group-hover:opacity-100 animation-opacity duration-300`}>
+        <div className={`flex justify-between items-center text-xl absolute bottom-0 left-0 w-56 p-2 min-h-[64px] bg-bg ${willEdit || willDelete ? '' : 'opacity-0'} group-hover:opacity-100 animation-opacity duration-300`}>
           {
-            onDelete ?
+            willDelete ?
               <div className="flex items-center justify-between w-full">
                 <p className="pl-2 text-sm">Are you sure?</p>
                 <div className="flex">
                   <AGButton nm fit onClickEvent={() => void deleteDoc(id)}>
                     <AiOutlineCheckCircle className="group-hover/button:text-green-600 transition-all duration-300" />
                   </AGButton>
-                  <AGButton nm fit onClickEvent={() => setOnDelete(false)}>
+                  <AGButton nm fit onClickEvent={() => setWillDelete(false)}>
                     <AiOutlineCloseCircle className="group-hover/button:text-red transition-all duration-300" />
                   </AGButton>
                 </div>
               </div>
-              : onEdit ?
+              : willEdit ?
                 <>
                   <div className="w-full">
                     <label htmlFor="" className="text-sm">Name: </label>
@@ -124,12 +124,12 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardProps)
                       <div className="flex">
                         <AGButton nm fit onClickEvent={() => {
                           resetFiles();
-                          setOnEdit(false);
+                          setWillEdit(false);
                         }}>
                           <AiOutlineCloseCircle className="group-hover/button:text-red transition-all duration-300" />
                         </AGButton>
                         <AGButton nm fit onClickEvent={() => {
-                          setUpdateAsset(true);
+                          setWillUpdateAsset(true);
                         }}>
                           <AiOutlineCheckCircle className="group-hover/button:text-green-600 transition-all duration-300" />
                         </AGButton>
@@ -139,10 +139,10 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardProps)
                 </>
                 :
                 <div className="flex justify-end items-center w-full">
-                  <AGButton nm fit onClickEvent={() => setOnEdit(true)}>
+                  <AGButton nm fit onClickEvent={() => setWillEdit(true)}>
                     <AiOutlineEdit className="group-hover/button:text-purple transition-all duration-300" />
                   </AGButton>
-                  <AGButton nm fit onClickEvent={() => setOnDelete(true)}>
+                  <AGButton nm fit onClickEvent={() => setWillDelete(true)}>
                     <AiOutlineDelete className="group-hover/button:text-red transition-all duration-300" />
                   </AGButton>
                 </div>
@@ -155,11 +155,11 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardProps)
         name={currentName.current}
         id={id}
         location={location}
-        assetReady={updateAsset}
+        assetReady={willUpdateAsset}
         onUpdated={() => {
           resetFiles();
-          setOnEdit(false);
-          setUpdateAsset(false);
+          setWillEdit(false);
+          setWillUpdateAsset(false);
           void dispatch(fetchData({ campaign: campaignName, location: location }));
         }} />
     </>
