@@ -5,7 +5,7 @@ import MobileBuildAlert from "../ui/admin/common/mobileBuildAlert.ui";
 export default function MobileLayout({ children }: { children: JSX.Element | JSX.Element[] | boolean }) {
   return (
     <Provider store={store}>
-      <main className="max-w-screen-xl min-h-screen m-auto py-[88px] px-8 bg-bg">
+      <main className="w-full h-screen">
         <div className="hidden xl:block">{children}</div>
         <div className="block xl:hidden"><MobileBuildAlert /></div>
       </main>
