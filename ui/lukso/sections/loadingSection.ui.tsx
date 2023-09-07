@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { fragmentShader } from "../shader/test.shader";
+import Image from "next/image";
 
 interface AGLoadingProps {
   loading?: boolean;
@@ -49,7 +50,29 @@ export default function LuksoLoadingUI({ loading, bgColor, transparency }: AGLoa
     <>{loading
       ? <div className={'fixed z-50 top-0 left-0 w-screen h-screen flex justify-center items-center' + (transparency ? ' bg-opacity-50 backdrop-blur-sm' : '')}
         style={{ backgroundColor: `#${bgColor ?? "FFFFFF"}${transparency ? '80' : ''}` }}>
-        <canvas ref={canvasRef} width={400} height={400}></canvas>
+        <canvas ref={canvasRef} width={400} height={400} className="fixed top-0 left-0"></canvas>
+        <div className="w-full h-screen flex flex-col justify-center items-center">
+          <div className="fixed top-0 w-full h-14 flex items-center px-4 justify-between">
+            <Image
+              src='/resources/icons/campaigns/lukso.svg'
+              width={106}
+              height={24}
+              alt="Lukso icon"
+            />
+            <div>
+              <p>Social Medias</p>
+            </div>
+          </div>
+          <Image
+            src='/resources/icons/campaigns/lukso.svg'
+            width={596}
+            height={138}
+            alt="Lukso icon"
+          />
+          <div className="w-[596px]">
+            <p className="text-4xl mt-7 tracking-[1.21em] text-center">AVATAR HU<span className="tracking-[0em]">B</span></p>
+          </div>
+        </div>
       </div> : ''
     }</>
   );

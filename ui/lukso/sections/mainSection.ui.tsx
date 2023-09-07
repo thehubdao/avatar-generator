@@ -24,26 +24,30 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
     moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(1));
   }
 
-  useEffect(() => { gsapEnterBlocks(); }, [])
+  useEffect(() => {
+    gsapEnterBlocks();
+  }, [])
 
   return (
     <section className={`flex h-full items-center justify-between`}>
       {/* Lukso Avatars */}
-      <div className="w-[688px] h-[70%] flex flex-col gap-3" ref={luksoAvatarRef}>
+      <div className="w-[580px] 2xl:w-[688px] h-[70%] flex flex-col gap-3" ref={luksoAvatarRef}>
         <TransparentBox
           fullWidth
           border
           backgroundColorClass="bg-[#FFCBDE]"
           heightClass="grow"
+          paddingClass="py-3"
         >
-          <Image
-            src={'/resources/images/campaings/full-avatar-lukso.png'}
-            width={548}
-            height={308}
-            alt="lukso avatar full body view"
-          />
-          <h2 className="font-extrabold text-4xl pt-5">LUKSO AVATARS</h2>
-          <p className="text-center mx-20 pt-2">A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
+          <div className="relative w-[328px] 2xl:w-[548px] h-[184px] 2xl:h-[308px]">
+            <Image
+              src={'/resources/images/campaings/full-avatar-lukso.png'}
+              fill
+              alt="lukso avatar full body view"
+            />
+          </div>
+          <h2 className="font-extrabold text-2xl 2xl:text-4xl pt-5">LUKSO AVATARS</h2>
+          <p className="text-center text-sm 2xl:text-base mx-20 pt-2">A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
         </TransparentBox>
 
         <button className="w-full h-fit" onClick={() => gsapOutBlocks()}>
@@ -51,9 +55,9 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
             fullWidth
             border
             backgroundColorClass="bg-white"
-            heightClass="h-[85px]"
+            heightClass="h-[70px] 2xl:h-[85px]"
           >
-            <p className="text-black text-xl">Roll your Avatar <span>(icon)</span></p>
+            <p className="text-black text-lg 2xl:text-xl">Roll your Avatar <span>(icon)</span></p>
           </TransparentBox>
         </button>
 
@@ -61,7 +65,7 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
 
       {/* Exclusive collection */}
       <div className="flex h-[70%] gap-3" ref={exclusiveCollectionRef}>
-        <div className="w-[345px] h-full flex flex-col">
+        <div className="w-[280px] 2xl:w-[345px] h-full flex flex-col">
           <TransparentBox
             fullWidth
             border
@@ -69,8 +73,8 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
             backgroundColorClass="bg-[#FFCBDE]"
             heightClass="h-[125px]"
           >
-            <h3 className="font-extrabold text-2xl">EXCLUSIVE COLLECTION</h3>
-            <p>Reamining: 15380</p>
+            <h3 className="font-extrabold text-xl 2xl:text-2xl">EXCLUSIVE COLLECTION</h3>
+            <p className="text-sm 2xl:text-base">Reamining: 15380</p>
           </TransparentBox>
           <TransparentBox
             fullWidth
@@ -79,8 +83,8 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
             backgroundColorClass="bg-[#FFCBDE]"
             heightClass="grow"
           >
-            <h3 className="font-semibold text-2xl">Features</h3>
-            <div className="mt-5 text-lg underline">
+            <h3 className="font-semibold text-xl 2xl:text-2xl">Features</h3>
+            <div className="mt-5 text-base 2xl:text-lg underline">
               <p>Feature one</p>
               <p>Feature two</p>
               <p>Feature three</p>
@@ -92,8 +96,8 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
             backgroundColorClass="bg-[#FFCBDE]"
             heightClass="grow"
           >
-            <h3 className="font-semibold text-2xl">Deluxe Avatars</h3>
-            <div className="mt-5 text-lg underline">
+            <h3 className="font-semibold text-xl 2xl:text-2xl">Deluxe Avatars</h3>
+            <div className="mt-5 text-base 2xl:text-lg underline">
               <p>Golden</p>
               <p>Silver</p>
               <p>Bronce</p>
@@ -101,7 +105,7 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
           </TransparentBox>
         </div>
 
-        <div className="w-[345px] flex">
+        <div className="w-[280px] 2xl:w-[345px] flex">
           <TransparentBox
             fullWidth
             border
@@ -116,7 +120,7 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
               height={380}
               alt="lukso avatar selfie view"
             />
-            <p className="grow flex items-center mx-14">Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.</p>
+            <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.</p>
           </TransparentBox>
         </div>
       </div>
