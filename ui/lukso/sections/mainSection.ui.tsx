@@ -1,13 +1,35 @@
 import Image from "next/image";
+import { useEffect, useRef } from "react";
 import TransparentBox from "../../common/transparentBox.ui";
+import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out";
 
-export default function MainLuksoSectionUI({ hidden }: { hidden?: boolean }) {
-  const hiddenClass = hidden ? 'hidden' : 'flex'
+interface MainLuksoSectionUIProps {
+  setCurrentSection: React.Dispatch<React.SetStateAction<number>>
+}
+
+export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSectionUIProps) {
+  const luksoAvatarRef = useRef<HTMLDivElement>(null);
+  const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
+  const ANIMATION_DURATION = 0.5;
+
+  const gsapEnterBlocks = () => {
+    if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
+    moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
+    moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'in');
+  }
+
+  const gsapOutBlocks = () => {
+    if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
+    moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'out');
+    moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(1));
+  }
+
+  useEffect(() => { gsapEnterBlocks(); }, [])
 
   return (
-    <section className={`${hiddenClass} h-full items-center justify-between`}>
+    <section className={`flex h-full items-center justify-between`}>
       {/* Lukso Avatars */}
-      <div className="w-[688px] h-[70%] flex flex-col gap-3">
+      <div className="w-[688px] h-[70%] flex flex-col gap-3" ref={luksoAvatarRef}>
         <TransparentBox
           fullWidth
           border
@@ -24,18 +46,21 @@ export default function MainLuksoSectionUI({ hidden }: { hidden?: boolean }) {
           <p className="text-center mx-20 pt-2">A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
         </TransparentBox>
 
-        <TransparentBox
-          fullWidth
-          border
-          backgroundColorClass="bg-white"
-          heightClass="h-[85px]"
-        >
-          <p className="text-black text-xl">Roll your Avatar <span>(icon)</span></p>
-        </TransparentBox>
+        <button className="w-full h-fit" onClick={() => gsapOutBlocks()}>
+          <TransparentBox
+            fullWidth
+            border
+            backgroundColorClass="bg-white"
+            heightClass="h-[85px]"
+          >
+            <p className="text-black text-xl">Roll your Avatar <span>(icon)</span></p>
+          </TransparentBox>
+        </button>
+
       </div>
 
       {/* Exclusive collection */}
-      <div className="flex h-[70%] gap-3">
+      <div className="flex h-[70%] gap-3" ref={exclusiveCollectionRef}>
         <div className="w-[345px] h-full flex flex-col">
           <TransparentBox
             fullWidth
