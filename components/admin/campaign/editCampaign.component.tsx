@@ -1,20 +1,29 @@
-import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import {useEffect} from "react";
+import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import EditCampaignUI from "../../../ui/admin/campaign/editCampaign/editCampaign.ui";
-import { GetFileUrl, UpdateDocObject } from "../../../utils/firebase.util";
-import { ShowModal } from "../../../utils/modal.util";
-import { fetchData } from "../../../store/currentCampaignSlice";
-import { FirestoreLocation } from "../../../enums/firebase.enum";
-import { AuthStateInterface, CampaignParameters, ColorConfig, LookAtVectors } from "../../../interfaces/common.interface";
-import { CameraConfigOption } from "../../../enums/campaign.enum";
-import { GoToPage } from "../../../utils/router.util";
-import { PageLocation } from "../../../enums/common.enum";
+import {GetFileUrl, UpdateDocObject, UploadFile} from "../../../utils/firebase.util";
+import {ShowModal} from "../../../utils/modal.util";
+import {fetchData} from "../../../store/currentCampaignSlice";
+import {FirestoreLocation, StorageLocation} from "../../../enums/firebase.enum";
+import {AuthStateInterface, CampaignParameters, ColorConfig, LookAtVectors} from "../../../interfaces/common.interface";
+import {CameraConfigOption} from "../../../enums/campaign.enum";
+import {GoToPage} from "../../../utils/router.util";
+import {Module, PageLocation} from "../../../enums/common.enum";
+import {LogError} from "../../../utils/common.util";
+import {useRouter} from "next/navigation";
 
 export default function EditCampaign() {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const userData: AuthStateInterface = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
+  const router = useRouter();
 
+  useEffect(() => {
+    if (!userData.connected) return
+    campaignName.length > 0 ? fetchAllCampaignData() : void GoToPage(PageLocation.Admin);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  
   async function downloadFile(path: string) {
     const fileLink = await GetFileUrl(path);
     if (fileLink === undefined) return ShowModal('error on file download, file link is undefined.');
@@ -55,11 +64,23 @@ export default function EditCampaign() {
     }
   }
 
-  useEffect(() => {
-    if (!userData.connected) return
-    campaignName.length > 0 ? fetchAllCampaignData() : void GoToPage(PageLocation.Admin);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  async function uploadAvatarBase(newAvatarBase: File | undefined) {
+    if (newAvatarBase == undefined)
+      return void LogError(Module.EditCampaign, "Missing AvatarBase to update!");
+
+    const uploadedFile = await UploadFile(newAvatarBase, StorageLocation.AvatarBase, undefined, campaignName);
+    if (uploadedFile == undefined)
+      return void LogError(Module.EditCampaign, "Error uploading new AvatarBase");
+    
+    const addedNewAvatarBase: Partial<CampaignParameters> = {armature: uploadedFile};
+    const updateResult = await UpdateDocObject(FirestoreLocation.Parameters, addedNewAvatarBase, campaignName);
+    if (updateResult.success) {
+      ShowModal("AvatarBase updated!");
+      router.refresh();
+    } else {
+      ShowModal("Errors updating AvatarBase!");
+    }
+  }
 
   return (
     <>
@@ -67,6 +88,7 @@ export default function EditCampaign() {
         downloadFile={(path: string) => downloadFile(path)}
         updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
         updateCameraConfig={(element: string, config: LookAtVectors) => updateCameraConfig(element, config)}
+        uploadAvatarBase={uploadAvatarBase}
       />
     </>
   )

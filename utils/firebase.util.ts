@@ -19,10 +19,10 @@ import {
   UserInterface,
   UserWithPass
 } from "../interfaces/firebase.interface";
-import {CampaignParameterName, Module, PageLocation} from "../enums/common.enum";
+import {CampaignParameterName, CommonErrorCode, Module, PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
 import {AddOrRemoveSlash, LogError, RandomPassword} from "./common.util";
-import {Result} from "../interfaces/common.interface";
+import {Result} from "../types/common.type";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
 import {SessionUserInfo} from "./common/session.util";
 import {ParameterNameType} from "../types/firebase.type";
@@ -322,12 +322,16 @@ export async function ReplaceDoc(docLocation: string, jsonData?: string, campaig
 }
 
 export async function InsertDoc(jsonData: string, location: string = FirestoreLocation.Features, campaign?: string): Promise<Result<string>> {
+  return InsertDocObj(JSON.parse(jsonData) as object, location, campaign);
+}
+
+export async function InsertDocObj(data: object, location: string | FirestoreLocation | FirestoreGlobalLocation, campaign?: string): Promise<Result<string>> {
   const {addDoc, collection} = await import('@firebase/firestore');
 
   try {
     const newDoc = await addDoc(
       collection(await FirebaseUtil.Instance().DB(), CampaignLocation(campaign) + location),
-      JSON.parse(jsonData));
+      data);
 
     return {success: true, value: newDoc.id};
   } catch (e) {
@@ -383,13 +387,12 @@ export async function LogIn(credentials: LogInInterface) {
 }
 
 export async function IsLogIn(): Promise<boolean> {
-  return (await FirebaseUtil.Instance().Auth()).currentUser != null;
-  
-  // return new Promise<boolean>(async (resolve) => {
-  //   (await FirebaseUtil.Instance().Auth()).onAuthStateChanged((user) => {
-  //     user ? resolve(true) : resolve(false);
-  //   });
-  // });
+  const authFirebase = await FirebaseUtil.Instance().Auth(); 
+  return new Promise<boolean>(resolve => {
+    authFirebase.onAuthStateChanged((user) => {
+      user != null ? resolve(true) : resolve(false);
+    });
+  });
 }
 
 export async function IsNotLogIn() {
@@ -464,7 +467,7 @@ export async function GetCurrentUserInfo(forceUpdate = false) {
 export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Result<boolean>> {
   if (newUser.email == undefined) {
     void LogError(Module.FirebaseUtil, "Missing email on create user!");
-    return {success: false, errMessage: 'Missing email on create user!'};
+    return {success: false, errMessage: 'Missing email on create user!', errCode: CommonErrorCode.MissingInfo};
   }
 
   const {createUserWithEmailAndPassword, updateCurrentUser} = await import('@firebase/auth');
