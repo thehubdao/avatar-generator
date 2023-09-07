@@ -17,7 +17,7 @@ export default function EditLuksoSectionUI() {
   return (
     <section className={`flex h-full items-center justify-between`}>
       {/* Edit Avatar */}
-      <div className="w-[461px] h-full flex flex-col" ref={editAvatarRef}>
+      <div className="w-[380px] 2xl:w-[461px] h-full flex flex-col" ref={editAvatarRef}>
         <TransparentBox
           fullWidth
           border
@@ -25,13 +25,14 @@ export default function EditLuksoSectionUI() {
           heightClass="grow"
           borderSizeClass="border-t-0 border-b-0"
         >
-          <Image
-            src={'/resources/images/campaings/close-avatar-lukso.png'}
-            width={347}
-            height={301}
-            alt="lukso avatar selfie view"
-          />
-          <div className="grid grid-cols-2 mt-20 gap-4 gap-x-14">
+          <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px]">
+            <Image
+              src={'/resources/images/campaings/close-avatar-lukso.png'}
+              fill
+              alt="lukso avatar selfie view"
+            />
+          </div>
+          <div className="grid grid-cols-2 mt-10 2xl:mt-20 gap-4 gap-x-14 text-sm 2xl:text-base">
             {Array.from({ length: 4 }).map((_, index) => {
               return (<Fragment key={index}>
                 <div>
@@ -46,15 +47,15 @@ export default function EditLuksoSectionUI() {
             })}
           </div>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" aditionalClass="mt-10" >
-            <p className="text-black text-xl ">World Color <span>(0x00f)</span></p>
+            <p className="text-black text-lg 2xl:text-xl">World Color <span>(0x00f)</span></p>
           </TransparentBox>
         </TransparentBox>
-        <div className="h-20 flex whitespace-nowrap">
-          <TransparentBox fullWidth border backgroundColorClass="bg-white">
-            <p className="text-black text-xl ">Download <span>(icon)</span></p>
+        <div className="h-14 w-full 2xl:h-18 flex whitespace-nowrap">
+          <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
+            <p className="text-black text-base 2xl:text-lg">Download <span>(icon)</span></p>
           </TransparentBox>
           <TransparentBox border backgroundColorClass="bg-white">
-            <p className="text-black text-xl ">Edit <span>(icon)</span></p>
+            <p className="text-black text-base 2xl:text-lg">Edit <span>(icon)</span></p>
           </TransparentBox>
         </div>
       </div>
