@@ -16,9 +16,10 @@ interface EditCampaignUIProps {
   downloadFile: ((path: string) => void) | ((path: string) => Promise<void>);
   updateColorConfig: (Element: string, config: ColorConfig) => Promise<void>;
   updateCameraConfig: (Element: string, config: LookAtVectors) => Promise<void>;
+  uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
-export default function EditCampaignUI({ downloadFile, updateColorConfig, updateCameraConfig }: EditCampaignUIProps) {
+export default function EditCampaignUI({ downloadFile, updateColorConfig, updateCameraConfig, uploadAvatarBase }: EditCampaignUIProps) {
   // GET DATA FROM REDUX STORE
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const campaignParameters = useAppSelector(state => state.currentCampaign.parameters);
@@ -77,6 +78,7 @@ export default function EditCampaignUI({ downloadFile, updateColorConfig, update
                       downloadAvatarBase={() => downloadAvatarBase()}
                       updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
                       updateCameraConfig={(Element: string, config: LookAtVectors) => updateCameraConfig(Element, config)}
+                      uploadAvatarBase={uploadAvatarBase}
                     />
                     <CampaignStats
                       featuresCount={campaignParameters.features?.length ?? 0}

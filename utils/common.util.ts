@@ -95,8 +95,7 @@ export function IsWebUrl(url: string) {
 }
 
 export function MixArrays<T>(arr1: T[] | undefined, arr2: T[] | undefined) {
-  const mixed: T[] = [...(arr1 ?? []), ...(arr2 ?? [])];
-  return mixed;
+  return [...(arr1 ?? []), ...(arr2 ?? [])];
 }
 
 export function RemovedAcc(text: string | undefined) {

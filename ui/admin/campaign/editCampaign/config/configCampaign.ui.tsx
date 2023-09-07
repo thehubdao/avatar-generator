@@ -1,13 +1,19 @@
-import { useRef, useState } from "react";
-import { RxAvatar } from "react-icons/rx";
+import {useRef, useState} from "react";
+import {RxAvatar} from "react-icons/rx";
 import AGButton from "../../../../common/ag-button.component";
-import { AiOutlineCloudDownload, AiOutlineCloudUpload, AiOutlineEye, AiOutlineVideoCamera } from "react-icons/ai";
-import { MdKeyboardArrowDown, MdOutlineColorLens } from "react-icons/md";
+import {
+  AiOutlineCheckCircle,
+  AiOutlineCloudDownload,
+  AiOutlineCloudUpload,
+  AiOutlineEye,
+  AiOutlineVideoCamera
+} from "react-icons/ai";
+import {MdKeyboardArrowDown, MdOutlineColorLens} from "react-icons/md";
 import ColorConfigUI from "./colorConfig.ui";
-import { IoSettingsOutline } from "react-icons/io5";
-import { BsLightbulb } from "react-icons/bs";
-import { CampaignConfig, ColorConfig, FeatureBasic, LookAtVectors } from "../../../../../interfaces/common.interface";
-import { CameraConfigOption, CampaignConfigOption } from "../../../../../enums/campaign.enum";
+import {IoSettingsOutline} from "react-icons/io5";
+import {BsLightbulb} from "react-icons/bs";
+import {CampaignConfig, ColorConfig, FeatureBasic, LookAtVectors} from "../../../../../interfaces/common.interface";
+import {CameraConfigOption, CampaignConfigOption} from "../../../../../enums/campaign.enum";
 import CameraConfigUI from "./cameraConfig.ui";
 
 interface ConfigCampaignProps {
@@ -16,16 +22,19 @@ interface ConfigCampaignProps {
   downloadAvatarBase: (() => void) | (() => Promise<void>);
   updateColorConfig: (element: string, colorConfig: ColorConfig) => Promise<void>;
   updateCameraConfig: (element: string, colorConfig: LookAtVectors) => Promise<void>;
+  uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
-export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig }: ConfigCampaignProps) {
+export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig, uploadAvatarBase }: ConfigCampaignProps) {
   const [shouldOpenConfig, setShouldOpenConfig] = useState<boolean>(false);
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
   const [camOption, setCamOption] = useState<string>(CameraConfigOption.DefCam);
+  const [hasNewAvatarBase, setHasNewAvatarBase] = useState<boolean>(false);
 
   const colorConfig = useRef<HTMLSelectElement>(null);
   const camConfig = useRef<HTMLSelectElement>(null);
+  const avatarBaseFile = useRef<HTMLInputElement>(null);
 
   const changeConfigOption = (e: React.MouseEvent, destiny: string) => {
     const target = e.currentTarget as HTMLElement;
@@ -88,13 +97,22 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                         </div>
                       </AGButton>
                     </div>
-                    <div>
-                      <AGButton nm full >
-                        <div className="flex items-center p-2 gap-2 cursor-not-allowed">
-                          <AiOutlineCloudUpload />
-                          <p>Update Avatar Base</p>
+                    <div className="flex">
+                      <label className={`flex justify-center m-2 p-2 gap-2 min-h-[32px] items-center shadow-flat-soft hover:shadow-flat-medium rounded-lg cursor-pointer transition-all duration-200 ${hasNewAvatarBase ? 'bg-green-400 text-white' : ''}`}
+                             htmlFor="avatarBaseFile">
+                        <AiOutlineCloudUpload className="ml-2" />
+                        <p className="my-1 pr-2">Update Avatar Base</p>
+                        <input type="file" id="avatarBaseFile" name="avatarBaseFile" className="hidden" accept=".glb"
+                               ref={avatarBaseFile}
+                               onChange={() => setHasNewAvatarBase(!!avatarBaseFile.current?.files?.length)}/>
+                      </label>
+                      {hasNewAvatarBase &&
+                      <AGButton nm full onClickEvent={() => uploadAvatarBase(avatarBaseFile.current?.files?.item(0) ?? undefined)}>
+                        <div className="flex items-center p-2 gap-2">
+                          <AiOutlineCheckCircle />
+                          Upload
                         </div>
-                      </AGButton>
+                      </AGButton>}
                     </div>
                   </div>
                 }

@@ -77,6 +77,7 @@ export enum Module {
   CollectionUtil = 'CollectionUtil',
   Single = 'SingleComponent',
   TextureUtil = 'TextureUtil',
+  EditCampaign = 'EditCampaignComponent',
 }
 
 export enum EmailResult {
@@ -93,4 +94,16 @@ export enum CampaignParameterName {
   Config = 'Config',
   All = '',
   Missing = 'NaN',
+}
+
+/***
+ * Way to code errors that use the result type, `AG-` start on all own errors 
+ * 100 - Api errors
+ * 200 - Data functions
+ * */
+export const enum CommonErrorCode {
+  GetNoData = 'AG-107',
+  FetchError = 'AG-103',
+  PostNoData = 'AG-108',
+  MissingInfo = 'AG-201',
 }
