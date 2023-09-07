@@ -26,6 +26,7 @@ import {Result} from "../types/common.type";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
 import {SessionUserInfo} from "./common/session.util";
 import {ParameterNameType} from "../types/firebase.type";
+import {CampaignParameters} from "../interfaces/common.interface";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -581,4 +582,8 @@ export async function UpdateAdminCampaigns() {
     campaigns: campaignList,
   };
   await UpdateDocObject(FirestoreGlobalLocation.ParametersV2, newParams);
+}
+
+export async function UpdateCampaignParameter(update: Partial<CampaignParameters>, campaign: string) {
+  return await UpdateDocObject(FirestoreLocation.Parameters, update, campaign);
 }

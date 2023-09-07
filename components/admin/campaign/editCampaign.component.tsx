@@ -1,7 +1,7 @@
 import {useEffect} from "react";
 import {useAppDispatch, useAppSelector} from "../../../store/hooks";
 import EditCampaignUI from "../../../ui/admin/campaign/editCampaign/editCampaign.ui";
-import {GetFileUrl, UpdateDocObject, UploadFile} from "../../../utils/firebase.util";
+import {GetFileUrl, UpdateCampaignParameter, UpdateDocObject, UploadFile} from "../../../utils/firebase.util";
 import {ShowModal} from "../../../utils/modal.util";
 import {fetchData} from "../../../store/currentCampaignSlice";
 import {FirestoreLocation, StorageLocation} from "../../../enums/firebase.enum";
@@ -72,8 +72,7 @@ export default function EditCampaign() {
     if (uploadedFile == undefined)
       return void LogError(Module.EditCampaign, "Error uploading new AvatarBase");
     
-    const addedNewAvatarBase: Partial<CampaignParameters> = {armature: uploadedFile};
-    const updateResult = await UpdateDocObject(FirestoreLocation.Parameters, addedNewAvatarBase, campaignName);
+    const updateResult = await UpdateCampaignParameter({armature: uploadedFile}, campaignName);
     if (updateResult.success) {
       ShowModal("AvatarBase updated!");
       router.refresh();
