@@ -22,7 +22,7 @@ export default function EditCampaign() {
     if (!userData.connected) return
     campaignName.length > 0 ? fetchAllCampaignData() : void GoToPage(PageLocation.Admin);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [userData]);
   
   async function downloadFile(path: string) {
     const fileLink = await GetFileUrl(path);
