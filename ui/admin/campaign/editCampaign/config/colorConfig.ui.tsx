@@ -57,7 +57,7 @@ export default function ColorConfigUI({ materialName, color, id, usePalette, col
 
   return (
     <>
-      <div className="my-2">
+      <div className="my-2 px-2">
         <p className="font-poppins font-medium text-purple pb-2 mt-6">Material:</p>
         <input type="text" className="shadow-inset-soft hover:shadow-inset-medium px-4 py-2 min-h-[48px] w-full rounded-lg bg-bg"
           defaultValue={defaultMaterialName}

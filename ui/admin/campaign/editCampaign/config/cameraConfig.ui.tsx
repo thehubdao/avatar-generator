@@ -81,9 +81,11 @@ export default function CameraConfigUI({ camConfig, updateCameraConfig }: Camera
           />
         </div>
       </div>
-      <AGButton nm full onClickEvent={() => sendNewCamConfig()}>
-        <p className="py-2">Update</p>
-      </AGButton>
+      <div className="mx-2">
+        <AGButton nm full onClickEvent={() => sendNewCamConfig()}>
+          <p className="py-2">Update</p>
+        </AGButton>
+      </div>
     </div>
   )
 }
