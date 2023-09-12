@@ -1,17 +1,19 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import gsap from 'gsap';
 
 // Fragment shader
 import { fragmentShaderSource } from '../shader/background.shader'
 
 interface AGLoadingProps {
-  loading?: boolean;
+  loading: boolean;
+  socialMedia: { alt: string, link: string, icon: React.ReactElement }[]
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setCurrentSection: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export default function LuksoLoadingUI({ loading, setIsLoading, setCurrentSection }: AGLoadingProps) {
+export default function LuksoLoadingUI({ loading, socialMedia, setIsLoading, setCurrentSection }: AGLoadingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -68,7 +70,6 @@ export default function LuksoLoadingUI({ loading, setIsLoading, setCurrentSectio
     };
 
     requestAnimationFrame(render);
-
   }, []);
 
   const compileShader = (gl: WebGLRenderingContext, source: string, type: number) => {
@@ -93,7 +94,8 @@ export default function LuksoLoadingUI({ loading, setIsLoading, setCurrentSectio
       opacity: 0,
       ease: 'power1.out',
       duration: 1,
-      delay: 5
+      delay: 5 
+      // delay: 1000
     }).then(() => {
       setIsLoading(false);
       setCurrentSection(0);
@@ -112,8 +114,12 @@ export default function LuksoLoadingUI({ loading, setIsLoading, setCurrentSectio
               height={24}
               alt="Lukso icon"
             />
-            <div>
-              <p>Social Medias</p>
+            <div className="flex gap-3">
+              {socialMedia.map((item, index) => {
+                return <Link key={index} href={item.link} target="_blank">
+                  {item.icon}
+                </Link>
+              })}
             </div>
           </div>
           <div className="fixed">
@@ -126,6 +132,9 @@ export default function LuksoLoadingUI({ loading, setIsLoading, setCurrentSectio
             <div className="w-[596px]">
               <p className="text-4xl mt-7 tracking-[1.21em] text-center">AVATAR HU<span className="tracking-[0em]">B</span></p>
             </div>
+          </div>
+          <div className="fixed">
+
           </div>
         </div>
       </div> : ''

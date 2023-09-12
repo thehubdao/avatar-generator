@@ -1,13 +1,15 @@
+import Link from "next/link";
 import Image from "next/image"
 import { Fragment, useEffect, useRef } from "react"
 import TransparentBox from "../../common/transparentBox.ui"
 import { moveHorizontalBlocks, moveVerticalBlocks } from "../../../utils/gsap/block_in_out";
 
 interface MintLuksoSectionUIProps {
-  setCurrentSection: React.Dispatch<React.SetStateAction<number>>
+  socialMedia: { alt: string, link: string, icon: React.ReactElement }[],
+  setCurrentSection: React.Dispatch<React.SetStateAction<number>>,
 }
 
-export default function MintLuksoSectionUI({ setCurrentSection }: MintLuksoSectionUIProps) {
+export default function MintLuksoSectionUI({ socialMedia, setCurrentSection }: MintLuksoSectionUIProps) {
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -85,7 +87,13 @@ export default function MintLuksoSectionUI({ setCurrentSection }: MintLuksoSecti
           <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10 2xl:mb-20">MINT YOUR AVATAR</h3>
           <p className="text-base 2xl:text-lg">Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.
             Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.</p>
-          <div>(Social media section)</div>
+          <div className="flex gap-3">
+            {socialMedia.map((item, index) => {
+              return <Link key={index} href={item.link} target="_blank">
+                {item.icon}
+              </Link>
+            })}
+          </div>
           <div className="font-semibold">
             <p>PUBLIC MINT</p>
             <p>0.03 ETH</p>

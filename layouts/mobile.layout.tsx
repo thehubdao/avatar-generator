@@ -7,7 +7,7 @@ export default function MobileLayout({ children }: { children: JSX.Element | JSX
     <Provider store={store}>
       <main className="w-full h-screen">
         <div className="hidden xl:block">{children}</div>
-        <div className="block xl:hidden"><MobileBuildAlert /></div>
+        <div className="flex justify-center items-center h-full xl:hidden"><MobileBuildAlert /></div>
       </main>
     </Provider>
   )
