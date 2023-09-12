@@ -1,56 +1,109 @@
 import { useEffect, useRef } from "react";
-import { fragmentShader } from "../shader/test.shader";
 import Image from "next/image";
+import gsap from 'gsap';
+
+// Fragment shader
+import { fragmentShaderSource } from '../shader/background.shader'
 
 interface AGLoadingProps {
   loading?: boolean;
-  transparency?: boolean;
-  bgColor?: string;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setCurrentSection: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export default function LuksoLoadingUI({ loading, bgColor, transparency }: AGLoadingProps) {
+export default function LuksoLoadingUI({ loading, setIsLoading, setCurrentSection }: AGLoadingProps) {
+  const parentRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // function loadShader(gl: any, type: any, source: any) {
-  //   const shader = gl.createShader(type);
+  useEffect(() => {
+    if (!canvasRef.current) return;
 
-  //   // Send the source to the shader object
-  //   gl.shaderSource(shader, source);
+    const canvas = canvasRef.current;
+    const gl = canvas.getContext('webgl');
 
-  //   // Compile the shader program
-  //   gl.compileShader(shader);
+    if (!gl) {
+      console.error('WebGL is not support on your browser');
+      return;
+    }
 
-  //   // See if it compiled successfully
-  //   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-  //     console.log(`An error occurred compiling the shaders: ${gl.getShaderInfoLog(shader)}`,);
-  //     gl.deleteShader(shader);
-  //     return null;
-  //   }
-  // }
+    // Vertex shader (optional)
+    const vertexShaderSource = `
+      attribute vec4 coordinates;
+      void main(void) {
+        gl_Position = coordinates;
+      }
+    `;
 
-  // function initShaderProgram(gl: any) {
-  //   const fsLoaded = loadShader(gl, gl.FRAGMENT_SHADER, fragmentShader);
-  //   const shaderProgram = gl.createProgram();
+    const fragmentShader = compileShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+    const vertexShader = compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
 
-  //   if (!shaderProgram || !fsLoaded) return
-  //   gl.attachShader(shaderProgram, fsLoaded);
-  //   gl.linkProgram(shaderProgram);
-  // }
+    const shaderProgram = gl.createProgram();
 
-  // useEffect(() => {
-  //   if (!canvasRef) return
-  //   const gl = canvasRef.current?.getContext("webgl");
-  //   if (!gl) return
+    if (!shaderProgram || !vertexShader || !fragmentShader) return;
 
-  //   initShaderProgram(gl);
-  // }, [])
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+    gl.useProgram(shaderProgram);
 
+    const coordsAttrib = gl.getAttribLocation(shaderProgram, 'coordinates');
+    gl.enableVertexAttribArray(coordsAttrib);
+
+    const vertexBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    const vertices = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+    gl.vertexAttribPointer(coordsAttrib, 2, gl.FLOAT, false, 0, 0);
+
+    const timeUniformLocation = gl.getUniformLocation(shaderProgram, 'u_time');
+    const resolutionUniformLocation = gl.getUniformLocation(shaderProgram, 'u_resolution');
+
+    const render = (time: number) => {
+      gl.uniform1f(timeUniformLocation, time / 1000);
+      gl.uniform2f(resolutionUniformLocation, canvas.width, canvas.height);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      requestAnimationFrame(render);
+    };
+
+    requestAnimationFrame(render);
+
+  }, []);
+
+  const compileShader = (gl: WebGLRenderingContext, source: string, type: number) => {
+    const shader = gl.createShader(type);
+
+    if (!shader) return;
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('Error on compile shader:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+
+    return shader;
+  };
+
+  useEffect(() => {
+    if (!parentRef.current) return
+    gsap.to(parentRef.current, {
+      opacity: 0,
+      ease: 'power1.out',
+      duration: 1,
+      delay: 5
+    }).then(() => {
+      setIsLoading(false);
+      setCurrentSection(0);
+    });
+  }, []);
 
   return (
     <>{loading
-      ? <div className={'fixed z-50 top-0 left-0 w-screen h-screen flex justify-center items-center' + (transparency ? ' bg-opacity-50 backdrop-blur-sm' : '')}
-        style={{ backgroundColor: `#${bgColor ?? "FFFFFF"}${transparency ? '80' : ''}` }}>
-        <canvas ref={canvasRef} width={400} height={400} className="fixed top-0 left-0"></canvas>
+      ? <div className={'fixed z-50 top-0 left-0 w-screen h-screen flex justify-center items-center bg-[#FABCE2]'} ref={parentRef}>
+        <canvas ref={canvasRef} className="w-full h-screen fixed top-0 left-0"></canvas>
         <div className="w-full h-screen flex flex-col justify-center items-center">
           <div className="fixed top-0 w-full h-14 flex items-center px-4 justify-between">
             <Image
@@ -63,14 +116,16 @@ export default function LuksoLoadingUI({ loading, bgColor, transparency }: AGLoa
               <p>Social Medias</p>
             </div>
           </div>
-          <Image
-            src='/resources/icons/campaigns/lukso.svg'
-            width={596}
-            height={138}
-            alt="Lukso icon"
-          />
-          <div className="w-[596px]">
-            <p className="text-4xl mt-7 tracking-[1.21em] text-center">AVATAR HU<span className="tracking-[0em]">B</span></p>
+          <div className="fixed">
+            <Image
+              src='/resources/icons/campaigns/lukso.svg'
+              width={596}
+              height={138}
+              alt="Lukso icon"
+            />
+            <div className="w-[596px]">
+              <p className="text-4xl mt-7 tracking-[1.21em] text-center">AVATAR HU<span className="tracking-[0em]">B</span></p>
+            </div>
           </div>
         </div>
       </div> : ''
