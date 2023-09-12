@@ -1,4 +1,14 @@
-export const fragmentShader = `
+export const fragmentShaderSource = `
+// Author:
+// Title:
+
+#ifdef GL_ES
+precision mediump float;
+#endif
+
+uniform vec2 u_resolution;
+uniform vec2 u_mouse;
+uniform float u_time;
 vec2 center = vec2(0.,0.9);
 float speed = 0.1;
 
@@ -9,11 +19,10 @@ float circle(in vec2 _st, in float _radius, in float _blur){
                          dot(dist,dist)*4.0);
 }
 
-void mainImage( out vec4 fragColor, in vec2 fragCoord )
-{
-    float invAr = iResolution.y / iResolution.x;
+void main(){
+    float invAr = u_resolution.y / u_resolution.x;
 
-    vec2 uv = fragCoord.xy / iResolution.xy;
+    vec2 uv = gl_FragCoord.xy/u_resolution.xy;
 		
     uv /= 2.0;
     
@@ -25,9 +34,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     // a. The DISTANCE from the pixel to the center
     // pct = distance(uv*2.0,vec2(1.));
     // vec3 light = vec3(abs(pct-1.))+0.5;
-    vec3 light = vec3(circle(uv*2.0,6.9+abs(sin(iTime)),0.9)) * 1.1;
+    vec3 light = vec3(circle(uv*2.0,6.9+abs(sin(u_time)),0.9)) * 1.0;
         
-	vec3 col = vec4(uv,0.5+0.5*sin(iTime),1.0).xyz;
+	vec3 col = vec4(uv,0.5+0.5*sin(u_time),1.0).xyz;
     vec3 texcol;
 			
 	float x = (center.x-uv.x);
@@ -35,7 +44,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     
 	//float r = -sqrt(x*x + y*y); //uncoment this line to symmetric ripples
 	float r = -(x*x + y*y);
-	float z = 1.0 + 0.5*sin((r+iTime*speed)/0.013);
+	float z = 1.0 + 0.5*sin((r+u_time*speed)/0.013);
 	
 	texcol.x = z;
 	texcol.y = z;
@@ -44,7 +53,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 	vec3 color = mix(texcol, bg, 0.9);
     vec3 ripple = mix(color, light*bg, 0.6);
     
-	fragColor = vec4(mix(ripple, vec3(1.0), 0.3),1.0);
+	gl_FragColor = vec4(mix(ripple, vec3(1.0), 0.3),1.0);
     //fragColor = vec4(light,1.0);
 }
 `;
