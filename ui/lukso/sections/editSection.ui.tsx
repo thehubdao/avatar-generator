@@ -2,6 +2,7 @@ import Image from "next/image"
 import { Fragment, useEffect, useRef } from "react"
 import TransparentBox from "../../common/transparentBox.ui"
 import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out";
+import { FaDownload, FaPencil } from "react-icons/fa6";
 
 export default function EditLuksoSectionUI() {
   const editAvatarRef = useRef<HTMLDivElement>(null);
@@ -51,12 +52,22 @@ export default function EditLuksoSectionUI() {
           </TransparentBox>
         </TransparentBox>
         <div className="h-14 w-full 2xl:h-18 flex whitespace-nowrap">
-          <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
-            <p className="text-black text-base 2xl:text-lg">Download <span>(icon)</span></p>
-          </TransparentBox>
-          <TransparentBox border backgroundColorClass="bg-white">
-            <p className="text-black text-base 2xl:text-lg">Edit <span>(icon)</span></p>
-          </TransparentBox>
+          <button className="w-full">
+            <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
+              <div className="flex items-center gap-3 text-black">
+                <p className="text-base 2xl:text-lg">Download</p>
+                <FaDownload />
+              </div>
+            </TransparentBox>
+          </button>
+          <button >
+            <TransparentBox border backgroundColorClass="bg-white">
+              <div className="flex items-center gap-3 text-black">
+                <p className="text-base 2xl:text-lg">Edit</p>
+                <FaPencil />
+              </div>
+            </TransparentBox>
+          </button>
         </div>
       </div>
     </section>

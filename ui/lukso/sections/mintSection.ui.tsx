@@ -3,6 +3,8 @@ import Image from "next/image"
 import { Fragment, useEffect, useRef, useState } from "react"
 import TransparentBox from "../../common/transparentBox.ui"
 import { moveHorizontalBlocks, moveVerticalBlocks } from "../../../utils/gsap/block_in_out";
+import { BsArrowRepeat } from "react-icons/bs";
+import { FaArrowRightLong } from "react-icons/fa6";
 
 interface MintLuksoSectionUIProps {
   socialMedia: { alt: string, link: string, icon: React.ReactElement }[];
@@ -84,12 +86,18 @@ export default function MintLuksoSectionUI({ socialMedia, setCurrentSection, reR
       <div className="absolute bottom-[15%] left-1/2 -translate-x-[50%] flex flex-col w-[240px] justify-end gap-3 text-black text-lg 2xl:text-xl" ref={buttonRef}>
         <button className="w-full h-fit" onClick={() => handleReRoll()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
-            <p>{isRolling ? 'is rolling' : 'Reroll'}<span>(icon)</span></p>
+            <div className="flex items-center gap-3">
+              <p>{isRolling ? 'Rolling' : 'Reroll'}</p>
+              <BsArrowRepeat className={`${isRolling ? 'rotate-180 transition-all duration-500' : ''}`}/>
+            </div>
           </TransparentBox>
         </button>
         <button className="w-full h-fit" onClick={() => gsapOutBlocks()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
-            <p>Claim <span>(icon)</span></p>
+            <div className="flex items-center gap-3">
+              <p>Claim</p>
+              <FaArrowRightLong className="text-base"/>
+            </div>
           </TransparentBox>
         </button>
       </div>
