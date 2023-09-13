@@ -55,6 +55,7 @@ export enum Module {
   EditCampaign = 'EditCampaignComponent',
   OptionSelector = 'OptionSelector',
   Importer = "ThreeJsImporterUtil",
+  Lukso = 'LuksoComponent'
 }
 
 export enum EmailResult {

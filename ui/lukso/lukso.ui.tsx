@@ -1,12 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import EditLuksoSectionUI from "./sections/editSection.ui";
 import MainLuksoSectionUI from "./sections/mainSection.ui";
 import MintLuksoSectionUI from "./sections/mintSection.ui";
 import LuksoLoadingUI from "./sections/loadingSection.ui";
 import { FaXTwitter, FaDiscord, FaInstagram } from "react-icons/fa6";
 
+interface LuksoUIProps {
+  reRoll: () => Promise<void>;
+}
 
-export default function LuksoUI() {
+export default function LuksoUI({ reRoll }: LuksoUIProps) {
   const [currentSection, setCurrentSection] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -28,7 +31,7 @@ export default function LuksoUI() {
     <div className="w-full grow text-white text-center">
       <LuksoLoadingUI loading={isLoading} setIsLoading={setIsLoading} setCurrentSection={setCurrentSection} socialMedia={luksoSocialMedia} />
       {(currentSection === 0) && <MainLuksoSectionUI setCurrentSection={setCurrentSection} />}
-      {(currentSection === 1) && <MintLuksoSectionUI setCurrentSection={setCurrentSection} socialMedia={luksoSocialMedia} />}
+      {(currentSection === 1) && <MintLuksoSectionUI setCurrentSection={setCurrentSection} socialMedia={luksoSocialMedia} reRoll={reRoll} />}
       {(currentSection === 2) && <EditLuksoSectionUI />}
     </div>
   )

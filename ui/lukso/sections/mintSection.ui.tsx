@@ -1,19 +1,22 @@
 import Link from "next/link";
 import Image from "next/image"
-import { Fragment, useEffect, useRef } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import TransparentBox from "../../common/transparentBox.ui"
 import { moveHorizontalBlocks, moveVerticalBlocks } from "../../../utils/gsap/block_in_out";
 
 interface MintLuksoSectionUIProps {
-  socialMedia: { alt: string, link: string, icon: React.ReactElement }[],
-  setCurrentSection: React.Dispatch<React.SetStateAction<number>>,
+  socialMedia: { alt: string, link: string, icon: React.ReactElement }[];
+  setCurrentSection: React.Dispatch<React.SetStateAction<number>>;
+  reRoll: () => Promise<void>;
 }
 
-export default function MintLuksoSectionUI({ socialMedia, setCurrentSection }: MintLuksoSectionUIProps) {
+export default function MintLuksoSectionUI({ socialMedia, setCurrentSection, reRoll }: MintLuksoSectionUIProps) {
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
   const ANIMATION_DURATION = 0.5;
+
+  const [isRolling, setIsRolling] = useState<boolean>(false);
 
   const gsapEnterBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
@@ -30,6 +33,13 @@ export default function MintLuksoSectionUI({ socialMedia, setCurrentSection }: M
   }
 
   useEffect(() => { gsapEnterBlocks(); }, [])
+
+  const handleReRoll = async () => {
+    if (isRolling) return;
+    setIsRolling(true);
+    await reRoll()
+    setIsRolling(false);
+  }
 
   return (
     <section className={`flex h-full items-center justify-between`}>
@@ -69,11 +79,14 @@ export default function MintLuksoSectionUI({ socialMedia, setCurrentSection }: M
         </TransparentBox>
       </div>
 
+      {/** TODO: evitar que se sobreponga la seccion de bottones a el avatar */}
       {/* Buttons */}
-      <div className="flex flex-col w-[240px] h-[70%] justify-end gap-3 text-black text-lg 2xl:text-xl" ref={buttonRef}>
-        <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
-          <p>Reroll <span>(icon)</span></p>
-        </TransparentBox>
+      <div className="absolute bottom-[15%] left-1/2 -translate-x-[50%] flex flex-col w-[240px] justify-end gap-3 text-black text-lg 2xl:text-xl" ref={buttonRef}>
+        <button className="w-full h-fit" onClick={() => handleReRoll()}>
+          <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
+            <p>{isRolling ? 'is rolling' : 'Reroll'}<span>(icon)</span></p>
+          </TransparentBox>
+        </button>
         <button className="w-full h-fit" onClick={() => gsapOutBlocks()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <p>Claim <span>(icon)</span></p>
