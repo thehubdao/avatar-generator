@@ -78,6 +78,7 @@ export enum Module {
   Single = 'SingleComponent',
   TextureUtil = 'TextureUtil',
   EditCampaign = 'EditCampaignComponent',
+  Lukso = 'LuksoComponent'
 }
 
 export enum EmailResult {
