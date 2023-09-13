@@ -2,6 +2,7 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import TransparentBox from "../../common/transparentBox.ui";
 import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out";
+import { FaDice } from "react-icons/fa6";
 
 interface MainLuksoSectionUIProps {
   setCurrentSection: React.Dispatch<React.SetStateAction<number>>
@@ -56,8 +57,12 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
             border
             backgroundColorClass="bg-white"
             heightClass="h-[70px] 2xl:h-[85px]"
+            aditionalClass="flex-row"
           >
-            <p className="text-black text-lg 2xl:text-xl">Roll your Avatar <span>(icon)</span></p>
+            <div className="flex items-center gap-3">
+              <p className="text-black text-lg 2xl:text-xl">Roll your Avatar </p>
+              <FaDice className="text-black text-2xl" />
+            </div>
           </TransparentBox>
         </button>
 
