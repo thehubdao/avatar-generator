@@ -3,10 +3,36 @@ import { Fragment, useEffect, useRef } from "react"
 import TransparentBox from "../../common/transparentBox.ui"
 import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out";
 import { FaDownload, FaPencil } from "react-icons/fa6";
+import { TakeCanvasPicture } from "../../../components/avatar/viewer.component";
+import { GetAvatarGLB } from "../../../components/avatar/editor.component";
+import { IFrameExportData } from "../../../utils/iframe.util";
+import { SaveFile } from "../../../utils/exporter.util";
+import { ExportInterface } from "../../../interfaces/common.interface";
+
+const exportData: ExportInterface = { attributes: [] };
+let isOnIFrame = false;
 
 export default function EditLuksoSectionUI() {
   const editAvatarRef = useRef<HTMLDivElement>(null);
   const ANIMATION_DURATION = 0.5;
+
+  async function exportModel() {
+    exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
+    const [picturePromise, modelPromise] = await Promise.all([
+      TakeCanvasPicture(''),
+      GetAvatarGLB()
+    ]);
+    exportData.picture = picturePromise;
+    exportData.model = modelPromise;
+
+    if (isOnIFrame) {
+      IFrameExportData(exportData);
+    } else {
+      if (exportData.model != undefined)
+        await SaveFile(exportData.model, 'model.glb');
+      await SaveFile(exportData.picture, 'picture.png');
+    }
+  }
 
   const gsapEnterBlocks = () => {
     if (!editAvatarRef.current) return
@@ -52,7 +78,7 @@ export default function EditLuksoSectionUI() {
           </TransparentBox>
         </TransparentBox>
         <div className="h-14 w-full 2xl:h-18 flex whitespace-nowrap">
-          <button className="w-full">
+          <button className="w-full" onClick={() => exportModel()}>
             <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
               <div className="flex items-center gap-3 text-black">
                 <p className="text-base 2xl:text-lg">Download</p>
