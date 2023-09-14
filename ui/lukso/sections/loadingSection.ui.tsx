@@ -94,8 +94,8 @@ export default function LuksoLoadingUI({ loading, socialMedia, setIsLoading, set
       opacity: 0,
       ease: 'power1.out',
       duration: 1,
-      // delay: 5 
-      delay: 1000
+      delay: 5 
+      // delay: 1000
     }).then(() => {
       setIsLoading(false);
       setCurrentSection(0);
