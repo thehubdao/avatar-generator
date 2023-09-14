@@ -94,8 +94,8 @@ export default function LuksoLoadingUI({ loading, socialMedia, setIsLoading, set
       opacity: 0,
       ease: 'power1.out',
       duration: 1,
-      delay: 5 
-      // delay: 1000
+      // delay: 5 
+      delay: 1000
     }).then(() => {
       setIsLoading(false);
       setCurrentSection(0);
@@ -133,8 +133,14 @@ export default function LuksoLoadingUI({ loading, socialMedia, setIsLoading, set
               <p className="text-4xl mt-7 tracking-[1.21em] text-center">AVATAR HU<span className="tracking-[0em]">B</span></p>
             </div>
           </div>
-          <div className="fixed">
-
+          <div className="fixed bottom-0 right-0 m-5">
+            <p className="text-xl tracking-[0.21em]">Powered b<span className="tracking-[0em]">y</span></p>
+            <Image
+              src='/resources/images/the-hub-logo-white.svg'
+              alt="the hub icon"
+              width={182}
+              height={32}
+            />
           </div>
         </div>
       </div> : ''
