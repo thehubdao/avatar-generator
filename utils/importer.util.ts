@@ -1,6 +1,8 @@
 ﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {GetFile} from "./firebase.util";
-import {IsWebUrl} from "./common.util";
+import {IsWebUrl, LogError} from "./common.util";
+import {Result} from "../types/common.type";
+import {CommonErrorCode, Module} from "../enums/common.enum";
 
 class ImporterUtil {
   private static _instance: ImporterUtil;
@@ -43,17 +45,30 @@ export async function LoadGltfModel(url: string): Promise<GLTF> {
   return loader.loadAsync(url);
 }
 
-export async function FetchGltfModel(url: string): Promise<GLTF> {
-  const arrayBuffer = await FetchArrayBuffer(url);
-  return ParseAsync(arrayBuffer);
+export async function FetchGltfModel(url: string): Promise<Result<GLTF>> {
+  try {
+    const arrayBuffer = await FetchArrayBuffer(url);
+    const parsed = await ParseAsync(arrayBuffer);
+    return {success: true, value: parsed};
+  }
+  catch(err) {
+    const msg = "Error while fetching external model file!";
+    void LogError(Module.Importer, msg, err);
+    return {success: false, errMessage: msg, errCode: CommonErrorCode.FetchError};
+  }
 }
 
-export async function FirebaseGltfModel(path: string, campaign?: string): Promise<GLTF> {
-  const arrayBuffer = await GetFile(path, campaign);
-  return ParseAsync(arrayBuffer);
+export async function FirebaseGltfModel(path: string, campaign?: string): Promise<Result<GLTF>> {
+  const fileResult = await GetFile(path, campaign);
+  if (fileResult.success) {
+    const gltf = await ParseAsync(fileResult.value);
+    return {success: true, value: gltf};
+  }
+  
+  return fileResult;
 }
 
-export async function GetGltfModel(path: string) {
+export async function GetGltfModel(path: string): Promise<Result<GLTF>> {
   if (IsWebUrl(path))
     return FetchGltfModel(path);
   else

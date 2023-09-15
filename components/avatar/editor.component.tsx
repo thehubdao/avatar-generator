@@ -25,6 +25,8 @@ import {ChangeMaterialOption} from "../../enums/model.enum";
 import {ConfigLight} from "../../interfaces/light.interface";
 import {GetLights} from "../../utils/threejs/light.util";
 import {BoneMatrix} from "../../types/model.type";
+import {ShowModal} from "../../utils/modal.util";
+import {Result} from "../../types/common.type";
 
 
 //#region Logic
@@ -43,16 +45,20 @@ export async function ChangeSkinColor(newSkinColor: string, skinName?: string) {
   ChangeObjectSkinColor(_avatar.scene, newSkinColor, skinName);
 }
 
-export async function GetWearableOption(id: string, optionPath: string) {
+export async function GetWearableOption(id: string, optionPath: string): Promise<Result<GLTF>> {
   let replaceModel: GLTF;
   if (_savedModels[id]) {
     replaceModel = _savedModels[id];
   } else {
-    replaceModel = await GetGltfModel(optionPath);
+    const getModelResult = await GetGltfModel(optionPath);
+    if (!getModelResult.success)
+      return getModelResult;
+
+    replaceModel = getModelResult.value;
     _savedModels[id] = replaceModel;
   }
 
-  return replaceModel;
+  return {success: true, value: replaceModel};
 }
 
 export async function ChangeFeature(id: string, featurePath: string, name: string, selectedFeature: string, skinColor?: string, skinName?: string, changeMaterial?: ChangeMaterialOption) {
@@ -60,8 +66,10 @@ export async function ChangeFeature(id: string, featurePath: string, name: strin
   if (_featureListData == undefined) return LogError(Module.Editor, "Missing feature list data");
 
   const replaceModel = await GetWearableOption(id, featurePath);
+  if (!replaceModel.success)
+    return LogError(Module.Editor, replaceModel.errMessage); // TODO: do something when wearable result didn't succeed
 
-  await ReplaceModelFeatureOnly(_avatar.scene.children[0], replaceModel, selectedFeature, _featureListData, skinColor, skinName, changeMaterial);
+  await ReplaceModelFeatureOnly(_avatar.scene.children[0], replaceModel.value, selectedFeature, _featureListData, skinColor, skinName, changeMaterial);
   // console.log('Avatar:', _avatar);
 }
 
@@ -69,7 +77,10 @@ export async function ChangeAccessory(id: string, path: string, name: string, se
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature in order to change accessory!");
 
   const replaceModel = await GetWearableOption(id, path);
-  await ReplaceModelAccessory(_avatar.scene.children[0], replaceModel, _accessoryListData, selectedAcc, changeMaterial);
+  if (!replaceModel.success)
+    return LogError(Module.Editor, replaceModel.errMessage); // TODO: do something when wearable result didn't succeed
+  
+  await ReplaceModelAccessory(_avatar.scene.children[0], replaceModel.value, _accessoryListData, selectedAcc, changeMaterial);
 }
 
 export async function ChangeStartAnimation(startAnimation: string | undefined) {
@@ -82,7 +93,10 @@ export async function SetStage(path?: string) {
   if (path == undefined) return;
   
   const stage = await GetWearableOption(GlobalValues.StageId, path);
-  AddToScene(stage.scene, GlobalValues.StageId);
+  if (!stage.success)
+    return; // TODO: do something when stage result didn't succeed
+  
+  AddToScene(stage.value.scene, GlobalValues.StageId);
 }
 
 export function RemoveStage() {
@@ -139,7 +153,13 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
       AddToScene(light);
     }
 
-    _avatar = await GetGltfModel(avatarBasePath);
+    const getAvatarBaseResult = await GetGltfModel(avatarBasePath);
+    if (!getAvatarBaseResult.success) {
+      ShowModal(getAvatarBaseResult.errMessage);
+      return;
+    }
+      
+    _avatar = getAvatarBaseResult.value;
     BonesFirst(_avatar);
     _startPose = GetPose(_avatar.scene);
     

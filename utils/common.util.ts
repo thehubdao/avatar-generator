@@ -6,13 +6,13 @@ export function RandomArrayElement<T>(array: T[]) {
 
 // Maybe save a log at some point either through api or just firebase
 // eslint-disable-next-line @typescript-eslint/require-await
-export async function LogError(origin: string | Module, message: string) {
-  console.error(`${origin} - `, message);
+export async function LogError(origin: string | Module, message: string, err?: unknown) {
+  console.error(`${origin} - `, message, err != undefined && {error: err});
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
-export async function LogWarning(origin: string | Module, message: string) {
-  console.warn(`${origin} - `, message);
+export async function LogWarning(origin: string | Module, message: string, err?: unknown) {
+  console.warn(`${origin} - `, message, err != undefined && {error: err});
 }
 
 export function Delay(ms: number) {

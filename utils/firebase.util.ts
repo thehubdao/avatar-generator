@@ -222,17 +222,24 @@ async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
   return constraints;
 }
 
-export async function GetFile(path: string, campaign?: string) {
-  const {getBlob, ref} = await import('@firebase/storage');
-  const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
-  const baseMeshRef = ref(await FirebaseUtil.Instance().Storage(), campaignSection + path);
+export async function GetFile(path: string, campaign?: string): Promise<Result<ArrayBuffer>> {
+  try {
+    const {getBlob, ref} = await import('@firebase/storage');
+    const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
+    const baseMeshRef = ref(await FirebaseUtil.Instance().Storage(), campaignSection + path);
 
-  // // Server Side
-  // const stream = await getStream(baseMeshRef);
-  // return stream;
+    // // Server Side
+    // const stream = await getStream(baseMeshRef);
+    // return stream;
 
-  const stream = await getBlob(baseMeshRef);
-  return stream.arrayBuffer();
+    const stream = await getBlob(baseMeshRef);
+    return {success: true, value: await stream.arrayBuffer()};
+  }
+  catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, e);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
 }
 
 export async function GetParameter<T>(campaign: string | undefined, parameter: ParameterNameType): Promise<T | undefined> {

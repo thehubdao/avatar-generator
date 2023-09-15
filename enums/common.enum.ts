@@ -78,6 +78,7 @@ export enum Module {
   Single = 'SingleComponent',
   TextureUtil = 'TextureUtil',
   EditCampaign = 'EditCampaignComponent',
+  Importer = "ThreeJsImporterUtil",
 }
 
 export enum EmailResult {
