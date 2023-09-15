@@ -41,6 +41,7 @@ import AvatarEditor, {
   SetFeaturesData
 } from "./editor.component";
 import { AGChangeCamPosition, AGChangeLookAtPosition, SetEnvironmentMap, TakeCanvasPicture } from "./viewer.component";
+import {Result} from "../../types/common.type";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -209,7 +210,7 @@ export default function AvatarBuilder({
           randomAccessory.push(randomAcc);
       }
 
-      const modelPromises: Promise<GLTF>[] = [];
+      const modelPromises: Promise<Result<GLTF>>[] = [];
       for (const feature of randomFeature)
         modelPromises.push(GetWearableOption(feature.id, feature.path));
       for (const acc of randomAccessory)
@@ -235,7 +236,7 @@ export default function AvatarBuilder({
         randomAccessory.push(randomAcc);
     }
 
-    const modelPromises: Promise<GLTF>[] = [];
+    const modelPromises: Promise<Result<GLTF>>[] = [];
     for (const acc of randomAccessory)
       modelPromises.push(GetWearableOption(acc.id, acc.path));
     await Promise.all([...modelPromises]);
