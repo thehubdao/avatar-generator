@@ -1,23 +1,22 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import gsap from 'gsap';
 
 // Fragment shader
 import { fragmentShaderSource } from '../shader/background.shader'
 
 interface AGLoadingProps {
   loading: boolean;
-  socialMedia: { alt: string, link: string, icon: React.ReactElement }[]
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setCurrentSection: React.Dispatch<React.SetStateAction<number>>;
+  socialMedia: { alt: string, link: string, icon: React.ReactElement }[];
+  getloaderDivElement: (elementReference: HTMLDivElement) => void;
 }
 
-export default function LuksoLoadingUI({ loading, socialMedia, setIsLoading, setCurrentSection }: AGLoadingProps) {
+export default function LuksoLoadingUI({ loading, socialMedia, getloaderDivElement }: AGLoadingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    if (parentRef.current) getloaderDivElement(parentRef.current);
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
@@ -87,20 +86,6 @@ export default function LuksoLoadingUI({ loading, socialMedia, setIsLoading, set
 
     return shader;
   };
-
-  useEffect(() => {
-    if (!parentRef.current) return
-    gsap.to(parentRef.current, {
-      opacity: 0,
-      ease: 'power1.out',
-      duration: 1,
-      delay: 5 
-      // delay: 1000
-    }).then(() => {
-      setIsLoading(false);
-      setCurrentSection(0);
-    });
-  }, []);
 
   return (
     <>{loading
