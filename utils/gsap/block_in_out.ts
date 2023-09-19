@@ -14,19 +14,13 @@ export const moveHorizontalBlocks = (
       x: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
-    }).then(() => {
-      if (thenFunction)
-        thenFunction()
-    });
+    }).then(() => { thenFunction && thenFunction() });
   } else {
     gsap.to(elementReference, {
       x: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
-    }).then(() => {
-      if (thenFunction)
-        thenFunction()
-    });
+    }).then(() => { thenFunction && thenFunction() });
   }
 }
 
@@ -44,18 +38,24 @@ export const moveVerticalBlocks = (
       y: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
-    }).then(() => {
-      if (thenFunction)
-        thenFunction()
-    });
+    }).then(() => { thenFunction && thenFunction() });
   } else {
     gsap.to(elementReference, {
       y: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
-    }).then(() => {
-      if (thenFunction)
-        thenFunction()
-    });
+    }).then(() => { thenFunction && thenFunction() });
   }
+}
+
+export const fadeBlock = (
+  elementReference: HTMLDivElement,
+  duration: number,
+  thenFunction?: Function
+) => {
+  gsap.to(elementReference, {
+    opacity: 0,
+    ease: 'power1.out',
+    duration,
+  }).then(() => { thenFunction && thenFunction() });
 }
