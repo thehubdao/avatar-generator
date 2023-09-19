@@ -12,7 +12,7 @@ import { ExportInterface } from "../../../interfaces/common.interface";
 const exportData: ExportInterface = { attributes: [] };
 let isOnIFrame = false;
 
-export default function EditLuksoSectionUI() {
+export default function EditLuksoSectionUI({ setIsEditModeSelected }: { setIsEditModeSelected: React.Dispatch<React.SetStateAction<boolean>> }) {
   const editAvatarRef = useRef<HTMLDivElement>(null);
   const ANIMATION_DURATION = 0.5;
 
@@ -86,7 +86,7 @@ export default function EditLuksoSectionUI() {
               </div>
             </TransparentBox>
           </button>
-          <button >
+          <button onClick={() => { setIsEditModeSelected(true); }}>
             <TransparentBox border backgroundColorClass="bg-white">
               <div className="flex items-center gap-3 text-black">
                 <p className="text-base 2xl:text-lg">Edit</p>

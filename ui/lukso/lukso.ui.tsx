@@ -7,9 +7,10 @@ import { FaXTwitter, FaDiscord, FaInstagram } from "react-icons/fa6";
 
 interface LuksoUIProps {
   reRoll: () => Promise<void>;
+  setIsEditModeSelected: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export default function LuksoUI({ reRoll }: LuksoUIProps) {
+export default function LuksoUI({ reRoll, setIsEditModeSelected }: LuksoUIProps) {
   const [currentSection, setCurrentSection] = useState<number>(-1);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
@@ -32,7 +33,7 @@ export default function LuksoUI({ reRoll }: LuksoUIProps) {
       <LuksoLoadingUI loading={isLoading} setIsLoading={setIsLoading} setCurrentSection={setCurrentSection} socialMedia={luksoSocialMedia} />
       {(currentSection === 0) && <MainLuksoSectionUI setCurrentSection={setCurrentSection} />}
       {(currentSection === 1) && <MintLuksoSectionUI setCurrentSection={setCurrentSection} socialMedia={luksoSocialMedia} reRoll={reRoll} />}
-      {(currentSection === 2) && <EditLuksoSectionUI />}
+      {(currentSection === 2) && <EditLuksoSectionUI setIsEditModeSelected={setIsEditModeSelected} />}
     </div>
   )
 }
