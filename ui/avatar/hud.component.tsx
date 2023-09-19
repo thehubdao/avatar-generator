@@ -45,6 +45,7 @@ interface HudComponentProps {
   editModeSelected: boolean;
   changeView: () => void;
   exportModel: () => void;
+  isCustomCampaignHud?: boolean
 }
 
 export default function HudComponent({
@@ -59,7 +60,8 @@ export default function HudComponent({
   onSkinColorChange,
   editModeSelected,
   changeView,
-  exportModel
+  exportModel,
+  isCustomCampaignHud
 }: HudComponentProps) {
   const [selectorOption, setSelectorOption] = useState<number>(1);
 
@@ -199,7 +201,7 @@ export default function HudComponent({
       {/* DESKTOP UI */}
       <div className={`fixed inset-0 ${editModeSelected ? 'w-[58%]' : 'w-0'} overflow-hidden h-screen bg-bg hidden xl:block transition-all duration-300`}>
         {/* CAMPAIGN HEADER SIGN */}
-        <div className="fixed flex right-0 top-0 justify-center items-center gap-1 py-3 px-8 max-w-lg">
+        {!isCustomCampaignHud && <div className="fixed flex right-0 top-0 justify-center items-center gap-1 py-3 px-8 max-w-lg">
           <div className="-z-10 absolute -left-10 h-full w-[180%] skew-x-[45deg] bg-bg" />
           <Image
             src={'/resources/images/the-hub-logo-web.svg'}
@@ -214,7 +216,7 @@ export default function HudComponent({
             }}
             alt="Campaign icon"
           />
-        </div>
+        </div>}
         {/* WRAPPER */}
         <div className={`w-full h-full grid grid-cols-[148px_minmax(100px,_1fr)] ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 duration-200'} transition-all`}>
           {/* FEATURES SECTION */}
@@ -270,7 +272,7 @@ export default function HudComponent({
           </div>
         </div>
       </div>
-      {!editModeSelected && <div className="fixed pt-8 pl-8 w-fit h-fit hidden xl:flex">
+      {!isCustomCampaignHud && !editModeSelected && <div className="fixed pt-8 pl-8 w-fit h-fit hidden xl:flex">
         <AGButton onClickEvent={() => changeView()}>
           <div className="flex items-center justify-between">
             <p className="font-poppins text-center w-[120px] py-2">EDIT</p>
