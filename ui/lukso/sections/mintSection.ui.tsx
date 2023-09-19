@@ -39,7 +39,7 @@ export default function MintLuksoSectionUI({ socialMedia, setCurrentSection, reR
   const handleReRoll = async () => {
     if (isRolling) return;
     setIsRolling(true);
-    await reRoll()
+    await reRoll();
     setIsRolling(false);
   }
 
