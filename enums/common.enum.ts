@@ -78,7 +78,8 @@ export enum Module {
   Single = 'SingleComponent',
   TextureUtil = 'TextureUtil',
   EditCampaign = 'EditCampaignComponent',
-  Lukso = 'LuksoComponent'
+  Lukso = 'LuksoComponent',
+  Importer = "ThreeJsImporterUtil",
 }
 
 export enum EmailResult {
