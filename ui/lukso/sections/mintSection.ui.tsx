@@ -1,18 +1,17 @@
-import Link from "next/link";
 import Image from "next/image"
 import { Fragment, useEffect, useRef, useState } from "react"
 import TransparentBox from "../../common/transparentBox.ui"
 import { moveHorizontalBlocks, moveVerticalBlocks } from "../../../utils/gsap/block_in_out";
 import { BsArrowRepeat } from "react-icons/bs";
 import { FaArrowRightLong } from "react-icons/fa6";
+import SocialMediaButtonsLukso from "../common/socialMediaButtons.ui";
 
 interface MintLuksoSectionUIProps {
-  socialMedia: { alt: string, link: string, icon: React.ReactElement }[];
   setCurrentSection: React.Dispatch<React.SetStateAction<number>>;
   reRoll: () => Promise<void>;
 }
 
-export default function MintLuksoSectionUI({ socialMedia, setCurrentSection, reRoll }: MintLuksoSectionUIProps) {
+export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLuksoSectionUIProps) {
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -88,7 +87,7 @@ export default function MintLuksoSectionUI({ socialMedia, setCurrentSection, reR
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
               <p>{isRolling ? 'Rolling' : 'Reroll'}</p>
-              <BsArrowRepeat className={`${isRolling ? 'rotate-180 transition-all duration-500' : ''}`}/>
+              <BsArrowRepeat className={`${isRolling ? 'rotate-180 transition-all duration-500' : ''}`} />
             </div>
           </TransparentBox>
         </button>
@@ -96,7 +95,7 @@ export default function MintLuksoSectionUI({ socialMedia, setCurrentSection, reR
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
               <p>Claim</p>
-              <FaArrowRightLong className="text-base"/>
+              <FaArrowRightLong className="text-base" />
             </div>
           </TransparentBox>
         </button>
@@ -108,13 +107,7 @@ export default function MintLuksoSectionUI({ socialMedia, setCurrentSection, reR
           <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10 2xl:mb-20">MINT YOUR AVATAR</h3>
           <p className="text-base 2xl:text-lg">Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.
             Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.</p>
-          <div className="flex gap-3">
-            {socialMedia.map((item, index) => {
-              return <Link key={index} href={item.link} target="_blank">
-                {item.icon}
-              </Link>
-            })}
-          </div>
+          <SocialMediaButtonsLukso />
           <div className="font-semibold">
             <p>PUBLIC MINT</p>
             <p>0.03 ETH</p>

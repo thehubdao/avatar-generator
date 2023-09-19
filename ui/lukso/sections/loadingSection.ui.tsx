@@ -1,17 +1,16 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
 
 // Fragment shader
 import { fragmentShaderSource } from '../shader/background.shader'
+import SocialMediaButtonsLukso from "../common/socialMediaButtons.ui";
 
 interface AGLoadingProps {
   loading: boolean;
-  socialMedia: { alt: string, link: string, icon: React.ReactElement }[];
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
 }
 
-export default function LuksoLoadingUI({ loading, socialMedia, getloaderDivElement }: AGLoadingProps) {
+export default function LuksoLoadingUI({ loading, getloaderDivElement }: AGLoadingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -99,13 +98,7 @@ export default function LuksoLoadingUI({ loading, socialMedia, getloaderDivEleme
               height={24}
               alt="Lukso icon"
             />
-            <div className="flex gap-3">
-              {socialMedia.map((item, index) => {
-                return <Link key={index} href={item.link} target="_blank">
-                  {item.icon}
-                </Link>
-              })}
-            </div>
+            <SocialMediaButtonsLukso />
           </div>
           <div className="fixed">
             <Image
