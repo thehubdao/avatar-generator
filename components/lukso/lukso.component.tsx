@@ -9,24 +9,29 @@ import TransparentBox from "../../ui/common/transparentBox.ui";
 import { GlobalValues, Module } from "../../enums/common.enum";
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
-import { AnimationInterface, EnvMapInterface, FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
-import { GetAccessoryListByCampaign, GetAnimationByCampaignAndName, GetAnimationListByCampaign, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombination, GetEnvMapListByCampaign, GetStageListByCampaign } from "../../utils/api.util";
+import { FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
 import { BasicData, CampaignParameters, ExportInterface, FeatureBasic, LookAtVectors } from "../../interfaces/common.interface";
 import AvatarEditor, { ChangeAccessory, ChangeFeature, ChangeSkinColor, ChangeStartAnimation, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
+import { GetAccessoryListByCampaign, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombination, GetStageListByCampaign } from "../../utils/api.util";
+import { fadeBlock } from "../../utils/gsap/block_in_out";
 
 const exportData: ExportInterface = { attributes: [] };
 let optionList: FeatureInterface[] | undefined;
 let featureList: FeatureInterface[] | undefined;
 let accessoryList: FeatureInterface[] | undefined;
-let animationList: AnimationInterface[] | undefined;
 let stageList: StageInterface[] | undefined;
-let envMapList: EnvMapInterface[] | undefined;
 let singleData: SingleInterface | undefined;
+let loaderDivElement: HTMLDivElement;
 
 export default function LuksoComponent({ campaignParams }: { campaignParams?: CampaignParameters }) {
   const selectListFeatures = useRef<FeatureBasic[]>(campaignParams?.features ?? []);
   const selectListAccessories = useRef<FeatureBasic[]>(campaignParams?.accessories ?? []);
 
+  // Loading flags
+  const [currentSection, setCurrentSection] = useState<number>(-1);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  // Edit state
   const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>();
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false);
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
@@ -37,11 +42,10 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     await Promise.all([
       getFeatureList(),
       getAccessoryList(),
-      getAnimationList(),
       getStageList(),
-      getEnvironmentMapList(),
       getSingleInfo(),
-      getSingleData()
+      getSingleData(),
+      sleep(5000)
     ]);
 
     optionList = MixArrays(optionList, accessoryList);
@@ -59,6 +63,16 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     if (result.success) {
       await ChangeStartAnimation(result.value.at(0)?.path);
     }
+
+    // fade loader view
+    handleFadeLoader(loaderDivElement, () => {
+      setIsLoading(false);
+      setCurrentSection(0);
+    })
+  }
+
+  async function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   async function getFeatureList() {
@@ -75,19 +89,9 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     // setAccessoryListShow(FilterList(accessoryList, "type", selectedAcc));
   }
 
-  async function getAnimationList() {
-    const result = await GetAnimationListByCampaign(Client.Lukso);
-    animationList = result.success ? result.value : undefined;
-  }
-
   async function getStageList() {
     const result = await GetStageListByCampaign(Client.Lukso);
     stageList = result.success ? result.value : undefined;
-  }
-
-  async function getEnvironmentMapList() {
-    const result = await GetEnvMapListByCampaign(Client.Lukso);
-    envMapList = result.success ? result.value : undefined;
   }
 
   async function getSingleInfo() {
@@ -175,6 +179,14 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     setSkinColor(newSkinColor);
   }
 
+  async function handleFadeLoader(elementReference: HTMLDivElement, thenFunction?: Function) {
+    fadeBlock(elementReference, 1, thenFunction);
+  }
+
+  function getloaderDivElement(elementReference: HTMLDivElement) {
+    loaderDivElement = elementReference;
+  }
+
   return (
     <MobileLayout>
       <div className="w-full h-screen bg-[#FABCE2] flex flex-col">
@@ -241,7 +253,14 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
             isCustomCampaignHud
           />
         </div>
-        <LuksoUI reRoll={reRoll} setIsEditModeSelected={setIsEditModeSelected} />
+        <LuksoUI
+          reRoll={reRoll}
+          setIsEditModeSelected={setIsEditModeSelected}
+          isLoading={isLoading}
+          currentSection={currentSection}
+          setCurrentSection={setCurrentSection}
+          getloaderDivElement={getloaderDivElement}
+        />
       </div>
     </MobileLayout>
   )
