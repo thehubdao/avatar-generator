@@ -1,7 +1,7 @@
 import {FirebaseApp, FirebaseOptions} from "@firebase/app";
 import {Firestore, QueryConstraint} from "@firebase/firestore";
 import {FirebaseStorage} from "@firebase/storage";
-import {Auth, UserCredential} from "@firebase/auth";
+import {Auth, User, UserCredential} from "@firebase/auth";
 import {FirebaseError} from "@firebase/util";
 
 import {
@@ -592,4 +592,49 @@ export async function UpdateAdminCampaigns() {
 
 export async function UpdateCampaignParameter(update: Partial<CampaignParameters>, campaign: string) {
   return await UpdateDocObject(FirestoreLocation.Parameters, update, campaign);
+}
+
+async function DeleteDocument(docLocation: string): Promise<Result<string>> {
+  try {
+    const {doc, deleteDoc} = await import('@firebase/firestore');
+    const leDoc = doc(await FirebaseUtil.Instance().DB(), docLocation);
+    
+    await deleteDoc(leDoc);
+    return {success: true, value: leDoc.id};
+  } catch (err) {
+    const error = err as FirebaseError;
+    void LogError(Module.FirebaseUtil, error.message, error.code);
+    return {success: false, errMessage: error.message, errCode: error.code};
+  }
+}
+
+export async function DeleteCampaign(campaign: string): Promise<Result<string>> {
+  try {
+    // Remove campaign from user
+    const currentUser = await GetCurrentUser();
+    if (currentUser == null)
+      return {success: false, errMessage: "No user authenticated right now!", errCode: CommonErrorCode.NoAuth};
+    
+    const {doc, getDoc, setDoc} = await import('@firebase/firestore');
+
+    const userLocation = `${FirestoreGlobalLocation.User}/${currentUser.uid}`;
+    const userDocRef = doc(await FirebaseUtil.Instance().DB(), userLocation);
+
+    // Get user account base on role and last update
+    const adminDoc = (await getDoc(userDocRef)).data() as UserInterface;
+    const newData: Partial<UserInterface> = {
+      campaign: adminDoc.campaign.filter(c => c !== campaign)
+    };
+
+    await setDoc(userDocRef, newData, {merge: true});
+
+    // Delete document
+    const campaignLocation = `${FirestoreGlobalLocation.Campaign}/${campaign}`;
+    return DeleteDocument(campaignLocation);
+  }
+  catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, err.code);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
 }
