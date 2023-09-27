@@ -139,6 +139,9 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardProps)
                 </>
                 :
                 <div className="flex justify-end items-center w-full">
+                  <AGButton nm full onClickEvent={() => {alert('default')}}>
+                    <p className="text-sm">Default</p>
+                  </AGButton>
                   <AGButton nm fit onClickEvent={() => setWillEdit(true)}>
                     <AiOutlineEdit className="group-hover/button:text-purple transition-all duration-300" />
                   </AGButton>
