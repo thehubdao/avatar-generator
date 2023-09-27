@@ -1,4 +1,6 @@
-import { AiOutlineLink } from "react-icons/ai";
+import { useState } from "react";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineDelete, AiOutlineInfoCircle } from "react-icons/ai";
+
 import AGButton from "../../../common/ag-button.component";
 
 interface CampaignCardProps {
@@ -9,6 +11,8 @@ interface CampaignCardProps {
 }
 
 export default function CampaignCard({ noCampaign, create, campaign, clickHandler }: CampaignCardProps) {
+	const [willDelete, setWillDelete] = useState<boolean>(false);
+
 	return (
 		<div className={`justify-self-center rounded-2xl h-96 w-72 flex flex-col justify-center items-center ${noCampaign ? 'shadow-inset-medium hover:shadow-inset-hard' : 'shadow-flat-soft hover:shadow-flat-hard'} overflow-hidden transition-all`}>
 			{noCampaign &&
@@ -38,12 +42,31 @@ export default function CampaignCard({ noCampaign, create, campaign, clickHandle
 							<div className="w-2 h-2 rounded-full bg-green-500"></div>
 						</div>
 						<div className="flex justify-end gap-2">
-							<button className="bg-bg w-fit px-5 rounded-full" onClick={() => void clickHandler()}>
-								<p className="py-1">Edit</p>
-							</button>
-							<div className="bg-bg w-fit px-2 rounded-full flex justify-between items-center">
-								<AiOutlineLink />
-							</div>
+							{
+								willDelete
+									? <div className="flex items-center justify-between w-full h-8">
+										<p className="pl-2 text-sm text-white">Are you sure?</p>
+										<div className="flex gap-2">
+											<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-blue" title="information">
+												<AiOutlineInfoCircle className="transition-all duration-300" />
+											</button>
+											<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-green-600" onClick={() => /* void deleteDoc(id) */ { }}>
+												<AiOutlineCheckCircle className="transition-all duration-300" />
+											</button>
+											<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-red" onClick={() => setWillDelete(false)}>
+												<AiOutlineCloseCircle className="transition-all duration-300" />
+											</button>
+										</div>
+									</div>
+									: <>
+										<button className="bg-bg w-fit px-5 rounded-full h-8 flex items-center" onClick={() => void clickHandler()}>
+											<p>Edit</p>
+										</button>
+										<button className="bg-bg w-fit px-2 rounded-full flex justify-between items-center hover:text-red" onClick={() => setWillDelete(true)}>
+											<AiOutlineDelete className="transition-all duration-300" />
+										</button>
+									</>
+							}
 						</div>
 					</div>
 				</>
