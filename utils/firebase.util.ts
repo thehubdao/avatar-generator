@@ -623,13 +623,13 @@ export async function DeleteCampaign(campaign: string): Promise<Result<string>> 
     // Get user account base on role and last update
     const adminDoc = (await getDoc(userDocRef)).data() as UserInterface;
     const newData: Partial<UserInterface> = {
-      campaign: adminDoc.campaign.filter(c => c !== campaign)
+      campaign: adminDoc.campaign.filter(c => c.toLowerCase() !== campaign.toLowerCase())
     };
 
     await setDoc(userDocRef, newData, {merge: true});
 
-    // Delete document
-    const campaignLocation = `${FirestoreGlobalLocation.Campaign}/${campaign}`;
+    // Delete document (lowercase needed cuz reasons)
+    const campaignLocation = `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}`;
     return DeleteDocument(campaignLocation);
   }
   catch (e) {
