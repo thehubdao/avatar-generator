@@ -417,13 +417,12 @@ export async function LogOut() {
 }
 
 export async function GetCurrentUser() {
-  return (await FirebaseUtil.Instance().Auth()).currentUser;
-  
-  // return new Promise<User | null>(async (resolve) => {
-  //   (await FirebaseUtil.Instance().Auth()).onAuthStateChanged((user) => {
-  //     resolve(user);
-  //   })
-  // });
+  const authFirebase = await FirebaseUtil.Instance().Auth();
+  return new Promise<User | null>((resolve) => {
+    authFirebase.onAuthStateChanged((user) => {
+      resolve(user);
+    });
+  });
 }
 
 export async function GetFileUrl(imagePath?: string) {
