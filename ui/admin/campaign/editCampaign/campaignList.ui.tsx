@@ -21,10 +21,9 @@ export default function CampaignList() {
         <CampaignCard create clickHandler={() => {
           void GoToPage(PageLocation.FirstSteps)
         }} />
-        {campaignsList === undefined || campaignsList?.length === 0 ?
-          <CampaignCard noCampaign clickHandler={() => 0} />
-          :
-          campaignsList.map((x: string) => {
+        {campaignsList === undefined || campaignsList?.length === 0
+          ? <CampaignCard noCampaign clickHandler={() => 0} />
+          : campaignsList.map((x: string) => {
             return (
               <CampaignCard campaign={x} key={x} clickHandler={() => {
                 dispatch(setName(x));
