@@ -105,7 +105,7 @@ export default function LightConfigUI({ lights }: lightConfigUIProps) {
         </div>
       </div>)}
       {lights.params.color && (<div>
-        <p className="font-poppins font-medium text-purple pb-2">Default color:</p>
+        <p className="font-poppins font-medium text-purple pb-2 pt-4 mt-2 px-2">Default color:</p>
         <div className="relative rounded-full overflow-hidden w-full h-12">
           <input type="color" name="" value={`#${defaultColor}`} className="absolute -top-2 -left-2 w-[130%] h-[130%]"
             onChange={e => { setDefaultColor(e.target.value.substring(1)) }} onLoad={() => setDefaultColor(lights.params.color ?? '000')} />
