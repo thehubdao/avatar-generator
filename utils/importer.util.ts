@@ -1,4 +1,4 @@
-﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
+import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {GetFile} from "./firebase.util";
 import {IsWebUrl, LogError} from "./common.util";
 import {Result} from "../types/common.type";
