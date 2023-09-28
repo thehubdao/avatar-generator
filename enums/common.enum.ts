@@ -101,10 +101,12 @@ export enum CampaignParameterName {
  * Way to code errors that use the result type, `AG-` start on all own errors 
  * 100 - Api errors
  * 200 - Data functions
+ * 300 - Firebase request
  * */
 export const enum CommonErrorCode {
   GetNoData = 'AG-107',
   FetchError = 'AG-103',
   PostNoData = 'AG-108',
   MissingInfo = 'AG-201',
+  NoAuth = 'AG-301'
 }
