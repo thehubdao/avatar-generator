@@ -174,7 +174,7 @@ export default function LightConfigUI({
         </div>
       )}
       {/* Size input fields */}
-      {currentOption.params.width && currentOption.params.height && (
+      {(typeof currentOption.params.width === 'number' && !isNaN(currentOption.params.width)) && (
         <div>
           <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
             Size:
