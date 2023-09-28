@@ -2,9 +2,10 @@
 import { ClientQuestion } from "../enums/campaign.enum";
 import { AdminComponents } from "../enums/common.enum";
 import { ChangeMaterialOption } from "../enums/model.enum";
-import { ConfigLight } from "./light.interface";
+import { ConfigLight, ConfigShadow } from "./light.interface";
 import { UserInterface } from "./firebase.interface";
 import { AccessoryInterface, AnimationInterface, EnvMapInterface, FeatureInterface, StageInterface } from "./api.interface";
+import { ConfigEnvMap } from "./envMap.interface";
 
 export interface BasicData {
   id: string;
@@ -30,6 +31,7 @@ export interface ExportInterface {
   model?: Blob;
 }
 
+// TODO: place it in a better place, maybe create a new file for color interfaces
 export interface ColorConfig {
   materialName?: string;
   defColor?: string;
@@ -53,20 +55,24 @@ export interface CampaignConfig {
   changeMaterial?: ChangeMaterialOption;
   defAvatarCombination?: number;
   defBg?: string;
-  lights?: ConfigLight[],
   defCam?: LookAtVectors;
+  defShadow?: ConfigShadow;
   defAnimation?: string;
   defStage?: string;
-  defEnvMap?: string;
+  lights?: ConfigLight[],
+  envMap?: ConfigEnvMap,
   skin?: ColorConfig;
   featuresCamPos?: Record<string, LookAtVectors>;
   accCamPos?: Record<string, LookAtVectors>;
   featuresSkin?: Record<string, ColorConfig>;
   accSkin?: Record<string, ColorConfig>;
-
+  
   // @deprecated: Data is replaced by skin: ColorConfig
   defSkin?: string,
   defSkinColor?: string,
+
+  // @deprecated: Data is replaced by envMap: EnvMapConfig
+  defEnvMap?: string;
 }
 
 

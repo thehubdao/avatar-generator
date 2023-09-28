@@ -3,3 +3,8 @@
   RectAreaLight = 'ral',
   AmbientLight = 'al',
 }
+
+export enum ShadowType {
+  Dynamic = 'dy',
+  Static = 'st',
+}
