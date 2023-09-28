@@ -1,4 +1,4 @@
-﻿import {Object3D, PerspectiveCamera, Scene, WebGLRenderer} from "three";
+﻿import {Object3D, PCFSoftShadowMap, PerspectiveCamera, Scene, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import {SceneInterface} from "../../interfaces/scene.interface";
 import {AGVector3} from "../../interfaces/common.interface";
@@ -51,6 +51,9 @@ export function GetBaseRenderer(): WebGLRenderer {
   });
   renderer.setClearColor(0x000000, 0);
   renderer.setSize(window.innerWidth, window.innerHeight);
+  // enabling shadows
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = PCFSoftShadowMap;
   
   return renderer;
 }
