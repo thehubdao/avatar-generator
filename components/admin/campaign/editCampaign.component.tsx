@@ -1,16 +1,17 @@
-import {useEffect} from "react";
-import {useAppDispatch, useAppSelector} from "../../../store/hooks";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import EditCampaignUI from "../../../ui/admin/campaign/editCampaign/editCampaign.ui";
-import {GetFileUrl, UpdateCampaignParameter, UpdateDocObject, UploadFile} from "../../../utils/firebase.util";
-import {ShowModal} from "../../../utils/modal.util";
-import {fetchData} from "../../../store/currentCampaignSlice";
-import {FirestoreLocation, StorageLocation} from "../../../enums/firebase.enum";
-import {AuthStateInterface, CampaignParameters, ColorConfig, LookAtVectors} from "../../../interfaces/common.interface";
-import {CameraConfigOption} from "../../../enums/campaign.enum";
-import {GoToPage} from "../../../utils/router.util";
-import {Module, PageLocation} from "../../../enums/common.enum";
-import {LogError} from "../../../utils/common.util";
-import {useRouter} from "next/navigation";
+import { GetFileUrl, UpdateCampaignParameter, UpdateDocObject, UploadFile } from "../../../utils/firebase.util";
+import { ShowModal } from "../../../utils/modal.util";
+import { fetchData } from "../../../store/currentCampaignSlice";
+import { FirestoreLocation, StorageLocation } from "../../../enums/firebase.enum";
+import { AuthStateInterface, CampaignParameters, ColorConfig, LookAtVectors } from "../../../interfaces/common.interface";
+import { CameraConfigOption } from "../../../enums/campaign.enum";
+import { GoToPage } from "../../../utils/router.util";
+import { Module, PageLocation } from "../../../enums/common.enum";
+import { LogError } from "../../../utils/common.util";
+import { useRouter } from "next/navigation";
+import { ConfigLight } from "../../../interfaces/light.interface";
 
 export default function EditCampaign() {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
@@ -23,7 +24,7 @@ export default function EditCampaign() {
     campaignName.length > 0 ? fetchAllCampaignData() : void GoToPage(PageLocation.Admin);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userData]);
-  
+
   async function downloadFile(path: string) {
     const fileLink = await GetFileUrl(path);
     if (fileLink === undefined) return ShowModal('error on file download, file link is undefined.');
@@ -64,6 +65,21 @@ export default function EditCampaign() {
     }
   }
 
+  const updateLightConfig = async (element: string, config: ConfigLight[]) => {
+    let newParameters: Partial<CampaignParameters>;
+    newParameters = { config: { lights: config } };
+
+    //console.log('sending:', { newParameters });
+    const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
+
+    if (result.success) {
+      ShowModal(`Update ${element} light config sucessful`)
+      void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Parameters }));
+    } else {
+      ShowModal(`Update ${element} light config failed`);
+    }
+  }
+
   async function uploadAvatarBase(newAvatarBase: File | undefined) {
     if (newAvatarBase == undefined)
       return void LogError(Module.EditCampaign, "Missing AvatarBase to update!");
@@ -71,8 +87,8 @@ export default function EditCampaign() {
     const uploadedFile = await UploadFile(newAvatarBase, StorageLocation.AvatarBase, undefined, campaignName);
     if (uploadedFile == undefined)
       return void LogError(Module.EditCampaign, "Error uploading new AvatarBase");
-    
-    const updateResult = await UpdateCampaignParameter({armature: uploadedFile}, campaignName);
+
+    const updateResult = await UpdateCampaignParameter({ armature: uploadedFile }, campaignName);
     if (updateResult.success) {
       ShowModal("AvatarBase updated!");
       router.refresh();
@@ -87,6 +103,7 @@ export default function EditCampaign() {
         downloadFile={(path: string) => downloadFile(path)}
         updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
         updateCameraConfig={(element: string, config: LookAtVectors) => updateCameraConfig(element, config)}
+        updateLightConfig={(element: string, config: ConfigLight[]) => updateLightConfig(element, config)}
         uploadAvatarBase={uploadAvatarBase}
       />
     </>

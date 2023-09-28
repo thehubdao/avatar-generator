@@ -17,6 +17,7 @@ import { CameraConfigOption, CampaignConfigOption } from "../../../../../enums/c
 import CameraConfigUI from "./cameraConfig.ui";
 import { LightType } from "../../../../../enums/light.enum";
 import LightConfigUI from "./lightConfig.ui";
+import { ConfigLight } from "../../../../../interfaces/light.interface";
 
 interface ConfigCampaignProps {
   configData?: CampaignConfig;
@@ -24,6 +25,7 @@ interface ConfigCampaignProps {
   downloadAvatarBase: (() => void) | (() => Promise<void>);
   updateColorConfig: (element: string, colorConfig: ColorConfig) => Promise<void>;
   updateCameraConfig: (element: string, colorConfig: LookAtVectors) => Promise<void>;
+  updateLightConfig: (element: string, config: ConfigLight[]) => Promise<void>;
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
@@ -33,7 +35,7 @@ const LightTypeLabels: Record<LightType, string> = {
   [LightType.RectAreaLight]: 'Rect Area Light',
 };
 
-export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig, uploadAvatarBase }: ConfigCampaignProps) {
+export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig, uploadAvatarBase, updateLightConfig }: ConfigCampaignProps) {
   const [shouldOpenConfig, setShouldOpenConfig] = useState<boolean>(false);
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
@@ -207,14 +209,16 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                         <MdKeyboardArrowDown />
                       </div>
                       <select ref={lightConfig} className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" onChange={() => changeLightConfigOption()}>
-                        {
-                          configData?.lights
-                            ? configData.lights.map((light, index) => <option key={index} value={light.type} className="bg-bg py-2 px-4">{LightTypeLabels[light.type as LightType]}</option>)
-                            : <option value='no features' className="bg-bg py-2 px-4" disabled>no lights</option>
-                        }
+                        {configData?.lights
+                          ? configData.lights.map((light, index) => <option key={index} value={light.type} className="bg-bg py-2 px-4">{LightTypeLabels[light.type as LightType]}</option>)
+                          : <option value='no features' className="bg-bg py-2 px-4" disabled>no lights</option>}
                       </select>
                     </div>
-                    <LightConfigUI lights={configData?.lights?.filter(light => light.type === lightOption)[0]} />
+                    <LightConfigUI
+                      lightOption={lightOption}
+                      lights={configData?.lights}
+                      updateLightConfig={(config: ConfigLight[]) => { updateLightConfig(lightOption, config) }}
+                    />
                   </div>
                 }
               </div>
