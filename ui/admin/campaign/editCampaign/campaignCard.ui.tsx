@@ -8,9 +8,10 @@ interface CampaignCardProps {
 	create?: boolean;
 	campaign?: string;
 	clickHandler: () => void;
+	deleteCampaign?: () => void;
 }
 
-export default function CampaignCard({ noCampaign, create, campaign, clickHandler }: CampaignCardProps) {
+export default function CampaignCard({ noCampaign, create, campaign, clickHandler, deleteCampaign }: CampaignCardProps) {
 	const [willDelete, setWillDelete] = useState<boolean>(false);
 
 	return (
@@ -44,10 +45,15 @@ export default function CampaignCard({ noCampaign, create, campaign, clickHandle
 								? <div className="flex items-center justify-between w-full h-8">
 									<p className="pl-2 text-sm text-white">Are you sure?</p>
 									<div className="flex gap-2">
-										<div className="bg-bg w-fit px-2 rounded-full h-8 hover:text-blue flex justify-center items-center" title="By doing so, you will no longer be able to access this campaign and the data will be permanently deleted.">
+										<div className="bg-bg w-fit px-2 rounded-full h-8 hover:text-blue flex justify-center items-center cursor-help" title="By doing so, you will no longer be able to access this campaign and the data will be permanently deleted.">
 											<AiOutlineInfoCircle className="transition-all duration-300" />
 										</div>
-										<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-green-600" onClick={() => /* void deleteDoc(id) */ { }}>
+										<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-green-600"
+											onClick={() => {
+												if (deleteCampaign)
+													deleteCampaign();
+											}}
+										>
 											<AiOutlineCheckCircle className="transition-all duration-300" />
 										</button>
 										<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-red" onClick={() => setWillDelete(false)}>

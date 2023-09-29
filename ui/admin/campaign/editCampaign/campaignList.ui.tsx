@@ -5,7 +5,11 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { GoToPage } from "../../../../utils/router.util";
 import CampaignCard from "./campaignCard.ui";
 
-export default function CampaignList() {
+interface CampaignListUIProps {
+  deleteCampaign: (campaign: string) => Promise<void>;
+}
+
+export default function CampaignListUI({ deleteCampaign }: CampaignListUIProps) {
   const campaignsList = useAppSelector(state => state.auth.userInfo?.campaign);
   const dispatch = useAppDispatch();
 
@@ -25,10 +29,13 @@ export default function CampaignList() {
           ? <CampaignCard noCampaign clickHandler={() => 0} />
           : campaignsList.map((x: string) => {
             return (
-              <CampaignCard campaign={x} key={x} clickHandler={() => {
-                dispatch(setName(x));
-                void GoToPage(PageLocation.AdminCampaign);
-              }} />
+              <CampaignCard campaign={x} key={x}
+                clickHandler={() => {
+                  dispatch(setName(x));
+                  void GoToPage(PageLocation.AdminCampaign);
+                }}
+                deleteCampaign={() => { deleteCampaign(x); }}
+              />
             )
           })
         }
