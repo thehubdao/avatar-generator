@@ -62,6 +62,11 @@ export async function FirebaseGltfModel(path: string, campaign?: string): Promis
   const fileResult = await GetFile(path, campaign);
   if (fileResult.success) {
     const gltf = await ParseAsync(fileResult.value);
+    gltf.scene.traverse(obj => {
+      obj.castShadow = true;
+      // TODO: Add envMapIntensity from campaignConfig
+      // obj.material.envMapIntensity = 7;
+    })
     return {success: true, value: gltf};
   }
   
