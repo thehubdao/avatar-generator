@@ -13,9 +13,10 @@ import AGButton from "../../../common/ag-button.component";
 
 interface AssetListProps {
   activedOption: FirestoreLocation;
+  updateDefaultAsset: (element: string, config: string) => Promise<void>;
 }
 
-export default function AssetList({ activedOption }: AssetListProps) {
+export default function AssetList({ activedOption, updateDefaultAsset }: AssetListProps) {
   //* Fetching campaign assets and features using custom hooks
   const campaignAssets = useAppSelector(state => state.currentCampaign.assets);
   const campaignTags = useAppSelector(state => {
@@ -40,13 +41,11 @@ export default function AssetList({ activedOption }: AssetListProps) {
 
   //* Updates the searchByTagValue state based on the provided tag.
   const handleSearchByTag = (tag: string) => {
-    //* Create a deep copy of the searchByTagValue array
-    let deepTagCopyArray = JSON.parse(JSON.stringify(searchByTagValue)) as string[];
-    //* Check if the tag already exists in the tag array
-    deepTagCopyArray.includes(tag)
-      ? deepTagCopyArray = deepTagCopyArray.filter((item) => item !== tag)
-      : deepTagCopyArray.push(tag)
-    updateFilteredListData(searchByNameValue, deepTagCopyArray)
+    const updatedTags = searchByTagValue.includes(tag)
+      ? searchByTagValue.filter((item) => item !== tag)
+      : [...searchByTagValue, tag];
+
+    updateFilteredListData(searchByNameValue, updatedTags);
   }
 
   //* handle reset search by tag value
@@ -65,12 +64,12 @@ export default function AssetList({ activedOption }: AssetListProps) {
       setSelectedItem(prev => (prev + 1) % searchSuggestionList.length);
     } else if (event.key === 'Enter') {
       event.preventDefault();
-      //* Get the name from the selected suggestion in the searchFilteredList or use the current searchByNameValue
+      // Get the name from the selected suggestion in the searchFilteredList or use the current searchByNameValue
       const name = searchSuggestionList[selectedItem]?.name ?? searchByNameValue;
       handleOnClickSuggestionSearch(name);
       setSelectedItem(-1);
     } else {
-      //* For any other key, reset the selectedItem to -1
+      // For any other key, reset the selectedItem to -1
       setSelectedItem(-1);
     }
   }
@@ -94,7 +93,7 @@ export default function AssetList({ activedOption }: AssetListProps) {
 
   //* Hides the search suggestions in blur these components.
   const handleBlur = (switchShowSuggestTo: boolean) => {
-    //* Applies await delay if an on click is executed on an internal suggestion.
+    // Applies await delay if an on click is executed on an internal suggestion.
     setTimeout(() => {
       setShouldShowSuggestions(switchShowSuggestTo)
     }, 500)
@@ -116,6 +115,25 @@ export default function AssetList({ activedOption }: AssetListProps) {
     setSearchByNameValue(currentNameFilter);
     setSearchSuggestionList(filterItems ?? []);
   }
+
+  //* Updates default asset config prop.
+  const handleUpdateDefaultAsset = (config: string) => {
+    let defaultConfigKey = '';
+    switch (activedOption) {
+      case FirestoreLocation.Animations:
+        defaultConfigKey = 'defAnimation';
+        break;
+      case FirestoreLocation.Stages:
+        defaultConfigKey = 'defStage';
+        break;
+      default:
+        break;
+    }
+
+    if (defaultConfigKey) {
+      updateDefaultAsset(defaultConfigKey, config);
+    }
+  };
 
   return (
     <>
@@ -174,7 +192,13 @@ export default function AssetList({ activedOption }: AssetListProps) {
             </div>
             {handleFilterItems().map((asset: AssetType) => {
               return (<div key={asset.id}>
-                <AssetCard id={asset.id} name={asset.name} thumb={asset.thumb} location={activedOption} />
+                <AssetCard
+                  id={asset.id}
+                  name={asset.name}
+                  thumb={asset.thumb}
+                  location={activedOption}
+                  updateDefaultAsset={(config: string) => { handleUpdateDefaultAsset(config) }}
+                />
               </div>)
             })}
           </>

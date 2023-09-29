@@ -15,9 +15,10 @@ interface AssetCardProps {
   name: string;
   thumb?: string;
   location: FirestoreLocation;
+  updateDefaultAsset: (config: string) => void;
 }
 
-export default function AssetCard({ id, name, thumb, location }: AssetCardProps) {
+export default function AssetCard({ id, name, thumb, location, updateDefaultAsset }: AssetCardProps) {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
 
   const filesForm = useRef<HTMLFormElement>(null);
@@ -31,8 +32,6 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardProps)
   const [hasFile, setHasFile] = useState<boolean>(false);
   const [hasThumb, setHasThumb] = useState<boolean>(false);
   const [willUpdateAsset, setWillUpdateAsset] = useState<boolean>(false);
-
-
 
   const dispatch = useAppDispatch();
 
@@ -139,9 +138,11 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardProps)
                 </>
                 :
                 <div className="flex justify-end items-center w-full">
-                  <AGButton nm full onClickEvent={() => {alert('default')}}>
-                    <p className="text-sm">Default</p>
-                  </AGButton>
+                  {(location == FirestoreLocation.Animations || location === FirestoreLocation.Stages) && (
+                    <AGButton nm full onClickEvent={() => { updateDefaultAsset(name); }}>
+                      <p className="text-sm">Default</p>
+                    </AGButton>
+                  )}
                   <AGButton nm fit onClickEvent={() => setWillEdit(true)}>
                     <AiOutlineEdit className="group-hover/button:text-purple transition-all duration-300" />
                   </AGButton>
