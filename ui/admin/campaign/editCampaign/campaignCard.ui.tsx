@@ -44,9 +44,9 @@ export default function CampaignCard({ noCampaign, create, campaign, clickHandle
 								? <div className="flex items-center justify-between w-full h-8">
 									<p className="pl-2 text-sm text-white">Are you sure?</p>
 									<div className="flex gap-2">
-										<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-blue" title="By doing so, you will no longer be able to access this campaign and the data will be permanently deleted.">
+										<div className="bg-bg w-fit px-2 rounded-full h-8 hover:text-blue flex justify-center items-center" title="By doing so, you will no longer be able to access this campaign and the data will be permanently deleted.">
 											<AiOutlineInfoCircle className="transition-all duration-300" />
-										</button>
+										</div>
 										<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-green-600" onClick={() => /* void deleteDoc(id) */ { }}>
 											<AiOutlineCheckCircle className="transition-all duration-300" />
 										</button>
