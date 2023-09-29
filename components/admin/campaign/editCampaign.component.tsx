@@ -65,9 +65,8 @@ export default function EditCampaign() {
   }
 
   const updateDefaultAsset = async (element: string, config: string) => {
-    let newParameters: Partial<CampaignParameters>;
     const newConfig = { [element]: config };
-    newParameters = { config: newConfig };
+    const newParameters: Partial<CampaignParameters> = { config: newConfig };
     // console.log(newParameters, location);
     const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
 

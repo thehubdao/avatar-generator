@@ -131,7 +131,7 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
     }
 
     if (defaultConfigKey) {
-      updateDefaultAsset(defaultConfigKey, config);
+      void updateDefaultAsset(defaultConfigKey, config);
     }
   };
 
