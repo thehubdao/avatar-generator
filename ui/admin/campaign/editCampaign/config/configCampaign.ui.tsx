@@ -29,7 +29,7 @@ interface ConfigCampaignProps {
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
-const LightTypeLabels: Record<LightType, string> = {
+const LIGHT_TYPE_LABELS: Record<LightType, string> = {
   [LightType.PointLight]: 'Point Light',
   [LightType.AmbientLight]: 'Ambient Light',
   [LightType.RectAreaLight]: 'Rect Area Light',
@@ -210,14 +210,14 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                       </div>
                       <select ref={lightConfig} className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" onChange={() => changeLightConfigOption()}>
                         {configData?.lights
-                          ? configData.lights.map((light, index) => <option key={index} value={light.type} className="bg-bg py-2 px-4">{LightTypeLabels[light.type as LightType]}</option>)
+                          ? configData.lights.map((light, index) => <option key={index} value={light.type} className="bg-bg py-2 px-4">{LIGHT_TYPE_LABELS[light.type]}</option>)
                           : <option value='no features' className="bg-bg py-2 px-4" disabled>no lights</option>}
                       </select>
                     </div>
                     <LightConfigUI
                       lightOption={lightOption}
                       lights={configData?.lights}
-                      updateLightConfig={(config: ConfigLight[]) => { updateLightConfig(lightOption, config) }}
+                      updateLightConfig={(config: ConfigLight[]) => { void updateLightConfig(lightOption, config) }}
                     />
                   </div>
                 }

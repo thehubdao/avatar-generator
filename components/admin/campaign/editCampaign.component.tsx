@@ -66,8 +66,7 @@ export default function EditCampaign() {
   }
 
   const updateLightConfig = async (element: string, config: ConfigLight[]) => {
-    let newParameters: Partial<CampaignParameters>;
-    newParameters = { config: { lights: config } };
+    const newParameters: Partial<CampaignParameters> = { config: { lights: config } };
 
     //console.log('sending:', { newParameters });
     const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);

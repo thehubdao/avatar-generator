@@ -46,7 +46,7 @@ export default function LightConfigUI({
     return isNaN(number) ? "" : number.toString();
   };
 
-  const sendNewLightConfig = async () => {
+  const sendNewLightConfig = () => {
     // Handle the case when currentOption is undefined
     if (!currentOption) return;
 
@@ -75,7 +75,7 @@ export default function LightConfigUI({
         if (light.params.width || light.params.height) {
           props.width = lightSize.width;
           props.height = lightSize.height;
-        };
+        }
         // return the Updated properties if they exist
         return { ...light, params: { ...light.params, ...props, }, };
       })
@@ -93,6 +93,7 @@ export default function LightConfigUI({
     setLightPos(newOption?.params.pos ?? { x: 0, y: 0, z: 0 });
     setLightLAt(newOption?.params.lAt ?? { x: 0, y: 0, z: 0 });
     setDefaultColor(newOption?.params.color ?? "000");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lightOption]);
 
   // If there is no currentOption, render nothing
