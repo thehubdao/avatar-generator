@@ -34,7 +34,7 @@ export default function CampaignListUI({ deleteCampaign }: CampaignListUIProps) 
                   dispatch(setName(x));
                   void GoToPage(PageLocation.AdminCampaign);
                 }}
-                deleteCampaign={() => { deleteCampaign(x); }}
+                deleteCampaign={() => { void deleteCampaign(x); }}
               />
             )
           })
