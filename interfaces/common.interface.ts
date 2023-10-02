@@ -66,13 +66,6 @@ export interface CampaignConfig {
   accCamPos?: Record<string, LookAtVectors>;
   featuresSkin?: Record<string, ColorConfig>;
   accSkin?: Record<string, ColorConfig>;
-  
-  // @deprecated: Data is replaced by skin: ColorConfig
-  defSkin?: string,
-  defSkinColor?: string,
-
-  // @deprecated: Data is replaced by envMap: EnvMapConfig
-  defEnvMap?: string;
 }
 
 
