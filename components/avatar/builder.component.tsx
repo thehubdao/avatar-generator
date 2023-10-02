@@ -42,7 +42,6 @@ import AvatarEditor, {
 } from "./editor.component";
 import { AGChangeCamPosition, AGChangeLookAtPosition, AddBackgroundScene, AddLightEnvScene, AddToScene, TakeCanvasPicture } from "./viewer.component";
 import {Result} from "../../types/common.type";
-import { GetLights } from "../../utils/threejs/light.util";
 import { GetShadow } from "../../utils/threejs/shadow.util";
 import { GetEnvironmentMap, GetSkybox } from "../../utils/threejs/envMap.util";
 
@@ -118,11 +117,6 @@ export default function AvatarBuilder({
 
     await loadPreData();
     await onClickChangeSkinColor();
-
-    const leLights = GetLights(campaignConfig.lights);
-    for (const light of leLights) {
-      AddToScene(light);
-    }
 
     if (campaignConfig.defShadow != undefined) {
       const leShadow = GetShadow(campaignConfig.defShadow);
@@ -432,6 +426,7 @@ export default function AvatarBuilder({
         <AvatarEditor avatarBasePath={avatarBasePath}
           onReady={() => onAvatarBuilderReady()}
           changeMaterial={campaignConfig.changeMaterial}
+          lights={campaignConfig.lights}
           editMode={isEditModeSelected}
           enablePan={enablePan}
           defaultCamera={campaignConfig.defCam}

@@ -25,6 +25,8 @@ import {ChangeMaterialOption} from "../../enums/model.enum";
 import {BoneMatrix} from "../../types/model.type";
 import {ShowModal} from "../../utils/modal.util";
 import {Result} from "../../types/common.type";
+import { GetLights } from "../../utils/threejs/light.util";
+import { ConfigLight } from "../../interfaces/light.interface";
 
 
 //#region Logic
@@ -127,6 +129,7 @@ interface AvatarEditorProps {
   avatarBasePath: string;
   onReady: () => Promise<void>;
   changeMaterial?: ChangeMaterialOption;
+  lights?: ConfigLight[];
   defaultCamera?: LookAtVectors;
   editMode?: boolean;
   enablePan?: boolean;
@@ -137,7 +140,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, defaultCamera, editMode, enablePan}: AvatarEditorProps) {
+export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera, editMode, enablePan}: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -149,6 +152,11 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, d
     if (!getAvatarBaseResult.success) {
       ShowModal(getAvatarBaseResult.errMessage);
       return;
+    }
+
+    const leLights = GetLights(lights);
+    for (const light of leLights) {
+      AddToScene(light);
     }
       
     _avatar = getAvatarBaseResult.value;
