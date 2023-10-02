@@ -117,7 +117,7 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
   }
 
   //* Updates default asset config prop.
-  const handleUpdateDefaultAsset = (config: string) => {
+  const handleUpdateDefaultAsset = (config: string, confKey: string) => {
     let defaultConfigKey = '';
     switch (activedOption) {
       case FirestoreLocation.Animations:
@@ -197,7 +197,7 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
                   name={asset.name}
                   thumb={asset.thumb}
                   location={activedOption}
-                  updateDefaultAsset={(config: string) => { handleUpdateDefaultAsset(config) }}
+                  updateDefaultAsset={(config: string, confKey: string) => { handleUpdateDefaultAsset(config, confKey) }}
                 />
               </div>)
             })}
