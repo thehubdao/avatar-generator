@@ -1,7 +1,6 @@
-import { Mesh, PlaneGeometry, ShadowMaterial } from "three";
+import { Mesh, PlaneGeometry, PointLight, ShadowMaterial } from "three";
 import { ShadowType } from "../../enums/light.enum";
 import { ConfigShadow } from "../../interfaces/light.interface";
-import { GenerateShadowLight } from "./light.util";
 import { AGVector3 } from "../../interfaces/common.interface";
 
 export function GetShadow(configShadow: ConfigShadow | undefined) {
@@ -13,6 +12,18 @@ export function GetShadow(configShadow: ConfigShadow | undefined) {
     default:
      return;
   }
+}
+
+function GenerateShadowLight(lightPos: AGVector3) {
+  const shadowLight = new PointLight(0xffffff, 0, 0);
+  shadowLight.position.set(lightPos.x, lightPos.y, lightPos.z);
+  shadowLight.castShadow = true;
+  shadowLight.shadow.mapSize.width = 2048;
+  shadowLight.shadow.mapSize.height = 2048;
+  shadowLight.shadow.radius = 3;
+  shadowLight.shadow.blurSamples = 25;
+  shadowLight.shadow.bias = 0.0001;
+  return shadowLight;
 }
 
 function GenerateDynamicShadow(lightPos: AGVector3) {

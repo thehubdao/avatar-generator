@@ -2,7 +2,6 @@
 import { ConfigLight } from "../../interfaces/light.interface";
 import { LightType } from "../../enums/light.enum";
 import { ColorStringToHexString } from "../common.util";
-import { AGVector3 } from "../../interfaces/common.interface";
 
 type GenerateLightFunction = (light: ConfigLight) => Light;
 
@@ -89,16 +88,4 @@ function GenerateRectAreaLight(light: ConfigLight) {
   if (lAt != undefined) newLight.lookAt(lAt.x, lAt.y, lAt.z);
 
   return newLight;
-}
-
-export function GenerateShadowLight(lightPos: AGVector3) {
-  const shadowLight = new PointLight(0xffffff, 0, 0);
-  shadowLight.position.set(lightPos.x, lightPos.y, lightPos.z);
-  shadowLight.castShadow = true;
-  shadowLight.shadow.mapSize.width = 2048;
-  shadowLight.shadow.mapSize.height = 2048;
-  shadowLight.shadow.radius = 3;
-  shadowLight.shadow.blurSamples = 25;
-  shadowLight.shadow.bias = 0.0001;
-  return shadowLight;
 }
