@@ -260,13 +260,13 @@ export default function LightConfigUI({
         </div>
       )}
       {/* Other input fields */}
-      {(currentOption?.params && ('intst' in currentOption.params || 'decay' in currentOption.params || 'dist' in currentOption.params || ['intensity', 'decay', 'distance'].some(item => sectionOnLightType[createLightOption as LightType].includes(item)))) && (
+      {(currentOption?.params && ('intst' in currentOption.params || 'decay' in currentOption.params || 'dist' in currentOption.params) || ['intensity', 'decay', 'distance'].some(item => sectionOnLightType[createLightOption as LightType].includes(item))) && (
         <div>
           <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
             Other props:
           </p>
           <div className="flex flex-col gap-4 px-2">
-            {'intst' in currentOption.params && (
+            {((currentOption && 'intst' in currentOption.params) || sectionOnLightType[createLightOption as LightType].includes('position')) && (
               <div className="flex items-center gap-2" key={'intst'}>
                 <p>Intensity:</p>
                 <input
@@ -278,7 +278,7 @@ export default function LightConfigUI({
                 />
               </div>
             )}
-            {'dist' in currentOption.params && (
+            {((currentOption && 'dist' in currentOption.params) || sectionOnLightType[createLightOption as LightType].includes('distance')) && (
               <div className="flex items-center gap-2" key={'dist'}>
                 <p>Distance:</p>
                 <input
@@ -290,7 +290,7 @@ export default function LightConfigUI({
                 />
               </div>
             )}
-            {'decay' in currentOption.params && (
+            {((currentOption && 'decay' in currentOption.params) || sectionOnLightType[createLightOption as LightType].includes('decay')) && (
               <div className="flex items-center gap-2" key={'decay'}>
                 <p>Decay:</p>
                 <input
