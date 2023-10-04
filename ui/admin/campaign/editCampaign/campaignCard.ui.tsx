@@ -1,4 +1,6 @@
-import { AiOutlineLink } from "react-icons/ai";
+import { useState } from "react";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineDelete, AiOutlineInfoCircle } from "react-icons/ai";
+
 import AGButton from "../../../common/ag-button.component";
 
 interface CampaignCardProps {
@@ -6,18 +8,20 @@ interface CampaignCardProps {
 	create?: boolean;
 	campaign?: string;
 	clickHandler: () => void;
+	deleteCampaign?: () => void;
 }
 
-export default function CampaignCard({ noCampaign, create, campaign, clickHandler }: CampaignCardProps) {
+export default function CampaignCard({ noCampaign, create, campaign, clickHandler, deleteCampaign }: CampaignCardProps) {
+	const [willDelete, setWillDelete] = useState<boolean>(false);
+
 	return (
 		<div className={`justify-self-center rounded-2xl h-96 w-72 flex flex-col justify-center items-center ${noCampaign ? 'shadow-inset-medium hover:shadow-inset-hard' : 'shadow-flat-soft hover:shadow-flat-hard'} overflow-hidden transition-all`}>
-			{noCampaign &&
-				<>
+			{noCampaign
+				&& <>
 					<h2 className="text-center font-bold leading-none text-gray-normal">YOU DON&apos;T<br />HAVE A CAMPAIGN</h2>
-				</>
-			}
-			{create &&
-				<>
+				</>}
+			{create
+				&& <>
 					<h2 className="text-center font-poppins font-bold leading-none text-gray-normal">CREATE A<br />NEW CAMPAIGN</h2>
 					<div>
 						<div className="relative rounded-full border border-gray-light w-32 h-32 my-4">
@@ -28,26 +32,46 @@ export default function CampaignCard({ noCampaign, create, campaign, clickHandle
 					<AGButton nm onClickEvent={() => void clickHandler()} >
 						Create
 					</AGButton>
-				</>
-			}
-			{campaign &&
-				<>
+				</>}
+			{campaign
+				&& <>
 					<div className="w-full h-full bg-gray-dark p-2 flex flex-col justify-between">
 						<div className="bg-bg w-fit px-5 py-2 rounded-xl flex justify-between items-center gap-6">
 							<p className="uppercase font-poppins font-bold text-gray-normal">{campaign}</p>
 							<div className="w-2 h-2 rounded-full bg-green-500"></div>
 						</div>
 						<div className="flex justify-end gap-2">
-							<button className="bg-bg w-fit px-5 rounded-full" onClick={() => void clickHandler()}>
-								<p className="py-1">Edit</p>
-							</button>
-							<div className="bg-bg w-fit px-2 rounded-full flex justify-between items-center">
-								<AiOutlineLink />
-							</div>
+							{willDelete
+								? <div className="flex items-center justify-between w-full h-8">
+									<p className="pl-2 text-sm text-white">Are you sure?</p>
+									<div className="flex gap-2">
+										<div className="bg-bg w-fit px-2 rounded-full h-8 hover:text-blue flex justify-center items-center cursor-help" title="By doing so, you will no longer be able to access this campaign and the data will be permanently deleted.">
+											<AiOutlineInfoCircle className="transition-all duration-300" />
+										</div>
+										<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-green-600"
+											onClick={() => {
+												if (deleteCampaign)
+													deleteCampaign();
+											}}
+										>
+											<AiOutlineCheckCircle className="transition-all duration-300" />
+										</button>
+										<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-red" onClick={() => setWillDelete(false)}>
+											<AiOutlineCloseCircle className="transition-all duration-300" />
+										</button>
+									</div>
+								</div>
+								: <>
+									<button className="bg-bg w-fit px-5 rounded-full h-8 flex items-center" onClick={() => void clickHandler()}>
+										<p>Edit</p>
+									</button>
+									<button className="bg-bg w-fit px-2 rounded-full flex justify-between items-center hover:text-red" onClick={() => setWillDelete(true)}>
+										<AiOutlineDelete className="transition-all duration-300" />
+									</button>
+								</>}
 						</div>
 					</div>
-				</>
-			}
+				</>}
 		</div>
 	)
 }
