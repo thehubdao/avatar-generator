@@ -11,7 +11,10 @@ import { GoToPage } from "../../../utils/router.util";
 import { Module, PageLocation } from "../../../enums/common.enum";
 import { LogError } from "../../../utils/common.util";
 import { useRouter } from "next/navigation";
+<<<<<<< HEAD
 import { ConfigLight } from "../../../interfaces/light.interface";
+=======
+>>>>>>> dev
 
 export default function EditCampaign() {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
@@ -65,6 +68,7 @@ export default function EditCampaign() {
     }
   }
 
+<<<<<<< HEAD
   const updateLightConfig = async (element: string, config: ConfigLight[]) => {
     const newParameters: Partial<CampaignParameters> = { config: { lights: config } };
 
@@ -76,6 +80,19 @@ export default function EditCampaign() {
       void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Parameters }));
     } else {
       ShowModal(`Update ${element} light config failed`);
+=======
+  const updateDefaultAsset = async (element: string, config: string) => {
+    const newConfig = { [element]: config };
+    const newParameters: Partial<CampaignParameters> = { config: newConfig };
+    // console.log(newParameters, location);
+    const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
+
+    if (result.success) {
+      ShowModal(`Update ${element} asset default config sucessful`)
+      void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Parameters }));
+    } else {
+      ShowModal(`Update ${element} asset default config failed`);
+>>>>>>> dev
     }
   }
 
@@ -96,13 +113,18 @@ export default function EditCampaign() {
     }
   }
 
+
   return (
     <>
       <EditCampaignUI
         downloadFile={(path: string) => downloadFile(path)}
         updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
         updateCameraConfig={(element: string, config: LookAtVectors) => updateCameraConfig(element, config)}
+<<<<<<< HEAD
         updateLightConfig={(element: string, config: ConfigLight[]) => updateLightConfig(element, config)}
+=======
+        updateDefaultAsset={(element: string, config: string) => updateDefaultAsset(element, config)}
+>>>>>>> dev
         uploadAvatarBase={uploadAvatarBase}
       />
     </>
