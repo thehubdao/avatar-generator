@@ -16,10 +16,11 @@ interface EditCampaignUIProps {
   downloadFile: ((path: string) => void) | ((path: string) => Promise<void>);
   updateColorConfig: (Element: string, config: ColorConfig) => Promise<void>;
   updateCameraConfig: (Element: string, config: LookAtVectors) => Promise<void>;
+  updateDefaultAsset: (element: string, config: string) => Promise<void>;
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
-export default function EditCampaignUI({ downloadFile, updateColorConfig, updateCameraConfig, uploadAvatarBase }: EditCampaignUIProps) {
+export default function EditCampaignUI({ downloadFile, updateColorConfig, updateCameraConfig, uploadAvatarBase, updateDefaultAsset }: EditCampaignUIProps) {
   // GET DATA FROM REDUX STORE
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const campaignParameters = useAppSelector(state => state.currentCampaign.parameters);
@@ -63,35 +64,38 @@ export default function EditCampaignUI({ downloadFile, updateColorConfig, update
         </div>
         {/* ASSETS LIST */}
         <div className="relative mt-6">
-          {
-            navBarOptionSelected === FirestoreLocation.Parameters ?
-              <>
-                {
-                  campaignParameters.features &&
-                  <>
-                    <div className="w-full h-[calc(1216px_*_9_/_16)] bg-gradient-to-r from-gray-dark to-gray-dark/95 rounded-2xl">
-                      <AvatarSingle campaign={campaignName} avatarBasePath={campaignParameters.armature} featureList={campaignParameters.features} />
-                    </div>
-                    <ConfigCampaignUI
-                      configData={campaignParameters.config}
-                      featuresList={campaignParameters.features}
-                      downloadAvatarBase={() => downloadAvatarBase()}
-                      updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
-                      updateCameraConfig={(Element: string, config: LookAtVectors) => updateCameraConfig(Element, config)}
-                      uploadAvatarBase={uploadAvatarBase}
+          {navBarOptionSelected === FirestoreLocation.Parameters
+            ? <>
+              {campaignParameters.features && (
+                <>
+                  <div className="w-full h-[calc(1216px_*_9_/_16)] bg-gradient-to-r from-gray-dark to-gray-dark/95 rounded-2xl">
+                    <AvatarSingle
+                      campaign={campaignName}
+                      avatarBasePath={campaignParameters.armature}
+                      featureList={campaignParameters.features}
                     />
-                    <CampaignStats
-                      featuresCount={campaignParameters.features?.length ?? 0}
-                      accessoriesCount={campaignParameters.accessories?.length ?? 0}
-                      defAnimation={campaignParameters.config?.defAnimation}
-                      defStage={campaignParameters.config?.defStage}
-                      defEnvironment={campaignParameters.config?.defEnvMap} />
-                  </>
-                }
-              </>
-              :
-              <AssetList activedOption={navBarOptionSelected} />
-          }
+                  </div>
+                  <ConfigCampaignUI
+                    configData={campaignParameters.config}
+                    featuresList={campaignParameters.features}
+                    downloadAvatarBase={() => downloadAvatarBase()}
+                    updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
+                    updateCameraConfig={(Element: string, config: LookAtVectors) => updateCameraConfig(Element, config)}
+                    uploadAvatarBase={uploadAvatarBase}
+                  />
+                  <CampaignStats
+                    featuresCount={campaignParameters.features?.length ?? 0}
+                    accessoriesCount={campaignParameters.accessories?.length ?? 0}
+                    defAnimation={campaignParameters.config?.defAnimation}
+                    defStage={campaignParameters.config?.defStage}
+                    defEnvironment={campaignParameters.config?.defEnvMap} />
+                </>
+              )}
+            </>
+            : <AssetList
+              activedOption={navBarOptionSelected}
+              updateDefaultAsset={(element: string, config: string) => updateDefaultAsset(element, config)}
+            />}
         </div>
       </div>
     </>
