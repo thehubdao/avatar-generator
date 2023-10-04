@@ -60,13 +60,13 @@ export default function LightConfigUI({
 
         const props: Partial<ConfigLight["params"]> = {};
 
-        if (light.params.dist) props.dist = lightDistance;
-        if (light.params.decay) props.decay = lightDecay;
-        if (light.params.intst) props.intst = lightIntensity;
-        if (light.params.color) props.color = defaultColor;
-        if (light.params.pos) props.pos = { ...lightPosition };
-        if (light.params.lAt) props.lAt = { ...lightLookAt };
-        if (light.params.width || light.params.height) {
+        if ('dist' in light.params) props.dist = lightDistance;
+        if ('decay' in light.params) props.decay = lightDecay;
+        if ('intst' in light.params) props.intst = lightIntensity;
+        if ('color' in light.params) props.color = defaultColor;
+        if ('pos' in light.params) props.pos = { ...lightPosition };
+        if ('lAt' in light.params) props.lAt = { ...lightLookAt };
+        if ('width' in light.params || 'height' in light.params) {
           props.width = lightSize.width;
           props.height = lightSize.height;
         }
@@ -305,7 +305,7 @@ export default function LightConfigUI({
           </div>
         </div>
       )}
-      {/* Update button */}
+      {/* Create and Update button */}
       <div className="pt-4">
         {lightOption === 'new light'
           ? <>{!isAllOptionsDisabled && <AGButton nm full onClickEvent={() => sendNewLightConfig()}>
