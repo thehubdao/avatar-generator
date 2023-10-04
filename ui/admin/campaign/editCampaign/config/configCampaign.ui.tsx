@@ -15,9 +15,9 @@ import { BsLightbulb } from "react-icons/bs";
 import { CampaignConfig, ColorConfig, FeatureBasic, LookAtVectors } from "../../../../../interfaces/common.interface";
 import { CameraConfigOption, CampaignConfigOption } from "../../../../../enums/campaign.enum";
 import CameraConfigUI from "./cameraConfig.ui";
-import { LightType } from "../../../../../enums/light.enum";
 import LightConfigUI from "./lightConfig.ui";
 import { ConfigLight } from "../../../../../interfaces/light.interface";
+import { LIGHT_TYPE_LABELS } from "../../../../../constants/lightType.constant";
 
 interface ConfigCampaignProps {
   configData?: CampaignConfig;
@@ -29,18 +29,12 @@ interface ConfigCampaignProps {
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
-const LIGHT_TYPE_LABELS: Record<LightType, string> = {
-  [LightType.PointLight]: 'Point Light',
-  [LightType.AmbientLight]: 'Ambient Light',
-  [LightType.RectAreaLight]: 'Rect Area Light',
-};
-
 export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig, uploadAvatarBase, updateLightConfig }: ConfigCampaignProps) {
   const [shouldOpenConfig, setShouldOpenConfig] = useState<boolean>(false);
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
   const [camOption, setCamOption] = useState<string>(CameraConfigOption.DefCam);
-  const [lightOption, setLightOption] = useState<string>(configData?.lights ? configData?.lights[0].type : '');
+  const [lightOption, setLightOption] = useState<string>(configData?.lights ? configData?.lights[0].type : 'new light');
   const [hasNewAvatarBase, setHasNewAvatarBase] = useState<boolean>(false);
 
   const camConfig = useRef<HTMLSelectElement>(null);
@@ -197,7 +191,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                 {/* SPECIFIC LIGHT CONFIG */}
                 {
                   configOption === CampaignConfigOption.Light &&
-                  <div className="bg-bg shadow-inset-hard rounded-xl p-4 w-fit">
+                  <div className="bg-bg shadow-inset-hard rounded-xl p-4 w-fit min-w-[300px]">
                     <div className="flex gap-2 items-center">
                       <div className="w-8 h-8 text-base bg-purple text-white rounded-full flex justify-center items-center">
                         <BsLightbulb className="pointer-events-none" />
@@ -212,6 +206,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                         {configData?.lights
                           ? configData.lights.map((light, index) => <option key={index} value={light.type} className="bg-bg py-2 px-4">{LIGHT_TYPE_LABELS[light.type]}</option>)
                           : <option value='no features' className="bg-bg py-2 px-4" disabled>no lights</option>}
+                        <option value='new light' className="bg-bg py-2 px-4">Add new light</option>
                       </select>
                     </div>
                     <LightConfigUI
