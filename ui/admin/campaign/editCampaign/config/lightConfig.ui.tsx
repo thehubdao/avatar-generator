@@ -24,6 +24,7 @@ export default function LightConfigUI({
   lights,
   updateLightConfig,
 }: LightConfigUIProps) {
+  //* Retrieve the current option based on the selected light type
   const currentOption = lights?.find((light) => light.type === lightOption);
 
   const [lightDecay, setLightDecay] = useState<number>(currentOption?.params.decay ?? 0);
@@ -39,6 +40,7 @@ export default function LightConfigUI({
   const isAllOptionsDisabled = lightTypeOptions.every(lightType => lights?.some(light => light.type === lightType));
   const [createLightOption, setCreateLightOption] = useState<string>('');
 
+  //* Handle input change for every numeric input fields on lights config
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
     setFunction: React.Dispatch<React.SetStateAction<number>>
@@ -54,6 +56,7 @@ export default function LightConfigUI({
   const sendUpdateLightConfig = () => {
     if (!currentOption) return;
 
+    // Map the updated properties for the selected light type
     const newLights = lights
       ? lights.map((light) => {
         if (light.type !== lightOption) return light;
@@ -79,9 +82,9 @@ export default function LightConfigUI({
 
   const sendNewLightConfig = () => {
     const props: Partial<ConfigLight["params"]> = {};
-
     const selectedLightType = createLightOption as LightType;
 
+    // Map the properties based on the selected light type
     sectionOnLightType[selectedLightType].forEach((prop) => {
       switch (prop) {
         case 'position':
@@ -116,16 +119,18 @@ export default function LightConfigUI({
       params: props
     }
 
+    // Update the light configurations with the new light.
     const newLights = [...(lights || []), newLight];
 
     updateLightConfig(newLights);
   }
 
-  //* Check if a number is NaN and return an empty string if true
+  //* Function to return an empty string if a number is NaN.
   const controlNaN = (number: number) => {
     return isNaN(number) ? "" : number.toString();
   };
 
+  //* Effect to update state variables when the selected light option changes.
   useEffect(() => {
     const newOption = lights?.find((light) => light.type === lightOption);
     if (newOption) {
@@ -138,6 +143,7 @@ export default function LightConfigUI({
       setLightSize({ width: newOption.params.width || 0, height: newOption.params.height || 0 });
     }
 
+    // Filter available light types to create a new light.
     const lightTypes = [LightType.PointLight, LightType.RectAreaLight, LightType.AmbientLight];
     const filteredLightTypes = lightTypes.filter(lightType => !lights?.some(light => light.type === lightType));
     setCreateLightOption(filteredLightTypes[0] || '');
