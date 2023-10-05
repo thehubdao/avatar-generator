@@ -2,10 +2,11 @@
 import { ClientQuestion } from "../enums/campaign.enum";
 import { AdminComponents } from "../enums/common.enum";
 import { ChangeMaterialOption } from "../enums/model.enum";
-import { ConfigLight, ConfigShadow } from "./light.interface";
+import { ConfigLight } from "./light.interface";
 import { UserInterface } from "./firebase.interface";
 import { AccessoryInterface, AnimationInterface, EnvMapInterface, FeatureInterface, StageInterface } from "./api.interface";
 import { ConfigEnvMap } from "./envMap.interface";
+import { ConfigShadow } from "./shadow.interface";
 
 export interface BasicData {
   id: string;
