@@ -65,7 +65,7 @@ export default function EditCampaign() {
     }
   }
 
-  const updateLightConfig = async (element: string, config: ConfigLight[]) => {
+  const updateLightConfig = async (config: ConfigLight[]) => {
     const newParameters: Partial<CampaignParameters> = { config: { lights: config } };
     const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
 
@@ -111,7 +111,7 @@ export default function EditCampaign() {
         downloadFile={(path: string) => downloadFile(path)}
         updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
         updateCameraConfig={(element: string, config: LookAtVectors) => updateCameraConfig(element, config)}
-        updateLightConfig={(element: string, config: ConfigLight[]) => updateLightConfig(element, config)}
+        updateLightConfig={(config: ConfigLight[]) => updateLightConfig(config)}
         updateDefaultAsset={(element: string, config: string) => updateDefaultAsset(element, config)}
         uploadAvatarBase={uploadAvatarBase}
       />

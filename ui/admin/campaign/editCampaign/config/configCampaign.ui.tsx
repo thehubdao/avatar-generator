@@ -26,7 +26,7 @@ interface ConfigCampaignProps {
   downloadAvatarBase: (() => void) | (() => Promise<void>);
   updateColorConfig: (element: string, colorConfig: ColorConfig) => Promise<void>;
   updateCameraConfig: (element: string, colorConfig: LookAtVectors) => Promise<void>;
-  updateLightConfig: (element: string, config: ConfigLight[]) => Promise<boolean>;
+  updateLightConfig: (config: ConfigLight[]) => Promise<boolean>;
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
@@ -212,7 +212,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                       lightOption={lightOption}
                       lights={configData?.lights}
                       updateLightConfig={async (config: ConfigLight[], messages: { success: string, error: string }, newLightOption: string) => {
-                        const result = await updateLightConfig(lightOption, config);
+                        const result = await updateLightConfig(config);
 
                         if (!result) {
                           ShowModal(messages.error);

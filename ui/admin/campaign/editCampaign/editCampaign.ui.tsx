@@ -17,7 +17,7 @@ interface EditCampaignUIProps {
   downloadFile: ((path: string) => void) | ((path: string) => Promise<void>);
   updateColorConfig: (element: string, config: ColorConfig) => Promise<void>;
   updateCameraConfig: (element: string, config: LookAtVectors) => Promise<void>;
-  updateLightConfig: (element: string, config: ConfigLight[]) => Promise<boolean>;
+  updateLightConfig: (config: ConfigLight[]) => Promise<boolean>;
   updateDefaultAsset: (element: string, config: string) => Promise<void>;
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
@@ -83,7 +83,7 @@ export default function EditCampaignUI({ downloadFile, updateColorConfig, update
                     downloadAvatarBase={() => downloadAvatarBase()}
                     updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
                     updateCameraConfig={(element: string, config: LookAtVectors) => updateCameraConfig(element, config)}
-                    updateLightConfig={(element: string, config: ConfigLight[]) => updateLightConfig(element, config)}
+                    updateLightConfig={(config: ConfigLight[]) => updateLightConfig(config)}
                     uploadAvatarBase={uploadAvatarBase}
                   />
                   <CampaignStats

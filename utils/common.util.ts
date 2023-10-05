@@ -1,4 +1,4 @@
-﻿import {EmailResult, GlobalValues, Module} from "../enums/common.enum";
+﻿import { EmailResult, GlobalValues, Module } from "../enums/common.enum";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
@@ -7,12 +7,12 @@ export function RandomArrayElement<T>(array: T[]) {
 // Maybe save a log at some point either through api or just firebase
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function LogError(origin: string | Module, message: string, err?: unknown) {
-  console.error(`${origin} - `, message, err != undefined && {error: err});
+  console.error(`${origin} - `, message, err != undefined && { error: err });
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function LogWarning(origin: string | Module, message: string, err?: unknown) {
-  console.warn(`${origin} - `, message, err != undefined && {error: err});
+  console.warn(`${origin} - `, message, err != undefined && { error: err });
 }
 
 export function Delay(ms: number) {
@@ -56,13 +56,13 @@ export function SetMapToMap<TKey, TValue>(leMap: Map<TKey, TValue>, toAdd: Map<T
   }
 }
 
-export function RemoveUndefinedProperties<T>(obj: T)  {
-  const clone = {...obj};
+export function RemoveUndefinedProperties<T>(obj: T) {
+  const clone = { ...obj };
   for (const k in clone) {
     if (clone[k] == undefined)
       delete clone[k];
   }
-  
+
   return clone;
 }
 
@@ -86,7 +86,7 @@ export function RandomIntMax(max: number) {
 export function ColorStringToHexString(color: string | undefined) {
   if (color == undefined) return undefined;
   if (color.length !== 6) return undefined;
-  
+
   return `#${color}`;
 }
 
@@ -100,7 +100,7 @@ export function MixArrays<T>(arr1: T[] | undefined, arr2: T[] | undefined) {
 
 export function RemovedAcc(text: string | undefined) {
   if (text == undefined || !text.endsWith(GlobalValues.AccEnd)) return text;
-  
+
   return text.slice(0, - GlobalValues.AccEnd.length);
 }
 
@@ -109,3 +109,7 @@ export function GetKeyByValue<TEnum extends object>(value: string, enumRef: TEnu
   const key = Object.keys(enumRef)[indexOfS];
   return key as unknown as keyof TEnum;
 }
+
+export const CastNumberToString = (number: number) => {
+  return isNaN(number) ? "" : number.toString();
+};

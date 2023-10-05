@@ -7,6 +7,9 @@ import { LightType } from "../../../../../enums/light.enum";
 import { LIGHT_TYPE_LABELS } from "../../../../../constants/lightType.constant";
 import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineDelete } from "react-icons/ai";
 import { DEFAULT_THREE_JS_PROPS } from "../../../../../constants/threeJsDefault.constant";
+import AxisInputFieldUI from "./inputFields/axisInputFiled.ux";
+import SingleInputFieldUI from "./inputFields/singleInputField.ux";
+import ColorInputFieldUI from "./inputFields/colorInputField.ux";
 
 interface LightConfigUIProps {
   lightOption: string;
@@ -146,11 +149,6 @@ export default function LightConfigUI({
     setWillDelete(false);
   }
 
-  //* Function to return an empty string if a number is NaN.
-  const controlNaN = (number: number) => {
-    return isNaN(number) ? "" : number.toString();
-  };
-
   //* Effect to update state variables when the selected light option changes.
   useEffect(() => {
     const newOption = lights?.find((light) => light.type === lightOption);
@@ -197,133 +195,66 @@ export default function LightConfigUI({
       </div>}
       {/* Position input fields */}
       {('pos' in lightParams || sectionOnLightType[createLightOption as LightType].includes('position')) && (
-        <div>
-          <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
-            Light position:
-          </p>
-          <div className="flex gap-4 px-2">
-            {["X", "Y", "Z"].map((axis) => (
-              <div className="flex items-center gap-2" key={axis}>
-                <p>{axis}:</p>
-                <input
-                  type="number"
-                  name={axis.toLowerCase()}
-                  className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-                  value={controlNaN(lightPosition[axis.toLowerCase() as "x" | "y" | "z"])}
-                  onChange={(e) => handleInputChange(e, (value) => setLightPosition({ ...lightPosition, [axis.toLowerCase()]: value }))}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <AxisInputFieldUI<AGVector3>
+          inputLabel="Light Position"
+          axisLabels={['X', 'Y', 'Z']}
+          configProp={lightPosition}
+          setConfigProp={setLightPosition}
+          handleInputChange={handleInputChange}
+        />
       )}
       {/* Look at input fields */}
       {('lAt' in lightParams || sectionOnLightType[createLightOption as LightType].includes('lookAt')) && (
-        <div>
-          <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
-            Look at:
-          </p>
-          <div className="flex gap-4 px-2">
-            {["X", "Y", "Z"].map((axis) => (
-              <div className="flex items-center gap-2" key={axis}>
-                <p>{axis}:</p>
-                <input
-                  type="number"
-                  name={axis.toLowerCase()}
-                  className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-                  value={controlNaN(lightLookAt[axis.toLowerCase() as "x" | "y" | "z"])}
-                  onChange={(e) => handleInputChange(e, (value) => setLightLookAt({ ...lightLookAt, [axis.toLowerCase()]: value }))}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <AxisInputFieldUI<AGVector3>
+          inputLabel="Look At"
+          axisLabels={['X', 'Y', 'Z']}
+          configProp={lightLookAt}
+          setConfigProp={setLightLookAt}
+          handleInputChange={handleInputChange}
+        />
       )}
       {/* Color selection field */}
       {('color' in lightParams || sectionOnLightType[createLightOption as LightType].includes('color')) && (
-        <>
-          <div className="px-2">
-            <p className="font-poppins font-medium text-purple pb-2">Default color:</p>
-            <div className="relative rounded-full overflow-hidden w-full h-12">
-              <input type="color" name="" value={`#${defaultColor}`} className="absolute -top-2 -left-2 w-[130%] h-[130%]"
-                onChange={e => { setDefaultColor(e.target.value.substring(1)) }} />
-              <div className="absolute bottom-2 left-2/4 -translate-x-2/4 rounded-full bg-bg shadow-inset-hard w-16 flex justify-center items-center">
-                <p className="text-xs">{defaultColor}</p>
-              </div>
-            </div>
-          </div>
-        </>
+        <ColorInputFieldUI
+          inputLabel="Default Color"
+          configProp={defaultColor}
+          setConfigProp={setDefaultColor}
+        />
       )}
       {/* Size input fields */}
       {(('width' in lightParams || 'height' in lightParams) || sectionOnLightType[createLightOption as LightType].includes('size')) && (
-        <div>
-          <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
-            Size:
-          </p>
-          <div className="flex gap-4 px-2">
-            {["Width", "Height"].map((axis) => (
-              <div className="flex items-center gap-2" key={axis}>
-                <p>{axis}:</p>
-                <input
-                  type="number"
-                  name={axis.toLowerCase()}
-                  className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-                  value={controlNaN(lightSize[axis.toLowerCase() as "width" | "height"])}
-                  onChange={(e) => handleInputChange(e, (value) => setLightSize({ ...lightSize, [axis.toLowerCase()]: value }))}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+        <AxisInputFieldUI<{ width: number, height: number }>
+          inputLabel="Size"
+          axisLabels={["Width", "Height"]}
+          configProp={lightSize}
+          setConfigProp={setLightSize}
+          handleInputChange={handleInputChange}
+        />
       )}
       {/* Other input fields */}
-      {'intst' in lightParams || sectionOnLightType[createLightOption as LightType].includes('intensity') && (
-        <div>
-          <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
-            Intensity:
-          </p>
-          <div className="flex items-center px-2">
-            <input
-              type="number"
-              name='intensity'
-              className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg text-center bg-bg"
-              value={controlNaN(lightIntensity)}
-              onChange={(e) => handleInputChange(e, setLightIntensity)}
-            />
-          </div>
-        </div>
+      {('intst' in lightParams || sectionOnLightType[createLightOption as LightType].includes('intensity')) && (
+        <SingleInputFieldUI
+          inputLabel="Intensity"
+          configProp={lightIntensity}
+          setConfigProp={setLightIntensity}
+          handleInputChange={handleInputChange}
+        />
       )}
-      {'dist' in lightParams || sectionOnLightType[createLightOption as LightType].includes('distance') && (
-        <div>
-          <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
-            Distance:
-          </p>
-          <div className="flex items-center px-2">
-            <input
-              type="number"
-              name='distance'
-              className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg text-center bg-bg"
-              value={controlNaN(lightDistance)}
-              onChange={(e) => handleInputChange(e, setLightDistance)}
-            />
-          </div>
-        </div>
+      {('dist' in lightParams || sectionOnLightType[createLightOption as LightType].includes('distance')) && (
+        <SingleInputFieldUI
+          inputLabel="Distance"
+          configProp={lightDistance}
+          setConfigProp={setLightDistance}
+          handleInputChange={handleInputChange}
+        />
       )}
-      {'decay' in lightParams || sectionOnLightType[createLightOption as LightType].includes('decay') && (
-        <div>
-          <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
-            Decay:
-          </p>
-          <div className="flex items-center px-2">
-            <input
-              type="number"
-              name='decay'
-              className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg text-center bg-bg"
-              value={controlNaN(lightDecay)}
-              onChange={(e) => handleInputChange(e, setLightDecay)}
-            />
-          </div>
-        </div>
+      {('decay' in lightParams || sectionOnLightType[createLightOption as LightType].includes('decay')) && (
+        <SingleInputFieldUI
+          inputLabel="Decay"
+          configProp={lightDecay}
+          setConfigProp={setLightDecay}
+          handleInputChange={handleInputChange}
+        />
       )}
       {/* Create and Update button */}
       <div className="pt-4 px-2">
