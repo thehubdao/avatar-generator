@@ -5,6 +5,8 @@ import 'swiper/css';
 import {BasicData} from '../../../../interfaces/common.interface';
 import {useEffect, MouseEvent, useState} from 'react';
 import {GetFileUrl} from "../../../../utils/firebase.util";
+import { LogError } from '../../../../utils/common.util';
+import { Module } from '../../../../enums/common.enum';
 
 interface Props {
   list?: FeatureInterface[];
@@ -23,9 +25,10 @@ function OptionThumbnail({opt}: OptionProps) {
   
   useEffect(() => {
     (async () => {
-      const newImage = await GetFileUrl(opt.thumb);
-      setImageUrl(newImage ?? '/resources/images/image.png');
-    })().catch(err => console.error(err));
+      const result = await GetFileUrl(opt.thumb);
+      if (!result.success) void LogError(Module.OptionSelector, `${result.errCode}: ${result.errMessage}`)
+      else setImageUrl(result.value ?? '/resources/images/image.png');
+    })
   }, [opt])
 
   return (
