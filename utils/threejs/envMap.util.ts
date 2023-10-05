@@ -1,26 +1,27 @@
-import { EquirectangularReflectionMapping, SRGBColorSpace, Texture } from "three";
+import { EquirectangularReflectionMapping, Object3D, SRGBColorSpace, Texture } from "three";
 import { GetTextureFromFile } from "./texture.util";
 import { GroundProjectedSkybox } from "three/examples/jsm/objects/GroundProjectedSkybox";
+import { EnvMapInterface } from "../../interfaces/api.interface";
+import { Result } from "../../types/common.type";
+import { ConfigSkybox } from "../../interfaces/envMap.interface";
 
-export async function GetEnvironmentMap(textureUrl: string | undefined) {
-  const texture = await GetTextureFromFile(textureUrl);
-  if (texture == undefined) return;
+export async function GetEnvironmentMap(envMapList: EnvMapInterface[], envMap: string, skyboxConfig?: ConfigSkybox): Promise<Result<{ texture: Texture, skybox: Object3D | undefined }>> {
+  const map = envMapList?.find(em => em.name === envMap);
+  const envTexture = await GetTextureFromFile(map?.path);
 
-  texture.mapping = EquirectangularReflectionMapping;
-  texture.colorSpace = SRGBColorSpace;
+  if (!envTexture.success)
+    return envTexture;
 
-  return texture;
-}
+  envTexture.value.mapping = EquirectangularReflectionMapping;
+  envTexture.value.colorSpace = SRGBColorSpace;
 
-export function GetSkybox(texture: Texture | undefined, scale?: number, radius?: number, height?: number ) {
-  if (texture == undefined) return;
+  let skybox;
+  if (skyboxConfig) {
+    skybox = new GroundProjectedSkybox(envTexture.value);
+    skybox.scale.setScalar(skyboxConfig.scale ?? 50);
+    skybox.radius = skyboxConfig.radius ?? 10;
+    skybox.height = skyboxConfig.height ?? 1;
+  }
 
-  texture.mapping = EquirectangularReflectionMapping;
-  texture.colorSpace = SRGBColorSpace;
-
-  const skybox = new GroundProjectedSkybox(texture);
-  skybox.scale.setScalar(scale ?? 50);
-  skybox.radius = radius ?? 10;
-  skybox.height = height ?? 1;
-  return skybox;
+  return { success: true, value: { texture: envTexture.value, skybox: skybox } };
 }
