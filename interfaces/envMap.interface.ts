@@ -1,4 +1,4 @@
-interface ConfigSkybox {
+export interface ConfigSkybox {
   scale?: number;
   radius?: number;
   height?: number;
