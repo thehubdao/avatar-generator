@@ -28,16 +28,17 @@ export default function LightConfigUI({
 }: LightConfigUIProps) {
   //* Retrieve the current option based on the selected light type
   const currentOption = lights?.find((light) => light.type === lightOption);
+  const lightParams = currentOption?.params ?? {};
   const [willDelete, setWillDelete] = useState<boolean>(false);
 
-  //* Initialize state variables for various light properties.
-  const [lightDecay, setLightDecay] = useState<number>(currentOption?.params.decay ?? DEFAULT_THREE_JS_PROPS.decay);
-  const [lightDistance, setLightDistance] = useState<number>(currentOption?.params.dist ?? DEFAULT_THREE_JS_PROPS.distance);
-  const [lightIntensity, setLightIntensity] = useState<number>(currentOption?.params.intst ?? DEFAULT_THREE_JS_PROPS.intensity);
-  const [defaultColor, setDefaultColor] = useState<string>(currentOption?.params.color ?? DEFAULT_THREE_JS_PROPS.color);
-  const [lightLookAt, setLightLookAt] = useState<AGVector3>(currentOption?.params.lAt ?? DEFAULT_THREE_JS_PROPS.lookAt);
-  const [lightPosition, setLightPosition] = useState<AGVector3>(currentOption?.params.pos ?? DEFAULT_THREE_JS_PROPS.position);
-  const [lightSize, setLightSize] = useState<{ width: number, height: number }>({ width: currentOption?.params.width ?? DEFAULT_THREE_JS_PROPS.width, height: currentOption?.params.height ?? DEFAULT_THREE_JS_PROPS.height });
+  //* Initialize state variables for various light properties.lightParams
+  const [lightDecay, setLightDecay] = useState<number>(lightParams.decay ?? DEFAULT_THREE_JS_PROPS.decay);
+  const [lightDistance, setLightDistance] = useState<number>(lightParams.dist ?? DEFAULT_THREE_JS_PROPS.distance);
+  const [lightIntensity, setLightIntensity] = useState<number>(lightParams.intst ?? DEFAULT_THREE_JS_PROPS.intensity);
+  const [defaultColor, setDefaultColor] = useState<string>(lightParams.color ?? DEFAULT_THREE_JS_PROPS.color);
+  const [lightLookAt, setLightLookAt] = useState<AGVector3>(lightParams.lAt ?? DEFAULT_THREE_JS_PROPS.lookAt);
+  const [lightPosition, setLightPosition] = useState<AGVector3>(lightParams.pos ?? DEFAULT_THREE_JS_PROPS.position);
+  const [lightSize, setLightSize] = useState<{ width: number, height: number }>({ width: lightParams.width ?? DEFAULT_THREE_JS_PROPS.width, height: lightParams.height ?? DEFAULT_THREE_JS_PROPS.height });
 
   //* Create new light config variables.
   const lightTypeOptions = Object.values(LightType);
@@ -195,7 +196,7 @@ export default function LightConfigUI({
         </select>
       </div>}
       {/* Position input fields */}
-      {(currentOption?.params.pos || sectionOnLightType[createLightOption as LightType].includes('position')) && (
+      {('pos' in lightParams || sectionOnLightType[createLightOption as LightType].includes('position')) && (
         <div>
           <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
             Light position:
@@ -217,7 +218,7 @@ export default function LightConfigUI({
         </div>
       )}
       {/* Look at input fields */}
-      {(currentOption?.params.lAt || sectionOnLightType[createLightOption as LightType].includes('lookAt')) && (
+      {('lAt' in lightParams || sectionOnLightType[createLightOption as LightType].includes('lookAt')) && (
         <div>
           <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
             Look at:
@@ -239,32 +240,22 @@ export default function LightConfigUI({
         </div>
       )}
       {/* Color selection field */}
-      {(currentOption?.params.color || sectionOnLightType[createLightOption as LightType].includes('color')) && (
-        <div>
-          <p className="font-poppins font-medium text-purple pb-2 pt-4 mt-2 px-2">
-            Default color:
-          </p>
-          <div className="relative rounded-full overflow-hidden w-full h-12">
-            <input
-              type="color"
-              name="color"
-              value={`#${defaultColor}`}
-              className="absolute -top-2 -left-2 w-[130%] h-[130%]"
-              onChange={(e) => {
-                setDefaultColor(e.target.value.substring(1));
-              }}
-              onLoad={() =>
-                setDefaultColor(currentOption?.params.color || "000000")
-              }
-            />
-            <div className="absolute bottom-2 left-2/4 -translate-x-2/4 rounded-full bg-bg shadow-inset-hard w-16 flex justify-center items-center">
-              <p className="text-xs">{defaultColor}</p>
+      {('color' in lightParams || sectionOnLightType[createLightOption as LightType].includes('color')) && (
+        <>
+          <div className="px-2">
+            <p className="font-poppins font-medium text-purple pb-2">Default color:</p>
+            <div className="relative rounded-full overflow-hidden w-full h-12">
+              <input type="color" name="" value={`#${defaultColor}`} className="absolute -top-2 -left-2 w-[130%] h-[130%]"
+                onChange={e => { setDefaultColor(e.target.value.substring(1)) }} />
+              <div className="absolute bottom-2 left-2/4 -translate-x-2/4 rounded-full bg-bg shadow-inset-hard w-16 flex justify-center items-center">
+                <p className="text-xs">{defaultColor}</p>
+              </div>
             </div>
           </div>
-        </div>
+        </>
       )}
       {/* Size input fields */}
-      {(currentOption?.params && ('width' in currentOption.params || 'height' in currentOption.params) || sectionOnLightType[createLightOption as LightType].includes('size')) && (
+      {(('width' in lightParams || 'height' in lightParams) || sectionOnLightType[createLightOption as LightType].includes('size')) && (
         <div>
           <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
             Size:
@@ -286,53 +277,56 @@ export default function LightConfigUI({
         </div>
       )}
       {/* Other input fields */}
-      {(currentOption?.params && ('intst' in currentOption.params || 'decay' in currentOption.params || 'dist' in currentOption.params) || ['intensity', 'decay', 'distance'].some(item => sectionOnLightType[createLightOption as LightType].includes(item))) && (
+      {'intst' in lightParams || sectionOnLightType[createLightOption as LightType].includes('intensity') && (
         <div>
           <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
-            Other props:
+            Intensity:
           </p>
-          <div className="flex flex-col gap-4 px-2">
-            {((currentOption && 'intst' in currentOption.params) || sectionOnLightType[createLightOption as LightType].includes('intensity')) && (
-              <div className="flex items-center gap-2" key={'intst'}>
-                <p>Intensity:</p>
-                <input
-                  type="number"
-                  name='intensity'
-                  className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-                  value={controlNaN(lightIntensity)}
-                  onChange={(e) => handleInputChange(e, setLightIntensity)}
-                />
-              </div>
-            )}
-            {((currentOption && 'dist' in currentOption.params) || sectionOnLightType[createLightOption as LightType].includes('distance')) && (
-              <div className="flex items-center gap-2" key={'dist'}>
-                <p>Distance:</p>
-                <input
-                  type="number"
-                  name='distance'
-                  className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-                  value={controlNaN(lightDistance)}
-                  onChange={(e) => handleInputChange(e, setLightDistance)}
-                />
-              </div>
-            )}
-            {((currentOption && 'decay' in currentOption.params) || sectionOnLightType[createLightOption as LightType].includes('decay')) && (
-              <div className="flex items-center gap-2" key={'decay'}>
-                <p>Decay:</p>
-                <input
-                  type="number"
-                  name='decay'
-                  className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-                  value={controlNaN(lightDecay)}
-                  onChange={(e) => handleInputChange(e, setLightDecay)}
-                />
-              </div>
-            )}
+          <div className="flex items-center px-2">
+            <input
+              type="number"
+              name='intensity'
+              className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg text-center bg-bg"
+              value={controlNaN(lightIntensity)}
+              onChange={(e) => handleInputChange(e, setLightIntensity)}
+            />
+          </div>
+        </div>
+      )}
+      {'dist' in lightParams || sectionOnLightType[createLightOption as LightType].includes('distance') && (
+        <div>
+          <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
+            Distance:
+          </p>
+          <div className="flex items-center px-2">
+            <input
+              type="number"
+              name='distance'
+              className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg text-center bg-bg"
+              value={controlNaN(lightDistance)}
+              onChange={(e) => handleInputChange(e, setLightDistance)}
+            />
+          </div>
+        </div>
+      )}
+      {'decay' in lightParams || sectionOnLightType[createLightOption as LightType].includes('decay') && (
+        <div>
+          <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
+            Decay:
+          </p>
+          <div className="flex items-center px-2">
+            <input
+              type="number"
+              name='decay'
+              className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg text-center bg-bg"
+              value={controlNaN(lightDecay)}
+              onChange={(e) => handleInputChange(e, setLightDecay)}
+            />
           </div>
         </div>
       )}
       {/* Create and Update button */}
-      <div className="pt-4">
+      <div className="pt-4 px-2">
         {lightOption === 'new light'
           ? <>{!isAllOptionsDisabled && <AGButton nm full onClickEvent={() => sendNewLightConfig()}>
             <p className="py-2">Create</p>
