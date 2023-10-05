@@ -18,6 +18,7 @@ import CameraConfigUI from "./cameraConfig.ui";
 import LightConfigUI from "./lightConfig.ui";
 import { ConfigLight } from "../../../../../interfaces/light.interface";
 import { LIGHT_TYPE_LABELS } from "../../../../../constants/lightType.constant";
+import { ShowModal } from "../../../../../utils/modal.util";
 
 interface ConfigCampaignProps {
   configData?: CampaignConfig;
@@ -25,7 +26,7 @@ interface ConfigCampaignProps {
   downloadAvatarBase: (() => void) | (() => Promise<void>);
   updateColorConfig: (element: string, colorConfig: ColorConfig) => Promise<void>;
   updateCameraConfig: (element: string, colorConfig: LookAtVectors) => Promise<void>;
-  updateLightConfig: (element: string, config: ConfigLight[]) => Promise<void>;
+  updateLightConfig: (element: string, config: ConfigLight[]) => Promise<boolean>;
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
@@ -34,12 +35,11 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
   const [camOption, setCamOption] = useState<string>(CameraConfigOption.DefCam);
-  const [lightOption, setLightOption] = useState<string>(configData?.lights ? configData?.lights[0].type : 'new light');
+  const [lightOption, setLightOption] = useState<string>((configData?.lights && configData?.lights.length > 0) ? configData?.lights[0].type : 'new light');
   const [hasNewAvatarBase, setHasNewAvatarBase] = useState<boolean>(false);
 
   const camConfig = useRef<HTMLSelectElement>(null);
   const colorConfig = useRef<HTMLSelectElement>(null);
-  const lightConfig = useRef<HTMLSelectElement>(null);
   const avatarBaseFile = useRef<HTMLInputElement>(null);
 
   const changeConfigOption = (e: React.MouseEvent, destiny: string) => {
@@ -66,10 +66,6 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
 
   const changeCamConfigOption = () => {
     setCamOption(camConfig.current?.value ?? '');
-  }
-
-  const changeLightConfigOption = () => {
-    setLightOption(lightConfig.current?.value ?? '');
   }
 
   return (
@@ -189,8 +185,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                   </div>
                 }
                 {/* SPECIFIC LIGHT CONFIG */}
-                {
-                  configOption === CampaignConfigOption.Light &&
+                {configOption === CampaignConfigOption.Light &&
                   <div className="bg-bg shadow-inset-hard rounded-xl p-4 w-fit min-w-[300px]">
                     <div className="flex gap-2 items-center">
                       <div className="w-8 h-8 text-base bg-purple text-white rounded-full flex justify-center items-center">
@@ -202,7 +197,11 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                       <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
                         <MdKeyboardArrowDown />
                       </div>
-                      <select ref={lightConfig} className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" onChange={() => changeLightConfigOption()}>
+                      <select
+                        className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer"
+                        onChange={(e) => setLightOption(e.target.value)}
+                        value={lightOption}
+                      >
                         {configData?.lights
                           ? configData.lights.map((light, index) => <option key={index} value={light.type} className="bg-bg py-2 px-4">{LIGHT_TYPE_LABELS[light.type]}</option>)
                           : <option value='no features' className="bg-bg py-2 px-4" disabled>no lights</option>}
@@ -212,10 +211,18 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                     <LightConfigUI
                       lightOption={lightOption}
                       lights={configData?.lights}
-                      updateLightConfig={(config: ConfigLight[]) => { void updateLightConfig(lightOption, config) }}
+                      updateLightConfig={async (config: ConfigLight[], messages: { success: string, error: string }, newLightOption: string) => {
+                        const result = await updateLightConfig(lightOption, config);
+
+                        if (!result) {
+                          ShowModal(messages.error);
+                        } else {
+                          ShowModal(messages.success);
+                          setLightOption(newLightOption);
+                        }
+                      }}
                     />
-                  </div>
-                }
+                  </div>}
               </div>
             </div>
           </div >

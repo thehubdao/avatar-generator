@@ -17,7 +17,7 @@ interface EditCampaignUIProps {
   downloadFile: ((path: string) => void) | ((path: string) => Promise<void>);
   updateColorConfig: (element: string, config: ColorConfig) => Promise<void>;
   updateCameraConfig: (element: string, config: LookAtVectors) => Promise<void>;
-  updateLightConfig: (element: string, config: ConfigLight[]) => Promise<void>;
+  updateLightConfig: (element: string, config: ConfigLight[]) => Promise<boolean>;
   updateDefaultAsset: (element: string, config: string) => Promise<void>;
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }

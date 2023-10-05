@@ -5,11 +5,13 @@ import AGButton from "../../../../common/ag-button.component";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { LightType } from "../../../../../enums/light.enum";
 import { LIGHT_TYPE_LABELS } from "../../../../../constants/lightType.constant";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineDelete } from "react-icons/ai";
+import { DEFAULT_THREE_JS_PROPS } from "../../../../../constants/threeJsDefault.constant";
 
 interface LightConfigUIProps {
   lightOption: string;
   lights: ConfigLight[] | undefined;
-  updateLightConfig: (config: ConfigLight[]) => void;
+  updateLightConfig: (config: ConfigLight[], messages: { success: string, error: string }, newLightOption: string) => void;
 }
 
 const sectionOnLightType = {
@@ -26,19 +28,21 @@ export default function LightConfigUI({
 }: LightConfigUIProps) {
   //* Retrieve the current option based on the selected light type
   const currentOption = lights?.find((light) => light.type === lightOption);
+  const [willDelete, setWillDelete] = useState<boolean>(false);
 
-  const [lightDecay, setLightDecay] = useState<number>(currentOption?.params.decay ?? 0);
-  const [lightDistance, setLightDistance] = useState<number>(currentOption?.params.dist ?? 0);
-  const [lightIntensity, setLightIntensity] = useState<number>(currentOption?.params.intst ?? 0);
-  const [defaultColor, setDefaultColor] = useState<string>(currentOption?.params.color ?? "000000");
-  const [lightLookAt, setLightLookAt] = useState<AGVector3>(currentOption?.params.lAt ?? { x: 0, y: 0, z: 0 });
-  const [lightPosition, setLightPosition] = useState<AGVector3>(currentOption?.params.pos ?? { x: 0, y: 0, z: 0 });
-  const [lightSize, setLightSize] = useState<{ width: number, height: number }>({ width: currentOption?.params.width ?? 0, height: currentOption?.params.height ?? 0 });
+  //* Initialize state variables for various light properties.
+  const [lightDecay, setLightDecay] = useState<number>(currentOption?.params.decay ?? DEFAULT_THREE_JS_PROPS.decay);
+  const [lightDistance, setLightDistance] = useState<number>(currentOption?.params.dist ?? DEFAULT_THREE_JS_PROPS.distance);
+  const [lightIntensity, setLightIntensity] = useState<number>(currentOption?.params.intst ?? DEFAULT_THREE_JS_PROPS.intensity);
+  const [defaultColor, setDefaultColor] = useState<string>(currentOption?.params.color ?? DEFAULT_THREE_JS_PROPS.color);
+  const [lightLookAt, setLightLookAt] = useState<AGVector3>(currentOption?.params.lAt ?? DEFAULT_THREE_JS_PROPS.lookAt);
+  const [lightPosition, setLightPosition] = useState<AGVector3>(currentOption?.params.pos ?? DEFAULT_THREE_JS_PROPS.position);
+  const [lightSize, setLightSize] = useState<{ width: number, height: number }>({ width: currentOption?.params.width ?? DEFAULT_THREE_JS_PROPS.width, height: currentOption?.params.height ?? DEFAULT_THREE_JS_PROPS.height });
 
-  const createLightConfig = useRef<HTMLSelectElement>(null);
+  //* Create new light config variables.
   const lightTypeOptions = Object.values(LightType);
-  const isAllOptionsDisabled = lightTypeOptions.every(lightType => lights?.some(light => light.type === lightType));
   const [createLightOption, setCreateLightOption] = useState<string>('');
+  const isAllOptionsDisabled = lightTypeOptions.every(lightType => lights?.some(light => light.type === lightType));
 
   //* Handle input change for every numeric input fields on lights config
   const handleInputChange = (
@@ -48,10 +52,6 @@ export default function LightConfigUI({
     const newValue = e.currentTarget.valueAsNumber;
     setFunction(isNaN(newValue) ? 0 : newValue);
   };
-
-  const handleSelectChange = () => {
-    setCreateLightOption(createLightConfig.current?.value ?? '');
-  }
 
   const sendUpdateLightConfig = () => {
     if (!currentOption) return;
@@ -77,7 +77,11 @@ export default function LightConfigUI({
       })
       : [];
 
-    updateLightConfig(newLights);
+    updateLightConfig(
+      newLights, {
+      success: `The ${LIGHT_TYPE_LABELS[lightOption as LightType].toLowerCase()} has been successfully updated!`,
+      error: `The ${LIGHT_TYPE_LABELS[lightOption as LightType].toLowerCase()} was not updated satisfactorily!`
+    }, lightOption);
   };
 
   const sendNewLightConfig = () => {
@@ -85,8 +89,8 @@ export default function LightConfigUI({
     const selectedLightType = createLightOption as LightType;
 
     // Map the properties based on the selected light type
-    sectionOnLightType[selectedLightType].forEach((prop) => {
-      switch (prop) {
+    sectionOnLightType[selectedLightType].forEach((section) => {
+      switch (section) {
         case 'position':
           props.pos = { ...lightPosition };
           break;
@@ -122,7 +126,23 @@ export default function LightConfigUI({
     // Update the light configurations with the new light.
     const newLights = [...(lights || []), newLight];
 
-    updateLightConfig(newLights);
+    updateLightConfig(
+      newLights, {
+      success: `The new ${LIGHT_TYPE_LABELS[selectedLightType].toLowerCase()} has been successfully created!`,
+      error: `The new ${LIGHT_TYPE_LABELS[selectedLightType].toLowerCase()} was not created satisfactorily!`
+    }, selectedLightType);
+  }
+
+  const sendDeleteLightConfig = () => {
+    // Update the light configurations without the current light.
+    const newLights = lights?.filter(light => light.type !== lightOption);
+
+    updateLightConfig(
+      newLights ?? [], {
+      success: `The ${LIGHT_TYPE_LABELS[lightOption as LightType].toLowerCase()} has been successfully deleted!`,
+      error: `The ${LIGHT_TYPE_LABELS[lightOption as LightType].toLowerCase()} was not deleted satisfactorily!`
+    }, 'new light');
+    setWillDelete(false);
   }
 
   //* Function to return an empty string if a number is NaN.
@@ -133,20 +153,20 @@ export default function LightConfigUI({
   //* Effect to update state variables when the selected light option changes.
   useEffect(() => {
     const newOption = lights?.find((light) => light.type === lightOption);
-    if (newOption) {
-      setLightDistance(newOption.params.dist || 0);
-      setLightDecay(newOption.params.decay || 0);
-      setLightIntensity(newOption.params.intst || 0);
-      setDefaultColor(newOption.params.color || "000000");
-      setLightPosition(newOption.params.pos ?? { x: 0, y: 0, z: 0 });
-      setLightLookAt(newOption.params.lAt ?? { x: 0, y: 0, z: 0 });
-      setLightSize({ width: newOption.params.width || 0, height: newOption.params.height || 0 });
-    }
+
+    setLightDecay(newOption?.params.decay ?? DEFAULT_THREE_JS_PROPS.decay);
+    setLightDistance(newOption?.params.dist ?? DEFAULT_THREE_JS_PROPS.distance);
+    setLightIntensity(newOption?.params.intst ?? DEFAULT_THREE_JS_PROPS.intensity);
+    setDefaultColor(newOption?.params.color ?? DEFAULT_THREE_JS_PROPS.color);
+    setLightLookAt(newOption?.params.lAt ?? DEFAULT_THREE_JS_PROPS.lookAt);
+    setLightPosition(newOption?.params.pos ?? DEFAULT_THREE_JS_PROPS.position);
+    setLightSize({ width: newOption?.params.width ?? DEFAULT_THREE_JS_PROPS.width, height: newOption?.params.height ?? DEFAULT_THREE_JS_PROPS.height });
+    setWillDelete(false);
 
     // Filter available light types to create a new light.
     const lightTypes = [LightType.PointLight, LightType.RectAreaLight, LightType.AmbientLight];
     const filteredLightTypes = lightTypes.filter(lightType => !lights?.some(light => light.type === lightType));
-    setCreateLightOption(filteredLightTypes[0] || '');
+    setCreateLightOption((lightOption === 'new light') ? filteredLightTypes[0] ?? '' : '');
   }, [lightOption, lights]);
 
   return (
@@ -157,8 +177,8 @@ export default function LightConfigUI({
         </div>
         <select
           className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer"
-          ref={createLightConfig}
-          onChange={handleSelectChange}
+          onChange={(e) => { setCreateLightOption(e.target.value) }}
+          value={createLightOption}
         >
           {isAllOptionsDisabled && (
             <option value="" disabled>
@@ -272,7 +292,7 @@ export default function LightConfigUI({
             Other props:
           </p>
           <div className="flex flex-col gap-4 px-2">
-            {((currentOption && 'intst' in currentOption.params) || sectionOnLightType[createLightOption as LightType].includes('position')) && (
+            {((currentOption && 'intst' in currentOption.params) || sectionOnLightType[createLightOption as LightType].includes('intensity')) && (
               <div className="flex items-center gap-2" key={'intst'}>
                 <p>Intensity:</p>
                 <input
@@ -317,10 +337,35 @@ export default function LightConfigUI({
           ? <>{!isAllOptionsDisabled && <AGButton nm full onClickEvent={() => sendNewLightConfig()}>
             <p className="py-2">Create</p>
           </AGButton>}</>
-          : <AGButton nm full onClickEvent={() => sendUpdateLightConfig()}>
-            <p className="py-2">Update</p>
-          </AGButton>}
-      </div>
+          : <>
+            {willDelete
+              ? (
+                <div className="flex items-center justify-between w-full">
+                  <p className="pl-2 text-sm">Are you sure?</p>
+                  <div className="flex">
+                    <AGButton nm fit onClickEvent={() => sendDeleteLightConfig()}>
+                      <AiOutlineCheckCircle className="group-hover/button:text-green-600 transition-all duration-300" />
+                    </AGButton>
+                    <AGButton nm fit onClickEvent={() => setWillDelete(false)}>
+                      <AiOutlineCloseCircle className="group-hover/button:text-red transition-all duration-300" />
+                    </AGButton>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center justify-between w-full">
+                  <p className="pl-2 text-sm">Delete {LIGHT_TYPE_LABELS[lightOption as LightType]}</p>
+                  <div className="flex">
+                    <AGButton nm fit onClickEvent={() => setWillDelete(true)}>
+                      <AiOutlineDelete className="group-hover/button:text-red transition-all duration-300" />
+                    </AGButton>
+                  </div>
+                </div>
+              )}
+            <AGButton nm full onClickEvent={() => sendUpdateLightConfig()}>
+              <p className="py-2">Update</p>
+            </AGButton>
+          </>}
+      </div >
     </>
   );
 }

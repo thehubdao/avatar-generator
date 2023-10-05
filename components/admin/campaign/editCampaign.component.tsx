@@ -67,23 +67,17 @@ export default function EditCampaign() {
 
   const updateLightConfig = async (element: string, config: ConfigLight[]) => {
     const newParameters: Partial<CampaignParameters> = { config: { lights: config } };
-
-    //console.log('sending:', { newParameters });
     const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
 
-    if (result.success) {
-      ShowModal(`Update ${element} light config sucessful`)
+    if (result.success)
       void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Parameters }));
-    } else {
-      ShowModal(`Update ${element} light config failed`);
-    }
+
+    return (result.success);
+    // ShowModal(`Update ${element} light config sucessful`)
   }
 
   const updateDefaultAsset = async (element: string, config: string) => {
-    const newConfig = { [element]: config };
-    const newParameters: Partial<CampaignParameters> = { config: newConfig };
-    // console.log(newParameters, location);
-    const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
+    const result = await UpdateDocObject(FirestoreLocation.Parameters, { config: { [element]: config } }, campaignName);
 
     if (result.success) {
       ShowModal(`Update ${element} asset default config sucessful`)
