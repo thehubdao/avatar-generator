@@ -39,7 +39,6 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
   const DEFAULT_CONFIG_SECTION_KEYS: { [key: string]: keyof CampaignConfig } = {
     [FirestoreLocation.Stages]: 'defStage',
     [FirestoreLocation.Animations]: 'defAnimation',
-    [FirestoreLocation.EnvMaps]: 'defEnvMap',
   }
 
   const dispatch = useAppDispatch();
