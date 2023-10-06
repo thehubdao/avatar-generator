@@ -38,12 +38,11 @@ import AvatarEditor, {
   GetWearableOption,
   RemoveStage,
   SetStage,
-  SetFeaturesData
+  SetFeaturesData,
+  SetEnvironment
 } from "./editor.component";
-import { AGChangeCamPosition, AGChangeLookAtPosition, AddBackgroundScene, AddLightEnvScene, AddToScene, TakeCanvasPicture } from "./viewer.component";
+import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "./viewer.component";
 import {Result} from "../../types/common.type";
-import { GetShadow } from "../../utils/threejs/shadow.util";
-import { GetEnvironmentMap, GetSkybox } from "../../utils/threejs/envMap.util";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -116,30 +115,11 @@ export default function AvatarBuilder({
     await SetFeaturesData(selectListFeatures);
 
     await loadPreData();
+
+    if(envMapList && envMapList.length > 0 && campaignConfig.envMap)
+      await SetEnvironment(envMapList, campaignConfig.envMap.defBgMap, campaignConfig.envMap.defLightMap, campaignConfig.envMap.skyboxConfig)
+
     await onClickChangeSkinColor();
-
-    if (campaignConfig.defShadow != undefined) {
-      const leShadow = GetShadow(campaignConfig.defShadow);
-      if (leShadow != undefined) {
-        AddToScene(leShadow.shadowLight);
-        AddToScene(leShadow.shadowPlane);
-      }
-    }
-
-    const bgMap = envMapList?.find(em => em.name === campaignConfig.envMap?.defBgMap) ?? envMapList?.at(0);
-    const bgMapTexture = await GetEnvironmentMap(bgMap?.path);
-    if (bgMapTexture != undefined) AddBackgroundScene(bgMapTexture);
-
-    const lightMap = envMapList?.find(em => em.name === campaignConfig.envMap?.defLightMap) ?? envMapList?.at(0);
-    const lightMapTexture = await GetEnvironmentMap(lightMap?.path);
-    if (lightMapTexture != undefined) AddLightEnvScene(lightMapTexture);
-
-    if (campaignConfig.envMap?.skyboxConfig != undefined) {
-      const skyboxConfig = campaignConfig.envMap.skyboxConfig;
-      const skyboxObject = GetSkybox(bgMapTexture, skyboxConfig.scale, skyboxConfig.radius, skyboxConfig.height);
-      if (skyboxObject != undefined) AddToScene(skyboxObject);
-    }
-
 
     const startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
     await ChangeStartAnimation(startAnimation?.path);
@@ -423,10 +403,12 @@ export default function AvatarBuilder({
         {/* CANVAS BACKGROUND */}
         <div style={{ backgroundColor: `#${bgColor ?? '272727'}` }} className="w-full h-screen absolute" />
         {/* CANVAS */}
-        <AvatarEditor avatarBasePath={avatarBasePath}
+        <AvatarEditor
+          avatarBasePath={avatarBasePath}
           onReady={() => onAvatarBuilderReady()}
           changeMaterial={campaignConfig.changeMaterial}
           lights={campaignConfig.lights}
+          defaultShadow={campaignConfig.defShadow}
           editMode={isEditModeSelected}
           enablePan={enablePan}
           defaultCamera={campaignConfig.defCam}
