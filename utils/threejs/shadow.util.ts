@@ -33,12 +33,16 @@ function GenerateShadowLight(lightPos: AGVector3) {
 function GenerateDynamicShadow(lightPos: AGVector3) {
   const geometry = new PlaneGeometry(10, 10);
   geometry.rotateX(- Math.PI / 2);
+
   const material = new ShadowMaterial();
   material.opacity = 0.2;
+
   const shadowPlane = new Mesh(geometry, material);
   shadowPlane.position.y = 0;
   shadowPlane.receiveShadow = true;
+
   const shadowLight = GenerateShadowLight(lightPos);
+  
   return {shadowPlane, shadowLight};
 }
 
