@@ -110,6 +110,6 @@ export function GetKeyByValue<TEnum extends object>(value: string, enumRef: TEnu
   return key as unknown as keyof TEnum;
 }
 
-export const CastNumberToString = (number: number) => {
+export function CastNumberToString(number: number) {
   return isNaN(number) ? "" : number.toString();
-};
+}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ConfigLight } from "../../../../../interfaces/light.interface";
 import { AGVector3 } from "../../../../../interfaces/common.interface";
 import AGButton from "../../../../common/ag-button.component";

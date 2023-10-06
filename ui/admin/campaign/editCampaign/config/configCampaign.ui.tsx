@@ -60,6 +60,17 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
     setConfigOption(destiny);
   }
 
+  const handleUpdateLight = async (config: ConfigLight[], messages: { success: string, error: string }, newLightOption: string) => {
+    const isSuccess = await updateLightConfig(config);
+
+    if (!isSuccess) {
+      ShowModal(messages.error);
+    } else {
+      ShowModal(messages.success);
+      setLightOption(newLightOption);
+    }
+  }
+
   const changeColorConfigOption = () => {
     setColorOption(colorConfig.current?.value ?? '');
   }
@@ -211,15 +222,8 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                     <LightConfigUI
                       lightOption={lightOption}
                       lights={configData?.lights}
-                      updateLightConfig={async (config: ConfigLight[], messages: { success: string, error: string }, newLightOption: string) => {
-                        const result = await updateLightConfig(config);
-
-                        if (!result) {
-                          ShowModal(messages.error);
-                        } else {
-                          ShowModal(messages.success);
-                          setLightOption(newLightOption);
-                        }
+                      updateLightConfig={(config: ConfigLight[], messages: { success: string, error: string }, newLightOption: string) => {
+                        handleUpdateLight(config, messages, newLightOption);
                       }}
                     />
                   </div>}

@@ -1,16 +1,16 @@
 import { Dispatch, SetStateAction } from "react";
 import { CastNumberToString } from "../../../../../../utils/common.util";
 
-// Agrega una restricción en el tipo genérico Type
-interface AxisInputFieldUIProps<Type, TypeKeys extends keyof Type> {
+// Agrega una restricción en el tipo genérico type
+interface AxisInputFieldUIProps<T, TKey extends keyof T> {
   inputLabel: string;
   axisLabels: string[];
-  configProp: Record<TypeKeys, number>;
-  setConfigProp: Dispatch<SetStateAction<Record<TypeKeys, number>>>;
+  configProp: Record<TKey, number>;
+  setConfigProp: Dispatch<SetStateAction<Record<TKey, number>>>;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, setFunction: React.Dispatch<React.SetStateAction<number>>) => void;
 }
 
-export default function AxisInputFieldUI<Type>({ inputLabel, axisLabels, configProp, setConfigProp, handleInputChange }: AxisInputFieldUIProps<Type, keyof Type>) {
+export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp, setConfigProp, handleInputChange }: AxisInputFieldUIProps<T, keyof T>) {
   return (
     <div>
       <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
@@ -24,7 +24,7 @@ export default function AxisInputFieldUI<Type>({ inputLabel, axisLabels, configP
               type="number"
               name={axis.toLowerCase()}
               className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-              value={CastNumberToString(configProp[axis.toLowerCase() as keyof Type])}
+              value={CastNumberToString(configProp[axis.toLowerCase() as keyof T])}
               onChange={(e) => handleInputChange(e, (value) => setConfigProp({ ...configProp, [axis.toLowerCase()]: value }))}
             />
           </div>

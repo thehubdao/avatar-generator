@@ -1,15 +1,15 @@
 import { Dispatch, SetStateAction } from "react";
 import { CastNumberToString } from "../../../../../../utils/common.util";
 
-// Agrega una restricción en el tipo genérico Type
-interface SingleInputFieldUIProps<Type> {
+// Agrega una restricción en el tipo genérico type
+interface SingleInputFieldUIProps<T> {
   inputLabel: string;
-  configProp: Type;
+  configProp: T;
   setConfigProp: Dispatch<SetStateAction<number>>;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, setFunction: React.Dispatch<React.SetStateAction<number>>) => void;
 }
 
-export default function SingleInputFieldUI<Type>({ inputLabel, configProp, setConfigProp, handleInputChange }: SingleInputFieldUIProps<Type>) {
+export default function SingleInputFieldUI<T>({ inputLabel, configProp, setConfigProp, handleInputChange }: SingleInputFieldUIProps<T>) {
   return (
     <div>
       <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
