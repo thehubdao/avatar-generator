@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
 import { ConfigLight } from "../../../../../interfaces/light.interface";
 import { AGVector3 } from "../../../../../interfaces/common.interface";
 import AGButton from "../../../../common/ag-button.component";
@@ -50,8 +50,8 @@ export default function LightConfigUI({
 
   //* Handle input change for every numeric input fields on lights config
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-    setFunction: React.Dispatch<React.SetStateAction<number>>
+    e: ChangeEvent<HTMLInputElement>,
+    setFunction: Dispatch<SetStateAction<number>>
   ) => {
     const newValue = e.currentTarget.valueAsNumber;
     setFunction(newValue);

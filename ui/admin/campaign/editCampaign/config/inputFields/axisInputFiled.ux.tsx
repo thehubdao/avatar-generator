@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from "react";
+import { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { CastNumberToString } from "../../../../../../utils/common.util";
 
 interface AxisInputFieldUIProps<T, TKey extends keyof T> {
@@ -6,7 +6,7 @@ interface AxisInputFieldUIProps<T, TKey extends keyof T> {
   axisLabels: string[];
   configProp: Record<TKey, number>;
   setConfigProp: Dispatch<SetStateAction<Record<TKey, number>>>;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, setFunction: React.Dispatch<React.SetStateAction<number>>) => void;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement>, setFunction: Dispatch<SetStateAction<number>>) => void;
 }
 
 export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp, setConfigProp, handleInputChange }: AxisInputFieldUIProps<T, keyof T>) {

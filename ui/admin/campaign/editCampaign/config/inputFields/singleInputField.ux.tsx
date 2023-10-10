@@ -1,10 +1,10 @@
-import { Dispatch, SetStateAction } from "react";
+import { ChangeEvent, Dispatch, SetStateAction } from "react";
 
 interface SingleInputFieldUIProps<T> {
   inputLabel: string;
   configProp: T;
   setConfigProp: Dispatch<SetStateAction<number>>;
-  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>, setFunction: React.Dispatch<React.SetStateAction<number>>) => void;
+  handleInputChange: (e: ChangeEvent<HTMLInputElement>, setFunction: Dispatch<SetStateAction<number>>) => void;
 }
 
 export default function SingleInputFieldUI<T>({ inputLabel, configProp, setConfigProp, handleInputChange }: SingleInputFieldUIProps<T>) {
