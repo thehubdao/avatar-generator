@@ -5,8 +5,6 @@ import 'swiper/css';
 import {BasicData} from '../../../../interfaces/common.interface';
 import {useEffect, MouseEvent, useState} from 'react';
 import {GetFileUrl} from "../../../../utils/firebase.util";
-import { LogError } from '../../../../utils/common.util';
-import { Module } from '../../../../enums/common.enum';
 
 interface Props {
   list?: FeatureInterface[];
@@ -26,8 +24,7 @@ function OptionThumbnail({opt}: OptionProps) {
   useEffect(() => {
     (async () => {
       const result = await GetFileUrl(opt.thumb);
-      if (!result.success) void LogError(Module.OptionSelector, `${result.errCode}: ${result.errMessage}`)
-      else setImageUrl(result.value ?? '/resources/images/image.png');
+      if (result.success) setImageUrl(result.value ?? undefined);
     })
   }, [opt])
 
@@ -35,10 +32,10 @@ function OptionThumbnail({opt}: OptionProps) {
     <>
       {imageUrl == undefined ?
         <div className='w-[75px] h-[75px] rounded-md overflow-hidden flex justify-center items-center bg-gray-700 blur-md'>
-          <Image src={'/resources/images/image.png'} width={75} height={75} alt={opt.name}/>
+          <Image src={'/resources/icons/features/default.svg'} width={75} height={75} alt={opt.name}/>
         </div> :
         <div className='w-[75px] h-[75px] rounded-md overflow-hidden flex justify-center items-center bg-gray-700'>
-          <Image placeholder="blur" blurDataURL="/resources/images/image.png"
+          <Image placeholder="blur" blurDataURL="/resources/icons/features/default.svg"
                  src={imageUrl} width={75} height={75} alt={opt.name}/>
         </div>
       }
@@ -72,12 +69,10 @@ export default function OptionSelectorComponent(props: Props) {
   const itemsPerView = 4;
   return (
     <div className='w-full'>
-      <Swiper
-        slidesPerView={itemsPerView}
-        grabCursor={true}
-        loop={itemsLength < itemsPerView ? false : true}
-        className='!py-2'
-      >
+      <Swiper slidesPerView={itemsPerView}
+              grabCursor={true}
+              loop={itemsLength < itemsPerView ? false : true}
+              className='!py-2'>
         {OptionList(props)}
       </Swiper>
     </div>
