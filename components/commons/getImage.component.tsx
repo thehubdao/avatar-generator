@@ -1,22 +1,18 @@
 import { useEffect, useState } from "react";
 import GetImageUI from "../../ui/common/getImage.ui";
 import { GetFileUrl } from "../../utils/firebase.util";
-import { Module } from "../../enums/common.enum";
-import { LogError } from "../../utils/common.util";
 
 interface GetImageProps {
   url?: string;
   alt?: string;
 }
 
+// TODO: Check the nextJS Image component, maybe we can improve the expectated behavior with only that component
 export default function GetImage({ url, alt }: GetImageProps) {
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
 
   const getData = async () => {
     const result = await GetFileUrl(url);
-    if (!result.success)
-      void LogError(Module.OptionSelector, `${result.errCode}: ${result.errMessage}`)
-
     setImageUrl(result.success ? result.value : undefined);
   }
 
