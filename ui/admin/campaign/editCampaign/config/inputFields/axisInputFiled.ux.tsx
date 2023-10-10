@@ -1,7 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { CastNumberToString } from "../../../../../../utils/common.util";
 
-// Agrega una restricción en el tipo genérico type
 interface AxisInputFieldUIProps<T, TKey extends keyof T> {
   inputLabel: string;
   axisLabels: string[];
@@ -16,7 +15,7 @@ export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp
       <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
         {inputLabel}:
       </p>
-      <div className="flex gap-4 px-2">
+      <div className="flex justify-between gap-4 px-2">
         {axisLabels.map((axis) => (
           <div className="flex items-center gap-2" key={axis}>
             <p>{axis}:</p>

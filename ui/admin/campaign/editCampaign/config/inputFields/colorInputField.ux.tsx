@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
 
-// Agrega una restricción en el tipo genérico Type
 interface ColorInputFieldUIProps {
   inputLabel: string;
   configProp: string;
@@ -9,7 +8,7 @@ interface ColorInputFieldUIProps {
 
 export default function ColorInputFieldUI({ inputLabel, configProp, setConfigProp }: ColorInputFieldUIProps) {
   return (
-    <div className="px-2">
+    <div className="mt-2 pt-4 px-2">
       <p className="font-poppins font-medium text-purple pb-2">{inputLabel}:</p>
       <div className="relative rounded-full overflow-hidden w-full h-12">
         <input type="color" name="" value={`#${configProp}`} className="absolute -top-2 -left-2 w-[130%] h-[130%]"

@@ -54,7 +54,7 @@ export default function LightConfigUI({
     setFunction: React.Dispatch<React.SetStateAction<number>>
   ) => {
     const newValue = e.currentTarget.valueAsNumber;
-    setFunction(isNaN(newValue) ? 0 : newValue);
+    setFunction(newValue);
   };
 
   const sendUpdateLightConfig = () => {
@@ -232,30 +232,32 @@ export default function LightConfigUI({
         />
       )}
       {/* Other input fields */}
-      {('intst' in lightParams || sectionOnLightType[createLightOption as LightType].includes('intensity')) && (
-        <SingleInputFieldUI
-          inputLabel="Intensity"
-          configProp={lightIntensity}
-          setConfigProp={setLightIntensity}
-          handleInputChange={handleInputChange}
-        />
-      )}
-      {('dist' in lightParams || sectionOnLightType[createLightOption as LightType].includes('distance')) && (
-        <SingleInputFieldUI
-          inputLabel="Distance"
-          configProp={lightDistance}
-          setConfigProp={setLightDistance}
-          handleInputChange={handleInputChange}
-        />
-      )}
-      {('decay' in lightParams || sectionOnLightType[createLightOption as LightType].includes('decay')) && (
-        <SingleInputFieldUI
-          inputLabel="Decay"
-          configProp={lightDecay}
-          setConfigProp={setLightDecay}
-          handleInputChange={handleInputChange}
-        />
-      )}
+      <div className="w-[350px] flex flex-wrap justify-between">
+        {('intst' in lightParams || sectionOnLightType[createLightOption as LightType].includes('intensity')) && (
+          <SingleInputFieldUI
+            inputLabel="Intensity"
+            configProp={lightIntensity}
+            setConfigProp={setLightIntensity}
+            handleInputChange={handleInputChange}
+          />
+        )}
+        {('dist' in lightParams || sectionOnLightType[createLightOption as LightType].includes('distance')) && (
+          <SingleInputFieldUI
+            inputLabel="Distance"
+            configProp={lightDistance}
+            setConfigProp={setLightDistance}
+            handleInputChange={handleInputChange}
+          />
+        )}
+        {('decay' in lightParams || sectionOnLightType[createLightOption as LightType].includes('decay')) && (
+          <SingleInputFieldUI
+            inputLabel="Decay"
+            configProp={lightDecay}
+            setConfigProp={setLightDecay}
+            handleInputChange={handleInputChange}
+          />
+        )}
+      </div>
       {/* Create and Update button */}
       <div className="pt-4 px-2">
         {lightOption === 'new light'
