@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { MouseEvent, useRef, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
 import AGButton from "../../../../common/ag-button.component";
 import {
@@ -36,7 +36,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
   const camConfig = useRef<HTMLSelectElement>(null);
   const avatarBaseFile = useRef<HTMLInputElement>(null);
 
-  const changeConfigOption = (e: React.MouseEvent, destiny: string) => {
+  const changeConfigOption = (e: MouseEvent<HTMLDivElement>, destiny: string) => {
     const target = e.currentTarget as HTMLElement;
     const elements = target.parentNode?.childNodes;
 

@@ -7,6 +7,7 @@ import { UserInterface } from "./firebase.interface";
 import { AccessoryInterface, AnimationInterface, EnvMapInterface, FeatureInterface, StageInterface } from "./api.interface";
 import { ConfigEnvMap } from "./envMap.interface";
 import { ConfigShadow } from "./shadow.interface";
+import { ReactNode } from "react";
 
 export interface BasicData {
   id: string;
@@ -117,5 +118,5 @@ export interface AuthStateInterface {
 
 export interface SocialMediaDataProps {
   link: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
 }

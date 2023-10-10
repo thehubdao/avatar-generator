@@ -1,5 +1,6 @@
 import { FeaturesIcons } from "../../../enums/icons.enum";
 import { FeatureBasic } from "../../../interfaces/common.interface";
+import { MouseEvent } from "react";
 
 interface FeatureItemSelectorUIProps {
   item: FeatureBasic;
@@ -9,7 +10,7 @@ interface FeatureItemSelectorUIProps {
 
 export default function FeatureItemSelectorUI({ item, activeOpc, handleClick }: FeatureItemSelectorUIProps) {
   const isActive: boolean = activeOpc && activeOpc === item.displayName ? true : false;
-  const selectFeature = (e: React.MouseEvent, name: string) => {
+  const selectFeature = (e: MouseEvent<HTMLDivElement>, name: string) => {
     e.preventDefault();
     handleClick(name);
   }

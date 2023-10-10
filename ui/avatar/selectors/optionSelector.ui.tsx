@@ -1,6 +1,7 @@
 import { FeatureInterface } from "../../../interfaces/api.interface";
 import { BasicData } from "../../../interfaces/common.interface";
 import OptionCardUI from "./optionCard.ui";
+import {MouseEvent} from "react";
 
 interface OptionSelectorProps {
   list?: FeatureInterface[];
@@ -10,7 +11,7 @@ interface OptionSelectorProps {
 
 export default function OptionSelectorUI({ list, activeOption, handleClick }: OptionSelectorProps) {
 
-  const selectFeature = (e: React.MouseEvent, opt: FeatureInterface) => {
+  const selectFeature = (e: MouseEvent<HTMLDivElement>, opt: FeatureInterface) => {
     e.preventDefault();
     handleClick(opt.id, opt.path, opt.name);
   }
