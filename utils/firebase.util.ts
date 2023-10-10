@@ -427,7 +427,7 @@ export async function GetCurrentUser() {
 
 export async function GetFileUrl(filePath?: string): Promise<Result<string>> {
   if(filePath == undefined || filePath === '') {
-    const msg = "Missing path to get URL!";
+    const msg = "Missing firebase path to get file URL!";
     void LogError(Module.FirebaseUtil, msg);
     return {success: false, errCode: CommonErrorCode.MissingInfo, errMessage: msg};
   }

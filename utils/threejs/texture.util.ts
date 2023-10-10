@@ -81,7 +81,7 @@ export async function GetToneTexture(tone: TextureTone = 'threeTone' ) {
 
 export async function GetTextureFromFile(url: string | undefined): Promise<Result<Texture>> {
   if (url == undefined) {
-    const msg =  "Missing path to get URL!";
+    const msg =  "Missing URL to get texture from file!";
     void LogError(Module.TextureUtil, msg);
     return {success: false, errMessage: msg, errCode: CommonErrorCode.MissingInfo};
   }
