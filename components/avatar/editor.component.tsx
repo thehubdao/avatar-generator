@@ -28,7 +28,6 @@ import { Result } from "../../types/common.type";
 import { GetLights } from "../../utils/threejs/light.util";
 import { ConfigLight } from "../../interfaces/light.interface";
 import { GetShadow } from "../../utils/threejs/shadow.util";
-import { EnvMapInterface } from "../../interfaces/api.interface";
 import { ConfigSkybox } from "../../interfaces/envMap.interface";
 import { GetEnvironmentMap } from "../../utils/threejs/envMap.util";
 import { ConfigShadow } from "../../interfaces/shadow.interface";
@@ -115,12 +114,11 @@ export async function SetFeaturesData(selectListFeatures: FeatureBasic[]) {
   _featureListData = await GetFeaturesData(_avatar.scene, selectListFeatures);
 }
 
-export async function SetEnvironment(envMapList: EnvMapInterface[], bgMap?: string, lightMap?: string, skyboxConfig?: ConfigSkybox) {
-  
+export async function SetEnvironment(bgMap?: string, lightMap?: string, skyboxConfig?: ConfigSkybox) {
   if (bgMap) {
-    const bgTexture = await GetEnvironmentMap(envMapList, bgMap, skyboxConfig);
+    const bgTexture = await GetEnvironmentMap(bgMap, skyboxConfig);
     if (!bgTexture.success) 
-      void ShowModal("Sorry, An error occurred while creating the environment!");
+      void ShowModal("Sorry, An error occurred while creating the background environment!"); // TODO: this modal should be a snackbar without buttons
     else {
       AddBackgroundScene(bgTexture.value.texture);
       if (bgTexture.value.skybox)
@@ -129,9 +127,9 @@ export async function SetEnvironment(envMapList: EnvMapInterface[], bgMap?: stri
   }
 
   if (lightMap) {
-    const result = await GetEnvironmentMap(envMapList, lightMap);
+    const result = await GetEnvironmentMap(lightMap);
     if (!result.success) 
-      void LogError(Module.Editor, `${result.errCode}: ${result.errMessage}`)
+      void ShowModal("Sorry, An error occurred while creating the light environment!"); // TODO: this modal should be a snackbar without buttons
     else 
       AddLightEnvScene(result.value.texture);
   }
@@ -177,12 +175,6 @@ export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, 
   }
 
   async function initEditor() {
-    const getAvatarBaseResult = await GetGltfModel(avatarBasePath);
-    if (!getAvatarBaseResult.success) {
-      ShowModal(getAvatarBaseResult.errMessage);
-      return;
-    }
-
     const leLights = GetLights(lights);
     for (const light of leLights) {
       AddToScene(light);
@@ -194,6 +186,12 @@ export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, 
         AddToScene(leShadow.shadowLight);
         AddToScene(leShadow.shadowPlane);
       }
+    }
+
+    const getAvatarBaseResult = await GetGltfModel(avatarBasePath);
+    if (!getAvatarBaseResult.success) {
+      ShowModal(getAvatarBaseResult.errMessage);
+      return;
     }
 
     _avatar = getAvatarBaseResult.value;
@@ -209,7 +207,8 @@ export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, 
   }
 
   return (
-    <AvatarViewer onReady={() => onAvatarEditorReady()}
+    <AvatarViewer 
+      onReady={() => onAvatarEditorReady()}
       defaultCamPos={defaultCamera?.pos}
       defaultCamLookAt={defaultCamera?.lookAt}
       editMode={editMode}

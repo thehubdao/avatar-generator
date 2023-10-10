@@ -116,8 +116,9 @@ export default function AvatarBuilder({
 
     await loadPreData();
 
-    if(envMapList && envMapList.length > 0 && campaignConfig.envMap)
-      await SetEnvironment(envMapList, campaignConfig.envMap.defBgMap, campaignConfig.envMap.defLightMap, campaignConfig.envMap.skyboxConfig)
+    const bgMap = envMapList?.find(em => em.name === campaignConfig.envMap?.defBgMap);
+    const lightMap = envMapList?.find(em => em.name === campaignConfig.envMap?.defLightMap);
+    await SetEnvironment(bgMap?.path, lightMap?.path, campaignConfig.envMap?.skyboxConfig)
 
     await onClickChangeSkinColor();
 

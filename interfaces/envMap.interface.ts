@@ -1,7 +1,7 @@
 export interface ConfigSkybox {
-  scale?: number;
-  radius?: number;
-  height?: number;
+  scale: number;
+  radius: number;
+  height: number;
 }
 
 export interface ConfigEnvMap {
