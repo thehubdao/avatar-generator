@@ -223,7 +223,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                       lightOption={lightOption}
                       lights={configData?.lights}
                       updateLightConfig={(config: ConfigLight[], messages: { success: string, error: string }, newLightOption: string) => {
-                        handleUpdateLight(config, messages, newLightOption);
+                        void handleUpdateLight(config, messages, newLightOption);
                       }}
                     />
                   </div>}
