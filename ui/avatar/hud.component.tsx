@@ -9,7 +9,7 @@ import MobileColorSelectorComponent from "./selectors/mobile/colorSelector.compo
 import { useEffect, useState } from "react";
 import Image from 'next/image';
 import FeatureSelector from "./selectors/featureSelector.component";
-import OptionSelector from "./selectors/optionSelector.component";
+import OptionSelectorUI from "./selectors/optionSelector.ui";
 import ColorSelector from "./selectors/colorSelector.component";
 import HudFeatureTitle from "./common/hudTitle.component";
 import { RemovedAcc } from "../../utils/common.util";
@@ -202,6 +202,7 @@ export default function HudComponent({
         <div className="fixed flex right-0 top-0 justify-center items-center gap-1 py-3 px-8 max-w-lg">
           <div className="-z-10 absolute -left-10 h-full w-[180%] skew-x-[45deg] bg-bg" />
           <Image
+            priority
             src={'/resources/images/the-hub-logo-web.svg'}
             width={0}
             height={0}
@@ -251,7 +252,7 @@ export default function HudComponent({
             </div>
             {/* OPTION SECTION */}
             <div className="h-full pt-8">
-              <OptionSelector
+              <OptionSelectorUI
                 list={optionList}
                 activeOption={selectedOption}
                 handleClick={(id: string, path: string, name: string) => onOptionChange(id, path, name)}

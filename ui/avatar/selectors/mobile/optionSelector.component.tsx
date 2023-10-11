@@ -23,19 +23,19 @@ function OptionThumbnail({opt}: OptionProps) {
   
   useEffect(() => {
     (async () => {
-      const newImage = await GetFileUrl(opt.thumb);
-      setImageUrl(newImage ?? '/resources/images/image.png');
-    })().catch(err => console.error(err));
+      const result = await GetFileUrl(opt.thumb);
+      if (result.success) setImageUrl(result.value ?? undefined);
+    })
   }, [opt])
 
   return (
     <>
       {imageUrl == undefined ?
         <div className='w-[75px] h-[75px] rounded-md overflow-hidden flex justify-center items-center bg-gray-700 blur-md'>
-          <Image src={'/resources/images/image.png'} width={75} height={75} alt={opt.name}/>
+          <Image src={'/resources/icons/features/default.svg'} width={75} height={75} alt={opt.name}/>
         </div> :
         <div className='w-[75px] h-[75px] rounded-md overflow-hidden flex justify-center items-center bg-gray-700'>
-          <Image placeholder="blur" blurDataURL="/resources/images/image.png"
+          <Image placeholder="blur" blurDataURL="/resources/icons/features/default.svg"
                  src={imageUrl} width={75} height={75} alt={opt.name}/>
         </div>
       }
@@ -69,12 +69,10 @@ export default function OptionSelectorComponent(props: Props) {
   const itemsPerView = 4;
   return (
     <div className='w-full'>
-      <Swiper
-        slidesPerView={itemsPerView}
-        grabCursor={true}
-        loop={itemsLength < itemsPerView ? false : true}
-        className='!py-2'
-      >
+      <Swiper slidesPerView={itemsPerView}
+              grabCursor={true}
+              loop={itemsLength < itemsPerView ? false : true}
+              className='!py-2'>
         {OptionList(props)}
       </Swiper>
     </div>

@@ -26,8 +26,8 @@ export default function EditCampaign() {
 
   async function downloadFile(path: string) {
     const fileLink = await GetFileUrl(path);
-    if (fileLink === undefined) return ShowModal('error on file download, file link is undefined.');
-    window.open(fileLink, '_blank');
+    if (!fileLink.success) return ShowModal("Error downloading the file, file link doesn't exist.");
+    window.open(fileLink.value, '_blank');
   }
 
   const fetchAllCampaignData = () => {
