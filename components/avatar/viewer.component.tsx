@@ -1,18 +1,17 @@
-import {useEffect, useRef} from "react";
+import { useEffect, useRef } from "react";
 import {
   AnimationMixer,
   Clock,
-  EquirectangularReflectionMapping,
   Object3D,
   PerspectiveCamera,
   Scene,
-  SRGBColorSpace,
+  Texture,
   Vector3,
   WebGLRenderer
 } from "three";
-import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
-import {LogError, LogWarning} from "../../utils/common.util";
-import {Module} from "../../enums/common.enum";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { LogError, LogWarning } from "../../utils/common.util";
+import { Module } from "../../enums/common.enum";
 import {
   FrustumCulledFalse,
   GetBaseCamera,
@@ -20,8 +19,8 @@ import {
   GetBaseRenderer,
   GetBaseScene
 } from "../../utils/threejs/scene.util";
-import {AGVector3} from "../../interfaces/common.interface";
-import {GetTextureFromFile, GetToneTexture} from "../../utils/threejs/texture.util";
+import { AGVector3 } from "../../interfaces/common.interface";
+import { GetToneTexture } from "../../utils/threejs/texture.util";
 
 //#region Logic
 let _scene: Scene | undefined;
@@ -63,26 +62,40 @@ export function AddToScene(toAdd: Object3D, objName?: string) {
     return void LogError(Module.Viewer, "Scene not started yet on viewer!");
 
   const addedPos = _scene.children.length;
-  
+
   FrustumCulledFalse(toAdd);
   _scene.add(toAdd);
-  
+
   if (objName != undefined) _sceneObjs.set(objName, addedPos);
 }
 
 export function RemoveFromScene(toRemove: string) {
   if (_scene == undefined)
     return void LogError(Module.Viewer, "Scene not started yet on viewer!");
-  
+
   const location = _sceneObjs.get(toRemove);
   if (location == undefined)
     return void LogWarning(Module.Viewer, "Item on scene to remove doesn't exist!");
-  
+
   for (const [key, value] of _sceneObjs) {
     if (value > location)
       _sceneObjs.set(key, value - 1);
   }
   _scene?.children.splice(location, 1);
+}
+
+export function AddBackgroundScene(texture: Texture) {
+  if (_scene == undefined)
+    return void LogError(Module.Viewer, "Scene not started yet on viewer!");
+
+  _scene.background = texture;
+}
+
+export function AddLightEnvScene(texture: Texture) {
+  if (_scene == undefined)
+    return void LogError(Module.Viewer, "Scene not started yet on viewer!");
+
+  _scene.environment = texture;
 }
 
 export function ChangeCamPosition(value: Vector3) {
@@ -95,13 +108,13 @@ export function ChangeCamPosition(value: Vector3) {
 
 export function AGChangeCamPosition(value: AGVector3 | undefined) {
   if (value == undefined) return;
-  
+
   ChangeCamPosition(new Vector3(value.x, value.y, value.z));
 }
 
 export function ChangeLookAtPosition(value: Vector3) {
   if (_controls == undefined) return void LogError(Module.Viewer, "Missing viewer Controls!");
-  
+
   _willCameraLookAt = true;
   // _controls.target = value;
   _cameraLookAt = value;
@@ -109,7 +122,7 @@ export function ChangeLookAtPosition(value: Vector3) {
 
 export function AGChangeLookAtPosition(value: AGVector3 | undefined) {
   if (value == undefined) return;
-  
+
   ChangeLookAtPosition(new Vector3(value.x, value.y, value.z));
 }
 
@@ -125,19 +138,6 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
   });
 }
 
-export async function SetEnvironmentMap(textureUrl: string | undefined) {
-  if (_scene == undefined) return void LogError(Module.Viewer, "Missing scene on set env map!");
-  
-  const texture = await GetTextureFromFile(textureUrl);
-  if (texture == undefined) return;
-  
-  texture.mapping = EquirectangularReflectionMapping;
-  texture.colorSpace = SRGBColorSpace;
-
-  _scene.background = texture;
-  _scene.environment = texture;
-}
-
 //#endregion
 
 //#region Component
@@ -149,7 +149,7 @@ interface AvatarViewerProps {
   enablePan?: boolean;
 }
 
-export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, editMode, enablePan}: AvatarViewerProps) {
+export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt, editMode, enablePan }: AvatarViewerProps) {
   const threeCanvas = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -164,7 +164,7 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, 
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  
+
   async function preload() {
     await GetToneTexture();
   }
@@ -186,7 +186,7 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, 
     // remember these initial values
     _tanFOV = Math.tan(((Math.PI / 180) * _camera.fov / 2));
     _windowHeight = window.innerHeight;
-    
+
     await preload();
 
     window.addEventListener('resize', onWindowResize, false);
@@ -234,7 +234,7 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, 
     if (_camera.position.distanceTo(_cameraPos) < 0.1) {
       _willCameraMove = false;
     }
-    
+
     if (_controls.target.distanceTo(_cameraLookAt) < 0.1) {
       _willCameraLookAt = false;
     }
@@ -247,7 +247,7 @@ export default function AvatarViewer({onReady, defaultCamPos, defaultCamLookAt, 
 
   return (
     <>
-      <div className={`relative h-full w-full ${editMode ? 'xl:w-[42%]':''} xl:overflow-hidden xl:flex xl:justify-center transition-all duration-300`} ref={threeCanvas} onMouseDown={() => stopCamMovement()}/>
+      <div className={`relative h-full w-full ${editMode ? 'xl:w-[42%]' : ''} xl:overflow-hidden xl:flex xl:justify-center transition-all duration-300`} ref={threeCanvas} onMouseDown={() => stopCamMovement()} />
     </>
   );
 }

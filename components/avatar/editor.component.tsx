@@ -1,9 +1,9 @@
-import {LogError} from "../../utils/common.util";
-import {GlobalValues, Module} from "../../enums/common.enum";
-import {AnimationMixer} from "three";
-import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {GetGltfModel} from "../../utils/importer.util";
-import {CreateAnimationMixer, SetAnimation} from "../../utils/threejs/animation.util";
+import { LogError } from "../../utils/common.util";
+import { GlobalValues, Module } from "../../enums/common.enum";
+import { AnimationMixer } from "three";
+import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import { GetGltfModel } from "../../utils/importer.util";
+import { CreateAnimationMixer, SetAnimation } from "../../utils/threejs/animation.util";
 import {
   ChangeObjectSkinColor,
   GetFeaturesData,
@@ -19,14 +19,18 @@ import {
   FeatureInfoInterface,
   LookAtVectors
 } from "../../interfaces/common.interface";
-import {ExportModelGlb, ExportModelVrm} from "../../utils/exporter.util";
-import AvatarViewer, {AddMixer, AddToScene, RemoveFromScene} from "./viewer.component";
-import {ChangeMaterialOption} from "../../enums/model.enum";
-import {ConfigLight} from "../../interfaces/light.interface";
-import {GetLights} from "../../utils/threejs/light.util";
-import {BoneMatrix} from "../../types/model.type";
-import {ShowModal} from "../../utils/modal.util";
-import {Result} from "../../types/common.type";
+import { ExportModelGlb, ExportModelVrm } from "../../utils/exporter.util";
+import AvatarViewer, { AddBackgroundScene, AddLightEnvScene, AddMixer, AddToScene, RemoveFromScene } from "./viewer.component";
+import { ChangeMaterialOption } from "../../enums/model.enum";
+import { BoneMatrix } from "../../types/model.type";
+import { ShowModal } from "../../utils/modal.util";
+import { Result } from "../../types/common.type";
+import { GetLights } from "../../utils/threejs/light.util";
+import { ConfigLight } from "../../interfaces/light.interface";
+import { GetShadow } from "../../utils/threejs/shadow.util";
+import { ConfigSkybox } from "../../interfaces/envMap.interface";
+import { GetEnvironmentMap } from "../../utils/threejs/envMap.util";
+import { ConfigShadow } from "../../interfaces/shadow.interface";
 
 
 //#region Logic
@@ -40,7 +44,8 @@ let _featureListData: Record<string, FeatureInfoInterface> | undefined;
 let _startPose: Record<string, BoneMatrix | undefined> | undefined;
 
 export async function ChangeSkinColor(newSkinColor: string, skinName?: string) {
-  if (_avatar == undefined) return LogError(Module.Editor, "Missing armature for skin color change");
+  if (_avatar == undefined) 
+    return LogError(Module.Editor, "Missing armature for skin color change");
 
   ChangeObjectSkinColor(_avatar.scene, newSkinColor, skinName);
 }
@@ -58,7 +63,7 @@ export async function GetWearableOption(id: string, optionPath: string): Promise
     _savedModels[id] = replaceModel;
   }
 
-  return {success: true, value: replaceModel};
+  return { success: true, value: replaceModel };
 }
 
 export async function ChangeFeature(id: string, featurePath: string, name: string, selectedFeature: string, skinColor?: string, skinName?: string, changeMaterial?: ChangeMaterialOption) {
@@ -79,7 +84,7 @@ export async function ChangeAccessory(id: string, path: string, name: string, se
   const replaceModel = await GetWearableOption(id, path);
   if (!replaceModel.success)
     return LogError(Module.Editor, replaceModel.errMessage); // TODO: do something when wearable result didn't succeed
-  
+
   await ReplaceModelAccessory(_avatar.scene.children[0], replaceModel.value, _accessoryListData, selectedAcc, changeMaterial);
 }
 
@@ -91,11 +96,11 @@ export async function ChangeStartAnimation(startAnimation: string | undefined) {
 
 export async function SetStage(path?: string) {
   if (path == undefined) return;
-  
+
   const stage = await GetWearableOption(GlobalValues.StageId, path);
   if (!stage.success)
     return; // TODO: do something when stage result didn't succeed
-  
+
   AddToScene(stage.value.scene, GlobalValues.StageId);
 }
 
@@ -107,6 +112,27 @@ export async function SetFeaturesData(selectListFeatures: FeatureBasic[]) {
   if (_avatar == undefined) return LogError(Module.Editor, "Missing armature!");
 
   _featureListData = await GetFeaturesData(_avatar.scene, selectListFeatures);
+}
+
+export async function SetEnvironment(bgMap?: string, lightMap?: string, skyboxConfig?: ConfigSkybox) {
+  if (bgMap) {
+    const bgTexture = await GetEnvironmentMap(bgMap, skyboxConfig);
+    if (!bgTexture.success) 
+      void ShowModal("Sorry, An error occurred while creating the background environment!"); // TODO: this modal should be a snackbar without buttons
+    else {
+      AddBackgroundScene(bgTexture.value.texture);
+      if (bgTexture.value.skybox)
+        AddToScene(bgTexture.value.skybox);
+    }
+  }
+
+  if (lightMap) {
+    const result = await GetEnvironmentMap(lightMap);
+    if (!result.success) 
+      void ShowModal("Sorry, An error occurred while creating the light environment!"); // TODO: this modal should be a snackbar without buttons
+    else 
+      AddLightEnvScene(result.value.texture);
+  }
 }
 
 export async function GetAvatarGLB() {
@@ -130,6 +156,7 @@ interface AvatarEditorProps {
   onReady: () => Promise<void>;
   changeMaterial?: ChangeMaterialOption;
   lights?: ConfigLight[];
+  defaultShadow?: ConfigShadow;
   defaultCamera?: LookAtVectors;
   editMode?: boolean;
   enablePan?: boolean;
@@ -140,7 +167,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, lights, defaultCamera, editMode, enablePan}: AvatarEditorProps) {
+export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, lights, defaultShadow, defaultCamera, editMode, enablePan }: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -153,16 +180,24 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
       AddToScene(light);
     }
 
+    if (defaultShadow != undefined) {
+      const leShadow = GetShadow(defaultShadow);
+      if (leShadow != undefined) {
+        AddToScene(leShadow.shadowLight);
+        AddToScene(leShadow.shadowPlane);
+      }
+    }
+
     const getAvatarBaseResult = await GetGltfModel(avatarBasePath);
     if (!getAvatarBaseResult.success) {
       ShowModal(getAvatarBaseResult.errMessage);
       return;
     }
-      
+
     _avatar = getAvatarBaseResult.value;
     BonesFirst(_avatar);
     _startPose = GetPose(_avatar.scene);
-    
+
     _mixer = CreateAnimationMixer(_avatar.scene);
     await SetAnimation(_mixer, _avatar, undefined);
 
@@ -172,11 +207,12 @@ export default function AvatarEditor({avatarBasePath, onReady, changeMaterial, l
   }
 
   return (
-    <AvatarViewer onReady={() => onAvatarEditorReady()}
-                  defaultCamPos={defaultCamera?.pos}
-                  defaultCamLookAt={defaultCamera?.lookAt}
-                  editMode={editMode}
-                  enablePan={enablePan}
+    <AvatarViewer 
+      onReady={() => onAvatarEditorReady()}
+      defaultCamPos={defaultCamera?.pos}
+      defaultCamLookAt={defaultCamera?.lookAt}
+      editMode={editMode}
+      enablePan={enablePan}
     />
   );
 }

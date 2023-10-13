@@ -91,7 +91,7 @@ export default function EditCampaignUI({ downloadFile, updateColorConfig, update
                     accessoriesCount={campaignParameters.accessories?.length ?? 0}
                     defAnimation={campaignParameters.config?.defAnimation}
                     defStage={campaignParameters.config?.defStage}
-                    defEnvironment={campaignParameters.config?.defEnvMap} />
+                    defEnvironment={campaignParameters.config?.envMap?.defBgMap} />
                 </>
               )}
             </>

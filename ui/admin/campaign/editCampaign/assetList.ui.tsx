@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, KeyboardEvent, useState } from "react";
 import AssetCard from "./assetCard.ui";
 import { useAppSelector } from "../../../../store/hooks";
 import { AssetType } from "../../../../types/asset.type";
@@ -33,7 +33,7 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
   const [shouldShowSuggestions, setShouldShowSuggestions] = useState<boolean>(false);
 
   // *Event handler for searching assets by name
-  const handleSearchByName = (event: React.FormEvent<HTMLInputElement>) => {
+  const handleSearchByName = (event: FormEvent<HTMLInputElement>) => {
     event.preventDefault()
     setShouldShowSuggestions(true)
     updateFilteredListData(event.currentTarget.value, searchByTagValue)
@@ -55,7 +55,7 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
   const handleOnClickSuggestionSearch = (itemName: string) => { updateFilteredListData(itemName, searchByTagValue) }
 
   //* Event handler for keyboard events
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'ArrowUp' && selectedItem >= 0) {
       event.preventDefault();
       setSelectedItem(prev => (prev - 1));

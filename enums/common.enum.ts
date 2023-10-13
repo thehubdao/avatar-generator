@@ -78,6 +78,7 @@ export enum Module {
   Single = 'SingleComponent',
   TextureUtil = 'TextureUtil',
   EditCampaign = 'EditCampaignComponent',
+  OptionSelector = 'OptionSelector',
   Importer = "ThreeJsImporterUtil",
 }
 
@@ -108,5 +109,6 @@ export const enum CommonErrorCode {
   FetchError = 'AG-103',
   PostNoData = 'AG-108',
   MissingInfo = 'AG-201',
+  CouldntProcess = 'AG-203',
   NoAuth = 'AG-301'
 }

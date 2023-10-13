@@ -3,6 +3,7 @@ import { Mousewheel } from 'swiper'
 import { FeatureBasic } from "../../../interfaces/common.interface";
 import { useRef } from "react";
 import FeatureItemSelectorUI from "./featureItemSelector.ui";
+import { MouseEvent } from "react";
 
 interface FeatureSelectorProps {
   list?: FeatureBasic[];
@@ -17,7 +18,7 @@ interface FeatureSelectorProps {
 function ScrollButton({ position = 'top' }: { position?: 'top' | 'bottom' }) {
   const swiper = useSwiper();
 
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     position === 'top' ? swiper.slidePrev() : swiper.slideNext();
   }

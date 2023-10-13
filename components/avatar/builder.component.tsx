@@ -38,9 +38,10 @@ import AvatarEditor, {
   GetWearableOption,
   RemoveStage,
   SetStage,
-  SetFeaturesData
+  SetFeaturesData,
+  SetEnvironment
 } from "./editor.component";
-import { AGChangeCamPosition, AGChangeLookAtPosition, SetEnvironmentMap, TakeCanvasPicture } from "./viewer.component";
+import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "./viewer.component";
 import {Result} from "../../types/common.type";
 
 interface AvatarBuilderProps {
@@ -114,10 +115,12 @@ export default function AvatarBuilder({
     await SetFeaturesData(selectListFeatures);
 
     await loadPreData();
-    await onClickChangeSkinColor();
 
-    const envMap = envMapList?.find(em => em.name === campaignConfig.defEnvMap) ?? envMapList?.at(0);
-    await SetEnvironmentMap(envMap?.path);
+    const bgMap = envMapList?.find(em => em.name === campaignConfig.envMap?.defBgMap);
+    const lightMap = envMapList?.find(em => em.name === campaignConfig.envMap?.defLightMap);
+    await SetEnvironment(bgMap?.path, lightMap?.path, campaignConfig.envMap?.skyboxConfig)
+
+    await onClickChangeSkinColor();
 
     const startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
     await ChangeStartAnimation(startAnimation?.path);
@@ -401,10 +404,12 @@ export default function AvatarBuilder({
         {/* CANVAS BACKGROUND */}
         <div style={{ backgroundColor: `#${bgColor ?? '272727'}` }} className="w-full h-screen absolute" />
         {/* CANVAS */}
-        <AvatarEditor avatarBasePath={avatarBasePath}
+        <AvatarEditor
+          avatarBasePath={avatarBasePath}
           onReady={() => onAvatarBuilderReady()}
           changeMaterial={campaignConfig.changeMaterial}
           lights={campaignConfig.lights}
+          defaultShadow={campaignConfig.defShadow}
           editMode={isEditModeSelected}
           enablePan={enablePan}
           defaultCamera={campaignConfig.defCam}

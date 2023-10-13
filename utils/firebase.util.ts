@@ -425,20 +425,25 @@ export async function GetCurrentUser() {
   });
 }
 
-export async function GetFileUrl(imagePath?: string) {
-  if(imagePath == undefined || imagePath === '')
-    return void LogError(Module.FirebaseUtil, "Missing image location");
-  
+export async function GetFileUrl(filePath?: string): Promise<Result<string>> {
+  if(filePath == undefined || filePath === '') {
+    const msg = "Missing firebase path to get file URL!";
+    void LogError(Module.FirebaseUtil, msg);
+    return {success: false, errCode: CommonErrorCode.MissingInfo, errMessage: msg};
+  }
+    
   try {
     const {ref, getDownloadURL} = await import('@firebase/storage');
 
-    const imageRef = ref(await FirebaseUtil.Instance().Storage(), imagePath);
-    return getDownloadURL(imageRef);
+    const fileRef = ref(await FirebaseUtil.Instance().Storage(), filePath);
+    const fileUrl = await getDownloadURL(fileRef);
+
+    return { success: true, value: fileUrl};
   }
   catch (e) {
     const err = e as FirebaseError;
-    console.error(`Error getting Image Url. ${err.message}`);
-    return undefined;
+    void LogError(Module.FirebaseUtil, err.message);
+    return {success: false, errCode: err.code, errMessage: err.message};
   }
 }
 
