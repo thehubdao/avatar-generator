@@ -11,6 +11,12 @@ import { fetchData } from "../../../../store/currentCampaignSlice";
 import { ShowModal } from "../../../../utils/modal.util";
 import { CampaignConfig } from "../../../../interfaces/common.interface";
 
+type ConfigSections = FirestoreLocation.Stages | FirestoreLocation.Animations;
+const DEFAULT_CONFIG_SECTIONS = [FirestoreLocation.Stages, FirestoreLocation.Animations];
+const DEFAULT_CONFIG_SECTION_KEYS: Record<ConfigSections, keyof CampaignConfig> = {
+  [FirestoreLocation.Stages]: 'defStage',
+  [FirestoreLocation.Animations]: 'defAnimation',
+};
 interface AssetCardProps {
   id: string;
   name: string;
@@ -34,12 +40,6 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
   const [hasFile, setHasFile] = useState<boolean>(false);
   const [hasThumb, setHasThumb] = useState<boolean>(false);
   const [willUpdateAsset, setWillUpdateAsset] = useState<boolean>(false);
-
-  const DEFAULT_CONFIG_SECTIONS = [FirestoreLocation.Stages, FirestoreLocation.Animations];
-  const DEFAULT_CONFIG_SECTION_KEYS: { [key: string]: keyof CampaignConfig } = {
-    [FirestoreLocation.Stages]: 'defStage',
-    [FirestoreLocation.Animations]: 'defAnimation',
-  }
 
   const dispatch = useAppDispatch();
 
@@ -146,8 +146,8 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
                 </>
                 : <div className={`flex ${DEFAULT_CONFIG_SECTIONS.includes(location) ? 'justify-between' : 'justify-end'} items-center w-full`}>
                   {(DEFAULT_CONFIG_SECTIONS.includes(location)) && (
-                    <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name} onClickEvent={() => { updateDefaultAsset(name, DEFAULT_CONFIG_SECTION_KEYS[location]); }}>
-                      {campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name
+                    <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location as ConfigSections]] === name} onClickEvent={() => { updateDefaultAsset(name, DEFAULT_CONFIG_SECTION_KEYS[location as ConfigSections]); }}>
+                      {campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location as ConfigSections]] === name
                         ? <div className="text-sm flex items-center gap-1">
                           <AiOutlineCheckCircle />
                           <p>default</p>
