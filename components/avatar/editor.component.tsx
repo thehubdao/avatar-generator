@@ -20,7 +20,7 @@ import {
   LookAtVectors
 } from "../../interfaces/common.interface";
 import { ExportModelGlb, ExportModelVrm } from "../../utils/exporter.util";
-import AvatarViewer, { AddBackgroundScene, AddLightEnvScene, AddMixer, AddToScene, RemoveFromScene } from "./viewer.component";
+import AvatarViewer, { AddBackgroundScene, AddComposer, AddLightEnvScene, AddMixer, AddToScene, RemoveFromScene } from "./viewer.component";
 import { ChangeMaterialOption } from "../../enums/model.enum";
 import { BoneMatrix } from "../../types/model.type";
 import { ShowModal } from "../../utils/modal.util";
@@ -194,6 +194,8 @@ export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, 
       ShowModal(getAvatarBaseResult.errMessage);
       return;
     }
+
+    AddComposer();
 
     _avatar = getAvatarBaseResult.value;
     BonesFirst(_avatar);
