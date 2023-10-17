@@ -7,6 +7,8 @@
     "no-console": ["error", {
       "allow": ["warn", "error"]
     }],
+    "@typescript-eslint/no-redundant-type-constituents": "off",
+    "@typescript-eslint/no-unsafe-enum-comparison": "off",
     "@typescript-eslint/naming-convention": [
       "error",
       {
