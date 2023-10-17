@@ -1,29 +1,4 @@
-﻿export const enum GlobalValues {
-  BaseCampaign = 'thehub',
-  Acc = 'Accessories',
-  Config = 'Config',
-  AccEnd = 'Acc',
-  AccGroup = 'Accessories.AG',
-  AvatarBase = 'base_mesh/MetaAvatarHub.glb',
-  CollectorIndexSeparator = '-',
-  StageId = 'stage',
-}
-
-export enum ExportAttributeValues {
-  Campaign = 'campaign',
-}
-
-export enum ViewModuleState {
-  SwitchingModule,
-  OnModule
-}
-
-export enum IFrameValues {
-  Project = 'avatar-generator',
-  Event = 'message',
-}
-
-export enum IFrameEvents {
+﻿export enum IFrameEvent {
   Ready = 'ready',
   Subscribe = 'subscribe',
   Exported = 'exported',
