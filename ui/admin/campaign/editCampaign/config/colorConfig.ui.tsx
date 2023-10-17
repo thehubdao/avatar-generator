@@ -113,7 +113,7 @@ export default function ColorConfigUI({ materialName, color, id, usePalette, col
                         </div>
                         <div className="relative rounded-lg overflow-hidden w-full h-12 my-2 ml-2">
                           <input type="color" name="" value={`#${paletteColors[defaultPaletteColor]}`}
-                            className="absolute -top-2 -left-2 w-[130%] h-[130%]"
+                            className="absolute -top-2 -left-2 w-[130%] h-[130%] cursor-pointer"
                             alt="change default palett color"
                             onChange={e => {
                               const arr = [...paletteColors];
@@ -148,7 +148,7 @@ export default function ColorConfigUI({ materialName, color, id, usePalette, col
                             return (
                               <div key={index} className="relative w-9 h-9 overflow-hidden rounded-full">
                                 <input type="color" name="" id={`${id}-color-${index}`} value={`#${color}`}
-                                  className="absolute top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 w-12 h-12"
+                                  className="absolute top-2/4 left-2/4 -translate-x-2/4 -translate-y-2/4 w-12 h-12 cursor-pointer"
                                   onChange={e => {
                                     const arr = [...paletteColors];
                                     arr[index] = e.target.value.substring(1);
