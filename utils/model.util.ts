@@ -13,10 +13,11 @@ import {
 import {AccessoryInfoInterface, FeatureBasic, FeatureInfoInterface} from "../interfaces/common.interface";
 import {GetToneTexture} from "./threejs/texture.util";
 import {LogError, LogWarning} from "./common.util";
-import {GlobalValues, Module} from "../enums/common.enum";
+import {Module} from "../enums/common.enum";
 import {BoneMatrix, MaterialFunction} from "../types/model.type";
 import {ChangeMaterialOption} from "../enums/model.enum";
 import {TextureTone} from "../types/texture.type";
+import {GLOBAL_VALUES} from "../constants/common.constant";
 
 function IsSkinnedMesh(obj: Object3D): obj is SkinnedMesh {
   return (obj as SkinnedMesh).isSkinnedMesh;
@@ -153,7 +154,7 @@ function FindOrCreateAccessoryGroup(baseModel: Object3D) {
   baseModel.traverse(object => {
     if (isFoundAccGroup) return;
 
-    if (object.name === GlobalValues.AccGroup) {
+    if (object.name === GLOBAL_VALUES.AccGroup) {
       isFoundAccGroup = true;
       accGroup = object as Group;
       return;
@@ -163,7 +164,7 @@ function FindOrCreateAccessoryGroup(baseModel: Object3D) {
   if (isFoundAccGroup && accGroup != undefined) return accGroup;
 
   accGroup = new Group();
-  accGroup.name = GlobalValues.AccGroup;
+  accGroup.name = GLOBAL_VALUES.AccGroup;
   baseModel.add(accGroup);
 
   return accGroup;

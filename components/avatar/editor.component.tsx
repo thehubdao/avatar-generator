@@ -1,5 +1,5 @@
 import { LogError } from "../../utils/common.util";
-import { GlobalValues, Module } from "../../enums/common.enum";
+import { Module } from "../../enums/common.enum";
 import { AnimationMixer } from "three";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
 import { GetGltfModel } from "../../utils/importer.util";
@@ -31,6 +31,7 @@ import { GetShadow } from "../../utils/threejs/shadow.util";
 import { ConfigSkybox } from "../../interfaces/envMap.interface";
 import { GetEnvironmentMap } from "../../utils/threejs/envMap.util";
 import { ConfigShadow } from "../../interfaces/shadow.interface";
+import {GLOBAL_VALUES} from "../../constants/common.constant";
 
 
 //#region Logic
@@ -97,15 +98,15 @@ export async function ChangeStartAnimation(startAnimation: string | undefined) {
 export async function SetStage(path?: string) {
   if (path == undefined) return;
 
-  const stage = await GetWearableOption(GlobalValues.StageId, path);
+  const stage = await GetWearableOption(GLOBAL_VALUES.StageId, path);
   if (!stage.success)
     return; // TODO: do something when stage result didn't succeed
 
-  AddToScene(stage.value.scene, GlobalValues.StageId);
+  AddToScene(stage.value.scene, GLOBAL_VALUES.StageId);
 }
 
 export function RemoveStage() {
-  RemoveFromScene(GlobalValues.StageId);
+  RemoveFromScene(GLOBAL_VALUES.StageId);
 }
 
 export async function SetFeaturesData(selectListFeatures: FeatureBasic[]) {

@@ -25,8 +25,8 @@ import {AddOrRemoveSlash, LogError, RandomPassword} from "./common.util";
 import {Result} from "../types/common.type";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
 import {SessionUserInfo} from "./common/session.util";
-import {ParameterNameType} from "../types/firebase.type";
 import {CampaignParameters} from "../interfaces/common.interface";
+import {ParameterNameType} from "../types/firebase.type";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -258,7 +258,7 @@ export async function GetParameter<T>(campaign: string | undefined, parameter: P
   }
 }
 
-export async function GetParameters<T>(campaign?: string, ...parameters: (string | CampaignParameterName)[]): Promise<T[]> {
+export async function GetParameters<T>(campaign?: string, ...parameters: ParameterNameType[]): Promise<T[]> {
   const {doc, getDoc} = await import('@firebase/firestore');
 
   const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}` : FirestoreGlobalLocation.Parameters;
@@ -291,7 +291,7 @@ export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlo
   try {
     const newLocation = campaign ?
       `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}${AddOrRemoveSlash(location)}` :
-      location !== '/' ?
+      location !== FirestoreLocation.Parameters ?
         location :
         FirestoreGlobalLocation.Parameters;
     const newDocName = docName == undefined ? '' : `/${docName}`;

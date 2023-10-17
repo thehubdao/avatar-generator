@@ -2,9 +2,10 @@
 import Head from "next/head";
 import Image from "next/image";
 import AGText from "../../../ui/common/ag-text.component";
-import {IFrameEvents, IFrameValues} from "../../../enums/common.enum";
+import {IFrameEvent} from "../../../enums/common.enum";
 
 import replitAvatarIFramePic from '../../../public/resources/images/info/replitAvatarIFrame.jpg';
+import {IFRAME_VALUES} from "../../../constants/common.constant";
 
 interface InfoState {
   prodUrl: string;
@@ -50,8 +51,8 @@ export default class Info extends Component<undefined, InfoState> {
                     </AGText>
                     <AGText type='code'>{
                       `{
-  source: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.Ready}”
+  source: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.Ready}”
 }`
                     }</AGText>
                     <AGText type='text'>
@@ -68,8 +69,8 @@ export default class Info extends Component<undefined, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  source: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.Exported}",
+  source: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.Exported}",
   data: {
     attributes: { id: string, val: string }[],
     attributesBase64: string,
@@ -94,8 +95,8 @@ export default class Info extends Component<undefined, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  target: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.Subscribe}”
+  target: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.Subscribe}”
 }`
                       }
                     </AGText>
@@ -109,8 +110,8 @@ export default class Info extends Component<undefined, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  target: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.ChangeSkinColor}”,
+  target: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.ChangeSkinColor}”,
   payload: string       // Hex color without #
 }`
                       }
@@ -125,8 +126,8 @@ export default class Info extends Component<undefined, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  target: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.ChangeFeature}”,
+  target: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.ChangeFeature}”,
   payload: {
     id: string,       // Feature/Accessory type
     val: string,      // Feature/Accessory name
@@ -147,8 +148,8 @@ export default class Info extends Component<undefined, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  target: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.Exported}”
+  target: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.Exported}”
 }`
                       }
                     </AGText>
