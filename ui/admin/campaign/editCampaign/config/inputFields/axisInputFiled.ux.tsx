@@ -6,10 +6,9 @@ interface AxisInputFieldUIProps<T, TKey extends keyof T> {
   axisLabels: string[];
   configProp: Record<TKey, number>;
   setConfigProp: Dispatch<SetStateAction<Record<TKey, number>>>;
-  handleInputChange: (e: ChangeEvent<HTMLInputElement>, setFunction: Dispatch<SetStateAction<number>>) => void;
 }
 
-export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp, setConfigProp, handleInputChange }: AxisInputFieldUIProps<T, keyof T>) {
+export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp, setConfigProp }: AxisInputFieldUIProps<T, keyof T>) {
   const [tempConfigProp, setTempConfigProp] = useState<Record<keyof T, number>>(configProp);
 
   const handleTempInputChange = (e: ChangeEvent<HTMLInputElement>, axis: keyof T) => { // axis.toLowerCase()
@@ -20,7 +19,7 @@ export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp
   const handleInputBlur = (axis: keyof T) => {
     let newNumber = GetStringToNumberInput(`${tempConfigProp[axis]}`);
 
-    if (!isNaN(newNumber) && newNumber >= 0) {
+    if (`${tempConfigProp[axis]}` !== '') {
       setConfigProp({ ...configProp, [axis]: newNumber });
       setTempConfigProp({ ...configProp, [axis]: newNumber });
     } else {
@@ -39,7 +38,7 @@ export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp
           <div className="flex items-center gap-2" key={axis}>
             <p>{axis}:</p>
             <input
-              type="string"
+              type="number"
               name={axis.toLowerCase()}
               className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
               value={tempConfigProp[axis.toLowerCase() as keyof T]}

@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
+import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
 import { GetStringToNumberInput } from "../../../../../../utils/input.util";
 
 interface SingleInputFieldUIProps<T> {
@@ -19,7 +19,7 @@ export default function SingleInputFieldUI<T>({ inputLabel, configProp, setConfi
   const handleInputBlur = () => {
     let newNumber = GetStringToNumberInput(tempConfigProp);
 
-    if (!isNaN(newNumber) && newNumber >= 0) {
+    if (tempConfigProp !== '') {
       setConfigProp(newNumber);
       setTempConfigProp(`${newNumber}`);
     } else {
@@ -27,7 +27,7 @@ export default function SingleInputFieldUI<T>({ inputLabel, configProp, setConfi
       setTempConfigProp(`${configProp}`);
     }
   };
-
+  
   return (
     <div className={`${width}`}>
       <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
@@ -35,7 +35,7 @@ export default function SingleInputFieldUI<T>({ inputLabel, configProp, setConfi
       </p>
       <div className="flex items-center px-2">
         <input
-          type="string"
+          type="number"
           name='intensity'
           className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg text-center bg-bg"
           value={tempConfigProp}

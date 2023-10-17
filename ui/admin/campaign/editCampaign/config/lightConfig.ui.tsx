@@ -48,15 +48,6 @@ export default function LightConfigUI({
   const [createLightOption, setCreateLightOption] = useState<string>('');
   const isAllOptionsDisabled = lightTypeOptions.every(lightType => lights?.some(light => light.type === lightType));
 
-  //* Handle input change for every numeric input fields on lights config
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement>,
-    setFunction: Dispatch<SetStateAction<number>>
-  ) => {
-    const newValue = e.currentTarget.valueAsNumber;
-    setFunction(newValue);
-  };
-
   const sendUpdateLightConfig = () => {
     if (!currentOption) return;
 
@@ -214,7 +205,6 @@ export default function LightConfigUI({
           axisLabels={['X', 'Y', 'Z']}
           configProp={lightPosition}
           setConfigProp={setLightPosition}
-          handleInputChange={handleInputChange}
         />
       )}
       {/* Look at input fields */}
@@ -224,7 +214,6 @@ export default function LightConfigUI({
           axisLabels={['X', 'Y', 'Z']}
           configProp={lightLookAt}
           setConfigProp={setLightLookAt}
-          handleInputChange={handleInputChange}
         />
       )}
       {/* Color selection field */}
@@ -242,7 +231,6 @@ export default function LightConfigUI({
           axisLabels={["Width", "Height"]}
           configProp={lightSize}
           setConfigProp={setLightSize}
-          handleInputChange={handleInputChange}
         />
       )}
       {/* Other input fields */}
