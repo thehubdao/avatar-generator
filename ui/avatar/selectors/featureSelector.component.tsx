@@ -1,9 +1,9 @@
 import { Swiper, SwiperRef, SwiperSlide, useSwiper } from 'swiper/react';
-import { Mousewheel } from 'swiper'
 import { FeatureBasic } from "../../../interfaces/common.interface";
 import { useRef } from "react";
 import FeatureItemSelectorUI from "./featureItemSelector.ui";
 import { MouseEvent } from "react";
+import {Mousewheel} from "swiper/modules";
 
 interface FeatureSelectorProps {
   list?: FeatureBasic[];
