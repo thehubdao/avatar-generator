@@ -168,6 +168,20 @@ export default function LightConfigUI({
     setCreateLightOption((lightOption === 'new light') ? filteredLightTypes[0] ?? '' : '');
   }, [lightOption, lights]);
 
+  const calculeOtherInputWidth = () => {
+    let numRenderedComponents = 0;
+
+    if ('intst' in lightParams || sectionOnLightType[createLightOption as LightType].includes('intensity')) {
+      numRenderedComponents++;
+    } if ('dist' in lightParams || sectionOnLightType[createLightOption as LightType].includes('distance')) {
+      numRenderedComponents++;
+    } if ('decay' in lightParams || sectionOnLightType[createLightOption as LightType].includes('decay')) {
+      numRenderedComponents++;
+    }
+
+    return numRenderedComponents === 1 ? 'w-full' : numRenderedComponents === 2 ? 'w-1/2' : 'w-1/3';
+  }
+
   return (
     <>
       {lightOption === 'new light' && <div className="relative mt-5 w-full cursor-pointer px-2">
@@ -238,7 +252,7 @@ export default function LightConfigUI({
             inputLabel="Intensity"
             configProp={lightIntensity}
             setConfigProp={setLightIntensity}
-            handleInputChange={handleInputChange}
+            width={calculeOtherInputWidth()}
           />
         )}
         {('dist' in lightParams || sectionOnLightType[createLightOption as LightType].includes('distance')) && (
@@ -246,7 +260,7 @@ export default function LightConfigUI({
             inputLabel="Distance"
             configProp={lightDistance}
             setConfigProp={setLightDistance}
-            handleInputChange={handleInputChange}
+            width={calculeOtherInputWidth()}
           />
         )}
         {('decay' in lightParams || sectionOnLightType[createLightOption as LightType].includes('decay')) && (
@@ -254,7 +268,7 @@ export default function LightConfigUI({
             inputLabel="Decay"
             configProp={lightDecay}
             setConfigProp={setLightDecay}
-            handleInputChange={handleInputChange}
+            width={calculeOtherInputWidth()}
           />
         )}
       </div>
