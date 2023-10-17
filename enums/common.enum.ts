@@ -1,5 +1,5 @@
 ﻿export const enum GlobalValues {
-  BaseCampaign = 'decentraland',
+  BaseCampaign = 'thehub',
   Acc = 'Accessories',
   Config = 'Config',
   AccEnd = 'Acc',
