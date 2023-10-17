@@ -1,5 +1,5 @@
-import { ChangeEvent, Dispatch, SetStateAction } from "react";
-import { CastNumberToString } from "../../../../../../utils/common.util";
+import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
+import { GetStringToNumberInput } from "../../../../../../utils/input.util";
 
 interface AxisInputFieldUIProps<T, TKey extends keyof T> {
   inputLabel: string;
@@ -10,6 +10,25 @@ interface AxisInputFieldUIProps<T, TKey extends keyof T> {
 }
 
 export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp, setConfigProp, handleInputChange }: AxisInputFieldUIProps<T, keyof T>) {
+  const [tempConfigProp, setTempConfigProp] = useState<Record<keyof T, number>>(configProp);
+
+  const handleTempInputChange = (e: ChangeEvent<HTMLInputElement>, axis: keyof T) => { // axis.toLowerCase()
+    setTempConfigProp({ ...configProp, [axis]: e.target.value });
+  };
+
+  //* Handle input blur (when it loses focus)
+  const handleInputBlur = (axis: keyof T) => {
+    let newNumber = GetStringToNumberInput(`${tempConfigProp[axis]}`);
+
+    if (!isNaN(newNumber) && newNumber >= 0) {
+      setConfigProp({ ...configProp, [axis]: newNumber });
+      setTempConfigProp({ ...configProp, [axis]: newNumber });
+    } else {
+      // The value is not valid, revert to the previous value
+      setTempConfigProp(configProp);
+    }
+  };
+
   return (
     <div>
       <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">
@@ -20,11 +39,17 @@ export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp
           <div className="flex items-center gap-2" key={axis}>
             <p>{axis}:</p>
             <input
-              type="number"
+              type="string"
               name={axis.toLowerCase()}
               className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-              value={CastNumberToString(configProp[axis.toLowerCase() as keyof T])}
-              onChange={(e) => handleInputChange(e, (value) => setConfigProp({ ...configProp, [axis.toLowerCase()]: value }))}
+              value={tempConfigProp[axis.toLowerCase() as keyof T]}
+              onChange={(e) => handleTempInputChange(e, axis.toLowerCase() as keyof T)}
+              onBlur={(e) => handleInputBlur(axis.toLowerCase() as keyof T)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleInputBlur(axis.toLowerCase() as keyof T);
+                }
+              }}
             />
           </div>
         ))}
