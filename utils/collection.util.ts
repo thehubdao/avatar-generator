@@ -2,9 +2,10 @@ import {GetParameter, UpdateDocObject} from "./firebase.util";
 import {FirestoreLocation} from "../enums/firebase.enum";
 import {FeatureInterface} from "../interfaces/api.interface";
 import {CastStringToInteger, LogError, SetMapToMap} from "./common.util";
-import {CampaignParameterName, GlobalValues, Module} from "../enums/common.enum";
+import {CampaignParameterName, Module} from "../enums/common.enum";
 import {FeatureBasic} from "../interfaces/common.interface";
 import {GetData} from "../server/api-handler/v1/featureOptions.api-handler";
+import {GLOBAL_VALUES} from "../constants/common.constant";
 
 export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Get FeatureList (same from page)
@@ -135,7 +136,7 @@ export function IndexValuesStringToNumber(indexValuesString: string | undefined,
 }
 
 export function StringToIndexValues(input: string) {
-  const inputArray = input.split(GlobalValues.CollectorIndexSeparator);  
+  const inputArray = input.split(GLOBAL_VALUES.CollectorIndexSeparator);  
   const result: Map<number, number> = new Map();
   
   for (const [key, value] of inputArray.entries()) {

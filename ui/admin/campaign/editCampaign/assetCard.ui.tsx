@@ -16,7 +16,7 @@ interface AssetCardProps {
   name: string;
   thumb?: string;
   location: FirestoreLocation;
-  updateDefaultAsset: (config: string, confKey: string) => void;
+  updateDefaultAsset: (config: string) => void;
 }
 
 export default function AssetCard({ id, name, thumb, location, updateDefaultAsset }: AssetCardProps) {
@@ -146,7 +146,7 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
                 </>
                 : <div className={`flex ${DEFAULT_CONFIG_SECTIONS.includes(location) ? 'justify-between' : 'justify-end'} items-center w-full`}>
                   {(DEFAULT_CONFIG_SECTIONS.includes(location)) && (
-                    <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name} onClickEvent={() => { updateDefaultAsset(name, DEFAULT_CONFIG_SECTION_KEYS[location]); }}>
+                    <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name} onClickEvent={() => updateDefaultAsset(name)}>
                       {campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name
                         ? <div className="text-sm flex items-center gap-1">
                           <AiOutlineCheckCircle />

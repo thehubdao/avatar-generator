@@ -1,4 +1,5 @@
-﻿import {EmailResult, GlobalValues, Module} from "../enums/common.enum";
+﻿import {EmailResult, Module} from "../enums/common.enum";
+import {GLOBAL_VALUES} from "../constants/common.constant";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
@@ -99,9 +100,9 @@ export function MixArrays<T>(arr1: T[] | undefined, arr2: T[] | undefined) {
 }
 
 export function RemovedAcc(text: string | undefined) {
-  if (text == undefined || !text.endsWith(GlobalValues.AccEnd)) return text;
+  if (text == undefined || !text.endsWith(GLOBAL_VALUES.AccEnd)) return text;
   
-  return text.slice(0, - GlobalValues.AccEnd.length);
+  return text.slice(0, - GLOBAL_VALUES.AccEnd.length);
 }
 
 export function GetKeyByValue<TEnum extends object>(value: string, enumRef: TEnum): keyof TEnum | undefined {

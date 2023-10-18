@@ -2,10 +2,11 @@
 import {CampaignParameters, FeatureBasic, LookAtVectors} from "../../interfaces/common.interface";
 import AvatarSingle from "../../components/avatar/single.component";
 import {CastStringToInteger, RemoveUndefinedProperties} from "../../utils/common.util";
-import {CampaignParameterName, GlobalValues} from "../../enums/common.enum";
+import {CampaignParameterName} from "../../enums/common.enum";
 import {GetParameter} from "../../utils/firebase.util";
 import {FirestoreParameters} from "../../enums/firebase.enum";
 import {ChangeMaterialOption} from "../../enums/model.enum";
+import {GLOBAL_VALUES} from "../../constants/common.constant";
 
 
 interface AvatarSimplePageProps {
@@ -63,7 +64,7 @@ export const getServerSideProps: GetServerSideProps<AvatarSimplePageProps> = asy
     campaign,
     combination: parsedCombination,
     featureList: campaignParameters?.features ?? [],
-    avatarBasePath: campaignParameters?.armature ?? GlobalValues.AvatarBase,
+    avatarBasePath: campaignParameters?.armature ?? GLOBAL_VALUES.AvatarBase,
     defaultAnimation: campaignParameters?.config?.defAnimation,
     defaultSkinTone: campaignParameters?.config?.skin?.defColor,
     defaultCamPos: campaignParameters?.config?.defCam,

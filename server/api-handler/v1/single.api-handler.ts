@@ -13,7 +13,7 @@ import {
   IndexValuesStringToNumber
 } from "../../../utils/collection.util";
 import {CastStringToInteger, RandomIntMax} from "../../../utils/common.util";
-import {GlobalValues} from "../../../enums/common.enum";
+import {GLOBAL_VALUES} from "../../../constants/common.constant";
 
 async function CheckCampaign(campaign: string) {
   const campaigns = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
@@ -21,7 +21,7 @@ async function CheckCampaign(campaign: string) {
 }
 
 function ProcessCombination(combination: string, maxValues: Map<number, number>) {
-  if (combination != undefined && combination.includes(GlobalValues.CollectorIndexSeparator)) {
+  if (combination != undefined && combination.includes(GLOBAL_VALUES.CollectorIndexSeparator)) {
     return IndexValuesStringToNumber(combination, maxValues);
   }
   

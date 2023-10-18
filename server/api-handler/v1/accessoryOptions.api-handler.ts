@@ -1,14 +1,14 @@
 import {NextApiRequest, NextApiResponse} from "next";
-import {GlobalValues} from "../../../enums/common.enum";
 import {GetInfoDB} from "../../../utils/firebase.util";
 import {AccessoryInterface, ApiResponse} from "../../../interfaces/api.interface";
 import {FirestoreLocation} from "../../../enums/firebase.enum";
 import {DefaultApiResponse} from "../../enums/api.enum";
 import {RequestResponse} from "../request.api-handler";
+import {GLOBAL_VALUES} from "../../../constants/common.constant";
 
 
 async function GetData(campaign?: string, type?: string) {
-  const realCampaign = campaign as string ?? GlobalValues.BaseCampaign;
+  const realCampaign = campaign as string ?? GLOBAL_VALUES.BaseCampaign;
 
   return GetInfoDB<AccessoryInterface>(FirestoreLocation.Accessories, realCampaign, {
     type: type as string

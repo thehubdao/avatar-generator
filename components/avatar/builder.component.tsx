@@ -17,7 +17,7 @@ import {
   EnvMapInterface
 } from "../../interfaces/api.interface";
 import { IFrameExportData, IFrameReady, SetIFrameEvents } from "../../utils/iframe.util";
-import { ExportAttributeValues, GlobalValues, Module } from "../../enums/common.enum";
+import { Module } from "../../enums/common.enum";
 import { FilterList, LogError, RandomArrayElement, MixArrays } from "../../utils/common.util";
 import {
   GetAccessoryListByCampaign,
@@ -43,6 +43,7 @@ import AvatarEditor, {
 } from "./editor.component";
 import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "./viewer.component";
 import {Result} from "../../types/common.type";
+import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../constants/common.constant";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -140,13 +141,13 @@ export default function AvatarBuilder({
     if (!params) return LogError(Module.AvatarGenerator, "Missing feature option!");
 
     if (params.detail && params.detail.startsWith('http')) {
-      if (params.id.endsWith(GlobalValues.AccEnd)) {
+      if (params.id.endsWith(GLOBAL_VALUES.AccEnd)) {
         await ChangeAccessory(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id, campaignConfig.changeMaterial);
       } else {
         await onChangeFeature(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
       }
     } else {
-      if (params.id.endsWith(GlobalValues.AccEnd)) {
+      if (params.id.endsWith(GLOBAL_VALUES.AccEnd)) {
         const accessory = accessoryList?.find(a => a.type === params.id && a.name === params.val);
 
         if (!accessory) return LogError(Module.AvatarGenerator, "Accessory option not found!");
@@ -177,8 +178,8 @@ export default function AvatarBuilder({
     if (!(featureList && accessoryList))
       return LogError(Module.AvatarGenerator, "No feature/accessory list!");
 
-    if (campaign && campaign !== GlobalValues.BaseCampaign) {
-      exportData?.attributes.push({ id: ExportAttributeValues.Campaign, val: campaign });
+    if (campaign && campaign !== GLOBAL_VALUES.BaseCampaign) {
+      exportData?.attributes.push({ id: EXPORT_ATTRIBUTE.Campaign, val: campaign });
     }
 
     if (attributeConfig) {
@@ -338,7 +339,7 @@ export default function AvatarBuilder({
 
   async function onOptionChange(id: string, path: string, name: string, _selectedCategory: string = selectedCategory) {
     // If Accessory
-    if (_selectedCategory.endsWith(GlobalValues.AccEnd))
+    if (_selectedCategory.endsWith(GLOBAL_VALUES.AccEnd))
       await ChangeAccessory(id, path, name, _selectedCategory, campaignConfig.changeMaterial);
     // If Feature
     else
