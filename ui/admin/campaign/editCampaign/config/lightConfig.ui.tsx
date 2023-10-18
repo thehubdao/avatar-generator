@@ -176,8 +176,6 @@ export default function LightConfigUI({
     } else if (ambientLightCount < maxAmbientLights) {
       setCreateLightOption(LightType.AmbientLight);
     }
-
-    console.log({ createLightOption });
   }, [lightOption, lights]);
 
   const calculeOtherInputWidth = () => {
