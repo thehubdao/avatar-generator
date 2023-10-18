@@ -6,9 +6,20 @@ interface AxisInputFieldUIProps<T, TKey extends keyof T> {
   axisLabels: string[];
   configProp: Record<TKey, number>;
   setConfigProp: Dispatch<SetStateAction<Record<TKey, number>>>;
+  minValue?: number;
+  maxValue?: number;
+  steps?: number;
 }
 
-export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp, setConfigProp }: AxisInputFieldUIProps<T, keyof T>) {
+export default function AxisInputFieldUI<T>({
+  inputLabel,
+  axisLabels,
+  configProp,
+  setConfigProp,
+  minValue = Number.NEGATIVE_INFINITY,
+  maxValue = Number.POSITIVE_INFINITY,
+  steps = 1
+}: AxisInputFieldUIProps<T, keyof T>) {
   const [tempConfigProp, setTempConfigProp] = useState<Record<keyof T, number>>(configProp);
 
   const handleTempInputChange = (e: ChangeEvent<HTMLInputElement>, axis: keyof T) => { // axis.toLowerCase()
@@ -47,6 +58,9 @@ export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp
               name={axis.toLowerCase()}
               className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
               value={tempConfigProp[axis.toLowerCase() as keyof T]}
+              min={minValue}
+              max={maxValue}
+              step={steps}
               onChange={(e) => handleTempInputChange(e, axis.toLowerCase() as keyof T)}
               onBlur={(e) => handleInputBlur(axis.toLowerCase() as keyof T)}
               onKeyDown={(e) => {
