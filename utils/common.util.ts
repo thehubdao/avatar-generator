@@ -110,3 +110,7 @@ export function GetKeyByValue<TEnum extends object>(value: string, enumRef: TEnu
   const key = Object.keys(enumRef)[indexOfS];
   return key as unknown as keyof TEnum;
 }
+
+export function Raise(msg: string): never {
+  throw new Error(msg);
+}
