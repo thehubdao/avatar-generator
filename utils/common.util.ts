@@ -62,7 +62,7 @@ export function RemoveUndefinedProperties<T>(obj: T)  {
     if (clone[k] == undefined)
       delete clone[k];
   }
-
+  
   return clone;
 }
 
@@ -100,7 +100,7 @@ export function MixArrays<T>(arr1: T[] | undefined, arr2: T[] | undefined) {
 
 export function RemovedAcc(text: string | undefined) {
   if (text == undefined || !text.endsWith(GlobalValues.AccEnd)) return text;
-  
+
   return text.slice(0, - GlobalValues.AccEnd.length);
 }
 
