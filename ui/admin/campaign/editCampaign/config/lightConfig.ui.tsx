@@ -57,9 +57,9 @@ export default function LightConfigUI({
 
   // Check if you have a number of supported lights
   const isAllOptionsValid =
-    pointLightCount <= maxPointLights &&
-    rectAreaLightCount <= maxRectAreaLights &&
-    ambientLightCount <= maxAmbientLights;
+    pointLightCount < maxPointLights &&
+    rectAreaLightCount < maxRectAreaLights &&
+    ambientLightCount < maxAmbientLights;
   const isAllOptionsDisabled = !isAllOptionsValid
 
   const sendUpdateLightConfig = () => {
@@ -167,9 +167,15 @@ export default function LightConfigUI({
     setWillDelete(false);
 
     // Filter available light types to create a new light.
-    const lightTypes = [LightType.PointLight, LightType.RectAreaLight, LightType.AmbientLight];
-    const filteredLightTypes = lightTypes.filter(lightType => !lights?.some(light => light.type === lightType));
-    setCreateLightOption((lightOption === -2) ? filteredLightTypes[0] : '');
+    if (pointLightCount < maxPointLights) {
+      setCreateLightOption(LightType.PointLight);
+    } else if (rectAreaLightCount < maxRectAreaLights) {
+      setCreateLightOption(LightType.RectAreaLight);
+    } else if (ambientLightCount < maxAmbientLights) {
+      setCreateLightOption(LightType.AmbientLight);
+    } else {
+      setCreateLightOption('');
+    }
   }, [lightOption, lights]);
 
   const calculeOtherInputWidth = () => {
