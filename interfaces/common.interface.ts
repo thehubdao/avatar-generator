@@ -8,6 +8,7 @@ import { AccessoryInterface, AnimationInterface, EnvMapInterface, FeatureInterfa
 import { ConfigEnvMap } from "./envMap.interface";
 import { ConfigShadow } from "./shadow.interface";
 import { ReactNode } from "react";
+import { ConfigPostProcessing } from "./postProcessing.interface";
 
 export interface BasicData {
   id: string;
@@ -68,6 +69,7 @@ export interface CampaignConfig {
   accCamPos?: Record<string, LookAtVectors>;
   featuresSkin?: Record<string, ColorConfig>;
   accSkin?: Record<string, ColorConfig>;
+  postProcessing?: ConfigPostProcessing[];
 }
 
 
