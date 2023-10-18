@@ -35,7 +35,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
   const [camOption, setCamOption] = useState<string>(CameraConfigOption.DefCam);
-  const [lightOption, setLightOption] = useState<string>((configData?.lights && configData?.lights.length > 0) ? configData?.lights[0].type : 'new light');
+  const [lightOption, setLightOption] = useState<number>(-2);
   const [hasNewAvatarBase, setHasNewAvatarBase] = useState<boolean>(false);
 
   const camConfig = useRef<HTMLSelectElement>(null);
@@ -60,7 +60,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
     setConfigOption(destiny);
   }
 
-  const handleUpdateLight = async (config: ConfigLight[], messages: { success: string, error: string }, newLightOption: string) => {
+  const handleUpdateLight = async (config: ConfigLight[], messages: { success: string, error: string }, newLightOption: number) => {
     const isSuccess = await updateLightConfig(config);
 
     if (!isSuccess) {
@@ -210,19 +210,19 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                       </div>
                       <select
                         className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer"
-                        onChange={(e) => setLightOption(e.target.value)}
+                        onChange={(e) => setLightOption(Number(e.target.value))}
                         value={lightOption}
                       >
                         {configData?.lights
-                          ? configData.lights.map((light, index) => <option key={index} value={light.type} className="bg-bg py-2 px-4">{LIGHT_TYPE_LABELS[light.type]}</option>)
-                          : <option value='no features' className="bg-bg py-2 px-4" disabled>no lights</option>}
-                        <option value='new light' className="bg-bg py-2 px-4">Add new light</option>
+                          ? configData.lights.map((light, index) => <option key={index} value={index} className="bg-bg py-2 px-4">{LIGHT_TYPE_LABELS[light.type]}</option>)
+                          : <option value={-1} className="bg-bg py-2 px-4" disabled>no lights</option>}
+                        <option value={-2} className="bg-bg py-2 px-4">Add new light</option>
                       </select>
                     </div>
                     <LightConfigUI
                       lightOption={lightOption}
                       lights={configData?.lights}
-                      updateLightConfig={(config: ConfigLight[], messages: { success: string, error: string }, newLightOption: string) => {
+                      updateLightConfig={(config: ConfigLight[], messages: { success: string, error: string }, newLightOption: number) => {
                         void handleUpdateLight(config, messages, newLightOption);
                       }}
                     />

@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ConfigLight } from "../../../../../interfaces/light.interface";
 import { AGVector3 } from "../../../../../interfaces/common.interface";
 import AGButton from "../../../../common/ag-button.component";
@@ -12,9 +12,9 @@ import SingleInputFieldUI from "./inputFields/singleInputField.ux";
 import ColorInputFieldUI from "./inputFields/colorInputField.ux";
 
 interface LightConfigUIProps {
-  lightOption: string;
+  lightOption: number;
   lights: ConfigLight[] | undefined;
-  updateLightConfig: (config: ConfigLight[], messages: { success: string, error: string }, newLightOption: string) => void;
+  updateLightConfig: (config: ConfigLight[], messages: { success: string, error: string }, newLightOption: number) => void;
 }
 
 const sectionOnLightType = {
@@ -30,7 +30,7 @@ export default function LightConfigUI({
   updateLightConfig,
 }: LightConfigUIProps) {
   //* Retrieve the current option based on the selected light type
-  const currentOption = lights?.find((light) => light.type === lightOption);
+  const currentOption = lights?.find((_, index) => index === lightOption);
   const lightParams = currentOption?.params ?? {};
   const [willDelete, setWillDelete] = useState<boolean>(false);
 
@@ -46,36 +46,48 @@ export default function LightConfigUI({
   //* Create new light config variables.
   const lightTypeOptions = Object.values(LightType);
   const [createLightOption, setCreateLightOption] = useState<string>('');
-  const isAllOptionsDisabled = lightTypeOptions.every(lightType => lights?.some(light => light.type === lightType));
+  const maxPointLights = 5;
+  const maxRectAreaLights = 2;
+  const maxAmbientLights = 1;
+
+  // Count the number of each type of light
+  const pointLightCount = lights?.filter(light => light.type === LightType.PointLight).length || 0;
+  const rectAreaLightCount = lights?.filter(light => light.type === LightType.RectAreaLight).length || 0;
+  const ambientLightCount = lights?.filter(light => light.type === LightType.AmbientLight).length || 0;
+
+  // Check if you have a number of supported lights
+  const isAllOptionsValid =
+    pointLightCount <= maxPointLights &&
+    rectAreaLightCount <= maxRectAreaLights &&
+    ambientLightCount <= maxAmbientLights;
+  const isAllOptionsDisabled = !isAllOptionsValid
 
   const sendUpdateLightConfig = () => {
-    if (!currentOption) return;
+    if (!currentOption || !lights) return;
 
     // Map the updated properties for the selected light type
-    const newLights = lights
-      ? lights.map((light) => {
-        if (light.type !== lightOption) return light;
+    const newLights = lights.map((light, index) => {
+      if (index !== lightOption) return light;
 
-        const props: Partial<ConfigLight["params"]> = {};
+      const props: Partial<ConfigLight["params"]> = {};
 
-        if ('dist' in light.params) props.dist = lightDistance;
-        if ('decay' in light.params) props.decay = lightDecay;
-        if ('intst' in light.params) props.intst = lightIntensity;
-        if ('color' in light.params) props.color = defaultColor;
-        if ('pos' in light.params) props.pos = { ...lightPosition };
-        if ('lAt' in light.params) props.lAt = { ...lightLookAt };
-        if ('width' in light.params || 'height' in light.params) {
-          props.width = lightSize.width;
-          props.height = lightSize.height;
-        }
-        return { ...light, params: { ...light.params, ...props, }, };
-      })
-      : [];
+      if ('dist' in light.params) props.dist = lightDistance;
+      if ('decay' in light.params) props.decay = lightDecay;
+      if ('intst' in light.params) props.intst = lightIntensity;
+      if ('color' in light.params) props.color = defaultColor;
+      if ('pos' in light.params) props.pos = { ...lightPosition };
+      if ('lAt' in light.params) props.lAt = { ...lightLookAt };
+      if ('width' in light.params || 'height' in light.params) {
+        props.width = lightSize.width;
+        props.height = lightSize.height;
+      }
+      return { ...light, params: { ...light.params, ...props, }, };
+    });
 
     updateLightConfig(
       newLights, {
-      success: `The ${LIGHT_TYPE_LABELS[lightOption as LightType].toLowerCase()} has been successfully updated!`,
-      error: `The ${LIGHT_TYPE_LABELS[lightOption as LightType].toLowerCase()} was not updated satisfactorily!`
+      success: `The ${LIGHT_TYPE_LABELS[lights[lightOption].type].toLowerCase()} has been successfully updated!`,
+      error: `The ${LIGHT_TYPE_LABELS[lights[lightOption].type].toLowerCase()} was not updated satisfactorily!`
     }, lightOption);
   };
 
@@ -125,24 +137,25 @@ export default function LightConfigUI({
       newLights, {
       success: `The new ${LIGHT_TYPE_LABELS[selectedLightType].toLowerCase()} has been successfully created!`,
       error: `The new ${LIGHT_TYPE_LABELS[selectedLightType].toLowerCase()} was not created satisfactorily!`
-    }, selectedLightType);
+    }, lights?.length ?? 0);
   }
 
   const sendDeleteLightConfig = () => {
+    if (!lights) return;
     // Update the light configurations without the current light.
-    const newLights = lights?.filter(light => light.type !== lightOption);
+    const newLights = lights?.filter((_, index) => index !== lightOption);
 
     updateLightConfig(
       newLights ?? [], {
-      success: `The ${LIGHT_TYPE_LABELS[lightOption as LightType].toLowerCase()} has been successfully deleted!`,
-      error: `The ${LIGHT_TYPE_LABELS[lightOption as LightType].toLowerCase()} was not deleted satisfactorily!`
-    }, 'new light');
+      success: `The ${LIGHT_TYPE_LABELS[lights[lightOption].type].toLowerCase()} has been successfully deleted!`,
+      error: `The ${LIGHT_TYPE_LABELS[lights[lightOption].type].toLowerCase()} was not deleted satisfactorily!`
+    }, -2);
     setWillDelete(false);
   }
 
   //* Effect to update state variables when the selected light option changes.
   useEffect(() => {
-    const newOption = lights?.find((light) => light.type === lightOption);
+    const newOption = lights?.find((_, index) => index === lightOption);
 
     setLightDecay(newOption?.params.decay ?? DEFAULT_THREE_JS_PROPS.decay);
     setLightDistance(newOption?.params.dist ?? DEFAULT_THREE_JS_PROPS.distance);
@@ -156,7 +169,7 @@ export default function LightConfigUI({
     // Filter available light types to create a new light.
     const lightTypes = [LightType.PointLight, LightType.RectAreaLight, LightType.AmbientLight];
     const filteredLightTypes = lightTypes.filter(lightType => !lights?.some(light => light.type === lightType));
-    setCreateLightOption((lightOption === 'new light') ? filteredLightTypes[0] ?? '' : '');
+    setCreateLightOption((lightOption === -2) ? filteredLightTypes[0] : '');
   }, [lightOption, lights]);
 
   const calculeOtherInputWidth = () => {
@@ -175,7 +188,7 @@ export default function LightConfigUI({
 
   return (
     <>
-      {lightOption === 'new light' && <div className="relative mt-5 w-full cursor-pointer px-2">
+      {lightOption === -2 && <div className="relative mt-5 w-full cursor-pointer px-2">
         <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
           <MdKeyboardArrowDown />
         </div>
@@ -189,13 +202,20 @@ export default function LightConfigUI({
               No lights available to add
             </option>
           )}
-          {lightTypeOptions.map((lightType) => (
-            !lights?.some(light => light.type === lightType) && (
-              <option key={lightType} value={lightType}>
-                {LIGHT_TYPE_LABELS[lightType]}
-              </option>
-            )
-          ))}
+          {lightTypeOptions.map((lightType) => {
+            if (
+              (lightType === LightType.PointLight && pointLightCount < maxPointLights) ||
+              (lightType === LightType.RectAreaLight && rectAreaLightCount < maxRectAreaLights) ||
+              (lightType === LightType.AmbientLight && ambientLightCount < maxAmbientLights)
+            ) {
+              return (
+                <option key={lightType} value={lightType}>
+                  {LIGHT_TYPE_LABELS[lightType]}
+                </option>
+              );
+            }
+            return null;
+          })}
         </select>
       </div>}
       {/* Position input fields */}
@@ -262,7 +282,7 @@ export default function LightConfigUI({
       </div>
       {/* Create and Update button */}
       <div className="pt-4 px-2">
-        {lightOption === 'new light'
+        {lightOption === -2
           ? <>{!isAllOptionsDisabled && <AGButton nm full onClickEvent={() => sendNewLightConfig()}>
             <p className="py-2">Create</p>
           </AGButton>}</>
@@ -282,7 +302,7 @@ export default function LightConfigUI({
                 </div>
               ) : (
                 <div className="flex items-center justify-between w-full">
-                  <p className="pl-2 text-sm">Delete {LIGHT_TYPE_LABELS[lightOption as LightType]}</p>
+                  <p className="pl-2 text-sm">Delete {LIGHT_TYPE_LABELS[currentOption ? currentOption.type : LightType.PointLight].toLowerCase()}</p>
                   <div className="flex">
                     <AGButton nm fit onClickEvent={() => setWillDelete(true)}>
                       <AiOutlineDelete className="group-hover/button:text-red transition-all duration-300" />

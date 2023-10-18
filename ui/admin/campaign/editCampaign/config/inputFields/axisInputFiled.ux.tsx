@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction, useState } from "react";
+import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
 import { GetStringToNumberInput } from "../../../../../../utils/input.util";
 
 interface AxisInputFieldUIProps<T, TKey extends keyof T> {
@@ -27,6 +27,11 @@ export default function AxisInputFieldUI<T>({ inputLabel, axisLabels, configProp
       setTempConfigProp(configProp);
     }
   };
+
+  //* Update current input field
+  useEffect(() => {
+    setTempConfigProp(configProp);
+  }, [configProp]);
 
   return (
     <div>

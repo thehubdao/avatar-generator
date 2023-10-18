@@ -27,6 +27,11 @@ export default function SingleInputFieldUI<T>({ inputLabel, configProp, setConfi
       setTempConfigProp(`${configProp}`);
     }
   };
+
+  //* Update current input field
+  useEffect(() => {
+    setTempConfigProp(`${configProp}`);
+  }, [configProp]);
   
   return (
     <div className={`${width}`}>
