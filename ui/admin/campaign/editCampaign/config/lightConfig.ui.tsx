@@ -167,15 +167,17 @@ export default function LightConfigUI({
     setWillDelete(false);
 
     // Filter available light types to create a new light.
-    if (pointLightCount < maxPointLights) {
+    if (lightOption !== -2) {
+      setCreateLightOption('');
+    } else if (pointLightCount < maxPointLights) {
       setCreateLightOption(LightType.PointLight);
     } else if (rectAreaLightCount < maxRectAreaLights) {
       setCreateLightOption(LightType.RectAreaLight);
     } else if (ambientLightCount < maxAmbientLights) {
       setCreateLightOption(LightType.AmbientLight);
-    } else {
-      setCreateLightOption('');
     }
+
+    console.log({ createLightOption });
   }, [lightOption, lights]);
 
   const calculeOtherInputWidth = () => {
