@@ -9,9 +9,9 @@ import {Raise} from "../common.util";
 // import {alchemyProvider} from "wagmi/providers/alchemy";
 
 export function GetWagmiConfig() {
-  const walletConnectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_ID ?? Raise("Missing WalletConnectId!");  
-  
-  const { chains, publicClient } = configureChains(
+  const walletConnectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_ID ?? Raise("Missing WalletConnectId!");
+
+  const {chains, publicClient} = configureChains(
     [
       mainnet,
       polygon,
@@ -26,17 +26,17 @@ export function GetWagmiConfig() {
     ]
   );
 
-  const { connectors } = getDefaultWallets({
+  const {connectors} = getDefaultWallets({
     appName: 'My RainbowKit App',
     projectId: walletConnectId,
     chains
   });
-  
+
   const wagmiConfig = createConfig({
     autoConnect: true,
     connectors,
     publicClient
   });
-  
+
   return {chains, wagmiConfig};
 }
