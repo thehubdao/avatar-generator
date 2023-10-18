@@ -411,6 +411,7 @@ export default function AvatarBuilder({
           changeMaterial={campaignConfig.changeMaterial}
           lights={campaignConfig.lights}
           defaultShadow={campaignConfig.defShadow}
+          postProcessing={campaignConfig.postProcessing}
           editMode={isEditModeSelected}
           enablePan={enablePan}
           defaultCamera={campaignConfig.defCam}

@@ -32,6 +32,7 @@ import { ConfigSkybox } from "../../interfaces/envMap.interface";
 import { GetEnvironmentMap } from "../../utils/threejs/envMap.util";
 import { ConfigShadow } from "../../interfaces/shadow.interface";
 import {GLOBAL_VALUES} from "../../constants/common.constant";
+import { ConfigPostProcessing } from "../../interfaces/postProcessing.interface";
 
 
 //#region Logic
@@ -157,6 +158,7 @@ interface AvatarEditorProps {
   onReady: () => Promise<void>;
   changeMaterial?: ChangeMaterialOption;
   lights?: ConfigLight[];
+  postProcessing?: ConfigPostProcessing[];
   defaultShadow?: ConfigShadow;
   defaultCamera?: LookAtVectors;
   editMode?: boolean;
@@ -168,7 +170,7 @@ interface AvatarEditorProps {
  * Will hold the information and send it to a viewer.
  * @component
  */
-export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, lights, defaultShadow, defaultCamera, editMode, enablePan }: AvatarEditorProps) {
+export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, lights, postProcessing, defaultShadow, defaultCamera, editMode, enablePan }: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
 
@@ -195,7 +197,8 @@ export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, 
       return;
     }
 
-    AddComposer();
+    if (postProcessing)
+      AddComposer(postProcessing);
 
     _avatar = getAvatarBaseResult.value;
     BonesFirst(_avatar);

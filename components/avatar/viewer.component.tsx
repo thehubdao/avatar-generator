@@ -23,6 +23,7 @@ import { AGVector3 } from "../../interfaces/common.interface";
 import { GetToneTexture } from "../../utils/threejs/texture.util";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { CreateEffectComposer } from "../../utils/threejs/postProcessing.util";
+import { ConfigPostProcessing } from "../../interfaces/postProcessing.interface";
 
 //#region Logic
 let _scene: Scene | undefined;
@@ -60,12 +61,12 @@ function DoAnimation(delta: number) {
   }
 }
 
-export function AddComposer() {
+export function AddComposer(postProcessing: ConfigPostProcessing[]) {
   if (_scene == undefined) return void LogError(Module.Viewer, "Missing Scene to create composer!");
   if (_renderer == undefined) return void LogError(Module.Viewer, "Missing Renderer to create composer!");
   if (_camera == undefined) return void LogError(Module.Viewer, "Missing Camera to create composer!");
 
-  _composer = CreateEffectComposer(_renderer, _scene, _camera);
+  _composer = CreateEffectComposer(_renderer, _scene, _camera, postProcessing);
 }
 
 export function AddToScene(toAdd: Object3D, objName?: string) {
