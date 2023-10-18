@@ -1,14 +1,28 @@
-import { PerspectiveCamera, Scene, Vector2, WebGLRenderer } from 'three';
+import { PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-import { ConfigUnrealBloomPass } from '../../interfaces/postProcessing.interface';
+import { ConfigPostProcessing, ConfigUnrealBloomPass } from '../../interfaces/postProcessing.interface';
+import { PostProcessType } from '../../enums/postProcecssing.enum';
 
-export function CreateEffectComposer(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera): EffectComposer {
+export function CreateEffectComposer(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, postProcecssing: ConfigPostProcessing[]): EffectComposer {
   const composer = new EffectComposer(renderer);
   composer.addPass( GetRenderPass(scene, camera) );
-  composer.addPass( GetUnrealBloomPass({resolution: new Vector2( window.innerWidth, window.innerHeight ), strength: 1, radius: 0.4, threshold: 0.2}) )
+  for (const pass of postProcecssing) {
+    GetGeneratePassFunction(composer, pass);
+  }
+
   return composer;
+}
+
+function GetGeneratePassFunction(composer: EffectComposer, pass: ConfigPostProcessing ) {
+  switch (pass.type) {
+    case PostProcessType.UnrealBloom:
+      composer.addPass( GetUnrealBloomPass(pass.params) )
+      break;
+    default:
+      break;
+  }
 }
 
 function GetRenderPass(scene: Scene, camera: PerspectiveCamera): RenderPass {
