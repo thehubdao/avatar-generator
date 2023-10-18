@@ -86,7 +86,7 @@ export function RandomIntMax(max: number) {
 export function ColorStringToHexString(color: string | undefined) {
   if (color == undefined) return undefined;
   if (color.length !== 6) return undefined;
-
+  
   return `#${color}`;
 }
 
@@ -100,7 +100,7 @@ export function MixArrays<T>(arr1: T[] | undefined, arr2: T[] | undefined) {
 
 export function RemovedAcc(text: string | undefined) {
   if (text == undefined || !text.endsWith(GlobalValues.AccEnd)) return text;
-
+  
   return text.slice(0, - GlobalValues.AccEnd.length);
 }
 
