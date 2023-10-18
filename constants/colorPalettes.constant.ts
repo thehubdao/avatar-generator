@@ -1,4 +1,4 @@
-export const EXAMPLE_PALETTES = [
+export const EXAMPLE_PALETTE = [
   '55efc4',
   '81ecec',
   '74b9ff',
@@ -11,10 +11,15 @@ export const EXAMPLE_PALETTES = [
   '636e72'
 ] as const;
 
-export const SKIN_PALETTES = [
-  'F8B290',
-  'E8A36F',
-  '9F5835',
-  'F2A47E',
-  'C67E42'
+export const DEFAULT_SKIN_PALETTE = [
+  'fbc4ac',
+  'd7a290',
+  'b78270',
+  'c79280',
+  'a77445',
+  '94695a',
+  '835d50',
+  '725145',
+  '60443b',
+  '4f3830'
 ] as const;

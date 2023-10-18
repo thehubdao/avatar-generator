@@ -2,7 +2,7 @@ import { useState } from "react";
 import AGButton from "../../../../common/ag-button.component";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { ColorConfig } from "../../../../../interfaces/common.interface";
-import { EXAMPLE_PALETTES } from "../../../../../constants/colorPalettes.constant";
+import { DEFAULT_SKIN_PALETTE } from "../../../../../constants/colorPalettes.constant";
 
 interface ColorPickerProps {
   materialName: string;
@@ -20,7 +20,7 @@ export default function ColorConfigUI({ materialName, color, id, usePalette, col
   const [defaultColor, setDefaultColor] = useState<string>(color);
   const [hasPaletteSelector, setHasPaletteSelector] = useState<boolean>(usePalette);
   const [paletteLength, setPaletteLength] = useState<number>(colorList?.length || maxColorsLength);
-  const [paletteColors, setPaletteColors] = useState<string[]>(colorList || [...EXAMPLE_PALETTES]);
+  const [paletteColors, setPaletteColors] = useState<string[]>(colorList || [...DEFAULT_SKIN_PALETTE]);
   const [defaultPaletteColor, setDefaultPaletteColor] = useState<number>(paletteColors.indexOf(defaultColor));
 
   const changePalette = (value = paletteLength) => {
@@ -99,7 +99,6 @@ export default function ColorConfigUI({ materialName, color, id, usePalette, col
                           </div>
                           <select name="" id=""
                             value={defaultPaletteColor}
-                            defaultValue={defaultPaletteColor}
                             onChange={e => setDefaultPaletteColor(parseInt(e.target.value))}
                             className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer" >
                             {paletteColors.map((el, index) => {
