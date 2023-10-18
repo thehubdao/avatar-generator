@@ -2,22 +2,27 @@
 const nextConfig = {
   eslint: {
     dirs: [
-            'components',
-            'constants',
-            'enums',
-            'interfaces',
-            'layouts',
-            'pages',
-            'server',
-            'store',
-            'types',
-            'ui',
-            'utils'
+            "components",
+            "constants",
+            "enums",
+            "interfaces",
+            "layouts",
+            "pages",
+            "server",
+            "store",
+            "types",
+            "ui",
+            "utils",
+            "providers",            
     ]
   },
   reactStrictMode: false,
+  webpack: config => {
+    config.resolve.fallback = { fs: false, net: false, tls: false };
+    return config;
+  },
   images: {
-    domains: ['firebasestorage.googleapis.com'],
+    domains: ["firebasestorage.googleapis.com"],
   },
   async headers() {
     return [
