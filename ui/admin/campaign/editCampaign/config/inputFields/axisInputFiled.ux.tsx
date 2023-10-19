@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
+import { ChangeEvent, Dispatch, KeyboardEvent, SetStateAction, useEffect, useState } from "react";
 import { GetStringToNumberInput } from "../../../../../../utils/input.util";
 
 interface AxisInputFieldUIProps<T, TKey extends keyof T> {
@@ -20,28 +20,33 @@ export default function AxisInputFieldUI<T>({
   maxValue = Number.POSITIVE_INFINITY,
   steps = 1
 }: AxisInputFieldUIProps<T, keyof T>) {
-  const [tempConfigProp, setTempConfigProp] = useState<Record<keyof T, number>>(configProp);
+  const [temporaryConfig, setTemporaryConfig] = useState<Record<keyof T, number>>(configProp);
 
   const handleTempInputChange = (e: ChangeEvent<HTMLInputElement>, axis: keyof T) => { // axis.toLowerCase()
-    setTempConfigProp({ ...configProp, [axis]: e.target.value });
+    setTemporaryConfig({ ...configProp, [axis]: e.target.value });
   };
 
-  //* Handle input blur (when it loses focus)
   const handleInputBlur = (axis: keyof T) => {
-    let newNumber = GetStringToNumberInput(`${tempConfigProp[axis]}`);
+    const newNumber = GetStringToNumberInput(`${temporaryConfig[axis]}`);
 
-    if (`${tempConfigProp[axis]}` !== '') {
+    if (`${temporaryConfig[axis]}` !== '') {
       setConfigProp({ ...configProp, [axis]: newNumber });
-      setTempConfigProp({ ...configProp, [axis]: newNumber });
+      setTemporaryConfig({ ...configProp, [axis]: newNumber });
     } else {
       // The value is not valid, revert to the previous value
-      setTempConfigProp(configProp);
+      setTemporaryConfig(configProp);
     }
   };
 
+  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>, axis: keyof T) => {
+    if (e.key === 'Enter') {
+      handleInputBlur(axis);
+    }
+  }
+
   //* Update current input field
   useEffect(() => {
-    setTempConfigProp(configProp);
+    setTemporaryConfig(configProp);
   }, [configProp]);
 
   return (
@@ -57,17 +62,13 @@ export default function AxisInputFieldUI<T>({
               type="number"
               name={axis.toLowerCase()}
               className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg"
-              value={tempConfigProp[axis.toLowerCase() as keyof T]}
+              value={temporaryConfig[axis.toLowerCase() as keyof T]}
               min={minValue}
               max={maxValue}
               step={steps}
               onChange={(e) => handleTempInputChange(e, axis.toLowerCase() as keyof T)}
-              onBlur={(e) => handleInputBlur(axis.toLowerCase() as keyof T)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  handleInputBlur(axis.toLowerCase() as keyof T);
-                }
-              }}
+              onBlur={(_) => handleInputBlur(axis.toLowerCase() as keyof T)}
+              onKeyDown={(e) => handleInputKeyDown(e, axis.toLowerCase() as keyof T)}
             />
           </div>
         ))}

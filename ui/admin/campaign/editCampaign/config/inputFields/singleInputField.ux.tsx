@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from "react";
+import { ChangeEvent, Dispatch, KeyboardEvent, SetStateAction, useEffect, useState } from "react";
 import { GetStringToNumberInput } from "../../../../../../utils/input.util";
 
 interface SingleInputFieldUIProps<T> {
@@ -26,9 +26,8 @@ export default function SingleInputFieldUI<T>({
     setTempConfigProp(e.target.value);
   };
 
-  //* Handle input blur (when it loses focus)
   const handleInputBlur = () => {
-    let newNumber = GetStringToNumberInput(tempConfigProp);
+    const newNumber = GetStringToNumberInput(tempConfigProp);
 
     if (tempConfigProp !== '') {
       setConfigProp(newNumber);
@@ -38,6 +37,12 @@ export default function SingleInputFieldUI<T>({
       setTempConfigProp(`${configProp}`);
     }
   };
+
+  const handleInputKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleInputBlur();
+    }
+  }
 
   //* Update current input field
   useEffect(() => {
@@ -60,11 +65,7 @@ export default function SingleInputFieldUI<T>({
           step={steps}
           onChange={(e) => handleTempInputChange(e)}
           onBlur={handleInputBlur}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handleInputBlur();
-            }
-          }}
+          onKeyDown={handleInputKeyDown}
         />
       </div>
     </div>
