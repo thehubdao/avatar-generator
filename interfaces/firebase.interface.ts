@@ -21,7 +21,7 @@ export interface UserInterface {
 }
 
 export interface AdminUser extends  UserInterface {
-  lastUpdate: Timestamp;
+  lastUpdate: number;
 }
 
 export interface UserWithPass extends UserInterface{
