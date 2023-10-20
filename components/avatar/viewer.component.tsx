@@ -21,11 +21,15 @@ import {
 } from "../../utils/threejs/scene.util";
 import { AGVector3 } from "../../interfaces/common.interface";
 import { GetToneTexture } from "../../utils/threejs/texture.util";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { CreateEffectComposer } from "../../utils/threejs/postProcessing.util";
+import { ConfigPostProcessing } from "../../interfaces/postProcessing.interface";
 
 //#region Logic
 let _scene: Scene | undefined;
 let _camera: PerspectiveCamera | undefined;
 let _renderer: WebGLRenderer | undefined;
+let _composer: EffectComposer | undefined;
 let _controls: OrbitControls | undefined;
 const _mixers: AnimationMixer[] = [];
 const _sceneObjs: Map<string, number> = new Map();
@@ -55,6 +59,14 @@ function DoAnimation(delta: number) {
   for (const mixer of _mixers) {
     mixer.update(delta);
   }
+}
+
+export function AddComposer(postProcessing: ConfigPostProcessing[]) {
+  if (_scene == undefined) return void LogError(Module.Viewer, "Missing Scene to create composer!");
+  if (_renderer == undefined) return void LogError(Module.Viewer, "Missing Renderer to create composer!");
+  if (_camera == undefined) return void LogError(Module.Viewer, "Missing Camera to create composer!");
+
+  _composer = CreateEffectComposer(_renderer, _scene, _camera, postProcessing);
 }
 
 export function AddToScene(toAdd: Object3D, objName?: string) {
@@ -242,7 +254,11 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
     if (_willCameraMove) _camera.position.lerp(_cameraPos, delta);
     if (_willCameraLookAt) _controls.target.lerp(_cameraLookAt, delta);
 
-    _renderer.render(_scene, _camera);
+    if (_composer) {
+      _composer.render();
+    } else {
+      _renderer.render(_scene, _camera);
+    }
   };
 
   return (
