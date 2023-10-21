@@ -179,6 +179,7 @@ export default function LightConfigUI({
     } else {
       setCreateLightOption('');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lightOption, lights]);
 
   const calculeOtherInputWidth = () => {
@@ -188,7 +189,7 @@ export default function LightConfigUI({
       { prefix: 'decay', completeName: 'decay' }
     ];
 
-    let numRenderedComponents = componentsToRender.reduce((count, component) => {
+    const numRenderedComponents = componentsToRender.reduce((count, component) => {
       if (component.prefix in currentParams || LIGHT_PROPERTIES[createLightOption as LightType].includes(component.completeName)) {
         return count + 1;
       }

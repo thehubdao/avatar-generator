@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, KeyboardEvent, SetStateAction, useEffect, useState } from "react";
+import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
 import { GetStringToNumberInput } from "../../../../../../utils/input.util";
 
 interface AxisInputFieldUIProps<T, TKey extends keyof T> {
@@ -68,7 +68,7 @@ export default function AxisInputFieldUI<T>({
               max={maxValue}
               step={steps}
               onChange={(e) => handleTempInputChange(e, axis.toLowerCase() as keyof T)}
-              onBlur={(_) => handleInputBlur(axis.toLowerCase() as keyof T)}
+              onBlur={() => handleInputBlur(axis.toLowerCase() as keyof T)}
               onKeyDown={(e) => handleInputKeyDown(e, axis.toLowerCase() as keyof T)}
             />
           </div>

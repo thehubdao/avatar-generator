@@ -1,4 +1,4 @@
-import { ChangeEvent, Dispatch, KeyboardEvent, SetStateAction, useEffect, useState } from "react";
+import { ChangeEvent, KeyboardEvent, useEffect, useState } from "react";
 import { GetStringToNumberInput } from "../../../../../../utils/input.util";
 
 interface SingleInputFieldUIProps<T> {
@@ -20,7 +20,7 @@ export default function SingleInputFieldUI<T>({
   maxValue = Number.POSITIVE_INFINITY,
   steps = 1
 }: SingleInputFieldUIProps<T>) {
-  const [tempConfigProp, setTempConfigProp] = useState(`${configProp}`);
+  const [tempConfigProp, setTempConfigProp] = useState<string>(`${configProp as string}`);
 
   const handleTempInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     setTempConfigProp(e.target.value);
@@ -34,7 +34,7 @@ export default function SingleInputFieldUI<T>({
       setTempConfigProp(`${newNumber}`);
     } else {
       // The value is not valid, revert to the previous value
-      setTempConfigProp(`${configProp}`);
+      setTempConfigProp(`${configProp as string}`);
     }
   };
 
@@ -46,7 +46,7 @@ export default function SingleInputFieldUI<T>({
 
   //* Update current input field
   useEffect(() => {
-    setTempConfigProp(`${configProp}`);
+    setTempConfigProp(`${configProp as string}`);
   }, [configProp]);
 
   return (

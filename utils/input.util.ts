@@ -1,6 +1,5 @@
-export function GetStringToNumberInput(currentValue: string = '') {
-  let newNumber = 0;
+export function GetStringToNumberInput(currentValue = '') {
   if (currentValue.includes(','))
-    return newNumber = Number(currentValue.replace(',', '.'));
-  return newNumber = Number(currentValue);
-};
+    return Number(currentValue.replace(',', '.'));
+  return Number(currentValue);
+}
