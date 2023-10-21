@@ -1,5 +1,6 @@
-﻿import {EmailResult, Module} from "../enums/common.enum";
+﻿import {CommonErrorCode, EmailResult, Module} from "../enums/common.enum";
 import {GLOBAL_VALUES} from "../constants/common.constant";
+import {Result} from "../types/common.type";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
@@ -70,6 +71,13 @@ export function RemoveUndefinedProperties<T>(obj: T)  {
 export function CastStringToInteger(toCast: string) {
   const num = +toCast;
   return isNaN(num) ? undefined : num | 0;
+}
+
+export function CastStringToNum(toCast: string): Result<number> {
+  const num = +toCast;
+  return isNaN(num) ?
+    {success: false, errMessage: `Input string: "${toCast}", can't be cast as number!`, errCode: CommonErrorCode.WrongInfo} :
+    {success: true, value: num};
 }
 
 export function RandomNumBetween(min: number, max: number) {
