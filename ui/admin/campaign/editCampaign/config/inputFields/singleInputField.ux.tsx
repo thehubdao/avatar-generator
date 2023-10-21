@@ -4,7 +4,7 @@ import { GetStringToNumberInput } from "../../../../../../utils/input.util";
 interface SingleInputFieldUIProps<T> {
   inputLabel: string;
   configProp: T;
-  setConfigProp: Dispatch<SetStateAction<number>>;
+  setConfigProp: (value: number) => void;
   width?: string;
   minValue?: number;
   maxValue?: number;

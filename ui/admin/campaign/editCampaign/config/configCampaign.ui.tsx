@@ -17,7 +17,7 @@ import { CameraConfigOption, CampaignConfigOption } from "../../../../../enums/c
 import CameraConfigUI from "./cameraConfig.ui";
 import LightConfigUI from "./lightConfig.ui";
 import { ConfigLight } from "../../../../../interfaces/light.interface";
-import { LIGHT_TYPE_LABELS } from "../../../../../constants/lightType.constant";
+import { INDEX_OUT_LIGHT_ARRAY, LIGHT_TYPE_LABELS } from "../../../../../constants/lightType.constant";
 import { ShowModal } from "../../../../../utils/modal.util";
 
 interface ConfigCampaignProps {
@@ -35,7 +35,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
   const [camOption, setCamOption] = useState<string>(CameraConfigOption.DefCam);
-  const [lightOption, setLightOption] = useState<number>(-2);
+  const [lightOption, setLightOption] = useState<number>(INDEX_OUT_LIGHT_ARRAY.create_light); // light index
   const [hasNewAvatarBase, setHasNewAvatarBase] = useState<boolean>(false);
 
   const camConfig = useRef<HTMLSelectElement>(null);
@@ -215,8 +215,8 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                       >
                         {configData?.lights
                           ? configData.lights.map((light, index) => <option key={index} value={index} className="bg-bg py-2 px-4">{LIGHT_TYPE_LABELS[light.type]}</option>)
-                          : <option value={-1} className="bg-bg py-2 px-4" disabled>no lights</option>}
-                        <option value={-2} className="bg-bg py-2 px-4">Add new light</option>
+                          : <option value={INDEX_OUT_LIGHT_ARRAY.no_lights} className="bg-bg py-2 px-4" disabled>no lights</option>}
+                        <option value={INDEX_OUT_LIGHT_ARRAY.create_light} className="bg-bg py-2 px-4">Add new light</option>
                       </select>
                     </div>
                     <LightConfigUI

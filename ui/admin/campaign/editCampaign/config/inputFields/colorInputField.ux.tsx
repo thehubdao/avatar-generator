@@ -3,7 +3,7 @@ import { ChangeEvent, Dispatch, SetStateAction } from "react";
 interface ColorInputFieldUIProps {
   inputLabel: string;
   configProp: string;
-  setConfigProp: Dispatch<SetStateAction<string>>;
+  setConfigProp: (value: string) => void;
 }
 
 export default function ColorInputFieldUI({ inputLabel, configProp, setConfigProp }: ColorInputFieldUIProps) {

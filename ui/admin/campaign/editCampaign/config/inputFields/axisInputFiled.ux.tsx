@@ -5,7 +5,7 @@ interface AxisInputFieldUIProps<T, TKey extends keyof T> {
   inputLabel: string;
   axisLabels: string[];
   configProp: Record<TKey, number>;
-  setConfigProp: Dispatch<SetStateAction<Record<TKey, number>>>;
+  setConfigProp: (value: T) => void;
   minValue?: number;
   maxValue?: number;
   steps?: number;
@@ -30,8 +30,9 @@ export default function AxisInputFieldUI<T>({
     const newNumber = GetStringToNumberInput(`${temporaryConfig[axis]}`);
 
     if (`${temporaryConfig[axis]}` !== '') {
-      setConfigProp({ ...configProp, [axis]: newNumber });
-      setTemporaryConfig({ ...configProp, [axis]: newNumber });
+      const newObject = { ...configProp, [axis]: newNumber }
+      setConfigProp(newObject as T);
+      setTemporaryConfig(newObject);
     } else {
       // The value is not valid, revert to the previous value
       setTemporaryConfig(configProp);
