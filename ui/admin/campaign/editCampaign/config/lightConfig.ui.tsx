@@ -54,8 +54,8 @@ export default function LightConfigUI({
   const ambientLightCount = lights?.filter(light => light.type === LightType.AmbientLight).length || 0;
 
   // Check if you have a number of supported lights
-  const isAllOptionsDisabled = !(pointLightCount < MAX_POINT_LIGHTS &&
-    rectAreaLightCount < MAX_RECT_AREA_LIGHT &&
+  const isAllOptionsDisabled = !(pointLightCount < MAX_POINT_LIGHTS ||
+    rectAreaLightCount < MAX_RECT_AREA_LIGHT ||
     ambientLightCount < MAX_AMBIENT_LIGHT);
 
   const sendUpdateLightConfig = () => {
