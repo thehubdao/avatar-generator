@@ -35,7 +35,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
   const [camOption, setCamOption] = useState<string>(CameraConfigOption.DefCam);
-  const [lightOption, setLightOption] = useState<number>(INDEX_OUT_LIGHT_ARRAY.create_light); // light index
+  const [lightOption, setLightOption] = useState<number>((configData?.lights && configData.lights.length > 0) ? 0 : INDEX_OUT_LIGHT_ARRAY.create_light); // light index
   const [hasNewAvatarBase, setHasNewAvatarBase] = useState<boolean>(false);
 
   const camConfig = useRef<HTMLSelectElement>(null);
