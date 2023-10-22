@@ -29,7 +29,7 @@ export default function SingleInputFieldUI<T>({
   const handleInputBlur = () => {
     const newNumber = GetStringToNumberInput(tempConfigProp);
 
-    if (tempConfigProp !== '') {
+    if (tempConfigProp !== '' && newNumber >= minValue && maxValue >= newNumber) {
       setConfigProp(newNumber);
       setTempConfigProp(`${newNumber}`);
     } else {

@@ -29,7 +29,7 @@ export default function AxisInputFieldUI<T>({
   const handleInputBlur = (axis: keyof T) => {
     const newNumber = GetStringToNumberInput(`${temporaryConfig[axis]}`);
 
-    if (`${temporaryConfig[axis]}` !== '') {
+    if (`${temporaryConfig[axis]}` !== '' && newNumber >= minValue && maxValue >= newNumber) {
       const newObject = { ...configProp, [axis]: newNumber }
       setConfigProp(newObject as T);
       setTemporaryConfig(newObject);

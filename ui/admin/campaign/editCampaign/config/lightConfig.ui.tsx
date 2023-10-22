@@ -286,6 +286,7 @@ export default function LightConfigUI({
           inputLabel="Size"
           axisLabels={["Width", "Height"]}
           configProp={lightParams.size}
+          minValue={0}
           setConfigProp={(value: { width: number, height: number }) => {
             setLightParams({
               ...lightParams,
@@ -300,6 +301,7 @@ export default function LightConfigUI({
           <SingleInputFieldUI
             inputLabel="Intensity"
             configProp={lightParams.intensity}
+            minValue={0}
             setConfigProp={(value: number) => {
               setLightParams({
                 ...lightParams,
@@ -313,6 +315,7 @@ export default function LightConfigUI({
           <SingleInputFieldUI
             inputLabel="Distance"
             configProp={lightParams.distance}
+            minValue={0}
             setConfigProp={(value: number) => {
               setLightParams({
                 ...lightParams,
@@ -326,6 +329,7 @@ export default function LightConfigUI({
           <SingleInputFieldUI
             inputLabel="Decay"
             configProp={lightParams.decay}
+            minValue={0}
             setConfigProp={(value: number) => {
               setLightParams({
                 ...lightParams,
