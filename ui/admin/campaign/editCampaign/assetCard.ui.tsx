@@ -56,14 +56,14 @@ export default function AssetCard({ id, name, thumb, location, activedOption, up
 
   //* Updates default asset config prop.
   const handleUpdateDefaultAsset = (config: string) => {
-    let defaultConfigKey = getCurrendDefaultOption();
+    const defaultConfigKey = getCurrendDefaultOption();
 
     setIsDefaultBeingManipulatied(true);
     void updateDefaultAsset(defaultConfigKey, config).then(() => setIsDefaultBeingManipulatied(false));
   };
 
   const handleClearDefaultAsset = () => {
-    let defaultConfigKey = getCurrendDefaultOption();
+    const defaultConfigKey = getCurrendDefaultOption();
 
     setIsDefaultBeingManipulatied(true);
     void updateDefaultAsset(defaultConfigKey, '').then(() => setIsDefaultBeingManipulatied(false));
