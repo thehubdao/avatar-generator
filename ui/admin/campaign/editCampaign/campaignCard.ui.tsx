@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineDelete, AiOutlineInfoCircle, AiOutlineLoading3Quarters } from "react-icons/ai";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineDelete, AiOutlineInfoCircle, AiOutlineLoading } from "react-icons/ai";
 
 import AGButton from "../../../common/ag-button.component";
 
@@ -47,7 +47,7 @@ export default function CampaignCard({ noCampaign, create, campaign, clickHandle
 									<p className="pl-2 text-sm text-white">Deleting...</p>
 									<div className="flex gap-2">
 										<div className="bg-bg w-fit px-2 rounded-full h-8 flex justify-center items-center cursor-wait">
-											<AiOutlineLoading3Quarters className="animate-spin" />
+											<AiOutlineLoading className="animate-spin" />
 										</div>
 									</div>
 								</div>
