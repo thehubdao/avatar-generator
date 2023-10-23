@@ -67,12 +67,14 @@ export default function EditCampaign() {
   const updateDefaultAsset = async (element: string, config: string) => {
     const newConfig = { [element]: config };
     const newParameters: Partial<CampaignParameters> = { config: newConfig };
-    // console.log(newParameters, location);
     const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
 
     if (result.success) {
-      ShowModal(`Update ${element} asset default config sucessful`)
-      void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Parameters }));
+      if (config === '') {
+        ShowModal(`Unselect ${element} asset default config sucessful`)
+      } else {
+        ShowModal(`Select ${element} asset default config sucessful`)
+      } void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Parameters }));
     } else {
       ShowModal(`Update ${element} asset default config failed`);
     }

@@ -116,25 +116,6 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
     setSearchSuggestionList(filterItems ?? []);
   }
 
-  //* Updates default asset config prop.
-  const handleUpdateDefaultAsset = (config: string) => {
-    let defaultConfigKey = '';
-    switch (activedOption) {
-      case FirestoreLocation.Animations:
-        defaultConfigKey = 'defAnimation';
-        break;
-      case FirestoreLocation.Stages:
-        defaultConfigKey = 'defStage';
-        break;
-      default:
-        break;
-    }
-
-    if (defaultConfigKey) {
-      void updateDefaultAsset(defaultConfigKey, config);
-    }
-  };
-
   return (
     <>
       {/* Display list of assets */}
@@ -197,7 +178,8 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
                   name={asset.name}
                   thumb={asset.thumb}
                   location={activedOption}
-                  updateDefaultAsset={(config: string) => handleUpdateDefaultAsset(config)}
+                  activedOption={activedOption}
+                  updateDefaultAsset={(defaultConfigKey: string, config: string) => updateDefaultAsset(defaultConfigKey, config)}
                 />
               </div>)
             })}

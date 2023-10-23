@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import GetImage from "../../../../components/commons/getImage.component";
 import UpdateAsset from "../../../../components/admin/assets/updateAsset.component";
 import AGButton from "../../../common/ag-button.component";
-import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineCloudUpload, AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineCloudUpload, AiOutlineDelete, AiOutlineEdit, AiOutlineLoading3Quarters } from "react-icons/ai";
 import { IoImageOutline } from "react-icons/io5";
 import { DeleteDoc } from "../../../../utils/firebase.util";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
@@ -16,10 +16,11 @@ interface AssetCardProps {
   name: string;
   thumb?: string;
   location: FirestoreLocation;
-  updateDefaultAsset: (config: string) => void;
+  activedOption: string;
+  updateDefaultAsset: (element: string, config: string) => Promise<void>;
 }
 
-export default function AssetCard({ id, name, thumb, location, updateDefaultAsset }: AssetCardProps) {
+export default function AssetCard({ id, name, thumb, location, activedOption, updateDefaultAsset }: AssetCardProps) {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const campaignConfigParams = useAppSelector(state => state.currentCampaign.parameters.config);
 
@@ -29,11 +30,44 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
   const currentFile = useRef<HTMLInputElement>(null);
   const currentThumb = useRef<HTMLInputElement>(null);
 
+  // general states
   const [willDelete, setWillDelete] = useState<boolean>(false);
   const [willEdit, setWillEdit] = useState<boolean>(false);
   const [hasFile, setHasFile] = useState<boolean>(false);
   const [hasThumb, setHasThumb] = useState<boolean>(false);
   const [willUpdateAsset, setWillUpdateAsset] = useState<boolean>(false);
+
+  // loading
+  const [isDefaultBeingManipulatied, setIsDefaultBeingManipulatied] = useState<boolean>(false);
+
+  const getCurrendDefaultOption = () => {
+    let defaultConfigKey = '';
+    switch (activedOption) {
+      case FirestoreLocation.Animations:
+        defaultConfigKey = 'defAnimation';
+        break;
+      case FirestoreLocation.Stages:
+        defaultConfigKey = 'defStage';
+        break;
+    }
+
+    return defaultConfigKey
+  }
+
+  //* Updates default asset config prop.
+  const handleUpdateDefaultAsset = (config: string) => {
+    let defaultConfigKey = getCurrendDefaultOption();
+
+    setIsDefaultBeingManipulatied(true);
+    void updateDefaultAsset(defaultConfigKey, config).then(() => setIsDefaultBeingManipulatied(false));
+  };
+
+  const handleClearDefaultAsset = () => {
+    let defaultConfigKey = getCurrendDefaultOption();
+
+    setIsDefaultBeingManipulatied(true);
+    void updateDefaultAsset(defaultConfigKey, '').then(() => setIsDefaultBeingManipulatied(false));
+  }
 
   const DEFAULT_CONFIG_SECTIONS = [FirestoreLocation.Stages, FirestoreLocation.Animations];
   const DEFAULT_CONFIG_SECTION_KEYS: { [key: string]: keyof CampaignConfig } = {
@@ -144,16 +178,31 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
                     </div>
                   </div>
                 </>
-                : <div className={`flex ${DEFAULT_CONFIG_SECTIONS.includes(location) ? 'justify-between' : 'justify-end'} items-center w-full`}>
+                : <div className={`flex ${DEFAULT_CONFIG_SECTIONS.includes(location) ? 'justify-between' : 'justify-end'} items-center text-sm`}>
                   {(DEFAULT_CONFIG_SECTIONS.includes(location)) && (
-                    <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name} onClickEvent={() => updateDefaultAsset(name)}>
-                      {campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name
-                        ? <div className="text-sm flex items-center gap-1">
-                          <AiOutlineCheckCircle />
-                          <p>default</p>
+                    <>{isDefaultBeingManipulatied
+                      ? <AGButton nm fit>
+                        <div className="w-20 flex justify-center cursor-wait">
+                          <AiOutlineLoading3Quarters className="animate-spin" />
                         </div>
-                        : <p className="text-sm">Set default</p>}
-                    </AGButton>
+                      </AGButton>
+                      : <>
+                        {campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name
+                          ? <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name} onClickEvent={() => handleClearDefaultAsset()}>
+                            <div className="w-20 flex justify-center items-center gap-1">
+                              <AiOutlineCheckCircle />
+                              <p>default</p>
+                            </div>
+                          </AGButton>
+                          :
+                          <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name} onClickEvent={() => handleUpdateDefaultAsset(name)}>
+                            <div className="w-20 flex justify-center">
+                              <p>Set default</p>
+                            </div>
+                          </AGButton>
+                        }
+                      </>
+                    }</>
                   )}
                   <AGButton nm fit onClickEvent={() => setWillEdit(true)}>
                     <AiOutlineEdit className="group-hover/button:text-purple transition-all duration-300" />
