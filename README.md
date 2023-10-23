@@ -1,4 +1,5 @@
 # Avatar Generator
+Branch for AGHackaton
 
 ---
 ## Vercel environments
