@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import GetImage from "../../../../components/commons/getImage.component";
 import UpdateAsset from "../../../../components/admin/assets/updateAsset.component";
 import AGButton from "../../../common/ag-button.component";
-import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineCloudUpload, AiOutlineDelete, AiOutlineEdit, AiOutlineLoading3Quarters } from "react-icons/ai";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineCloudUpload, AiOutlineDelete, AiOutlineEdit, AiOutlineLoading } from "react-icons/ai";
 import { IoImageOutline } from "react-icons/io5";
 import { DeleteDoc } from "../../../../utils/firebase.util";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
@@ -183,7 +183,7 @@ export default function AssetCard({ id, name, thumb, location, activedOption, up
                     <>{isDefaultBeingManipulatied
                       ? <AGButton nm fit>
                         <div className="w-20 flex justify-center cursor-wait">
-                          <AiOutlineLoading3Quarters className="animate-spin" />
+                          <AiOutlineLoading className="animate-spin" />
                         </div>
                       </AGButton>
                       : <>
