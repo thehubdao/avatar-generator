@@ -45,7 +45,7 @@ export default function NewUserUI({ handleCreateNewUser }: NewUserProps) {
         </div>
         {/* User Input */}
         <div className="w-1/3 px-2">
-          <p>User:</p>
+          <p>User/Email:</p>
           <input type="text" ref={userAccount} required className="w-full nm-inset-bg-sm rounded-lg p-2 font-normal" />
         </div>
         {/* Password Input */}
