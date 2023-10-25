@@ -1,7 +1,7 @@
 import { Dispatch } from "react";
 import { ShowModal } from "./modal.util";
 
-export function checkFileSize(
+export function CheckFileSize(
   fileSize: number,
   maxSize: number,
   scale: { label: string, bytes: number },

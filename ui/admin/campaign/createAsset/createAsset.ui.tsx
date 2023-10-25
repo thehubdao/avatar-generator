@@ -8,9 +8,8 @@ import AGButton from "../../../common/ag-button.component";
 import CreateAsset from "../../../../components/admin/assets/createAsset.component";
 import { AiOutlineCheckCircle, AiOutlineCloudUpload } from "react-icons/ai";
 import { IoImageOutline } from "react-icons/io5";
-import { MAXIMUM_FILE_SIZE, Megabytes } from "../../../../constants/inputValues.constant";
-import { ShowModal } from "../../../../utils/modal.util";
-import { checkFileSize } from "../../../../utils/input.util";
+import { MAXIMUM_FILE_SIZE, megabytes } from "../../../../constants/inputValues.constant";
+import { CheckFileSize } from "../../../../utils/input.util";
 
 export default function AddAssetUI() {
   const currentCampaignParams = useAppSelector(state => state.currentCampaign.parameters);
@@ -82,7 +81,7 @@ export default function AddAssetUI() {
     if (fileLength < 1) {
       setHasFileState(false);
     } else {
-      checkFileSize(
+      CheckFileSize(
         fileSize,
         maxFileSize,
         {
@@ -169,7 +168,7 @@ export default function AddAssetUI() {
                 accept=".glb"
                 ref={assetFile}
                 onChange={() => {
-                  checkFile(assetFile.current, MAXIMUM_FILE_SIZE.model.sizeOnMb, MAXIMUM_FILE_SIZE.model.scale, Megabytes, setHasAssetFile);
+                  checkFile(assetFile.current, MAXIMUM_FILE_SIZE.model.sizeOnMb, MAXIMUM_FILE_SIZE.model.scale, megabytes, setHasAssetFile);
                 }}
               />
               {hasAssetFile && <div className="absolute w-11/12 flex gap-2 mt-3 whitespace-nowrap">
@@ -183,7 +182,7 @@ export default function AddAssetUI() {
                 ? <AiOutlineCheckCircle className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none text-green-600" />
                 : <IoImageOutline className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none" />}
               <input type="file" id="createNewImageAsset" name="createNewImageAsset" className="hidden" accept="image/png, image/jpeg" ref={thumbFile} onChange={() => {
-                checkFile(thumbFile.current, MAXIMUM_FILE_SIZE.image.sizeOnMb, MAXIMUM_FILE_SIZE.image.scale, Megabytes, setHasThumbFile);
+                checkFile(thumbFile.current, MAXIMUM_FILE_SIZE.image.sizeOnMb, MAXIMUM_FILE_SIZE.image.scale, megabytes, setHasThumbFile);
               }} />
               {hasThumbFile && <div className="absolute w-11/12 flex gap-2 mt-3 whitespace-nowrap">
                 <p>File updated:</p>

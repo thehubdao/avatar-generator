@@ -1,4 +1,4 @@
-import { Dispatch, useCallback, useRef, useState } from "react";
+import { Dispatch, useRef, useState } from "react";
 import GetImage from "../../../../components/commons/getImage.component";
 import UpdateAsset from "../../../../components/admin/assets/updateAsset.component";
 import AGButton from "../../../common/ag-button.component";
@@ -10,8 +10,8 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { fetchData } from "../../../../store/currentCampaignSlice";
 import { ShowModal } from "../../../../utils/modal.util";
 import { CampaignConfig } from "../../../../interfaces/common.interface";
-import { checkFileSize } from "../../../../utils/input.util";
-import { MAXIMUM_FILE_SIZE, Megabytes } from "../../../../constants/inputValues.constant";
+import { CheckFileSize } from "../../../../utils/input.util";
+import { MAXIMUM_FILE_SIZE, megabytes } from "../../../../constants/inputValues.constant";
 
 interface AssetCardProps {
   id: string;
@@ -63,7 +63,7 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
     if (fileLength < 1) {
       setHasFileState(false);
     } else {
-      checkFileSize(
+      CheckFileSize(
         fileSize,
         maxFileSize,
         {
@@ -140,7 +140,7 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
                             accept=".glb"
                             ref={currentFile}
                             onChange={() => {
-                              checkFile(currentFile.current, MAXIMUM_FILE_SIZE.model.sizeOnMb, MAXIMUM_FILE_SIZE.model.scale, Megabytes, setHasFile);
+                              checkFile(currentFile.current, MAXIMUM_FILE_SIZE.model.sizeOnMb, MAXIMUM_FILE_SIZE.model.scale, megabytes, setHasFile);
                             }}
                           />
                         </label>
@@ -154,7 +154,7 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
                             name={`editThumbAsset-${id}`}
                             className="hidden" accept="image/png, image/jpeg"
                             ref={currentThumb} onChange={() => {
-                              checkFile(currentThumb.current, MAXIMUM_FILE_SIZE.image.sizeOnMb, MAXIMUM_FILE_SIZE.image.scale, Megabytes, setHasThumb);
+                              checkFile(currentThumb.current, MAXIMUM_FILE_SIZE.image.sizeOnMb, MAXIMUM_FILE_SIZE.image.scale, megabytes, setHasThumb);
                             }} />
                         </label>
                       </form>

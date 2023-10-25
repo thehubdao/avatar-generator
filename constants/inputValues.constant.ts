@@ -1,6 +1,6 @@
 
-export const Kilobytes = 1024
-export const Megabytes = Math.pow(Kilobytes, 2);
+export const kilobytes = 1024
+export const megabytes = Math.pow(kilobytes, 2);
 
 export const MAXIMUM_FILE_SIZE = {
   model: {

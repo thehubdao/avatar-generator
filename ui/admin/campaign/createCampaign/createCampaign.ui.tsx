@@ -12,8 +12,8 @@ import FeaturesConfig from "./featuresConfigStep.ui";
 import ConfirmationStep from "./confirmationStep.ui";
 
 import { setName } from "../../../../store/addCampaignSlice";
-import { checkFileSize } from "../../../../utils/input.util";
-import { MAXIMUM_FILE_SIZE, Megabytes } from "../../../../constants/inputValues.constant";
+import { CheckFileSize } from "../../../../utils/input.util";
+import { MAXIMUM_FILE_SIZE, megabytes } from "../../../../constants/inputValues.constant";
 
 interface AddCampaignProps {
   setAvatarBaseFile: (file: File | undefined) => Promise<void>;
@@ -51,12 +51,12 @@ export default function AddCampaign({ setAvatarBaseFile }: AddCampaignProps) {
     if (fileLength < 1) {
       setHasCampaignBase(false);
     } else {
-      checkFileSize(
+      CheckFileSize(
         fileSize,
         MAXIMUM_FILE_SIZE.model.sizeOnMb,
         {
           label: MAXIMUM_FILE_SIZE.model.scale,
-          bytes: Megabytes,
+          bytes: megabytes,
         },
         setHasCampaignBase,
         campaignBaseInput.current

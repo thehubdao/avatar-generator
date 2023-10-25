@@ -15,8 +15,8 @@ import { BsLightbulb } from "react-icons/bs";
 import { CampaignConfig, ColorConfig, FeatureBasic, LookAtVectors } from "../../../../../interfaces/common.interface";
 import { CameraConfigOption, CampaignConfigOption } from "../../../../../enums/campaign.enum";
 import CameraConfigUI from "./cameraConfig.ui";
-import { checkFileSize } from "../../../../../utils/input.util";
-import { MAXIMUM_FILE_SIZE, Megabytes } from "../../../../../constants/inputValues.constant";
+import { CheckFileSize } from "../../../../../utils/input.util";
+import { MAXIMUM_FILE_SIZE, megabytes } from "../../../../../constants/inputValues.constant";
 
 interface ConfigCampaignProps {
   configData?: CampaignConfig;
@@ -82,7 +82,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
     if (fileLength < 1) {
       setHasFileState(false);
     } else {
-      checkFileSize(
+      CheckFileSize(
         fileSize,
         maxFileSize,
         {
@@ -142,7 +142,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                               avatarBaseFile.current,
                               MAXIMUM_FILE_SIZE.model.sizeOnMb,
                               MAXIMUM_FILE_SIZE.model.scale,
-                              Megabytes,
+                              megabytes,
                               setHasNewAvatarBase
                             );
                           }} />
