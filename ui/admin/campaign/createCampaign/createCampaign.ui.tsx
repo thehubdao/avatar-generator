@@ -12,15 +12,17 @@ import FeaturesConfig from "./featuresConfigStep.ui";
 import ConfirmationStep from "./confirmationStep.ui";
 
 import { setName } from "../../../../store/addCampaignSlice";
+import { checkFileSize } from "../../../../utils/input.util";
+import { MAXIMUM_FILE_SIZE, Megabytes } from "../../../../constants/inputValues.constant";
 
 interface AddCampaignProps {
   setAvatarBaseFile: (file: File | undefined) => Promise<void>;
 }
 
-export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
+export default function AddCampaign({ setAvatarBaseFile }: AddCampaignProps) {
   const name = useAppSelector(state => state.addCampaign.name);
   const dispatch = useAppDispatch();
-  
+
   const campaignNameInput = useRef<HTMLInputElement>(null);
   const campaignBaseInput = useRef<HTMLInputElement>(null);
   const [hasCampaignName, setHasCampaignName] = useState<boolean>(false);
@@ -38,11 +40,27 @@ export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
   }
 
   function checkCampaignBase() {
-    const fileLength = campaignBaseInput.current?.files?.length;
-    if (!fileLength || fileLength < 1) {
+    if (!campaignBaseInput.current?.files) {
+      setHasCampaignBase(false);
+      return;
+    }
+
+    const fileLength = campaignBaseInput.current.files?.length;
+    const fileSize = campaignBaseInput.current.files.item(0)?.size ?? 0;
+
+    if (fileLength < 1) {
       setHasCampaignBase(false);
     } else {
-      setHasCampaignBase(true);
+      checkFileSize(
+        fileSize,
+        MAXIMUM_FILE_SIZE.model.sizeOnMb,
+        {
+          label: MAXIMUM_FILE_SIZE.model.scale,
+          bytes: Megabytes,
+        },
+        setHasCampaignBase,
+        campaignBaseInput.current
+      );
     }
   }
 
@@ -68,12 +86,12 @@ export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
             onChange={checkCampaignName}
             disabled={!shouldEditName}
           />
-          {hasCampaignName ?
-            <p>Campaigns are the container for a personalization system. A campaign is formed by
+          {hasCampaignName
+            ? <p>Campaigns are the container for a personalization system. A campaign is formed by
               <span className="text-purple font-bold"> AVATAR BASE</span> and
-              <span className="text-orange font-bold"> FEATURES</span> initially.</p>
-            :
-            <label htmlFor="newCampaignName" className="block text-gray-light cursor-pointer">Set the campaign&apos;s name.</label>
+              <span className="text-orange font-bold"> FEATURES</span> initially.
+            </p>
+            : <label htmlFor="newCampaignName" className="block text-gray-light cursor-pointer">Set the campaign&apos;s name.</label>
           }
 
         </div>
@@ -82,15 +100,20 @@ export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
             <div className="rounded-2xl h-96 w-3/5 flex flex-col justify-center items-center shadow-inset-medium hover:shadow-inset-hard overflow-hidden transition-all duration-300">
               <div className="w-full h-full p-2 flex justify-center items-center">
                 <label className="flex justify-center items-center bg-bg rounded-lg cursor-pointer shadow-flat-soft hover:shadow-flat-hard w-56 h-56 hover:w-11/12 hover:h-[85%] transition-all duration-1000 group" htmlFor="newCampaignBase">
-                  <div className={`flex gap-10 p-10 font-humane text-9xl text-gray-light ${hasCampaignBase ? 'group-hover:text-green-400':'group-hover:text-purple'} transition-all duration-1000`}>
-                    {
-                      hasCampaignBase ?
-                      <AiOutlineCheckCircle/>
-                      :
-                      <AiOutlineCloudUpload/>
+                  <div className={`flex gap-10 p-10 font-humane text-9xl text-gray-light ${hasCampaignBase ? 'group-hover:text-green-400' : 'group-hover:text-purple'} transition-all duration-1000`}>
+                    {hasCampaignBase
+                      ? <AiOutlineCheckCircle />
+                      : <AiOutlineCloudUpload />
                     }
                   </div>
-                  <input type="file" id="newCampaignBase" ref={campaignBaseInput} className="hidden" accept=".glb" onChange={checkCampaignBase} />
+                  <input
+                    type="file"
+                    id="newCampaignBase"
+                    ref={campaignBaseInput}
+                    className="hidden"
+                    accept=".glb"
+                    onChange={checkCampaignBase}
+                  />
                 </label>
               </div>
             </div>
@@ -105,7 +128,7 @@ export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
                   <AvatarBaseStep ready={hasCampaignName && hasCampaignBase} handleNextStep={() => {
                     dispatch(setName(campaignNameInput.current?.value || ''));
                     setShouldEditName(false);
-                  }}/>
+                  }} />
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
                   <AssetsCountStep ready={true} handleNextStep={(value) => setFeaturesCount(value)} handleBackStep={() => setShouldEditName(true)} />
@@ -114,7 +137,7 @@ export default function AddCampaign({setAvatarBaseFile}: AddCampaignProps) {
                   <FeaturesConfig ready={true} featuresCount={featuresCount} />
                 </SwiperSlide>
                 <SwiperSlide style={{ minHeight: 384 }}>
-                  <ConfirmationStep handleNextStep={() => onSubmit()}/>
+                  <ConfirmationStep handleNextStep={() => onSubmit()} />
                 </SwiperSlide>
               </Swiper>
             </div>
