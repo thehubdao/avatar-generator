@@ -15,6 +15,13 @@ export default function CampaignCard({ noCampaign, create, campaign, clickHandle
 	const [willDelete, setWillDelete] = useState<boolean>(false);
 	const [shouldDeleteCampaing, setShouldDeleteCampaing] = useState<boolean>(false);
 
+	const handleDeleteCampaign = (campaign: string) => {
+		if (deleteCampaign) {
+			setShouldDeleteCampaing(true);
+			void deleteCampaign(campaign).then(() => setShouldDeleteCampaing(false));
+		}
+	}
+
 	return (
 		<div className={`justify-self-center rounded-2xl h-96 w-72 flex flex-col justify-center items-center ${noCampaign ? 'shadow-inset-medium hover:shadow-inset-hard' : 'shadow-flat-soft hover:shadow-flat-hard'} overflow-hidden transition-all`}>
 			{noCampaign
@@ -59,12 +66,7 @@ export default function CampaignCard({ noCampaign, create, campaign, clickHandle
 												<AiOutlineInfoCircle className="transition-all duration-300" />
 											</div>
 											<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-green-600"
-												onClick={() => {
-													if (deleteCampaign) {
-														setShouldDeleteCampaing(true);
-														void deleteCampaign(campaign).then(() => setShouldDeleteCampaing(false));
-													}
-												}}
+												onClick={() => handleDeleteCampaign(campaign)}
 											>
 												<AiOutlineCheckCircle className="transition-all duration-300" />
 											</button>
