@@ -1,4 +1,4 @@
-export const DEFAULT_THREE_JS_PROPS = {
+export const DEFAULT_LIGHTS_CONFIG = {
   color: 'ffffff',
   intensity: 1,
   distance: 0,
