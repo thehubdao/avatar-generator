@@ -21,7 +21,7 @@ import {
 } from "../interfaces/firebase.interface";
 import {CampaignParameterName, CommonErrorCode, Module, PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
-import {AddOrRemoveSlash, LogError, RandomPassword} from "./common.util";
+import {AddOrRemoveSlash, LogError, Raise, RandomPassword} from "./common.util";
 import {Result} from "../types/common.type";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
 import {SessionUserInfo} from "./common/session.util";
@@ -242,19 +242,27 @@ export async function GetFile(path: string, campaign?: string): Promise<Result<A
   }
 }
 
-export async function GetParameter<T>(campaign: string | undefined, parameter: ParameterNameType): Promise<T | undefined> {
-  if(parameter === CampaignParameterName.Missing) return undefined;
+export async function GetParameter<T>(campaign: string | undefined, parameter: ParameterNameType): Promise<Result<T>> {
+  try {
+    if (parameter === CampaignParameterName.Missing) Raise("Non existent parameter wanted!");
 
-  const {doc, getDoc} = await import('@firebase/firestore');
+    const {doc, getDoc} = await import('@firebase/firestore');
 
-  const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}`.toLowerCase() : FirestoreGlobalLocation.ParametersV2;
-  const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
-  const leDoc = await getDoc(docRef);
-
-  if (parameter !== CampaignParameterName.All) {
-    return leDoc.get(parameter) as T;
-  } else {
-    return leDoc.data() as T;
+    const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}`.toLowerCase() : FirestoreGlobalLocation.ParametersV2;
+    const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
+    const leDoc = await getDoc(docRef);
+    
+    const data: T = parameter === CampaignParameterName.All ?
+      leDoc.data() :
+      leDoc.get(parameter);
+    
+    return data == undefined ?
+      {success: false, errMessage: "Empty data on db!", errCode: CommonErrorCode.GetNoData} :
+      {success: true, value: data};
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, e);
+    return {success: false, errMessage: err.message, errCode: err.code};
   }
 }
 
