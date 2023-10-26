@@ -252,9 +252,9 @@ export async function GetParameter<T>(campaign: string | undefined, parameter: P
     const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
     const leDoc = await getDoc(docRef);
     
-    const data: T = parameter === CampaignParameterName.All ?
-      leDoc.data() :
-      leDoc.get(parameter);
+    const data = parameter === CampaignParameterName.All ?
+      leDoc.data() as T :
+      leDoc.get(parameter) as T;
     
     return data == undefined ?
       {success: false, errMessage: "Empty data on db!", errCode: CommonErrorCode.GetNoData} :
