@@ -45,7 +45,7 @@ export default function NewUserUI({ handleCreateNewUser }: NewUserProps) {
         </div>
         {/* User Input */}
         <div className="w-1/3 px-2">
-          <p>User:</p>
+          <p>User/Email:</p>
           <input type="text" ref={userAccount} required className="w-full nm-inset-bg-sm rounded-lg p-2 font-normal" />
         </div>
         {/* Password Input */}
@@ -56,12 +56,12 @@ export default function NewUserUI({ handleCreateNewUser }: NewUserProps) {
       </form>
       <div className="w-full flex flex-wrap mt-3 font-poppins font-bold">
         {/* Renders a NewUserButton component for adding and canceling a new user. */}
-        <div className="w-1/2">
+        <div className="w-1/2 px-2">
           <AGButton full form nm onClickEvent={() => { handleAddEvent(); }}>
             <p className="text-gray-normal py-1">Add</p>
           </AGButton>
         </div>
-        <div className="w-1/2">
+        <div className="w-1/2 px-2">
           <AGButton full nm onClickEvent={() => { handleCancelEvent(); }}>
             <p className="text-gray-normal py-1">Cancel</p>
           </AGButton>
