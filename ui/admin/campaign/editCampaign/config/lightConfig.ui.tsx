@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { ConfigLight } from "../../../../../interfaces/light.interface";
+import { ConfigLight, ConfigPointLight } from "../../../../../interfaces/light.interface";
 import { AGVector3 } from "../../../../../interfaces/common.interface";
 import AGButton from "../../../../common/ag-button.component";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { LightType } from "../../../../../enums/light.enum";
-import { INDEX_OUT_LIGHT_ARRAY, LIGHT_PROPERTIES, LIGHT_TYPE_LABELS } from "../../../../../constants/lightType.constant";
+import { INDEX_OUT_LIGHT_ARRAY, LIGHT_PROPERTIES, LIGHT_TYPE_LABELS, MAX_NUMBER_OF_AMBIENT_LIGHT, MAX_NUMBER_OF_POINT_LIGHTS, MAX_NUMBER_OF_RECT_AREA_LIGHT } from "../../../../../constants/lightType.constant";
 import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineDelete } from "react-icons/ai";
-import { DEFAULT_THREE_JS_PROPS } from "../../../../../constants/threeJsDefault.constant";
+import { DEFAULT_LIGHTS_CONFIG } from "../../../../../constants/lightConfig.constant";
 import AxisInputFieldUI from "./inputFields/axisInputFiled.ux";
 import SingleInputFieldUI from "./inputFields/singleInputField.ux";
 import ColorInputFieldUI from "./inputFields/colorInputField.ux";
@@ -29,24 +29,23 @@ export default function LightConfigUI({
 
   //* Initialize state variables for various light properties.currentParams
   const [lightParams, setLightParams] = useState({
-    decay: currentParams.decay ?? DEFAULT_THREE_JS_PROPS.decay,
-    distance: currentParams.dist ?? DEFAULT_THREE_JS_PROPS.distance,
-    intensity: currentParams.intst ?? DEFAULT_THREE_JS_PROPS.intensity,
-    color: currentParams.color ?? DEFAULT_THREE_JS_PROPS.color,
-    lookAt: currentParams.lAt ?? DEFAULT_THREE_JS_PROPS.lookAt,
-    position: currentParams.pos ?? DEFAULT_THREE_JS_PROPS.position,
+    decay: currentParams.decay ?? DEFAULT_LIGHTS_CONFIG.decay,
+    distance: currentParams.dist ?? DEFAULT_LIGHTS_CONFIG.distance,
+    intensity: currentParams.intst ?? DEFAULT_LIGHTS_CONFIG.intensity,
+    color: currentParams.color ?? DEFAULT_LIGHTS_CONFIG.color,
+    lookAt: currentParams.lAt ?? DEFAULT_LIGHTS_CONFIG.lookAt,
+    position: currentParams.pos ?? DEFAULT_LIGHTS_CONFIG.position,
     size: {
-      width: currentParams.width ?? DEFAULT_THREE_JS_PROPS.width,
-      height: currentParams.height ?? DEFAULT_THREE_JS_PROPS.height
+      width: currentParams.width ?? DEFAULT_LIGHTS_CONFIG.width,
+      height: currentParams.height ?? DEFAULT_LIGHTS_CONFIG.height
     }
   });
 
   //* Create new light config variables.
   const lightTypeOptions = Object.values(LightType);
   const [createLightOption, setCreateLightOption] = useState<string>('');
-  const MAX_POINT_LIGHTS = 5;
-  const MAX_RECT_AREA_LIGHT = 2;
-  const MAX_AMBIENT_LIGHT = 1;
+  // TODO: ADD 'S TO LIGHT(S) AND PASS THE CODE TO LIGHT CONSTANTS.
+
 
   // Count the number of each type of light
   const pointLightCount = lights?.filter(light => light.type === LightType.PointLight).length || 0;
@@ -54,9 +53,11 @@ export default function LightConfigUI({
   const ambientLightCount = lights?.filter(light => light.type === LightType.AmbientLight).length || 0;
 
   // Check if you have a number of supported lights
-  const isAllOptionsDisabled = !(pointLightCount < MAX_POINT_LIGHTS ||
-    rectAreaLightCount < MAX_RECT_AREA_LIGHT ||
-    ambientLightCount < MAX_AMBIENT_LIGHT);
+  const isAllOptionsDisabled = !(pointLightCount < MAX_NUMBER_OF_POINT_LIGHTS ||
+    rectAreaLightCount < MAX_NUMBER_OF_RECT_AREA_LIGHT ||
+    ambientLightCount < MAX_NUMBER_OF_AMBIENT_LIGHT);
+
+  // TODO: CHANGE LIGHT_PROPERTIES CONST TO INTERFACES
 
   const sendUpdateLightConfig = () => {
     if (!currentOption || !lights) return;
@@ -64,7 +65,6 @@ export default function LightConfigUI({
     // Map the updated properties for the selected light type
     const newlightsArray = lights.map((light, index) => {
       if (index !== lightOption) return light;
-
       const newLightParams: Partial<ConfigLight["params"]> = {};
 
       if ('dist' in light.params) newLightParams.dist = lightParams.distance;
@@ -154,26 +154,26 @@ export default function LightConfigUI({
     const newOption = lights?.find((_, index) => index === lightOption);
 
     setLightParams({
-      decay: newOption?.params.decay ?? DEFAULT_THREE_JS_PROPS.decay,
-      distance: newOption?.params.dist ?? DEFAULT_THREE_JS_PROPS.distance,
-      intensity: newOption?.params.intst ?? DEFAULT_THREE_JS_PROPS.intensity,
-      color: newOption?.params.color ?? DEFAULT_THREE_JS_PROPS.color,
-      lookAt: newOption?.params.lAt ?? DEFAULT_THREE_JS_PROPS.lookAt,
-      position: newOption?.params.pos ?? DEFAULT_THREE_JS_PROPS.position,
+      decay: newOption?.params.decay ?? DEFAULT_LIGHTS_CONFIG.decay,
+      distance: newOption?.params.dist ?? DEFAULT_LIGHTS_CONFIG.distance,
+      intensity: newOption?.params.intst ?? DEFAULT_LIGHTS_CONFIG.intensity,
+      color: newOption?.params.color ?? DEFAULT_LIGHTS_CONFIG.color,
+      lookAt: newOption?.params.lAt ?? DEFAULT_LIGHTS_CONFIG.lookAt,
+      position: newOption?.params.pos ?? DEFAULT_LIGHTS_CONFIG.position,
       size: {
-        width: newOption?.params.width ?? DEFAULT_THREE_JS_PROPS.width,
-        height: newOption?.params.height ?? DEFAULT_THREE_JS_PROPS.height
+        width: newOption?.params.width ?? DEFAULT_LIGHTS_CONFIG.width,
+        height: newOption?.params.height ?? DEFAULT_LIGHTS_CONFIG.height
       }
     });
     setWillDelete(false);
 
     // Filter available light types to create a new light.
     if (lightOption === INDEX_OUT_LIGHT_ARRAY.create_light) {
-      if (pointLightCount < MAX_POINT_LIGHTS) {
+      if (pointLightCount < MAX_NUMBER_OF_POINT_LIGHTS) {
         setCreateLightOption(LightType.PointLight);
-      } else if (rectAreaLightCount < MAX_RECT_AREA_LIGHT) {
+      } else if (rectAreaLightCount < MAX_NUMBER_OF_RECT_AREA_LIGHT) {
         setCreateLightOption(LightType.RectAreaLight);
-      } else if (ambientLightCount < MAX_AMBIENT_LIGHT) {
+      } else if (ambientLightCount < MAX_NUMBER_OF_AMBIENT_LIGHT) {
         setCreateLightOption(LightType.AmbientLight);
       }
     } else {
@@ -207,6 +207,7 @@ export default function LightConfigUI({
   };
 
 
+  // TODO: ADD INPUT NAME
   return (
     <>
       {lightOption === INDEX_OUT_LIGHT_ARRAY.create_light && <div className="relative mt-5 w-full cursor-pointer px-2">
@@ -225,9 +226,9 @@ export default function LightConfigUI({
           )}
           {lightTypeOptions.map((lightType) => {
             if (
-              (lightType === LightType.PointLight && pointLightCount < MAX_POINT_LIGHTS) ||
-              (lightType === LightType.RectAreaLight && rectAreaLightCount < MAX_RECT_AREA_LIGHT) ||
-              (lightType === LightType.AmbientLight && ambientLightCount < MAX_AMBIENT_LIGHT)
+              (lightType === LightType.PointLight && pointLightCount < MAX_NUMBER_OF_POINT_LIGHTS) ||
+              (lightType === LightType.RectAreaLight && rectAreaLightCount < MAX_NUMBER_OF_RECT_AREA_LIGHT) ||
+              (lightType === LightType.AmbientLight && ambientLightCount < MAX_NUMBER_OF_AMBIENT_LIGHT)
             ) {
               return (
                 <option key={lightType} value={lightType}>
@@ -341,6 +342,7 @@ export default function LightConfigUI({
         )}
       </div>
       {/* Create and Update button */}
+      {/* // TODO: ADD LOADING FEEDBACK WHEN IS SENDING SOMETHING TO FIREBASE TO ALL BUTTONS */}
       <div className="pt-4 px-2">
         {lightOption === INDEX_OUT_LIGHT_ARRAY.create_light
           ? <>{!isAllOptionsDisabled && <AGButton nm full onClickEvent={() => sendNewLightConfig()}>

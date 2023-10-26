@@ -213,9 +213,11 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                         onChange={(e) => setLightOption(Number(e.target.value))}
                         value={lightOption}
                       >
+                        {/** TODO: REMOVE NO LIGHTS OPTION */}
                         {configData?.lights
                           ? configData.lights.map((light, index) => <option key={index} value={index} className="bg-bg py-2 px-4">{LIGHT_TYPE_LABELS[light.type]}</option>)
                           : <option value={INDEX_OUT_LIGHT_ARRAY.no_lights} className="bg-bg py-2 px-4" disabled>no lights</option>}
+                        {/* TODO: REMOVE ADD NEW LIGHT OPTION WHEN COMPLETE ALL MAX LIGHTS OPTIONS */}
                         <option value={INDEX_OUT_LIGHT_ARRAY.create_light} className="bg-bg py-2 px-4">Add new light</option>
                       </select>
                     </div>
