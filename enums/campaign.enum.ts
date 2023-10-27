@@ -14,3 +14,9 @@ export enum CampaignConfigOption {
 export enum CameraConfigOption {
     DefCam = 'defCam',
 }
+
+export enum CampaignDefaultOption {
+    DefAnimation = 'defAnimation',
+    DefStage = 'defStage',
+    NoDef = ''
+}

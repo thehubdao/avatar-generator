@@ -9,7 +9,8 @@ import { FirestoreLocation } from "../../../../enums/firebase.enum";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { fetchData } from "../../../../store/currentCampaignSlice";
 import { ShowModal } from "../../../../utils/modal.util";
-import { CampaignConfig } from "../../../../interfaces/common.interface";
+import { CampaignDefaultOption } from "../../../../enums/campaign.enum";
+import { String } from "../../../../enums/common.enum";
 
 interface AssetCardProps {
   id: string;
@@ -17,7 +18,7 @@ interface AssetCardProps {
   thumb?: string;
   location: FirestoreLocation;
   activedOption: string;
-  updateDefaultAsset: (element: string, config: string) => Promise<void>;
+  updateDefaultAsset: (element: CampaignDefaultOption, config: string) => Promise<void>;
 }
 
 export default function AssetCard({ id, name, thumb, location, activedOption, updateDefaultAsset }: AssetCardProps) {
@@ -40,39 +41,46 @@ export default function AssetCard({ id, name, thumb, location, activedOption, up
   // loading
   const [isDefaultBeingManipulatied, setIsDefaultBeingManipulatied] = useState<boolean>(false);
 
-  const getCurrendDefaultOption = () => {
-    let defaultConfigKey = '';
+  const getCurrentDefaultOption = (): CampaignDefaultOption => {
     switch (activedOption) {
       case FirestoreLocation.Animations:
-        defaultConfigKey = 'defAnimation';
-        break;
+        return CampaignDefaultOption.DefAnimation;
       case FirestoreLocation.Stages:
-        defaultConfigKey = 'defStage';
-        break;
+        return CampaignDefaultOption.DefStage;
+      default:
+        return CampaignDefaultOption.NoDef;
     }
+  }
 
-    return defaultConfigKey
+  const isCurrentAssetSelectedAsDefault = () => {
+    const currentDefaultConfigKey = getCurrentDefaultOption();
+
+    if (currentDefaultConfigKey == CampaignDefaultOption.NoDef)
+      return false
+    return campaignConfigParams[currentDefaultConfigKey] === name
+  }
+
+  const shouldShowDefaultButton = () => {
+    const currentDefaultConfigKey = getCurrentDefaultOption();
+
+    if (currentDefaultConfigKey == CampaignDefaultOption.NoDef)
+      return false
+    return true
   }
 
   //* Updates default asset config prop.
   const handleUpdateDefaultAsset = (config: string) => {
-    const defaultConfigKey = getCurrendDefaultOption();
+    const currentDefaultConfigKey = getCurrentDefaultOption();
 
     setIsDefaultBeingManipulatied(true);
-    void updateDefaultAsset(defaultConfigKey, config).then(() => setIsDefaultBeingManipulatied(false));
+    void updateDefaultAsset(currentDefaultConfigKey, config).then(() => setIsDefaultBeingManipulatied(false));
   };
 
   const handleClearDefaultAsset = () => {
-    const defaultConfigKey = getCurrendDefaultOption();
+    const currentDefaultConfigKey = getCurrentDefaultOption();
 
     setIsDefaultBeingManipulatied(true);
-    void updateDefaultAsset(defaultConfigKey, '').then(() => setIsDefaultBeingManipulatied(false));
-  }
-
-  const DEFAULT_CONFIG_SECTIONS = [FirestoreLocation.Stages, FirestoreLocation.Animations];
-  const DEFAULT_CONFIG_SECTION_KEYS: { [key: string]: keyof CampaignConfig } = {
-    [FirestoreLocation.Stages]: 'defStage',
-    [FirestoreLocation.Animations]: 'defAnimation',
+    void updateDefaultAsset(currentDefaultConfigKey, String.empty).then(() => setIsDefaultBeingManipulatied(false));
   }
 
   const dispatch = useAppDispatch();
@@ -178,8 +186,8 @@ export default function AssetCard({ id, name, thumb, location, activedOption, up
                     </div>
                   </div>
                 </>
-                : <div className={`flex ${DEFAULT_CONFIG_SECTIONS.includes(location) ? 'justify-between' : 'justify-end'} items-center text-sm`}>
-                  {(DEFAULT_CONFIG_SECTIONS.includes(location)) && (
+                : <div className={`flex ${shouldShowDefaultButton() ? 'justify-between' : 'justify-end'} items-center text-sm`}>
+                  {shouldShowDefaultButton() && (
                     <>{isDefaultBeingManipulatied
                       ? <AGButton nm fit>
                         <div className="w-20 flex justify-center cursor-wait">
@@ -187,15 +195,15 @@ export default function AssetCard({ id, name, thumb, location, activedOption, up
                         </div>
                       </AGButton>
                       : <>
-                        {campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name
-                          ? <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name} onClickEvent={() => handleClearDefaultAsset()}>
+                        {isCurrentAssetSelectedAsDefault()
+                          ? <AGButton nm fit selected={isCurrentAssetSelectedAsDefault()} onClickEvent={() => handleClearDefaultAsset()}>
                             <div className="w-20 flex justify-center items-center gap-1">
                               <AiOutlineCheckCircle />
                               <p>default</p>
                             </div>
                           </AGButton>
                           :
-                          <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name} onClickEvent={() => handleUpdateDefaultAsset(name)}>
+                          <AGButton nm fit selected={isCurrentAssetSelectedAsDefault()} onClickEvent={() => handleUpdateDefaultAsset(name)}>
                             <div className="w-20 flex justify-center">
                               <p>Set default</p>
                             </div>

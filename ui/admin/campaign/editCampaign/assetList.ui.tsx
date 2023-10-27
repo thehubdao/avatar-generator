@@ -10,10 +10,11 @@ import { CampaignAssets, FeatureBasic } from "../../../../interfaces/common.inte
 import { FeatureInterface } from "../../../../interfaces/api.interface";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import AGButton from "../../../common/ag-button.component";
+import { CampaignDefaultOption } from "../../../../enums/campaign.enum";
 
 interface AssetListProps {
   activedOption: FirestoreLocation;
-  updateDefaultAsset: (element: string, config: string) => Promise<void>;
+  updateDefaultAsset: (element: CampaignDefaultOption, config: string) => Promise<void>;
 }
 
 export default function AssetList({ activedOption, updateDefaultAsset }: AssetListProps) {
@@ -179,7 +180,7 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
                   thumb={asset.thumb}
                   location={activedOption}
                   activedOption={activedOption}
-                  updateDefaultAsset={(defaultConfigKey: string, config: string) => updateDefaultAsset(defaultConfigKey, config)}
+                  updateDefaultAsset={(defaultConfigKey: CampaignDefaultOption, config: string) => updateDefaultAsset(defaultConfigKey, config)}
                 />
               </div>)
             })}

@@ -87,3 +87,7 @@ export const enum CommonErrorCode {
   CouldntProcess = 'AG-203',
   NoAuth = 'AG-301'
 }
+
+export enum String {
+  empty = ''
+}
