@@ -8,7 +8,7 @@ import { FirestoreLocation, StorageLocation } from "../../../enums/firebase.enum
 import { AuthStateInterface, CampaignParameters, ColorConfig, LookAtVectors } from "../../../interfaces/common.interface";
 import { CameraConfigOption, CampaignDefaultOption } from "../../../enums/campaign.enum";
 import { GoToPage } from "../../../utils/router.util";
-import { Module, PageLocation, String } from "../../../enums/common.enum";
+import { Module, PageLocation, CommonString } from "../../../enums/common.enum";
 import { LogError } from "../../../utils/common.util";
 import { useRouter } from "next/navigation";
 
@@ -70,7 +70,7 @@ export default function EditCampaign() {
     const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
 
     if (result.success) {
-      if (config === String.empty) {
+      if (config === CommonString.empty) {
         ShowModal(`Unselect ${element} asset default config sucessful`);
       } else {
         ShowModal(`Select ${element} asset default config sucessful`);

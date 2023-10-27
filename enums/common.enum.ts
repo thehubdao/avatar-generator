@@ -88,6 +88,6 @@ export const enum CommonErrorCode {
   NoAuth = 'AG-301'
 }
 
-export enum String {
+export enum CommonString {
   empty = ''
 }

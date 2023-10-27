@@ -10,7 +10,7 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { fetchData } from "../../../../store/currentCampaignSlice";
 import { ShowModal } from "../../../../utils/modal.util";
 import { CampaignDefaultOption } from "../../../../enums/campaign.enum";
-import { String } from "../../../../enums/common.enum";
+import { CommonString } from "../../../../enums/common.enum";
 
 interface AssetCardProps {
   id: string;
@@ -80,7 +80,7 @@ export default function AssetCard({ id, name, thumb, location, activedOption, up
     const currentDefaultConfigKey = getCurrentDefaultOption();
 
     setIsDefaultBeingManipulatied(true);
-    void updateDefaultAsset(currentDefaultConfigKey, String.empty).then(() => setIsDefaultBeingManipulatied(false));
+    void updateDefaultAsset(currentDefaultConfigKey, CommonString.empty).then(() => setIsDefaultBeingManipulatied(false));
   }
 
   const dispatch = useAppDispatch();

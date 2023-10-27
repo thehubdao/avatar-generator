@@ -1,3 +1,5 @@
+import { CommonString } from "./common.enum";
+
 export enum ClientQuestion {
     Name = 1,
     BGColor = 2,
@@ -18,5 +20,5 @@ export enum CameraConfigOption {
 export enum CampaignDefaultOption {
     DefAnimation = 'defAnimation',
     DefStage = 'defStage',
-    NoDef = ''
+    NoDef = CommonString.empty
 }
