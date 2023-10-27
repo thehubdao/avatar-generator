@@ -15,12 +15,17 @@ export default function CampaignCard({ noCampaign, create, campaign, clickHandle
 	const [willDelete, setWillDelete] = useState<boolean>(false);
 	const [shouldDeleteCampaing, setShouldDeleteCampaing] = useState<boolean>(false);
 
-	const handleDeleteCampaign = (campaign: string) => {
+	const handleDeleteCampaign = async (campaign: string) => {
 		if (deleteCampaign) {
 			setShouldDeleteCampaing(true);
-			void deleteCampaign(campaign).then(() => setShouldDeleteCampaing(false));
+			try {
+				await deleteCampaign(campaign);
+			} finally {
+				setShouldDeleteCampaing(false);
+			}
 		}
 	}
+
 
 	return (
 		<div className={`justify-self-center rounded-2xl h-96 w-72 flex flex-col justify-center items-center ${noCampaign ? 'shadow-inset-medium hover:shadow-inset-hard' : 'shadow-flat-soft hover:shadow-flat-hard'} overflow-hidden transition-all`}>
