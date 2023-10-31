@@ -570,12 +570,13 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
   return result;
 }
 
-export async function GetUserList() {
+export async function GetUserList(): Promise<Result<UserInterface[]>> {
   try {
     return GetInfoDB<UserInterface>(FirestoreGlobalLocation.User);
   } catch (e) {
     const err = e as FirebaseError;
-    return LogError(Module.FirebaseUtil, `Error while retrieving UserList: ${err.message}`);
+    void LogError(Module.FirebaseUtil, `Error while retrieving UserList: ${err.message}`);
+    return {success: false, errMessage: err.message, errCode: err.code};
   }
 }
 

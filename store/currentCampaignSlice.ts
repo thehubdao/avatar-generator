@@ -37,8 +37,10 @@ export const fetchData = createAsyncThunk(
 
   async ({ campaign, location }: { campaign: string, location: FirestoreLocation }) => {
     const res = await GetInfoDB(location, campaign);
+    const realRes = res.success ? res.value : [];
+    
     return {
-      res,
+      res: realRes,
       location
     }
   }
@@ -62,7 +64,7 @@ export const currentCampaignSlice = createSlice({
       state.error = `${FirestoreLocation.Parameters} info saved!`;
       switch (action.payload.location) {
         case FirestoreLocation.Parameters:
-          state.parameters = action.payload.res[0] as CampaignParameters;
+          state.parameters = action.payload.res.at(0) as CampaignParameters;
           break;
         case FirestoreLocation.Features:
           state.assets.features = action.payload.res as FeatureInterface[];
