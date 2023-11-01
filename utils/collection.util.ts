@@ -16,8 +16,8 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Get FeatureOptionListData
   const featureOptionListData: Map<number, FeatureInterface[] | undefined> = new Map();
   const featureData = await GetData(campaign);
-  // if (!featureData.success)
-  //   return void LogError(Module.CollectionUtil, "Could not retrieve feature option data!");
+  if (!featureData.success)
+    return void LogError(Module.CollectionUtil, "Could not retrieve feature option data!");
 
   for (const feature of featuresResult.value) {
     if (feature.index == undefined) {
@@ -25,7 +25,7 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
       continue;
     }
 
-    featureOptionListData.set(feature.index, featureData.filter(f => f.type === feature.displayName));
+    featureOptionListData.set(feature.index, featureData.value.filter(f => f.type === feature.displayName));
   }
 
   const featureOptionsToUpdate: Map<string, FeatureInterface> = new Map();
