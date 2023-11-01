@@ -567,7 +567,7 @@ export async function GetCollectionList(dbLocation: string | FirestoreGlobalLoca
 
 export async function UpdateAdminCampaigns(): Promise<Result<boolean>> {
   try {
-    const {doc, setDoc, getDoc, Timestamp} = await import('@firebase/firestore');
+    const {doc, setDoc} = await import('@firebase/firestore');
 
     const adminId = process.env.AG_ADMIN_ID ?? Raise("Missing AdminId on env variables!");
 
@@ -597,7 +597,7 @@ export async function UpdateAdminCampaigns(): Promise<Result<boolean>> {
   catch (e) {
     const msg = "Error updating admin campaigns!";
     void LogError(Module.FirebaseUtil, msg, e);
-    return {success: false, errMessage: msg, errCode: CommonErrorCode.InternalError};
+    return {success: false, errMessage: msg, errCode: CommonErrorCode.CouldntProcess};
   }
 }
 

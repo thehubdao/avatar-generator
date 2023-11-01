@@ -1,5 +1,4 @@
 ﻿import {UserRoleValues} from "../enums/firebase.enum";
-import {Timestamp} from "@firebase/firestore";
 
 export interface AGQueryConstraints {
   campaign?: string;
