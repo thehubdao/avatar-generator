@@ -5,7 +5,9 @@ import {RequestResponse} from "../request.api-handler";
 import {DefaultApiResponse} from "../../enums/api.enum";
 
 export async function UpdateApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<void>>) {
-  await UpdateAdminCampaigns();
-
-  return RequestResponse(res, "Successful", true, DefaultApiResponse.PostSuccess);
+  const result = await UpdateAdminCampaigns();
+  
+  return result.success ?
+    RequestResponse(res, "Successful", true, DefaultApiResponse.PostSuccess) :
+    RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
 }

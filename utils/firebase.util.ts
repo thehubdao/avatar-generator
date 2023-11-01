@@ -21,7 +21,7 @@ import {
 } from "../interfaces/firebase.interface";
 import {CampaignParameterName, CommonErrorCode, Module, PageLocation} from "../enums/common.enum";
 import {GoToPage} from "./router.util";
-import {AddOrRemoveSlash, LogError, RandomPassword} from "./common.util";
+import {AddOrRemoveSlash, LogError, Raise, RandomPassword} from "./common.util";
 import {Result} from "../types/common.type";
 import {ConvertObject, ConvertType} from "./common/object-converter.util";
 import {SessionUserInfo} from "./common/session.util";
@@ -526,7 +526,7 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
   }
 
   // Reset password
-  if (result.success) {
+  if (result.success) { 
     const {sendPasswordResetEmail} = await import('@firebase/auth');
 
     try {
@@ -565,34 +565,40 @@ export async function GetCollectionList(dbLocation: string | FirestoreGlobalLoca
   });
 }
 
-// TODO: add try/catch with return response
-export async function UpdateAdminCampaigns() {
-  const {doc, setDoc, getDoc, Timestamp} = await import('@firebase/firestore');
+export async function UpdateAdminCampaigns(): Promise<Result<boolean>> {
+  try {
+    const {doc, setDoc} = await import('@firebase/firestore');
 
-  const adminId = process.env.AG_ADMIN_ID;
-  if (adminId == undefined)
-    return void LogError(Module.FirebaseUtil, "Missing AdminId on env variables!");
+    const adminId = process.env.AG_ADMIN_ID ?? Raise("Missing AdminId on env variables!");
+
+    const adminDocLocation = `${FirestoreGlobalLocation.User}/${adminId}`;
+    const docRef = doc(await FirebaseUtil.Instance().DB(), adminDocLocation);
+
+    // Get admin account base on role and last update
+    // const adminDoc = (await getDoc(docRef)).data() as AdminUser;
+
+    // Get the whole list of campaigns in db as a string array
+    const campaignList = await GetCollectionList(FirestoreGlobalLocation.Campaign);
     
-  const adminDocLocation = `${FirestoreGlobalLocation.User}/${adminId}`;
-  const docRef = doc(await FirebaseUtil.Instance().DB(), adminDocLocation);
+    // Update this account with the new data
+    const data: Partial<AdminUser> = {
+      campaign: [...campaignList],
+      lastUpdate: Date.now(),
+    };
+    await setDoc(docRef, data, {merge: true});
 
-  // Get admin account base on role and last update
-  const adminDoc = (await getDoc(docRef)).data() as AdminUser;
-
-  // Get the whole list of campaigns in db as a string array
-  const campaignList = await GetCollectionList(FirestoreGlobalLocation.Campaign);
-
-  // Update this account with the new data
-  const data: Partial<AdminUser> = {
-    campaign: [...new Set([...adminDoc.campaign, ...campaignList])],
-    lastUpdate: Timestamp.now(),
-  };
-  await setDoc(docRef, data, {merge: true});
-
-  const newParams: AGParameters = {
-    campaigns: campaignList,
-  };
-  await UpdateDocObject(FirestoreGlobalLocation.ParametersV2, newParams);
+    const newParams: AGParameters = {
+      campaigns: campaignList,
+    };
+    await UpdateDocObject(FirestoreGlobalLocation.ParametersV2, newParams);
+    
+    return {success: true, value: true};
+  }
+  catch (e) {
+    const msg = "Error updating admin campaigns!";
+    void LogError(Module.FirebaseUtil, msg, e);
+    return {success: false, errMessage: msg, errCode: CommonErrorCode.CouldntProcess};
+  }
 }
 
 export async function UpdateCampaignParameter(update: Partial<CampaignParameters>, campaign: string) {
