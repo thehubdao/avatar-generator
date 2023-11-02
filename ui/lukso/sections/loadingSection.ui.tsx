@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 
 // Fragment shader
@@ -13,6 +13,8 @@ interface AGLoadingProps {
 export default function LuksoLoadingUI({ loading, getloaderDivElement }: AGLoadingProps) {
   const parentRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const memoizedGetLoaderDivElement = useCallback(getloaderDivElement, [getloaderDivElement]);
 
   useEffect(() => {
     if (parentRef.current) getloaderDivElement(parentRef.current);
@@ -68,7 +70,8 @@ export default function LuksoLoadingUI({ loading, getloaderDivElement }: AGLoadi
     };
 
     requestAnimationFrame(render);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memoizedGetLoaderDivElement]);
 
   const compileShader = (gl: WebGLRenderingContext, source: string, type: number) => {
     const shader = gl.createShader(type);

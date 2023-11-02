@@ -43,10 +43,10 @@ export default function TransparentBox({
         ${widthClass}
         ${borderClass}
         ${getBgOpacity()}
-        ${backgroundColorClass}
+        ${backgroundColorClass ?? ''}
         ${heightClass}
         ${paddingClass}
-        ${aditionalClass}
+        ${aditionalClass ?? ''}
         ${justifyClass}
         ${alignItemsClass}
       `}

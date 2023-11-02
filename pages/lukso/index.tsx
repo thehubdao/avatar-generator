@@ -14,7 +14,7 @@ export default function LuksoAvatarView({ campaignParams }: LuksoAvatarViewProps
   return <LuksoComponent campaignParams={campaignParams} />
 }
 
-export const getServerSideProps: GetServerSideProps<LuksoAvatarViewProps> = async (context) => {
+export const getServerSideProps: GetServerSideProps<LuksoAvatarViewProps> = async () => {
   const campaignParameters = await GetParameter<CampaignParameters>(Client.Lukso, CampaignParameterName.All);
   const returnProps: LuksoAvatarViewProps = { campaignParams: campaignParameters, };
 

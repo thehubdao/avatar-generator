@@ -125,7 +125,7 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
               height={380}
               alt="lukso avatar selfie view"
             />
-            <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.</p>
+            <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">{`Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.`}</p>
           </TransparentBox>
         </div>
       </div>
