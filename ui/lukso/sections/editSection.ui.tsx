@@ -10,7 +10,7 @@ import { SaveFile } from "../../../utils/exporter.util";
 import { ExportInterface } from "../../../interfaces/common.interface";
 
 const exportData: ExportInterface = { attributes: [] };
-let isOnIFrame = false;
+const isOnIFrame = false;
 
 export default function EditLuksoSectionUI({ setIsEditModeSelected }: { setIsEditModeSelected: React.Dispatch<React.SetStateAction<boolean>> }) {
   const editAvatarRef = useRef<HTMLDivElement>(null);
@@ -78,7 +78,7 @@ export default function EditLuksoSectionUI({ setIsEditModeSelected }: { setIsEdi
           </TransparentBox>
         </TransparentBox>
         <div className="h-14 w-full 2xl:h-18 flex whitespace-nowrap">
-          <button className="w-full" onClick={() => exportModel()}>
+          <button className="w-full" onClick={() => void exportModel()}>
             <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
               <div className="flex items-center gap-3 text-black">
                 <p className="text-base 2xl:text-lg">Download</p>

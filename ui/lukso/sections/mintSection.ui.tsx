@@ -83,7 +83,7 @@ export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLu
       {/** TODO: evitar que se sobreponga la seccion de bottones a el avatar */}
       {/* Buttons */}
       <div className="absolute bottom-[15%] left-1/2 -translate-x-[50%] flex flex-col w-[240px] justify-end gap-3 text-black text-lg 2xl:text-xl" ref={buttonRef}>
-        <button className="w-full h-fit" onClick={() => handleReRoll()}>
+        <button className="w-full h-fit" onClick={() => void handleReRoll()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
               <p>{isRolling ? 'Rolling' : 'Reroll'}</p>
@@ -105,8 +105,8 @@ export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLu
       <div className="w-[460px] 2xl:w-[564px] h-[70%]" ref={mintAvatarRef}>
         <TransparentBox fullWidth border backgroundColorClass="bg-[#FFCBDE]" paddingClass="px-14 2xl:px-28" aditionalClass="gap-6 2xl:gap-8">
           <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10 2xl:mb-20">MINT YOUR AVATAR</h3>
-          <p className="text-base 2xl:text-lg">Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.
-            Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.</p>
+          <p className="text-base 2xl:text-lg">{`Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.
+            Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.`}</p>
           <SocialMediaButtonsLukso />
           <div className="font-semibold">
             <p>PUBLIC MINT</p>

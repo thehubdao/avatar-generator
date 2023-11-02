@@ -102,9 +102,8 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   }
 
   async function getSingleData() {
-    let result: SingleInterface | undefined;
     const numResult = await GetAvatarSingleByCampaignCombination(Client.Lukso);
-    result = numResult.success ? numResult.value : undefined;
+    const result: SingleInterface | undefined = numResult.success ? numResult.value : undefined;
     singleData = result;
   }
 
@@ -179,7 +178,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     setSkinColor(newSkinColor);
   }
 
-  async function handleFadeLoader(elementReference: HTMLDivElement, thenFunction?: Function) {
+  function handleFadeLoader(elementReference: HTMLDivElement, thenFunction?: () => void) {
     fadeBlock(elementReference, 1, thenFunction);
   }
 
@@ -248,7 +247,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
             // onCategoryChange
             onCategoryTypeChange={(value: string) => onCategoryTypeChange(value)}
             onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
-            exportModel={() => { }}
+            exportModel={() => { return }}
 
             isCustomCampaignHud
           />
