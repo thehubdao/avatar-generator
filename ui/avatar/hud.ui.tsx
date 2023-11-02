@@ -1,17 +1,15 @@
 import AGButton from "../common/ag-button.component";
-import { BsArrowRight } from 'react-icons/bs';
-import { CiEdit, CiSaveUp2 } from 'react-icons/ci';
 import { FeatureInterface } from "../../interfaces/api.interface";
 import { BasicData, ColorConfig, FeatureBasic } from "../../interfaces/common.interface";
-import MobileOptionSelectorComponent from "./selectors/mobile/optionSelector.component";
-import MobileFeatureSelectorComponent from "./selectors/mobile/featureSelector.component";
-import MobileColorSelectorComponent from "./selectors/mobile/colorSelector.component";
+import MobileOptionSelectorComponent from "./selectors/mobile/optionSelector.ui";
+import MobileFeatureSelectorComponent from "./selectors/mobile/featureSelector.ui";
+import MobileColorSelectorComponent from "./selectors/mobile/colorSelector.ui";
 import { useEffect, useState } from "react";
 import Image from 'next/image';
 import FeatureSelector from "./selectors/featureSelector.component";
 import OptionSelectorUI from "./selectors/optionSelector.ui";
 import ColorSelector from "./selectors/colorSelector.component";
-import HudFeatureTitle from "./common/hudTitle.component";
+import HudFeatureTitle from "./common/hudTitle.ui";
 import { RemovedAcc } from "../../utils/common.util";
 
 interface HudComponentProps {
@@ -63,10 +61,10 @@ export default function HudComponent({
   exportModel,
   isCustomCampaignHud
 }: HudComponentProps) {
-  const [selectorOption, setSelectorOption] = useState<number>(1);
-
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
+  const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
 
+  //* todo, change this to redux to control screen size.
   // * This function allows us to know if the page has a width greater than 1536px.
   useEffect(() => {
     const handleResize = () => {
@@ -84,120 +82,63 @@ export default function HudComponent({
   return (
     <>
       {/* MOBILE UI */}
-      <div className="fixed xl:hidden">
-        <div onClick={() => changeView()}>
-          {editModeSelected ?
-            <AGButton>
-              <div className="flex items-center justify-between">
-                <BsArrowRight />
-                <p className="text-sm">NEXT</p>
-              </div>
+      <div className={`fixed flex w-full xl:hidden gap-5 px-10 text-xs font-semibold ${editModeSelected ? 'top-3 justify-around' : 'bottom-5 justify-center'}`}>
+        {editModeSelected
+          ? <>
+            <AGButton full onClickEvent={() => changeView()}>
+              <p>BACK</p>
             </AGButton>
-            :
-            <AGButton>
-              <div className="flex items-center justify-between">
-                <CiEdit />
-                <p className="text-sm">EDIT</p>
-              </div>
+            <AGButton full onClickEvent={() => changeView()}>
+              <p>SAVE</p>
             </AGButton>
-          }
-        </div>
-        {editModeSelected ?
-          <div className="fixed bottom-0 left-0 w-screen">
-            {/* OPTION SELECTOR */}
+          </>
+          : <>
+            <AGButton full onClickEvent={() => changeView()}>
+              <p>EDIT</p>
+            </AGButton>
+            <AGButton full onClickEvent={() => exportModel()}>
+              <p>EXPORT</p>
+            </AGButton>
+          </>
+        }
+        {editModeSelected &&
+          <div className="fixed bottom-0 left-0 w-screen bg-slate-100">
             <div className="w-full">
-              {
-                selectorOption == 1 &&
-                <>
-                  <MobileOptionSelectorComponent list={optionList}
-                    activeOption={selectedOption}
-                    handleClick={(id: string, path: string, name: string) => onOptionChange(id, path, name)} />
-                </>
-              }
-              {/* {
-                selectorOption == 2 &&
-                <>
-                <MobileOptionSelectorComponent list={accessoryList}
-                  activeOption={selectedOption}
-                  handleClick={(id: string, path: string, name: string) => changeAccessory(id, path, name)} />
-                  <div>holis</div>
-                  </>
-              } */}
-            </div>
-            {/* FEATURES SELECTOR */}
-            <div className="w-full bg-slate-100 flex">
-              <div className="w-[calc(100%_-_60px)]">
-                {selectorOption == 1 &&
-                  <MobileFeatureSelectorComponent
-                    list={selectListCategory}
-                    activeOpc={selectedCategory}
-                    handleClick={(value: string) => onCategoryTypeChange(value)}
-                  />
-                }
-                {/* {
-                  selectorOption == 2 &&
-                  <MobileFeatureSelectorComponent
-                    list={selectListAccessories}
-                    activeOpc={selectedAcc}
-                    handleClick={(value: string) => onAccessoryTypeChange(value)}
-                  />
-                } */}
-                {
-                  selectorOption == 2 &&
-                  <MobileColorSelectorComponent list={['F6C89B', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
-                    activeColor={skinColor}
-                    handleClick={(value: string) => void onSkinColorChange(value)} />
-                }
-              </div>
-              <div className="w-[60px] pt-3 cursor-pointer" onClick={() => setSelectorOption(selectorOption >= 2 ? 1 : selectorOption + 1)}>
-                <div className="border-l border-slate-400 text-center flex flex-col items-center">
-                  <div className={"rounded-md w-[40px] h-[40px] flex justify-center items-center"}>
-                    {/* {selectorOption == 1 &&
-                      <Image
-                        src='/resources/icons/buttons/accessories.svg'
-                        width={30}
-                        height={30}
-                        alt={'Color button'}
-                        className='opacity-70'
-                      />
-                    } */}
-                    {selectorOption == 1 &&
-                      <Image
-                        src='/resources/icons/buttons/head.svg'
-                        width={30}
-                        height={30}
-                        alt={'Color button'}
-                        className='opacity-70'
-                      />
-                    }
-                    {selectorOption == 2 &&
-                      <Image
-                        src='/resources/icons/buttons/features.svg'
-                        width={30}
-                        height={30}
-                        alt={'Color button'}
-                        className='opacity-70'
-                      />
-                    }
-                  </div>
-                  <p className='text-[10px] pt-1 opacity-50 w-[40px]'>
-                    {/* {selectorOption == 1 && 'Accessor.'} */}
-                    {selectorOption == 1 && 'Skin'}
-                    {selectorOption == 2 && 'Features'}
-                  </p>
+              {/* FEATURES SELECTOR */}
+              <div className="w-full">
+                <MobileFeatureSelectorComponent
+                  list={selectListCategory}
+                  activeOpc={selectedCategory}
+                  handleClick={(value: string) => onCategoryTypeChange(value)}
+                />
+                <div className="flex text-gray-normal mx-4 items-center">
+                  <HudFeatureTitle selectedFeature={RemovedAcc(selectedCategory)} size="small" />
+                  <AGButton nm fit onClickEvent={() => setShouldShowColorSelectorModal(true)}>
+                    <div className="w-full flex justify-center items-center gap-3 text-xs font-semibold">
+                      <p>SKIN</p>
+                      <div className="shadow-flat-soft h-7 w-7 rounded-sm p-1">
+                        <div className="w-full h-full rounded-sm" style={{ backgroundColor: ('#' + skinColor) }} />
+                      </div>
+                    </div>
+                  </AGButton>
                 </div>
               </div>
             </div>
-          </div>
-          :
-          <AGButton>
-            <div className="flex items-center justify-between" onClick={() => exportModel()}>
-              <CiSaveUp2 />
-              <p className="text-sm">SAVE</p>
+            {/* OPTION SELECTOR */}
+            <div className="w-full">
+              <MobileOptionSelectorComponent list={optionList}
+                activeOption={selectedOption}
+                handleClick={(id: string, path: string, name: string) => onOptionChange(id, path, name)} />
             </div>
-          </AGButton>
+          </div>
         }
       </div>
+      {shouldShowColorSelectorModal && <MobileColorSelectorComponent
+        list={['F6C89B', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
+        activeColor={skinColor}
+        handleChangeColor={(value: string) => void onSkinColorChange(value)}
+        handleSwitchShowColorSelector={() => setShouldShowColorSelectorModal(false)}
+      />}
       {/* DESKTOP UI */}
       <div className={`fixed inset-0 ${editModeSelected ? 'w-[58%]' : 'w-0'} overflow-hidden h-screen bg-bg hidden xl:block transition-all duration-300`}>
         {/* CAMPAIGN HEADER SIGN */}
