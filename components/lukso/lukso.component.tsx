@@ -6,7 +6,7 @@ import { Client } from "../../enums/client.enum";
 import MobileLayout from "../../layouts/mobile.layout";
 import HudComponent from "../../ui/avatar/hud.component";
 import TransparentBox from "../../ui/common/transparentBox.ui";
-import { GlobalValues, Module } from "../../enums/common.enum";
+import { Module } from "../../enums/common.enum";
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
 import { FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
@@ -135,12 +135,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   }
 
   async function onOptionChange(id: string, path: string, name: string, _selectedCategory: string = selectedCategory) {
-    // If Accessory
-    if (_selectedCategory.endsWith(GlobalValues.AccEnd))
-      await ChangeAccessory(id, path, name, _selectedCategory, campaignParams?.config.changeMaterial);
-    // If Feature
-    else
-      await ChangeFeature(id, path, name, _selectedCategory, skinColor, campaignParams?.config.skin?.materialName, campaignParams?.config.changeMaterial);
+    await ChangeFeature(id, path, name, _selectedCategory, skinColor, campaignParams?.config.skin?.materialName, campaignParams?.config.changeMaterial);
 
     addReplaceAttribute(_selectedCategory, name);
   }
