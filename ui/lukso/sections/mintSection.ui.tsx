@@ -19,21 +19,21 @@ export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLu
 
   const [isRolling, setIsRolling] = useState<boolean>(false);
 
-  const gsapEnterBlocks = () => {
+  const gsapEnterBlocks = async () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
-    moveHorizontalBlocks(mainFeatureRef.current, ANIMATION_DURATION, 'left', 'in');
-    moveHorizontalBlocks(mintAvatarRef.current, ANIMATION_DURATION, 'right', 'in');
-    moveVerticalBlocks(buttonRef.current, ANIMATION_DURATION, 'bottom', 'in');
+    await moveHorizontalBlocks(mainFeatureRef.current, ANIMATION_DURATION, 'left', 'in');
+    await moveHorizontalBlocks(mintAvatarRef.current, ANIMATION_DURATION, 'right', 'in');
+    await moveVerticalBlocks(buttonRef.current, ANIMATION_DURATION, 'bottom', 'in');
   }
 
-  const gsapOutBlocks = () => {
+  const gsapOutBlocks = async () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
-    moveHorizontalBlocks(mainFeatureRef.current, ANIMATION_DURATION, 'left', 'out');
-    moveHorizontalBlocks(mintAvatarRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(2));
-    moveVerticalBlocks(buttonRef.current, ANIMATION_DURATION, 'bottom', 'out');
+    await moveHorizontalBlocks(mainFeatureRef.current, ANIMATION_DURATION, 'left', 'out');
+    await moveHorizontalBlocks(mintAvatarRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(2));
+    await moveVerticalBlocks(buttonRef.current, ANIMATION_DURATION, 'bottom', 'out');
   }
 
-  useEffect(() => { gsapEnterBlocks(); }, [])
+  useEffect(() => { void gsapEnterBlocks(); }, [])
 
   const handleReRoll = async () => {
     if (isRolling) return;
@@ -91,7 +91,7 @@ export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLu
             </div>
           </TransparentBox>
         </button>
-        <button className="w-full h-fit" onClick={() => gsapOutBlocks()}>
+        <button className="w-full h-fit" onClick={() => void gsapOutBlocks()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
               <p>Claim</p>

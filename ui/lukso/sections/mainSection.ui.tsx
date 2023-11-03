@@ -13,21 +13,19 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
   const ANIMATION_DURATION = 0.5;
 
-  const gsapEnterBlocks = () => {
+  const gsapEnterBlocks = async () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
-    moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
-    moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'in');
+    await moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
+    await moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'in');
   }
 
-  const gsapOutBlocks = () => {
+  const gsapOutBlocks = async () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
-    moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'out');
-    moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(1));
+    await moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'out');
+    await moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(1));
   }
 
-  useEffect(() => {
-    gsapEnterBlocks();
-  }, [])
+  useEffect(() => { void gsapEnterBlocks(); }, [])
 
   return (
     <section className={`flex h-full items-center justify-between`}>
@@ -51,7 +49,7 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
           <p className="text-center text-sm 2xl:text-base mx-20 pt-2">A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
         </TransparentBox>
 
-        <button className="w-full h-fit" onClick={() => gsapOutBlocks()}>
+        <button className="w-full h-fit" onClick={() => void gsapOutBlocks()}>
           <TransparentBox
             fullWidth
             border
