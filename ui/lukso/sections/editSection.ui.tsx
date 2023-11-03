@@ -34,12 +34,12 @@ export default function EditLuksoSectionUI({ setIsEditModeSelected }: { setIsEdi
     }
   }
 
-  const gsapEnterBlocks = () => {
+  const gsapEnterBlocks = async () => {
     if (!editAvatarRef.current) return
-    moveHorizontalBlocks(editAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
+    await moveHorizontalBlocks(editAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
   }
 
-  useEffect(() => { gsapEnterBlocks(); }, [])
+  useEffect(() => { void gsapEnterBlocks(); }, [])
 
   return (
     <section className={`flex h-full items-center justify-between`}>

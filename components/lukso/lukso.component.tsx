@@ -65,7 +65,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     }
 
     // fade loader view
-    handleFadeLoader(loaderDivElement, () => {
+    await handleFadeLoader(loaderDivElement, () => {
       setIsLoading(false);
       setCurrentSection(0);
     })
@@ -178,8 +178,8 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     setSkinColor(newSkinColor);
   }
 
-  function handleFadeLoader(elementReference: HTMLDivElement, thenFunction?: () => void) {
-    fadeBlock(elementReference, 1, thenFunction);
+  async function handleFadeLoader(elementReference: HTMLDivElement, thenFunction?: () => void) {
+    await fadeBlock(elementReference, 1, thenFunction);
   }
 
   function getloaderDivElement(elementReference: HTMLDivElement) {
