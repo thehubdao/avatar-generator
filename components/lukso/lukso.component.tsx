@@ -11,7 +11,7 @@ import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
 import { FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
 import { BasicData, CampaignParameters, ExportInterface, FeatureBasic, LookAtVectors } from "../../interfaces/common.interface";
-import AvatarEditor, { ChangeAccessory, ChangeFeature, ChangeSkinColor, ChangeStartAnimation, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
+import AvatarEditor, { ChangeFeature, ChangeSkinColor, ChangeStartAnimation, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
 import { GetAccessoryListByCampaign, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombination, GetStageListByCampaign } from "../../utils/api.util";
 import { fadeBlock } from "../../utils/gsap/block_in_out";
 
