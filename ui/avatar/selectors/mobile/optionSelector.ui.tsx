@@ -20,28 +20,20 @@ function OptionList({ list, activeOption, handleClick }: Props) {
   return list != undefined ?
     list.map((opt: FeatureInterface, index: number) => {
       return (
-        <SwiperSlide className='flex justify-center items-center' key={index}>
+        <div className='flex justify-center items-center' key={index}>
           <div className={`rounded-md w-28 h-28 flex items-center justify-center relative overflow-hidden`} onClick={event => selectFeature(event, opt)}>
             <GetImage url={opt.thumb} alt={opt.path} />
             <div className={'w-full h-full absolute top-0 left-0 bg-opacity-0 border-4 border-accent rounded-md opacity-0' + (activeOption?.val === opt.name ? '  opacity-100' : '')}></div>
           </div>
-        </SwiperSlide>
+        </div>
       )
     }) : <></>;
 }
 
 export default function OptionSelectorComponent(props: Props) {
-  const itemsLength = props.list?.length ? props.list.length : 1;
-  const itemsPerView = 3;
   return (
-    <div className='w-full px-2'>
-      <Swiper
-        slidesPerView={itemsPerView}
-        grabCursor={true}
-        loop={itemsLength < itemsPerView ? false : true}
-        className='!pb-5'>
-        {OptionList(props)}
-      </Swiper>
+    <div className='w-full px-2 flex flex-wrap overflow-y-scroll gap-2 justify-center h-fit items-center'>
+      {OptionList(props)}
     </div>
   )
 }
