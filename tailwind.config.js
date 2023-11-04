@@ -44,7 +44,7 @@
         'flat---inset-hard': '6px 6px 12px #E9ECF6, -6px -6px 12px #ffffff, inset 6px 6px 12px #E9ECF6, inset -6px -6px 12px #ffffff'
       },
       transitionProperty: {
-        'height': 'height',
+        'size': 'width, height',
       }
     },
   }
