@@ -99,8 +99,8 @@ export default function HudComponent({
             </AGButton>
           </>
         }
-        {editModeSelected &&
-          <div className="fixed bottom-0 left-0 w-screen bg-slate-100">
+        {
+          <div className={`fixed bottom-0 left-0 w-screen bg-slate-100 ${editModeSelected ? 'h-64' : ' h-0'} transition-all duration-300`}>
             <div className="w-full">
               {/* FEATURES SELECTOR */}
               <div className="w-full">
@@ -123,7 +123,7 @@ export default function HudComponent({
               </div>
             </div>
             {/* OPTION SELECTOR */}
-            <div className="w-full">
+            <div className="w-full overflow-scroll h-[167px] py-2">
               <MobileOptionSelectorComponent list={optionList}
                 activeOption={selectedOption}
                 handleClick={(id: string, path: string, name: string) => onOptionChange(id, path, name)} />
@@ -132,7 +132,7 @@ export default function HudComponent({
         }
       </div>
       {shouldShowColorSelectorModal && <MobileColorSelectorComponent
-        list={['F6C89B', 'E8A36F', '9F5835', 'F2A47E', 'C67E42']}
+        list={campaignSkinColorConfig.colorPalette}
         activeColor={skinColor}
         handleChangeColor={(value: string) => void onSkinColorChange(value)}
         handleSwitchShowColorSelector={() => setShouldShowColorSelectorModal(false)}

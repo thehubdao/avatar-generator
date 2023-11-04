@@ -6,7 +6,7 @@ import AGButton from '../../../common/ag-button.component';
 // REFERENCE PALETTE: https://www.colourlovers.com/palette/2543931/Cartoon_Skin_2
 
 interface ColorSelectorComponentProps {
-  list: string[];
+  list?: string[];
   activeColor: string | undefined;
   handleChangeColor: (color: string) => void;
   handleSwitchShowColorSelector: () => void;
@@ -20,7 +20,7 @@ function OptionList(props: OptionListProps) {
     props.handleChangeColor(color);
   }
 
-  return props.list.map((opt) => {
+  return props.list?.map((opt) => {
     return (
       <div
         className={'cursor-pointer rounded-md transition duration-200 ease-in-out w-[50px] h-[50px] flex items-center justify-center mx-3 ' + (props.activeColor == opt ? 'shadow-inset-medium' : 'shadow-flat-medium')}
