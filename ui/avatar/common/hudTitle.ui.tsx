@@ -59,9 +59,9 @@ export default function HudFeatureTitle({ selectedFeature, size = 'big' }: HudFe
   return (
     <div className={`w-full relative overflow-hidden font-work font-bold ${getSizeClass()}`}>
       {/* Current HUD feature title with animation */}
-      <h2 className={`absolute uppercase truncate ${hasRunAnimation ? '-top-[60px] duration-500 transition-all' : 'top-0'}`}>{currentTitle}</h2>
+      <h2 className={`w-full absolute uppercase truncate ${hasRunAnimation ? '-top-[60px] duration-500 transition-all' : 'top-0'}`}>{currentTitle}</h2>
       {/* Next HUD feature title with animation */}
-      <h2 className={`absolute uppercase truncate ${hasRunAnimation ? 'bottom-0 duration-500 transition-all' : '-bottom-[60px]'}`}>{nextTitle}</h2>
+      <h2 className={`w-full absolute uppercase truncate ${hasRunAnimation ? 'bottom-0 duration-500 transition-all' : '-bottom-[60px]'}`}>{nextTitle}</h2>
     </div>
   );
 }
