@@ -1,4 +1,3 @@
-import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import { MouseEvent } from "react";
 import AGButton from '../../../common/ag-button.component';
@@ -12,7 +11,7 @@ interface ColorSelectorComponentProps {
   handleSwitchShowColorSelector: () => void;
 }
 
-interface OptionListProps extends Omit<ColorSelectorComponentProps, 'handleSwitchShowColorSelector'> { };
+interface OptionListProps extends Omit<ColorSelectorComponentProps, 'handleSwitchShowColorSelector'> { }
 
 function OptionList(props: OptionListProps) {
   function selectFeature(e: MouseEvent, color: string) {
