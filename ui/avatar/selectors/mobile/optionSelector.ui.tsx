@@ -1,4 +1,3 @@
-import { Swiper, SwiperSlide } from 'swiper/react';
 import { FeatureInterface } from "../../../../interfaces/api.interface";
 import 'swiper/css';
 import { BasicData } from '../../../../interfaces/common.interface';

@@ -1,4 +1,4 @@
-import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
+import { Swiper, SwiperRef } from 'swiper/react';
 import { useRef } from "react";
 import 'swiper/css';
 import { FeatureBasic } from '../../../../interfaces/common.interface';
