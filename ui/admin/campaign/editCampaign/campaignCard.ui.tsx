@@ -71,7 +71,7 @@ export default function CampaignCard({ noCampaign, create, campaign, clickHandle
 												<AiOutlineInfoCircle className="transition-all duration-300" />
 											</div>
 											<button className="bg-bg w-fit px-2 rounded-full h-8 hover:text-green-600"
-												onClick={() => handleDeleteCampaign(campaign)}
+												onClick={() => void handleDeleteCampaign(campaign)}
 											>
 												<AiOutlineCheckCircle className="transition-all duration-300" />
 											</button>
