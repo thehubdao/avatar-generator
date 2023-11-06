@@ -8,12 +8,14 @@ import HudComponent from "../../ui/avatar/hud.component";
 import TransparentBox from "../../ui/common/transparentBox.ui";
 import { Module } from "../../enums/common.enum";
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
-import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
+import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "../avatar/viewer.component";
 import { FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
 import { BasicData, CampaignParameters, ExportInterface, FeatureBasic, LookAtVectors } from "../../interfaces/common.interface";
-import AvatarEditor, { ChangeFeature, ChangeSkinColor, ChangeStartAnimation, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
+import AvatarEditor, { ChangeFeature, ChangeSkinColor, ChangeStartAnimation, GetAvatarGLB, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
 import { GetAccessoryListByCampaign, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombination, GetStageListByCampaign } from "../../utils/api.util";
 import { fadeBlock } from "../../utils/gsap/block_in_out";
+import { IFrameExportData } from "../../utils/iframe.util";
+import { SaveFile } from "../../utils/exporter.util";
 
 const exportData: ExportInterface = { attributes: [] };
 let optionList: FeatureInterface[] | undefined;
@@ -22,6 +24,7 @@ let accessoryList: FeatureInterface[] | undefined;
 let stageList: StageInterface[] | undefined;
 let singleData: SingleInterface | undefined;
 let loaderDivElement: HTMLDivElement;
+const isOnIFrame = false;
 
 export default function LuksoComponent({ campaignParams }: { campaignParams?: CampaignParameters }) {
   const selectListFeatures = useRef<FeatureBasic[]>(campaignParams?.features ?? []);
@@ -181,6 +184,24 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     loaderDivElement = elementReference;
   }
 
+  async function exportModel() {
+    exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
+    const [picturePromise, modelPromise] = await Promise.all([
+      TakeCanvasPicture(''),
+      GetAvatarGLB()
+    ]);
+    exportData.picture = picturePromise;
+    exportData.model = modelPromise;
+
+    if (isOnIFrame) {
+      IFrameExportData(exportData);
+    } else {
+      if (exportData.model != undefined)
+        await SaveFile(exportData.model, 'model.glb');
+      await SaveFile(exportData.picture, 'picture.png');
+    }
+  }
+
   return (
     <MobileLayout>
       <div className="w-full h-screen bg-[#FABCE2] flex flex-col">
@@ -249,11 +270,12 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
         </div>
         <LuksoUI
           reRoll={reRoll}
-          setIsEditModeSelected={setIsEditModeSelected}
+          setIsEditModeSelected={(value: boolean) => setIsEditModeSelected(value)}
           isLoading={isLoading}
           currentSection={currentSection}
-          setCurrentSection={setCurrentSection}
+          setCurrentSection={(changeSectionValue: number) => setCurrentSection(changeSectionValue)}
           getloaderDivElement={getloaderDivElement}
+          exportModel={exportModel}
         />
       </div>
     </MobileLayout>
