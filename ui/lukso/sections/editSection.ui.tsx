@@ -3,36 +3,15 @@ import { Fragment, useEffect, useRef } from "react"
 import TransparentBox from "../../common/transparentBox.ui"
 import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out";
 import { FaDownload, FaPencil } from "react-icons/fa6";
-import { TakeCanvasPicture } from "../../../components/avatar/viewer.component";
-import { GetAvatarGLB } from "../../../components/avatar/editor.component";
-import { IFrameExportData } from "../../../utils/iframe.util";
-import { SaveFile } from "../../../utils/exporter.util";
-import { ExportInterface } from "../../../interfaces/common.interface";
 
-const exportData: ExportInterface = { attributes: [] };
-const isOnIFrame = false;
+interface EditLuksoSectionUIProps {
+  setIsEditModeSelected: (value: boolean) => void;
+  exportModel: () => void;
+}
 
-export default function EditLuksoSectionUI({ setIsEditModeSelected }: { setIsEditModeSelected: React.Dispatch<React.SetStateAction<boolean>> }) {
+export default function EditLuksoSectionUI({ setIsEditModeSelected, exportModel }: EditLuksoSectionUIProps) {
   const editAvatarRef = useRef<HTMLDivElement>(null);
   const ANIMATION_DURATION = 0.5;
-
-  async function exportModel() {
-    exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
-    const [picturePromise, modelPromise] = await Promise.all([
-      TakeCanvasPicture(''),
-      GetAvatarGLB()
-    ]);
-    exportData.picture = picturePromise;
-    exportData.model = modelPromise;
-
-    if (isOnIFrame) {
-      IFrameExportData(exportData);
-    } else {
-      if (exportData.model != undefined)
-        await SaveFile(exportData.model, 'model.glb');
-      await SaveFile(exportData.picture, 'picture.png');
-    }
-  }
 
   const gsapEnterBlocks = async () => {
     if (!editAvatarRef.current) return
@@ -86,7 +65,7 @@ export default function EditLuksoSectionUI({ setIsEditModeSelected }: { setIsEdi
               </div>
             </TransparentBox>
           </button>
-          <button onClick={() => { setIsEditModeSelected(true); }}>
+          <button onClick={() => setIsEditModeSelected(true)}>
             <TransparentBox border backgroundColorClass="bg-white">
               <div className="flex items-center gap-3 text-black">
                 <p className="text-base 2xl:text-lg">Edit</p>
