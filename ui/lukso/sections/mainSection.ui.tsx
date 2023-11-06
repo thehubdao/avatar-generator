@@ -13,16 +13,16 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
   const ANIMATION_DURATION = 0.5;
 
-  const gsapEnterBlocks = async () => {
+  const gsapEnterBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
-    await moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
-    await moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'in');
+    moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
+    moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'in');
   }
 
-  const gsapOutBlocks = async () => {
+  const gsapOutBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
-    await moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'out');
-    await moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(1));
+    moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'out');
+    moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(1));
   }
 
   useEffect(() => { void gsapEnterBlocks(); }, [])

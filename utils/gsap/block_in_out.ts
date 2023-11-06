@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 
-export const moveHorizontalBlocks = async (
+export const moveHorizontalBlocks = (
   elementReference: HTMLDivElement,
   duration: number,
   position: 'right' | 'left',
@@ -10,13 +10,13 @@ export const moveHorizontalBlocks = async (
   const positionPibot = position === "right" ? 1 : -1
 
   if (animationType === 'in') {
-    await gsap.from(elementReference, {
+    gsap.from(elementReference, {
       x: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
     }).then(() => { thenFunction && thenFunction() });
   } else {
-    await gsap.to(elementReference, {
+    gsap.to(elementReference, {
       x: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
@@ -24,7 +24,7 @@ export const moveHorizontalBlocks = async (
   }
 }
 
-export const moveVerticalBlocks = async (
+export const moveVerticalBlocks = (
   elementReference: HTMLDivElement,
   duration: number,
   position: 'top' | 'bottom',
@@ -34,13 +34,13 @@ export const moveVerticalBlocks = async (
   const positionPibot = position === "bottom" ? 1 : -1
 
   if (animationType === 'in') {
-    await gsap.from(elementReference, {
+    gsap.from(elementReference, {
       y: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
     }).then(() => { thenFunction && thenFunction() });
   } else {
-    await gsap.to(elementReference, {
+    gsap.to(elementReference, {
       y: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
@@ -48,12 +48,12 @@ export const moveVerticalBlocks = async (
   }
 }
 
-export const fadeBlock = async (
+export const fadeBlock = (
   elementReference: HTMLDivElement,
   duration: number,
   thenFunction?: () => void
 ) => {
-  await gsap.to(elementReference, {
+  gsap.to(elementReference, {
     opacity: 0,
     ease: 'power1.out',
     duration,

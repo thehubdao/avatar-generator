@@ -19,18 +19,18 @@ export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLu
 
   const [isRolling, setIsRolling] = useState<boolean>(false);
 
-  const gsapEnterBlocks = async () => {
+  const gsapEnterBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
-    await moveHorizontalBlocks(mainFeatureRef.current, ANIMATION_DURATION, 'left', 'in');
-    await moveHorizontalBlocks(mintAvatarRef.current, ANIMATION_DURATION, 'right', 'in');
-    await moveVerticalBlocks(buttonRef.current, ANIMATION_DURATION, 'bottom', 'in');
+    moveHorizontalBlocks(mainFeatureRef.current, ANIMATION_DURATION, 'left', 'in');
+    moveHorizontalBlocks(mintAvatarRef.current, ANIMATION_DURATION, 'right', 'in');
+    moveVerticalBlocks(buttonRef.current, ANIMATION_DURATION, 'bottom', 'in');
   }
 
-  const gsapOutBlocks = async () => {
+  const gsapOutBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
-    await moveHorizontalBlocks(mainFeatureRef.current, ANIMATION_DURATION, 'left', 'out');
-    await moveHorizontalBlocks(mintAvatarRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(2));
-    await moveVerticalBlocks(buttonRef.current, ANIMATION_DURATION, 'bottom', 'out');
+    moveHorizontalBlocks(mainFeatureRef.current, ANIMATION_DURATION, 'left', 'out');
+    moveHorizontalBlocks(mintAvatarRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(2));
+    moveVerticalBlocks(buttonRef.current, ANIMATION_DURATION, 'bottom', 'out');
   }
 
   useEffect(() => { void gsapEnterBlocks(); }, [])

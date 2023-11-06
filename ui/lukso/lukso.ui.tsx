@@ -10,7 +10,7 @@ interface LuksoUIProps {
   currentSection: number;
   setCurrentSection: (value: number) => void;
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
-  exportModel: () => void;
+  exportModel: () => void | Promise<void>;
 }
 
 export default function LuksoUI({ reRoll, setIsEditModeSelected, isLoading, currentSection, setCurrentSection, getloaderDivElement, exportModel }: LuksoUIProps) {

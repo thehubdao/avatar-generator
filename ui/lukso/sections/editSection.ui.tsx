@@ -1,24 +1,35 @@
 import Image from "next/image"
-import { Fragment, useEffect, useRef } from "react"
+import { Fragment, useEffect, useRef, useState } from "react"
 import TransparentBox from "../../common/transparentBox.ui"
 import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out";
 import { FaDownload, FaPencil } from "react-icons/fa6";
+import { AiOutlineLoading } from "react-icons/ai";
 
 interface EditLuksoSectionUIProps {
   setIsEditModeSelected: (value: boolean) => void;
-  exportModel: () => void;
+  exportModel: () => void | Promise<void>;
 }
 
 export default function EditLuksoSectionUI({ setIsEditModeSelected, exportModel }: EditLuksoSectionUIProps) {
+  useEffect(() => {
+    void gsapEnterBlocks();
+  }, [])
+
+  const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
+
   const editAvatarRef = useRef<HTMLDivElement>(null);
   const ANIMATION_DURATION = 0.5;
 
-  const gsapEnterBlocks = async () => {
+  const gsapEnterBlocks = () => {
     if (!editAvatarRef.current) return
-    await moveHorizontalBlocks(editAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
+    moveHorizontalBlocks(editAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
   }
 
-  useEffect(() => { void gsapEnterBlocks(); }, [])
+  const handleExportModel = async () => {
+    setIsExportingModel(true);
+    await exportModel();
+    setIsExportingModel(false);
+  }
 
   return (
     <section className={`flex h-full items-center justify-between`}>
@@ -57,11 +68,18 @@ export default function EditLuksoSectionUI({ setIsEditModeSelected, exportModel 
           </TransparentBox>
         </TransparentBox>
         <div className="h-14 w-full 2xl:h-18 flex whitespace-nowrap">
-          <button className="w-full" onClick={() => void exportModel()}>
+          <button className="w-full" onClick={() => void handleExportModel()}>
             <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
               <div className="flex items-center gap-3 text-black">
-                <p className="text-base 2xl:text-lg">Download</p>
-                <FaDownload />
+                {isExportingModel
+                  ? <>
+                    <p className="text-base 2xl:text-lg">Downloading</p>
+                    <AiOutlineLoading className="animate-spin"/>
+                  </>
+                  : <>
+                    <p className="text-base 2xl:text-lg">Download</p>
+                    <FaDownload />
+                  </>}
               </div>
             </TransparentBox>
           </button>
