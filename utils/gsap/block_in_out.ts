@@ -10,13 +10,13 @@ export const moveHorizontalBlocks = (
   const positionPibot = position === "right" ? 1 : -1
 
   if (animationType === 'in') {
-    gsap.from(elementReference, {
+    return gsap.from(elementReference, {
       x: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
     }).then(() => { thenFunction && thenFunction() });
   } else {
-    gsap.to(elementReference, {
+    return gsap.to(elementReference, {
       x: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
@@ -34,13 +34,13 @@ export const moveVerticalBlocks = (
   const positionPibot = position === "bottom" ? 1 : -1
 
   if (animationType === 'in') {
-    gsap.from(elementReference, {
+    return gsap.from(elementReference, {
       y: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
     }).then(() => { thenFunction && thenFunction() });
   } else {
-    gsap.to(elementReference, {
+    return gsap.to(elementReference, {
       y: positionPibot * elementReference.clientWidth,
       ease: 'power1.out',
       duration,
@@ -53,7 +53,7 @@ export const fadeBlock = (
   duration: number,
   thenFunction?: () => void
 ) => {
-  gsap.to(elementReference, {
+  return gsap.to(elementReference, {
     opacity: 0,
     ease: 'power1.out',
     duration,
