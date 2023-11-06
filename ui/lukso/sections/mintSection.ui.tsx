@@ -7,8 +7,8 @@ import { FaArrowRightLong } from "react-icons/fa6";
 import SocialMediaButtonsLukso from "../common/socialMediaButtons.ui";
 
 interface MintLuksoSectionUIProps {
-  setCurrentSection: React.Dispatch<React.SetStateAction<number>>;
-  reRoll: () => Promise<void>;
+  setCurrentSection: (value: number) => void;
+  reRoll: () => void | Promise<void>;
 }
 
 export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLuksoSectionUIProps) {

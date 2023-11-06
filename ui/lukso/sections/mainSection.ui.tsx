@@ -5,7 +5,7 @@ import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out";
 import { FaDice } from "react-icons/fa6";
 
 interface MainLuksoSectionUIProps {
-  setCurrentSection: React.Dispatch<React.SetStateAction<number>>
+  setCurrentSection: (value: number) => void;
 }
 
 export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSectionUIProps) {
