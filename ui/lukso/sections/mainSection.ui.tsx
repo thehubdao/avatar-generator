@@ -1,28 +1,29 @@
 import Image from "next/image";
 import { useEffect, useRef } from "react";
-import TransparentBox from "../../common/transparentBox.ui";
-import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out";
+import TransparentBox from "../common/transparentBox.ui";
+import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out.util";
 import { FaDice } from "react-icons/fa6";
+import { LuksoSections } from "../../../enums/lukso/common.enum";
+import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 
-interface MainLuksoSectionUIProps {
-  setCurrentSection: (value: number) => void;
+interface MainSectionUIProps {
+  setCurrentSection: (value: LuksoSections) => void;
 }
 
-export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
-  const ANIMATION_DURATION = 0.5;
 
   const gsapEnterBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
-    moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
-    moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'in');
+    moveHorizontalBlocks(luksoAvatarRef.current, DURATION_ANIMATION_SECTION, 'left', 'in');
+    moveHorizontalBlocks(exclusiveCollectionRef.current, DURATION_ANIMATION_SECTION, 'right', 'in');
   }
 
   const gsapOutBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
-    moveHorizontalBlocks(luksoAvatarRef.current, ANIMATION_DURATION, 'left', 'out');
-    moveHorizontalBlocks(exclusiveCollectionRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(1));
+    moveHorizontalBlocks(luksoAvatarRef.current, DURATION_ANIMATION_SECTION, 'left', 'out');
+    moveHorizontalBlocks(exclusiveCollectionRef.current, DURATION_ANIMATION_SECTION, 'right', 'out', () => setCurrentSection(LuksoSections.Mint));
   }
 
   useEffect(() => { void gsapEnterBlocks(); }, [])
@@ -30,7 +31,7 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
   return (
     <section className={`flex h-full items-center justify-between`}>
       {/* Lukso Avatars */}
-      <div className="w-[580px] 2xl:w-[688px] h-[70%] flex flex-col gap-3" ref={luksoAvatarRef}>
+      <div ref={luksoAvatarRef} className="w-[580px] 2xl:w-[688px] h-[70%] flex flex-col gap-3">
         <TransparentBox
           fullWidth
           border
@@ -63,11 +64,10 @@ export default function MainLuksoSectionUI({ setCurrentSection }: MainLuksoSecti
             </div>
           </TransparentBox>
         </button>
-
       </div>
 
       {/* Exclusive collection */}
-      <div className="flex h-[70%] gap-3" ref={exclusiveCollectionRef}>
+      <div ref={exclusiveCollectionRef} className="flex h-[70%] gap-3">
         <div className="w-[280px] 2xl:w-[345px] h-full flex flex-col">
           <TransparentBox
             fullWidth
