@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { Fragment, useEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
-import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out.util";
+import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDownload, FaPencil } from "react-icons/fa6";
 import { AiOutlineLoading } from "react-icons/ai";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
@@ -18,7 +18,7 @@ export default function EditSectionUI({ setIsEditModeSelected, exportModel }: Ed
 
   const gsapEnterBlocks = () => {
     if (!editAvatarRef.current) return
-    moveHorizontalBlocks(editAvatarRef.current, DURATION_ANIMATION_SECTION, 'left', 'in');
+    translationInOutBlock(editAvatarRef.current, DURATION_ANIMATION_SECTION, 'left', 'in');
   }
 
   const handleExportModel = async () => {

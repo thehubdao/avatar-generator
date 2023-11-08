@@ -1,7 +1,7 @@
 import Image from "next/image"
 import { Fragment, useEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
-import { moveHorizontalBlocks, moveVerticalBlocks } from "../../../utils/gsap/block_in_out.util";
+import { translationInOutBlock, fadeInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { BsArrowRepeat } from "react-icons/bs";
 import { FaArrowRightLong } from "react-icons/fa6";
 import SocialButtonsUI from "../common/socialButtons.ui";
@@ -22,16 +22,16 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
 
   const gsapEnterBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
-    moveHorizontalBlocks(mainFeatureRef.current, DURATION_ANIMATION_SECTION, 'left', 'in');
-    moveHorizontalBlocks(mintAvatarRef.current, DURATION_ANIMATION_SECTION, 'right', 'in');
-    moveVerticalBlocks(buttonRef.current, DURATION_ANIMATION_SECTION, 'bottom', 'in');
+    translationInOutBlock(mainFeatureRef.current, DURATION_ANIMATION_SECTION);
+    translationInOutBlock(mintAvatarRef.current, DURATION_ANIMATION_SECTION);
+    fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION);
   }
 
   const gsapOutBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
-    moveHorizontalBlocks(mainFeatureRef.current, DURATION_ANIMATION_SECTION, 'left', 'out');
-    moveHorizontalBlocks(mintAvatarRef.current, DURATION_ANIMATION_SECTION, 'right', 'out', () => setCurrentSection(LuksoSections.Edit));
-    moveVerticalBlocks(buttonRef.current, DURATION_ANIMATION_SECTION, 'bottom', 'out');
+    translationInOutBlock(mainFeatureRef.current, DURATION_ANIMATION_SECTION, true);
+    translationInOutBlock(mintAvatarRef.current, DURATION_ANIMATION_SECTION, true, true);
+    fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION, true, () => setCurrentSection(LuksoSections.Edit));
   }
 
   useEffect(() => { void gsapEnterBlocks(); }, [])
@@ -44,9 +44,9 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
   }
 
   return (
-    <section className={`flex h-full items-center justify-between`}>
+    <section className={`flex w-full h-full items-center justify-between`}>
       {/* Mint features */}
-      <div ref={mainFeatureRef} className="w-[360px] 2xl:w-[461px] h-full flex flex-col gap-3">
+      <div ref={mainFeatureRef} className="w-[360px] 2xl:w-[461px] -translate-x-full h-full flex flex-col gap-3">
         <TransparentBox
           fullWidth
           border
@@ -79,7 +79,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
       </div>
 
       {/* Buttons */}
-      <div ref={buttonRef} className="absolute bottom-[15%] left-1/2 -translate-x-[50%] flex flex-col w-[240px] justify-end gap-3 text-black text-lg 2xl:text-xl">
+      <div ref={buttonRef} className="fixed bottom-[15%] left-1/2 -translate-x-[50%] flex flex-col w-[240px] justify-end gap-3 text-black text-lg 2xl:text-xl opacity-0">
         <button className="w-full h-fit" onClick={() => void handleReRoll()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
@@ -99,7 +99,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
       </div>
 
       {/* Mint your avatar */}
-      <div ref={mintAvatarRef} className="w-[460px] 2xl:w-[564px] h-[70%]">
+      <div ref={mintAvatarRef} className="w-[460px] 2xl:w-[564px] translate-x-full h-[70%]">
         <TransparentBox fullWidth border backgroundColorClass="bg-[#FFCBDE]" paddingClass="px-14 2xl:px-28" aditionalClass="gap-6 2xl:gap-8">
           <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10 2xl:mb-20">MINT YOUR AVATAR</h3>
           <p className="text-base 2xl:text-lg">{`Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.

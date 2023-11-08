@@ -21,7 +21,7 @@ import { LuksoSections } from "../../enums/lukso/common.enum";
 // Utils
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { GetAccessoryListByCampaign, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombination, GetStageListByCampaign } from "../../utils/api.util";
-import { fadeBlock } from "../../utils/gsap/block_in_out.util";
+import { fadeInOutBlock } from "../../utils/gsap/block_in_out.util";
 import { IFrameExportData } from "../../utils/iframe.util";
 import { SaveFile } from "../../utils/exporter.util";
 
@@ -187,7 +187,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   }
 
   async function handleFadeLoader(elementReference: HTMLDivElement, thenFunction?: () => void) {
-    await fadeBlock(elementReference, 1, thenFunction);
+    await fadeInOutBlock(elementReference, 1, true, thenFunction);
   }
 
   function getloaderDivElement(elementReference: HTMLDivElement) {
