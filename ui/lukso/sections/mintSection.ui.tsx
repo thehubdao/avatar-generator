@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Fragment, useEffect, useRef, useState } from "react"
+import { Fragment, useLayoutEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock, fadeInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { BsArrowRepeat } from "react-icons/bs";
@@ -34,7 +34,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
     fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION, true, () => setCurrentSection(LuksoSections.Edit));
   }
 
-  useEffect(() => { void gsapEnterBlocks(); }, [])
+  useLayoutEffect(() => { void gsapEnterBlocks(); }, [])
 
   const handleReRoll = async () => {
     if (isRolling) return;

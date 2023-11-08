@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Fragment, useEffect, useRef, useState } from "react"
+import { Fragment, useLayoutEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDownload, FaPencil } from "react-icons/fa6";
@@ -18,7 +18,7 @@ export default function EditSectionUI({ setIsEditModeSelected, exportModel }: Ed
 
   const gsapEnterBlocks = () => {
     if (!editAvatarRef.current) return
-    translationInOutBlock(editAvatarRef.current, DURATION_ANIMATION_SECTION, 'left', 'in');
+    translationInOutBlock(editAvatarRef.current, DURATION_ANIMATION_SECTION);
   }
 
   const handleExportModel = async () => {
@@ -27,14 +27,14 @@ export default function EditSectionUI({ setIsEditModeSelected, exportModel }: Ed
     setIsExportingModel(false);
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     void gsapEnterBlocks();
   }, [])
 
   return (
     <section className={`flex h-full items-center justify-between`}>
       {/* Edit Avatar */}
-      <div ref={editAvatarRef} className="w-[380px] 2xl:w-[461px] h-full flex flex-col">
+      <div ref={editAvatarRef} className="w-[380px] 2xl:w-[461px] h-full -translate-x-full flex flex-col">
         <TransparentBox
           fullWidth
           border

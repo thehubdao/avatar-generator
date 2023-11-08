@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import TransparentBox from "../common/transparentBox.ui";
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDice } from "react-icons/fa6";
@@ -26,11 +26,7 @@ export default function MainSectionUI({ setCurrentSection }: MainSectionUIProps)
     translationInOutBlock(exclusiveCollectionRef.current, DURATION_ANIMATION_SECTION, true, true, () => setCurrentSection(LuksoSections.Mint));
   }
 
-  useEffect(() => {
-    if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
-
-    void gsapEnterBlocks();
-  }, [])
+  useLayoutEffect(() => { void gsapEnterBlocks() }, [])
 
   return (
     <section className={`flex h-full items-center justify-between`}>
