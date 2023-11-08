@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 
 // Fragment shader
@@ -18,12 +18,12 @@ export default function LoadingUI({ getloaderDivElement }: LoadingUIProps) {
   const compileShader = (gl: WebGLRenderingContext, source: string, type: number) => {
     const shader = gl.createShader(type);
 
-    if (!shader) return LogError(Module.Lukso, 'Shader doesn\'t exist on compile shader function');
+    if (!shader) return void LogError(Module.Lukso, 'Shader doesn\'t exist on compile shader function');
     gl.shaderSource(shader, source);
     gl.compileShader(shader);
 
     if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      LogError(Module.Lukso, 'Error on compile shader:', gl.getShaderInfoLog(shader));
+      void LogError(Module.Lukso, 'Error on compile shader:', gl.getShaderInfoLog(shader));
       gl.deleteShader(shader);
       return null;
     }
@@ -31,15 +31,15 @@ export default function LoadingUI({ getloaderDivElement }: LoadingUIProps) {
     return shader;
   };
 
-  const createShader = () => {
+  function createShader() {
     if (parentRef.current) getloaderDivElement(parentRef.current);
-    if (!canvasRef.current) return LogError(Module.Lukso, 'Canvas doesn\'t exist on create shader function');
+    if (!canvasRef.current) return void LogError(Module.Lukso, 'Canvas doesn\'t exist on create shader function');
 
     const canvas = canvasRef.current;
     const gl = canvas.getContext('webgl');
 
     if (!gl) {
-      return LogError(Module.Lukso, 'WebGL is not support on your browser on create shader function');
+      return void LogError(Module.Lukso, 'WebGL is not support on your browser on create shader function');
     }
 
     // Vertex shader (optional)
@@ -56,7 +56,7 @@ export default function LoadingUI({ getloaderDivElement }: LoadingUIProps) {
     const shaderProgram = gl.createProgram();
 
     if (!shaderProgram || !vertexShader || !fragmentShader)
-      return LogError(Module.Lukso, 'Shader Program | Vertex Shader | Fragment Shader doesn\'t exist on create shader function');
+      return void LogError(Module.Lukso, 'Shader Program | Vertex Shader | Fragment Shader doesn\'t exist on create shader function');
 
     gl.attachShader(shaderProgram, vertexShader);
     gl.attachShader(shaderProgram, fragmentShader);
@@ -87,7 +87,7 @@ export default function LoadingUI({ getloaderDivElement }: LoadingUIProps) {
     requestAnimationFrame(render);
   }
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     createShader();
   }, []);
 
