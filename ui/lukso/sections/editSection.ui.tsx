@@ -1,28 +1,24 @@
 import Image from "next/image"
 import { Fragment, useEffect, useRef, useState } from "react"
-import TransparentBox from "../../common/transparentBox.ui"
-import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out";
+import TransparentBox from "../common/transparentBox.ui"
+import { moveHorizontalBlocks } from "../../../utils/gsap/block_in_out.util";
 import { FaDownload, FaPencil } from "react-icons/fa6";
 import { AiOutlineLoading } from "react-icons/ai";
+import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 
-interface EditLuksoSectionUIProps {
+interface EditSectionUIProps {
+  exportModel: () => Promise<void>;
   setIsEditModeSelected: (value: boolean) => void;
-  exportModel: () => void | Promise<void>;
 }
 
-export default function EditLuksoSectionUI({ setIsEditModeSelected, exportModel }: EditLuksoSectionUIProps) {
-  useEffect(() => {
-    void gsapEnterBlocks();
-  }, [])
-
+export default function EditSectionUI({ setIsEditModeSelected, exportModel }: EditSectionUIProps) {
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
 
   const editAvatarRef = useRef<HTMLDivElement>(null);
-  const ANIMATION_DURATION = 0.5;
 
   const gsapEnterBlocks = () => {
     if (!editAvatarRef.current) return
-    moveHorizontalBlocks(editAvatarRef.current, ANIMATION_DURATION, 'left', 'in');
+    moveHorizontalBlocks(editAvatarRef.current, DURATION_ANIMATION_SECTION, 'left', 'in');
   }
 
   const handleExportModel = async () => {
@@ -31,10 +27,14 @@ export default function EditLuksoSectionUI({ setIsEditModeSelected, exportModel 
     setIsExportingModel(false);
   }
 
+  useEffect(() => {
+    void gsapEnterBlocks();
+  }, [])
+
   return (
     <section className={`flex h-full items-center justify-between`}>
       {/* Edit Avatar */}
-      <div className="w-[380px] 2xl:w-[461px] h-full flex flex-col" ref={editAvatarRef}>
+      <div ref={editAvatarRef} className="w-[380px] 2xl:w-[461px] h-full flex flex-col">
         <TransparentBox
           fullWidth
           border
@@ -63,23 +63,22 @@ export default function EditLuksoSectionUI({ setIsEditModeSelected, exportModel 
               </Fragment>)
             })}
           </div>
-          <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" aditionalClass="mt-10" >
-            <p className="text-black text-lg 2xl:text-xl">World Color <span>(0x00f)</span></p>
-          </TransparentBox>
         </TransparentBox>
         <div className="h-14 w-full 2xl:h-18 flex whitespace-nowrap">
           <button className="w-full" onClick={() => void handleExportModel()}>
             <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
               <div className="flex items-center gap-3 text-black">
-                {isExportingModel
-                  ? <>
+                {isExportingModel ?
+                  <>
                     <p className="text-base 2xl:text-lg">Downloading</p>
-                    <AiOutlineLoading className="animate-spin"/>
+                    <AiOutlineLoading className="animate-spin" />
                   </>
-                  : <>
+                  :
+                  <>
                     <p className="text-base 2xl:text-lg">Download</p>
                     <FaDownload />
-                  </>}
+                  </>
+                }
               </div>
             </TransparentBox>
           </button>

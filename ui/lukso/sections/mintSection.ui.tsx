@@ -1,36 +1,37 @@
 import Image from "next/image"
 import { Fragment, useEffect, useRef, useState } from "react"
-import TransparentBox from "../../common/transparentBox.ui"
-import { moveHorizontalBlocks, moveVerticalBlocks } from "../../../utils/gsap/block_in_out";
+import TransparentBox from "../common/transparentBox.ui"
+import { moveHorizontalBlocks, moveVerticalBlocks } from "../../../utils/gsap/block_in_out.util";
 import { BsArrowRepeat } from "react-icons/bs";
 import { FaArrowRightLong } from "react-icons/fa6";
-import SocialMediaButtonsLukso from "../common/socialMediaButtons.ui";
+import SocialButtonsUI from "../common/socialButtons.ui";
+import { LuksoSections } from "../../../enums/lukso/common.enum";
+import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 
-interface MintLuksoSectionUIProps {
-  setCurrentSection: (value: number) => void;
-  reRoll: () => void | Promise<void>;
+interface MintSectionUIProps {
+  setCurrentSection: (value: LuksoSections) => void;
+  reRoll: () => Promise<void>;
 }
 
-export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLuksoSectionUIProps) {
+export default function MintSectionUI({ setCurrentSection, reRoll }: MintSectionUIProps) {
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
-  const ANIMATION_DURATION = 0.5;
 
   const [isRolling, setIsRolling] = useState<boolean>(false);
 
   const gsapEnterBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
-    moveHorizontalBlocks(mainFeatureRef.current, ANIMATION_DURATION, 'left', 'in');
-    moveHorizontalBlocks(mintAvatarRef.current, ANIMATION_DURATION, 'right', 'in');
-    moveVerticalBlocks(buttonRef.current, ANIMATION_DURATION, 'bottom', 'in');
+    moveHorizontalBlocks(mainFeatureRef.current, DURATION_ANIMATION_SECTION, 'left', 'in');
+    moveHorizontalBlocks(mintAvatarRef.current, DURATION_ANIMATION_SECTION, 'right', 'in');
+    moveVerticalBlocks(buttonRef.current, DURATION_ANIMATION_SECTION, 'bottom', 'in');
   }
 
   const gsapOutBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
-    moveHorizontalBlocks(mainFeatureRef.current, ANIMATION_DURATION, 'left', 'out');
-    moveHorizontalBlocks(mintAvatarRef.current, ANIMATION_DURATION, 'right', 'out', () => setCurrentSection(2));
-    moveVerticalBlocks(buttonRef.current, ANIMATION_DURATION, 'bottom', 'out');
+    moveHorizontalBlocks(mainFeatureRef.current, DURATION_ANIMATION_SECTION, 'left', 'out');
+    moveHorizontalBlocks(mintAvatarRef.current, DURATION_ANIMATION_SECTION, 'right', 'out', () => setCurrentSection(LuksoSections.Edit));
+    moveVerticalBlocks(buttonRef.current, DURATION_ANIMATION_SECTION, 'bottom', 'out');
   }
 
   useEffect(() => { void gsapEnterBlocks(); }, [])
@@ -45,7 +46,7 @@ export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLu
   return (
     <section className={`flex h-full items-center justify-between`}>
       {/* Mint features */}
-      <div className="w-[360px] 2xl:w-[461px] h-full flex flex-col gap-3" ref={mainFeatureRef}>
+      <div ref={mainFeatureRef} className="w-[360px] 2xl:w-[461px] h-full flex flex-col gap-3">
         <TransparentBox
           fullWidth
           border
@@ -74,15 +75,11 @@ export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLu
               </Fragment>)
             })}
           </div>
-          <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" aditionalClass="mt-10" >
-            <p className="text-black text-lg 2xl:text-xl">World Color <span>(0x00f)</span></p>
-          </TransparentBox>
         </TransparentBox>
       </div>
 
-      {/** TODO: evitar que se sobreponga la seccion de bottones a el avatar */}
       {/* Buttons */}
-      <div className="absolute bottom-[15%] left-1/2 -translate-x-[50%] flex flex-col w-[240px] justify-end gap-3 text-black text-lg 2xl:text-xl" ref={buttonRef}>
+      <div ref={buttonRef} className="absolute bottom-[15%] left-1/2 -translate-x-[50%] flex flex-col w-[240px] justify-end gap-3 text-black text-lg 2xl:text-xl">
         <button className="w-full h-fit" onClick={() => void handleReRoll()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
@@ -102,12 +99,12 @@ export default function MintLuksoSectionUI({ setCurrentSection, reRoll }: MintLu
       </div>
 
       {/* Mint your avatar */}
-      <div className="w-[460px] 2xl:w-[564px] h-[70%]" ref={mintAvatarRef}>
+      <div ref={mintAvatarRef} className="w-[460px] 2xl:w-[564px] h-[70%]">
         <TransparentBox fullWidth border backgroundColorClass="bg-[#FFCBDE]" paddingClass="px-14 2xl:px-28" aditionalClass="gap-6 2xl:gap-8">
           <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10 2xl:mb-20">MINT YOUR AVATAR</h3>
           <p className="text-base 2xl:text-lg">{`Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.
             Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.`}</p>
-          <SocialMediaButtonsLukso />
+          <SocialButtonsUI />
           <div className="font-semibold">
             <p>PUBLIC MINT</p>
             <p>0.03 ETH</p>
