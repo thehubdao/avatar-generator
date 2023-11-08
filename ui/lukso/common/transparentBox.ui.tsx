@@ -1,19 +1,20 @@
-interface TransparentBoxProps {
-  children: React.ReactNode,
-  fullWidth?: boolean,
-  opacityPercentage?: '25' | '50' | '75'
-  heightClass?: string,
-  paddingClass?: string,
-  backgroundColorClass?: string,
-  border?: boolean,
-  borderSizeClass?: string,
-  borderColorClass?: string,
-  aditionalClass?: string
-  justifyClass?: string,
-  alignItemsClass?: string
+interface TransparentBoxUIProps {
+  children: React.ReactNode;
+  fullWidth?: boolean;
+  opacityPercentage?: '25' | '50' | '75';
+  heightClass?: string;
+  paddingClass?: string;
+  backgroundColorClass?: string;
+  border?: boolean;
+  borderSizeClass?: string;
+  borderColorClass?: string;
+  aditionalClass?: string;
+  justifyClass?: string;
+  alignItemsClass?: string;
 }
 
-export default function TransparentBox({
+// TODO: use tailwind class instead this component
+export default function TransparentBoxUI({
   children,
   fullWidth,
   opacityPercentage = '75',
@@ -26,7 +27,7 @@ export default function TransparentBox({
   aditionalClass,
   justifyClass = 'justify-center',
   alignItemsClass = 'items-center'
-}: TransparentBoxProps) {
+}: TransparentBoxUIProps) {
   const widthClass = fullWidth ? 'w-full' : 'w-fit'
   const borderClass = border ? `${borderColorClass} ${borderSizeClass}` : 'border-none'
 
