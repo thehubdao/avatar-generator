@@ -2,7 +2,11 @@ import { Provider } from "react-redux";
 import store from "../store/store";
 import MobileBuildAlert from "../ui/admin/common/mobileBuildAlert.ui";
 
-export default function MobileLayout({ children }: { children: JSX.Element | JSX.Element[] | boolean }) {
+interface MobileLayoutProps {
+  children: JSX.Element | JSX.Element[] | boolean;
+}
+
+export default function MobileLayout({ children }: MobileLayoutProps) {
   return (
     <Provider store={store}>
       <main className="w-full h-screen">
