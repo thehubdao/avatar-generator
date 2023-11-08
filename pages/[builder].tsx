@@ -6,6 +6,7 @@ import {GetParameter} from "../utils/firebase.util";
 import AvatarBuilder from "../components/avatar/builder.component";
 import {Base64ToObj, RemoveUndefinedProperties} from "../utils/common.util";
 import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../constants/common.constant";
+import Web3Login from "../components/auth/login.component";
 
 interface AvatarGeneratorProps {
   campaign: string;
@@ -25,6 +26,7 @@ export default function AvatarGenerator({
                                           enablePan
                                         }: AvatarGeneratorProps) {
   return (<>
+  <Web3Login/>
     <AvatarBuilder campaign={campaign}
                    avatarBasePath={campaignParams?.armature ?? GLOBAL_VALUES.AvatarBase}
                    campaignConfig={campaignParams?.config ?? {}}
