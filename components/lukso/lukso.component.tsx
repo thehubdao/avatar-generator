@@ -1,21 +1,33 @@
 import { useRef, useState } from "react";
 import Image from "next/image";
 
-import LuksoUI from "../../ui/lukso/lukso.ui";
-import { Client } from "../../enums/client.enum";
+// Layout
 import MobileLayout from "../../layouts/mobile.layout";
-import HudComponent from "../../ui/avatar/hud.component";
-import TransparentBox from "../../ui/common/transparentBox.ui";
-import { Module } from "../../enums/common.enum";
-import { FilterList, LogError, MixArrays } from "../../utils/common.util";
-import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "../avatar/viewer.component";
-import { FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
-import { BasicData, CampaignParameters, ExportInterface, FeatureBasic, LookAtVectors } from "../../interfaces/common.interface";
+
+// Components
 import AvatarEditor, { ChangeFeature, ChangeSkinColor, ChangeStartAnimation, GetAvatarGLB, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
+import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "../avatar/viewer.component";
+import HudComponent from "../../ui/avatar/hud.component";
+
+// UI
+import LuksoUI from "../../ui/lukso/lukso.ui";
+import TransparentBoxUI from "../../ui/lukso/common/transparentBox.ui";
+
+// Enums
+import { Client } from "../../enums/client.enum";
+import { Module } from "../../enums/common.enum";
+import { LuksoSections } from "../../enums/lukso/common.enum";
+
+// Utils
+import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { GetAccessoryListByCampaign, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombination, GetStageListByCampaign } from "../../utils/api.util";
-import { fadeBlock } from "../../utils/gsap/block_in_out";
+import { fadeBlock } from "../../utils/gsap/block_in_out.util";
 import { IFrameExportData } from "../../utils/iframe.util";
 import { SaveFile } from "../../utils/exporter.util";
+
+// Interfaces
+import { FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
+import { BasicData, CampaignParameters, ExportInterface, FeatureBasic, LookAtVectors } from "../../interfaces/common.interface";
 
 const exportData: ExportInterface = { attributes: [] };
 let optionList: FeatureInterface[] | undefined;
@@ -31,7 +43,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   const selectListAccessories = useRef<FeatureBasic[]>(campaignParams?.accessories ?? []);
 
   // Loading flags
-  const [currentSection, setCurrentSection] = useState<number>(-1);
+  const [currentSection, setCurrentSection] = useState<LuksoSections>(LuksoSections.Loading);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // Edit state
@@ -70,7 +82,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     // fade loader view
     await handleFadeLoader(loaderDivElement, () => {
       setIsLoading(false);
-      setCurrentSection(0);
+      setCurrentSection(LuksoSections.Main);
     })
   }
 
@@ -82,14 +94,12 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     const result = await GetAssetsListByCampaign(Client.Lukso);
     featureList = result.success ? result.value : undefined;
     optionList = MixArrays(optionList, featureList);
-    // setFeatureListShow(FilterList(featureList, "type", selectedFeature));
     setOptionListShow(FilterList(featureList, "type", selectedCategory));
   }
 
   async function getAccessoryList() {
     const result = await GetAccessoryListByCampaign(Client.Lukso);
     accessoryList = result.success ? result.value : undefined;
-    // setAccessoryListShow(FilterList(accessoryList, "type", selectedAcc));
   }
 
   async function getStageList() {
@@ -205,7 +215,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   return (
     <MobileLayout>
       <div className="w-full h-screen bg-[#FABCE2] flex flex-col">
-        <TransparentBox
+        <TransparentBoxUI
           fullWidth
           border
           backgroundColorClass="bg-[#FFCBDE]"
@@ -222,7 +232,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
             height={24}
             alt="Lukso icon"
           />
-        </TransparentBox>
+        </TransparentBoxUI>
         {/* CANVAS WRAPPER */}
         <div
           className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
@@ -258,11 +268,11 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
             }}
 
             // changeCategory
-            onOptionChange={(id: string, path: string, name: string) => void onOptionChange(id, path, name)}
+            onOptionChange={(id, path, name) => void onOptionChange(id, path, name)}
 
             // onCategoryChange
-            onCategoryTypeChange={(value: string) => onCategoryTypeChange(value)}
-            onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
+            onCategoryTypeChange={(value) => onCategoryTypeChange(value)}
+            onSkinColorChange={(value) => void onClickChangeSkinColor(value)}
             exportModel={() => { return }}
 
             isCustomCampaignHud
@@ -270,12 +280,12 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
         </div>
         <LuksoUI
           reRoll={reRoll}
-          setIsEditModeSelected={(value: boolean) => setIsEditModeSelected(value)}
+          setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
           isLoading={isLoading}
           currentSection={currentSection}
-          setCurrentSection={(changeSectionValue: number) => setCurrentSection(changeSectionValue)}
-          getloaderDivElement={getloaderDivElement}
-          exportModel={exportModel}
+          setCurrentSection={(changeSectionValue) => setCurrentSection(changeSectionValue)}
+          getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
+          exportModel={() => exportModel()}
         />
       </div>
     </MobileLayout>
