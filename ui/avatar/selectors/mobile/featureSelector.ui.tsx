@@ -3,6 +3,7 @@ import { useRef } from "react";
 import 'swiper/css';
 import { FeatureBasic } from '../../../../interfaces/common.interface';
 import FeatureOptionList from './featureOptionList.ui';
+import { MOBILE_ITEMS_PER_VIEW } from '../../../../constants/mobile/swiper.constants';
 
 interface FeatureSelectorComponentProps {
   list: FeatureBasic[];
@@ -12,8 +13,6 @@ interface FeatureSelectorComponentProps {
 
 export default function FeatureSelectorComponent(props: FeatureSelectorComponentProps) {
   const swiperRef = useRef<SwiperRef>(null);
-
-  const itemsPerView = 4;
 
   const handleSlide = (id: string, index: number) => {
     if (swiperRef.current && swiperRef.current.swiper) {
@@ -26,7 +25,7 @@ export default function FeatureSelectorComponent(props: FeatureSelectorComponent
   return (
     <div className='w-full relative'>
       <Swiper
-        slidesPerView={itemsPerView}
+        slidesPerView={MOBILE_ITEMS_PER_VIEW}
         centeredSlides={true}
         grabCursor={true}
         // loop={itemsLength < itemsPerView ? false : true} //! error with this prop on swipper lib (loop)
