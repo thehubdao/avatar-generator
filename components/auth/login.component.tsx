@@ -1,10 +1,12 @@
 import { ethers } from 'ethers';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
+
+interface Web3LoginButtonProps {
+    children: ReactNode;
+}
 
 
-
-
-export default function Web3Login() {
+export default function Web3LoginButton({ children }: Web3LoginButtonProps) {
     const [etherProvider, setEtherProvider] = useState<ethers.BrowserProvider>();
     const [signer, setSigner] = useState<ethers.JsonRpcSigner>()
     useEffect(() => {
@@ -12,11 +14,11 @@ export default function Web3Login() {
         promise()
     }, [])
     return <>
-
-        {etherProvider && <button onClick={async () => {
+        {etherProvider && <span onClick={async () => {
+            console.log("HOLA")
             const signer = await etherProvider.getSigner();
             setSigner(signer)
-        }}>Login</button>}
+        }}>{children}</span>}
     </>
 
 }

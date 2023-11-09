@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Fragment, useLayoutEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock, fadeInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { BsArrowRepeat } from "react-icons/bs";
@@ -7,6 +7,8 @@ import { FaArrowRightLong } from "react-icons/fa6";
 import SocialButtonsUI from "../common/socialButtons.ui";
 import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
+import Web3LoginButton from "../../../components/auth/login.component";
+import { ethers } from "ethers";
 
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
@@ -20,6 +22,14 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
 
   const [isRolling, setIsRolling] = useState<boolean>(false);
 
+  const [etherProvider, setEtherProvider] = useState<ethers.BrowserProvider>();
+  const [signer, setSigner] = useState<ethers.JsonRpcSigner>()
+
+  useEffect(() => {
+    const setEtherProviderPromise = () => { setEtherProvider(new ethers.BrowserProvider((window as any).ethereum)) }
+    setEtherProviderPromise()
+  }, [])
+
   const gsapEnterBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
     translationInOutBlock(mainFeatureRef.current, DURATION_ANIMATION_SECTION);
@@ -32,6 +42,17 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
     translationInOutBlock(mainFeatureRef.current, DURATION_ANIMATION_SECTION, true);
     translationInOutBlock(mintAvatarRef.current, DURATION_ANIMATION_SECTION, true, true);
     fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION, true, () => setCurrentSection(LuksoSections.Edit));
+  }
+
+  const handleClaim = async () => {
+    if (!etherProvider) return
+    try {
+      const signer = await etherProvider.getSigner();
+      setSigner(signer)
+    } catch (err) {
+      console.log(err) //Error handling
+    }
+
   }
 
   useLayoutEffect(() => { void gsapEnterBlocks(); }, [])
@@ -88,10 +109,10 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
             </div>
           </TransparentBox>
         </button>
-        <button className="w-full h-fit" onClick={() => void gsapOutBlocks()}>
+        <button className="w-full h-fit" onClick={async () => void await handleClaim()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
-              <p>Claim</p>
+              Claim
               <FaArrowRightLong className="text-base" />
             </div>
           </TransparentBox>
