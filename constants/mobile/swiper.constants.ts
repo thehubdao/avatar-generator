@@ -1,0 +1,1 @@
+export const MOBILE_ITEMS_PER_VIEW = 4;
