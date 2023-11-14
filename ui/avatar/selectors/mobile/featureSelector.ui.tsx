@@ -38,6 +38,6 @@ export default function FeatureSelectorComponent(props: FeatureSelectorComponent
       <div className='absolute w-full px-3' >
         <div className='w-full border-b-[1px] border-slate-300' />
       </div>
-    </div >
+    </div>
   )
-} 
+}

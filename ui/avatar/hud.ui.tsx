@@ -132,7 +132,7 @@ export default function HudComponent({
             </div>
           </div>
         }
-      </div>
+      </div >
       {shouldShowColorSelectorModal && <MobileColorSelectorComponent
         list={campaignSkinColorConfig.colorPalette}
         activeColor={skinColor}
@@ -214,18 +214,20 @@ export default function HudComponent({
           </div>
         </div>
       </div>
-      {!isCustomCampaignHud && !editModeSelected && <div className="fixed pt-8 pl-8 w-fit h-fit hidden xl:flex">
-        <AGButton onClickEvent={() => changeView()}>
-          <div className="flex items-center justify-between">
-            <p className="font-poppins text-center w-[120px] py-2">EDIT</p>
-          </div>
-        </AGButton>
-        <AGButton onClickEvent={() => exportModel()}>
-          <div className="flex items-center justify-between">
-            <p className="font-poppins text-center w-[120px] py-2">EXPORT</p>
-          </div>
-        </AGButton>
-      </div>}
+      {
+        !isCustomCampaignHud && !editModeSelected && <div className="fixed pt-8 pl-8 w-fit h-fit hidden xl:flex">
+          <AGButton onClickEvent={() => changeView()}>
+            <div className="flex items-center justify-between">
+              <p className="font-poppins text-center w-[120px] py-2">EDIT</p>
+            </div>
+          </AGButton>
+          <AGButton onClickEvent={() => exportModel()}>
+            <div className="flex items-center justify-between">
+              <p className="font-poppins text-center w-[120px] py-2">EXPORT</p>
+            </div>
+          </AGButton>
+        </div>
+      }
     </>
   )
 }
