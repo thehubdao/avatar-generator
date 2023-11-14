@@ -132,7 +132,7 @@ export default function HudComponent({
             </div>
           </div>
         }
-      </div >
+      </div>
       {shouldShowColorSelectorModal && <MobileColorSelectorComponent
         list={campaignSkinColorConfig.colorPalette}
         activeColor={skinColor}
