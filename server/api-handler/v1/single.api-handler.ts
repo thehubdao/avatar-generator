@@ -16,8 +16,8 @@ import {CastStringToInteger, RandomIntMax} from "../../../utils/common.util";
 import {GLOBAL_VALUES} from "../../../constants/common.constant";
 
 async function CheckCampaign(campaign: string) {
-  const campaigns = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
-  return campaigns == undefined ? false : campaigns.some(c => c === campaign);
+  const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
+  return campaignsResult.success ? campaignsResult.value.some(c => c === campaign) : false;
 }
 
 function ProcessCombination(combination: string, maxValues: Map<number, number>) {

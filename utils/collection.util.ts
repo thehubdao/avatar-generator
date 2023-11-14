@@ -9,28 +9,28 @@ import {GLOBAL_VALUES} from "../constants/common.constant";
 
 export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Get FeatureList (same from page)
-  const featureList = await GetParameter<FeatureBasic[]>(campaign, CampaignParameterName.Features);
-  if (featureList == undefined)
+  const featuresResult = await GetParameter<FeatureBasic[]>(campaign, CampaignParameterName.Features);
+  if (!featuresResult.success)
     return void LogError(Module.CollectionUtil, `Couldn't find featureList for campaign: ${campaign}`);
   
   // Get FeatureOptionListData
   const featureOptionListData: Map<number, FeatureInterface[] | undefined> = new Map();
   const featureData = await GetData(campaign);
-  // if (!featureData.success)
-  //   return void LogError(Module.CollectionUtil, "Could not retrieve feature option data!");
+  if (!featureData.success)
+    return void LogError(Module.CollectionUtil, "Could not retrieve feature option data!");
 
-  for (const feature of featureList) {
+  for (const feature of featuresResult.value) {
     if (feature.index == undefined) {
       void LogError(Module.CollectionUtil, `Missing index on ${feature.displayName} feature type!`);
       continue;
     }
 
-    featureOptionListData.set(feature.index, featureData.filter(f => f.type === feature.displayName));
+    featureOptionListData.set(feature.index, featureData.value.filter(f => f.type === feature.displayName));
   }
 
   const featureOptionsToUpdate: Map<string, FeatureInterface> = new Map();
   // Process every single one like in the for
-  for (const feature of featureList) {
+  for (const feature of featuresResult.value) {
     const featureOptionList = featureOptionListData.get(feature.index);
     if (featureOptionList == undefined) continue;
 
@@ -43,7 +43,7 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Update all at the same time
   await UpdateNewIndexesOnDB(campaign, featureOptionsToUpdate);
   // Return the FeatureOptionListData with the new values
-  return {featureList, featureOptionListData};
+  return {featureList: featuresResult.value, featureOptionListData};
 }
 
 export async function ReadjustFeatureIndexes(featureList: FeatureInterface[] | undefined, campaign: string) {

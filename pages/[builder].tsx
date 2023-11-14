@@ -54,20 +54,21 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
     }
   }
 
-  const campaigns = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
-  const isCampaign = campaigns == undefined ? false : campaigns.some(c => c === leCampaign);
+  const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
+  const isCampaign = campaignsResult.success ? campaignsResult.value.some(c => c === leCampaign) : false;
 
   // TODO: either show base campaign (which is what I'm going to do here) or send user to another page (404 or something)
   if (!isCampaign)
     leCampaign = GLOBAL_VALUES.BaseCampaign;
 
   const campaignParameters = await GetParameter<CampaignParameters>(leCampaign, CampaignParameterName.All);
+  const defBg = campaignParameters.success ? campaignParameters.value.config?.defBg : undefined;
 
   const returnProps: AvatarGeneratorProps = {
     campaign: leCampaign,
-    campaignParams: campaignParameters,
+    campaignParams: campaignParameters.success ? campaignParameters.value : undefined,
     attributeConfig: parsedConfig,
-    bgColor: bg != undefined ? bg as string : campaignParameters?.config?.defBg,
+    bgColor: bg != undefined ? bg as string : defBg,
     onlyView: ov != undefined ? (ov as string).toLowerCase() === 'true' : false,
     enablePan: ep == undefined ? undefined : (ep as string).toLowerCase() === 't',
   };
