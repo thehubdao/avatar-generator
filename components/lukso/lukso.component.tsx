@@ -7,7 +7,7 @@ import MobileLayout from "../../layouts/mobile.layout";
 // Components
 import AvatarEditor, { ChangeFeature, ChangeSkinColor, ChangeStartAnimation, GetAvatarGLB, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
 import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "../avatar/viewer.component";
-import HudComponent from "../../ui/avatar/hud.component";
+import HudComponent from "../../ui/avatar/hud.ui";
 
 // UI
 import LuksoUI from "../../ui/lukso/lukso.ui";
