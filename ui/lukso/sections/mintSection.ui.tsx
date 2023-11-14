@@ -7,15 +7,15 @@ import { FaArrowRightLong } from "react-icons/fa6";
 import SocialButtonsUI from "../common/socialButtons.ui";
 import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
-import Web3LoginButton from "../../../components/auth/login.component";
-import { ethers } from "ethers";
+import { Signer, ethers } from "ethers";
 
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   reRoll: () => Promise<void>;
+  handleClaim: (address: string, signer: Signer) => Promise<void>;
 }
 
-export default function MintSectionUI({ setCurrentSection, reRoll }: MintSectionUIProps) {
+export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim }: MintSectionUIProps) {
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -26,7 +26,9 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
   const [signer, setSigner] = useState<ethers.JsonRpcSigner>()
 
   useEffect(() => {
-    const setEtherProviderPromise = () => { setEtherProvider(new ethers.BrowserProvider((window as any).ethereum)) }
+    const setEtherProviderPromise = () => { 
+      const lukso = (window as any).lukso
+      setEtherProvider(new ethers.BrowserProvider(lukso)) }
     setEtherProviderPromise()
   }, [])
 
@@ -44,7 +46,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
     fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION, true, () => setCurrentSection(LuksoSections.Edit));
   }
 
-  const handleClaim = async () => {
+  const handleConnect = async () => {
     if (!etherProvider) return
     try {
       const signer = await etherProvider.getSigner();
@@ -59,6 +61,10 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
 
   const handleReRoll = async () => {
     if (isRolling) return;
+
+
+
+
     setIsRolling(true);
     await reRoll();
     setIsRolling(false);
@@ -109,7 +115,12 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
             </div>
           </TransparentBox>
         </button>
-        <button className="w-full h-fit" onClick={async () => void await handleClaim()}>
+        <button className="w-full h-fit" onClick={async () => {
+          await handleConnect()
+          if(!signer) return
+          const address= await signer.getAddress()
+          handleClaim(address, signer)
+        }}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
               Claim

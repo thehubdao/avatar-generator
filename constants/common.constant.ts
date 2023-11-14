@@ -17,3 +17,5 @@ export const IFRAME_VALUES = {
   Project: "avatar-generator",
   Event: "message",
 } as const;
+
+export const LUKSO_BACKEND_URL = process.env.NEXT_PUBLIC_LUKSO_BACKEND_URL

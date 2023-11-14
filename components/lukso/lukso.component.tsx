@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 
 // Layout
@@ -28,6 +28,13 @@ import { SaveFile } from "../../utils/exporter.util";
 // Interfaces
 import { FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
 import { BasicData, CampaignParameters, ExportInterface, FeatureBasic, LookAtVectors } from "../../interfaces/common.interface";
+import { uploadMetadata } from "../../utils/metadata.util";
+import { TokenMetadata } from "../../types/metadata.type";
+import { BodyPart } from "../../types/avatar.type";
+import { getTokensMetadata, mint } from "../../utils/web3/lukso.util";
+import { Signer, ethers } from "ethers";
+import ConnectWeb3Button from "../web3/connectWeb3.component";
+import { ConnectionStatus } from "../../enums/web3";
 
 const exportData: ExportInterface = { attributes: [] };
 let optionList: FeatureInterface[] | undefined;
@@ -52,6 +59,10 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
   const [skinColor, setSkinColor] = useState<string>(campaignParams?.config.skin?.defColor ?? 'FFFFFF');
   const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.current[0].displayName ?? '');
+
+  const [signer, setSigner] = useState<Signer>()
+
+
 
   async function onAvatarBuilderReady() {
     await Promise.all([
@@ -117,6 +128,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   async function getSingleData() {
     const numResult = await GetAvatarSingleByCampaignCombination(Client.Lukso);
     const result: SingleInterface | undefined = numResult.success ? numResult.value : undefined;
+    console.log(result)
     singleData = result;
   }
 
@@ -212,6 +224,33 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     }
   }
 
+  async function handleClaim(address: string) {
+    if (!singleData) return
+    const { features } = singleData
+    const tokenMetadata: TokenMetadata = {
+      name: "",
+      description: "",
+      GLBUrl: "",
+      body: {}
+    }
+
+    for (let feature of features) {
+      const { val } = feature
+      const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as any
+      tokenMetadata.body[bodyIndex] = val as BodyPart
+    }
+
+    const metadataUrl = await uploadMetadata(tokenMetadata)
+    await mint(address, metadataUrl)
+
+    console.log(await getTokensMetadata(address))
+
+  }
+
+  function switchLoading() { setIsLoading(!isLoading) }
+  function onConnect(signer: Signer | undefined, status: ConnectionStatus) {
+    setSigner(signer)
+  }
   return (
     <MobileLayout>
       <div className="w-full h-screen bg-[#FABCE2] flex flex-col">
@@ -239,11 +278,11 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           {/* CANVAS BACKGROUND */}
           <div className="w-full h-screen absolute bg-opacity-0" />
           {/* CANVAS */}
-          {campaignParams && <AvatarEditor
+          {signer && campaignParams && <AvatarEditor
             avatarBasePath={campaignParams.armature}
             editMode={isEditModeSelected}
             onReady={() => onAvatarBuilderReady()}
-          />}
+          /> || <ConnectWeb3Button label={"Connect Wallet"} switchLoading={switchLoading} onConnect={onConnect} ></ConnectWeb3Button>}
         </div>
         <div className="fixed z-10">
           <HudComponent
@@ -286,6 +325,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           setCurrentSection={(changeSectionValue) => setCurrentSection(changeSectionValue)}
           getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
           exportModel={() => exportModel()}
+          handleClaim={handleClaim}
         />
       </div>
     </MobileLayout>

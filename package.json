@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@lukso/lsp-smart-contracts": "^0.12.1",
     "@next/font": "^13.5.5",
     "@rainbow-me/rainbowkit": "^1.1.2",
     "@reduxjs/toolkit": "^1.9.7",

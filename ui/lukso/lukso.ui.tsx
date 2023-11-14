@@ -3,6 +3,7 @@ import MainSectionUI from "./sections/mainSection.ui";
 import MintSectionUI from "./sections/mintSection.ui";
 import LoadingUI from "./sections/loadingSection.ui";
 import { LuksoSections } from "../../enums/lukso/common.enum";
+import { Signer } from "ethers";
 
 interface LuksoUIProps {
   isLoading: boolean;
@@ -12,6 +13,7 @@ interface LuksoUIProps {
   setIsEditModeSelected: (value: boolean) => void;
   setCurrentSection: (value: LuksoSections) => void;
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
+  handleClaim: (address:string, signer:Signer) => Promise<void>;
 }
 
 export default function LuksoUI({
@@ -21,13 +23,13 @@ export default function LuksoUI({
   currentSection,
   setCurrentSection,
   getloaderDivElement,
-  exportModel
+  exportModel, handleClaim
 }: LuksoUIProps) {
   return (
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
       {(currentSection === LuksoSections.Main) && <MainSectionUI setCurrentSection={(newSection) => setCurrentSection(newSection)} />}
-      {(currentSection === LuksoSections.Mint) && <MintSectionUI setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} />}
+      {(currentSection === LuksoSections.Mint) && <MintSectionUI setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} />}
       {(currentSection === LuksoSections.Edit) && <EditSectionUI setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
     </div>
   )
