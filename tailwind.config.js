@@ -44,11 +44,7 @@
         'flat---inset-hard': '6px 6px 12px #E9ECF6, -6px -6px 12px #ffffff, inset 6px 6px 12px #E9ECF6, inset -6px -6px 12px #ffffff'
       },
       transitionProperty: {
-<<<<<<< HEAD
         'size': 'width, height',
-=======
-        'height': 'height',
->>>>>>> aa17b7e (Add tailwind height pluggin)
       }
     },
   }
