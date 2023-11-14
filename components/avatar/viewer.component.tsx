@@ -262,7 +262,11 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
   };
 
   return (
+<<<<<<< HEAD
     <div className={`relative w-full ${editMode ? 'xl:w-[42%] h-[calc(100vh-256px)] xl:h-full' : 'h-full'} overflow-hidden flex justify-center items-center transition-all duration-300`} ref={threeCanvas} onMouseDown={() => stopCamMovement()} />
+=======
+    <div className={`relative w-full ${editMode ? 'xl:w-[42%] h-[50vh] xl:h-full' : ''} overflow-hidden flex justify-center items-center transition-[height] duration-300`} ref={threeCanvas} onMouseDown={() => stopCamMovement()} />
+>>>>>>> aa17b7e (Add tailwind height pluggin)
   );
 }
 //#endregion 
