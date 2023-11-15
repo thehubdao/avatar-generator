@@ -44,7 +44,7 @@ export const getServerSideProps: GetServerSideProps<AvatarCollectionPageProps> =
 
   const campaignParamsResult: Result<CampaignParameters> = isCampaign ?
     await GetParameter<CampaignParameters>(leCampaign, CampaignParameterName.All) :
-    {success: false, errMessage: "Not a campaign!", errCode: CommonErrorCode.CouldntProcess};
+    {success: false, errMessage: "Not a campaign!", errCode: CommonErrorCode.InternalError};
 
   const returnProps: AvatarCollectionPageProps = {
     isCampaign,
