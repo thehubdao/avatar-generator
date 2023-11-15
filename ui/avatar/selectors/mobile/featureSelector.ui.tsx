@@ -5,13 +5,13 @@ import { FeatureBasic } from '../../../../interfaces/common.interface';
 import FeatureOptionListUI from './featureOptionList.ui';
 import { MOBILE_ITEMS_PER_VIEW } from '../../../../constants/mobile/swiperItemsPerView.constants';
 
-interface FeatureSelectorComponentProps {
+interface FeatureSelectorUIProps {
   list: FeatureBasic[];
   activeOpc: string;
   handleClick: (id: string) => void;
 }
 
-export default function FeatureSelectorComponent(props: FeatureSelectorComponentProps) {
+export default function FeatureSelectorUI(props: FeatureSelectorUIProps) {
   const swiperRef = useRef<SwiperRef>(null);
 
   const handleSlide = (id: string, index: number) => {
