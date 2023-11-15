@@ -11,7 +11,7 @@ interface FeatureSelectorUIProps {
   handleClick: (id: string) => void;
 }
 
-export default function FeatureSelectorUI(props: FeatureSelectorUIProps) {
+export default function FeatureSelectorUI({ activeOpc, handleClick, list }: FeatureSelectorUIProps) {
   const swiperRef = useRef<SwiperRef>(null);
 
   const handleSlide = (id: string, index: number) => {
@@ -19,7 +19,7 @@ export default function FeatureSelectorUI(props: FeatureSelectorUIProps) {
       swiperRef.current.swiper.slideToLoop(index, 1000);
     }
 
-    props.handleClick(id);
+    handleClick(id);
   };
 
   return (
@@ -33,7 +33,7 @@ export default function FeatureSelectorUI(props: FeatureSelectorUIProps) {
         className='!pt-1'
         ref={swiperRef}
       >
-        {FeatureOptionListUI({ ...props, handleClick: handleSlide })}
+        {FeatureOptionListUI({ list, activeOpc, handleClick: (id, index) => { handleSlide(id, index) } })}
       </Swiper>
       <div className='absolute w-full px-3' >
         <div className='w-full border-b-[1px] border-slate-300' />
