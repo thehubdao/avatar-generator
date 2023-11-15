@@ -15,9 +15,9 @@ export default function FeatureOptionListUI({ list, activeOpc, handleClick }: Fe
     handleClick(id, index);
   }
 
-  return list?.map((opt: FeatureBasic, index: number) => {
+  return list?.map((opt, index) => {
     return (
-      <SwiperSlide className='flex flex-col items-center justify-center' key={index} onClick={(event: MouseEvent) => selectFeature(event, opt.displayName, index)}>
+      <SwiperSlide className='flex flex-col items-center justify-center' key={index} onClick={(event) => selectFeature(event, opt.displayName, index)}>
         <p className={'text-xs text-center p-2 opacity-50 truncate' + (activeOpc == opt.displayName ? ' opacity-90 text-slate-700 border-b-[1px] border-slate-700' : '')}>
           {opt.displayName.toUpperCase()}
         </p>
