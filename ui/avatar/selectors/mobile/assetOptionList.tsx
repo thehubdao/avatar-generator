@@ -1,23 +1,22 @@
+import GetImage from "../../../../components/commons/getImage.component";
 import { FeatureInterface } from "../../../../interfaces/api.interface";
-import 'swiper/css';
-import { BasicData } from '../../../../interfaces/common.interface';
+import { BasicData } from "../../../../interfaces/common.interface";
 import { MouseEvent } from 'react';
-import GetImage from '../../../../components/commons/getImage.component';
 
-interface Props {
+interface AssetOptionListUIProps {
   list?: FeatureInterface[];
   activeOption?: BasicData;
   handleClick: (id: string, path: string, name: string) => void;
 }
 
-function OptionList({ list, activeOption, handleClick }: Props) {
+export function AssetOptionListUI({ list, activeOption, handleClick }: AssetOptionListUIProps) {
   function selectFeature(e: MouseEvent, opt: FeatureInterface) {
     e.preventDefault();
     handleClick(opt.id, opt.path, opt.name);
   }
 
   return list != undefined ?
-    list.map((opt: FeatureInterface, index: number) => {
+    list.map((opt, index) => {
       return (
         <div className='flex justify-center items-center' key={index}>
           <div className={`rounded-md w-28 h-28 flex items-center justify-center relative overflow-hidden`} onClick={event => selectFeature(event, opt)}>
@@ -28,12 +27,3 @@ function OptionList({ list, activeOption, handleClick }: Props) {
       )
     }) : <></>;
 }
-
-export default function OptionSelectorComponent(props: Props) {
-  return (
-    <div className='w-full px-2 flex flex-wrap overflow-y-scroll gap-2 justify-center h-fit items-center'>
-      {OptionList(props)}
-    </div>
-  )
-}
-

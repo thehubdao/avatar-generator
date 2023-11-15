@@ -1,7 +1,7 @@
 import AGButton from "../common/ag-button.component";
 import { FeatureInterface } from "../../interfaces/api.interface";
 import { BasicData, ColorConfig, FeatureBasic } from "../../interfaces/common.interface";
-import MobileOptionSelectorComponent from "./selectors/mobile/optionSelector.ui";
+import MobileAssetSelectorUI from "./selectors/mobile/assetSelector.ui";
 import MobileFeatureSelectorComponent from "./selectors/mobile/featureSelector.ui";
 import MobileColorSelectorComponent from "./selectors/mobile/colorSelector.ui";
 import { useEffect, useState } from "react";
@@ -124,9 +124,9 @@ export default function HudUI({
                 </div>
               </div>
             </div>
-            {/* OPTION SELECTOR */}
+            {/* ASSET SELECTOR */}
             <div className="w-full overflow-scroll h-[167px] py-2">
-              <MobileOptionSelectorComponent list={optionList}
+              <MobileAssetSelectorUI list={optionList}
                 activeOption={selectedOption}
                 handleClick={(id: string, path: string, name: string) => onOptionChange(id, path, name)} />
             </div>
