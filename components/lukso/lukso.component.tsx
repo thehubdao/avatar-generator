@@ -7,7 +7,7 @@ import MobileLayout from "../../layouts/mobile.layout";
 // Components
 import AvatarEditor, { ChangeFeature, ChangeSkinColor, ChangeStartAnimation, GetAvatarGLB, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
 import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "../avatar/viewer.component";
-import HudComponent from "../../ui/avatar/hud.ui";
+import HudUI from "../../ui/avatar/hud.ui";
 
 // UI
 import LuksoUI from "../../ui/lukso/lukso.ui";
@@ -246,7 +246,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           />}
         </div>
         <div className="fixed z-10">
-          <HudComponent
+          <HudUI
             selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
 
             editModeSelected={isEditModeSelected}

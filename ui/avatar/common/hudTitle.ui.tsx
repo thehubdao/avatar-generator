@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-interface HudFeatureTitleProps {
+interface HudFeatureTitleUIProps {
   selectedFeature: string | undefined;
   size?: 'small' | 'medium' | 'big'
 }
@@ -10,7 +10,7 @@ interface HudFeatureTitleProps {
  * 
  * @param {string} selectedFeature - The selected feature to display as the HUD feature title.
  */
-export default function HudFeatureTitle({ selectedFeature, size = 'big' }: HudFeatureTitleProps) {
+export default function HudFeatureTitleUI({ selectedFeature, size = 'big' }: HudFeatureTitleUIProps) {
   // * State for the current and next HUD titles
   const [currentTitle, setCurrentTitle] = useState<string>();
   const [nextTitle, setNextTitle] = useState<string>();

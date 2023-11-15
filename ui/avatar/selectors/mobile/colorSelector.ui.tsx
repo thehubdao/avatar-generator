@@ -2,14 +2,14 @@ import 'swiper/css';
 import AGButton from '../../../common/ag-button.component';
 import ColorOptionUI from './colorOption.ui';
 
-interface ColorSelectorComponentProps {
+interface ColorSelectorUIProps {
   list?: string[];
   activeColor: string | undefined;
   handleChangeColor: (color: string) => void;
   handleSwitchShowColorSelector: () => void;
 }
 
-export default function ColorSelectorUI({ list, activeColor, handleChangeColor, handleSwitchShowColorSelector }: ColorSelectorComponentProps) {
+export default function ColorSelectorUI({ list, activeColor, handleChangeColor, handleSwitchShowColorSelector }: ColorSelectorUIProps) {
   return (
     <div className='w-full relative fix top-0 left-0 h-screen flex justify-center items-center'>
       <div className='fixed top-0 left-0 w-full h-full bg-black bg-opacity-30' onClick={() => { handleSwitchShowColorSelector() }} />

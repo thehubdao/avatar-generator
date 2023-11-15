@@ -9,10 +9,10 @@ import Image from 'next/image';
 import FeatureSelector from "./selectors/featureSelector.component";
 import OptionSelectorUI from "./selectors/optionSelector.ui";
 import ColorSelector from "./selectors/colorSelector.component";
-import HudFeatureTitle from "./common/hudTitle.ui";
+import HudFeatureTitleUI from "./common/hudTitle.ui";
 import { RemovedAcc } from "../../utils/common.util";
 
-interface HudComponentProps {
+interface HudUIProps {
 
   selectListCategory: FeatureBasic[];
   // selectListFeatures: FeatureBasic[];
@@ -46,7 +46,7 @@ interface HudComponentProps {
   isCustomCampaignHud?: boolean
 }
 
-export default function HudComponent({
+export default function HudUI({
   selectListCategory,
   optionList,
   selectedCategory,
@@ -60,7 +60,7 @@ export default function HudComponent({
   changeView,
   exportModel,
   isCustomCampaignHud
-}: HudComponentProps) {
+}: HudUIProps) {
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
 
@@ -112,7 +112,7 @@ export default function HudComponent({
                   handleClick={(value: string) => onCategoryTypeChange(value)}
                 />
                 <div className="flex text-gray-normal mx-4 items-center">
-                  <HudFeatureTitle selectedFeature={RemovedAcc(selectedCategory)} size="small" />
+                  <HudFeatureTitleUI selectedFeature={RemovedAcc(selectedCategory)} size="small" />
                   <AGButton nm fit onClickEvent={() => setShouldShowColorSelectorModal(true)}>
                     <div className="w-full flex justify-center items-center gap-3 text-xs font-semibold">
                       <p>SKIN</p>
@@ -180,7 +180,7 @@ export default function HudComponent({
               </div>
               <div className="w-full">
                 <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
-                <HudFeatureTitle selectedFeature={RemovedAcc(selectedCategory)} />
+                <HudFeatureTitleUI selectedFeature={RemovedAcc(selectedCategory)} />
               </div>
             </div>
             {/* OPTION COLOR SECTION */}

@@ -2,7 +2,7 @@ import { Swiper, SwiperRef } from 'swiper/react';
 import { useRef } from "react";
 import 'swiper/css';
 import { FeatureBasic } from '../../../../interfaces/common.interface';
-import FeatureOptionList from './featureOptionList.ui';
+import FeatureOptionListUI from './featureOptionList.ui';
 import { MOBILE_ITEMS_PER_VIEW } from '../../../../constants/mobile/swiperItemsPerView.constants';
 
 interface FeatureSelectorComponentProps {
@@ -33,7 +33,7 @@ export default function FeatureSelectorComponent(props: FeatureSelectorComponent
         className='!pt-1'
         ref={swiperRef}
       >
-        {FeatureOptionList({ ...props, handleClick: handleSlide })}
+        {FeatureOptionListUI({ ...props, handleClick: handleSlide })}
       </Swiper>
       <div className='absolute w-full px-3' >
         <div className='w-full border-b-[1px] border-slate-300' />

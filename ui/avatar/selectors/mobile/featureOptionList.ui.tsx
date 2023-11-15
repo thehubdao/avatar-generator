@@ -2,13 +2,13 @@ import { SwiperSlide } from "swiper/react";
 import { FeatureBasic } from "../../../../interfaces/common.interface";
 import { MouseEvent } from "react";
 
-interface OptionListProps {
+interface FeatureOptionListUIProps {
   list: FeatureBasic[];
   activeOpc: string;
   handleClick: (id: string, index: number) => void;
 }
 
-export default function FeatureOptionList({ list, activeOpc, handleClick }: OptionListProps) {
+export default function FeatureOptionListUI({ list, activeOpc, handleClick }: FeatureOptionListUIProps) {
 
   function selectFeature(e: MouseEvent, id: string, index: number) {
     e.preventDefault();
