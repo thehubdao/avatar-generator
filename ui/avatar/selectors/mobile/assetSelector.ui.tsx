@@ -1,7 +1,7 @@
 import { FeatureInterface } from "../../../../interfaces/api.interface";
 import 'swiper/css';
 import { BasicData } from '../../../../interfaces/common.interface';
-import { AssetOptionListUI } from "./assetOptionList";
+import { AssetOptionListUI } from "./assetOptionList.ui";
 
 interface AssetSelectorUIProps {
   list?: FeatureInterface[];
