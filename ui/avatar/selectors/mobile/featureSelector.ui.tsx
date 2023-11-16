@@ -1,9 +1,10 @@
-import { Swiper, SwiperRef } from 'swiper/react';
 import { useRef } from "react";
+import { MouseEvent } from "react";
 import 'swiper/css';
+import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
 import { FeatureBasic } from '../../../../interfaces/common.interface';
-import FeatureOptionListUI from './featureOptionList.ui';
-import { MOBILE_ITEMS_PER_VIEW } from '../../../../constants/mobile/swiperItemsPerView.constant';
+import FeatureOptionCardUI from './featureOptionCard.ui';
+import { MOBILE_FEATURE_OPTIONS_PER_VIEW } from '../../../../constants/ui.constant';
 
 interface FeatureSelectorUIProps {
   list: FeatureBasic[];
@@ -22,18 +23,29 @@ export default function FeatureSelectorUI({ activeOpc, handleClick, list }: Feat
     handleClick(id);
   };
 
+  function selectFeature(e: MouseEvent, id: string, index: number) {
+    e.preventDefault();
+    handleSlide(id, index);
+  }
+
   return (
     <div className='w-full relative'>
       <Swiper
-        slidesPerView={MOBILE_ITEMS_PER_VIEW}
+        slidesPerView={MOBILE_FEATURE_OPTIONS_PER_VIEW}
         centeredSlides={true}
         grabCursor={true}
-        // loop={itemsLength < itemsPerView ? false : true} //! error with this prop on swipper lib (loop)
-        // onSlideChange={() => console.log('slide change')}
         className='!pt-1'
         ref={swiperRef}
       >
-        {FeatureOptionListUI({ list, activeOpc, handleClick: (id, index) => { handleSlide(id, index) } })}
+        {list.map((feature, index) => (
+          <SwiperSlide className='flex flex-col items-center justify-center' onClick={(event) => selectFeature(event, feature.displayName, index)}>
+            <FeatureOptionCardUI
+              key={index}
+              feature={feature}
+              activeOpc={activeOpc == feature.displayName}
+            />
+          </SwiperSlide>
+        ))}
       </Swiper>
       <div className='absolute w-full px-3' >
         <div className='w-full border-b-[1px] border-slate-300' />
