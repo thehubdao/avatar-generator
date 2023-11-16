@@ -3,7 +3,7 @@ import { useRef } from "react";
 import 'swiper/css';
 import { FeatureBasic } from '../../../../interfaces/common.interface';
 import FeatureOptionListUI from './featureOptionList.ui';
-import { MOBILE_ITEMS_PER_VIEW } from '../../../../constants/mobile/swiperItemsPerView.constants';
+import { MOBILE_ITEMS_PER_VIEW } from '../../../../constants/mobile/swiperItemsPerView.constant';
 
 interface FeatureSelectorUIProps {
   list: FeatureBasic[];
