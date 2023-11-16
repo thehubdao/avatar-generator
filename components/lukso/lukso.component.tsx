@@ -26,12 +26,12 @@ import { IFrameExportData } from "../../utils/iframe.util";
 import { SaveFile } from "../../utils/exporter.util";
 
 // Interfaces
-import { FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
+import { FeatureInterface, IndexFeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
 import { BasicData, CampaignParameters, ExportInterface, FeatureBasic, LookAtVectors } from "../../interfaces/common.interface";
 import { uploadMetadata } from "../../utils/metadata.util";
 import { TokenMetadata } from "../../types/metadata.type";
 import { BodyPart } from "../../types/avatar.type";
-import { getTokensMetadata, mint } from "../../utils/web3/lukso.util";
+import { getIPFSData, getTokensMetadata, mint } from "../../utils/web3/lukso.util";
 import { Signer, ethers } from "ethers";
 import ConnectWeb3Button from "../web3/connectWeb3.component";
 import { ConnectionStatus } from "../../enums/web3";
@@ -59,10 +59,30 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
   const [skinColor, setSkinColor] = useState<string>(campaignParams?.config.skin?.defColor ?? 'FFFFFF');
   const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.current[0].displayName ?? '');
-
+  // Web3 state
   const [signer, setSigner] = useState<Signer>()
+  const [hasMinted, setHasMinted] = useState<any>(undefined)
 
+  const [etherProvider, setEtherProvider] = useState<ethers.BrowserProvider>();
 
+  useEffect(() => {
+    const setEtherProviderPromise = () => {
+      const lukso = (window as any).lukso
+      setEtherProvider(new ethers.BrowserProvider(lukso))
+    }
+    setEtherProviderPromise()
+  }, [])
+
+  useEffect(() => {
+    const setTokensMetadataPromise = async () => {
+      if (!signer) return
+      const address = await signer.getAddress()
+      await setTokensMetadata(address)
+    }
+    setTokensMetadataPromise()
+  }, [signer])
+
+  useEffect(() => { console.log("HAS MINTED", hasMinted) }, [hasMinted])
 
   async function onAvatarBuilderReady() {
     await Promise.all([
@@ -70,7 +90,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
       getAccessoryList(),
       getStageList(),
       getSingleInfo(),
-      getSingleData(),
+      !hasMinted && getSingleData(),
       sleep(5000)
     ]);
 
@@ -224,6 +244,17 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     }
   }
 
+  async function setTokensMetadata(address: string) {
+    console.log(address)
+    const tokensMetadata = await getTokensMetadata(address)
+
+    if (tokensMetadata.length <= 0) { return setHasMinted(false) }
+    const avatarMetadata = await getIPFSData(tokensMetadata[0])
+    const features = Object.entries(avatarMetadata.body).map(([key, bodyPart]: any) => { return { index: key, val: bodyPart as FeatureInterface } as IndexFeatureInterface })
+    singleData = { random: false, features }
+    setHasMinted(true)
+  }
+
   async function handleClaim(address: string) {
     if (!singleData) return
     const { features } = singleData
@@ -242,12 +273,9 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
 
     const metadataUrl = await uploadMetadata(tokenMetadata)
     await mint(address, metadataUrl)
-
-    console.log(await getTokensMetadata(address))
-
+    await setTokensMetadata(address)
   }
 
-  function switchLoading() { setIsLoading(!isLoading) }
   function onConnect(signer: Signer | undefined, status: ConnectionStatus) {
     setSigner(signer)
   }
@@ -262,15 +290,18 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           borderColorClass="border-white"
           borderSizeClass="border-2"
           heightClass="h-14"
-          paddingClass="px-11"
+          paddingClass="pl-11"
           alignItemsClass="items-stretch"
         >
-          <Image
-            src='/resources/icons/campaigns/lukso.svg'
-            width={106}
-            height={24}
-            alt="Lukso icon"
-          />
+          <div className="flex flex-row justify-between h-full">
+            <Image
+              src='/resources/icons/campaigns/lukso.svg'
+              width={106}
+              height={24}
+              alt="Lukso icon"
+            />
+            {etherProvider && <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={'border-l-2 font-bold z-10'} signer={signer} ><>Connect Wallet</></ConnectWeb3Button>}
+          </div>
         </TransparentBoxUI>
         {/* CANVAS WRAPPER */}
         <div
@@ -278,11 +309,14 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           {/* CANVAS BACKGROUND */}
           <div className="w-full h-screen absolute bg-opacity-0" />
           {/* CANVAS */}
-          {signer && campaignParams && <AvatarEditor
+          {campaignParams && <AvatarEditor
             avatarBasePath={campaignParams.armature}
             editMode={isEditModeSelected}
-            onReady={() => onAvatarBuilderReady()}
-          /> || <ConnectWeb3Button label={"Connect Wallet"} switchLoading={switchLoading} onConnect={onConnect} ></ConnectWeb3Button>}
+            onReady={() =>
+              onAvatarBuilderReady()
+            }
+            hasMinted={hasMinted}
+          />}
         </div>
         <div className="fixed z-10">
           <HudComponent
@@ -325,9 +359,9 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           setCurrentSection={(changeSectionValue) => setCurrentSection(changeSectionValue)}
           getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
           exportModel={() => exportModel()}
-          handleClaim={handleClaim}
-        />
+          handleClaim={handleClaim} hasMinted={hasMinted} signer={signer} onConnect={onConnect} etherProvider={etherProvider}/>
       </div>
     </MobileLayout>
   )
 }
+

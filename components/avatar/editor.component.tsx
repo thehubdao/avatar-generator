@@ -163,6 +163,7 @@ interface AvatarEditorProps {
   defaultCamera?: LookAtVectors;
   editMode?: boolean;
   enablePan?: boolean;
+  hasMinted:boolean
 }
 
 /***
