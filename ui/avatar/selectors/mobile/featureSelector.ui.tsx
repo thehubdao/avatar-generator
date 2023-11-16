@@ -38,7 +38,7 @@ export default function FeatureSelectorUI({ activeOpc, handleClick, list }: Feat
         ref={swiperRef}
       >
         {list.map((feature, index) => (
-          <SwiperSlide className='flex flex-col items-center justify-center' onClick={(event) => selectFeature(event, feature.displayName, index)}>
+          <SwiperSlide className='flex flex-col items-center justify-center' onClick={(event) => selectFeature(event, feature.displayName, index)} key={index}>
             <FeatureOptionCardUI
               key={index}
               feature={feature}
