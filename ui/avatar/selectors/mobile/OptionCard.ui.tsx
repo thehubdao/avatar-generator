@@ -1,6 +1,5 @@
 import GetImage from "../../../../components/commons/getImage.component";
 import { FeatureInterface } from "../../../../interfaces/api.interface";
-import { BasicData } from "../../../../interfaces/common.interface";
 import { MouseEvent } from 'react';
 
 interface AssetOptionCardUIProps {
