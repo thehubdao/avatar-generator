@@ -16,7 +16,14 @@ export default function ColorSelectorUI({ list, activeColor, handleChangeColor, 
       <div className='w-[80vw] h-[70vh] bg-bg rounded-2xl z-10 flex flex-col justify-around items-stretch'>
         <h2 className='w-full text-center text-3xl text-gray-normal font-poppins'>SKIN COLOR</h2>
         <div className='w-full flex flex-wrap justify-center gap-3'>
-          <ColorOptionUI list={list} activeColor={activeColor} handleChangeColor={(color) => handleChangeColor(color)} />
+          {list ?
+            list.map((color) => <ColorOptionUI color={color} activeColor={(activeColor == color)} handleChangeColor={(color) => handleChangeColor(color)} />)
+            :
+            <div className={'cursor-pointer rounded-md transition duration-200 ease-in-out w-[50px] h-[50px] flex items-center justify-center mx-3 '}>
+              <p className='text-center'>No Colors</p>
+            </div>
+          }
+
         </div>
         <div className='flex w-full justify-center'>
           <AGButton nm onClickEvent={() => { handleSwitchShowColorSelector() }}>
