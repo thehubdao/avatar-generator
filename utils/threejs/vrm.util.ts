@@ -1,4 +1,6 @@
-﻿import {
+﻿import {DeepPartial} from "redux";
+import {mergeDeep} from "immutable";
+import {
   GltfMaterial,
   GltfNode,
   GltfScene,
@@ -10,6 +12,65 @@ import {LogError} from "../common.util";
 import {CommonErrorCode, Module} from "../../enums/common.enum";
 import {Result} from "../../types/common.type";
 import {VrmTextureShader} from "../../enums/export.enum";
+import {VRM_BASE} from "../../constants/export.constant";
+
+class VrmUtil {
+  private static _instance: VrmUtil;
+  private _vrmData: VrmStructure | undefined;
+
+  public static Instance() {
+    if(this._instance === undefined)
+      this._instance = new VrmUtil();
+
+    return this._instance;
+  }
+
+  public GetVrmData() {
+    if (this._vrmData == undefined)
+      this._vrmData = VRM_BASE;
+    
+    return structuredClone(this._vrmData);
+  }
+  
+  public AddVrmData(extra: DeepPartial<VrmStructure>) {
+    const current = this.GetVrmData();
+    this._vrmData = mergeDeep(current, extra);
+  }
+}
+
+export function GetVrmData() {
+  return VrmUtil.Instance().GetVrmData();
+}
+
+export function GenerateVrmMaterialData(materialList: GltfMaterial[] | undefined) {
+  if (materialList == undefined) {
+    const msg = "Need material list in order to generate material properties!";
+    return void LogError(Module.ExporterUtil, msg);
+  }
+
+  const generatedMaterials = materialList
+    .map((m): VrmMaterialProperty => {
+      return {
+        name: m.name,
+        shader: VrmTextureShader.Gltf,
+        keywordMap: {},
+        tagMap: {},
+        floatProperties: {},
+        vectorProperties: {},
+        textureProperties: {}
+      }
+    });
+
+  const setData: DeepPartial<VrmStructure> = {
+    extensions: {
+      VRM: {
+        materialProperties: generatedMaterials
+      }
+    }
+  };
+
+  VrmUtil.Instance().AddVrmData(setData);
+}
 
 export function AddNoBoneScenes(nodesRef: GltfNode[] | undefined, skinsRef: GltfSkin[] | undefined): Result<GltfScene[]> {
   if (nodesRef == undefined || nodesRef.length === 0)
@@ -53,30 +114,6 @@ export function CleanSkins(skinsRef: GltfSkin[] | undefined): Result<GltfSkin[]>
   
   console.log("LeSkins: ", firstSkinRef);
   return {success: true, value: [{...firstSkinRef}]};
-}
-
-export function GenerateVrmMaterialProperties(materialList: GltfMaterial[] | undefined): Result<VrmMaterialProperty[]> {
-  if (materialList == undefined) {
-    const msg = "Need material list in order to generate material properties!";
-    void LogError(Module.ExporterUtil, msg);
-    return {success: false, errMessage: msg, errCode: CommonErrorCode.MissingInfo};
-  }
-
-  const generatedMaterials = materialList
-    // .filter(f => f.name != undefined)
-    .map((m): VrmMaterialProperty => {
-      return {
-        name: m.name,
-        shader: VrmTextureShader.Gltf,
-        keywordMap: {},
-        tagMap: {},
-        floatProperties: {},
-        vectorProperties: {},
-        textureProperties: {}
-      }
-    });
-
-  return {success: true, value: generatedMaterials};
 }
 
 const GLB_CHUNK_TYPE_BIN = 0x004E4942;
