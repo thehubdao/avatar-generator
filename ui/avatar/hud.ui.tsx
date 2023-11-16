@@ -2,8 +2,8 @@ import AGButton from "../common/ag-button.component";
 import { FeatureInterface } from "../../interfaces/api.interface";
 import { BasicData, ColorConfig, FeatureBasic } from "../../interfaces/common.interface";
 import MobileAssetSelectorUI from "./selectors/mobile/assetSelector.ui";
-import MobileFeatureSelectorComponent from "./selectors/mobile/featureSelector.ui";
-import MobileColorSelectorComponent from "./selectors/mobile/colorSelector.ui";
+import MobileFeatureSelectorUI from "./selectors/mobile/featureSelector.ui";
+import MobileColorSelectorUI from "./selectors/mobile/colorSelector.ui";
 import { useEffect, useState } from "react";
 import Image from 'next/image';
 import FeatureSelector from "./selectors/featureSelector.component";
@@ -106,7 +106,7 @@ export default function HudUI({
             <div className="w-full">
               {/* FEATURES SELECTOR */}
               <div className="w-full">
-                <MobileFeatureSelectorComponent
+                <MobileFeatureSelectorUI
                   list={selectListCategory}
                   activeOpc={selectedCategory}
                   handleClick={(value: string) => onCategoryTypeChange(value)}
@@ -133,7 +133,7 @@ export default function HudUI({
           </div>
         }
       </div>
-      {shouldShowColorSelectorModal && <MobileColorSelectorComponent
+      {shouldShowColorSelectorModal && <MobileColorSelectorUI
         list={campaignSkinColorConfig.colorPalette}
         activeColor={skinColor}
         handleChangeColor={(value: string) => void onSkinColorChange(value)}
