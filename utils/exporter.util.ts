@@ -7,10 +7,9 @@ import {IsBone, IsSkinnedMesh, SetPose} from "./model.util";
 import {BoneMatrix} from "../types/model.type";
 import {Result} from "../types/common.type";
 import GLTFExporterRemoveSkinDuplicatesExtension from "./threejs/export-plugin.util";
-import {Bone, BufferGeometry, Material, Matrix4, Object3D, Scene, Skeleton, SkinnedMesh} from "three";
+import {Bone, BufferGeometry, Material, Matrix4, Scene, Skeleton, SkinnedMesh} from "three";
 import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
 import {degToRad} from "three/src/math/MathUtils";
-import {VrmStructure} from "../interfaces/export.interface";
 
 class ExporterUtil {
   private static _instance: ExporterUtil;
@@ -43,32 +42,44 @@ class ExporterUtil {
 }
 
 export async function ExportModelGlb(model: GLTF | undefined): Promise<Result<Blob>> {
-  if (model == undefined)
-    Raise("Model can't be undefined if trying to export!");
+  try {
+    if (model == undefined)
+      Raise("Model can't be undefined if trying to export!");
 
-  const exporter = ExporterUtil.Instance().GltfExporter();
-  // CleanModelForExport(model); // TODO: use at some point
-  const out = await exporter.parseAsync(model.scene, {
-    animations: model.animations,
-    binary: true,
-  });
+    const exporter = ExporterUtil.Instance().GltfExporter();
+    // CleanModelForExport(model); // TODO: use at some point
+    const out = await exporter.parseAsync(model.scene, {
+      animations: model.animations,
+      binary: true,
+    });
 
-  return {success: true, value: new Blob([out as ArrayBuffer], {type: 'application/octet-stream'})};
+    return {success: true, value: new Blob([out as ArrayBuffer], {type: 'application/octet-stream'})};
+  } catch (e) {
+    const err = e as Error;
+    void LogError(Module.ExporterUtil, err.message, err);
+    return {success: false, errMessage: err.message, errCode: CommonErrorCode.InternalError};
+  }
 }
 
-export async function ExportObjectGltf(model: Object3D | undefined): Promise<Result<Blob>> {
-  if (model == undefined)
-    Raise("Model can't be undefined if trying to export!");
+export async function ExportModelGltf(model: GLTF | undefined): Promise<Result<Blob>> {
+  try {
+    if (model == undefined)
+      Raise("Model can't be undefined if trying to export!");
 
-  const exporter = ExporterUtil.Instance().GltfExporter();
-  
-  const gltf = await exporter.parseAsync(model, {
-    animations: [],
-  });
-  
-  // Export gltf
-  const output = JSON.stringify( gltf, null, 2 );
-  return {success: true, value:  new Blob( [ output ], { type: 'text/plain' } )};
+    const exporter = ExporterUtil.Instance().GltfExporter();
+
+    const gltf = await exporter.parseAsync(model.scene, {
+      animations: [],
+    });
+
+    const output = JSON.stringify(gltf, null, 2);
+    return {success: true, value: new Blob([output], {type: 'text/plain'})};
+  }
+  catch (e) {
+    const err = e as Error;
+    void LogError(Module.ExporterUtil, err.message, err);
+    return {success: false, errMessage: err.message, errCode:  CommonErrorCode.InternalError};
+  }
 }
 
 export async function ExportModelVrm(model: GLTF | undefined, pose?: Record<string, BoneMatrix | undefined>): Promise<Result<Blob>> {
@@ -484,16 +495,6 @@ function GetPaddedArrayBuffer(arrayBuffer: ArrayBuffer, paddingByte = 0) {
 
 function GetPaddedBufferSize(bufferSize: number) {
   return Math.ceil(bufferSize / 4) * 4;
-}
-
-export async function ExportModelGltf(model: GLTF) {
-    const exporter = ExporterUtil.Instance().GltfExporter();
-    const out = await exporter.parseAsync(model.scene, {
-        animations: model.animations,
-    });
-
-    const jsonString = JSON.stringify(out, null, 2);
-    await SaveString(jsonString, `exported.gltf`);
 }
 
 export async function SaveFile(blob: Blob | undefined, fileName: string) {
