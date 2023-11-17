@@ -6,7 +6,7 @@ import {clone} from "three/examples/jsm/utils/SkeletonUtils";
 import {IsBone, IsSkinnedMesh, SetPose} from "./model.util";
 import {BoneMatrix} from "../types/model.type";
 import {Result} from "../types/common.type";
-import GLTFExporterRemoveSkinDuplicatesExtension from "./threejs/export-plugin.util";
+import GLTFExporterAddVrmData from "./threejs/export-plugin.util";
 import {Bone, BufferGeometry, Material, Matrix4, Scene, Skeleton, SkinnedMesh} from "three";
 import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
 import {degToRad} from "three/src/math/MathUtils";
@@ -34,7 +34,7 @@ class ExporterUtil {
   public VrmExporter() {
     if (this._vrmExporter == undefined) {
       this._vrmExporter = new GLTFExporter();
-      this._vrmExporter.register(writer => new GLTFExporterRemoveSkinDuplicatesExtension(writer));
+      this._vrmExporter.register(writer => new GLTFExporterAddVrmData(writer));
     }
     
     return this._vrmExporter;

@@ -10,7 +10,7 @@ interface WriterProps {
   }
 }
 
-export default class GLTFExporterRemoveSkinDuplicatesExtension implements GLTFExporterPlugin {
+export default class GLTFExporterAddVrmData implements GLTFExporterPlugin {
   public writer: GLTFWriter;
   public name: string;
 
