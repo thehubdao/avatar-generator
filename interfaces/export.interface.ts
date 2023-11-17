@@ -26,8 +26,12 @@ export interface GltfSkin {
 }
 
 export interface GltfNode {
+  name?: string;
   mesh?: number;
   children?: number[];
+  extras?: {
+    name?: string;
+  }
 }
 
 export interface GltfScene {
@@ -43,6 +47,12 @@ export interface VrmMaterialProperty {
   floatProperties: {};
   vectorProperties: {};
   textureProperties: {};
+}
+
+export interface VrmHumanBone {
+  bone: VrmHumanoidBones;
+  node: number;
+  useDefaultValues: boolean;
 }
 
 export interface VrmMetadata {
@@ -61,7 +71,6 @@ export interface VrmMetadata {
 }
 
 export interface VrmStructure {
-  // TODO: probably wont go
   scenes?: GltfScene[];
   nodes?: GltfNode[];
   skins?: GltfSkin[];
@@ -72,28 +81,24 @@ export interface VrmStructure {
   }[];
   
   extensionsUsed?: string[];
-  extensions: {
-    VRM: {
+  extensions?: {
+    VRM?: {
       materialProperties?: VrmMaterialProperty[];
-      exporterVersion: "avatarhub_vrm_exporter_experimental_0.3";
-      specVersion: VrmSpecVersion;
+      exporterVersion?: "avatarhub_vrm_exporter_experimental_0.3";
+      specVersion?: VrmSpecVersion;
       meta?: VrmMetadata;
-      humanoid: {
-        humanBones: {
-          bone: VrmHumanoidBones,
-          node: number;
-          useDefaultValues: boolean;
-        }[];
-        armStretch: number;
-        legStretch: number;
-        upperArmTwist: number;
-        lowerArmTwist: number;
-        upperLegTwist: number;
-        lowerLegTwist: number;
-        feetSpacing: number;
-        hasTranslationDoF: boolean;
+      humanoid?: {
+        humanBones?: VrmHumanBone[];
+        armStretch?: number;
+        legStretch?: number;
+        upperArmTwist?: number;
+        lowerArmTwist?: number;
+        upperLegTwist?: number;
+        lowerLegTwist?: number;
+        feetSpacing?: number;
+        hasTranslationDoF?: boolean;
       };
-      firstPerson: {
+      firstPerson?: {
         firstPersonBone: number;
         firstPersonBoneOffset: {
           x: number;
@@ -110,7 +115,7 @@ export interface VrmStructure {
         lookAtVerticalDown: DegreeMap;
         lookAtVerticalUp: DegreeMap;
       };
-      blendShapeMaster: {
+      blendShapeMaster?: {
         blendShapeGroups: {
           name: string;
           presetName: VrmBlendShapePreset;
@@ -127,7 +132,7 @@ export interface VrmStructure {
           isBinary: boolean;
         }[];
       };
-      secondaryAnimation: {
+      secondaryAnimation?: {
         colliderGroups: {
           node: number;
           colliders: {
