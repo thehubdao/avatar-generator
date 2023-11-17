@@ -71,62 +71,6 @@ export async function ExportObjectGltf(model: Object3D | undefined): Promise<Res
   return {success: true, value:  new Blob( [ output ], { type: 'text/plain' } )};
 }
 
-export async function ExportModelVrmOG(model: GLTF | undefined, pose?: Record<string, BoneMatrix | undefined>): Promise<Result<Blob>> {
-  const exporter = ExporterUtil.Instance().GltfExporter();
-  try {
-    if (model == undefined)
-      Raise("Model can't be undefined if trying to export!");
-
-    const sceneClone = clone(model.scene);
-
-    SetPose(sceneClone, pose);
-
-    // CleanModelForExport(model); // TODO: use at some point
-    let gltf = await exporter.parseAsync(sceneClone, {
-      animations: [],
-    }) as VrmStructure;
-    
-    console.log("LeGltf: ", gltf);
-    // Export gltf
-    // const output = JSON.stringify( gltf, null, 2 );
-    // return {success: true, value:  new Blob( [ output ], { type: 'text/plain' } )};
-    
-    gltf = {
-      ...gltf,
-      ...VrmBase
-    };
-    gltf.extensionsUsed?.push("VRM");
-
-    // const cSkins = CleanSkins(gltf.skins);
-    // if (cSkins.success)
-    //   gltf.skins = cSkins.value;
-    //
-    // const rScenes = AddNoBoneScenes(gltf.nodes, gltf.skins);
-    // if (rScenes.success)
-    //   gltf.scenes = rScenes.value;
-    
-
-    // Add vrm info to gltf
-    const newMaterialProperties = GenerateVrmMaterialProperties(gltf.materials);
-    gltf.extensions.VRM.materialProperties = newMaterialProperties.success ? newMaterialProperties.value : undefined;
-    console.log(gltf);
-
-    // Binary gltf
-    const vrmArrayBuffer = await BinarizeGltfToVrm(gltf);
-    if (!vrmArrayBuffer.success)
-      return vrmArrayBuffer;
-
-    return {
-      success: true,
-      value: new Blob([vrmArrayBuffer.value], { type: 'application/octet-stream' })
-    };
-  } catch (err) {
-    const msg = "Error while exporting to VRM!";
-    void LogError(Module.ExporterUtil, msg, err);
-    return {success: false, errMessage: msg, errCode: CommonErrorCode.InternalError};
-  }
-}
-
 export async function ExportModelVrm(model: GLTF | undefined, pose?: Record<string, BoneMatrix | undefined>): Promise<Result<Blob>> {
   const exporter = ExporterUtil.Instance().VrmExporter();
   try {
