@@ -1,14 +1,19 @@
 ﻿import {DeepPartial} from "redux";
 import {mergeDeep} from "immutable";
 import {
-  GltfMaterial,
-  VrmMaterialProperty,
+  GltfMaterial, GltfNode, VrmHumanBone,
+  VrmMaterialProperty, VrmMetadata,
   VrmStructure
 } from "../../interfaces/export.interface";
-import {LogError} from "../common.util";
+import {LogError, Raise} from "../common.util";
 import {Module} from "../../enums/common.enum";
 import {VrmTextureShader} from "../../enums/export.enum";
-import {VRM_BASE} from "../../constants/export.constant";
+import {
+  VRM_BASE,
+  VRM_HUMAN_BONES_DEFAULT,
+  VRM_HUMAN_BONES_DEFAULT_LENGHT,
+  VRM_HUMANOID_BONES, VRM_MAP_MIXAMO, VRM_META_DEFAULT
+} from "../../constants/export.constant";
 
 class VrmUtil {
   private static _instance: VrmUtil;
@@ -57,10 +62,72 @@ export function GenerateVrmMaterialData(materialList: GltfMaterial[] | undefined
       }
     });
 
-  const setData: DeepPartial<VrmStructure> = {
+  const setData: VrmStructure = {
     extensions: {
       VRM: {
         materialProperties: generatedMaterials
+      }
+    }
+  };
+
+  VrmUtil.Instance().AddVrmData(setData);
+}
+
+export function GenerateVrmBoneData(nodes: GltfNode[] | undefined) {
+  let generatedBones: VrmHumanBone[] = [];
+  
+  try {    
+    if (nodes == undefined)
+      Raise("Need skin and node list in order to generate human bones properly!");
+    
+    for (let i = 0; i < VRM_HUMANOID_BONES.length; i++) {
+      const vrmBone = VRM_HUMANOID_BONES[i];
+      const mappedName = VRM_MAP_MIXAMO[vrmBone];
+      const mappedIndex = nodes.findIndex(n => n.name === mappedName);
+      
+      generatedBones.push({
+        bone: vrmBone,
+        node: mappedIndex,
+        useDefaultValues: true
+      });
+    }
+  }
+  catch (e) {
+    const err = e as Error;
+    void LogError(Module.ExporterUtil, err.message);
+  }
+  
+  const setData: VrmStructure = {
+    extensions: {
+      VRM: {
+        humanoid: {
+          humanBones: generatedBones.length === VRM_HUMAN_BONES_DEFAULT_LENGHT
+            ? generatedBones : VRM_HUMAN_BONES_DEFAULT
+        }
+      }
+    }
+  };
+
+  VrmUtil.Instance().AddVrmData(setData);
+}
+
+export function GenerateVrmMetaData(meta: VrmMetadata | undefined) {
+  let generatedMeta: VrmMetadata | undefined;
+  
+  try {
+    if (meta == undefined)
+      Raise("Need metadata in order to fill the property!");
+    
+    generatedMeta = meta;
+  } catch (e) {
+    const err = e as Error;
+    void LogError(Module.ExporterUtil, err.message);
+  }
+
+  const setData: VrmStructure = {
+    extensions: {
+      VRM: {
+        meta: generatedMeta ?? VRM_META_DEFAULT
       }
     }
   };
