@@ -6,15 +6,11 @@ import {clone} from "three/examples/jsm/utils/SkeletonUtils";
 import {IsBone, IsSkinnedMesh, SetPose} from "./model.util";
 import {BoneMatrix} from "../types/model.type";
 import {Result} from "../types/common.type";
-import {AddNoBoneScenes, BinarizeGltfToVrm, CleanSkins, GenerateVrmMaterialProperties} from "./threejs/vrm.util";
 import GLTFExporterRemoveSkinDuplicatesExtension from "./threejs/export-plugin.util";
-import {Bone, BufferGeometry, Group, Material, Matrix4, Object3D, Scene, Skeleton, SkinnedMesh} from "three";
-import {Geometry} from "three/examples/jsm/deprecated/Geometry";
+import {Bone, BufferGeometry, Material, Matrix4, Object3D, Scene, Skeleton, SkinnedMesh} from "three";
 import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
-import {AddToScene} from "../components/avatar/viewer.component";
-import {Mate} from "@next/font/google";
 import {degToRad} from "three/src/math/MathUtils";
-import {VrmBase, VrmStructure} from "../interfaces/export.interface";
+import {VrmStructure} from "../interfaces/export.interface";
 
 class ExporterUtil {
   private static _instance: ExporterUtil;
@@ -69,8 +65,6 @@ export async function ExportObjectGltf(model: Object3D | undefined): Promise<Res
   const gltf = await exporter.parseAsync(model, {
     animations: [],
   });
-
-  console.log("GLTF: ", gltf);
   
   // Export gltf
   const output = JSON.stringify( gltf, null, 2 );
