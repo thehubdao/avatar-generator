@@ -1,7 +1,7 @@
 import AGButton from "../common/ag-button.component";
 import { FeatureInterface } from "../../interfaces/api.interface";
 import { BasicData, ColorConfig, FeatureBasic } from "../../interfaces/common.interface";
-import MobileOptionSelectorUI from "./selectors/mobile/optionSelector.ui";
+import MobileOptionSelectorUI from "./selectors/mobile/soptionSelector.ui";
 import MobileFeatureSelectorUI from "./selectors/mobile/featureSelector.ui";
 import MobileColorSelectorUI from "./selectors/mobile/colorSelector.ui";
 import { useEffect, useState } from "react";
