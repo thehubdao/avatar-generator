@@ -14,6 +14,10 @@ import {
   VRM_HUMAN_BONES_DEFAULT_LENGHT,
   VRM_HUMANOID_BONES, VRM_MAP_MIXAMO, VRM_META_DEFAULT
 } from "../../constants/export.constant";
+import {Bone, BufferGeometry, Material, Matrix4, Object3D, Scene, Skeleton, SkinnedMesh, Vector3} from "three";
+import {IsBone, IsSkinnedMesh} from "../model.util";
+import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
+import {degToRad} from "three/src/math/MathUtils";
 
 class VrmUtil {
   private static _instance: VrmUtil;
@@ -133,4 +137,158 @@ export function GenerateVrmMetaData(meta: VrmMetadata | undefined) {
   };
 
   VrmUtil.Instance().AddVrmData(setData);
+}
+
+export function GenerateVrmScene(model: Object3D) {
+  // TODO: Check how to force scale on sub objects without changing scale on those subobjects
+  let scaleFactor = 1;
+  
+  // Create new scene, this one has the new structure
+  const sceneReal = new Scene();
+  sceneReal.name = "Scene";
+  sceneReal.userData.name = "Scene";
+
+  const skinnedMeshArray: SkinnedMesh[] = [];
+  const geometryArray: BufferGeometry[] = [];
+  const materialArray: Material[] = [];
+
+  // Find scale, skinnedMeshArray, geometryArray and materialArray
+  model.traverse(obj => {
+    if (obj.name === "Armature")
+      scaleFactor = obj.scale.x;
+    
+    if (IsSkinnedMesh(obj)) {
+      skinnedMeshArray.push(obj);
+      geometryArray.push(obj.geometry.clone());
+      const mat = obj.material;
+      if (mat instanceof Material) {
+        materialArray.push(mat.clone());
+      } else {
+        const lel = mat.map(m => m.clone());
+        materialArray.push(...lel);
+      }
+    }
+  });
+
+  // Remove not allowed attributes on skinnedMesh geometries
+  const allowedProps = GetAllowedProps(geometryArray);
+  for (const geom of geometryArray) {
+    for (const key of Object.keys(geom.attributes)) {
+      if (!allowedProps.includes(key))
+        delete geom.attributes[key];
+    }
+  }
+
+  const firstSM = skinnedMeshArray[0]
+  firstSM.scale.setScalar(scaleFactor);
+  firstSM.updateMatrix();
+  firstSM.geometry.applyMatrix4(firstSM.matrix);
+  const matrixCopy = firstSM.skeleton.boneInverses.map(b => b.clone());
+  const actualBones = firstSM.skeleton.bones[0].clone(true);
+  const boneArray: Bone[] = [];
+
+  actualBones.traverse(obj => {
+    if (IsBone(obj)) {
+      boneArray.push(obj);
+    }
+  });
+
+  const avatarGeom = mergeGeometries(geometryArray, true);
+
+  const leSkinnedMesh = new SkinnedMesh(avatarGeom, materialArray);
+  leSkinnedMesh.name = "Avatar";
+  leSkinnedMesh.userData.name = "Avatar";
+
+  // leSkinnedMesh.scale.setScalar(0.01);
+  // leSkinnedMesh.rotateX(degToRad(90));
+  // leSkinnedMesh.position.setScalar(0);
+  // leSkinnedMesh.updateMatrix();
+  // leSkinnedMesh.geometry.applyMatrix4(leSkinnedMesh.matrix);
+  // leSkinnedMesh.scale.setScalar(1);
+  // leSkinnedMesh.rotation.set(0, 0, 0);
+  // leSkinnedMesh.position.setScalar(0);
+  // leSkinnedMesh.updateMatrix();
+  
+  // actualBones.scale.setScalar(scaleFactor);
+  // actualBones.rotateX(degToRad(90));
+  // actualBones.position.setScalar(0);
+  // actualBones.updateMatrix();
+
+  const newSkeleton = new Skeleton(boneArray, matrixCopy);
+  const identity = new Matrix4();
+  leSkinnedMesh.bind(newSkeleton, identity);
+
+  leSkinnedMesh.scale.setScalar(scaleFactor);
+  leSkinnedMesh.rotateX(degToRad(90));
+  leSkinnedMesh.updateMatrix();
+  leSkinnedMesh.geometry.applyMatrix4(leSkinnedMesh.matrix);
+
+  // leSkinnedMesh.updateMatrix();
+
+  // actualBones.scale.setScalar(0.01);
+  // actualBones.rotateX(degToRad(90));
+  // actualBones.position.setScalar(0);
+  // actualBones.updateMatrix();
+
+  // actualBones.scale.setScalar(0.01);
+  // actualBones.rotateX(degToRad(90));
+  // actualBones.position.setScalar(0);
+  // actualBones.updateMatrix();
+
+  // leSkinnedMesh.updateMatrix();
+  // leSkinnedMesh.geometry.applyMatrix4(leSkinnedMesh.matrix);
+  // leSkinnedMesh.scale.setScalar(1);
+  // leSkinnedMesh.position.setScalar(0);
+  // leSkinnedMesh.rotation.set(0, 0, 0);
+  // leSkinnedMesh.updateMatrix();
+
+  // const armatureGroup = new Group();
+  // armatureGroup.name = "Main";
+  // armatureGroup.userData.name = "Main";
+  // armatureGroup.scale.setScalar(0.01);
+  // armatureGroup.rotateX(degToRad(90));
+  // armatureGroup.rotateZ(degToRad(180));
+
+  // armatureGroup.children.push(actualBones);
+  // armatureGroup.children.push(leSkinnedMesh);
+  // armatureGroup.add(actualBones);
+  // armatureGroup.add(leSkinnedMesh);
+
+  // sceneReal.children.push(armatureGroup);
+
+  // sceneReal.children.push(actualBones);
+  // sceneReal.children.push(leSkinnedMesh);
+
+  // sceneReal.add(actualBones);
+  // sceneReal.add(leSkinnedMesh);
+
+
+  // actualBones.geometry.applyMatrix4(leSkinnedMesh.matrix);
+  // actualBones.scale.setScalar(1);
+  // actualBones.updateMatrix();
+
+  sceneReal.children.push(actualBones);
+  sceneReal.children.push(leSkinnedMesh);
+
+  // sceneReal.position.setScalar(0);
+  // sceneReal.rotation.set(0, 0, 0);
+  // sceneReal.scale.setScalar(1);
+  // sceneReal.updateMatrix();
+  
+  return sceneReal;
+}
+
+function GetAllowedProps(array: BufferGeometry[]) {
+  if (array.length <= 0) return [];
+  
+  const allowedProps = Object.keys(array[0].attributes);
+  for (let i = 1; i < array.length; i++) {
+    const current = Object.keys(array[i].attributes);
+    allowedProps.forEach((attribute, index) => {
+      if (!current.some(a => a === attribute))
+        allowedProps.splice(index, 1);
+    });
+  }
+  
+  return allowedProps;
 }
