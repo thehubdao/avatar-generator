@@ -126,10 +126,14 @@ export default function HudUI({
             </div>
             {/* ASSET SELECTOR */}
             <div className="w-full overflow-scroll h-[167px] py-2">
-              <MobileOptionSelectorUI
-                list={optionList}
-                activeOption={selectedOption}
-                handleClick={(id: string, path: string, name: string) => onOptionChange(id, path, name)} />
+              {
+                optionList &&
+                <MobileOptionSelectorUI
+                  list={optionList}
+                  activeOption={selectedOption}
+                  handleClick={(id: string, path: string, name: string) => onOptionChange(id, path, name)}
+                />
+              }
             </div>
           </div>
         }
