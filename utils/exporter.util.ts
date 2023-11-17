@@ -3,13 +3,10 @@ import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
 import {Delay, LogError, Raise} from "./common.util";
 import {CommonErrorCode, Module} from "../enums/common.enum";
 import {clone} from "three/examples/jsm/utils/SkeletonUtils";
-import {IsBone, IsSkinnedMesh, SetPose} from "./model.util";
+import {SetPose} from "./model.util";
 import {BoneMatrix} from "../types/model.type";
 import {Result} from "../types/common.type";
 import GLTFExporterAddVrmData from "./threejs/export-plugin.util";
-import {Bone, BufferGeometry, Material, Matrix4, Scene, Skeleton, SkinnedMesh} from "three";
-import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
-import {degToRad} from "three/src/math/MathUtils";
 import {GenerateVrmScene} from "./threejs/vrm.util";
 
 class ExporterUtil {
