@@ -5,7 +5,7 @@ import {
   VrmMaterialProperty, VrmMetadata,
   VrmStructure
 } from "../../interfaces/export.interface";
-import {LogError, Raise} from "../common.util";
+import {LogError, LogWarning, Raise} from "../common.util";
 import {Module} from "../../enums/common.enum";
 import {VrmTextureShader} from "../../enums/export.enum";
 import {
@@ -46,7 +46,7 @@ export function GetVrmData() {
 export function GenerateVrmMaterialData(materialList: GltfMaterial[] | undefined) {
   if (materialList == undefined) {
     const msg = "Need material list in order to generate material properties!";
-    return void LogError(Module.ExporterUtil, msg);
+    return void LogError(Module.VrmUtil, msg);
   }
 
   const generatedMaterials = materialList
@@ -94,7 +94,7 @@ export function GenerateVrmBoneData(nodes: GltfNode[] | undefined) {
   }
   catch (e) {
     const err = e as Error;
-    void LogError(Module.ExporterUtil, err.message);
+    void LogWarning(Module.VrmUtil, err.message, e);
   }
   
   const setData: VrmStructure = {
@@ -121,7 +121,7 @@ export function GenerateVrmMetaData(meta: VrmMetadata | undefined) {
     generatedMeta = meta;
   } catch (e) {
     const err = e as Error;
-    void LogError(Module.ExporterUtil, err.message);
+    void LogWarning(Module.VrmUtil, err.message, e);
   }
 
   const setData: VrmStructure = {
