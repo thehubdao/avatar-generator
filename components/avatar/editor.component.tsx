@@ -138,14 +138,10 @@ export async function SetEnvironment(bgMap?: string, lightMap?: string, skyboxCo
 }
 
 export async function GetAvatarGLB() {
-  if (_avatar == undefined) return void LogError(Module.Editor, "Missing Avatar for export!");
-
   return ExportModelGlb(_avatar);
 }
 
 export async function GetAvatarVRM() {
-  if (_avatar == undefined) return void LogError(Module.Editor, "Missing Avatar for export!");
-
   return ExportModelVrm(_avatar, _startPose);
 }
 
