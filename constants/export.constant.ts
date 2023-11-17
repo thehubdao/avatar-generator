@@ -1,4 +1,5 @@
-﻿import {VrmMetadata, VrmStructure} from "../interfaces/export.interface";
+﻿import {VrmHumanBone, VrmMetadata, VrmStructure} from "../interfaces/export.interface";
+import {MixamoBone, VrmHumanoidBones} from "../types/export.type";
 
 export const VRM_SPEC_VERSION = [ "0.0" ] as const;
 
@@ -75,6 +76,26 @@ export const VRM_BLEND_SHAPE_PRESET = [
   "blink_r"
 ] as const;
 
+export const MIXAMO_BONE = [
+  "mixamorigSpine2",
+  "mixamorigHead",
+  "mixamorigHips",
+  "mixamorigLeftFoot",
+  "mixamorigLeftHand",
+  "mixamorigLeftForeArm",
+  "mixamorigLeftLeg",
+  "mixamorigLeftArm",
+  "mixamorigLeftUpLeg",
+  "mixamorigNeck",
+  "mixamorigRightFoot",
+  "mixamorigRightHand",
+  "mixamorigRightForeArm",
+  "mixamorigRightLeg",
+  "mixamorigRightArm",
+  "mixamorigRightUpLeg",
+  "mixamorigSpine1"
+] as const;
+
 export const VRM_META_DEFAULT: VrmMetadata = {
   title: "",
   version: "",
@@ -90,100 +111,102 @@ export const VRM_META_DEFAULT: VrmMetadata = {
   otherLicenseUrl: ""
 } as const;
 
+export const VRM_HUMAN_BONES_DEFAULT: VrmHumanBone[] = [
+  {
+    bone: "hips",
+    node: 64,
+    useDefaultValues: true
+  },
+  {
+    bone: "spine",
+    node: 53,
+    useDefaultValues: true
+  },
+  {
+    bone: "chest",
+    node: 51,
+    useDefaultValues: true
+  },
+  {
+    bone: "neck",
+    node: 2,
+    useDefaultValues: true
+  },
+  {
+    bone: "head",
+    node: 1,
+    useDefaultValues: true
+  },
+  {
+    bone: "leftUpperLeg",
+    node: 58,
+    useDefaultValues: true
+  },
+  {
+    bone: "leftLowerLeg",
+    node: 57,
+    useDefaultValues: true
+  },
+  {
+    bone: "leftFoot",
+    node: 56,
+    useDefaultValues: true
+  },
+  {
+    bone: "rightUpperLeg",
+    node: 63,
+    useDefaultValues: true
+  },
+  {
+    bone: "rightLowerLeg",
+    node: 62,
+    useDefaultValues: true
+  },
+  {
+    bone: "rightFoot",
+    node: 61,
+    useDefaultValues: true
+  },
+  {
+    bone: "leftUpperArm",
+    node: 25,
+    useDefaultValues: true
+  },
+  {
+    bone: "leftLowerArm",
+    node: 24,
+    useDefaultValues: true
+  },
+  {
+    bone: "leftHand",
+    node: 23,
+    useDefaultValues: true
+  },
+  {
+    bone: "rightUpperArm",
+    node: 49,
+    useDefaultValues: true
+  },
+  {
+    bone: "rightLowerArm",
+    node: 48,
+    useDefaultValues: true
+  },
+  {
+    bone: "rightHand",
+    node: 47,
+    useDefaultValues: true
+  }
+];
+
+export const VRM_HUMAN_BONES_DEFAULT_LENGHT = VRM_HUMAN_BONES_DEFAULT.length;
+
 export const VRM_BASE: VrmStructure = {
   extensions: {
     VRM: {
       exporterVersion: "avatarhub_vrm_exporter_experimental_0.3",
       specVersion: "0.0",
       humanoid: {
-        // TODO: Can be build on the spot
-        humanBones: [
-          {
-            bone: "hips",
-            node: 64,
-            useDefaultValues: true
-          },
-          {
-            bone: "spine",
-            node: 53,
-            useDefaultValues: true
-          },
-          {
-            bone: "chest",
-            node: 51,
-            useDefaultValues: true
-          },
-          {
-            bone: "neck",
-            node: 2,
-            useDefaultValues: true
-          },
-          {
-            bone: "head",
-            node: 1,
-            useDefaultValues: true
-          },
-          {
-            bone: "leftUpperLeg",
-            node: 58,
-            useDefaultValues: true
-          },
-          {
-            bone: "leftLowerLeg",
-            node: 57,
-            useDefaultValues: true
-          },
-          {
-            bone: "leftFoot",
-            node: 56,
-            useDefaultValues: true
-          },
-          {
-            bone: "rightUpperLeg",
-            node: 63,
-            useDefaultValues: true
-          },
-          {
-            bone: "rightLowerLeg",
-            node: 62,
-            useDefaultValues: true
-          },
-          {
-            bone: "rightFoot",
-            node: 61,
-            useDefaultValues: true
-          },
-          {
-            bone: "leftUpperArm",
-            node: 25,
-            useDefaultValues: true
-          },
-          {
-            bone: "leftLowerArm",
-            node: 24,
-            useDefaultValues: true
-          },
-          {
-            bone: "leftHand",
-            node: 23,
-            useDefaultValues: true
-          },
-          {
-            bone: "rightUpperArm",
-            node: 49,
-            useDefaultValues: true
-          },
-          {
-            bone: "rightLowerArm",
-            node: 48,
-            useDefaultValues: true
-          },
-          {
-            bone: "rightHand",
-            node: 47,
-            useDefaultValues: true
-          }
-        ],
         armStretch: 0.05000000074505806,
         legStretch: 0.05000000074505806,
         upperArmTwist: 0.5,
@@ -361,3 +384,23 @@ export const VRM_BASE: VrmStructure = {
     }
   }
 };
+
+export const VRM_MAP_MIXAMO: Record<VrmHumanoidBones, MixamoBone> = {
+  "chest": "mixamorigSpine2",
+  "head": "mixamorigHead",
+  "hips": "mixamorigHips",
+  "leftFoot": "mixamorigLeftFoot",
+  "leftHand": "mixamorigLeftHand",
+  "leftLowerArm": "mixamorigLeftForeArm",
+  "leftLowerLeg": "mixamorigLeftLeg",
+  "leftUpperArm": "mixamorigLeftArm",
+  "leftUpperLeg": "mixamorigLeftUpLeg",
+  "neck": "mixamorigNeck",
+  "rightFoot": "mixamorigRightFoot",
+  "rightHand": "mixamorigRightHand",
+  "rightLowerArm": "mixamorigRightForeArm",
+  "rightLowerLeg": "mixamorigRightLeg",
+  "rightUpperArm": "mixamorigRightArm",
+  "rightUpperLeg": "mixamorigRightUpLeg",
+  "spine": "mixamorigSpine1",
+} as const;

@@ -1,4 +1,5 @@
 ﻿import {
+  MIXAMO_BONE,
   VRM_BLEND_SHAPE_PRESET,
   VRM_FIRST_PERSON_LOOK_AT,
   VRM_HUMANOID_BONES,
@@ -21,3 +22,5 @@ export type VrmHumanoidBones = typeof VRM_HUMANOID_BONES[number];
 export type VrmFirstPersonLookAtType = typeof VRM_FIRST_PERSON_LOOK_AT[number];
 
 export type VrmBlendShapePreset = typeof VRM_BLEND_SHAPE_PRESET[number];
+
+export type MixamoBone = typeof MIXAMO_BONE[number];
