@@ -4,7 +4,7 @@ import ColorItemUI from './colorItem.ui';
 
 interface ColorSelectorUIProps {
   list?: string[];
-  activeColor: string | undefined;
+  activeColor?: string;
   handleChangeColor: (color: string) => void;
   handleSwitchShowColorSelector: () => void;
 }
@@ -16,14 +16,10 @@ export default function ColorSelectorUI({ list, activeColor, handleChangeColor, 
       <div className='w-[80vw] h-[70vh] bg-bg rounded-2xl z-10 flex flex-col justify-around items-stretch'>
         <h2 className='w-full text-center text-3xl text-gray-normal font-poppins'>SKIN COLOR</h2>
         <div className='w-full flex flex-wrap justify-center gap-3'>
-          {list ?
+          {list &&
             list.map((color, index) => <ColorItemUI key={index} color={color} isActive={(activeColor == color)} handleChangeColor={(color) => handleChangeColor(color)} />)
-            :
-            <div className={'cursor-pointer rounded-md transition duration-200 ease-in-out flex items-center justify-center mx-3 '}>
-              <p className='w-full text-center'>No colors is available to change.</p>
-            </div>
           }
-
+          {/* TODO: if list don't exist, show full custom rgb modal */}
         </div>
         <div className='flex w-full justify-center'>
           <AGButton nm onClickEvent={() => { handleSwitchShowColorSelector() }}>
