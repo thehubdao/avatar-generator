@@ -1,7 +1,7 @@
 import { FeatureInterface } from "../../../../interfaces/api.interface";
 import 'swiper/css';
 import { BasicData } from '../../../../interfaces/common.interface';
-import { OptionItemUI } from "./soptionItem.ui";
+import { OptionItemUI } from "./optionItem.ui";
 
 interface OptionSelectorUIProps {
   list?: FeatureInterface[];
