@@ -1,12 +1,12 @@
 import { MouseEvent } from "react";
 
-interface ColorOptionUIProps {
+interface ColorItemUIProps {
   color: string;
   activeColor: boolean;
   handleChangeColor: (color: string) => void;
 }
 
-export default function ColorOptionUI({ color, activeColor, handleChangeColor }: ColorOptionUIProps) {
+export default function ColorItemUI({ color, activeColor, handleChangeColor }: ColorItemUIProps) {
   function selectFeature(e: MouseEvent) {
     e.preventDefault();
     handleChangeColor(color);

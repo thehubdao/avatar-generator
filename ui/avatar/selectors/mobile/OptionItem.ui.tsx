@@ -2,13 +2,13 @@ import GetImage from "../../../../components/commons/getImage.component";
 import { FeatureInterface } from "../../../../interfaces/api.interface";
 import { MouseEvent } from 'react';
 
-interface AssetOptionCardUIProps {
+interface OptionItemUIProps {
   opt: FeatureInterface;
   activeOption: boolean;
   handleClick: (id: string, path: string, name: string) => void;
 }
 
-export function OptionCardUI({ opt, activeOption, handleClick }: AssetOptionCardUIProps) {
+export function OptionItemUI({ opt, activeOption, handleClick }: OptionItemUIProps) {
   function selectFeature(e: MouseEvent, opt: FeatureInterface) {
     e.preventDefault();
     handleClick(opt.id, opt.path, opt.name);

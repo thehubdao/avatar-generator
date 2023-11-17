@@ -1,7 +1,7 @@
 import { FeatureInterface } from "../../../../interfaces/api.interface";
 import 'swiper/css';
 import { BasicData } from '../../../../interfaces/common.interface';
-import { OptionCardUI } from "./OptionCard.ui";
+import { OptionItemUI } from "./OptionItem.ui";
 
 interface OptionSelectorUIProps {
   list?: FeatureInterface[];
@@ -17,7 +17,7 @@ export default function OptionSelectorUI({ list, activeOption, handleClick }: Op
   return (
     <div className='w-full px-2 flex flex-wrap overflow-y-scroll gap-2 justify-center h-fit items-center'>
       {list.map((opt, index) => (
-        <OptionCardUI key={index} opt={opt} activeOption={activeOption?.val === opt.name} handleClick={(id, path, name) => handleClick(id, path, name)} />
+        <OptionItemUI key={index} opt={opt} activeOption={activeOption?.val === opt.name} handleClick={(id, path, name) => handleClick(id, path, name)} />
       ))}
     </div>
   )

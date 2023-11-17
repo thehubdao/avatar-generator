@@ -3,7 +3,7 @@ import { MouseEvent } from "react";
 import 'swiper/css';
 import { Swiper, SwiperRef, SwiperSlide } from 'swiper/react';
 import { FeatureBasic } from '../../../../interfaces/common.interface';
-import FeatureOptionCardUI from './featureOptionCard.ui';
+import FeatureItemUI from './featureItem.ui';
 import { MOBILE_FEATURE_OPTIONS_PER_VIEW } from '../../../../constants/ui.constant';
 
 interface FeatureSelectorUIProps {
@@ -39,7 +39,7 @@ export default function FeatureSelectorUI({ activeOpc, handleClick, list }: Feat
       >
         {list.map((feature, index) => (
           <SwiperSlide className='flex flex-col items-center justify-center' onClick={(event) => selectFeature(event, feature.displayName, index)} key={index}>
-            <FeatureOptionCardUI
+            <FeatureItemUI
               key={index}
               feature={feature}
               activeOpc={activeOpc == feature.displayName}
