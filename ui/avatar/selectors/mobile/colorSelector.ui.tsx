@@ -17,10 +17,10 @@ export default function ColorSelectorUI({ list, activeColor, handleChangeColor, 
         <h2 className='w-full text-center text-3xl text-gray-normal font-poppins'>SKIN COLOR</h2>
         <div className='w-full flex flex-wrap justify-center gap-3'>
           {list ?
-            list.map((color, index) => <ColorItemUI key={index} color={color} activeColor={(activeColor == color)} handleChangeColor={(color) => handleChangeColor(color)} />)
+            list.map((color, index) => <ColorItemUI key={index} color={color} isActive={(activeColor == color)} handleChangeColor={(color) => handleChangeColor(color)} />)
             :
-            <div className={'cursor-pointer rounded-md transition duration-200 ease-in-out w-[50px] h-[50px] flex items-center justify-center mx-3 '}>
-              <p className='text-center'>No Colors</p>
+            <div className={'cursor-pointer rounded-md transition duration-200 ease-in-out flex items-center justify-center mx-3 '}>
+              <p className='w-full text-center'>No colors is available to change.</p>
             </div>
           }
 

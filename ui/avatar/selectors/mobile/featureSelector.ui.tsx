@@ -42,7 +42,7 @@ export default function FeatureSelectorUI({ activeOpc, handleClick, list }: Feat
             <FeatureItemUI
               key={index}
               feature={feature}
-              activeOpc={activeOpc == feature.displayName}
+              isActive={activeOpc == feature.displayName}
             />
           </SwiperSlide>
         ))}
