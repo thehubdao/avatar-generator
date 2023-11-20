@@ -7,6 +7,7 @@ import { FaArrowRightLong } from "react-icons/fa6";
 import SocialButtonsUI from "../common/socialButtons.ui";
 import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
+import MintSectionModalUI from "../common/mintModal.ui";
 
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
@@ -19,6 +20,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
   const buttonRef = useRef<HTMLDivElement>(null);
 
   const [isRolling, setIsRolling] = useState<boolean>(false);
+  const [isMinting, setIsMinting] = useState<boolean>(false);w
 
   const gsapEnterBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
@@ -112,6 +114,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
         </TransparentBox>
       </div>
 
+      {true && <MintSectionModalUI />}
     </section>
   )
 }

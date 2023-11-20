@@ -1,5 +1,7 @@
+import { ReactNode } from "react";
+
 interface TransparentBoxUIProps {
-  children: React.ReactNode;
+  children: ReactNode;
   fullWidth?: boolean;
   opacityPercentage?: '25' | '50' | '75';
   heightClass?: string;
