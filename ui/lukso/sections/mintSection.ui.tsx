@@ -20,7 +20,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
   const buttonRef = useRef<HTMLDivElement>(null);
 
   const [isRolling, setIsRolling] = useState<boolean>(false);
-  const [isMinting, setIsMinting] = useState<boolean>(false);w
+  const [isMinting, setIsMinting] = useState<boolean>(false);
 
   const gsapEnterBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
