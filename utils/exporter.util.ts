@@ -8,6 +8,7 @@ import {BoneMatrix} from "../types/model.type";
 import {Result} from "../types/common.type";
 import GLTFExporterAddVrmData from "./threejs/export-plugin.util";
 import {GenerateVrmScene} from "./threejs/vrm.util";
+import {Object3D} from "three";
 
 class ExporterUtil {
   private static _instance: ExporterUtil;
@@ -59,14 +60,18 @@ export async function ExportModelGlb(model: GLTF | undefined): Promise<Result<Bl
   }
 }
 
-export async function ExportModelGltf(model: GLTF | undefined): Promise<Result<Blob>> {
+export async function ExportModelGltf(model: GLTF | undefined) {
+  return ExportObjectGltf(model?.scene);
+}
+
+export async function ExportObjectGltf(object: Object3D | undefined): Promise<Result<Blob>> {
   try {
-    if (model == undefined)
+    if (object == undefined)
       Raise("Model can't be undefined if trying to export!");
 
     const exporter = ExporterUtil.Instance().GltfExporter();
 
-    const gltf = await exporter.parseAsync(model.scene, {
+    const gltf = await exporter.parseAsync(object, {
       animations: [],
     });
 
@@ -80,13 +85,17 @@ export async function ExportModelGltf(model: GLTF | undefined): Promise<Result<B
   }
 }
 
-export async function ExportModelVrm(model: GLTF | undefined, pose?: Record<string, BoneMatrix | undefined>): Promise<Result<Blob>> {
+export async function ExportModelVrm(model: GLTF | undefined, pose?: Record<string, BoneMatrix | undefined>) {
+  return ExportObjectVrm(model?.scene, pose);
+}
+
+export async function ExportObjectVrm(object: Object3D | undefined, pose?: Record<string, BoneMatrix | undefined>): Promise<Result<Blob>> {
   const exporter = ExporterUtil.Instance().VrmExporter();
   try {
-    if (model == undefined)
+    if (object == undefined)
       Raise("Model can't be undefined if trying to export!");
 
-    const sceneClone = clone(model.scene);
+    const sceneClone = clone(object);
     SetPose(sceneClone, pose);
 
     const vrmAvatar = GenerateVrmScene(sceneClone);
