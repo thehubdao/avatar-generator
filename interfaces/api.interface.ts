@@ -34,7 +34,7 @@ export interface EnvMapInterface extends Omit<AssetInterface, 'type' | 'index'>{
   id: string;
 }
 
-interface IndexFeatureInterface {
+export interface IndexFeatureInterface {
   index: number;
   val: FeatureInterface;
 }

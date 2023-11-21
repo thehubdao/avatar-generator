@@ -9,10 +9,12 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@lukso/lsp-smart-contracts": "^0.12.1",
     "@next/font": "^13.5.5",
     "@rainbow-me/rainbowkit": "^1.1.2",
     "@reduxjs/toolkit": "^1.9.7",
     "@types/react-redux": "^7.1.27",
+    "ethers": "^6.8.1",
     "firebase": "^10.5.0",
     "gsap": "^3.12.2",
     "next": "13.5.5",

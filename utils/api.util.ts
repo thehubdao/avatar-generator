@@ -38,7 +38,7 @@ function BuildQuery(uris: UriParams, queries: QueryParams) {
   return newUris + (params.toString() != '' ? `?${params.toString()}` : '');
 }
 
-async function GetRequest<T>(url: string | ApiRoutesV1, extraUri?: UriParams, query?: QueryParams): Promise<Result<T>> {
+export async function GetRequest<T>(url: string | ApiRoutesV1, extraUri?: UriParams, query?: QueryParams): Promise<Result<T>> {
   try {
     const extraQuery = BuildQuery(extraUri ?? [], query ?? {});
     const jsonResult = await fetch(url + extraQuery, GET_PARAMS).then(res => res.json()) as ApiResponse<T>;
@@ -61,12 +61,13 @@ const POST_PARAMS: RequestInit = {
   }
 };
 
-async function PostRequest<T>(url: string, obj?: object): Promise<Result<T>> {
+export async function PostRequest<T>(url: string, obj?: object): Promise<Result<T>> {
   try {
     const jsonResult = await fetch(url, {
       ...POST_PARAMS,
       body: JSON.stringify(obj)
-    }).then(res => res.json()) as ApiResponse<T>;
+    }).then(res => {
+      return res.json()}) as ApiResponse<T>;
     if (jsonResult.success && jsonResult.data != undefined)
       return {success: true, value: jsonResult.data};
     else

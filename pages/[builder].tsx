@@ -1,11 +1,11 @@
-import {GetServerSideProps} from "next";
-import {CampaignParameterName} from "../enums/common.enum";
-import {FirestoreParameters} from "../enums/firebase.enum";
-import {BasicData, CampaignParameters} from "../interfaces/common.interface";
-import {GetParameter} from "../utils/firebase.util";
+import { GetServerSideProps } from "next";
+import { CampaignParameterName } from "../enums/common.enum";
+import { FirestoreParameters } from "../enums/firebase.enum";
+import { BasicData, CampaignParameters } from "../interfaces/common.interface";
+import { GetParameter } from "../utils/firebase.util";
 import AvatarBuilder from "../components/avatar/builder.component";
-import {Base64ToObj, RemoveUndefinedProperties} from "../utils/common.util";
-import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../constants/common.constant";
+import { Base64ToObj, RemoveUndefinedProperties } from "../utils/common.util";
+import { EXPORT_ATTRIBUTE, GLOBAL_VALUES } from "../constants/common.constant";
 
 interface AvatarGeneratorProps {
   campaign: string;
@@ -17,29 +17,29 @@ interface AvatarGeneratorProps {
 }
 
 export default function AvatarGenerator({
-                                          campaign,
-                                          campaignParams,
-                                          attributeConfig,
-                                          onlyView,
-                                          bgColor, 
-                                          enablePan
-                                        }: AvatarGeneratorProps) {
+  campaign,
+  campaignParams,
+  attributeConfig,
+  onlyView,
+  bgColor,
+  enablePan
+}: AvatarGeneratorProps) {
   return (<>
     <AvatarBuilder campaign={campaign}
-                   avatarBasePath={campaignParams?.armature ?? GLOBAL_VALUES.AvatarBase}
-                   campaignConfig={campaignParams?.config ?? {}}
-                   selectListFeatures={campaignParams?.features ?? []}
-                   selectListAccessories={campaignParams?.accessories ?? []}
-                   attributeConfig={attributeConfig}
-                   onlyView={onlyView}
-                   bgColor={bgColor}
-                   enablePan={enablePan}
+      avatarBasePath={campaignParams?.armature ?? GLOBAL_VALUES.AvatarBase}
+      campaignConfig={campaignParams?.config ?? {}}
+      selectListFeatures={campaignParams?.features ?? []}
+      selectListAccessories={campaignParams?.accessories ?? []}
+      attributeConfig={attributeConfig}
+      onlyView={onlyView}
+      bgColor={bgColor}
+      enablePan={enablePan}
     />
   </>);
 }
 
 export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = async (context) => {
-  const {builder, config, bg, ov, ep} = context.query;
+  const { builder, config, bg, ov, ep } = context.query;
 
   let parsedConfig: BasicData[] | undefined = undefined;
 

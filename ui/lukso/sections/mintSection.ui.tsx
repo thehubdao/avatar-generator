@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Fragment, useLayoutEffect, useRef, useState } from "react"
+import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock, fadeInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { BsArrowRepeat } from "react-icons/bs";
@@ -8,13 +8,18 @@ import SocialButtonsUI from "../common/socialButtons.ui";
 import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 import MintSectionModalUI from "../common/mintModal.ui";
+import { Signer, ethers } from "ethers";
+import { ConnectionStatus } from "../../../enums/web3";
 
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   reRoll: () => Promise<void>;
+  handleClaim: (address: string, signer: Signer) => Promise<void>;
+  signer:Signer | undefined
+  onConnect: (signer: Signer | undefined, status: ConnectionStatus) => void
 }
 
-export default function MintSectionUI({ setCurrentSection, reRoll }: MintSectionUIProps) {
+export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim,signer,onConnect }: MintSectionUIProps) {
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
@@ -40,6 +45,10 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
 
   const handleReRoll = async () => {
     if (isRolling) return;
+
+
+
+
     setIsRolling(true);
     await reRoll();
     setIsRolling(false);
@@ -90,10 +99,14 @@ export default function MintSectionUI({ setCurrentSection, reRoll }: MintSection
             </div>
           </TransparentBox>
         </button>
-        <button className="w-full h-fit" onClick={() => void gsapOutBlocks()}>
+        <button className="w-full h-fit" onClick={async () => {
+          if (!signer) return
+          const address = await signer.getAddress()
+          handleClaim(address, signer)
+        }}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
-              <p>Claim</p>
+              Claim
               <FaArrowRightLong className="text-base" />
             </div>
           </TransparentBox>

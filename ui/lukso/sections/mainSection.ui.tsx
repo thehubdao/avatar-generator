@@ -1,18 +1,27 @@
 import Image from "next/image";
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import TransparentBox from "../common/transparentBox.ui";
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDice } from "react-icons/fa6";
 import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
+import { Signer, ethers } from "ethers";
+import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
+import { ConnectionStatus } from "../../../enums/web3";
 
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
+  hasMinted: boolean
+  signer: Signer | undefined
+  etherProvider: ethers.BrowserProvider | undefined
+  onConnect: (signer: Signer | undefined, status: ConnectionStatus) => void
 }
 
-export default function MainSectionUI({ setCurrentSection }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, signer, etherProvider, onConnect }: MainSectionUIProps) {
+  console.log("SIGNER:" + signer)
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
+
 
   const gsapEnterBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
@@ -50,7 +59,7 @@ export default function MainSectionUI({ setCurrentSection }: MainSectionUIProps)
           <p className="text-center text-sm 2xl:text-base mx-20 pt-2">A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
         </TransparentBox>
 
-        <button className="w-full h-fit" onClick={() => void gsapOutBlocks()}>
+        {!hasMinted && signer && <button className="w-full h-fit" onClick={() => void gsapOutBlocks()}>
           <TransparentBox
             fullWidth
             border
@@ -63,7 +72,20 @@ export default function MainSectionUI({ setCurrentSection }: MainSectionUIProps)
               <FaDice className="text-black text-2xl" />
             </div>
           </TransparentBox>
-        </button>
+        </button>}
+        {!signer && etherProvider && <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={""} signer={signer}>      
+            <TransparentBox
+          fullWidth
+          border
+          backgroundColorClass="bg-white"
+          heightClass="h-[70px] 2xl:h-[85px]"
+          aditionalClass="flex-row"
+        >
+          <div className="flex items-center gap-3">
+            <p className="text-black text-lg 2xl:text-xl">Connect to Roll your Avatar </p>
+            <FaDice className="text-black text-2xl" />
+          </div>
+        </TransparentBox></ConnectWeb3Button>}
       </div>
 
       {/* Exclusive collection */}
