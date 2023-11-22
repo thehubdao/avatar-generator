@@ -5,8 +5,8 @@ export enum LuksoSections {
   Edit
 }
 
-export enum LuksoSocialLinks {
-  Instagram = 'https://www.instagram.com/lukso/',
-  Twitter = 'https://twitter.com/lukso_io',
-  Discord = 'https://discord.com/invite/lukso'
+export enum TheHubSocialLinks {
+  Instagram = 'https://www.instagram.com/thehub_dao/',
+  Twitter = 'https://twitter.com/thehub_dao',
+  Discord = 'https://discord.com/invite/J35NGdPWgq'
 }
