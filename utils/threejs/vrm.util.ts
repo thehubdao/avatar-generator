@@ -152,7 +152,6 @@ export function GenerateVrmMetaData(meta: VrmMetadata | undefined) {
 }
 
 export function GenerateVrmScene(model: Object3D) {
-  // TODO: Check how to force scale on sub objects without changing scale on those subobjects
   let scaleFactor = 1;
   
   // Create new scene, this one has the new structure
@@ -207,135 +206,30 @@ export function GenerateVrmScene(model: Object3D) {
   const leSkinnedMesh = new SkinnedMesh(avatarGeom, materialArray);
   leSkinnedMesh.name = "Avatar";
   leSkinnedMesh.userData.name = "Avatar";
-  
-  // actualBones.matrixAutoUpdate = false;
-  // leSkinnedMesh.matrixAutoUpdate = false;
-  
-  // leSkinnedMesh.scale.setScalar(scaleFactor);
-  // leSkinnedMesh.rotateX(degToRad(90));
-  // leSkinnedMesh.position.setScalar(0);
-  // leSkinnedMesh.updateMatrix();
-  // leSkinnedMesh.updateWorldMatrix(true, true)
-  //
-  // const pos1 = new Vector3();
-  // const rot1 = new Quaternion();
-  // const sca1 = new Vector3();
-  // leSkinnedMesh.matrixWorld.clone().decompose(pos1, rot1, sca1);
-  // console.log("Tranform: ", {pos1, rot1, sca1});
-  //
-  //
-  // leSkinnedMesh.geometry.applyMatrix4(leSkinnedMesh.matrix);
-  // leSkinnedMesh.scale.setScalar(1);
-  // leSkinnedMesh.rotation.set(0, 0, 0);
-  // leSkinnedMesh.position.setScalar(0);
-  // leSkinnedMesh.updateMatrix();
-  //
-  // leSkinnedMesh.updateWorldMatrix(true, true)
-  // const pos3 = new Vector3();
-  // const rot3 = new Quaternion();
-  // const sca3 = new Vector3();
-  // leSkinnedMesh.matrixWorld.clone().decompose(pos3, rot3, sca3);
-  // console.log("KEK: ", {pos3, rot3, sca3});
-  // leSkinnedMesh.matrixAutoUpdate = false;
-  
-  // actualBones.rotateOnWorldAxis(new Vector3(1, 0, 0), degToRad(90));
-  // actualBones.updateMatrix();
-  // actualBones.scale.setScalar(scaleFactor);
-  // actualBones.position.setX(0);
-  // actualBones.position.setZ(0);
-  // actualBones.position.setY();
-  // actualBones.updateMatrix();
-
-  // const scull = 0.01;
-  // const matrixScaleOG = new Matrix4();
-  // matrixScaleOG.makeScale(scull, scull, scull);
-  // leSkinnedMesh.scale.applyMatrix4(matrixScaleOG);
 
   const newSkeleton = new Skeleton(boneArray, matrixCopy);
   const identity = new Matrix4();
   leSkinnedMesh.bind(newSkeleton, identity);
   
-  //Create a matrix
+  // Create a matrix
   const matrix = new Matrix4();
-  //Rotate the matrix
+  // Rotate the matrix
   matrix.makeRotationX(Math.PI / 2);
-
-  //rotate the object using the matrix
+  // rotate the object using the matrix
   actualBones.position.applyMatrix4(matrix);
-
-  leSkinnedMesh.geometry.computeBoundingBox();
-  console.log(leSkinnedMesh.geometry.boundingBox?.clone());
   
+  // Create scale matrix
   const matrixScale = new Matrix4();
-  matrixScale.makeScale(0.01, 0.01, 0.01);
+  matrixScale.makeScale(scaleFactor, scaleFactor, scaleFactor);
+  
+  // Scale bones with scale matrix
   actualBones.scale.applyMatrix4(matrixScale);
   actualBones.position.applyMatrix4(matrixScale);
   // leSkinnedMesh.scale.applyMatrix4(matrixScale);
   
-  // leSkinnedMesh.geometry.computeBoundingBox();
-  // console.log(leSkinnedMesh.geometry.);
-  
+  // Rotate bones on own axis
   actualBones.rotateX(Math.PI / 2);
   // actualBones.rotateY(Math.PI);
-  
-  // const pivot = new Object3D();
-  // pivot.add(actualBones);
-  // pivot.add(leSkinnedMesh);
-  //
-  // pivot.scale.setScalar(0.01);
-  // pivot.rotateX(degToRad(90));
-  // pivot.updateMatrix();
-  // pivot.updateMatrixWorld(true);
-  // pivot.updateWorldMatrix(true, true);
-  
-  // leSkinnedMesh.scale.setScalar(scaleFactor);
-  // leSkinnedMesh.rotateX(degToRad(90));
-  // leSkinnedMesh.updateMatrix();
-  // leSkinnedMesh.geometry.applyMatrix4(leSkinnedMesh.matrix);
-
-  // leSkinnedMesh.updateMatrix();
-
-  // actualBones.scale.setScalar(0.01);
-  // actualBones.rotateX(degToRad(90));
-  // actualBones.position.setScalar(0);
-  // actualBones.updateMatrix();
-
-  // actualBones.scale.setScalar(0.01);
-  // actualBones.rotateX(degToRad(90));
-  // actualBones.position.setScalar(0);
-  // actualBones.updateMatrix();
-
-  // leSkinnedMesh.updateMatrix();
-  // leSkinnedMesh.geometry.applyMatrix4(leSkinnedMesh.matrix);
-  // leSkinnedMesh.scale.setScalar(1);
-  // leSkinnedMesh.position.setScalar(0);
-  // leSkinnedMesh.rotation.set(0, 0, 0);
-  // leSkinnedMesh.updateMatrix();
-
-  // const armatureGroup = new Group();
-  // armatureGroup.name = "Main";
-  // armatureGroup.userData.name = "Main";
-  // armatureGroup.scale.setScalar(0.01);
-  // armatureGroup.rotateX(degToRad(90));
-  // armatureGroup.rotateZ(degToRad(180));
-
-  // armatureGroup.children.push(actualBones);
-  // armatureGroup.children.push(leSkinnedMesh);
-  // armatureGroup.add(actualBones);
-  // armatureGroup.add(leSkinnedMesh);
-
-  // sceneReal.children.push(armatureGroup);
-
-  // sceneReal.children.push(actualBones);
-  // sceneReal.children.push(leSkinnedMesh);
-
-  // sceneReal.add(actualBones);
-  // sceneReal.add(leSkinnedMesh);
-
-
-  // actualBones.geometry.applyMatrix4(leSkinnedMesh.matrix);
-  // actualBones.scale.setScalar(1);
-  // actualBones.updateMatrix();
 
   sceneReal.children.push(actualBones);
   sceneReal.children.push(leSkinnedMesh);
