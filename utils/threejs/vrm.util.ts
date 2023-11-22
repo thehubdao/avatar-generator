@@ -229,7 +229,7 @@ export function GenerateVrmScene(model: Object3D) {
   
   // Rotate bones on own axis
   actualBones.rotateX(Math.PI / 2);
-  // actualBones.rotateY(Math.PI);
+  actualBones.rotateY(Math.PI);
 
   sceneReal.children.push(actualBones);
   sceneReal.children.push(leSkinnedMesh);
