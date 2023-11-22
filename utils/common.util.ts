@@ -1,5 +1,6 @@
-﻿import {EmailResult, Module} from "../enums/common.enum";
+﻿import {CommonErrorCode, EmailResult, Module} from "../enums/common.enum";
 import {GLOBAL_VALUES} from "../constants/common.constant";
+import {Result} from "../types/common.type";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
@@ -72,6 +73,13 @@ export function CastStringToInteger(toCast: string) {
   return isNaN(num) ? undefined : num | 0;
 }
 
+export function CastStringToNum(toCast: string): Result<number> {
+  const num = +toCast;
+  return isNaN(num) ?
+    {success: false, errMessage: `Input string: "${toCast}", can't be cast as number!`, errCode: CommonErrorCode.WrongInfo} :
+    {success: true, value: num};
+}
+
 export function RandomNumBetween(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
@@ -113,4 +121,11 @@ export function GetKeyByValue<TEnum extends object>(value: string, enumRef: TEnu
 
 export function Raise(msg: string): never {
   throw new Error(msg);
+}
+
+export function GetDateNum() {
+  return new Date().toLocaleString("sv")
+    .replaceAll("-", "")
+    .replace(" ", "")
+    .replaceAll(":", "");
 }

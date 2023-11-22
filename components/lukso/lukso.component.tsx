@@ -206,8 +206,9 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
-      if (exportData.model != undefined)
-        await SaveFile(exportData.model, 'model.glb');
+      if (exportData.model.success)
+        await SaveFile(exportData.model.value, 'model.glb');
+      
       await SaveFile(exportData.picture, 'picture.png');
     }
   }

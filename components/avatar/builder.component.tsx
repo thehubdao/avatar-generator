@@ -44,6 +44,7 @@ import AvatarEditor, {
 import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "./viewer.component";
 import {Result} from "../../types/common.type";
 import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../constants/common.constant";
+import {GenerateVrmMetaData} from "../../utils/threejs/vrm.util";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -140,7 +141,7 @@ export default function AvatarBuilder({
     if (!isOnIFrame) return LogError(Module.AvatarGenerator, "Not on IFrame, subscribe if you forgot!");
     if (!params) return LogError(Module.AvatarGenerator, "Missing feature option!");
 
-    if (params.detail && params.detail.startsWith('http')) {
+    if (params.detail?.startsWith('http')) {
       if (params.id.endsWith(GLOBAL_VALUES.AccEnd)) {
         await ChangeAccessory(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id, campaignConfig.changeMaterial);
       } else {
@@ -364,6 +365,9 @@ export default function AvatarBuilder({
   }
 
   async function exportModel() {
+    // TODO: Add metadata from user
+    GenerateVrmMetaData(undefined);
+    
     exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
     const [picturePromise, modelPromise] = await Promise.all([
       TakeCanvasPicture(),
@@ -375,8 +379,8 @@ export default function AvatarBuilder({
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
-      if (exportData.model != undefined)
-        await SaveFile(exportData.model, 'model.glb');
+      if (exportData.model.success)
+        await SaveFile(exportData.model.value, 'model.glb');
 
       await SaveFile(exportData.picture, 'picture.png');
     }
