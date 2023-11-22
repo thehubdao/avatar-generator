@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef } from "react";
 import TransparentBox from "../common/transparentBox.ui";
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDice } from "react-icons/fa6";
@@ -32,7 +32,12 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
   const gsapOutBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
     translationInOutBlock(luksoAvatarRef.current, DURATION_ANIMATION_SECTION, true);
-    translationInOutBlock(exclusiveCollectionRef.current, DURATION_ANIMATION_SECTION, true, true, () => setCurrentSection(LuksoSections.Mint));
+    translationInOutBlock(exclusiveCollectionRef.current, DURATION_ANIMATION_SECTION, true, true, () => {
+      if (!hasMinted)
+        setCurrentSection(LuksoSections.Mint);
+      else
+        setCurrentSection(LuksoSections.Edit);
+    });
   }
 
   useLayoutEffect(() => { void gsapEnterBlocks() }, [])
@@ -73,19 +78,19 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
             </div>
           </TransparentBox>
         </button>}
-        {!signer && etherProvider && <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={""} signer={signer}>      
-            <TransparentBox
-          fullWidth
-          border
-          backgroundColorClass="bg-white"
-          heightClass="h-[70px] 2xl:h-[85px]"
-          aditionalClass="flex-row"
-        >
-          <div className="flex items-center gap-3">
-            <p className="text-black text-lg 2xl:text-xl">Connect to Roll your Avatar </p>
-            <FaDice className="text-black text-2xl" />
-          </div>
-        </TransparentBox></ConnectWeb3Button>}
+        {!signer && etherProvider && <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={""} signer={signer}>
+          <TransparentBox
+            fullWidth
+            border
+            backgroundColorClass="bg-white"
+            heightClass="h-[70px] 2xl:h-[85px]"
+            aditionalClass="flex-row"
+          >
+            <div className="flex items-center gap-3">
+              <p className="text-black text-lg 2xl:text-xl">Connect to Roll your Avatar </p>
+              <FaDice className="text-black text-2xl" />
+            </div>
+          </TransparentBox></ConnectWeb3Button>}
       </div>
 
       {/* Exclusive collection */}
