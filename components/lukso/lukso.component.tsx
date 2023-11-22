@@ -256,7 +256,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   }
 
   async function handleClaim(address: string) {
-    if (!singleData) return
+    if (!singleData) return { message: "Error claiming citizen, please try again later!", success: false }
     const { features } = singleData
     const tokenMetadata: TokenMetadata = {
       name: "",
@@ -265,20 +265,27 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
       body: {}
     }
 
-    for (let feature of features) {
-      const { val } = feature
-      const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as any
-      tokenMetadata.body[bodyIndex] = val as BodyPart
-    }
+    try {
+      for (let feature of features) {
+        const { val } = feature
+        const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as any
+        tokenMetadata.body[bodyIndex] = val as BodyPart
+      }
 
-    const metadataUrl = await uploadMetadata(tokenMetadata)
-    await mint(address, metadataUrl)
-    await setTokensMetadata(address)
+      const metadataUrl = await uploadMetadata(tokenMetadata)
+      await mint(address, metadataUrl)
+      await setTokensMetadata(address)
+
+      return { message: "Your citizen has been created!", success: true }
+    } catch (error) {
+      return { message: "Looks like you've already claimed your avatar! Remember, each explorer gets just one.", success: false }
+    }
   }
 
-  function onConnect(signer: Signer | undefined, status: ConnectionStatus) {
+  function onConnect(signer: Signer | undefined) {
     setSigner(signer)
   }
+
   return (
     <MobileLayout>
       <div className="w-full h-screen bg-[#FABCE2] flex flex-col">
@@ -359,7 +366,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           setCurrentSection={(changeSectionValue) => setCurrentSection(changeSectionValue)}
           getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
           exportModel={() => exportModel()}
-          handleClaim={handleClaim} hasMinted={hasMinted} signer={signer} onConnect={onConnect} etherProvider={etherProvider}/>
+          handleClaim={handleClaim} hasMinted={hasMinted} signer={signer} onConnect={onConnect} etherProvider={etherProvider} />
       </div>
     </MobileLayout>
   )
