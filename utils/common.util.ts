@@ -122,3 +122,10 @@ export function GetKeyByValue<TEnum extends object>(value: string, enumRef: TEnu
 export function Raise(msg: string): never {
   throw new Error(msg);
 }
+
+export function GetDateNum() {
+  return new Date().toLocaleString("sv")
+    .replaceAll("-", "")
+    .replace(" ", "")
+    .replaceAll(":", "");
+}
