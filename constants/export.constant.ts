@@ -199,7 +199,7 @@ export const VRM_HUMAN_BONES_DEFAULT: VrmHumanBone[] = [
   }
 ];
 
-export const VRM_HUMAN_BONES_DEFAULT_LENGHT = VRM_HUMAN_BONES_DEFAULT.length;
+export const VRM_HUMAN_BONES_DEFAULT_LENGTH = VRM_HUMAN_BONES_DEFAULT.length;
 
 export const VRM_BASE: VrmStructure = {
   extensions: {
