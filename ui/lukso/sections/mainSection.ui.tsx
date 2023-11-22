@@ -1,27 +1,30 @@
 import Image from "next/image";
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import TransparentBox from "../common/transparentBox.ui";
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDice } from "react-icons/fa6";
 import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 import { Signer, ethers } from "ethers";
-import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 import { ConnectionStatus } from "../../../enums/web3";
-
+import ConnectModalUI from "../common/conectModal";
+import { AiOutlineLoading } from "react-icons/ai";
+import { FaWallet } from "react-icons/fa";
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   hasMinted: boolean
   signer: Signer | undefined
   etherProvider: ethers.BrowserProvider | undefined
   onConnect: (signer: Signer | undefined, status: ConnectionStatus) => void
+  isGettingInfoAboutHasMinted: boolean
 }
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, signer, etherProvider, onConnect }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, signer, etherProvider, onConnect, isGettingInfoAboutHasMinted }: MainSectionUIProps) {
   console.log("SIGNER:" + signer)
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
+  const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
   const gsapEnterBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
@@ -64,21 +67,43 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
           <p className="text-center text-sm 2xl:text-base mx-20 pt-2">A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
         </TransparentBox>
 
-        {!hasMinted && signer && <button className="w-full h-fit" onClick={() => void gsapOutBlocks()}>
-          <TransparentBox
-            fullWidth
-            border
-            backgroundColorClass="bg-white"
-            heightClass="h-[70px] 2xl:h-[85px]"
-            aditionalClass="flex-row"
-          >
-            <div className="flex items-center gap-3">
-              <p className="text-black text-lg 2xl:text-xl">Roll your Avatar </p>
-              <FaDice className="text-black text-2xl" />
-            </div>
-          </TransparentBox>
-        </button>}
-        {!signer && etherProvider && <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={"w-full mx-0 p-0"} signer={signer}>
+        {(signer) && (
+          <>
+            {!isGettingInfoAboutHasMinted ? (
+              <button className="w-full h-fit" onClick={() => void gsapOutBlocks()}>
+                <TransparentBox
+                  fullWidth
+                  border
+                  backgroundColorClass="bg-white"
+                  heightClass="h-[70px] 2xl:h-[85px]"
+                  aditionalClass="flex-row"
+                >
+                  <div className="flex items-center gap-3">
+                    <p className="text-black text-lg 2xl:text-xl">Roll your Avatar </p>
+                    <FaDice className="text-black text-2xl" />
+                  </div>
+                </TransparentBox>
+              </button>
+            ) : (
+              <div className="w-full h-fit cursor-wait">
+                <TransparentBox
+                  fullWidth
+                  border
+                  backgroundColorClass="bg-white"
+                  heightClass="h-[70px] 2xl:h-[85px]"
+                  aditionalClass="flex-row"
+                >
+                  <div className="flex items-center gap-3 text-black text-lg 2xl:text-xl">
+                    <p>Obtaining wallet information</p>
+                    <AiOutlineLoading className="animate-spin" />
+                  </div>
+                </TransparentBox>
+              </div>
+            )}
+          </>
+        )
+        }
+        {!signer && etherProvider && <button className="w-full h-fit" onClick={() => setIsConnecting(true)}>
           <TransparentBox
             fullWidth
             border
@@ -88,11 +113,20 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
           >
             <div className="flex items-center gap-3">
               <p className="text-black text-lg 2xl:text-xl">Connect to Roll your Avatar </p>
-              <FaDice className="text-black text-2xl" />
+              <FaWallet className="text-black text-2xl"/>
             </div>
           </TransparentBox>
-        </ConnectWeb3Button>}
+        </button>}
       </div>
+
+      {
+        isConnecting && <ConnectModalUI
+          onConnect={onConnect}
+          etherProvider={etherProvider}
+          signer={signer}
+          setIsConnecting={(value) => setIsConnecting(value)}
+        />
+      }
 
       {/* Exclusive collection */}
       <div ref={exclusiveCollectionRef} className="flex h-[70%] gap-3 translate-x-full">
@@ -155,6 +189,6 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
           </TransparentBox>
         </div>
       </div>
-    </section>
+    </section >
   )
 }

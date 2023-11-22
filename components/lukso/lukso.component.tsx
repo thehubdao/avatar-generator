@@ -34,7 +34,6 @@ import { BodyPart } from "../../types/avatar.type";
 import { getIPFSData, getTokensMetadata, mint } from "../../utils/web3/lukso.util";
 import { Signer, ethers } from "ethers";
 import ConnectWeb3Button from "../web3/connectWeb3.component";
-import { ConnectionStatus } from "../../enums/web3";
 
 const exportData: ExportInterface = { attributes: [] };
 let optionList: FeatureInterface[] | undefined;
@@ -59,9 +58,12 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
   const [skinColor, setSkinColor] = useState<string>(campaignParams?.config.skin?.defColor ?? 'FFFFFF');
   const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.current[0].displayName ?? '');
+
   // Web3 state
   const [signer, setSigner] = useState<Signer>()
   const [hasMinted, setHasMinted] = useState<any>(undefined)
+  const [addressToShow, setAddressToShow] = useState<string>("");
+  const [isGettingInfoAboutHasMinted, setIsGettingInfoAboutHasMinted] = useState<boolean>(false);
 
   const [etherProvider, setEtherProvider] = useState<ethers.BrowserProvider>();
 
@@ -77,7 +79,11 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     const setTokensMetadataPromise = async () => {
       if (!signer) return
       const address = await signer.getAddress()
+
+      setAddressToShow(address)
+      setIsGettingInfoAboutHasMinted(true)
       await setTokensMetadata(address)
+      setIsGettingInfoAboutHasMinted(false)
     }
     setTokensMetadataPromise()
   }, [signer])
@@ -283,7 +289,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   }
 
   function onConnect(signer: Signer | undefined) {
-    setSigner(signer)
+    setSigner(signer);
   }
 
   return (
@@ -307,24 +313,36 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
               height={24}
               alt="Lukso icon"
             />
-            {etherProvider && <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={'border-l-2 font-bold z-10'} signer={signer} ><>Connect Wallet</></ConnectWeb3Button>}
+            {etherProvider && <>
+              {signer ? (
+                <div className="h-full w-36 flex justify-center items-center border-l-2 border-white px-2">
+                  <p className="truncate h-fit text-white">{`${addressToShow}`}</p>
+                </div>
+              ) : (
+                <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={'border-l-2 border-white font-bold z-10 text-white'} signer={signer} >
+                  <>Connect Wallet</>
+                </ConnectWeb3Button>
+              )}
+            </>}
           </div>
-        </TransparentBoxUI>
+        </TransparentBoxUI >
         {/* CANVAS WRAPPER */}
         <div
-          className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+          className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out" >
           {/* CANVAS BACKGROUND */}
-          <div className="w-full h-screen absolute bg-opacity-0" />
+          < div className="w-full h-screen absolute bg-opacity-0" />
           {/* CANVAS */}
-          {campaignParams && <AvatarEditor
-            avatarBasePath={campaignParams.armature}
-            editMode={isEditModeSelected}
-            onReady={() =>
-              onAvatarBuilderReady()
-            }
-            hasMinted={hasMinted}
-          />}
-        </div>
+          {
+            campaignParams && <AvatarEditor
+              avatarBasePath={campaignParams.armature}
+              editMode={isEditModeSelected}
+              onReady={() =>
+                onAvatarBuilderReady()
+              }
+              hasMinted={hasMinted}
+            />
+          }
+        </div >
         <div className="fixed z-10">
           <HudComponent
             selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
@@ -366,9 +384,11 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           setCurrentSection={(changeSectionValue) => setCurrentSection(changeSectionValue)}
           getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
           exportModel={() => exportModel()}
-          handleClaim={handleClaim} hasMinted={hasMinted} signer={signer} onConnect={onConnect} etherProvider={etherProvider} />
-      </div>
-    </MobileLayout>
+          handleClaim={handleClaim} hasMinted={hasMinted} signer={signer} onConnect={onConnect} etherProvider={etherProvider}
+          isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
+        />
+      </div >
+    </MobileLayout >
   )
 }
 

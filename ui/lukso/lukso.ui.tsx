@@ -4,7 +4,6 @@ import MintSectionUI from "./sections/mintSection.ui";
 import LoadingUI from "./sections/loadingSection.ui";
 import { LuksoSections } from "../../enums/lukso/common.enum";
 import { Signer, ethers } from "ethers";
-import { useEffect, useState } from "react";
 import { ConnectionStatus } from "../../enums/web3";
 
 interface LuksoUIProps {
@@ -20,6 +19,7 @@ interface LuksoUIProps {
   hasMinted: boolean
   signer: Signer | undefined
   etherProvider: ethers.BrowserProvider | undefined
+  isGettingInfoAboutHasMinted: boolean
 }
 
 export default function LuksoUI({
@@ -34,14 +34,15 @@ export default function LuksoUI({
   hasMinted,
   signer,
   onConnect,
-  etherProvider
+  etherProvider,
+  isGettingInfoAboutHasMinted
 }: LuksoUIProps) {
 
 
   return (
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
-      {(currentSection === LuksoSections.Main) && <MainSectionUI onConnect={onConnect} setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} signer={signer} etherProvider={etherProvider} />}
+      {(currentSection === LuksoSections.Main) && <MainSectionUI onConnect={onConnect} setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} signer={signer} etherProvider={etherProvider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}/>}
       {(currentSection === LuksoSections.Mint) && <MintSectionUI onConnect={onConnect} setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} signer={signer} />}
       {(currentSection === LuksoSections.Edit) && <EditSectionUI setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
     </div>
