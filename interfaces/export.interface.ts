@@ -38,15 +38,14 @@ export interface GltfScene {
   nodes: number[];
 }
 
-// TODO: fix type?
 export interface VrmMaterialProperty {
   name: string;
-  shader: VrmTextureShader;
-  keywordMap: {};
-  tagMap: {};
-  floatProperties: {};
-  vectorProperties: {};
-  textureProperties: {};
+  shader: VrmTextureShader;  
+  keywordMap: Record<string, boolean>;
+  tagMap: Record<string, string>;
+  floatProperties: Record<string, number>;
+  vectorProperties: Record<string, number[]>;
+  textureProperties: Record<string, number>;
 }
 
 export interface VrmHumanBone {
