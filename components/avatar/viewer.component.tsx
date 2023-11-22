@@ -262,9 +262,7 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
   };
 
   return (
-    <>
-      <div className={`relative h-full w-full ${editMode ? 'xl:w-[42%]' : ''} xl:overflow-hidden xl:flex xl:justify-center transition-all duration-300`} ref={threeCanvas} onMouseDown={() => stopCamMovement()} />
-    </>
+    <div className={`relative w-full ${editMode ? 'xl:w-[42%] h-[calc(100vh-256px)] xl:h-full' : 'h-full'} overflow-hidden flex justify-center items-center transition-all duration-300`} ref={threeCanvas} onMouseDown={() => stopCamMovement()} />
   );
 }
-//#endregion
+//#endregion 

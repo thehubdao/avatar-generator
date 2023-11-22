@@ -29,7 +29,7 @@ import {
 } from "../../utils/api.util";
 import { SaveFile } from "../../utils/exporter.util";
 import AGLoading from "../../ui/common/ag-loading.component";
-import HudComponent from "../../ui/avatar/hud.component";
+import HudUI from "../../ui/avatar/hud.ui";
 import AvatarEditor, {
   ChangeAccessory,
   ChangeFeature, ChangeSkinColor,
@@ -420,7 +420,7 @@ export default function AvatarBuilder({
       {isLoading ? <></> :
         <>
           {!onlyView &&
-            <HudComponent
+            <HudUI
               selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
 
               editModeSelected={isEditModeSelected}

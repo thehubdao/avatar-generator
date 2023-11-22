@@ -42,6 +42,9 @@
           'flat---inset-soft': '2px 2px 4px #E9ECF6, -2px -2px 4px #ffffff, inset 2px 2px 4px #E9ECF6, inset -2px -2px 4px #ffffff',
           'flat---inset-medium': '4px 4px 8px #E9ECF6, -4px -4px 8px #ffffff, inset 4px 4px 8px #E9ECF6, inset -4px -4px 8px #ffffff',
           'flat---inset-hard': '6px 6px 12px #E9ECF6, -6px -6px 12px #ffffff, inset 6px 6px 12px #E9ECF6, inset -6px -6px 12px #ffffff'
+        },
+        transitionProperty: {
+          'size': 'width, height',
         }
       },
     }
