@@ -138,7 +138,7 @@ export async function SetEnvironment(bgMap?: string, lightMap?: string, skyboxCo
 }
 
 export async function GetAvatarGLB() {
-  return ExportModelGlb(_avatar);
+  return ExportModelGlb(_avatar, _startPose);
 }
 
 export async function GetAvatarVRM() {

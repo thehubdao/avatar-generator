@@ -14,45 +14,54 @@ class ExporterUtil {
   private static _instance: ExporterUtil;
   private _gltfExporter: GLTFExporter | undefined;
   private _vrmExporter: GLTFExporter | undefined;
-    
+
   public static Instance() {
-    if(ExporterUtil._instance === undefined)
+    if (ExporterUtil._instance === undefined)
       ExporterUtil._instance = new ExporterUtil();
-    
+
     return ExporterUtil._instance;
   }
-  
+
   public GltfExporter() {
-    if(this._gltfExporter == undefined) {
+    if (this._gltfExporter == undefined) {
       this._gltfExporter = new GLTFExporter();
     }
-    
+
     return this._gltfExporter;
   }
-  
+
   public VrmExporter() {
     if (this._vrmExporter == undefined) {
       this._vrmExporter = new GLTFExporter();
       this._vrmExporter.register(writer => new GLTFExporterAddVrmData(writer));
     }
-    
+
     return this._vrmExporter;
   }
 }
 
-export async function ExportModelGlb(model: GLTF | undefined): Promise<Result<Blob>> {
+export async function ExportModelGlb(model: GLTF | undefined, pose?: Record<string, BoneMatrix | undefined>) {
+  return ExportObjectGlb(model?.scene, pose);
+}
+
+export async function ExportObjectGlb(object: Object3D | undefined, pose?: Record<string, BoneMatrix | undefined>): Promise<Result<Blob>> {
   try {
-    if (model == undefined)
+    if (object == undefined)
       Raise("Model can't be undefined if trying to export!");
 
     const exporter = ExporterUtil.Instance().GltfExporter();
-    // CleanModelForExport(model); // TODO: use at some point
-    const out = await exporter.parseAsync(model.scene, {
-      animations: model.animations,
-      binary: true,
-    });
 
-    return {success: true, value: new Blob([out as ArrayBuffer], {type: 'application/octet-stream'})};
+    const sceneClone = clone(object);
+    SetPose(sceneClone, pose);
+
+    // CleanModelForExport(model);
+    const out = await exporter.parseAsync(sceneClone, {
+      animations: [],
+      binary: true,
+      trs: true,
+    }) as ArrayBuffer;
+
+    return {success: true, value: new Blob([out], {type: 'application/octet-stream'})};
   } catch (e) {
     const err = e as Error;
     void LogError(Module.ExporterUtil, err.message, err);
@@ -77,11 +86,10 @@ export async function ExportObjectGltf(object: Object3D | undefined): Promise<Re
 
     const output = JSON.stringify(gltf, null, 2);
     return {success: true, value: new Blob([output], {type: 'text/plain'})};
-  }
-  catch (e) {
+  } catch (e) {
     const err = e as Error;
     void LogError(Module.ExporterUtil, err.message, err);
-    return {success: false, errMessage: err.message, errCode:  CommonErrorCode.InternalError};
+    return {success: false, errMessage: err.message, errCode: CommonErrorCode.InternalError};
   }
 }
 
@@ -99,7 +107,7 @@ export async function ExportObjectVrm(object: Object3D | undefined, pose?: Recor
     SetPose(sceneClone, pose);
 
     const vrmAvatar = GenerateVrmScene(sceneClone);
-    
+
     // CleanModelForExport(model);
     let vrm = await exporter.parseAsync(vrmAvatar, {
       animations: [],
@@ -118,20 +126,20 @@ export async function ExportObjectVrm(object: Object3D | undefined, pose?: Recor
 export async function SaveFile(blob: Blob | undefined, fileName: string) {
   if (blob == undefined)
     return LogError(Module.ExporterUtil, "Missing blob to save as a file!");
-  
+
   const link = document.createElement('a');
   link.style.display = 'none';
   link.href = URL.createObjectURL(blob);
   link.download = fileName;
   document.body.appendChild(link);
   link.click();
-  
+
   await Delay(100);
   link.remove();
 }
 
 export async function SaveArrayBuffer(buffer: ArrayBuffer, fileName: string) {
-  await SaveFile(new Blob([buffer], { type: 'application/octet-stream' }), fileName);
+  await SaveFile(new Blob([buffer], {type: 'application/octet-stream'}), fileName);
 }
 
 export async function SaveString(text: string, fileName: string) {
