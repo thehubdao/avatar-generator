@@ -97,9 +97,9 @@ export const MIXAMO_BONE = [
 ] as const;
 
 export const VRM_META_DEFAULT: VrmMetadata = {
-  title: "",
-  version: "",
-  author: "",
+  title: "The Citizens",
+  version: "0.1",
+  author: "The Hub Studios",
   contactInformation: "",
   reference: "",
   allowedUserName: "OnlyAuthor",
@@ -108,7 +108,7 @@ export const VRM_META_DEFAULT: VrmMetadata = {
   commercialUssageName: "Disallow",
   otherPermissionUrl: "",
   licenseName: "Redistribution_Prohibited",
-  otherLicenseUrl: ""
+  otherLicenseUrl: "",
 } as const;
 
 export const VRM_HUMAN_BONES_DEFAULT: VrmHumanBone[] = [
