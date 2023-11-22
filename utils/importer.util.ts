@@ -49,9 +49,17 @@ function ParseAsync(array: ArrayBuffer): Promise<GLTF> {
   });
 }
 
-function LoadVrmAsync(vrmLoc: string) {
-  const loader = ImporterUtil.Instance().GetVrmLoaderInstance();
-  return loader.loadAsync(vrmLoc);
+export async function LoadVrmAsync(vrmLoc: string): Promise<Result<GLTF>> {
+  try {
+    const loader = ImporterUtil.Instance().GetVrmLoaderInstance();
+    const vrm = await loader.loadAsync(vrmLoc);
+    return {success: true, value: vrm};
+  }
+  catch (e) {
+    const msg = "Error loading VRM asset!";
+    void LogError(Module.Importer, msg);
+    return {success: false, errMessage: msg, errCode: CommonErrorCode.InternalError};
+  }
 }
 
 export async function LoadGltfModel(url: string): Promise<GLTF> {
