@@ -78,7 +78,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
             </div>
           </TransparentBox>
         </button>}
-        {!signer && etherProvider && <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={""} signer={signer}>
+        {!signer && etherProvider && <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={"w-full mx-0 p-0"} signer={signer}>
           <TransparentBox
             fullWidth
             border
@@ -90,7 +90,8 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
               <p className="text-black text-lg 2xl:text-xl">Connect to Roll your Avatar </p>
               <FaDice className="text-black text-2xl" />
             </div>
-          </TransparentBox></ConnectWeb3Button>}
+          </TransparentBox>
+        </ConnectWeb3Button>}
       </div>
 
       {/* Exclusive collection */}

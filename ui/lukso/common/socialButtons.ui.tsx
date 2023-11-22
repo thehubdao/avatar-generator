@@ -1,18 +1,18 @@
 import Link from "next/link";
 import { FaDiscord, FaInstagram, FaXTwitter } from "react-icons/fa6";
-import { LuksoSocialLinks } from "../../../enums/lukso/common.enum";
+import { TheHubSocialLinks } from "../../../enums/lukso/common.enum";
 
 const socialMedia = [{
   alt: 'twitter icon',
-  link: LuksoSocialLinks.Twitter,
+  link: TheHubSocialLinks.Twitter,
   icon: <FaXTwitter size={25} />
 }, {
   alt: 'instagram icon',
-  link: LuksoSocialLinks.Instagram,
+  link: TheHubSocialLinks.Instagram,
   icon: <FaInstagram size={25} />
 }, {
   alt: 'discord icon',
-  link: LuksoSocialLinks.Discord,
+  link: TheHubSocialLinks.Discord,
   icon: <FaDiscord size={25} />
 }];
 
