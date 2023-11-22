@@ -28,7 +28,7 @@ export default function UserControlComponent() {
   //** Retrieves the user list data from Firebase.
   async function getUserListData() {
     const userData = await GetUserList();
-    setUserList(userData ?? []);
+    setUserList(userData.success ? userData.value : []);
   }
 
   /**

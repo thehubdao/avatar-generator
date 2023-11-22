@@ -50,25 +50,26 @@ export const getServerSideProps: GetServerSideProps<AvatarSimplePageProps> = asy
   // if campaign is not campaign throw 404
   if (campaign == undefined) return { notFound: true };
 
-  const campaigns = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
-  const isCampaign = campaigns == undefined ? false : campaigns.some(c => c === campaign);
+  const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
+  const isCampaign = campaignsResult.success ? campaignsResult.value.some(c => c === campaign) : false;
   if (!isCampaign) return { notFound: true };
   
   // Parse combination to number
   const parsedCombination = combination != undefined ? CastStringToInteger(combination) : undefined;
   
   // Get campaign configuration
-  const campaignParameters = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
+  const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
+  if (!campaignParams.success) return { notFound: true };
 
   const returnProps: AvatarSimplePageProps = {
     campaign,
     combination: parsedCombination,
-    featureList: campaignParameters?.features ?? [],
-    avatarBasePath: campaignParameters?.armature ?? GLOBAL_VALUES.AvatarBase,
-    defaultAnimation: campaignParameters?.config?.defAnimation,
-    defaultSkinTone: campaignParameters?.config?.skin?.defColor,
-    defaultCamPos: campaignParameters?.config?.defCam,
-    changeMaterial: campaignParameters?.config?.changeMaterial,
+    featureList: campaignParams.value.features ?? [],
+    avatarBasePath: campaignParams.value.armature ?? GLOBAL_VALUES.AvatarBase,
+    defaultAnimation: campaignParams.value.config?.defAnimation,
+    defaultSkinTone: campaignParams.value.config?.skin?.defColor,
+    defaultCamPos: campaignParams.value.config?.defCam,
+    changeMaterial: campaignParams.value.config?.changeMaterial,
   };
 
   return {

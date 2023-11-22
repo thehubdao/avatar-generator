@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+
+@import url('./lukso/spin.css');
+
 body {
   background-color: #F1F5F9;
 }

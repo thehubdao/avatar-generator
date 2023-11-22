@@ -7,23 +7,27 @@ import { FaArrowRightLong } from "react-icons/fa6";
 import SocialButtonsUI from "../common/socialButtons.ui";
 import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
-import { Signer, ethers } from "ethers";
+import MintSectionModalUI from "../common/mintModal.ui";
+import { Signer } from "ethers";
 import { ConnectionStatus } from "../../../enums/web3";
 
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   reRoll: () => Promise<void>;
-  handleClaim: (address: string, signer: Signer) => Promise<void>;
-  signer:Signer | undefined
-  onConnect: (signer: Signer | undefined, status: ConnectionStatus) => void
+  handleClaim: (address: string, signer: Signer) => Promise<{ message: string, success: boolean }>;
+  signer: Signer | undefined;
+  onConnect: (signer: Signer | undefined, status: ConnectionStatus) => void;
 }
 
-export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim,signer,onConnect }: MintSectionUIProps) {
+export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, signer, onConnect }: MintSectionUIProps) {
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
 
   const [isRolling, setIsRolling] = useState<boolean>(false);
+  const [isMinting, setIsMinting] = useState<boolean>(false);
+
+  useLayoutEffect(() => { void gsapEnterBlocks(); }, [])
 
   const gsapEnterBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
@@ -39,14 +43,8 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim,s
     fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION, true, () => setCurrentSection(LuksoSections.Edit));
   }
 
-  useLayoutEffect(() => { void gsapEnterBlocks(); }, [])
-
   const handleReRoll = async () => {
     if (isRolling) return;
-
-
-
-
     setIsRolling(true);
     await reRoll();
     setIsRolling(false);
@@ -97,11 +95,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim,s
             </div>
           </TransparentBox>
         </button>
-        <button className="w-full h-fit" onClick={async () => {
-          if (!signer) return
-          const address = await signer.getAddress()
-          handleClaim(address, signer)
-        }}>
+        <button className="w-full h-fit" onClick={() => setIsMinting(true)}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
               Claim
@@ -125,6 +119,12 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim,s
         </TransparentBox>
       </div>
 
+      {isMinting && <MintSectionModalUI
+        setIsMinting={(value) => setIsMinting(value)}
+        signer={signer}
+        handleClaim={(address, signer) => handleClaim(address, signer)}
+        gsapOutBlocks={() => gsapOutBlocks()}
+      />}
     </section>
   )
 }
