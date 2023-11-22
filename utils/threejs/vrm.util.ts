@@ -22,11 +22,9 @@ import {
   Material,
   Matrix4,
   Object3D,
-  Quaternion,
   Scene,
   Skeleton,
   SkinnedMesh,
-  Vector3
 } from "three";
 import {IsBone, IsSkinnedMesh} from "../model.util";
 import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
@@ -90,7 +88,7 @@ export function GenerateVrmMaterialData(materialList: GltfMaterial[] | undefined
 }
 
 export function GenerateVrmBoneData(nodes: GltfNode[] | undefined) {
-  let generatedBones: VrmHumanBone[] = [];
+  const generatedBones: VrmHumanBone[] = [];
   
   try {    
     if (nodes == undefined)

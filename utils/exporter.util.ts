@@ -109,7 +109,7 @@ export async function ExportObjectVrm(object: Object3D | undefined, pose?: Recor
     const vrmAvatar = GenerateVrmScene(sceneClone);
 
     // CleanModelForExport(model);
-    let vrm = await exporter.parseAsync(vrmAvatar, {
+    const vrm = await exporter.parseAsync(vrmAvatar, {
       animations: [],
       binary: true,
       trs: true,

@@ -1,5 +1,4 @@
 ﻿import {GLTFExporterPlugin, GLTFWriter} from "three/examples/jsm/exporters/GLTFExporter";
-import {Object3D} from "three";
 import {VrmStructure} from "../../interfaces/export.interface";
 import {GenerateVrmBoneData, GenerateVrmMaterialData, GetVrmData} from "./vrm.util";
 
@@ -12,7 +11,7 @@ export default class GLTFExporterAddVrmData implements GLTFExporterPlugin {
     this.name = "VRM";
   }
   
-  afterParse(input: Object3D | Object3D[]) {
+  afterParse() {
     const writer = this.writer;    
     const json = writer.json!;
     const extensionsUsed = writer.extensionsUsed!;
