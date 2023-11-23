@@ -34,6 +34,7 @@ import { BodyPart } from "../../types/avatar.type";
 import { getIPFSData, getTokensMetadata, mint } from "../../utils/web3/lukso.util";
 import { Signer, ethers } from "ethers";
 import ConnectWeb3Button from "../web3/connectWeb3.component";
+import AccountModalUI from "../../ui/lukso/common/accountModal";
 
 const exportData: ExportInterface = { attributes: [] };
 let optionList: FeatureInterface[] | undefined;
@@ -64,8 +65,9 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   const [hasMinted, setHasMinted] = useState<boolean>(false)
   const [addressToShow, setAddressToShow] = useState<string>("");
   const [isGettingInfoAboutHasMinted, setIsGettingInfoAboutHasMinted] = useState<boolean>(false);
-
   const [etherProvider, setEtherProvider] = useState<ethers.BrowserProvider>();
+
+  const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const setEtherProviderPromise = () => {
@@ -98,7 +100,6 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
       getStageList(),
       getSingleInfo(),
       !hasMinted && getSingleData(),
-      sleep(5000)
     ]);
 
     optionList = MixArrays(optionList, accessoryList);
@@ -124,9 +125,9 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     })
   }
 
-  async function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
+  // async function sleep(ms: number) {
+  //   return new Promise(resolve => setTimeout(resolve, ms));
+  // }
 
   async function getFeatureList() {
     const result = await GetAssetsListByCampaign(Client.Lukso);
@@ -254,7 +255,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     const tokensMetadata = await getTokensMetadata(address)
 
     if (tokensMetadata.length <= 0) { return setHasMinted(false) }
-    const avatarMetadata = await getIPFSData(tokensMetadata[0]) 
+    const avatarMetadata = await getIPFSData(tokensMetadata[0])
     const features = Object.entries(avatarMetadata.body).map(([key, bodyPart]: Array<string | TokenMetadata["body"]>) => { return { index: key, val: bodyPart as FeatureInterface } as IndexFeatureInterface })
     singleData = { random: false, features }
     setHasMinted(true)
@@ -291,9 +292,25 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     setSigner(signer);
   }
 
+  function formatearString(inputString: string): string {
+    if (inputString.length < 8) {
+      return "El string debe tener al menos 8 caracteres";
+    }
+
+    const primerosCuatro = inputString.slice(0, 4);
+    const ultimosCuatro = inputString.slice(-4);
+
+    return `(${primerosCuatro}...${ultimosCuatro})`;
+  }
+
   return (
     <MobileLayout>
       <div className="w-full h-screen bg-[#FABCE2] flex flex-col">
+        {isAccountModalOpen && <AccountModalUI
+          addressAccount={addressToShow}
+          formatAddress={formatearString(addressToShow)}
+          setIsAccountModalOpen={(value) => setIsAccountModalOpen(value)}
+        />}
         <TransparentBoxUI
           fullWidth
           border
@@ -314,12 +331,12 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
             />
             {etherProvider && <>
               {signer ? (
-                <div className="h-full w-36 flex justify-center items-center border-l-2 border-white px-2">
-                  <p className="truncate h-fit text-white">{`${addressToShow}`}</p>
-                </div>
+                <button className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2 z-10" onClick={() => setIsAccountModalOpen(true)}>
+                  <p className="truncate h-fit text-white">{`${formatearString(addressToShow)}`}</p>
+                </button>
               ) : (
-                <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={'border-l-2 border-white font-bold z-10 text-white'} signer={signer} >
-                  <>Connect Wallet</>
+                <ConnectWeb3Button onConnect={onConnect} etherProvider={etherProvider} classStyles={'w-48 border-l-2 border-white font-bold z-10 text-white'} signer={signer} >
+                  <>Login with your UP!</>
                 </ConnectWeb3Button>
               )}
             </>}
