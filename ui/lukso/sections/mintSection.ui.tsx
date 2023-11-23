@@ -53,7 +53,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
 
   return (
     <section className={`flex w-full h-full items-center justify-between`}>
-      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isRolling ? 'opacity-100 flex' : 'opacity-0 hidden'}`}>
+      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isRolling ? 'flex' : 'hidden'}`}>
         <div className="scale-[3]">
           <Loader />
         </div>

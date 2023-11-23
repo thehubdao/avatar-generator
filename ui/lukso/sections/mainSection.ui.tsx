@@ -10,6 +10,7 @@ import { ConnectionStatus } from "../../../enums/web3";
 import ConnectModalUI from "../common/conectModal";
 import { AiOutlineLoading } from "react-icons/ai";
 import { FaWallet } from "react-icons/fa";
+import Loader from "../common/loader.ui";
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   hasMinted: boolean
@@ -47,6 +48,11 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
 
   return (
     <section className={`flex h-full items-center justify-between`}>
+      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isGettingInfoAboutHasMinted ? 'flex' : 'hidden'}`}>
+        <div className="scale-[3]">
+          <Loader />
+        </div>
+      </div>
       {/* Lukso Avatars */}
       <div ref={luksoAvatarRef} className="w-[580px] 2xl:w-[688px] -translate-x-full h-[70%] flex flex-col gap-3">
         <TransparentBox
@@ -113,7 +119,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
           >
             <div className="flex items-center gap-3">
               <p className="text-black text-lg 2xl:text-xl">Connect to Roll your Avatar </p>
-              <FaWallet className="text-black text-2xl"/>
+              <FaWallet className="text-black text-2xl" />
             </div>
           </TransparentBox>
         </button>}
