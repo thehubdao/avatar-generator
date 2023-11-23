@@ -19,22 +19,24 @@ export default function MintSectionModalUI({ setIsMinting, signer, handleClaim, 
 
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-  const handleButtonClaim = async () =>  {
-    if (!signer) return
-    setIsClaiming(true);
-    const address = await signer.getAddress()
-    const result = await handleClaim(address, signer)
+  const handleButtonClaim = async ():Promise<void> => {
 
-    setIsClaiming(false);
-    setIsProvidingFeedback(true);
-    setFeedbackMessage(result.message);
-    setIsFeedbackError(result.success);
+      if(!signer) return
+      setIsClaiming(true);
+      const address = await signer.getAddress()
+      const result = await handleClaim(address, signer)
 
-    if (result.success) {
-      await delay(5000);
-      setIsMinting(false);
-      gsapOutBlocks();
-    }
+      setIsClaiming(false);
+      setIsProvidingFeedback(true);
+      setFeedbackMessage(result.message);
+      setIsFeedbackError(result.success);
+
+      if (result.success) {
+        await delay(5000);
+        setIsMinting(false);
+        gsapOutBlocks();
+      }
+    
   }
 
   return (
@@ -52,7 +54,7 @@ export default function MintSectionModalUI({ setIsMinting, signer, handleClaim, 
                   </div>
                 </TransparentBoxUI>
               </button>
-              <button className="w-52 h-fit" onClick={void handleButtonClaim}>
+              <button className="w-52 h-fit" onClick={ ()=>{void handleButtonClaim()} }>
                 <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                   <div className="flex items-center gap-3">
                     <p className="text-black">Claim</p>
