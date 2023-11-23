@@ -20,7 +20,6 @@ interface MainSectionUIProps {
 }
 
 export default function MainSectionUI({ setCurrentSection, hasMinted, signer, etherProvider, onConnect, isGettingInfoAboutHasMinted }: MainSectionUIProps) {
-  console.log("SIGNER:" + signer)
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 

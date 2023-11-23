@@ -61,7 +61,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
 
   // Web3 state
   const [signer, setSigner] = useState<Signer>()
-  const [hasMinted, setHasMinted] = useState<any>(undefined)
+  const [hasMinted, setHasMinted] = useState<boolean>(false)
   const [addressToShow, setAddressToShow] = useState<string>("");
   const [isGettingInfoAboutHasMinted, setIsGettingInfoAboutHasMinted] = useState<boolean>(false);
 
@@ -88,9 +88,9 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     setTokensMetadataPromise()
   }, [signer])
 
-  useEffect(() => { console.log("HAS MINTED", hasMinted) }, [hasMinted])
+  useEffect(() => { onAvatarBuilderReady(hasMinted) }, [hasMinted])
 
-  async function onAvatarBuilderReady() {
+  async function onAvatarBuilderReady(hasMinted:boolean) {
     await Promise.all([
       getFeatureList(),
       getAccessoryList(),
@@ -119,7 +119,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     // fade loader view
     await handleFadeLoader(loaderDivElement, () => {
       setIsLoading(false);
-      setCurrentSection(LuksoSections.Main);
+      !hasMinted && setCurrentSection(LuksoSections.Main);
     })
   }
 
@@ -333,15 +333,14 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           < div className="w-full h-screen absolute opacity-0" />
           {/* CANVAS */}
           {
-            campaignParams && <AvatarEditor
+            campaignParams  && <AvatarEditor
               avatarBasePath={campaignParams.armature}
               editMode={isEditModeSelected}
               lights={campaignParams.config.lights}
               defaultShadow={campaignParams.config.defShadow}
               onReady={() =>
-                onAvatarBuilderReady()
+                onAvatarBuilderReady(hasMinted)
               }
-              hasMinted={hasMinted}
             />
           }
         </div >

@@ -163,7 +163,6 @@ interface AvatarEditorProps {
   defaultCamera?: LookAtVectors;
   editMode?: boolean;
   enablePan?: boolean;
-  hasMinted:boolean
 }
 
 /***
@@ -174,7 +173,6 @@ interface AvatarEditorProps {
 export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, lights, postProcessing, defaultShadow, defaultCamera, editMode, enablePan }: AvatarEditorProps) {
   async function onAvatarEditorReady() {
     await initEditor();
-
     await onReady();
   }
 
