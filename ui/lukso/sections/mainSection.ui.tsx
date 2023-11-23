@@ -68,7 +68,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
               alt="lukso avatar full body view"
             />
           </div>
-          <h2 className="font-extrabold text-2xl 2xl:text-4xl pt-5">LUKSO AVATARS</h2>
+          <h2 className="font-extrabold text-2xl 2xl:text-4xl pt-5">LUKSO CITIZENS</h2>
           <p className="text-center text-sm 2xl:text-base mx-20 pt-2">A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
         </TransparentBox>
 
@@ -84,7 +84,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
                   aditionalClass="flex-row"
                 >
                   <div className="flex items-center gap-3">
-                    <p className="text-black text-lg 2xl:text-xl">{!hasMinted && "Roll your Avatar" || "Edit your Avatar"} </p>
+                    <p className="text-black text-lg 2xl:text-xl">{!hasMinted && "Roll your Citizen" || "Edit your Citizen"} </p>
                     <FaDice className="text-black text-2xl" />
                   </div>
                 </TransparentBox>
@@ -117,7 +117,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
             aditionalClass="flex-row"
           >
             <div className="flex items-center gap-3">
-              <p className="text-black text-lg 2xl:text-xl">Connect to Roll your Avatar </p>
+              <p className="text-black text-lg 2xl:text-xl">Login to Get Your Citizen</p>
               <FaWallet className="text-black text-2xl" />
             </div>
           </TransparentBox>

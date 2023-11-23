@@ -26,7 +26,7 @@ function ConnectModalUI({ onConnect, etherProvider, signer, setIsConnecting }: C
             <ConnectWeb3Button onConnect={handleConnect} etherProvider={etherProvider} signer={signer} classStyles="h-fit" >
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                 <div className="flex items-center gap-3">
-                  <p className="text-black">Connect to Roll your Avatar</p>
+                  <p className="text-black">Login to Get Your Citizen</p>
                 </div>
               </TransparentBoxUI>
             </ConnectWeb3Button>

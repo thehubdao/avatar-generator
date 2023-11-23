@@ -23,7 +23,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
   const mintAvatarRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
 
-  const [isRolling, setIsRolling] = useState<boolean>(false);
+  const [isShuffling, setIsShuffling] = useState<boolean>(false);
   const [isMinting, setIsMinting] = useState<boolean>(false);
 
   useLayoutEffect(() => { void gsapEnterBlocks(); }, [])
@@ -43,15 +43,15 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
   }
 
   const handleReRoll = async () => {
-    if (isRolling) return;
-    setIsRolling(true);
+    if (isShuffling) return;
+    setIsShuffling(true);
     await reRoll();
-    setIsRolling(false);
+    setIsShuffling(false);
   }
 
   return (
     <section className={`flex w-full h-full items-center justify-between`}>
-      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isRolling ? 'flex' : 'hidden'}`}>
+      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isShuffling ? 'flex' : 'hidden'}`}>
         <div className="scale-[3]">
           <Loader />
         </div>
@@ -94,8 +94,8 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
         <button className="w-full h-fit" onClick={() => void handleReRoll()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
-              <p>{isRolling ? 'Rolling' : 'Reroll'}</p>
-              <BsArrowRepeat className={`${isRolling ? 'animate-spin' : ''}`} />
+              <p>{isShuffling ? 'shuffling' : 'Reshuffle'}</p>
+              <BsArrowRepeat className={`${isShuffling ? 'animate-spin' : ''}`} />
             </div>
           </TransparentBox>
         </button>
@@ -112,7 +112,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
       {/* Mint your avatar */}
       <div ref={mintAvatarRef} className="w-[460px] 2xl:w-[564px] translate-x-full h-[70%]">
         <TransparentBox fullWidth border backgroundColorClass="bg-[#FFCBDE]" paddingClass="px-14 2xl:px-28" aditionalClass="gap-6 2xl:gap-8">
-          <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10 2xl:mb-20">MINT YOUR AVATAR</h3>
+          <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10 2xl:mb-20">MINT YOUR CITIZEN</h3>
           <p className="text-base 2xl:text-lg">{`Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.
             Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.`}</p>
           <SocialButtonsUI />
