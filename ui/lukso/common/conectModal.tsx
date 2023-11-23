@@ -34,7 +34,7 @@ function ConnectModalUI({ onConnect, etherProvider, signer, setIsConnecting }: C
         ) : (
           <div className="flex flex-col justify-center items-center gap-4">
             <h3 className="text-2xl">Oops!</h3>
-            <p>Can't connect ur browser with the Ethers Provider</p>
+            <p>Can&apos;t connect ur browser with the Ethers Provider</p>
             <button className="w-52 h-fit" onClick={() => { setIsConnecting(false) }}>
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                 <div className="flex items-center gap-3">

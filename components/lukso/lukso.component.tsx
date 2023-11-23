@@ -69,10 +69,11 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
 
   useEffect(() => {
     const setEtherProviderPromise = () => {
-      const lukso = (window as any).lukso
+      if (!window) return
+      const lukso = window.lukso
       setEtherProvider(new ethers.BrowserProvider(lukso))
     }
-    setEtherProviderPromise()
+    void setEtherProviderPromise()
   }, [])
 
   useEffect(() => {
@@ -85,12 +86,12 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
       await setTokensMetadata(address)
       setIsGettingInfoAboutHasMinted(false)
     }
-    setTokensMetadataPromise()
+    void setTokensMetadataPromise()
   }, [signer])
 
-  useEffect(() => { onAvatarBuilderReady(hasMinted) }, [hasMinted])
+  useEffect(() => { void onAvatarBuilderReady() }, [hasMinted])
 
-  async function onAvatarBuilderReady(hasMinted:boolean) {
+  async function onAvatarBuilderReady() {
     await Promise.all([
       getFeatureList(),
       getAccessoryList(),
@@ -154,7 +155,6 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   async function getSingleData() {
     const numResult = await GetAvatarSingleByCampaignCombination(Client.Lukso);
     const result: SingleInterface | undefined = numResult.success ? numResult.value : undefined;
-    console.log(result)
     singleData = result;
   }
 
@@ -251,12 +251,11 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   }
 
   async function setTokensMetadata(address: string) {
-    console.log(address)
     const tokensMetadata = await getTokensMetadata(address)
 
     if (tokensMetadata.length <= 0) { return setHasMinted(false) }
-    const avatarMetadata = await getIPFSData(tokensMetadata[0])
-    const features = Object.entries(avatarMetadata.body).map(([key, bodyPart]: any) => { return { index: key, val: bodyPart as FeatureInterface } as IndexFeatureInterface })
+    const avatarMetadata = await getIPFSData(tokensMetadata[0]) 
+    const features = Object.entries(avatarMetadata.body).map(([key, bodyPart]: Array<string | TokenMetadata["body"]>) => { return { index: key, val: bodyPart as FeatureInterface } as IndexFeatureInterface })
     singleData = { random: false, features }
     setHasMinted(true)
   }
@@ -272,9 +271,9 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     }
 
     try {
-      for (let feature of features) {
+      for (const feature of features) {
         const { val } = feature
-        const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as any
+        const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
         tokenMetadata.body[bodyIndex] = val as BodyPart
       }
 
@@ -333,13 +332,13 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           < div className="w-full h-screen absolute opacity-0" />
           {/* CANVAS */}
           {
-            campaignParams  && <AvatarEditor
+            campaignParams && <AvatarEditor
               avatarBasePath={campaignParams.armature}
               editMode={isEditModeSelected}
               lights={campaignParams.config.lights}
               defaultShadow={campaignParams.config.defShadow}
               onReady={() =>
-                onAvatarBuilderReady(hasMinted)
+                onAvatarBuilderReady()
               }
             />
           }

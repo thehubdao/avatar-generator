@@ -19,7 +19,7 @@ export default function MintSectionModalUI({ setIsMinting, signer, handleClaim, 
 
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-  const handleButtonClaim = async () => {
+  const handleButtonClaim = async () =>  {
     if (!signer) return
     setIsClaiming(true);
     const address = await signer.getAddress()
@@ -52,7 +52,7 @@ export default function MintSectionModalUI({ setIsMinting, signer, handleClaim, 
                   </div>
                 </TransparentBoxUI>
               </button>
-              <button className="w-52 h-fit" onClick={() => { handleButtonClaim() }}>
+              <button className="w-52 h-fit" onClick={void handleButtonClaim}>
                 <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                   <div className="flex items-center gap-3">
                     <p className="text-black">Claim</p>

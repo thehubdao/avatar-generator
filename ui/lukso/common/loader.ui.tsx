@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Loader = () => {
+function Loader() {
   return (
     <div className="loader-container">
       <div className="scene">
@@ -20,6 +20,6 @@ const Loader = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Loader;
