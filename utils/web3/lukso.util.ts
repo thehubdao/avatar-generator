@@ -1,5 +1,8 @@
 import { LUKSO_BACKEND_URL } from "../../constants/common.constant"
+import { TokenMetadata } from "../../types/metadata.type"
 import { GetRequest, PostRequest } from "../api.util"
+
+type IpfsResponse = {body:TokenMetadata}
 
 const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY
 
@@ -17,7 +20,8 @@ export const getTokensMetadata = async (address: string) => {
 export const getIPFSData = async (ipfsUrl: string) => {
     const CID = ipfsUrl.split('//')[1]
     const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${CID}`
-    const ipfsRequest = await fetch(ipfsHTTPUrl).then(res => res.json())
+    const ipfsRequest = await fetch(ipfsHTTPUrl) 
+    const ipfsData:IpfsResponse = await ipfsRequest.json() as IpfsResponse
 
-    return ipfsRequest
+    return ipfsData
 }

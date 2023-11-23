@@ -43,7 +43,7 @@ export default function LuksoUI({
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
       {(currentSection === LuksoSections.Main) && <MainSectionUI onConnect={onConnect} setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} signer={signer} etherProvider={etherProvider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}/>}
-      {(currentSection === LuksoSections.Mint) && <MintSectionUI onConnect={onConnect} setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} signer={signer} />}
+      {(currentSection === LuksoSections.Mint) && <MintSectionUI setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} signer={signer} />}
       {(currentSection === LuksoSections.Edit) && <EditSectionUI setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
     </div>
   )

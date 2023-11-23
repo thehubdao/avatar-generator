@@ -177,6 +177,7 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+
   async function preload() {
     await GetToneTexture();
   }

@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Fragment, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { Fragment, useLayoutEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock, fadeInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { BsArrowRepeat } from "react-icons/bs";
@@ -9,7 +9,6 @@ import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 import MintSectionModalUI from "../common/mintModal.ui";
 import { Signer } from "ethers";
-import { ConnectionStatus } from "../../../enums/web3";
 import Loader from "../common/loader.ui";
 
 interface MintSectionUIProps {
@@ -17,10 +16,9 @@ interface MintSectionUIProps {
   reRoll: () => Promise<void>;
   handleClaim: (address: string, signer: Signer) => Promise<{ message: string, success: boolean }>;
   signer: Signer | undefined;
-  onConnect: (signer: Signer | undefined, status: ConnectionStatus) => void;
 }
 
-export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, signer, onConnect }: MintSectionUIProps) {
+export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, signer }: MintSectionUIProps) {
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
