@@ -330,12 +330,14 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
         <div
           className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out" >
           {/* CANVAS BACKGROUND */}
-          < div className="w-full h-screen absolute bg-opacity-0" />
+          < div className="w-full h-screen absolute opacity-0" />
           {/* CANVAS */}
           {
             campaignParams && <AvatarEditor
               avatarBasePath={campaignParams.armature}
               editMode={isEditModeSelected}
+              lights={campaignParams.config.lights}
+              defaultShadow={campaignParams.config.defShadow}
               onReady={() =>
                 onAvatarBuilderReady()
               }

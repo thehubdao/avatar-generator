@@ -10,6 +10,7 @@ import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.c
 import MintSectionModalUI from "../common/mintModal.ui";
 import { Signer } from "ethers";
 import { ConnectionStatus } from "../../../enums/web3";
+import Loader from "../common/loader.ui";
 
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
@@ -52,6 +53,11 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
 
   return (
     <section className={`flex w-full h-full items-center justify-between`}>
+      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isRolling ? 'opacity-100 flex' : 'opacity-0 hidden'}`}>
+        <div className="scale-[3]">
+          <Loader />
+        </div>
+      </div>
       {/* Mint features */}
       <div ref={mainFeatureRef} className="w-[360px] 2xl:w-[461px] -translate-x-full h-full flex flex-col gap-3">
         <TransparentBox
@@ -91,7 +97,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
               <p>{isRolling ? 'Rolling' : 'Reroll'}</p>
-              <BsArrowRepeat className={`${isRolling ? 'rotate-180 transition-all duration-500' : ''}`} />
+              <BsArrowRepeat className={`${isRolling ? 'animate-spin' : ''}`} />
             </div>
           </TransparentBox>
         </button>
