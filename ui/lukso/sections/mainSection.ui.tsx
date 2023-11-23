@@ -144,7 +144,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
             heightClass="h-[125px]"
           >
             <h3 className="font-extrabold text-xl 2xl:text-2xl">EXCLUSIVE COLLECTION</h3>
-            <p className="text-sm 2xl:text-base">Reamining: 15380</p>
+            <p className="text-sm 2xl:text-base">Remaining: 15380</p>
           </TransparentBox>
           <TransparentBox
             fullWidth
