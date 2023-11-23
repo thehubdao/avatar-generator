@@ -79,7 +79,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
                   aditionalClass="flex-row"
                 >
                   <div className="flex items-center gap-3">
-                    <p className="text-black text-lg 2xl:text-xl">Roll your Avatar </p>
+                    <p className="text-black text-lg 2xl:text-xl">{!hasMinted && "Roll your Avatar" || "Edit your Avatar"} </p>
                     <FaDice className="text-black text-2xl" />
                   </div>
                 </TransparentBox>
