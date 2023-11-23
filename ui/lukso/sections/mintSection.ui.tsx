@@ -118,7 +118,6 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
           <SocialButtonsUI />
           <div className="font-semibold">
             <p>PUBLIC MINT</p>
-            <p>0.03 ETH</p>
           </div>
         </TransparentBox>
       </div>
