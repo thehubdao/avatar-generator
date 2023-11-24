@@ -6,6 +6,7 @@ import { fragmentShaderSource } from '../shader/background.shader'
 import SocialButtonsUI from "../common/socialButtons.ui";
 import { LogError } from "../../../utils/common.util";
 import { Module } from "../../../enums/common.enum";
+import Loader from "../common/loader.ui";
 
 interface LoadingUIProps {
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
@@ -104,16 +105,19 @@ export default function LoadingUI({ getloaderDivElement }: LoadingUIProps) {
           />
           <SocialButtonsUI />
         </div>
-        <div className="fixed">
-          <Image
-            src='/resources/icons/campaigns/lukso.svg'
-            width={596}
-            height={138}
-            alt="Lukso icon"
-          />
-          <div className="w-[596px]">
-            <p className="text-4xl mt-7 tracking-[1.21em] text-center">AVATAR HU<span className="tracking-[0em]">B</span></p>
+        <div className="fixed flex flex-col justify-center items-center gap-8">
+          <div>
+            <Image
+              src='/resources/icons/campaigns/lukso.svg'
+              width={596}
+              height={138}
+              alt="Lukso icon"
+            />
+            <div className="w-[596px]">
+              <p className="text-4xl mt-7 tracking-[1.21em] text-center">AVATAR HU<span className="tracking-[0em]">B</span></p>
+            </div>
           </div>
+          <Loader />
         </div>
         <div className="fixed bottom-0 right-0 m-5">
           <p className="text-xl tracking-[0.21em]">Powered b<span className="tracking-[0em]">y</span></p>
