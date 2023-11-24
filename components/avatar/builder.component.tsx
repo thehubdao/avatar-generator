@@ -374,13 +374,13 @@ export default function AvatarBuilder({
       GetAvatarGLB()
     ]);
     exportData.picture = picturePromise;
-    exportData.model = modelPromise;
+    exportData.model = modelPromise.success ? modelPromise.value : undefined;
 
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
-      if (exportData.model.success)
-        await SaveFile(exportData.model.value, 'model.glb');
+      if (modelPromise.success)
+        await SaveFile(modelPromise.value, 'model.glb');
 
       await SaveFile(exportData.picture, 'picture.png');
     }

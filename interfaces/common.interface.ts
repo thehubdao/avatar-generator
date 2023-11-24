@@ -32,7 +32,7 @@ export interface ExportInterface {
   attributes: BasicData[];
   attributesBase64?: string;
   picture?: Blob;
-  model?: Result<Blob>;
+  model?: Blob;
 }
 
 // TODO: place it in a better place, maybe create a new file for color interfaces
