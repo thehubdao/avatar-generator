@@ -13,6 +13,8 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
   if (!featuresResult.success)
     return void LogError(Module.CollectionUtil, `Couldn't find featureList for campaign: ${campaign}`);
   
+  featuresResult.value.sort((a, b) => a.index - b.index);
+  
   // Get FeatureOptionListData
   const featureOptionListData: Map<number, FeatureInterface[] | undefined> = new Map();
   const featureData = await GetData(campaign);
@@ -114,16 +116,16 @@ export function IndexValuesToNumber(indexValues: Map<number, number> | undefined
     return void LogError(Module.CollectionUtil, "Error getting misshaped values for multiply nums!");
 
   let result = 0;
-  for (let i = 0; i < maxValues.size; i++) {
+  for (const [i, val] of Array.from(maxValues.values()).entries()) {    
     const indexVal = indexValues.get(i) ?? 0;
-    if (indexVal >= (maxValues.get(i) ?? 0))
+    if (indexVal >= val)
       return void LogError(Module.CollectionUtil, "Error index values higher than maximum values!");
       
     const newVal = indexVal * multNums[i + 1];
 
     result += newVal;
   }
-
+  
   return result;
 }
 
@@ -158,11 +160,13 @@ export function NumberToIndexValues(num: number, maxCombination: number, maxValu
 
   const result = new Map<number, number>();
   let currentValue = num;
+  let i = 0;
 
-  for (let i = 0; i < maxValues.size; i++) {
+  for (const key of maxValues.keys()) {
     const newIndexValue = (currentValue / multNums[i + 1]) | 0;
     currentValue -= newIndexValue * multNums[i + 1];
-    result.set(i, newIndexValue);
+    result.set(key, newIndexValue);
+    i++;
   }
 
   return result;
@@ -186,10 +190,11 @@ function GetMultiplyNums(maxValues: Map<number, number>) {
 
 export function GetMaxIndexValues(featureList: FeatureBasic[], featureOptionListData: Map<number, FeatureInterface[] | undefined>) {
   const maxIndexValues: Map<number, number> = new Map();
-  for (const feature of featureList) {
-    const optionList = featureOptionListData.get(feature.index);
+  for (let i = 0; i < featureList.length; i++) {
+    const currentFeature = featureList[i];
+    const optionList = featureOptionListData.get(currentFeature.index);
     if (optionList != undefined)
-      maxIndexValues.set(feature.index, optionList.length);
+      maxIndexValues.set(i, optionList.length);
   }
   
   return maxIndexValues;
@@ -207,9 +212,8 @@ export function GetMinIndexValues(size: number) {
 export function GetMaxCombinationNum(maxIndexValues: Map<number, number>) {
   let result = 1;
 
-  for (let i = 0; i < maxIndexValues.size; i++) {
-    const value = maxIndexValues.get(i);
-    result *= value ?? 1;
+  for (const value of maxIndexValues.values()) {
+    result *= value;
   }
   
   return result;
@@ -231,8 +235,8 @@ export function IndexValuesToString(indexValues: Map<number, number> | undefined
 
 export function GetCombinationValues(combinationIndexValues: Map<number, number>, featureOptionListData: Map<number, FeatureInterface[] | undefined>) {
   const featureCombination: {index: number, val: FeatureInterface}[] = [];
-  for (const [key, value] of combinationIndexValues) {
-    const feature = featureOptionListData.get(key)?.find(f => f.index === value);
+  for (const [key, val] of Array.from(featureOptionListData.values()).entries()) {
+    const feature = val?.find(f => f.index === combinationIndexValues.get(key));
     if (feature != undefined)
       featureCombination.push({index: key, val: feature});
   }
