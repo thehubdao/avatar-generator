@@ -1,11 +1,11 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import {ApiResponse} from "../../interfaces/api.interface";
 
-export interface RequestHandler<T, U, V, W> {
-  Get?: RequestFunction<T>,
-  Post?: RequestFunction<U>,
-  Put?: RequestFunction<V>,
-  Delete?: RequestFunction<W>,
+export interface RequestHandler<TGet, TPost, TPut, TDelete> {
+  Get?: RequestFunction<TGet>,
+  Post?: RequestFunction<TPost>,
+  Put?: RequestFunction<TPut>,
+  Delete?: RequestFunction<TDelete>,
 }
 
 type RequestFunction<T> = (req: NextApiRequest, res: NextApiResponse<ApiResponse<T>>) => Promise<void>;
