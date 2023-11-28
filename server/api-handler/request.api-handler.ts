@@ -5,7 +5,7 @@ import {RequestMessage, RequestStatus} from "../types/api.type";
 import {REQUEST_STATUS, REQUEST_METHOD} from "../constants/api.constant";
 import {DefaultApiResponse} from "../enums/api.enum";
 
-export async function RequestApiHandler<T>(req: NextApiRequest, res: NextApiResponse<ApiResponse<T>>, requests: RequestHandler<T>) {
+export async function RequestApiHandler<T, U, V, W>(req: NextApiRequest, res: NextApiResponse<ApiResponse<T | U | V | W>>, requests: RequestHandler<T, U, V, W>) {
   switch (req.method) {
     case REQUEST_METHOD.Get:
       if (requests.Get == undefined)
