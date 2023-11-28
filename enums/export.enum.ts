@@ -3,3 +3,8 @@
   MToon = "VRM/MToon",
   Unlit = "VRM/UnlitTransparentZWrite"
 }
+
+export enum ModelExtension {
+  GLB = 'glb',
+  VRM = 'vrm'
+}
