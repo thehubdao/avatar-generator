@@ -19,7 +19,7 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
       .then(() => {
         setCopyAddressMessage("Copied on clipboard!");
       })
-      .catch((err) => {
+      .catch(() => {
         setCopyAddressMessage("Error copied on clipboard!");
       });
 
@@ -50,7 +50,7 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
                 </div>
               </TransparentBoxUI>
             </button>
-            <button className="w-72 h-fit" onClick={() => copyToClipboard(addressAccount)}>
+            <button className="w-72 h-fit" onClick={() => void copyToClipboard(addressAccount)}>
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                 <div className="flex items-center gap-3">
                   <p className="">{isCopyAddress ? copyAddressMessage : "Copy Address"}</p>
