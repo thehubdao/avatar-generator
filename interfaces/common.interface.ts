@@ -8,7 +8,6 @@ import { AccessoryInterface, AnimationInterface, EnvMapInterface, FeatureInterfa
 import { ConfigEnvMap } from "./envMap.interface";
 import { ConfigShadow } from "./shadow.interface";
 import { ReactNode } from "react";
-import {Result} from "../types/common.type";
 import { ConfigPostProcessing } from "./postProcessing.interface";
 
 export interface BasicData {
@@ -33,6 +32,7 @@ export interface ExportInterface {
   attributesBase64?: string;
   picture?: Blob;
   model?: Blob;
+  combination?: number;
 }
 
 // TODO: place it in a better place, maybe create a new file for color interfaces
