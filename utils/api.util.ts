@@ -115,3 +115,7 @@ export async function GetAvatarSingleByCampaignCombination(campaign: string, com
 export async function GetAvatarSingleByCampaignCombinationString(campaign: string, combination?: string) {
   return GetRequest<SingleInterface>(ApiRoutesV1.Single, [campaign, combination]);
 }
+
+export async function GetAvatarCombinationByAttributes(campaign: string, attributesBase64: string) {
+  return GetRequest<number>(ApiRoutesV1.SingleMix, [campaign, attributesBase64]);
+}

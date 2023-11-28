@@ -5,5 +5,6 @@
   Stages = '/api/v1/stages',
   AdminCampaigns = 'api/v1/adminCampaigns',
   Single = '/api/v1/single',
+  SingleMix = '/api/v1/singleMix',
   EnvMaps = '/api/v1/envMaps',
 }
