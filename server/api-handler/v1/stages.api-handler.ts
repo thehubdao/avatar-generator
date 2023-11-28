@@ -1,5 +1,4 @@
 import {NextApiRequest, NextApiResponse} from "next";
-import {GlobalValues} from "../../../enums/common.enum";
 import {GetInfoDB} from "../../../utils/firebase.util";
 import {ApiResponse, StageInterface} from "../../../interfaces/api.interface";
 import {FirestoreLocation} from "../../../enums/firebase.enum";
@@ -8,11 +7,16 @@ import {DefaultApiResponse} from "../../enums/api.enum";
 
 export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<StageInterface[]>>) {
   const {campaign} = req.query;
-  const realCampaign = campaign as string ?? GlobalValues.BaseCampaign;
 
-  const data = await GetInfoDB<StageInterface>(FirestoreLocation.Stages, realCampaign, {
-    campaign: realCampaign
-  });
+  if (!campaign)
+    return RequestResponse(res, "BadRequest", false, DefaultApiResponse.MissingInfo);
 
-  return RequestResponse(res, "Successful", true, DefaultApiResponse.GetSuccess, data);
+  const realCampaign = typeof campaign === "string" ? campaign : campaign[0];
+
+  const dataResult = await GetInfoDB<StageInterface>(FirestoreLocation.Stages, realCampaign);
+
+  if (dataResult.success)
+    return RequestResponse(res, "Successful", true, DefaultApiResponse.GetSuccess, dataResult.value);
+
+  return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
 }

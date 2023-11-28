@@ -1,4 +1,6 @@
-﻿import {EmailResult, GlobalValues, Module} from "../enums/common.enum";
+﻿import {CommonErrorCode, EmailResult, Module} from "../enums/common.enum";
+import {GLOBAL_VALUES} from "../constants/common.constant";
+import {Result} from "../types/common.type";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
@@ -6,13 +8,13 @@ export function RandomArrayElement<T>(array: T[]) {
 
 // Maybe save a log at some point either through api or just firebase
 // eslint-disable-next-line @typescript-eslint/require-await
-export async function LogError(origin: string | Module, message: string) {
-  console.error(`${origin} - `, message);
+export async function LogError(origin: string | Module, message: string, err?: unknown) {
+  console.error(`${origin} - `, message, err != undefined && {error: err});
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
-export async function LogWarning(origin: string | Module, message: string) {
-  console.warn(`${origin} - `, message);
+export async function LogWarning(origin: string | Module, message: string, err?: unknown) {
+  console.warn(`${origin} - `, message, err != undefined && {error: err});
 }
 
 export function Delay(ms: number) {
@@ -71,6 +73,13 @@ export function CastStringToInteger(toCast: string) {
   return isNaN(num) ? undefined : num | 0;
 }
 
+export function CastStringToNum(toCast: string): Result<number> {
+  const num = +toCast;
+  return isNaN(num) ?
+    {success: false, errMessage: `Input string: "${toCast}", can't be cast as number!`, errCode: CommonErrorCode.WrongInfo} :
+    {success: true, value: num};
+}
+
 export function RandomNumBetween(min: number, max: number) {
   return Math.random() * (max - min) + min;
 }
@@ -95,18 +104,28 @@ export function IsWebUrl(url: string) {
 }
 
 export function MixArrays<T>(arr1: T[] | undefined, arr2: T[] | undefined) {
-  const mixed: T[] = [...(arr1 ?? []), ...(arr2 ?? [])];
-  return mixed;
+  return [...(arr1 ?? []), ...(arr2 ?? [])];
 }
 
 export function RemovedAcc(text: string | undefined) {
-  if (text == undefined || !text.endsWith(GlobalValues.AccEnd)) return text;
+  if (text == undefined || !text.endsWith(GLOBAL_VALUES.AccEnd)) return text;
   
-  return text.slice(0, - GlobalValues.AccEnd.length);
+  return text.slice(0, - GLOBAL_VALUES.AccEnd.length);
 }
 
 export function GetKeyByValue<TEnum extends object>(value: string, enumRef: TEnum): keyof TEnum | undefined {
   const indexOfS = Object.values(enumRef).indexOf(value);
   const key = Object.keys(enumRef)[indexOfS];
   return key as unknown as keyof TEnum;
+}
+
+export function Raise(msg: string): never {
+  throw new Error(msg);
+}
+
+export function GetDateNum() {
+  return new Date().toLocaleString("sv")
+    .replaceAll("-", "")
+    .replace(" ", "")
+    .replaceAll(":", "");
 }

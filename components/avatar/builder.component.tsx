@@ -17,19 +17,19 @@ import {
   EnvMapInterface
 } from "../../interfaces/api.interface";
 import { IFrameExportData, IFrameReady, SetIFrameEvents } from "../../utils/iframe.util";
-import { ExportAttributeValues, GlobalValues, Module } from "../../enums/common.enum";
+import { Module } from "../../enums/common.enum";
 import { FilterList, LogError, RandomArrayElement, MixArrays } from "../../utils/common.util";
 import {
   GetAccessoryListByCampaign,
   GetAnimationListByCampaign,
-  GetAssetsListByCampaign,
+  GetAssetsListByCampaign, GetAvatarCombinationByAttributes,
   GetAvatarSingleByCampaignCombination,
   GetEnvMapListByCampaign,
   GetStageListByCampaign
 } from "../../utils/api.util";
 import { SaveFile } from "../../utils/exporter.util";
 import AGLoading from "../../ui/common/ag-loading.component";
-import HudComponent from "../../ui/avatar/hud.component";
+import HudUI from "../../ui/avatar/hud.ui";
 import AvatarEditor, {
   ChangeAccessory,
   ChangeFeature, ChangeSkinColor,
@@ -38,9 +38,13 @@ import AvatarEditor, {
   GetWearableOption,
   RemoveStage,
   SetStage,
-  SetFeaturesData
+  SetFeaturesData,
+  SetEnvironment
 } from "./editor.component";
-import { AGChangeCamPosition, AGChangeLookAtPosition, SetEnvironmentMap, TakeCanvasPicture } from "./viewer.component";
+import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "./viewer.component";
+import {Result} from "../../types/common.type";
+import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../constants/common.constant";
+import {GenerateVrmMetaData} from "../../utils/threejs/vrm.util";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -113,10 +117,12 @@ export default function AvatarBuilder({
     await SetFeaturesData(selectListFeatures);
 
     await loadPreData();
-    await onClickChangeSkinColor();
 
-    const envMap = envMapList?.find(em => em.name === campaignConfig.defEnvMap) ?? envMapList?.at(0);
-    await SetEnvironmentMap(envMap?.path);
+    const bgMap = envMapList?.find(em => em.name === campaignConfig.envMap?.defBgMap);
+    const lightMap = envMapList?.find(em => em.name === campaignConfig.envMap?.defLightMap);
+    await SetEnvironment(bgMap?.path, lightMap?.path, campaignConfig.envMap?.skyboxConfig)
+
+    await onClickChangeSkinColor();
 
     const startAnimation = animationList?.find(a => a.name == campaignConfig.defAnimation) ?? animationList?.at(0);
     await ChangeStartAnimation(startAnimation?.path);
@@ -135,14 +141,14 @@ export default function AvatarBuilder({
     if (!isOnIFrame) return LogError(Module.AvatarGenerator, "Not on IFrame, subscribe if you forgot!");
     if (!params) return LogError(Module.AvatarGenerator, "Missing feature option!");
 
-    if (params.detail && params.detail.startsWith('http')) {
-      if (params.id.endsWith(GlobalValues.AccEnd)) {
+    if (params.detail?.startsWith('http')) {
+      if (params.id.endsWith(GLOBAL_VALUES.AccEnd)) {
         await ChangeAccessory(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id, campaignConfig.changeMaterial);
       } else {
         await onChangeFeature(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id);
       }
     } else {
-      if (params.id.endsWith(GlobalValues.AccEnd)) {
+      if (params.id.endsWith(GLOBAL_VALUES.AccEnd)) {
         const accessory = accessoryList?.find(a => a.type === params.id && a.name === params.val);
 
         if (!accessory) return LogError(Module.AvatarGenerator, "Accessory option not found!");
@@ -173,8 +179,8 @@ export default function AvatarBuilder({
     if (!(featureList && accessoryList))
       return LogError(Module.AvatarGenerator, "No feature/accessory list!");
 
-    if (campaign && campaign !== GlobalValues.BaseCampaign) {
-      exportData?.attributes.push({ id: ExportAttributeValues.Campaign, val: campaign });
+    if (campaign && campaign !== GLOBAL_VALUES.BaseCampaign) {
+      exportData?.attributes.push({ id: EXPORT_ATTRIBUTE.Campaign, val: campaign });
     }
 
     if (attributeConfig) {
@@ -209,7 +215,7 @@ export default function AvatarBuilder({
           randomAccessory.push(randomAcc);
       }
 
-      const modelPromises: Promise<GLTF>[] = [];
+      const modelPromises: Promise<Result<GLTF>>[] = [];
       for (const feature of randomFeature)
         modelPromises.push(GetWearableOption(feature.id, feature.path));
       for (const acc of randomAccessory)
@@ -235,7 +241,7 @@ export default function AvatarBuilder({
         randomAccessory.push(randomAcc);
     }
 
-    const modelPromises: Promise<GLTF>[] = [];
+    const modelPromises: Promise<Result<GLTF>>[] = [];
     for (const acc of randomAccessory)
       modelPromises.push(GetWearableOption(acc.id, acc.path));
     await Promise.all([...modelPromises]);
@@ -254,40 +260,39 @@ export default function AvatarBuilder({
   }
 
   async function getFeatureList() {
-    const { value: newAssetList } = await GetAssetsListByCampaign(campaign);
-    featureList = newAssetList;
+    const result = await GetAssetsListByCampaign(campaign);
+    featureList = result.success ? result.value : undefined;
     optionList = MixArrays(optionList, featureList);
     // setFeatureListShow(FilterList(featureList, "type", selectedFeature));
     setOptionListShow(FilterList(featureList, "type", selectedCategory));
   }
 
   async function getAccessoryList() {
-    const { value: newAccList } = await GetAccessoryListByCampaign(campaign);
-    accessoryList = newAccList;
+    const result = await GetAccessoryListByCampaign(campaign);
+    accessoryList = result.success ? result.value : undefined;
     // setAccessoryListShow(FilterList(accessoryList, "type", selectedAcc));
   }
 
   async function getAnimationList() {
-    const { value: newAnimationList } = await GetAnimationListByCampaign(campaign);
-    animationList = newAnimationList;
+    const result = await GetAnimationListByCampaign(campaign);
+    animationList = result.success ? result.value : undefined;
   }
 
   async function getStageList() {
-    const { value: newStageList } = await GetStageListByCampaign(campaign);
-    stageList = newStageList;
+    const result = await GetStageListByCampaign(campaign);
+    stageList = result.success ? result.value : undefined;
   }
 
   async function getEnvironmentMapList() {
-    if (campaign == undefined) return;
-    const { value: newEnvMapList } = await GetEnvMapListByCampaign(campaign);
-    envMapList = newEnvMapList;
+    const result = await GetEnvMapListByCampaign(campaign);
+    envMapList = result.success ? result.value : undefined;
   }
 
   async function getSingleInfo() {
     if (campaignConfig.defAvatarCombination == undefined) return;
 
-    const { value: reqSingleData } = await GetAvatarSingleByCampaignCombination(campaign, campaignConfig.defAvatarCombination);
-    singleData = reqSingleData;
+    const result = await GetAvatarSingleByCampaignCombination(campaign, campaignConfig.defAvatarCombination);
+    singleData = result.success ? result.value : undefined;
   }
 
   async function onClickChangeSkinColor(newSkinColor = skinColor) {
@@ -335,7 +340,7 @@ export default function AvatarBuilder({
 
   async function onOptionChange(id: string, path: string, name: string, _selectedCategory: string = selectedCategory) {
     // If Accessory
-    if (_selectedCategory.endsWith(GlobalValues.AccEnd))
+    if (_selectedCategory.endsWith(GLOBAL_VALUES.AccEnd))
       await ChangeAccessory(id, path, name, _selectedCategory, campaignConfig.changeMaterial);
     // If Feature
     else
@@ -360,19 +365,26 @@ export default function AvatarBuilder({
   }
 
   async function exportModel() {
-    exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
-    const [picturePromise, modelPromise] = await Promise.all([
+    // TODO: Add metadata from user
+    GenerateVrmMetaData(undefined);
+    
+    const attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
+    
+    exportData.attributesBase64 = attributesBase64;
+    const [picturePromise, modelPromise, combinationPromise] = await Promise.all([
       TakeCanvasPicture(),
-      GetAvatarGLB()
+      GetAvatarGLB(),
+      GetAvatarCombinationByAttributes(campaign, attributesBase64)
     ]);
     exportData.picture = picturePromise;
-    exportData.model = modelPromise;
+    exportData.model = modelPromise.success ? modelPromise.value : undefined;
+    exportData.combination = combinationPromise.success ? combinationPromise.value : undefined;
 
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
-      if (exportData.model != undefined)
-        await SaveFile(exportData.model, 'model.glb');
+      if (modelPromise.success)
+        await SaveFile(modelPromise.value, 'model.glb');
 
       await SaveFile(exportData.picture, 'picture.png');
     }
@@ -401,10 +413,13 @@ export default function AvatarBuilder({
         {/* CANVAS BACKGROUND */}
         <div style={{ backgroundColor: `#${bgColor ?? '272727'}` }} className="w-full h-screen absolute" />
         {/* CANVAS */}
-        <AvatarEditor avatarBasePath={avatarBasePath}
+        <AvatarEditor
+          avatarBasePath={avatarBasePath}
           onReady={() => onAvatarBuilderReady()}
           changeMaterial={campaignConfig.changeMaterial}
           lights={campaignConfig.lights}
+          defaultShadow={campaignConfig.defShadow}
+          postProcessing={campaignConfig.postProcessing}
           editMode={isEditModeSelected}
           enablePan={enablePan}
           defaultCamera={campaignConfig.defCam}
@@ -413,7 +428,7 @@ export default function AvatarBuilder({
       {isLoading ? <></> :
         <>
           {!onlyView &&
-            <HudComponent
+            <HudUI
               selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
 
               editModeSelected={isEditModeSelected}

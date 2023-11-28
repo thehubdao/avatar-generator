@@ -2,14 +2,14 @@ import {
   AccessoryInterface,
   AnimationInterface,
   ApiResponse,
-  StageInterface,
   EnvMapInterface,
   FeatureInterface,
   SingleInterface,
+  StageInterface,
 } from "../interfaces/api.interface";
 import {LogError} from "./common.util";
-import {Result} from "../interfaces/common.interface";
-import {Module} from "../enums/common.enum";
+import {Result} from "../types/common.type";
+import {CommonErrorCode, Module} from "../enums/common.enum";
 import {ApiRoutesV1} from "../enums/api.enum";
 
 //#region Generic
@@ -42,14 +42,14 @@ async function GetRequest<T>(url: string | ApiRoutesV1, extraUri?: UriParams, qu
   try {
     const extraQuery = BuildQuery(extraUri ?? [], query ?? {});
     const jsonResult = await fetch(url + extraQuery, GET_PARAMS).then(res => res.json()) as ApiResponse<T>;
-    if (jsonResult.success)
+    if (jsonResult.success && jsonResult.data != undefined)
       return {success: true, value: jsonResult.data};
     else
-      return {success: false, errMessage: jsonResult.message, value: undefined};
+      return {success: false, errMessage: jsonResult.message, errCode: CommonErrorCode.GetNoData};
   } catch (e) {
     const err = e as Error;
     void LogError(Module.ApiUtil, "Error on get request");
-    return {success: false, errMessage: err.message, value: undefined};
+    return {success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError};
   }
 }
 
@@ -67,14 +67,14 @@ async function PostRequest<T>(url: string, obj?: object): Promise<Result<T>> {
       ...POST_PARAMS,
       body: JSON.stringify(obj)
     }).then(res => res.json()) as ApiResponse<T>;
-    if (jsonResult.success)
+    if (jsonResult.success && jsonResult.data != undefined)
       return {success: true, value: jsonResult.data};
     else
-      return {success: false, errMessage: jsonResult.message, value: undefined};
+      return {success: false, errMessage: jsonResult.message, errCode: CommonErrorCode.PostNoData};
   } catch (e) {
     const err = e as Error;
     void LogError(Module.ApiUtil, "Error on post request");
-    return {success: false, errMessage: err.message, value: undefined};
+    return {success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError};
   }
 }
 
@@ -114,4 +114,8 @@ export async function GetAvatarSingleByCampaignCombination(campaign: string, com
 
 export async function GetAvatarSingleByCampaignCombinationString(campaign: string, combination?: string) {
   return GetRequest<SingleInterface>(ApiRoutesV1.Single, [campaign, combination]);
+}
+
+export async function GetAvatarCombinationByAttributes(campaign: string, attributesBase64: string) {
+  return PostRequest<number>(ApiRoutesV1.Single, {campaign, attributes: attributesBase64});
 }

@@ -1,10 +1,11 @@
 import {GetServerSideProps} from "next";
-import {CampaignParameterName, ExportAttributeValues, GlobalValues} from "../enums/common.enum";
+import {CampaignParameterName} from "../enums/common.enum";
 import {FirestoreParameters} from "../enums/firebase.enum";
 import {BasicData, CampaignParameters} from "../interfaces/common.interface";
 import {GetParameter} from "../utils/firebase.util";
 import AvatarBuilder from "../components/avatar/builder.component";
 import {Base64ToObj, RemoveUndefinedProperties} from "../utils/common.util";
+import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../constants/common.constant";
 
 interface AvatarGeneratorProps {
   campaign: string;
@@ -25,7 +26,7 @@ export default function AvatarGenerator({
                                         }: AvatarGeneratorProps) {
   return (<>
     <AvatarBuilder campaign={campaign}
-                   avatarBasePath={campaignParams?.armature ?? GlobalValues.AvatarBase}
+                   avatarBasePath={campaignParams?.armature ?? GLOBAL_VALUES.AvatarBase}
                    campaignConfig={campaignParams?.config ?? {}}
                    selectListFeatures={campaignParams?.features ?? []}
                    selectListAccessories={campaignParams?.accessories ?? []}
@@ -42,31 +43,32 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
 
   let parsedConfig: BasicData[] | undefined = undefined;
 
-  let leCampaign = (builder as string).toLowerCase() ?? GlobalValues.BaseCampaign;
+  let leCampaign = (builder as string).toLowerCase() ?? GLOBAL_VALUES.BaseCampaign;
 
   if (config) {
     parsedConfig = Base64ToObj<BasicData[]>(config as string);
-    if (parsedConfig && parsedConfig.some(x => x.id === ExportAttributeValues.Campaign)) {
-      const configCampaign = parsedConfig.find(x => x.id === ExportAttributeValues.Campaign);
+    if (parsedConfig && parsedConfig.some(x => x.id === EXPORT_ATTRIBUTE.Campaign)) {
+      const configCampaign = parsedConfig.find(x => x.id === EXPORT_ATTRIBUTE.Campaign);
       if (configCampaign)
         leCampaign = configCampaign.val;
     }
   }
 
-  const campaigns = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
-  const isCampaign = campaigns == undefined ? false : campaigns.some(c => c === leCampaign);
+  const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
+  const isCampaign = campaignsResult.success ? campaignsResult.value.some(c => c === leCampaign) : false;
 
   // TODO: either show base campaign (which is what I'm going to do here) or send user to another page (404 or something)
   if (!isCampaign)
-    leCampaign = GlobalValues.BaseCampaign;
+    leCampaign = GLOBAL_VALUES.BaseCampaign;
 
   const campaignParameters = await GetParameter<CampaignParameters>(leCampaign, CampaignParameterName.All);
+  const defBg = campaignParameters.success ? campaignParameters.value.config?.defBg : undefined;
 
   const returnProps: AvatarGeneratorProps = {
     campaign: leCampaign,
-    campaignParams: campaignParameters,
+    campaignParams: campaignParameters.success ? campaignParameters.value : undefined,
     attributeConfig: parsedConfig,
-    bgColor: bg != undefined ? bg as string : campaignParameters?.config?.defBg,
+    bgColor: bg != undefined ? bg as string : defBg,
     onlyView: ov != undefined ? (ov as string).toLowerCase() === 'true' : false,
     enablePan: ep == undefined ? undefined : (ep as string).toLowerCase() === 't',
   };

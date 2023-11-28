@@ -34,7 +34,9 @@ export default function CreateCampaign() {
       dispatch(reset());
       return void HandleNotLoggedIn();
     } else {
-      const baseMeshUploaded = await UploadFile(avatarBaseFile, StorageLocation.AvatarBase, undefined, campaignName);
+      const campaignNameOnLowerCase = campaignName.toLowerCase();
+
+      const baseMeshUploaded = await UploadFile(avatarBaseFile, StorageLocation.AvatarBase, undefined, campaignNameOnLowerCase);
       if (baseMeshUploaded == undefined) return LogError(Module.CampaignAdd, "Error uploading armature");
 
       // Make doc campaign object
@@ -47,11 +49,11 @@ export default function CreateCampaign() {
       };
 
       // Upload information to DB
-      const result = await InsertDocWithId(campaignName, docData, FirestoreGlobalLocation.Campaign);
+      const result = await InsertDocWithId(campaignNameOnLowerCase, docData, FirestoreGlobalLocation.Campaign);
 
       // Update user info
       const newUserInfo: Partial<UserInterface> = {
-        campaign: campaignList ? [...campaignList, campaignName] : [campaignName]
+        campaign: campaignList ? [...campaignList, campaignNameOnLowerCase] : [campaignNameOnLowerCase]
       };
 
       await UpdateDocObject(FirestoreGlobalLocation.User, newUserInfo, undefined, userInfo.uid);

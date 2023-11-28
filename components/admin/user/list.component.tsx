@@ -16,7 +16,7 @@ export default function UserList() {
 
   async function getUserListData() {
     const userData = await GetUserList();
-    setUserList(userData ?? []);
+    setUserList(userData.success ? userData.value : []);
   }
 
   function renderUserList() {

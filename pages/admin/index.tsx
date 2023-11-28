@@ -1,6 +1,6 @@
 ﻿import Head from "next/head";
 import Layout from "../../layouts/admin.layout";
-import Campaigns from "../../ui/admin/campaign/editCampaign/campaignList.ui";
+import CampaignListComponent from "../../components/admin/campaign/campaignList.component";
 
 export default function Admin() {
   return (
@@ -9,7 +9,7 @@ export default function Admin() {
         <title>Admin Dashboard</title>
       </Head>
       <Layout>
-        <Campaigns/>
+        <CampaignListComponent />
       </Layout>
     </>
   );

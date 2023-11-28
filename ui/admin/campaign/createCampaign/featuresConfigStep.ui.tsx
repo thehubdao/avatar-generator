@@ -25,7 +25,6 @@ const featureBase = {
 };
 
 type FeatureStringOption = keyof Omit<FeatureBasic, 'hasCustomIcon' | 'isMulticolor'>;
-// type FeatureBooleanOption = keyof Omit<FeatureBasic, 'meshName' | 'displayName' | 'index' | 'iconUrl'>;
 
 export default function FeaturesConfigStepUI({ ready = false, featuresCount }: FeaturesConfigStepUIProps) {
   const swiper = useSwiper();
@@ -104,14 +103,7 @@ export default function FeaturesConfigStepUI({ ready = false, featuresCount }: F
           </select>
         </div>
         <div>
-          <div className="pt-4">
-            <div className="flex items-center gap-2 w-full">
-              <p className="whitespace-nowrap">Feature mesh Name:</p>
-              <input type="text" value={featureList[featureSelected]?.meshName || ''} className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg bg-bg"
-                onChange={(e) => updateString(e.currentTarget.value, 'meshName')} />
-            </div>
-          </div>
-          <div className="flex justify-between gap-8">
+          <div className="flex justify-between gap-8 pt-4">
             <div className="flex items-center gap-2 w-full">
               <p className="whitespace-nowrap">Display Name:</p>
               <input type="text" value={featureList[featureSelected]?.displayName || ''} className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg bg-bg"
@@ -119,8 +111,15 @@ export default function FeaturesConfigStepUI({ ready = false, featuresCount }: F
             </div>
             <div className="flex items-center gap-2">
               <p>Index:</p>
-              <input type="number" value={featureList[featureSelected]?.index || ''} className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-16 rounded-lg text-center bg-bg"
+              <input type="number" value={featureList[featureSelected]?.index || (featureSelected + 1)} className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-16 rounded-lg text-center bg-bg"
                 onChange={(e) => updateNumber(e.currentTarget.valueAsNumber, 'index')} />
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 w-full">
+              <p className="whitespace-nowrap">Feature mesh Name:</p>
+              <input type="text" value={featureList[featureSelected]?.meshName || ''} className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-full rounded-lg bg-bg"
+                onChange={(e) => updateString(e.currentTarget.value, 'meshName')} />
             </div>
           </div>
           <div className="grid grid-cols-2 items-center w-full py-4">

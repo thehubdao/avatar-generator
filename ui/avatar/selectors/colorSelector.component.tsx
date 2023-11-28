@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 
 interface ColorSelectorProps {
   list?: string[];
@@ -72,7 +72,7 @@ function ColorOption({ option, isActive, listStyle = 'Rectangular' }: ColorOptio
  */
 
 export default function ColorSelector({ list, activeColor, handleClick, listStyle = 'Rectangular' }: ColorSelectorProps) {
-  const selectFeature = (e: React.MouseEvent, color: string) => {
+  const selectFeature = (e: MouseEvent<HTMLDivElement>, color: string) => {
     e.preventDefault();
     handleClick(color);
   }
