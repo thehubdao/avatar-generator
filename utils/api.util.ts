@@ -117,5 +117,5 @@ export async function GetAvatarSingleByCampaignCombinationString(campaign: strin
 }
 
 export async function GetAvatarCombinationByAttributes(campaign: string, attributesBase64: string) {
-  return GetRequest<number>(ApiRoutesV1.SingleMix, [campaign, attributesBase64]);
+  return PostRequest<number>(ApiRoutesV1.Single, {campaign, attributes: attributesBase64});
 }
