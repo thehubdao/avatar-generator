@@ -35,6 +35,7 @@ import { getIPFSData, getTokensMetadata, mint } from "../../utils/web3/lukso.uti
 import { Signer, ethers } from "ethers";
 import ConnectWeb3Button from "../web3/connectWeb3.component";
 import AccountModalUI from "../../ui/lukso/common/accountModal";
+import Loader from "../../ui/lukso/common/loader.ui";
 
 const exportData: ExportInterface = { attributes: [] };
 let optionList: FeatureInterface[] | undefined;
@@ -68,6 +69,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   const [etherProvider, setEtherProvider] = useState<ethers.BrowserProvider>();
 
   const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false);
+  const [isLoadingMintedData, setIsLoadingMintedData] = useState<boolean>(false);
 
   useEffect(() => {
     const setEtherProviderPromise = () => {
@@ -85,15 +87,20 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
 
       setAddressToShow(address)
       setIsGettingInfoAboutHasMinted(true)
+      setIsLoadingMintedData(true);
       await setTokensMetadata(address)
       setIsGettingInfoAboutHasMinted(false)
     }
     void setTokensMetadataPromise()
   }, [signer])
 
-  useEffect(() => { void onAvatarBuilderReady() }, [hasMinted])
+  useEffect(() => {
+    void onAvatarBuilderReady()
+  }, [hasMinted])
 
   async function onAvatarBuilderReady() {
+    setIsLoadingMintedData(true);
+
     await Promise.all([
       getFeatureList(),
       getAccessoryList(),
@@ -123,6 +130,8 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
       setIsLoading(false);
       !hasMinted && setCurrentSection(LuksoSections.Main);
     })
+
+    setIsLoadingMintedData(false);
   }
 
   // async function sleep(ms: number) {
@@ -360,6 +369,11 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
             />
           }
         </div >
+        <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'}`}>
+          <div className="scale-[3]">
+            <Loader />
+          </div>
+        </div>
         <div className="fixed z-10">
           <HudComponent
             selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
