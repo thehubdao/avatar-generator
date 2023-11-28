@@ -33,6 +33,7 @@ export interface ExportInterface {
   attributesBase64?: string;
   picture?: Blob;
   model?: Blob;
+  combination?: number;
 }
 
 // TODO: place it in a better place, maybe create a new file for color interfaces

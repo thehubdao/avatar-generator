@@ -22,7 +22,7 @@ import { FilterList, LogError, RandomArrayElement, MixArrays } from "../../utils
 import {
   GetAccessoryListByCampaign,
   GetAnimationListByCampaign,
-  GetAssetsListByCampaign,
+  GetAssetsListByCampaign, GetAvatarCombinationByAttributes,
   GetAvatarSingleByCampaignCombination,
   GetEnvMapListByCampaign,
   GetStageListByCampaign
@@ -368,13 +368,17 @@ export default function AvatarBuilder({
     // TODO: Add metadata from user
     GenerateVrmMetaData(undefined);
     
-    exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
-    const [picturePromise, modelPromise] = await Promise.all([
+    const attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
+    
+    exportData.attributesBase64 = attributesBase64;
+    const [picturePromise, modelPromise, combinationPromise] = await Promise.all([
       TakeCanvasPicture(),
-      GetAvatarGLB()
+      GetAvatarGLB(),
+      GetAvatarCombinationByAttributes(campaign, attributesBase64)
     ]);
     exportData.picture = picturePromise;
     exportData.model = modelPromise.success ? modelPromise.value : undefined;
+    exportData.combination = combinationPromise.success ? combinationPromise.value : undefined;
 
     if (isOnIFrame) {
       IFrameExportData(exportData);
