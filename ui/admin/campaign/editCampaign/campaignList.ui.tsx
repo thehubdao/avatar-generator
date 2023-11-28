@@ -27,14 +27,14 @@ export default function CampaignListUI({ deleteCampaign }: CampaignListUIProps) 
         }} />
         {campaignsList === undefined || campaignsList?.length === 0
           ? <CampaignCard noCampaign clickHandler={() => 0} />
-          : campaignsList.map((x: string) => {
+          : campaignsList.map((x) => {
             return (
               <CampaignCard campaign={x} key={x}
                 clickHandler={() => {
                   dispatch(setName(x));
                   void GoToPage(PageLocation.AdminCampaign);
                 }}
-                deleteCampaign={() => { void deleteCampaign(x); }}
+                deleteCampaign={(campaign) => deleteCampaign(campaign)}
               />
             )
           })
