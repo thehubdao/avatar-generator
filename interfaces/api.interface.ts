@@ -43,3 +43,9 @@ export interface SingleInterface {
   random: boolean;
   features: IndexFeatureInterface[];
 }
+
+export interface CollectionDataInterface {
+  featureIndex: { index: number, name: string }[];
+  maxIndex: string;
+  maxCombination: number;
+}
