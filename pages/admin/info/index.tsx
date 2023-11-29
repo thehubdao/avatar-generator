@@ -74,6 +74,7 @@ export default class Info extends Component<undefined, InfoState> {
   data: {
     attributes: { id: string, val: string }[],
     attributesBase64: string,
+    combination: number;
     model: Blob,
     picture: Blob,
   }
