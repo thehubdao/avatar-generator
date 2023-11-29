@@ -14,7 +14,11 @@ export async function SetAnimation(mixer: AnimationMixer, animation: GLTF | stri
   
   let animationFile: GLTF;
   if(typeof animation === 'string'){
-    animationFile = await FirebaseGltfModel(animation, campaign);
+    const animationResult = await FirebaseGltfModel(animation, campaign);
+    if (!animationResult.success)
+      return LogError(Module.AnimationUtil, animationResult.errMessage);
+    
+    animationFile = animationResult.value;
   }
   else {
     animationFile = animation;

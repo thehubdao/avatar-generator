@@ -2,34 +2,37 @@ import {GetParameter, UpdateDocObject} from "./firebase.util";
 import {FirestoreLocation} from "../enums/firebase.enum";
 import {FeatureInterface} from "../interfaces/api.interface";
 import {CastStringToInteger, LogError, SetMapToMap} from "./common.util";
-import {CampaignParameterName, GlobalValues, Module} from "../enums/common.enum";
+import {CampaignParameterName, Module} from "../enums/common.enum";
 import {FeatureBasic} from "../interfaces/common.interface";
 import {GetData} from "../server/api-handler/v1/featureOptions.api-handler";
+import {GLOBAL_VALUES} from "../constants/common.constant";
 
 export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Get FeatureList (same from page)
-  const featureList = await GetParameter<FeatureBasic[]>(campaign, CampaignParameterName.Features);
-  if (featureList == undefined)
+  const featuresResult = await GetParameter<FeatureBasic[]>(campaign, CampaignParameterName.Features);
+  if (!featuresResult.success)
     return void LogError(Module.CollectionUtil, `Couldn't find featureList for campaign: ${campaign}`);
+  
+  featuresResult.value.sort((a, b) => a.index - b.index);
   
   // Get FeatureOptionListData
   const featureOptionListData: Map<number, FeatureInterface[] | undefined> = new Map();
   const featureData = await GetData(campaign);
-  // if (!featureData.success)
-  //   return void LogError(Module.CollectionUtil, "Could not retrieve feature option data!");
+  if (!featureData.success)
+    return void LogError(Module.CollectionUtil, "Could not retrieve feature option data!");
 
-  for (const feature of featureList) {
+  for (const feature of featuresResult.value) {
     if (feature.index == undefined) {
       void LogError(Module.CollectionUtil, `Missing index on ${feature.displayName} feature type!`);
       continue;
     }
 
-    featureOptionListData.set(feature.index, featureData.filter(f => f.type === feature.displayName));
+    featureOptionListData.set(feature.index, featureData.value.filter(f => f.type === feature.displayName));
   }
 
   const featureOptionsToUpdate: Map<string, FeatureInterface> = new Map();
   // Process every single one like in the for
-  for (const feature of featureList) {
+  for (const feature of featuresResult.value) {
     const featureOptionList = featureOptionListData.get(feature.index);
     if (featureOptionList == undefined) continue;
 
@@ -42,7 +45,7 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Update all at the same time
   await UpdateNewIndexesOnDB(campaign, featureOptionsToUpdate);
   // Return the FeatureOptionListData with the new values
-  return {featureList, featureOptionListData};
+  return {featureList: featuresResult.value, featureOptionListData};
 }
 
 export async function ReadjustFeatureIndexes(featureList: FeatureInterface[] | undefined, campaign: string) {
@@ -113,16 +116,16 @@ export function IndexValuesToNumber(indexValues: Map<number, number> | undefined
     return void LogError(Module.CollectionUtil, "Error getting misshaped values for multiply nums!");
 
   let result = 0;
-  for (let i = 0; i < maxValues.size; i++) {
+  for (const [i, val] of Array.from(maxValues.values()).entries()) {    
     const indexVal = indexValues.get(i) ?? 0;
-    if (indexVal >= (maxValues.get(i) ?? 0))
+    if (indexVal >= val)
       return void LogError(Module.CollectionUtil, "Error index values higher than maximum values!");
       
     const newVal = indexVal * multNums[i + 1];
 
     result += newVal;
   }
-
+  
   return result;
 }
 
@@ -135,7 +138,7 @@ export function IndexValuesStringToNumber(indexValuesString: string | undefined,
 }
 
 export function StringToIndexValues(input: string) {
-  const inputArray = input.split(GlobalValues.CollectorIndexSeparator);  
+  const inputArray = input.split(GLOBAL_VALUES.CollectorIndexSeparator);  
   const result: Map<number, number> = new Map();
   
   for (const [key, value] of inputArray.entries()) {
@@ -157,11 +160,13 @@ export function NumberToIndexValues(num: number, maxCombination: number, maxValu
 
   const result = new Map<number, number>();
   let currentValue = num;
+  let i = 0;
 
-  for (let i = 0; i < maxValues.size; i++) {
+  for (const key of maxValues.keys()) {
     const newIndexValue = (currentValue / multNums[i + 1]) | 0;
     currentValue -= newIndexValue * multNums[i + 1];
-    result.set(i, newIndexValue);
+    result.set(key, newIndexValue);
+    i++;
   }
 
   return result;
@@ -185,10 +190,11 @@ function GetMultiplyNums(maxValues: Map<number, number>) {
 
 export function GetMaxIndexValues(featureList: FeatureBasic[], featureOptionListData: Map<number, FeatureInterface[] | undefined>) {
   const maxIndexValues: Map<number, number> = new Map();
-  for (const feature of featureList) {
-    const optionList = featureOptionListData.get(feature.index);
+  for (let i = 0; i < featureList.length; i++) {
+    const currentFeature = featureList[i];
+    const optionList = featureOptionListData.get(currentFeature.index);
     if (optionList != undefined)
-      maxIndexValues.set(feature.index, optionList.length);
+      maxIndexValues.set(i, optionList.length);
   }
   
   return maxIndexValues;
@@ -206,9 +212,8 @@ export function GetMinIndexValues(size: number) {
 export function GetMaxCombinationNum(maxIndexValues: Map<number, number>) {
   let result = 1;
 
-  for (let i = 0; i < maxIndexValues.size; i++) {
-    const value = maxIndexValues.get(i);
-    result *= value ?? 1;
+  for (const value of maxIndexValues.values()) {
+    result *= value;
   }
   
   return result;
@@ -230,8 +235,8 @@ export function IndexValuesToString(indexValues: Map<number, number> | undefined
 
 export function GetCombinationValues(combinationIndexValues: Map<number, number>, featureOptionListData: Map<number, FeatureInterface[] | undefined>) {
   const featureCombination: {index: number, val: FeatureInterface}[] = [];
-  for (const [key, value] of combinationIndexValues) {
-    const feature = featureOptionListData.get(key)?.find(f => f.index === value);
+  for (const [key, val] of Array.from(featureOptionListData.values()).entries()) {
+    const feature = val?.find(f => f.index === combinationIndexValues.get(key));
     if (feature != undefined)
       featureCombination.push({index: key, val: feature});
   }

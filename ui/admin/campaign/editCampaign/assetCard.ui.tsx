@@ -9,16 +9,19 @@ import { FirestoreLocation } from "../../../../enums/firebase.enum";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { fetchData } from "../../../../store/currentCampaignSlice";
 import { ShowModal } from "../../../../utils/modal.util";
+import { CampaignConfig } from "../../../../interfaces/common.interface";
 
 interface AssetCardProps {
   id: string;
   name: string;
   thumb?: string;
   location: FirestoreLocation;
+  updateDefaultAsset: (config: string) => void;
 }
 
-export default function AssetCard({ id, name, thumb, location }: AssetCardProps) {
+export default function AssetCard({ id, name, thumb, location, updateDefaultAsset }: AssetCardProps) {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
+  const campaignConfigParams = useAppSelector(state => state.currentCampaign.parameters.config);
 
   const filesForm = useRef<HTMLFormElement>(null);
 
@@ -32,7 +35,11 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardProps)
   const [hasThumb, setHasThumb] = useState<boolean>(false);
   const [willUpdateAsset, setWillUpdateAsset] = useState<boolean>(false);
 
-
+  const DEFAULT_CONFIG_SECTIONS = [FirestoreLocation.Stages, FirestoreLocation.Animations];
+  const DEFAULT_CONFIG_SECTION_KEYS: { [key: string]: keyof CampaignConfig } = {
+    [FirestoreLocation.Stages]: 'defStage',
+    [FirestoreLocation.Animations]: 'defAnimation',
+  }
 
   const dispatch = useAppDispatch();
 
@@ -137,8 +144,17 @@ export default function AssetCard({ id, name, thumb, location }: AssetCardProps)
                     </div>
                   </div>
                 </>
-                :
-                <div className="flex justify-end items-center w-full">
+                : <div className={`flex ${DEFAULT_CONFIG_SECTIONS.includes(location) ? 'justify-between' : 'justify-end'} items-center w-full`}>
+                  {(DEFAULT_CONFIG_SECTIONS.includes(location)) && (
+                    <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name} onClickEvent={() => updateDefaultAsset(name)}>
+                      {campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name
+                        ? <div className="text-sm flex items-center gap-1">
+                          <AiOutlineCheckCircle />
+                          <p>default</p>
+                        </div>
+                        : <p className="text-sm">Set default</p>}
+                    </AGButton>
+                  )}
                   <AGButton nm fit onClickEvent={() => setWillEdit(true)}>
                     <AiOutlineEdit className="group-hover/button:text-purple transition-all duration-300" />
                   </AGButton>

@@ -3,13 +3,15 @@ import AvatarCollection from "../../../components/admin/collection.component";
 import {GetParameter} from "../../../utils/firebase.util";
 import {FirestoreParameters} from "../../../enums/firebase.enum";
 import {CampaignParameters} from "../../../interfaces/common.interface";
-import {CampaignParameterName} from "../../../enums/common.enum";
+import {CampaignParameterName, CommonErrorCode} from "../../../enums/common.enum";
 import Layout from "../../../layouts/_layout.component.deprecated";
+import {Result} from "../../../types/common.type";
+import {RemoveUndefinedProperties} from "../../../utils/common.util";
 
 interface AvatarCollectionPageProps {
   isCampaign: boolean;
   campaign: string;
-  campaignParams: CampaignParameters | null;
+  campaignParams?: CampaignParameters;
 }
 
 export default function AvatarCollectionPage({isCampaign, campaign, campaignParams}: AvatarCollectionPageProps) {
@@ -37,21 +39,20 @@ export const getServerSideProps: GetServerSideProps<AvatarCollectionPageProps> =
 
   const leCampaign = collection as string;
 
-  const campaigns = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
-  const isCampaign = campaigns == undefined ? false : campaigns.some(c => c === leCampaign);
-  
-  let campaignParameters: CampaignParameters | undefined = undefined;
+  const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
+  const isCampaign = campaignsResult.success ? campaignsResult.value.some(c => c === leCampaign) : false;
 
-  if(isCampaign)
-    campaignParameters = await GetParameter<CampaignParameters>(leCampaign, CampaignParameterName.All);
+  const campaignParamsResult: Result<CampaignParameters> = isCampaign ?
+    await GetParameter<CampaignParameters>(leCampaign, CampaignParameterName.All) :
+    {success: false, errMessage: "Not a campaign!", errCode: CommonErrorCode.InternalError};
 
   const returnProps: AvatarCollectionPageProps = {
     isCampaign,
     campaign: leCampaign,
-    campaignParams: campaignParameters ?? null
+    campaignParams: campaignParamsResult.success ? campaignParamsResult.value : undefined
   };
 
   return {
-    props: returnProps
+    props: RemoveUndefinedProperties(returnProps)
   };
 }

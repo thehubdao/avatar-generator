@@ -1,7 +1,13 @@
-import { useRef, useState } from "react";
+import { MouseEvent, useRef, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
 import AGButton from "../../../../common/ag-button.component";
-import { AiOutlineCloudDownload, AiOutlineCloudUpload, AiOutlineEye, AiOutlineVideoCamera } from "react-icons/ai";
+import {
+  AiOutlineCheckCircle,
+  AiOutlineCloudDownload,
+  AiOutlineCloudUpload,
+  AiOutlineEye,
+  AiOutlineVideoCamera
+} from "react-icons/ai";
 import { MdKeyboardArrowDown, MdOutlineColorLens } from "react-icons/md";
 import ColorConfigUI from "./colorConfig.ui";
 import { IoSettingsOutline } from "react-icons/io5";
@@ -16,18 +22,21 @@ interface ConfigCampaignProps {
   downloadAvatarBase: (() => void) | (() => Promise<void>);
   updateColorConfig: (element: string, colorConfig: ColorConfig) => Promise<void>;
   updateCameraConfig: (element: string, colorConfig: LookAtVectors) => Promise<void>;
+  uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
-export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig }: ConfigCampaignProps) {
+export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig, uploadAvatarBase }: ConfigCampaignProps) {
   const [shouldOpenConfig, setShouldOpenConfig] = useState<boolean>(false);
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
   const [camOption, setCamOption] = useState<string>(CameraConfigOption.DefCam);
+  const [hasNewAvatarBase, setHasNewAvatarBase] = useState<boolean>(false);
 
   const colorConfig = useRef<HTMLSelectElement>(null);
   const camConfig = useRef<HTMLSelectElement>(null);
+  const avatarBaseFile = useRef<HTMLInputElement>(null);
 
-  const changeConfigOption = (e: React.MouseEvent, destiny: string) => {
+  const changeConfigOption = (e: MouseEvent<HTMLDivElement>, destiny: string) => {
     const target = e.currentTarget as HTMLElement;
     const elements = target.parentNode?.childNodes;
 
@@ -74,7 +83,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                       </div>
                       <p className="font-poppins font-bold text-purple">AVATAR BASE</p>
                     </div>
-                    <div className="flex mt-5">
+                    <div className="flex mt-3">
                       <AGButton fit nm>
                         <div className="flex items-center p-2 gap-2 cursor-not-allowed">
                           <AiOutlineEye />
@@ -88,13 +97,22 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                         </div>
                       </AGButton>
                     </div>
-                    <div>
-                      <AGButton nm full >
-                        <div className="flex items-center p-2 gap-2 cursor-not-allowed">
-                          <AiOutlineCloudUpload />
-                          <p>Update Avatar Base</p>
-                        </div>
-                      </AGButton>
+                    <div className="flex">
+                      <label className={`w-full flex justify-center m-2 p-2 gap-2 min-h-[32px] items-center shadow-flat-soft hover:shadow-flat-medium rounded-lg cursor-pointer transition-all duration-300 ${hasNewAvatarBase ? 'bg-green-400 text-white' : ''}`}
+                        htmlFor="avatarBaseFile">
+                        <AiOutlineCloudUpload className="ml-2" />
+                        <p className="my-1 pr-2">Update Base</p>
+                        <input type="file" id="avatarBaseFile" name="avatarBaseFile" className="hidden" accept=".glb"
+                          ref={avatarBaseFile}
+                          onChange={() => setHasNewAvatarBase(!!avatarBaseFile.current?.files?.length)} />
+                      </label>
+                      {hasNewAvatarBase &&
+                        <AGButton nm fit onClickEvent={() => uploadAvatarBase(avatarBaseFile.current?.files?.item(0) ?? undefined)}>
+                          <div className="flex items-center p-2 gap-2 group">
+                            <AiOutlineCheckCircle className="group-hover:text-green-400 transition-all duration-300" />
+                            Upload
+                          </div>
+                        </AGButton>}
                     </div>
                   </div>
                 }
@@ -119,16 +137,14 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                     </div>
                     {
                       colorOption === 'avatarHubSkin' &&
-                      <div className="px-2">
-                        <ColorConfigUI
-                          materialName={configData?.skin?.materialName ?? ''}
-                          color={configData?.skin?.defColor ?? 'FFFFFF'}
-                          id="configColorPicker"
-                          usePalette={configData?.skin?.usePalette ?? false}
-                          colorList={configData?.skin?.colorPalette}
-                          updateColorConfig={(colorConfig: ColorConfig) => updateColorConfig(colorOption, colorConfig)}
-                        />
-                      </div>
+                      <ColorConfigUI
+                        materialName={configData?.skin?.materialName ?? ''}
+                        color={configData?.skin?.defColor ?? 'FFFFFF'}
+                        id="configColorPicker"
+                        usePalette={configData?.skin?.usePalette ?? false}
+                        colorList={configData?.skin?.colorPalette}
+                        updateColorConfig={(colorConfig: ColorConfig) => updateColorConfig(colorOption, colorConfig)}
+                      />
                     }
                   </div>
                 }
