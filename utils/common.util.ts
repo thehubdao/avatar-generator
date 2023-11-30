@@ -129,3 +129,7 @@ export function GetDateNum() {
     .replace(" ", "")
     .replaceAll(":", "");
 }
+
+export function ObjectEntries<K extends (string | number | symbol), V>(obj: Record<K, V>) {
+  return Object.entries(obj) as unknown as [K, V][];
+}
