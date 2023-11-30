@@ -12,12 +12,11 @@ import {
   IndexValuesStringToNumber,
   NumberToIndexValues, RandomIndexValues, StringToIndexValues
 } from "../../../utils/collection.util";
-import {Base64ToObj, CastStringToInteger, LogError, Raise, RandomIntMax} from "../../../utils/common.util";
+import {Base64ToObj, CastStringToInteger, LogError, Raise} from "../../../utils/common.util";
 import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../../constants/common.constant";
 import {SinglePostBody} from "../../interfaces/single.interface";
 import {BasicData} from "../../../interfaces/common.interface";
 import {CampaignParameterName, Module, RandomTier} from "../../../enums/common.enum";
-import { Result } from "../../../types/common.type";
 
 async function CheckCampaign(campaign: string) {
   const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);

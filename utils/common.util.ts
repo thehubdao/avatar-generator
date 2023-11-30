@@ -130,6 +130,6 @@ export function GetDateNum() {
     .replaceAll(":", "");
 }
 
-export function ObjectEntries<K extends (string | number | symbol), V>(obj: Record<K, V>) {
-  return Object.entries(obj) as unknown as [K, V][];
+export function ObjectEntries<TKey extends (string | number | symbol), TValue>(obj: Record<TKey, TValue>) {
+  return Object.entries(obj) as unknown as [TKey, TValue][];
 }

@@ -1,5 +1,4 @@
 import {
-  AccessoryInterface,
   AnimationInterface,
   ApiResponse,
   EnvMapInterface,
@@ -85,7 +84,7 @@ export async function GetAssetsListByCampaign(campaign?: string | null) {
 }
 
 export async function GetAccessoryListByCampaign(campaign?: string | null) {
-  return GetRequest<AccessoryInterface[]>(ApiRoutesV1.AccessoryOptions, undefined, {campaign});
+  return GetRequest<FeatureInterface[]>(ApiRoutesV1.AccessoryOptions, undefined, {campaign});
 }
 
 export async function GetAnimationListByCampaign(campaign?: string | null) {
