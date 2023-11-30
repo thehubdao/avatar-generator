@@ -274,7 +274,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
             // onCategoryChange
             onCategoryTypeChange={(value) => onCategoryTypeChange(value)}
             onSkinColorChange={(value) => void onClickChangeSkinColor(value)}
-            exportModel={() => { return }}
+            exportModel={() => exportModel()}
 
             isCustomCampaignHud
           />
