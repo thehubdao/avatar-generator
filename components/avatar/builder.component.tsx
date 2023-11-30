@@ -35,6 +35,7 @@ import AvatarEditor, {
   ChangeFeature, ChangeSkinColor,
   ChangeStartAnimation,
   GetAvatarGLB,
+  GetAvatarVRM,
   GetWearableOption,
   RemoveStage,
   SetStage,
@@ -45,6 +46,7 @@ import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "
 import {Result} from "../../types/common.type";
 import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../constants/common.constant";
 import {GenerateVrmMetaData} from "../../utils/threejs/vrm.util";
+import { ModelExtension } from "../../enums/export.enum";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -167,7 +169,7 @@ export default function AvatarBuilder({
   }
 
   const exportFromIFrame = () => {
-    return exportModel();
+    return exportModel(ModelExtension.GLB);
   }
 
   async function loadPreData() {
@@ -364,7 +366,7 @@ export default function AvatarBuilder({
     setSelectedOpc([...exportData.attributes]);
   }
 
-  async function exportModel() {
+  async function exportModel(type: ModelExtension) {
     // TODO: Add metadata from user
     GenerateVrmMetaData(undefined);
     
@@ -373,7 +375,7 @@ export default function AvatarBuilder({
     exportData.attributesBase64 = attributesBase64;
     const [picturePromise, modelPromise, combinationPromise] = await Promise.all([
       TakeCanvasPicture(),
-      GetAvatarGLB(),
+      type === ModelExtension.VRM ? GetAvatarVRM() : GetAvatarGLB(),
       GetAvatarCombinationByAttributes(campaign, attributesBase64)
     ]);
     exportData.picture = picturePromise;
@@ -384,7 +386,7 @@ export default function AvatarBuilder({
       IFrameExportData(exportData);
     } else {
       if (modelPromise.success)
-        await SaveFile(modelPromise.value, 'model.glb');
+        await SaveFile(modelPromise.value, `model.${type}`);
 
       await SaveFile(exportData.picture, 'picture.png');
     }
@@ -466,7 +468,8 @@ export default function AvatarBuilder({
 
 
               onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
-              exportModel={() => void exportModel()}
+              exportModel={(type) => exportModel(type)}
+              exportAllow={campaignConfig.extraExport}
             />
           }
         </>

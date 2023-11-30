@@ -9,6 +9,7 @@ import { ConfigEnvMap } from "./envMap.interface";
 import { ConfigShadow } from "./shadow.interface";
 import { ReactNode } from "react";
 import { ConfigPostProcessing } from "./postProcessing.interface";
+import {ModelExtension} from "../enums/export.enum";
 
 export interface BasicData {
   id: string;
@@ -71,6 +72,7 @@ export interface CampaignConfig {
   featuresSkin?: Record<string, ColorConfig>;
   accSkin?: Record<string, ColorConfig>;
   postProcessing?: ConfigPostProcessing[];
+  extraExport?: ModelExtension[];
 }
 
 
