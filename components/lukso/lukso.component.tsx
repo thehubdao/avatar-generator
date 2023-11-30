@@ -51,7 +51,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false);
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
   const [skinColor, setSkinColor] = useState<string>(campaignParams?.config.skin?.defColor ?? 'FFFFFF');
-  const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.current[0].displayName ?? '');
+  const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.current.at(0)?.displayName ?? '');
 
   async function onAvatarBuilderReady() {
     await Promise.all([
