@@ -469,6 +469,7 @@ export default function AvatarBuilder({
 
               onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
               exportModel={(type) => exportModel(type)}
+              exportAllow={campaignConfig.extraExport}
             />
           }
         </>

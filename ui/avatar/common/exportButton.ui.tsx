@@ -8,9 +8,10 @@ import { AiOutlineLoading } from "react-icons/ai";
 interface ExportButtonUIProps {
   children?: string | JSX.Element;
   onClickEvent: (type: ModelExtension) => Promise<void>;
+  allowExtension?: ModelExtension[];
 }
 
-export default function ExportButtonUI({ children, onClickEvent }: ExportButtonUIProps) {
+export default function ExportButtonUI({ children, onClickEvent, allowExtension }: ExportButtonUIProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isExporting, setIsExporting] = useState<boolean>(false);
 
@@ -25,6 +26,7 @@ export default function ExportButtonUI({ children, onClickEvent }: ExportButtonU
     await Delay(500);
     setIsExporting(false);
   }
+  
   return (
     <div className="relative">
       <AGButton full onClickEvent={() => buttonClickHandler()}>
@@ -44,16 +46,23 @@ export default function ExportButtonUI({ children, onClickEvent }: ExportButtonU
         isOpen &&
         <div className="absolute w-full top-full rounded px-4 py-2 bg-bg">
           {
-            Object.keys(ModelExtension).map((type, index) => {
+            allowExtension != undefined && allowExtension.length > 0 ?
+            allowExtension.map(ext => {
               return (
-                <AGButton key={index} full onClickEvent={() => optionClickHandler(ModelExtension[type as keyof typeof ModelExtension])}>
+                <AGButton key={ext} full onClickEvent={() => optionClickHandler(ext)}>
                   <div className="flex items-center gap-4">
                     <AiOutlineCloudDownload />
-                    <p>{type}</p>
+                    <p className="uppercase">{ext}</p>
                   </div>
                 </AGButton>
               )
-            })
+            }) :
+              <AGButton key={ModelExtension.GLB} full onClickEvent={() => optionClickHandler(ModelExtension.GLB)}>
+                <div className="flex items-center gap-4">
+                  <AiOutlineCloudDownload />
+                  <p className="uppercase">{ModelExtension.GLB}</p>
+                </div>
+              </AGButton>
           }
         </div>
       }

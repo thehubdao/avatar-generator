@@ -45,7 +45,8 @@ interface HudUIProps {
   editModeSelected: boolean;
   changeView: () => void;
   exportModel: (type: ModelExtension) => Promise<void>;
-  isCustomCampaignHud?: boolean
+  isCustomCampaignHud?: boolean;
+  exportAllow?: ModelExtension[];
 }
 
 export default function HudUI({
@@ -61,7 +62,8 @@ export default function HudUI({
   editModeSelected,
   changeView,
   exportModel,
-  isCustomCampaignHud
+  isCustomCampaignHud,
+  exportAllow
 }: HudUIProps) {
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
@@ -228,7 +230,7 @@ export default function HudUI({
               <p className="font-poppins text-center w-[120px] py-2">EDIT</p>
             </div>
           </AGButton>
-          <ExportButtonUI onClickEvent={(type) => exportModel(type)} >
+          <ExportButtonUI allowExtension={exportAllow} onClickEvent={(type) => exportModel(type)} >
             <div className="flex items-center justify-between">
               <p className="font-poppins text-center w-[120px] py-2">EXPORT</p>
             </div>
