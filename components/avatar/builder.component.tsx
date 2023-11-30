@@ -327,6 +327,15 @@ export default function AvatarBuilder({
     AGChangeCamPosition(confRef.pos);
     AGChangeLookAtPosition(confRef.lookAt);
   }
+  
+  function updateCamMode(isEditMode: boolean) {
+    if(isEditMode) {
+      updateFeatureCamPosition(selectedCategory, { ...campaignConfig.featuresCamPos, ...campaignConfig.accCamPos });
+    } else {
+      AGChangeCamPosition(campaignConfig.defCam?.pos);
+      AGChangeLookAtPosition(campaignConfig.defCam?.lookAt);
+    }
+  }
 
   async function onChangeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {
     await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor, campaignConfig.skin?.materialName, campaignConfig.changeMaterial);
@@ -454,6 +463,7 @@ export default function AvatarBuilder({
               changeView={() => {
                 setIsEditModeSelected(!isEditModeSelected);
                 void updateStage(!isEditModeSelected);
+                updateCamMode(!isEditModeSelected);
               }}
 
               // changeCategory
