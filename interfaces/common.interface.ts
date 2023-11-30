@@ -1,6 +1,6 @@
 ﻿import { Object3D } from "three";
 import { ClientQuestion } from "../enums/campaign.enum";
-import { AdminComponents } from "../enums/common.enum";
+import {AdminComponents, RandomTier} from "../enums/common.enum";
 import { ChangeMaterialOption } from "../enums/model.enum";
 import { ConfigLight } from "./light.interface";
 import { UserInterface } from "./firebase.interface";
@@ -86,6 +86,7 @@ export interface CampaignParameters {
   features?: FeatureBasic[];
   accessories?: FeatureBasic[];
   config: CampaignConfig;
+  r_val?: Record<RandomTier, number>;
 }
 
 export interface CampaignAssets {
