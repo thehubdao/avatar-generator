@@ -10,23 +10,25 @@ import {
   GetMaxCombinationNum,
   GetMaxIndexValues,
   IndexValuesStringToNumber,
-  NumberToIndexValues
+  NumberToIndexValues, RandomIndexValues, StringToIndexValues
 } from "../../../utils/collection.util";
 import {Base64ToObj, CastStringToInteger, LogError, Raise, RandomIntMax} from "../../../utils/common.util";
 import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../../constants/common.constant";
 import {SinglePostBody} from "../../interfaces/single.interface";
 import {BasicData} from "../../../interfaces/common.interface";
-import {Module} from "../../../enums/common.enum";
+import {CampaignParameterName, Module, RandomTier} from "../../../enums/common.enum";
+import { Result } from "../../../types/common.type";
 
 async function CheckCampaign(campaign: string) {
   const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
   return campaignsResult.success ? campaignsResult.value.some(c => c === campaign) : false;
 }
 
-function ProcessCombination(combination: string, maxValues: Map<number, number>) {
-  if (combination != undefined && combination.includes(GLOBAL_VALUES.CollectorIndexSeparator)) {
-    return IndexValuesStringToNumber(combination, maxValues);
-  }
+function ProcessCombination(combination: string | undefined, maxValues: Map<number, number>) {
+  if (combination == undefined) return;
+  
+  if (combination.includes(GLOBAL_VALUES.CollectorIndexSeparator))
+    return StringToIndexValues(combination, maxValues);
   
   return CastStringToInteger(combination);
 }
@@ -45,23 +47,24 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   // On invalid number use random combination
   const maxIndexValues = GetMaxIndexValues(featureValues.featureList, featureValues.featureOptionListData);
   const maxCombination = GetMaxCombinationNum(maxIndexValues);
-  let combinationNum = ProcessCombination(combination as string, maxIndexValues);
+  let combinationNum = ProcessCombination(combination, maxIndexValues);
   let isRandom = false;
 
+  const randomBalance = await GetParameter<Record<RandomTier, number>>(campaign, CampaignParameterName.Random);
+  
   // Collection util
   // If combination is out of bounds throw error
-  if (combinationNum == undefined || combinationNum < 0) {
-    // random
-    isRandom = true;
-    combinationNum = RandomIntMax(maxCombination);
-  }
-  else if (combinationNum > maxCombination) {
+  if (typeof combinationNum === 'number' && (combinationNum < 0 || combinationNum > maxCombination)) {
     // Error
     return RequestResponse(res, "BadRequest", false, DefaultApiResponse.WrongInput);
+  } else if (combinationNum == undefined) {
+    // random
+    isRandom = true;
+    combinationNum = RandomIndexValues(maxIndexValues, randomBalance, featureValues.featureOptionListData);
   }
 
   // Try get combination
-  const combinationIndexValues = NumberToIndexValues(combinationNum, maxCombination, maxIndexValues);
+  const combinationIndexValues = typeof combinationNum === 'number' ? NumberToIndexValues(combinationNum, maxCombination, maxIndexValues) : combinationNum;
   if (combinationIndexValues == undefined)
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
 
