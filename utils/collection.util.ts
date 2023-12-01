@@ -1,11 +1,19 @@
 import {GetParameter, UpdateDocObject} from "./firebase.util";
 import {FirestoreLocation} from "../enums/firebase.enum";
 import {FeatureInterface} from "../interfaces/api.interface";
-import {CastStringToInteger, LogError, SetMapToMap} from "./common.util";
-import {CampaignParameterName, Module} from "../enums/common.enum";
+import {
+  CastStringToInteger,
+  LogError,
+  ObjectEntries,
+  RandomArrayElement,
+  RandomIntMax,
+  SetMapToMap
+} from "./common.util";
+import {CampaignParameterName, Module, RandomTier} from "../enums/common.enum";
 import {FeatureBasic} from "../interfaces/common.interface";
 import {GetData} from "../server/api-handler/v1/featureOptions.api-handler";
 import {GLOBAL_VALUES} from "../constants/common.constant";
+import {Result} from "../types/common.type";
 
 export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Get FeatureList (same from page)
@@ -16,7 +24,7 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
   featuresResult.value.sort((a, b) => a.index - b.index);
   
   // Get FeatureOptionListData
-  const featureOptionListData: Map<number, FeatureInterface[] | undefined> = new Map();
+  const featureOptionListData: Map<number, FeatureInterface[]> = new Map();
   const featureData = await GetData(campaign);
   if (!featureData.success)
     return void LogError(Module.CollectionUtil, "Could not retrieve feature option data!");
@@ -133,11 +141,11 @@ export function IndexValuesStringToNumber(indexValuesString: string | undefined,
     if (indexValuesString == undefined)
       return void LogError(Module.CollectionComponent, "No indexValues to work on!");
     
-    const realIndexValues = StringToIndexValues(indexValuesString);
+    const realIndexValues = StringToIndexValues(indexValuesString, maxValues);
     return IndexValuesToNumber(realIndexValues, maxValues, multiplyNums);
 }
 
-export function StringToIndexValues(input: string) {
+export function StringToIndexValues(input: string, maxValues: Map<number, number>) {
   const inputArray = input.split(GLOBAL_VALUES.CollectorIndexSeparator);  
   const result: Map<number, number> = new Map();
   
@@ -147,7 +155,30 @@ export function StringToIndexValues(input: string) {
       result.set(key, realValue);
   }
   
+  if (!IsValidIndexValues(result, maxValues)) return undefined;
   return result;
+}
+
+export function IsValidIndexValues(indexValues: Map<number, number>, maxValues: Map<number, number>) {
+  if (indexValues.size === 0) {
+    void LogError(Module.CommonUtil, "Empty index values, not valid!");
+    return false;
+  }
+  
+  if (indexValues.size !== maxValues.size) {
+    void LogError(Module.CommonUtil, "Misshaped index values, not valid!");
+    return false;
+  }
+  
+  for (const [key, value] of indexValues) {
+    const maxVal = maxValues.get(key); 
+    if (maxVal !== undefined && value >= 0 && value < maxVal) continue;
+
+    void LogError(Module.CommonUtil, "IndexValues out of bounds, not valid!");
+    return false;
+  }
+  
+  return true;
 }
 
 export function NumberToIndexValues(num: number, maxCombination: number, maxValues: Map<number, number>, multiplyNums?: number[]) {
@@ -243,3 +274,63 @@ export function GetCombinationValues(combinationIndexValues: Map<number, number>
   
   return featureCombination;
 }
+
+function GetWinnerTeam(maxIndexValues: Map<number, number>, rVal: Result<Record<RandomTier, number>>): RandomTier[] | false {
+  if (!rVal.success) return false;
+  if (Object.keys(rVal.value).length !== Object.keys(RandomTier).length) return false;
+  
+  const values = Object.values(rVal.value);
+  let sum = 0;
+  values.forEach(v => sum += v);
+  if (sum !== 100) return false;
+
+  const acc: [RandomTier, number][] = [];
+  for (const [key, v] of ObjectEntries(rVal.value)) {
+    if (acc.length === 0)
+      acc.push([key, v / 100]);
+    else
+      acc.push([key, (v / 100) + acc[acc.length - 1][1]]);
+  }
+  
+  const winnerTeam: RandomTier[] = [];
+  for (let i = 0; i < maxIndexValues.size; i++) {
+    const rand = Math.random();
+    const tier = acc.find(([, a]) => rand <= a);
+    if (tier !== undefined)
+      winnerTeam.push(tier[0]);
+  }
+  
+  if (winnerTeam.length !== maxIndexValues.size) return false;
+  
+  return winnerTeam;
+}
+
+export function RandomIndexValues(maxIndexValues: Map<number, number>, rVal: Result<Record<RandomTier, number>>, optionList: Map<number, FeatureInterface[]>): Map<number, number> {
+  const winnerTeam = GetWinnerTeam(maxIndexValues, rVal);
+  const randomIndexValues: Map<number, number> = new Map();
+  
+  if (winnerTeam !== false) {
+    // use winnerTeam
+    for (const [index, featureArray] of Array.from(optionList.values()).entries()) {
+      const winnerTier = winnerTeam[index];
+      let filteredArray = featureArray.filter(f => f.tier === winnerTier);
+      if (filteredArray.length === 0 && winnerTier !== RandomTier.Common)
+        filteredArray = featureArray.filter(f => f.tier === RandomTier.Common);
+      if (filteredArray.length === 0)
+        filteredArray = featureArray;
+      
+      const randomFeature = RandomArrayElement(filteredArray);
+      randomIndexValues.set(index, randomFeature.index);
+    }
+  }
+  else {
+    for (const [index, val] of maxIndexValues) {
+      // Generate random based on maxIndexValues
+      const randomNum = RandomIntMax(val);
+      randomIndexValues.set(index, randomNum);
+    }
+  }
+  
+  return randomIndexValues;
+}
+
