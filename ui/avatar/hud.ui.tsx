@@ -11,6 +11,8 @@ import OptionSelectorUI from "./selectors/optionSelector.ui";
 import ColorSelector from "./selectors/colorSelector.component";
 import HudFeatureTitleUI from "./common/hudTitle.ui";
 import { RemovedAcc } from "../../utils/common.util";
+import ExportButtonUI from "./common/exportButton.ui";
+import { ModelExtension } from "../../enums/export.enum";
 
 interface HudUIProps {
 
@@ -42,8 +44,9 @@ interface HudUIProps {
 
   editModeSelected: boolean;
   changeView: () => void;
-  exportModel: () => void;
-  isCustomCampaignHud?: boolean
+  exportModel: (type: ModelExtension) => Promise<void>;
+  isCustomCampaignHud?: boolean;
+  exportAllow?: ModelExtension[];
 }
 
 export default function HudUI({
@@ -59,7 +62,8 @@ export default function HudUI({
   editModeSelected,
   changeView,
   exportModel,
-  isCustomCampaignHud
+  isCustomCampaignHud,
+  exportAllow
 }: HudUIProps) {
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
@@ -96,7 +100,7 @@ export default function HudUI({
             <AGButton full onClickEvent={() => changeView()}>
               <p>EDIT</p>
             </AGButton>
-            <AGButton full onClickEvent={() => exportModel()}>
+            <AGButton full onClickEvent={() => exportModel(ModelExtension.GLB)}>
               <p>EXPORT</p>
             </AGButton>
           </>
@@ -226,11 +230,11 @@ export default function HudUI({
               <p className="font-poppins text-center w-[120px] py-2">EDIT</p>
             </div>
           </AGButton>
-          <AGButton onClickEvent={() => exportModel()}>
+          <ExportButtonUI allowExtension={exportAllow} onClickEvent={(type) => exportModel(type)} >
             <div className="flex items-center justify-between">
               <p className="font-poppins text-center w-[120px] py-2">EXPORT</p>
             </div>
-          </AGButton>
+          </ExportButtonUI>
         </div>
       }
     </>

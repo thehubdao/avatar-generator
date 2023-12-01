@@ -70,9 +70,16 @@ export enum CampaignParameterName {
   Armature = 'armature',
   Features = 'features',
   Accessories = 'accessories',
+  Random = 'r_val',
   Config = 'Config',
   All = '',
   Missing = 'NaN',
+}
+
+export enum RandomTier {
+  Common = "c",
+  Rare = "r",
+  Epic = "e",
 }
 
 /***
