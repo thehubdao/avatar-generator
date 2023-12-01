@@ -1,5 +1,5 @@
 ﻿import {NextApiRequest, NextApiResponse} from "next";
-import {ApiResponse, CollectionDataInterface} from "../../../interfaces/api.interface";
+import {ApiResponse, CollectionDataInterface, CollectionDataProcess} from "../../../interfaces/api.interface";
 import {RequestResponse} from "../request.api-handler";
 import {DefaultApiResponse} from "../../enums/api.enum";
 import {GetParameter} from "../../../utils/firebase.util";
@@ -44,4 +44,34 @@ export async function GetUriApiHandler(req: NextApiRequest, res: NextApiResponse
 async function CheckCampaign(campaign: string) {
   const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
   return campaignsResult.success ? campaignsResult.value.some(c => c === campaign) : false;
+}
+
+export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<CollectionDataProcess>>) {
+  // Call the util that does things
+  // Start with code and singleton that saves this code on db
+  // On process done update the status of the code on db
+  // Make status api call that returns how that code is handling
+  // Status code can be an UID
+  // Either check if request stack, or replace each other
+    // Create queue system for this request
+  
+  
+  // Process
+  // Fill the db in some place (collection/<campaign>/nft/<doc-id>
+  // doc-id should be the combination number
+  // schema
+  //   id: same doc-id
+  //   status: minted | waiting
+  //   indexValues: string - Array of index values that create this combination
+  //   percentage: number - based on how likable to hit this combination can be (based on tier of features)
+  
+  // GetRandomNft (change name something more likeable)
+  // Gets one random from the list that is on status waiting
+  // Generate random number, check with percentage if it hits return this 
+  // If the chance doesn't hit, re roll random number and check with another item
+  // return the id and index-values of the winner
+  
+  // Util on LuksoBackend
+  // Allow to update this combination status to minted when a mint happens
+  // that way we keep track of minted combinations and won't show any combination that is already taken
 }

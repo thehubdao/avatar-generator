@@ -51,3 +51,7 @@ export interface CollectionDataInterface {
   maxIndex: string;
   maxCombination: number;
 }
+
+export interface CollectionDataProcess {
+  status: number;
+}
