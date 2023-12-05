@@ -8,6 +8,7 @@ import {FindAndReadjustFeatureIndexes, GetMaxCombinationNum, GetMaxIndexValues} 
 import {LogError} from "../../../utils/common.util";
 import {Module} from "../../../enums/common.enum";
 import {GLOBAL_VALUES} from "../../../constants/common.constant";
+import {CollectionPostBody} from "../../interfaces/collection.interface";
 
 export async function GetUriApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<CollectionDataInterface>>) {
   const {collection} = req.query;
@@ -41,37 +42,73 @@ export async function GetUriApiHandler(req: NextApiRequest, res: NextApiResponse
   }
 }
 
-async function CheckCampaign(campaign: string) {
+async function CheckCampaign(campaign: string | undefined) {
+  if (campaign == undefined) return false;
+  
   const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
   return campaignsResult.success ? campaignsResult.value.some(c => c === campaign) : false;
 }
 
-export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<CollectionDataProcess>>) {
-  // Call the util that does things
-  // Start with code and singleton that saves this code on db
-  // On process done update the status of the code on db
-  // Make status api call that returns how that code is handling
-  // Status code can be an UID
-  // Either check if request stack, or replace each other
-    // Create queue system for this request
+async function ProcessCollection(campaign: string, update: boolean, processId: number) {
+  // Check existence of collection
   
+  // If it exists dont do anything, unless update is true
   
-  // Process
-  // Fill the db in some place (collection/<campaign>/nft/<doc-id>
-  // doc-id should be the combination number
-  // schema
-  //   id: same doc-id
-  //   status: minted | waiting
-  //   indexValues: string - Array of index values that create this combination
-  //   percentage: number - based on how likable to hit this combination can be (based on tier of features)
+  // Count the amount of docs
+  // If same amount of maxCombination, all good
   
-  // GetRandomNft (change name something more likeable)
-  // Gets one random from the list that is on status waiting
-  // Generate random number, check with percentage if it hits return this 
-  // If the chance doesn't hit, re roll random number and check with another item
-  // return the id and index-values of the winner
+  // If different? update the existence
+  // Separate the minted ones from the others
   
-  // Util on LuksoBackend
-  // Allow to update this combination status to minted when a mint happens
-  // that way we keep track of minted combinations and won't show any combination that is already taken
+  // If no minted ones, just refill to the same amount of existence with new index-values
+  // If minted ones, recalculate based on the index-values
+  // and update the minted state
+  
+  // When done, fill on db the status and tell is done
+  // Create something that controls this status
 }
+
+export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<CollectionDataProcess>>) {
+  const {update, campaign} = req.body as CollectionPostBody;
+  
+  try {
+    const isCampaign = await CheckCampaign(campaign);
+    if (!isCampaign)
+      return RequestResponse(res, "BadRequest", false, DefaultApiResponse.MissingInfo);
+    
+    
+    
+  } catch (e) {
+    const err = e as Error;
+    void LogError(Module.ApiUtil, err.message, e);
+    return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
+  }
+}
+
+// Call the util that does things
+// Start with code and singleton that saves this code on db
+// On process done update the status of the code on db
+// Make status api call that returns how that code is handling
+// Status code can be an UID
+// Either check if request stack, or replace each other
+// Create queue system for this request
+
+
+// Process
+// Fill the db in some place (collection/<campaign>/nft/<doc-id>
+// doc-id should be the combination number
+// schema
+//   id: same doc-id
+//   status: minted | waiting
+//   indexValues: string - Array of index values that create this combination
+//   percentage: number - based on how likable to hit this combination can be (based on tier of features)
+
+// GetRandomNft (change name something more likeable)
+// Gets one random from the list that is on status waiting
+// Generate random number, check with percentage if it hits return this 
+// If the chance doesn't hit, re roll random number and check with another item
+// return the id and index-values of the winner
+
+// Util on LuksoBackend
+// Allow to update this combination status to minted when a mint happens
+// that way we keep track of minted combinations and won't show any combination that is already taken
