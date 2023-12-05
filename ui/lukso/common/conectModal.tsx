@@ -11,7 +11,7 @@ interface ConnectModalUIProps {
 }
 
 function ConnectModalUI({ onConnect, etherProvider, signer, setIsConnecting }: ConnectModalUIProps) {
-  const handleConnect = (signer: Signer | undefined, status: ConnectionStatus) => {
+  const _onConnect = (signer: Signer | undefined, status: ConnectionStatus) => {
     onConnect(signer, status);
     setIsConnecting(false);
   }
@@ -23,7 +23,7 @@ function ConnectModalUI({ onConnect, etherProvider, signer, setIsConnecting }: C
           <div className="flex flex-col justify-center items-center gap-4">
             <h3 className="text-2xl">Connect Wallet!</h3>
             <p>In order to mint a citizen must have connected the wallet to which we are going to link its asset</p>
-            <ConnectWeb3Button onConnect={handleConnect} etherProvider={etherProvider} signer={signer} classStyles="h-fit" >
+            <ConnectWeb3Button onConnect={_onConnect} etherProvider={etherProvider} signer={signer} classStyles="h-fit" >
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                 <div className="flex items-center gap-3">
                   <p className="text-black">Login to Get Your Citizen</p>

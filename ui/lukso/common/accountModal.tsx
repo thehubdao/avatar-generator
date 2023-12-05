@@ -57,7 +57,7 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
                 </div>
               </TransparentBoxUI>
             </button>
-            <button className="w-72 h-fit" onClick={() => { alert("Lukso disconnect function") }}>
+            <button className="w-72 h-fit" onClick={() => {  }}>
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                 <div className="flex items-center gap-3">
                   <p className="">Disconnect</p>

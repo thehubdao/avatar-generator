@@ -17,9 +17,8 @@ export const getTokensMetadata = async (address: string) => {
     return tokensMetadataRequest.value
 }
 
-export const getIPFSData = async (ipfsUrl: string) => {
-    const CID = ipfsUrl.split('//')[1]
-    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${CID}`
+export const getIPFSData = async (cid: string) => {
+    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}`
     const ipfsRequest = await fetch(ipfsHTTPUrl) 
     const ipfsData:IpfsResponse = await ipfsRequest.json() as IpfsResponse
 

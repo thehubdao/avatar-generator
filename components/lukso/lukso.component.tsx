@@ -95,6 +95,8 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   }, [signer])
 
   useEffect(() => {
+    console.log(hasMinted)
+    /* if(!hasMinted) return */
     void onAvatarBuilderReady()
   }, [hasMinted])
 
