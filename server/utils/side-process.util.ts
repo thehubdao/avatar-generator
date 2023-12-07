@@ -26,7 +26,11 @@ class SideProcessUtil {
     if (sessionProcess != undefined)
       return {success: true, value: sessionProcess};
 
-    return GetSingleDocument<ProcessInfo>(FirestoreGlobalLocation.Process, processId);
+    const docResult = await GetSingleDocument<ProcessInfo>(FirestoreGlobalLocation.Process, processId);
+    if (!docResult.success) return {success: false, errMessage: "Process does not exist!", errCode: CommonErrorCode.GetNoData};
+    
+    this.SetProcess(docResult.value);
+    return docResult;
   }
   
   public SetProcess(process: ProcessInfo) {
@@ -39,8 +43,7 @@ export async function GenerateProcessId() {
   return uuidv4();
 }
 
-export async function CreateProcess(request: string[]) {
-  const processId = await GenerateProcessId();
+export async function CreateProcess(processId: string, ...request: string[]) {
   const newProcess: ProcessInfo = {
     id: processId,
     done: false,
@@ -62,8 +65,6 @@ export async function CreateProcess(request: string[]) {
     SideProcessUtil.Instance().SetProcess(findProcess.value);
     return true;
   });
-  
-  return processId;
 }
 
 export async function SetProcessDone(processId: string): Promise<Result<boolean>> {
@@ -83,4 +84,8 @@ export async function SetProcessDone(processId: string): Promise<Result<boolean>
     const doneProcess: Partial<ProcessInfo> = {done: true};
     return UpdateDocObject(FirestoreGlobalLocation.Process, doneProcess, undefined, processId);
   }
+}
+
+export async function GetProcess(processId: string) {
+  return SideProcessUtil.Instance().GetProcess(processId);
 }
