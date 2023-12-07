@@ -171,6 +171,27 @@ async function GetDocuments<T>(dbLocation: string, constraintsValues?: AGQueryCo
   }
 }
 
+export async function GetSingleDocument<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, docId: string): Promise<Result<T>> {
+  if (!docId) return {success: false, errMessage: "Missing a valid docId!", errCode: CommonErrorCode.MissingInfo};
+  if (dbLocation.split('/').length % 2 !== 0)
+    return {success: false, errMessage: "Location is not a collection!", errCode: CommonErrorCode.WrongInfo};
+
+  try {
+    const {doc, getDoc} = await import('@firebase/firestore');
+    const docRef = doc(await FirebaseUtil.Instance().DB(), `${dbLocation}/${docId}`);
+    const leDoc = await getDoc(docRef);
+
+    const data = leDoc.data() as T;
+    return data == undefined ?
+      {success: false, errMessage: "Missing data on collection!", errCode: CommonErrorCode.MissingInfo} :
+      {success: true, value: data};
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, err.code);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
+}
+
 function GetConstraints(dbLocation: string, constraintsValues?: AGQueryConstraints) {
   if (!constraintsValues)
     return [];
