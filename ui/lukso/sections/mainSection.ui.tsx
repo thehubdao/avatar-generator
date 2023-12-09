@@ -43,6 +43,8 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
     });
   }
 
+
+  
   useLayoutEffect(() => { void gsapEnterBlocks() }, [])
 
   return (
@@ -108,7 +110,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
           </>
         )
         }
-        {!signer && etherProvider && <button className="w-full h-fit" onClick={() => setIsConnecting(true)}>
+        {!signer && <button className="w-full h-fit" onClick={() => setIsConnecting(true)}>
           <TransparentBox
             fullWidth
             border
