@@ -22,19 +22,20 @@ import { FilterList, LogError, RandomArrayElement, MixArrays } from "../../utils
 import {
   GetAccessoryListByCampaign,
   GetAnimationListByCampaign,
-  GetAssetsListByCampaign,
+  GetAssetsListByCampaign, GetAvatarCombinationByAttributes,
   GetAvatarSingleByCampaignCombination,
   GetEnvMapListByCampaign,
   GetStageListByCampaign
 } from "../../utils/api.util";
 import { SaveFile } from "../../utils/exporter.util";
 import AGLoading from "../../ui/common/ag-loading.component";
-import HudComponent from "../../ui/avatar/hud.component";
+import HudUI from "../../ui/avatar/hud.ui";
 import AvatarEditor, {
   ChangeAccessory,
   ChangeFeature, ChangeSkinColor,
   ChangeStartAnimation,
   GetAvatarGLB,
+  GetAvatarVRM,
   GetWearableOption,
   RemoveStage,
   SetStage,
@@ -44,6 +45,8 @@ import AvatarEditor, {
 import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "./viewer.component";
 import {Result} from "../../types/common.type";
 import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../constants/common.constant";
+import {GenerateVrmMetaData} from "../../utils/threejs/vrm.util";
+import { ModelExtension } from "../../enums/export.enum";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -140,7 +143,7 @@ export default function AvatarBuilder({
     if (!isOnIFrame) return LogError(Module.AvatarGenerator, "Not on IFrame, subscribe if you forgot!");
     if (!params) return LogError(Module.AvatarGenerator, "Missing feature option!");
 
-    if (params.detail && params.detail.startsWith('http')) {
+    if (params.detail?.startsWith('http')) {
       if (params.id.endsWith(GLOBAL_VALUES.AccEnd)) {
         await ChangeAccessory(`${params.id}_${params.val}_${params.detail}`, params.detail, params.val, params.id, campaignConfig.changeMaterial);
       } else {
@@ -166,7 +169,7 @@ export default function AvatarBuilder({
   }
 
   const exportFromIFrame = () => {
-    return exportModel();
+    return exportModel(ModelExtension.GLB);
   }
 
   async function loadPreData() {
@@ -324,6 +327,15 @@ export default function AvatarBuilder({
     AGChangeCamPosition(confRef.pos);
     AGChangeLookAtPosition(confRef.lookAt);
   }
+  
+  function updateCamMode(isEditMode: boolean) {
+    if(isEditMode) {
+      updateFeatureCamPosition(selectedCategory, { ...campaignConfig.featuresCamPos, ...campaignConfig.accCamPos });
+    } else {
+      AGChangeCamPosition(campaignConfig.defCam?.pos);
+      AGChangeLookAtPosition(campaignConfig.defCam?.lookAt);
+    }
+  }
 
   async function onChangeFeature(id: string, featurePath: string, name: string, _selectedFeature: string = selectedFeature) {
     await ChangeFeature(id, featurePath, name, _selectedFeature, skinColor, campaignConfig.skin?.materialName, campaignConfig.changeMaterial);
@@ -363,20 +375,27 @@ export default function AvatarBuilder({
     setSelectedOpc([...exportData.attributes]);
   }
 
-  async function exportModel() {
-    exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
-    const [picturePromise, modelPromise] = await Promise.all([
+  async function exportModel(type: ModelExtension) {
+    // TODO: Add metadata from user
+    GenerateVrmMetaData(undefined);
+    
+    const attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
+    
+    exportData.attributesBase64 = attributesBase64;
+    const [picturePromise, modelPromise, combinationPromise] = await Promise.all([
       TakeCanvasPicture(),
-      GetAvatarGLB()
+      type === ModelExtension.VRM ? GetAvatarVRM() : GetAvatarGLB(),
+      GetAvatarCombinationByAttributes(campaign, attributesBase64)
     ]);
     exportData.picture = picturePromise;
-    exportData.model = modelPromise;
+    exportData.model = modelPromise.success ? modelPromise.value : undefined;
+    exportData.combination = combinationPromise.success ? combinationPromise.value : undefined;
 
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
-      if (exportData.model != undefined)
-        await SaveFile(exportData.model, 'model.glb');
+      if (modelPromise.success)
+        await SaveFile(modelPromise.value, `model.${type}`);
 
       await SaveFile(exportData.picture, 'picture.png');
     }
@@ -420,7 +439,7 @@ export default function AvatarBuilder({
       {isLoading ? <></> :
         <>
           {!onlyView &&
-            <HudComponent
+            <HudUI
               selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
 
               editModeSelected={isEditModeSelected}
@@ -444,6 +463,7 @@ export default function AvatarBuilder({
               changeView={() => {
                 setIsEditModeSelected(!isEditModeSelected);
                 void updateStage(!isEditModeSelected);
+                updateCamMode(!isEditModeSelected);
               }}
 
               // changeCategory
@@ -458,7 +478,8 @@ export default function AvatarBuilder({
 
 
               onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
-              exportModel={() => void exportModel()}
+              exportModel={(type) => exportModel(type)}
+              exportAllow={campaignConfig.extraExport}
             />
           }
         </>

@@ -7,7 +7,7 @@ import MobileLayout from "../../layouts/mobile.layout";
 // Components
 import AvatarEditor, { ChangeFeature, ChangeSkinColor, ChangeStartAnimation, GetAvatarGLB, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
 import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "../avatar/viewer.component";
-import HudComponent from "../../ui/avatar/hud.component";
+import HudUI from "../../ui/avatar/hud.ui";
 
 // UI
 import LuksoUI from "../../ui/lukso/lukso.ui";
@@ -59,7 +59,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false);
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
   const [skinColor, setSkinColor] = useState<string>(campaignParams?.config.skin?.defColor ?? 'FFFFFF');
-  const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.current[0].displayName ?? '');
+  const [selectedCategory, setSelectedCategory] = useState<string>(selectListFeatures.current.at(0)?.displayName ?? '');
 
   // Web3 state
   const [signer, setSigner] = useState<Signer>()
@@ -251,13 +251,14 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
       GetAvatarGLB()
     ]);
     exportData.picture = picturePromise;
-    exportData.model = modelPromise;
+    exportData.model = modelPromise.success ? modelPromise.value : undefined;
 
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
-      if (exportData.model != undefined)
-        await SaveFile(exportData.model, 'model.glb');
+      if (modelPromise.success)
+        await SaveFile(modelPromise.value, 'model.glb');
+      
       await SaveFile(exportData.picture, 'picture.png');
     }
   }
@@ -377,7 +378,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
           </div>
         </div>
         <div className="fixed z-10">
-          <HudComponent
+          <HudUI
             selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
 
             editModeSelected={isEditModeSelected}
@@ -404,7 +405,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
             // onCategoryChange
             onCategoryTypeChange={(value) => onCategoryTypeChange(value)}
             onSkinColorChange={(value) => void onClickChangeSkinColor(value)}
-            exportModel={() => { return }}
+            exportModel={() => exportModel()}
 
             isCustomCampaignHud
           />

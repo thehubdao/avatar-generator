@@ -55,7 +55,8 @@ export enum Module {
   EditCampaign = 'EditCampaignComponent',
   OptionSelector = 'OptionSelector',
   Importer = "ThreeJsImporterUtil",
-  Lukso = 'LuksoComponent'
+  Lukso = 'LuksoComponent',
+  VrmUtil = "VrmUtil",
 }
 
 export enum EmailResult {
@@ -69,9 +70,16 @@ export enum CampaignParameterName {
   Armature = 'armature',
   Features = 'features',
   Accessories = 'accessories',
+  Random = 'r_val',
   Config = 'Config',
   All = '',
   Missing = 'NaN',
+}
+
+export enum RandomTier {
+  Common = "c",
+  Rare = "r",
+  Epic = "e",
 }
 
 /***
@@ -85,6 +93,7 @@ export const enum CommonErrorCode {
   FetchError = 'AG-103',
   PostNoData = 'AG-108',
   MissingInfo = 'AG-201',
-  CouldntProcess = 'AG-203',
+  WrongInfo = 'AG-202',
+  InternalError = 'AG-205',
   NoAuth = 'AG-301'
 }

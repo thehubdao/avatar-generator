@@ -1,4 +1,5 @@
 ﻿import {DefaultApiResponse} from "../server/enums/api.enum";
+import {RandomTier} from "../enums/common.enum";
 
 export interface ApiResponse<T> {
   success: boolean,
@@ -16,6 +17,7 @@ export interface AssetInterface {
 
 export interface FeatureInterface extends AssetInterface {
   id: string;
+  tier: RandomTier;
 }
 
 export interface AccessoryInterface extends AssetInterface {
@@ -42,4 +44,10 @@ export interface IndexFeatureInterface {
 export interface SingleInterface {
   random: boolean;
   features: IndexFeatureInterface[];
+}
+
+export interface CollectionDataInterface {
+  featureIndex: { index: number, name: string }[];
+  maxIndex: string;
+  maxCombination: number;
 }

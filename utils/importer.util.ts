@@ -3,14 +3,12 @@ import {GetFile} from "./firebase.util";
 import {IsWebUrl, LogError} from "./common.util";
 import {Result} from "../types/common.type";
 import {CommonErrorCode, Module} from "../enums/common.enum";
+import {VRMLoaderPlugin} from "@pixiv/three-vrm";
 
 class ImporterUtil {
   private static _instance: ImporterUtil;
-  private _gltfLoader: GLTFLoader | null;
-
-  constructor() {
-    this._gltfLoader = null;
-  }
+  private _gltfLoader: GLTFLoader | undefined;
+  private _vrmLoader: GLTFLoader | undefined;
 
   public static Instance() {
     if (ImporterUtil._instance === undefined)
@@ -20,10 +18,21 @@ class ImporterUtil {
   }
 
   public GetGltfLoaderInstance(): GLTFLoader {
-    if (this._gltfLoader === null)
+    if (this._gltfLoader == undefined)
       this._gltfLoader = new GLTFLoader();
 
     return this._gltfLoader;
+  }
+  
+  public GetVrmLoaderInstance(): GLTFLoader {
+    if (this._vrmLoader == undefined) {
+      this._vrmLoader = new GLTFLoader();
+      this._vrmLoader.register((parser) => {
+        return new VRMLoaderPlugin(parser);
+      });
+    }
+
+    return this._vrmLoader;
   }
 }
 
@@ -38,6 +47,19 @@ function ParseAsync(array: ArrayBuffer): Promise<GLTF> {
         reject(error);
       })
   });
+}
+
+export async function LoadVrmAsync(vrmLoc: string): Promise<Result<GLTF>> {
+  try {
+    const loader = ImporterUtil.Instance().GetVrmLoaderInstance();
+    const vrm = await loader.loadAsync(vrmLoc);
+    return {success: true, value: vrm};
+  }
+  catch (e) {
+    const msg = "Error loading VRM asset!";
+    void LogError(Module.Importer, msg);
+    return {success: false, errMessage: msg, errCode: CommonErrorCode.InternalError};
+  }
 }
 
 export async function LoadGltfModel(url: string): Promise<GLTF> {

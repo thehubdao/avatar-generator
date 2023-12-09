@@ -204,7 +204,8 @@ export default function AvatarCollection({
       GetAvatarGLB()
     ]);
 
-    await SaveFile(modelPromise, 'model.glb');
+    if (modelPromise.success)
+      await SaveFile(modelPromise.value, 'model.glb');
     await SaveFile(picturePromise, 'picture.png');
   }
 

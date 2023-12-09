@@ -621,7 +621,7 @@ export async function UpdateAdminCampaigns(): Promise<Result<boolean>> {
   catch (e) {
     const msg = "Error updating admin campaigns!";
     void LogError(Module.FirebaseUtil, msg, e);
-    return {success: false, errMessage: msg, errCode: CommonErrorCode.CouldntProcess};
+    return {success: false, errMessage: msg, errCode: CommonErrorCode.InternalError};
   }
 }
 
