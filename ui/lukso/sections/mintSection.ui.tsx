@@ -8,7 +8,7 @@ import SocialButtonsUI from "../common/socialButtons.ui";
 import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 import MintSectionModalUI from "../common/mintModal.ui";
-import { BrowserProvider, Signer, ethers } from "ethers";
+import { BrowserProvider, ethers } from "ethers";
 import Loader from "../common/loader.ui";
 
 interface MintSectionUIProps {

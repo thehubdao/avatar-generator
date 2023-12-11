@@ -117,17 +117,17 @@ export default function LuksoComponent({
     const [addressToShow, setAddressToShow] = useState<string>('')
     const [
         isGettingInfoAboutHasMinted,
-        setIsGettingInfoAboutHasMinted,
+        
     ] = useState<boolean>(false)
 
     const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false)
     const [isLoadingMintedData, setIsLoadingMintedData] = useState<boolean>(
         false
     )
-    const [{ wallet, connecting }, Connect, Disconnect] = useConnectWallet()
+    const [{ wallet }] = useConnectWallet()
     useEffect(() => {
         if (!wallet) return setProvider(undefined)
-        const setEtherProviderPromise = async () => {
+        const setEtherProviderPromise = () => {
             const _etherProvider = new ethers.BrowserProvider(wallet.provider, 'any')
             setProvider(_etherProvider)
         }
@@ -138,7 +138,8 @@ export default function LuksoComponent({
     useEffect(() => {
         if (!provider) return
         const setTokensMetadataPromise = async () => {
-            const address = wallet?.accounts[0]?.address!
+            if(!wallet) return
+            const address = wallet.accounts[0].address
             setAddressToShow(address)
             
             await setTokensMetadata(address)

@@ -3,8 +3,7 @@ import MainSectionUI from "./sections/mainSection.ui";
 import MintSectionUI from "./sections/mintSection.ui";
 import LoadingUI from "./sections/loadingSection.ui";
 import { LuksoSections } from "../../enums/lukso/common.enum";
-import { Signer, ethers } from "ethers";
-import { ConnectionStatus } from "../../enums/web3";
+import { BrowserProvider, ethers } from "ethers";
 
 interface LuksoUIProps {
   isLoading: boolean;
@@ -14,7 +13,7 @@ interface LuksoUIProps {
   setIsEditModeSelected: (value: boolean) => void;
   setCurrentSection: (value: LuksoSections) => void;
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
-  handleClaim: (address: string, signer: Signer) => Promise<{ message: string, success: boolean }>;
+  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean }>;
   hasMinted: boolean
   provider: ethers.BrowserProvider | undefined
   isGettingInfoAboutHasMinted: boolean

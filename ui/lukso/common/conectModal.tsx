@@ -1,7 +1,5 @@
-import { BrowserProvider, Signer } from "ethers"
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component"
 import TransparentBoxUI from "./transparentBox.ui"
-import { ConnectionStatus } from "../../../enums/web3"
 
 interface ConnectModalUIProps {
   setIsConnecting: (value: boolean) => void;
