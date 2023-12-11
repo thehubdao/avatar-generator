@@ -1,6 +1,7 @@
 import Image from "next/image";
 import TransparentBoxUI from "./transparentBox.ui";
 import { useState } from "react";
+import { useConnectWallet } from "@web3-onboard/react";
 
 interface AccountModalUIProps {
   addressAccount: string;
@@ -11,7 +12,7 @@ interface AccountModalUIProps {
 export default function AccountModalUI({ addressAccount, formatAddress, setIsAccountModalOpen }: AccountModalUIProps) {
   const [isCopyAddress, setIsCopyAddress] = useState<boolean>(false);
   const [copyAddressMessage, setCopyAddressMessage] = useState<string>("");
-
+  const [{ wallet, connecting },, disconnect,, wallets] = useConnectWallet()
   async function copyToClipboard(text: string): Promise<void> {
     setIsCopyAddress(true);
 
@@ -57,7 +58,9 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
                 </div>
               </TransparentBoxUI>
             </button>
-            <button className="w-72 h-fit" onClick={() => {  }}>
+            <button className="w-72 h-fit" onClick={() => { 
+              disconnect({label:'Detected Wallet'})
+              setIsAccountModalOpen(false) }}>
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                 <div className="flex items-center gap-3">
                   <p className="">Disconnect</p>

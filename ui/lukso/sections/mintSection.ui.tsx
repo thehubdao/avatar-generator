@@ -8,13 +8,13 @@ import SocialButtonsUI from "../common/socialButtons.ui";
 import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 import MintSectionModalUI from "../common/mintModal.ui";
-import { Signer, ethers } from "ethers";
+import { BrowserProvider, Signer, ethers } from "ethers";
 import Loader from "../common/loader.ui";
 
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   reRoll: () => Promise<void>;
-  handleClaim: (address: string, signer: Signer) => Promise<{ message: string, success: boolean }>;
+  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean }>;
   provider: ethers.BrowserProvider | undefined;
 }
 
@@ -124,8 +124,8 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
 
       {isMinting && <MintSectionModalUI
         setIsMinting={(value) => setIsMinting(value)}
-        signer={provider}
-        handleClaim={(address, signer) => handleClaim(address, signer)}
+        provider={provider}
+        handleClaim={(address, provider) => handleClaim(address, provider)}
         gsapOutBlocks={() => gsapOutBlocks()}
       />}
     </section>

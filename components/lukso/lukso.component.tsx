@@ -124,9 +124,9 @@ export default function LuksoComponent({
     const [isLoadingMintedData, setIsLoadingMintedData] = useState<boolean>(
         false
     )
-    const [{ wallet, connecting }] = useConnectWallet()
+    const [{ wallet, connecting }, Connect, Disconnect] = useConnectWallet()
     useEffect(() => {
-        if (!wallet) return
+        if (!wallet) return setProvider(undefined)
         const setEtherProviderPromise = async () => {
             const _etherProvider = new ethers.BrowserProvider(wallet.provider, 'any')
             setProvider(_etherProvider)
@@ -139,18 +139,15 @@ export default function LuksoComponent({
         if (!provider) return
         const setTokensMetadataPromise = async () => {
             const address = wallet?.accounts[0]?.address!
-
             setAddressToShow(address)
-            setIsGettingInfoAboutHasMinted(true)
-            setIsLoadingMintedData(true)
+            
             await setTokensMetadata(address)
-            setIsGettingInfoAboutHasMinted(false)
         }
         void setTokensMetadataPromise()
     }, [provider])
 
     useEffect(() => {
-        /* if(!hasMinted) return */
+        if(!hasMinted) return
         void onAvatarBuilderReady()
     }, [hasMinted])
 
@@ -473,8 +470,8 @@ export default function LuksoComponent({
                                 classStyles={
                                     'w-48 border-l-2 border-white font-bold z-10 text-white'
                                 }
-                                onConnect={()=>{}}
-    
+                                onConnect={() => { }}
+
                             >
                                 <>Login with your UP!</>
                             </ConnectWeb3Button>

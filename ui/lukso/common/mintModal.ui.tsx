@@ -1,17 +1,17 @@
 import { useState } from "react";
-import { Signer } from "ethers";
+import { BrowserProvider } from "ethers";
 import TransparentBoxUI from "./transparentBox.ui";
 import Loader from "./loader.ui";
 import { FaRegCheckCircle } from "react-icons/fa";
 
 interface MintSectionModalUIPros {
   setIsMinting: (value: boolean) => void;
-  signer: Signer | undefined;
-  handleClaim: (address: string, signer: Signer) => Promise<{ message: string, success: boolean }>;
+  provider: BrowserProvider | undefined;
+  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean }>;
   gsapOutBlocks: () => void
 }
 
-export default function MintSectionModalUI({ setIsMinting, signer, handleClaim, gsapOutBlocks }: MintSectionModalUIPros) {
+export default function MintSectionModalUI({ setIsMinting, provider, handleClaim, gsapOutBlocks }: MintSectionModalUIPros) {
   const [isClaiming, setIsClaiming] = useState<boolean>(false);
   const [isProvidingFeedback, setIsProvidingFeedback] = useState<boolean>(false);
   const [feedbackMessage, setFeedbackMessage] = useState<string>("message");
@@ -19,24 +19,25 @@ export default function MintSectionModalUI({ setIsMinting, signer, handleClaim, 
 
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-  const handleButtonClaim = async ():Promise<void> => {
+  const handleButtonClaim = async (): Promise<void> => {
 
-      if(!signer) return
-      setIsClaiming(true);
-      const address = await signer.getAddress()
-      const result = await handleClaim(address, signer)
+    if (!provider) return
+    setIsClaiming(true);
+    const signer = await provider.getSigner()
+    const address = await signer.getAddress()
+    const result = await handleClaim(address, provider)
 
-      setIsClaiming(false);
-      setIsProvidingFeedback(true);
-      setFeedbackMessage(result.message);
-      setIsFeedbackError(result.success);
+    setIsClaiming(false);
+    setIsProvidingFeedback(true);
+    setFeedbackMessage(result.message);
+    setIsFeedbackError(result.success);
 
-      if (result.success) {
-        await delay(5000);
-        setIsMinting(false);
-        gsapOutBlocks();
-      }
-    
+    if (result.success) {
+      await delay(5000);
+      setIsMinting(false);
+      gsapOutBlocks();
+    }
+
   }
 
   return (
@@ -54,7 +55,7 @@ export default function MintSectionModalUI({ setIsMinting, signer, handleClaim, 
                   </div>
                 </TransparentBoxUI>
               </button>
-              <button className="w-52 h-fit" onClick={ ()=>{void handleButtonClaim()} }>
+              <button className="w-52 h-fit" onClick={() => { void handleButtonClaim() }}>
                 <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                   <div className="flex items-center gap-3">
                     <p className="text-black">Claim</p>
