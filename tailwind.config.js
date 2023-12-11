@@ -43,8 +43,8 @@
           'flat---inset-medium': '4px 4px 8px #E9ECF6, -4px -4px 8px #ffffff, inset 4px 4px 8px #E9ECF6, inset -4px -4px 8px #ffffff',
           'flat---inset-hard': '6px 6px 12px #E9ECF6, -6px -6px 12px #ffffff, inset 6px 6px 12px #E9ECF6, inset -6px -6px 12px #ffffff'
         },
-        animation: {
-          'spin-slow': 'spin 3s linear infinite',
+        transitionProperty: {
+          'size': 'width, height',
         }
       },
     }

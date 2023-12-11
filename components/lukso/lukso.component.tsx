@@ -19,7 +19,7 @@ import {
     AGChangeLookAtPosition,
     TakeCanvasPicture,
 } from '../avatar/viewer.component'
-import HudComponent from '../../ui/avatar/hud.component'
+import HudComponent from '../../ui/avatar/hud.ui'
 
 // UI
 import LuksoUI from '../../ui/lukso/lukso.ui'
@@ -350,7 +350,7 @@ export default function LuksoComponent({
             GetAvatarGLB(),
         ])
         exportData.picture = picturePromise
-        exportData.model = modelPromise
+        exportData.model = modelPromise.success ? modelPromise.value : undefined;
 
         if (isOnIFrame) {
             IFrameExportData(exportData)
@@ -535,9 +535,7 @@ export default function LuksoComponent({
                         onSkinColorChange={(value) =>
                             void onClickChangeSkinColor(value)
                         }
-                        exportModel={() => {
-                            return
-                        }}
+                        exportModel={() => exportModel()}
                         isCustomCampaignHud
                     />
                 </div>

@@ -51,7 +51,7 @@ class TextureUtil {
     catch(e) {
       const msg = `Couldn't make a texture for url: ${url}!`;
       void LogError(Module.TextureUtil, msg, e);
-      return {success: false, errMessage: msg, errCode: CommonErrorCode.CouldntProcess};
+      return {success: false, errMessage: msg, errCode: CommonErrorCode.InternalError};
     }
   }
 
@@ -70,7 +70,7 @@ class TextureUtil {
     catch(e) {
       const msg = `Couldn't make a texture for url: ${url}!`;
       void LogError(Module.TextureUtil, msg, e);
-      return {success: false, errMessage: msg, errCode: CommonErrorCode.CouldntProcess};
+      return {success: false, errMessage: msg, errCode: CommonErrorCode.InternalError};
     }
   }
 }

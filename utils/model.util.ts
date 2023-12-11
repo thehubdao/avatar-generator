@@ -19,11 +19,11 @@ import {ChangeMaterialOption} from "../enums/model.enum";
 import {TextureTone} from "../types/texture.type";
 import {GLOBAL_VALUES} from "../constants/common.constant";
 
-function IsSkinnedMesh(obj: Object3D): obj is SkinnedMesh {
+export function IsSkinnedMesh(obj: Object3D): obj is SkinnedMesh {
   return (obj as SkinnedMesh).isSkinnedMesh;
 }
 
-function IsBone(obj: Object3D): obj is Bone {
+export function IsBone(obj: Object3D): obj is Bone {
   return (obj as Bone).isBone;
 }
 
