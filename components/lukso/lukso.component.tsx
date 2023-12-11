@@ -65,7 +65,7 @@ import {
     getTokensMetadata,
     mint,
 } from '../../utils/web3/lukso.util'
-import { Signer, ethers } from 'ethers'
+import { ethers } from 'ethers'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
@@ -112,14 +112,13 @@ export default function LuksoComponent({
     )
 
     // Web3 state
-    const [signer, setSigner] = useState<Signer>()
+    const [provider, setProvider] = useState<ethers.BrowserProvider>()
     const [hasMinted, setHasMinted] = useState<boolean>(false)
     const [addressToShow, setAddressToShow] = useState<string>('')
     const [
         isGettingInfoAboutHasMinted,
         setIsGettingInfoAboutHasMinted,
     ] = useState<boolean>(false)
-    const [etherProvider, setEtherProvider] = useState<ethers.BrowserProvider>()
 
     const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false)
     const [isLoadingMintedData, setIsLoadingMintedData] = useState<boolean>(
@@ -129,20 +128,17 @@ export default function LuksoComponent({
     useEffect(() => {
         if (!wallet) return
         const setEtherProviderPromise = async () => {
-            console.log('WALLET', wallet)
-            const _etherProvider = new ethers.BrowserProvider(wallet.provider)
-            const signer = await _etherProvider?.getSigner()//this line seems to make "wallet" re render the component
-            setSigner(signer)
+            const _etherProvider = new ethers.BrowserProvider(wallet.provider, 'any')
+            setProvider(_etherProvider)
         }
         void setEtherProviderPromise()
     }, [wallet])
 
 
     useEffect(() => {
-        return console.log('SIGNER CHANGE')
-        if (!signer) return
+        if (!provider) return
         const setTokensMetadataPromise = async () => {
-            const address = await signer.getAddress()
+            const address = wallet?.accounts[0]?.address!
 
             setAddressToShow(address)
             setIsGettingInfoAboutHasMinted(true)
@@ -151,7 +147,7 @@ export default function LuksoComponent({
             setIsGettingInfoAboutHasMinted(false)
         }
         void setTokensMetadataPromise()
-    }, [signer])
+    }, [provider])
 
     useEffect(() => {
         /* if(!hasMinted) return */
@@ -421,10 +417,6 @@ export default function LuksoComponent({
         }
     }
 
-    function onConnect(signer: Signer | undefined) {
-        /* setSigner(signer) */
-    }
-
     function formatearString(inputString: string): string {
         if (inputString.length < 8) {
             return 'El string debe tener al menos 8 caracteres'
@@ -467,7 +459,7 @@ export default function LuksoComponent({
                             alt="Lukso icon"
                         />
 
-                        {signer ? (
+                        {provider ? (
                             <button
                                 className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2 z-10"
                                 onClick={() => setIsAccountModalOpen(true)}
@@ -478,11 +470,11 @@ export default function LuksoComponent({
                             </button>
                         ) : (
                             <ConnectWeb3Button
-                                onConnect={onConnect}
                                 classStyles={
                                     'w-48 border-l-2 border-white font-bold z-10 text-white'
                                 }
-                                signer={signer}
+                                onConnect={()=>{}}
+    
                             >
                                 <>Login with your UP!</>
                             </ConnectWeb3Button>
@@ -505,9 +497,8 @@ export default function LuksoComponent({
                     )}
                 </div>
                 <div
-                    className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${
-                        isLoadingMintedData ? 'flex' : 'hidden'
-                    }`}
+                    className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
+                        }`}
                 >
                     <div className="scale-[3]">
                         <Loader />
@@ -568,9 +559,7 @@ export default function LuksoComponent({
                     exportModel={() => exportModel()}
                     handleClaim={handleClaim}
                     hasMinted={hasMinted}
-                    signer={signer}
-                    onConnect={onConnect}
-                    etherProvider={etherProvider}
+                    provider={provider}
                     isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
                 />
             </div>

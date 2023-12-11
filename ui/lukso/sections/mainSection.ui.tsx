@@ -5,7 +5,7 @@ import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDice } from "react-icons/fa6";
 import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
-import { Signer, ethers } from "ethers";
+import { BrowserProvider, ethers } from "ethers";
 import { ConnectionStatus } from "../../../enums/web3";
 import ConnectModalUI from "../common/conectModal";
 import { AiOutlineLoading } from "react-icons/ai";
@@ -14,13 +14,11 @@ import Loader from "../common/loader.ui";
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   hasMinted: boolean
-  signer: Signer | undefined
-  etherProvider: ethers.BrowserProvider | undefined
-  onConnect: (signer: Signer | undefined, status: ConnectionStatus) => void
+  provider: ethers.BrowserProvider | undefined
   isGettingInfoAboutHasMinted: boolean
 }
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, signer, etherProvider, onConnect, isGettingInfoAboutHasMinted }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
@@ -74,7 +72,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
           <p className="text-center text-sm 2xl:text-base mx-20 pt-2">A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
         </TransparentBox>
 
-        {(signer) && (
+        {(provider) && (
           <>
             {!isGettingInfoAboutHasMinted ? (
               <button className="w-full h-fit" onClick={() => void gsapOutBlocks()}>
@@ -110,7 +108,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
           </>
         )
         }
-        {!signer && <button className="w-full h-fit" onClick={() => setIsConnecting(true)}>
+        {!provider && <button className="w-full h-fit" onClick={() => setIsConnecting(true)}>
           <TransparentBox
             fullWidth
             border
@@ -128,9 +126,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, signer, et
 
       {
         isConnecting && <ConnectModalUI
-          onConnect={onConnect}
-          etherProvider={etherProvider}
-          signer={signer}
+
           setIsConnecting={(value) => setIsConnecting(value)}
         />
       }
