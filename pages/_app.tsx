@@ -5,6 +5,15 @@ import FeaturesIcons from '@next/font/local'
 import { AppProps } from 'next/app'
 import { Web3OnboardProvider, init } from '@web3-onboard/react'
 import injectedModule from '@web3-onboard/injected-wallets'
+import luksoModule from "@lukso/web3-onboard-config";
+import { ConnectModalOptions } from '@web3-onboard/core/dist/types'
+
+// Initialize the LUKSO provider from this library
+const luksoProvider = luksoModule();
+
+// Define the download link for the extension
+const UP_BROWSER_EXTENSION_URL =
+  "https://chrome.google.com/webstore/detail/universal-profiles/abpickdkkbnbcoepogfhkhennhfhehfn?hl";
 
 const luksoNetwork = {
     id: '0x42010001',
@@ -13,18 +22,55 @@ const luksoNetwork = {
     rpcUrl: 'https://rpc.testnet.lukso.network',
 }
 
+
+
 const chains = [luksoNetwork]
 
-const wallets = [injectedModule()]
+const appInfo = {
+    name: "Avatar Lukso",
+    /**
+     * Pictures can either be a valid
+     * Image URL or SVG as string
+     *
+     * The icon shows behind the extension picture
+     * on the right side, while the connection
+     * is being established
+     */
+    icon: "/my_app_icon.svg",
+    /**
+     * The logo shows left of the wallet list,
+     * indicating the used app
+     */
+    logo: "<svg> ... </svg>",
+    description: "My LUKSO App using Web3-Onboard",
+    recommendedInjectedWallets: [
+      /**
+       * Add other injected wallets and their download links
+       * to directly take users to the installation screen
+       */
+      {
+        name: "Universal Profiles",
+        url: UP_BROWSER_EXTENSION_URL,
+      },
+    ],
+  };
+  
+  // OPTIONAL: Set up global installation notices
+  const connectionOptions: ConnectModalOptions = {
+    iDontHaveAWalletLink: UP_BROWSER_EXTENSION_URL,
+    removeWhereIsMyWalletWarning: true,
+  };
+
+const wallets = [injectedModule({
+    custom: [luksoProvider],
+    displayUnavailable: ["Universal Profiles"]
+})]
 
 const web3Onboard = init({
     wallets,
     chains,
-    appMetadata: {
-        name: 'Avatar Lukso',
-        icon: '<svg>My App Icon</svg>',
-        description: 'A demo of Web3-Onboard.',
-    },
+    appMetadata: appInfo,
+    connect: connectionOptions,
 })
 
 const workSans = Work_Sans({ subsets: ['latin'], display: 'block' })
