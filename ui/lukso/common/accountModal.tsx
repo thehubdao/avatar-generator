@@ -59,7 +59,7 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
               </TransparentBoxUI>
             </button>
             <button className="w-72 h-fit" onClick={() => {
-              void (async () => { await disconnect({ label: 'Detected Wallet' }) })()
+              void (async () => { await disconnect({ label: 'Universal Profiles' }) })()
               setIsAccountModalOpen(false)
             }}>
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
