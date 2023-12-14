@@ -694,3 +694,99 @@ export async function DeleteCampaign(campaign: string): Promise<Result<string>> 
     return {success: false, errMessage: err.message, errCode: err.code};
   }
 }
+
+export async function BatchSet(prefix: string, allItems: ({id: string | number} & object)[]): Promise<Result<number>> {
+  try {
+    if (allItems.length === 0) return {success: true, value: 0};
+
+    const {writeBatch, doc} = await import("@firebase/firestore");
+    const dbRef = await FirebaseUtil.Instance().DB();
+
+    let batch = writeBatch(dbRef);
+    let limit = 0;
+    let done = 0;
+
+    for (const item of allItems) {
+      const itemRef = doc(dbRef, `${prefix}/${item.id}`);
+      batch.set(itemRef, item);
+      limit++;
+
+      if (limit >= 500) {
+        await batch.commit();
+        batch = writeBatch(dbRef);
+        done += limit;
+        limit = 0;
+      }
+    }
+
+    return {success: true, value: done};
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, err.code);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
+}
+
+export async function BatchUpdate(prefix: string, allItems: [string | number, object][]): Promise<Result<number>> {
+  try {
+    if (allItems.length === 0) return {success: true, value: 0};
+
+    const {writeBatch, doc} = await import("@firebase/firestore");
+    const dbRef = await FirebaseUtil.Instance().DB();
+
+    let batch = writeBatch(dbRef);
+    let limit = 0;
+    let done = 0;
+
+    for (const [key, item] of allItems) {
+      const itemRef = doc(dbRef, `${prefix}/${key}`);
+      batch.update(itemRef, item);
+      limit++;
+
+      if (limit >= 500) {
+        await batch.commit();
+        batch = writeBatch(dbRef);
+        done += limit;
+        limit = 0;
+      }
+    }
+
+    return {success: true, value: done};
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, err.code);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
+}
+
+export async function BatchDelete(prefix: string, allItems: (string | number)[]): Promise<Result<number>> {
+  try {
+    if (allItems.length === 0) return {success: true, value: 0};
+
+    const {writeBatch, doc} = await import("@firebase/firestore");
+    const dbRef = await FirebaseUtil.Instance().DB();
+
+    let batch = writeBatch(dbRef);
+    let limit = 0;
+    let done = 0;
+
+    for (const key of allItems) {
+      const itemRef = doc(dbRef, `${prefix}/${key}`);
+      batch.delete(itemRef);
+      limit++;
+
+      if (limit >= 500) {
+        await batch.commit();
+        batch = writeBatch(dbRef);
+        done += limit;
+        limit = 0;
+      }
+    }
+
+    return {success: true, value: done};
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, err.code);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
+}
