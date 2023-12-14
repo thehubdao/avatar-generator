@@ -9,11 +9,12 @@ import {
   RandomIntMax,
   SetMapToMap
 } from "./common.util";
-import {CampaignParameterName, Module, RandomTier} from "../enums/common.enum";
+import {CampaignParameterName, CommonErrorCode, Module, RandomTier} from "../enums/common.enum";
 import {FeatureBasic} from "../interfaces/common.interface";
 import {GetData} from "../server/api-handler/v1/featureOptions.api-handler";
 import {GLOBAL_VALUES} from "../constants/common.constant";
 import {Result} from "../types/common.type";
+import {IndexValues} from "../types/collection.type";
 
 export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Get FeatureList (same from page)
@@ -203,7 +204,7 @@ export function NumberToIndexValues(num: number, maxCombination: number, maxValu
   return result;
 }
 
-function GetMultiplyNums(maxValues: Map<number, number>) {
+export function GetMultiplyNums(maxValues: Map<number, number>) {
   const multNums: number[] = [];
   for (let i = maxValues.size - 1; i > 0; i--) {
     const multi = multNums[i + 1] ?? 1;
@@ -334,3 +335,29 @@ export function RandomIndexValues(maxIndexValues: Map<number, number>, rVal: Res
   return randomIndexValues;
 }
 
+export function NextIteration(current: IndexValues, start: IndexValues, end: IndexValues) {
+  const clone = new Map(current);
+  return LowerIteration(clone, current.size - 1, end);
+}
+
+function LowerIteration(currentIteration: IndexValues, index: number, end: IndexValues): Result<IndexValues> {
+  if (index < 0) return {success: true, value: currentIteration};
+
+  const current = currentIteration.get(index);
+  const max = end.get(index);
+
+  if (current == undefined || max == undefined)
+    return {success: false, errMessage: "Missing current and max index values!", errCode: CommonErrorCode.MissingInfo};
+
+  if (current < max) {
+    currentIteration.set(index, current + 1);
+    return {success: true, value: currentIteration};
+  } else {
+    currentIteration.set(index, 0);
+    return LowerIteration(currentIteration, index - 1, end);
+  }
+}
+
+export function CalculateChance(current: IndexValues | undefined, tierChance: Result<Record<RandomTier, number>>): number {
+  return 0.2;
+}
