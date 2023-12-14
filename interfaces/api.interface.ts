@@ -53,5 +53,6 @@ export interface CollectionDataInterface {
 }
 
 export interface CollectionDataProcess {
-  status: number;
+  id: string;
+  done: boolean;
 }
