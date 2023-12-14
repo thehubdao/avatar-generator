@@ -2,13 +2,31 @@
 import {ApiResponse, CollectionDataInterface, CollectionDataProcess} from "../../../interfaces/api.interface";
 import {RequestResponse} from "../request.api-handler";
 import {DefaultApiResponse} from "../../enums/api.enum";
-import {GetParameter} from "../../../utils/firebase.util";
-import {FirestoreParameters} from "../../../enums/firebase.enum";
-import {FindAndReadjustFeatureIndexes, GetMaxCombinationNum, GetMaxIndexValues} from "../../../utils/collection.util";
+import {BatchDelete, BatchSet, BatchUpdate, GetInfoDB, GetParameter} from "../../../utils/firebase.util";
+import {FirestoreGlobalLocation, FirestoreParameters} from "../../../enums/firebase.enum";
+import {
+  CalculateChance,
+  FindAndReadjustFeatureIndexes,
+  GetMaxCombinationNum,
+  GetMaxIndexValues,
+  GetMinIndexValues,
+  GetMultiplyNums,
+  IndexValuesStringToNumber,
+  IndexValuesToString,
+  NumberToIndexValues
+} from "../../../utils/collection.util";
 import {LogError} from "../../../utils/common.util";
-import {Module} from "../../../enums/common.enum";
+import {CampaignParameterName, Module, RandomTier} from "../../../enums/common.enum";
 import {GLOBAL_VALUES} from "../../../constants/common.constant";
-import {CollectionPostBody} from "../../interfaces/collection.interface";
+import {CollectionItem, CollectionPostBody} from "../../interfaces/collection.interface";
+import {
+  CreateProcess,
+  GenerateProcessId,
+  GetProcess,
+  SetProcessDone,
+  SetProcessError
+} from "../../utils/side-process.util";
+import {CollectionStatus} from "../../enums/collection.enum";
 
 export async function GetUriApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<CollectionDataInterface>>) {
   const {collection} = req.query;
@@ -49,23 +67,121 @@ async function CheckCampaign(campaign: string | undefined) {
   return campaignsResult.success ? campaignsResult.value.some(c => c === campaign) : false;
 }
 
-async function ProcessCollection(campaign: string, update: boolean, processId: number) {
+async function ProcessCollection(campaign: string, update: boolean, processId: string) {
+  const collectionRoute = `${FirestoreGlobalLocation.Collection}/${campaign}/nft`;
   // Check existence of collection
+  const collectionItemsResult = await GetInfoDB<CollectionItem>(collectionRoute);
   
-  // If it exists dont do anything, unless update is true
+  if (!collectionItemsResult.success)
+    return await SetProcessError(processId, "Error getting collection item list");
   
+  const collectionItems = collectionItemsResult.value;
+  
+  // If it exists, has something and update flag is false don't do anything
+  if (collectionItems.length > 0 && !update)
+    return await SetProcessDone(processId);
+
+  // Update index on campaign
+  const featureValues = await FindAndReadjustFeatureIndexes(campaign);
+  if (featureValues == undefined)
+    return await SetProcessError(processId, "Error readjusting feature indexes");
+
+  const maxIndexValues = GetMaxIndexValues(featureValues.featureList, featureValues.featureOptionListData);
+  const maxCombination = GetMaxCombinationNum(maxIndexValues);
+
   // Count the amount of docs
   // If same amount of maxCombination, all good
-  
+  if (collectionItems.length === maxCombination)
+    return await SetProcessDone(processId);
+
+  const multNums = GetMultiplyNums(maxIndexValues);
+  if (multNums == undefined)
+    return await SetProcessError(processId, "Error generating multiply numbers");
+
   // If different? update the existence
   // Separate the minted ones from the others
+  const minted: Map<number, CollectionItem> = new Map();
+  const mappedItems: Map<number, CollectionItem> = new Map();
   
-  // If no minted ones, just refill to the same amount of existence with new index-values
-  // If minted ones, recalculate based on the index-values
-  // and update the minted state
+  for (let i = 0; i < collectionItems.length; i++) {
+    const item = collectionItems[i];
+
+    mappedItems.set(item.id, item);
+    if (item.status === CollectionStatus.Minted)
+      minted.set(item.id, item);
+  }
+  
+  const needMintedKeys: (string | number)[] = [];
+
+  // If minted ones, recalculate based on the index-values and update the minted state
+  if (minted.size !== 0) {
+    for (const [key, item] of minted) {
+      const newKey = IndexValuesStringToNumber(item.indexValues, maxIndexValues, multNums);
+      if (newKey == undefined) continue;
+      
+      if (newKey != key) {
+        const exists = mappedItems.get(newKey);
+        if (exists != undefined) {
+          exists.status = CollectionStatus.Minted;
+          item.status = CollectionStatus.NotMinted;
+        } else {
+          needMintedKeys.push(newKey);
+        }
+      }
+    }
+  }
+
+  const tierChance = await GetParameter<Record<RandomTier, number>>(campaign, CampaignParameterName.Random);
+  const forCreation: CollectionItem[] = [];
+  const forUpdate: [(string | number), Partial<CollectionItem>][] = [];
+  const forDelete: (string | number)[] = [];
+  
+  for (let i = 0; i < maxCombination; i++) {
+    const item = mappedItems.get(i);
+    const indexValues = NumberToIndexValues(i, maxCombination, maxIndexValues, multNums);
+    const ivString = IndexValuesToString(indexValues);
+    const calculatedChance = CalculateChance(indexValues, tierChance);
+
+    // If non-existent create new item
+    if (item == undefined) {
+      forCreation.push({
+        id: i,
+        status: needMintedKeys.some(x => x === i) ? CollectionStatus.Minted : CollectionStatus.NotMinted,
+        indexValues: ivString,
+        chance: calculatedChance,
+      });
+    }
+    else {
+      forUpdate.push([i, {
+        status: item.status,
+        indexValues: ivString,
+        chance: calculatedChance,
+      }]);
+    }
+  }
+
+  if (mappedItems.size > maxCombination) {
+    const outOfBounds = [...mappedItems.keys()].filter(x => x > maxCombination);
+    for (const outKey of outOfBounds) {
+      forDelete.push(outKey);
+    }
+  }
+  
+  const setResult = await BatchSet(collectionRoute, forCreation);
+  if (!setResult.success)
+    return await SetProcessError(processId, setResult.errMessage);
+  
+  const updateResult = await BatchUpdate(collectionRoute, forUpdate);
+  if (!updateResult.success)
+    return await SetProcessError(processId, updateResult.errMessage);
+  
+  const deleteResult = await BatchDelete(collectionRoute, forDelete);
+  if (!deleteResult.success)
+    return await SetProcessError(processId, deleteResult.errMessage);
   
   // When done, fill on db the status and tell is done
   // Create something that controls this status
+  return await SetProcessDone(processId);
 }
 
 export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<CollectionDataProcess>>) {
@@ -76,32 +192,23 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
     if (!isCampaign)
       return RequestResponse(res, "BadRequest", false, DefaultApiResponse.MissingInfo);
     
+    const processId = await GenerateProcessId();
     
+    void CreateProcess(processId, campaign!, String(update));
+    void ProcessCollection(campaign!, update, processId);
     
+    const processStatus = await GetProcess(processId);
+    const collectionData: CollectionDataProcess = {
+      id: processId,
+      done: processStatus.success ? processStatus.value.done : false,
+    };
+    return RequestResponse(res, "Successful", true, DefaultApiResponse.Processing, collectionData);
   } catch (e) {
     const err = e as Error;
     void LogError(Module.ApiUtil, err.message, e);
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
   }
 }
-
-// Call the util that does things
-// Start with code and singleton that saves this code on db
-// On process done update the status of the code on db
-// Make status api call that returns how that code is handling
-// Status code can be an UID
-// Either check if request stack, or replace each other
-// Create queue system for this request
-
-
-// Process
-// Fill the db in some place (collection/<campaign>/nft/<doc-id>
-// doc-id should be the combination number
-// schema
-//   id: same doc-id
-//   status: minted | waiting
-//   indexValues: string - Array of index values that create this combination
-//   percentage: number - based on how likable to hit this combination can be (based on tier of features)
 
 // GetRandomNft (change name something more likeable)
 // Gets one random from the list that is on status waiting
