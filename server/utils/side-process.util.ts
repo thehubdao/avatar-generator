@@ -73,16 +73,31 @@ export async function SetProcessDone(processId: string): Promise<Result<boolean>
     return {success: false, errMessage: "No process found!", errCode: CommonErrorCode.GetNoData};
 
   const process = processResult.value;
+  process.done = true;
+  SideProcessUtil.Instance().SetProcess(process);
+  
   if (process.canUpdate) {
-    process.done = true;
-    SideProcessUtil.Instance().SetProcess(process);
     return {success: true, value: true};
   } else {
-    process.done = true;
-    SideProcessUtil.Instance().SetProcess(process);
-    
     const doneProcess: Partial<ProcessInfo> = {done: true};
     return UpdateDocObject(FirestoreGlobalLocation.Process, doneProcess, undefined, processId);
+  }
+}
+
+export async function SetProcessError(processId: string, error: string) {
+  const processResult = await SideProcessUtil.Instance().GetProcess(processId);
+  if (!processResult.success)
+    return {success: false, errMessage: "No process found!", errCode: CommonErrorCode.GetNoData};
+
+  const process = processResult.value;
+  process.error != undefined ? process.error.push(error) : [error];
+  SideProcessUtil.Instance().SetProcess(process);
+  
+  if (process.canUpdate) {
+    return {success: true, value: true};
+  } else {
+    const errorProcess: Partial<ProcessInfo> = {error: process.error};
+    return UpdateDocObject(FirestoreGlobalLocation.Process, errorProcess, undefined, processId);
   }
 }
 
