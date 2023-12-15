@@ -56,3 +56,8 @@ export interface CollectionDataProcess {
   id: string;
   done: boolean;
 }
+
+export interface RandomSet {
+  id: number;
+  indexValues?: string;
+}
