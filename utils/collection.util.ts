@@ -358,6 +358,19 @@ function LowerIteration(currentIteration: IndexValues, index: number, end: Index
   }
 }
 
-export function CalculateChance(current: IndexValues | undefined, tierChance: Result<Record<RandomTier, number>>): number {
-  return 0.2;
+export function CalculateChance(current: IndexValues, tierChance: Result<Record<RandomTier, number>>, options: Map<number, Map<number, RandomTier | undefined>>, maxCombination: number): number {
+  // if no tierChance same chance for all options
+  if (!tierChance.success) return 1 / maxCombination;
+  
+  let chance = 1;
+  for (const [feature, optionList] of options) {
+    const iV = current.get(feature);
+    if (iV == undefined) continue;
+    const optionTier = optionList.get(iV) ?? RandomTier.Common;
+    const tierValue = tierChance.value[optionTier] / 100;
+    
+    chance *= tierValue;
+  }
+  
+  return chance;
 }

@@ -131,6 +131,12 @@ async function ProcessCollection(campaign: string, update: boolean, processId: s
     }
   }
 
+  const optionTier: Map<number, Map<number, RandomTier | undefined>> = new Map();
+  for (const [feature, optionList] of Array.from(featureValues.featureOptionListData.values()).entries()) {
+    const mappedList = new Map(optionList.map(item => [item.index, item.tier]));
+    optionTier.set(feature, mappedList);
+  }
+  
   const tierChance = await GetParameter<Record<RandomTier, number>>(campaign, CampaignParameterName.Random);
   const forCreation: CollectionItem[] = [];
   const forUpdate: [(string | number), Partial<CollectionItem>][] = [];
@@ -139,8 +145,10 @@ async function ProcessCollection(campaign: string, update: boolean, processId: s
   for (let i = 0; i < maxCombination; i++) {
     const item = mappedItems.get(i);
     const indexValues = NumberToIndexValues(i, maxCombination, maxIndexValues, multNums);
+    if (indexValues == undefined) continue;
+    
     const ivString = IndexValuesToString(indexValues);
-    const calculatedChance = CalculateChance(indexValues, tierChance);
+    const calculatedChance = CalculateChance(indexValues, tierChance, optionTier, maxCombination);
 
     // If non-existent create new item
     if (item == undefined) {
