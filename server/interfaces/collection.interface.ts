@@ -7,7 +7,8 @@ export interface CollectionPostBody {
 
 export interface CollectionItem {
   id: number;
-  indexValues: string;
-  status: CollectionStatus;
-  chance: number;
+  status?: CollectionStatus;
+  indexValues?: string;
+  chance?: number;
+  acc?: number;
 }

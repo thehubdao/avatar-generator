@@ -9,7 +9,6 @@ import {
   FindAndReadjustFeatureIndexes,
   GetMaxCombinationNum,
   GetMaxIndexValues,
-  GetMinIndexValues,
   GetMultiplyNums,
   IndexValuesStringToNumber,
   IndexValuesToString,
@@ -142,6 +141,8 @@ async function ProcessCollection(campaign: string, update: boolean, processId: s
   const forUpdate: [(string | number), Partial<CollectionItem>][] = [];
   const forDelete: (string | number)[] = [];
   
+  if (collectionItems.length === 0) forCreation.push({id: -1, acc: 0});
+  
   for (let i = 0; i < maxCombination; i++) {
     const item = mappedItems.get(i);
     const indexValues = NumberToIndexValues(i, maxCombination, maxIndexValues, multNums);
@@ -217,12 +218,6 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
   }
 }
-
-// GetRandomNft (change name something more likeable)
-// Gets one random from the list that is on status waiting
-// Generate random number, check with percentage if it hits return this 
-// If the chance doesn't hit, re roll random number and check with another item
-// return the id and index-values of the winner
 
 // Util on LuksoBackend
 // Allow to update this combination status to minted when a mint happens
