@@ -205,6 +205,8 @@ function GetConstraints(dbLocation: string, constraintsValues?: AGQueryConstrain
       return AccessoryConstraints(constraintsValues);
     case FirestoreLocation.Animations:
       return AnimationConstraints(constraintsValues);
+    case FirestoreGlobalLocation.Collection:
+      return CollectionConstraints(constraintsValues);
     default:
       return [];
   }
@@ -254,6 +256,17 @@ async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
     constraints.push(where(FirestoreFilterValues.Name, "==", name));
   else
     constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
+
+  return constraints;
+}
+
+async function CollectionConstraints(constraintsValues: AGQueryConstraints) {
+  const constraints: QueryConstraint[] = [];
+  const {collectionStatus} = constraintsValues;
+  const {orderBy, where} = await import('@firebase/firestore');
+  
+  if (collectionStatus != undefined)
+    constraints.push(where(FirestoreFilterValues.CollectionStatus, "==", collectionStatus));
 
   return constraints;
 }

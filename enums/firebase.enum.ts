@@ -35,6 +35,7 @@ export enum FirestoreFilterValues {
     Type = 'type',
     Name = 'name',
     Campaign = 'campaign',
+    CollectionStatus = "status",
 }
 
 export enum UserRoleValues {
