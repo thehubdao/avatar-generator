@@ -134,7 +134,7 @@ export function ObjectEntries<TKey extends (string | number | symbol), TValue>(o
   return Object.entries(obj) as unknown as [TKey, TValue][];
 }
 
-export async function TryAgainTimes(times: number, doRetDone: () => Promise<boolean>) {
+export async function TryAgainTimes(times: number, doRetDone: () => boolean | Promise<boolean>) {
   for (let i = 0; i < times; i++) {
     const done = await doRetDone();
     if (done)
