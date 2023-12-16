@@ -4,7 +4,7 @@ import {GetInfoDB, GetParameter} from "../../../utils/firebase.util";
 import {FirestoreGlobalLocation, FirestoreParameters} from "../../../enums/firebase.enum";
 import {RequestResponse} from "../request.api-handler";
 import {DefaultApiResponse} from "../../enums/api.enum";
-import {LogError} from "../../../utils/common.util";
+import {LogError, TryAgainTimes} from "../../../utils/common.util";
 import {Module} from "../../../enums/common.enum";
 import {CollectionItem} from "../../interfaces/collection.interface";
 import {CollectionStatus} from "../../enums/collection.enum";
@@ -27,16 +27,46 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
     if (!collectionList.success)
       return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
     
-    const rand = Math.random();
+    let factor = collectionList.value.find(i => i.id === -1)?.factor;
+    let returnItem: CollectionItem | undefined;
+    
+    await TryAgainTimes(2, () => {
+      const rand = Math.random() * (factor ?? 1);
+      let acc = 0;
+      for (const item of collectionList.value) {
+        const itemChance = item.chance ?? 0;
+        acc += itemChance;
+        if (rand < acc) {
+          returnItem = item;
+          return true;
+        }
+      }
+      
+      return false;
+    });
+
+    if (returnItem != undefined)
+      return RequestResponse(res, "Successful", true, DefaultApiResponse.GetSuccess, {
+        id: returnItem.id,
+        indexValues: returnItem.indexValues,
+      });
+
+    factor = collectionList.value
+      .filter(i => i.chance != undefined)
+      .map(i => i.chance)
+      .reduce((sum, a) => sum! + a!, 0);
+
+    const rand = Math.random() * (factor ?? 1);
     let acc = 0;
     for (const item of collectionList.value) {
       const itemChance = item.chance ?? 0;
       acc += itemChance;
-      if (rand < acc)
-        return RequestResponse(res, "Successful", true,  DefaultApiResponse.GetSuccess, {
+      if (rand < acc) {
+        return RequestResponse(res, "Successful", true, DefaultApiResponse.GetSuccess, {
           id: item.id,
           indexValues: item.indexValues,
         });
+      }
     }
 
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
