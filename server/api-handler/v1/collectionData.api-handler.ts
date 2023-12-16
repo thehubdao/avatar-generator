@@ -5,7 +5,7 @@ import {DefaultApiResponse} from "../../enums/api.enum";
 import {BatchDelete, BatchSet, BatchUpdate, GetInfoDB, GetParameter} from "../../../utils/firebase.util";
 import {FirestoreGlobalLocation, FirestoreParameters} from "../../../enums/firebase.enum";
 import {
-  CalculateChance,
+  CalculateChance, CalculateFactor,
   FindAndReadjustFeatureIndexes,
   GetMaxCombinationNum,
   GetMaxIndexValues,
@@ -141,7 +141,7 @@ async function ProcessCollection(campaign: string, update: boolean, processId: s
   const forUpdate: [(string | number), Partial<CollectionItem>][] = [];
   const forDelete: (string | number)[] = [];
   
-  if (collectionItems.length === 0) forCreation.push({id: -1, acc: 0});
+  if (collectionItems.length === 0) forCreation.push({id: -1, factor: CalculateFactor(maxIndexValues.size, maxCombination, tierChance)});
   
   for (let i = 0; i < maxCombination; i++) {
     const item = mappedItems.get(i);

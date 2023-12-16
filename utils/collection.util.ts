@@ -374,3 +374,11 @@ export function CalculateChance(current: IndexValues, tierChance: Result<Record<
   
   return chance;
 }
+
+export function CalculateFactor(iVSize: number, maxAmount: number, tierChance: Result<Record<RandomTier, number>>) {
+  const factor = (tierChance.success ?
+    Math.pow(tierChance.value[RandomTier.Common], iVSize) :
+    1 / maxAmount) * 3;
+
+  return Math.round(factor * 100) / 100;
+}

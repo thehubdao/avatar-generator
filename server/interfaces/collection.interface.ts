@@ -10,5 +10,5 @@ export interface CollectionItem {
   status?: CollectionStatus;
   indexValues?: string;
   chance?: number;
-  acc?: number;
+  factor?: number;
 }
