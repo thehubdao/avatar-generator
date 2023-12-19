@@ -81,14 +81,6 @@ export default function EditSectionUI({ setIsEditModeSelected, exportModel, feat
               </div>
             </TransparentBox>
           </button>
-          <button onClick={() => setIsEditModeSelected(true)}>
-            <TransparentBox border backgroundColorClass="bg-white">
-              <div className="flex items-center gap-3 text-black">
-                <p className="text-base 2xl:text-lg">Edit</p>
-                <FaPencil />
-              </div>
-            </TransparentBox>
-          </button>
         </div>
       </div>
     </section>
