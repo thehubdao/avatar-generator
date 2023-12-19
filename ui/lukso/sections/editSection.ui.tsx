@@ -2,7 +2,7 @@ import Image from "next/image"
 import { Fragment, useLayoutEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
-import { FaDownload, FaPencil } from "react-icons/fa6";
+import { FaDownload } from "react-icons/fa6";
 import { AiOutlineLoading } from "react-icons/ai";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
@@ -13,7 +13,7 @@ interface EditSectionUIProps {
   features?: IndexFeatureInterface[];
 }
 
-export default function EditSectionUI({ setIsEditModeSelected, exportModel, features }: EditSectionUIProps) {
+export default function EditSectionUI({ exportModel, features }: EditSectionUIProps) {
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
 
   const editAvatarRef = useRef<HTMLDivElement>(null);
