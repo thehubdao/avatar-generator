@@ -194,7 +194,7 @@ async function ProcessCollection(campaign: string, update: boolean, processId: s
 }
 
 export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<CollectionDataProcess>>) {
-  const {update, campaign} = req.body as CollectionPostBody;
+  const {isUpdate, campaign} = req.body as CollectionPostBody;
   
   try {
     const isCampaign = await CheckCampaign(campaign);
@@ -203,8 +203,8 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
     
     const processId = await GenerateProcessId();
     
-    void CreateProcess(processId, campaign!, String(update));
-    void ProcessCollection(campaign!, update, processId);
+    void CreateProcess(processId, campaign!, String(isUpdate));
+    void ProcessCollection(campaign!, isUpdate, processId);
     
     const processStatus = await GetProcess(processId);
     const collectionData: CollectionDataProcess = {

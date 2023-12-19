@@ -136,8 +136,8 @@ export function ObjectEntries<TKey extends (string | number | symbol), TValue>(o
 
 export async function TryAgainTimes(times: number, doRetDone: () => boolean | Promise<boolean>) {
   for (let i = 0; i < times; i++) {
-    const done = await doRetDone();
-    if (done)
+    const isDone = await doRetDone();
+    if (isDone)
       break;
   }
 }

@@ -263,7 +263,7 @@ async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
 async function CollectionConstraints(constraintsValues: AGQueryConstraints) {
   const constraints: QueryConstraint[] = [];
   const {collectionStatus} = constraintsValues;
-  const {orderBy, where} = await import('@firebase/firestore');
+  const {where} = await import('@firebase/firestore');
   
   if (collectionStatus != undefined)
     constraints.push(where(FirestoreFilterValues.CollectionStatus, "==", collectionStatus));
