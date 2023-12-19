@@ -152,3 +152,7 @@ html {
 html:hover {
   scrollbar-color: #999 #ddd;
 }
+.gradient-radial {
+  background: rgb(86, 113, 198);
+  background: radial-gradient(circle, rgba(86, 113, 198, 1) 5%, rgba(63, 83, 147, 1) 63%, rgba(52, 69, 121, 1) 100%);
+}

@@ -490,6 +490,7 @@ export default function LuksoComponent({
                             editMode={isEditModeSelected}
                             lights={campaignParams.config.lights}
                             defaultShadow={campaignParams.config.defShadow}
+                            defaultCamera={campaignParams.config.defCam}
                             onReady={() => onAvatarBuilderReady()}
                         />
                     )}
@@ -557,6 +558,7 @@ export default function LuksoComponent({
                     hasMinted={hasMinted}
                     provider={provider}
                     isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
+                    features={singleData?.features}
                 />
             </div>
         </MobileLayout>

@@ -4,6 +4,7 @@ import MintSectionUI from "./sections/mintSection.ui";
 import LoadingUI from "./sections/loadingSection.ui";
 import { LuksoSections } from "../../enums/lukso/common.enum";
 import { BrowserProvider, ethers } from "ethers";
+import { IndexFeatureInterface } from "../../interfaces/api.interface";
 
 interface LuksoUIProps {
   isLoading: boolean;
@@ -14,9 +15,10 @@ interface LuksoUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
   handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean }>;
-  hasMinted: boolean
-  provider: ethers.BrowserProvider | undefined
-  isGettingInfoAboutHasMinted: boolean
+  hasMinted: boolean;
+  provider: ethers.BrowserProvider | undefined;
+  isGettingInfoAboutHasMinted: boolean;
+  features?: IndexFeatureInterface[];
 }
 
 export default function LuksoUI({
@@ -30,7 +32,8 @@ export default function LuksoUI({
   handleClaim,
   hasMinted,
   provider,
-  isGettingInfoAboutHasMinted
+  isGettingInfoAboutHasMinted,
+  features
 }: LuksoUIProps) {
 
 
@@ -38,8 +41,8 @@ export default function LuksoUI({
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
       {(currentSection === LuksoSections.Main) && <MainSectionUI setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} provider={provider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}/>}
-      {(currentSection === LuksoSections.Mint) && <MintSectionUI setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} provider={provider} />}
-      {(currentSection === LuksoSections.Edit) && <EditSectionUI setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
+      {(currentSection === LuksoSections.Mint) && <MintSectionUI features={features} setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} provider={provider} />}
+      {(currentSection === LuksoSections.Edit) && <EditSectionUI features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
     </div>
   )
 }

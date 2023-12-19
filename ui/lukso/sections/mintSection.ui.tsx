@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Fragment, useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock, fadeInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { BsArrowRepeat } from "react-icons/bs";
@@ -10,23 +10,27 @@ import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.c
 import MintSectionModalUI from "../common/mintModal.ui";
 import { BrowserProvider, ethers } from "ethers";
 import Loader from "../common/loader.ui";
+import { GetCanvasImageUrl } from "../../../components/avatar/viewer.component";
+import { Delay } from "../../../utils/common.util";
+import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   reRoll: () => Promise<void>;
   handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean }>;
   provider: ethers.BrowserProvider | undefined;
+  features?: IndexFeatureInterface[];
 }
 
-export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, provider }: MintSectionUIProps) {
+export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, provider, features }: MintSectionUIProps) {
+  const [picture, setPicture] = useState<string>('/resources/images/campaings/full-avatar-lukso.png');
+
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLDivElement>(null);
 
   const [isShuffling, setIsShuffling] = useState<boolean>(false);
   const [isMinting, setIsMinting] = useState<boolean>(false);
-
-  useLayoutEffect(() => { void gsapEnterBlocks(); }, [])
 
   const gsapEnterBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
@@ -42,12 +46,26 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
     fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION, true, () => setCurrentSection(LuksoSections.Edit));
   }
 
+  const takePicture = () => {
+    const pic = GetCanvasImageUrl();
+    if (pic && pic.length > 0) {
+      setPicture(pic);
+    }
+  }
+
   const handleReRoll = async () => {
     if (isShuffling) return;
     setIsShuffling(true);
     await reRoll();
     setIsShuffling(false);
+    await Delay(200);
+    takePicture();
   }
+
+  useEffect(() => {
+    void gsapEnterBlocks(); 
+    takePicture();
+  }, [])
 
   return (
     <section className={`flex w-full h-full items-center justify-between`}>
@@ -65,25 +83,24 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
           heightClass="grow"
           borderSizeClass="border-t-0"
         >
-          <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px]">
+          <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px] overflow-hidden rounded-lg gradient-radial">
             <Image
-              src={'/resources/images/campaings/close-avatar-lukso.png'}
+              src={picture}
               fill
               alt="lukso avatar selfie view"
+              style={{objectFit: 'cover'}}
+              className="origin-top scale-[300%] -translate-y-1/4"
             />
           </div>
           <div className="grid grid-cols-2 mt-20 gap-4 gap-x-14 text-sm 2xl:text-base">
-            {Array.from({ length: 4 }).map((_, index) => {
-              return (<Fragment key={index}>
-                <div>
-                  <h3>TOP</h3>
-                  <p>Information</p>
+          {features && features.map((feature, index) => {
+              return (
+                <div key={index}>
+                  <h3 className="uppercase font-bold">{feature.index}</h3>
+                  <p className="lowercase">{feature.val.name}</p>
+                  <p className="capitalize text-xs leading-none text-gray-dark/30">{feature.val.tier ?? '-'}</p>
                 </div>
-                <div>
-                  <h3>BUTTON</h3>
-                  <p>Information</p>
-                </div>
-              </Fragment>)
+              )
             })}
           </div>
         </TransparentBox>
@@ -112,9 +129,10 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
       {/* Mint your avatar */}
       <div ref={mintAvatarRef} className="w-[460px] 2xl:w-[564px] translate-x-full h-[70%]">
         <TransparentBox fullWidth border backgroundColorClass="bg-[#FFCBDE]" paddingClass="px-14 2xl:px-28" aditionalClass="gap-6 2xl:gap-8">
-          <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10 2xl:mb-20">MINT YOUR CITIZEN</h3>
-          <p className="text-base 2xl:text-lg">{`Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.
-            Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.`}</p>
+          <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10">MINT YOUR CITIZEN</h3>
+          <p className="text-base 2xl:text-lg">
+            LUKSO Citizens is a collection of 1764 interoperable Avatars in the LUKSO Blockchain.
+          </p>
           <SocialButtonsUI />
           <div className="font-semibold">
             <p>PUBLIC MINT</p>

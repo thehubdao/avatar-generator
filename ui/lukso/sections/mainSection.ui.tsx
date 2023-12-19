@@ -10,6 +10,7 @@ import ConnectModalUI from "../common/conectModal";
 import { AiOutlineLoading } from "react-icons/ai";
 import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
+import { GetCanvasImageUrl } from "../../../components/avatar/viewer.component";
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   hasMinted: boolean
@@ -20,6 +21,8 @@ interface MainSectionUIProps {
 export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
+
+  const [picture, setPicture] = useState<string>('/resources/images/campaings/full-avatar-lukso.png');
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
@@ -40,9 +43,17 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
     });
   }
 
+  const takePicture = () => {
+    const pic = GetCanvasImageUrl();
+    if (pic && pic.length > 0) {
+      setPicture(pic);
+    }
+  }
 
-  
-  useLayoutEffect(() => { void gsapEnterBlocks() }, [])
+  useLayoutEffect(() => {
+    void gsapEnterBlocks();
+    takePicture();
+  }, [])
 
   return (
     <section className={`flex h-full items-center justify-between`}>
@@ -58,17 +69,19 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
           border
           backgroundColorClass="bg-[#FFCBDE]"
           heightClass="grow"
-          paddingClass="py-3"
+          paddingClass="pb-3 px-10"
         >
-          <div className="relative w-[328px] 2xl:w-[548px] h-[184px] 2xl:h-[308px]">
+          <div className="relative w-full h-1/2 pointer-events-none overflow-hidden gradient-radial rounded-lg">
             <Image
-              src={'/resources/images/campaings/full-avatar-lukso.png'}
+              src={picture}
               fill
               alt="lukso avatar full body view"
+              className="origin-top bottom-0 scale-95"
+              style={{objectFit: "cover"}}
             />
           </div>
           <h2 className="font-extrabold text-2xl 2xl:text-4xl pt-5">LUKSO CITIZENS</h2>
-          <p className="text-center text-sm 2xl:text-base mx-20 pt-2">A new batch of wearables have been added to the THE HUB Heroes pool. You will find new traits when rerolling from now on. Let the fun continue!</p>
+          <p className="text-center text-sm 2xl:text-base pt-2">The scientists at THE HUB developed a digital genome for all the participants of the creator economy. With these identity, luksonians will be able to travel between worlds, games and experiences and impress the world with their creative powers.</p>
         </TransparentBox>
 
         {(provider) && (
@@ -141,7 +154,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             heightClass="h-[125px]"
           >
             <h3 className="font-extrabold text-xl 2xl:text-2xl">EXCLUSIVE COLLECTION</h3>
-            <p className="text-sm 2xl:text-base">Remaining: 15380</p>
+            <p className="text-sm 2xl:text-base">Remaining: 1764</p>
           </TransparentBox>
           <TransparentBox
             fullWidth
@@ -150,11 +163,12 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             backgroundColorClass="bg-[#FFCBDE]"
             heightClass="grow"
           >
-            <h3 className="font-semibold text-xl 2xl:text-2xl">Features</h3>
+            <h3 className="font-semibold text-xl 2xl:text-2xl">Rarety</h3>
             <div className="mt-5 text-base 2xl:text-lg underline">
-              <p>Feature one</p>
-              <p>Feature two</p>
-              <p>Feature three</p>
+              <p>Common</p>
+              <p>Rare</p>
+              <p>Epic</p>
+              <p>Mythical</p>
             </div>
           </TransparentBox>
           <TransparentBox
@@ -181,13 +195,18 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             paddingClass="px-0"
             justifyClass="justify-start"
           >
-            <Image
-              src={'/resources/images/campaings/close-avatar-lukso-without-borders.png'}
-              width={345}
-              height={380}
-              alt="lukso avatar selfie view"
-            />
-            <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">{`Heroes is THE HUB's genesis PFP collection. 5,000 Unique Interoperable Avatars on the Ethereum blockchain.`}</p>
+            <div className="relative w-full h-1/2 overflow-hidden gradient-radial rounded-lg">
+              <Image
+                src={picture}
+                fill
+                alt="lukso avatar selfie view"
+                style={{objectFit: "cover"}}
+                className="origin-top scale-[300%] -translate-y-1/4"
+              />
+            </div>
+            <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">
+              LUKSO Citizens is a collection of 1764 interoperable Avatars in the LUKSO Blockchain.
+            </p>
           </TransparentBox>
         </div>
       </div>

@@ -150,6 +150,14 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
   });
 }
 
+export function GetCanvasImageUrl() {
+  if (_renderer == undefined) {
+    void LogError(Module.Viewer, 'Missing scene');
+    return ''
+  }
+  return(_renderer.domElement.toDataURL())
+}
+
 //#endregion
 
 //#region Component
