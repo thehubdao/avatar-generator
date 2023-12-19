@@ -490,6 +490,7 @@ export default function LuksoComponent({
                             editMode={isEditModeSelected}
                             lights={campaignParams.config.lights}
                             defaultShadow={campaignParams.config.defShadow}
+                            defaultCamera={campaignParams.config.defCam}
                             onReady={() => onAvatarBuilderReady()}
                         />
                     )}
