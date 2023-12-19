@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Fragment, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock, fadeInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { BsArrowRepeat } from "react-icons/bs";
@@ -12,15 +12,17 @@ import { BrowserProvider, ethers } from "ethers";
 import Loader from "../common/loader.ui";
 import { GetCanvasImageUrl } from "../../../components/avatar/viewer.component";
 import { Delay } from "../../../utils/common.util";
+import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   reRoll: () => Promise<void>;
   handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean }>;
   provider: ethers.BrowserProvider | undefined;
+  features?: IndexFeatureInterface[];
 }
 
-export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, provider }: MintSectionUIProps) {
+export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, provider, features }: MintSectionUIProps) {
   const [picture, setPicture] = useState<string>('/resources/images/campaings/full-avatar-lukso.png');
 
   const mainFeatureRef = useRef<HTMLDivElement>(null);
@@ -91,17 +93,14 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
             />
           </div>
           <div className="grid grid-cols-2 mt-20 gap-4 gap-x-14 text-sm 2xl:text-base">
-            {Array.from({ length: 4 }).map((_, index) => {
-              return (<Fragment key={index}>
-                <div>
-                  <h3>TOP</h3>
-                  <p>Information</p>
+          {features && features.map((feature, index) => {
+              return (
+                <div key={index}>
+                  <h3 className="uppercase font-bold">{feature.index}</h3>
+                  <p className="lowercase">{feature.val.name}</p>
+                  <p className="capitalize text-xs leading-none text-gray-dark/30">{feature.val.tier ?? '-'}</p>
                 </div>
-                <div>
-                  <h3>BUTTON</h3>
-                  <p>Information</p>
-                </div>
-              </Fragment>)
+              )
             })}
           </div>
         </TransparentBox>

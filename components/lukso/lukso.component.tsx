@@ -558,6 +558,7 @@ export default function LuksoComponent({
                     hasMinted={hasMinted}
                     provider={provider}
                     isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
+                    features={singleData?.features}
                 />
             </div>
         </MobileLayout>

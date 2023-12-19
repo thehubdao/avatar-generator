@@ -5,13 +5,15 @@ import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDownload, FaPencil } from "react-icons/fa6";
 import { AiOutlineLoading } from "react-icons/ai";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
+import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 
 interface EditSectionUIProps {
   exportModel: () => Promise<void>;
   setIsEditModeSelected: (value: boolean) => void;
+  features?: IndexFeatureInterface[];
 }
 
-export default function EditSectionUI({ setIsEditModeSelected, exportModel }: EditSectionUIProps) {
+export default function EditSectionUI({ setIsEditModeSelected, exportModel, features }: EditSectionUIProps) {
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
 
   const editAvatarRef = useRef<HTMLDivElement>(null);
@@ -50,17 +52,14 @@ export default function EditSectionUI({ setIsEditModeSelected, exportModel }: Ed
             />
           </div>
           <div className="grid grid-cols-2 mt-10 2xl:mt-20 gap-4 gap-x-14 text-sm 2xl:text-base">
-            {Array.from({ length: 4 }).map((_, index) => {
-              return (<Fragment key={index}>
-                <div>
-                  <h3>TOP</h3>
-                  <p>Information</p>
+            {features && features.map((feature, index) => {
+              return (
+                <div key={index}>
+                  <h3 className="uppercase font-bold">{feature.index}</h3>
+                  <p className="lowercase">{feature.val.name}</p>
+                  <p className="capitalize text-xs leading-none text-gray-dark/30">{feature.val.tier ?? '-'}</p>
                 </div>
-                <div>
-                  <h3>BUTTON</h3>
-                  <p>Information</p>
-                </div>
-              </Fragment>)
+              )
             })}
           </div>
         </TransparentBox>
