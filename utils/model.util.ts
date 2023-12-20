@@ -1,34 +1,30 @@
 ﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
 import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
 import {
+  Bone,
   Group,
-  Material,
+  MeshBasicMaterial,
   MeshStandardMaterial,
   MeshToonMaterial,
   Object3D,
   Skeleton,
   SkinnedMesh
 } from "three";
-import {AccessoryInfoInterface, BasicData, PartInfoInterface} from "../interfaces/common.interface";
-import {TextureTone, TextureUtil} from "./texture.util";
-import {LoadGltfModel} from "./importer.util";
-import {GlobalValues} from "../enums/common.enum";
+import {AccessoryInfoInterface, FeatureBasic, FeatureInfoInterface} from "../interfaces/common.interface";
+import {GetToneTexture} from "./threejs/texture.util";
+import {LogError, LogWarning} from "./common.util";
+import {Module} from "../enums/common.enum";
+import {BoneMatrix, MaterialFunction} from "../types/model.type";
+import {ChangeMaterialOption} from "../enums/model.enum";
+import {TextureTone} from "../types/texture.type";
+import {GLOBAL_VALUES} from "../constants/common.constant";
 
-type MaterialFunction = (obj: SkinnedMesh, tone?: TextureTone) => void;
-
-export async function ReplaceModelPart(baseModel: GLTF, partUrl: string, partIndex: number) {
-  const partModel = await LoadGltfModel(partUrl);
-
-  const chest = SkeletonUtils.clone(partModel.scene.children[0].children[partIndex]) as SkinnedMesh;
-  const oldSkeleton = SkeletonUtils.getBones((baseModel.scene.children[0].children[partIndex] as SkinnedMesh).skeleton);
-
-  chest.skeleton.bones = oldSkeleton;
-
-  baseModel.scene.children[0].children[partIndex] = chest;
+export function IsSkinnedMesh(obj: Object3D): obj is SkinnedMesh {
+  return (obj as SkinnedMesh).isSkinnedMesh;
 }
 
-function IsSkinnedMesh(obj: Object3D): obj is SkinnedMesh {
-  return (obj as SkinnedMesh).isSkinnedMesh;
+export function IsBone(obj: Object3D): obj is Bone {
+  return (obj as Bone).isBone;
 }
 
 function GetSkeleton(skeletonModel: Object3D, index: number) {
@@ -58,38 +54,39 @@ function GetSkeleton(skeletonModel: Object3D, index: number) {
   return leSkelly;
 }
 
-export async function ReplaceModelPartOnly(baseModel: Object3D, replaceModel: GLTF, partInfo: PartInfoInterface, selectedPart?: BasicData, skinColor?: string) {
-  if (selectedPart == undefined) {
-    console.error('No selected Part', 'There is no selected part to replace on base model.');
-    return;
+export async function ReplaceModelFeatureOnly(baseModel: Object3D, replaceModel: GLTF, selectedFeature: string, allFeatureInfo: Record<string, FeatureInfoInterface>, skinColor?: string, skinName?: string, changeMaterial?: ChangeMaterialOption) {
+  if(allFeatureInfo == undefined) return LogError(Module.ModelUtil, "Missing feature on armature.");
+  if(selectedFeature == undefined)
+    return LogError(Module.ModelUtil, "There is no selected feature to replace on base model.");
+  
+  const featureInfo = allFeatureInfo[selectedFeature];
+  if (featureInfo == undefined) return LogError(Module.ModelUtil, "Feature not found on avatar base!");
+  
+  const changeMesh: Object3D | null = await GetMatchPiece(replaceModel, featureInfo.name);
+  if(changeMesh == null)
+    return LogError(Module.ModelUtil, `Piece not found: '${featureInfo.name}' not found on replace model, please verify the glb file.`);
+  
+  const newFeature: Object3D = SkeletonUtils.clone(changeMesh);
+  const baseSkeleton = GetSkeleton(baseModel, featureInfo.index);
+  if (baseSkeleton == undefined)
+    return LogError(Module.ModelUtil, "Skeleton missing from base_mesh some of the features have weird components.")
+
+  const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
+  ChangeSkeleton(newFeature, baseSkeleton, changeMaterialFunction, "threeTone", skinColor, skinName);
+
+  newFeature.frustumCulled = false;
+  
+  // update all feature info
+  for (const fI of Object.values(allFeatureInfo)) {
+    if (fI.index > featureInfo.index)
+      fI.index -= 1;
   }
-
-  let chestMesh = await GetMatchPiece(replaceModel, selectedPart.val);
-  if (chestMesh == null) {
-    console.error('Piece not found:', `'${selectedPart.val}' not found on replace model, please verify the glb file.`);
-    return;
-  }
-
-  const newPart: Object3D = SkeletonUtils.clone(chestMesh);
-  const baseSkeleton = GetSkeleton(baseModel, partInfo.partIndex);
-  if (baseSkeleton == undefined) {
-    console.error('Skeleton Missing:', 'Skeleton missing from base_mesh some of the parts have weird components.');
-    return;
-  }
-
-  await ChangeSkeleton(newPart, baseSkeleton, ChangeToToonMaterial, "threeTone");
-
-  if (skinColor) {
-    await ChangeObjectSkinColor(newPart, skinColor);
-  }
-
-  // console.log('base', baseModel);
-  // console.log('replace', newPart);
-  // console.log('partInfo', partInfo);
-
-  newPart.frustumCulled = false;
-  baseModel.children.splice(partInfo.partIndex, 1);
-  baseModel.add(newPart);
+  
+  baseModel.children.splice(featureInfo.index, 1);
+  baseModel.add(newFeature);
+  
+  featureInfo.index = baseModel.children.length - 1;
+  featureInfo.ref = newFeature;
 }
 
 async function GetMatchPiece(object: GLTF, match?: string) {
@@ -104,9 +101,9 @@ async function GetMatchPiece(object: GLTF, match?: string) {
     }
 
     if (retObj == null) {
-      let objectFound = false;
+      let didFoundObject = false;
       object.scene.traverse(m => {
-        if (objectFound) return;
+        if (didFoundObject) return;
 
         const skinnedMesh = m as SkinnedMesh;
         if (skinnedMesh.isSkinnedMesh) {
@@ -115,7 +112,7 @@ async function GetMatchPiece(object: GLTF, match?: string) {
           else
             retObj = skinnedMesh;
 
-          objectFound = true;
+          didFoundObject = true;
           return;
         }
       });
@@ -125,21 +122,28 @@ async function GetMatchPiece(object: GLTF, match?: string) {
   });
 }
 
-async function ChangeSkeleton(newPart: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone) {
-  newPart.traverse(async object => {
+function ChangeSkeleton(newFeature: Object3D, baseSkeleton: Skeleton, changeMaterial?: MaterialFunction, tone?: TextureTone, skinColor?: string, skinMatName = 'Skin _Mat_MAH') {
+  newFeature.traverse(async object => {
     if (IsSkinnedMesh(object)) {
       object.skeleton = baseSkeleton.clone();
       if (changeMaterial && tone)
         await changeMaterial(object, tone);
+
+      if (skinColor) {
+        const matRef = object.material as MeshStandardMaterial;
+        if (matRef.name.startsWith(skinMatName)) {
+          matRef.color.set(`#${skinColor}`);
+        }
+      }
     }
 
     object.frustumCulled = false;
   });
 
-  // if (IsSkinnedMesh(newPart)) {
-  //   newPart.skeleton = baseSkeleton.clone();
+  // if (IsSkinnedMesh(newFeature)) {
+  //   newFeature.skeleton = baseSkeleton.clone();
   //   if (changeMaterial && tone)
-  //     await changeMaterial(newPart, tone);
+  //     await changeMaterial(newFeature, tone);
   // }
 }
 
@@ -150,7 +154,7 @@ function FindOrCreateAccessoryGroup(baseModel: Object3D) {
   baseModel.traverse(object => {
     if (isFoundAccGroup) return;
 
-    if (object.name === GlobalValues.AccGroup) {
+    if (object.name === GLOBAL_VALUES.AccGroup) {
       isFoundAccGroup = true;
       accGroup = object as Group;
       return;
@@ -160,13 +164,22 @@ function FindOrCreateAccessoryGroup(baseModel: Object3D) {
   if (isFoundAccGroup && accGroup != undefined) return accGroup;
 
   accGroup = new Group();
-  accGroup.name = GlobalValues.AccGroup;
+  accGroup.name = GLOBAL_VALUES.AccGroup;
   baseModel.add(accGroup);
 
   return accGroup;
 }
 
-export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLTF, allAccInfo: Record<string, AccessoryInfoInterface>, selectedAcc: string) {
+function GetChangeMaterialFunction(changeMaterial?: ChangeMaterialOption): MaterialFunction | undefined {
+  switch (changeMaterial) {
+    case ChangeMaterialOption.Toon:
+      return ChangeToToonMaterial;
+    default:
+      return undefined;
+  }
+}
+
+export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLTF, allAccInfo: Record<string, AccessoryInfoInterface>, selectedAcc: string, changeMaterial?: ChangeMaterialOption) {
   // Find valid accessory
   const leAcc = await GetMatchPiece(replaceAcc);
   if (leAcc == null) {
@@ -203,7 +216,9 @@ export async function ReplaceModelAccessory(baseModel: Object3D, replaceAcc: GLT
     console.error('Missing skeleton');
     return;
   }
-  await ChangeSkeleton(newAcc, newSkeleton, ChangeToToonMaterial, "threeTone");
+  
+  const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
+  ChangeSkeleton(newAcc, newSkeleton, changeMaterialFunction, "threeTone");
 
   // Add new one
   accessoryGroup.add(newAcc);
@@ -215,37 +230,134 @@ export async function ChangeToToonMaterial(object: SkinnedMesh, tone?: TextureTo
     const mapClone = materialRef.map?.clone();
     const oldName = materialRef.name;
     const oldColor = materialRef.color.clone();
-    const _toneTexture = await TextureUtil.Instance().GetToneTexture(tone);
+    const toneTexture = await GetToneTexture(tone);
     object.material = new MeshToonMaterial({
       map: mapClone,
       name: oldName,
       color: oldColor,
-      gradientMap: _toneTexture,
-      transparent: true,
+      gradientMap: toneTexture,
+      transparent: materialRef.transparent,
     });
   }
 }
 
-export async function TransformObject3dToToonMaterial(object: Object3D, tone?: TextureTone) {
-  object.traverse(async subObj => {
-    const skinnedRef = subObj as SkinnedMesh;
-    if (skinnedRef.isSkinnedMesh) {
-      await ChangeToToonMaterial(skinnedRef, tone);
+export function ChangeToBasicMaterial(object: SkinnedMesh) {
+  const materialRef = object.material as MeshStandardMaterial;
+  if (materialRef.isMeshStandardMaterial) {
+    const mapClone = materialRef.map?.clone();
+    const oldName = materialRef.name;
+    const oldColor = materialRef.color.clone();
+    
+    object.material = new MeshBasicMaterial({
+      map: mapClone,
+      name: oldName,
+      color: oldColor,
+    });
+  }
+}
+
+export function TransformObject3dToNewMaterial(object: Object3D, tone?: TextureTone, changeMaterial?: ChangeMaterialOption) {
+  const changeMaterialFunction = GetChangeMaterialFunction(changeMaterial);
+  if (changeMaterialFunction == undefined) return;
+  
+  object.traverse(subObj => {
+    if (IsSkinnedMesh(subObj)) {
+      void changeMaterialFunction(subObj, tone);
     }
   });
 }
 
-export async function ChangeObjectSkinColor(object: Object3D, skinColor: string, skinMatName: string = 'AvatarSkin_MAT') {
+export function ChangeObjectSkinColor(object: Object3D, skinColor: string, skinMatName = 'Skin _Mat_MAH') {
   object.traverse(subObject => {
-    const objectRef = subObject as SkinnedMesh;
-    if (objectRef.isSkinnedMesh) {
-      const matRef = objectRef.material as Material;
-      if (matRef.name.startsWith(skinMatName))
-        (matRef as MeshStandardMaterial).color.set(`#${skinColor}`);
+    if (IsSkinnedMesh(subObject)) {
+      const matRef = subObject.material as MeshStandardMaterial;
+      if (matRef.name.startsWith(skinMatName)) {
+        matRef.color.set(`#${skinColor}`);
+      }
     }
   });
 }
 
-export function CleanModelForExport(model: GLTF) {
-  // TODO: something
+// TODO: use at some point
+// export function CleanModelForExport(model: GLTF) {
+//   // something
+// }
+
+// TODO Review meshName
+export async function GetFeaturesData(baseModel: Group, featureList: FeatureBasic[], update = false) {
+  return new Promise<Record<string, FeatureInfoInterface>>(resolve => {
+    const baseFeatures = baseModel.children[0];
+    const result: Record<string, FeatureInfoInterface> = {};
+
+    for (const [index, feature] of baseFeatures.children.entries()) {
+      if (featureList.some(x => feature.name.startsWith(x.meshName))) {
+        const foundFeature = featureList.find(x => x.meshName === feature.name);
+        if (foundFeature != undefined) {
+          result[foundFeature.displayName] = {
+            index: index,
+            ref: update ? result[foundFeature.displayName].ref : feature.clone(),
+            name: foundFeature.meshName
+          };
+        }
+      }
+    }
+
+    resolve(result);
+  });
+}
+
+
+export function BonesFirst(avatar: GLTF) {
+  const root = avatar.scene.children.at(0);
+  
+  if (root == undefined)
+    return void LogError(Module.ModelUtil, "Avatar scene children at position 0 is undefined");
+
+  for (const child of root.children) {
+    if (IsBone(child)) {
+      const boneIndex = root.children.indexOf(child) + 1;
+      root.children.splice(0, 0, child);
+      root.children.splice(boneIndex, 1);
+      return;
+    }
+  }
+}
+
+export function SetPose(model: Object3D, pose: Record<string, BoneMatrix | undefined> | undefined) {
+  if (pose == undefined)
+    return void LogWarning(Module.ModelUtil, "Missing pose to update!");
+
+  let sharedSkeleton: Skeleton | undefined;
+  
+  model.traverse(obj => {
+    if (IsSkinnedMesh(obj)) {
+      if (sharedSkeleton == undefined)
+        sharedSkeleton = obj.skeleton;
+      else
+        obj.skeleton = sharedSkeleton;
+    }
+
+    const matrix = pose[obj.name];
+    if (matrix != undefined) {
+      obj.matrixAutoUpdate = false;
+      obj.position.copy(matrix.p);
+      obj.quaternion.copy(matrix.q);
+      obj.scale.copy(matrix.s);
+      obj.matrixAutoUpdate = true;
+    }
+  });
+}
+
+export function GetPose(model: Object3D) {
+  const pose: Record<string, BoneMatrix | undefined> = {};
+
+  model.traverse(obj => {
+    pose[obj.name] = {
+      p: obj.position.clone(),
+      q: obj.quaternion.clone(),
+      s: obj.scale.clone(),
+    }
+  });
+  
+  return pose;
 }

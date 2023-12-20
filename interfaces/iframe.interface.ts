@@ -1,6 +1,8 @@
+import {IFrameEvent} from "../enums/common.enum";
+
 export interface IFrameInBound<T> {
   target: string;
-  eventName: string;
+  eventName: IFrameEvent;
   payload: T;
 }
 

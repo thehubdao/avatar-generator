@@ -1,26 +1,24 @@
 ﻿import {Component} from "react";
 import Head from "next/head";
 import Image from "next/image";
-import AGText from "../../../components/common/ag-text.component";
-import {IFrameEvents, IFrameValues} from "../../../enums/common.enum";
+import AGText from "../../../ui/common/ag-text.component";
+import {IFrameEvent} from "../../../enums/common.enum";
 
 import replitAvatarIFramePic from '../../../public/resources/images/info/replitAvatarIFrame.jpg';
-
-interface InfoProps {
-}
+import {IFRAME_VALUES} from "../../../constants/common.constant";
 
 interface InfoState {
   prodUrl: string;
 }
 
-export default class Info extends Component<InfoProps, InfoState> {
-  constructor(props: InfoProps) {
+export default class Info extends Component<undefined, InfoState> {
+  constructor(props: undefined) {
     super(props);
     this.state = {
       prodUrl: 'https://avatar-generator-metagamehub.vercel.app/'
     };
   }
-  
+
   render() {
     return (
       <>
@@ -32,12 +30,13 @@ export default class Info extends Component<InfoProps, InfoState> {
             <div className="my-2">
               <AGText type='th1.5'>How to use</AGText>
               <AGText type='th1'>Avatar Generator</AGText>
-              
+
               <section>
                 <AGText type='th2'>IFrame Implementation:</AGText>
                 <AGText type='text'>
                   In order to use Avatar Generator (AG) on an IFrame we use
-                  <AGText type="link" href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">Window PostMessage API</AGText>,
+                  <AGText type="link" href="https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage">Window
+                    PostMessage API</AGText>,
                   and a list of events
                   our AG handles in order to work properly inside an IFrame:
                 </AGText>
@@ -52,8 +51,8 @@ export default class Info extends Component<InfoProps, InfoState> {
                     </AGText>
                     <AGText type='code'>{
                       `{
-  source: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.Ready}”
+  source: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.Ready}”
 }`
                     }</AGText>
                     <AGText type='text'>
@@ -70,11 +69,12 @@ export default class Info extends Component<InfoProps, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  source: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.Exported}",
+  source: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.Exported}",
   data: {
     attributes: { id: string, val: string }[],
     attributesBase64: string,
+    combination: number;
     model: Blob,
     picture: Blob,
   }
@@ -84,7 +84,7 @@ export default class Info extends Component<InfoProps, InfoState> {
                     <AGText type="text">We are in the process of adding the video.</AGText>
                   </dd>
                 </dl>
-                
+
                 <AGText type="th2">Requests to IFrame</AGText>
                 <dl>
                   <dt><AGText type="th3" mark="dash">Subscribe event:</AGText></dt>
@@ -96,8 +96,8 @@ export default class Info extends Component<InfoProps, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  target: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.Subscribe}”
+  target: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.Subscribe}”
 }`
                       }
                     </AGText>
@@ -111,14 +111,14 @@ export default class Info extends Component<InfoProps, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  target: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.ChangeSkinColor}”,
+  target: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.ChangeSkinColor}”,
   payload: string       // Hex color without #
 }`
                       }
                     </AGText>
                   </dd>
-                  
+
                   <dt><AGText type="th3" mark="dash">Change feature/accessory event:</AGText></dt>
                   <dd>
                     <AGText type="text">
@@ -127,8 +127,8 @@ export default class Info extends Component<InfoProps, InfoState> {
                     <AGText type="code">
                       {
                         `{
-  target: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.ChangePart}”,
+  target: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.ChangeFeature}”,
   payload: {
     id: string,       // Feature/Accessory type
     val: string,      // Feature/Accessory name
@@ -143,13 +143,14 @@ export default class Info extends Component<InfoProps, InfoState> {
                   <dt><AGText type="th3" mark="dash">Export event:</AGText></dt>
                   <dd>
                     <AGText type="text">
-                      Message sent to AG in order to export current avatar (Triggers the Exported event from the IFrame).
+                      Message sent to AG in order to export current avatar (Triggers the Exported event from the
+                      IFrame).
                     </AGText>
                     <AGText type="code">
                       {
                         `{
-  target: “${IFrameValues.Project}”,
-  eventName: “${IFrameEvents.Exported}”
+  target: “${IFRAME_VALUES.Project}”,
+  eventName: “${IFrameEvent.Exported}”
 }`
                       }
                     </AGText>
@@ -163,11 +164,12 @@ export default class Info extends Component<InfoProps, InfoState> {
                   </AGText>
                 </AGText>
                 <div className="flex justify-center my-2">
-                  <Image width={640} height={487} src={replitAvatarIFramePic} layout="intrinsic" alt="Replit Example"></Image>
+                  <Image width={640} height={487} src={replitAvatarIFramePic} layout="intrinsic"
+                         alt="Replit Example"></Image>
                 </div>
                 <AGText type="text">You can clone this small project and test it on your own.</AGText>
               </section>
-              
+
               <section>
                 <AGText type="th2">URL Parameters:</AGText>
                 <dl>
@@ -215,7 +217,7 @@ export default class Info extends Component<InfoProps, InfoState> {
                       This link will show our base campaign implementation with only the view mode.
                     </AGText>
                   </dd>
-                  
+
                   <dt><AGText type="th3" mark="bullet">Config:</AGText></dt>
                   <dd>
                     <AGText type="text">
@@ -254,7 +256,7 @@ export default class Info extends Component<InfoProps, InfoState> {
                   </dd>
                 </dl>
               </section>
-              
+
               <AGText type="end">end</AGText>
             </div>
           </div>
