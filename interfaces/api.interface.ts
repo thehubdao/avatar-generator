@@ -1,20 +1,53 @@
-﻿export interface BodyPartLocationApi extends FeatureLocationApi {
-  id: string;
-  index: string;
+﻿import {DefaultApiResponse} from "../server/enums/api.enum";
+import {RandomTier} from "../enums/common.enum";
+
+export interface ApiResponse<T> {
+  success: boolean,
+  message: string | DefaultApiResponse,
+  data?: T,
 }
 
-export interface AccLocationApi extends FeatureLocationApi {
-  id: string;
-}
-
-export interface FeatureLocationApi {
+export interface AssetInterface {
+  index: number;
   name: string;
-  type?: string;
+  type: string;
   path: string;
   thumb?: string;
-  campaign: string[];
 }
 
-export interface AnimLocationApi extends Omit<FeatureLocationApi, 'type' | 'thumb'> {
+export interface FeatureInterface extends AssetInterface {
   id: string;
+  tier: RandomTier;
+}
+
+export interface AccessoryInterface extends AssetInterface {
+  id: string;
+}
+
+export interface AnimationInterface extends Omit<AssetInterface, 'type' | 'index'> {
+  id: string;
+}
+
+export interface StageInterface extends Omit<AssetInterface, 'type' | 'index'> {
+  id: string;
+}
+
+export interface EnvMapInterface extends Omit<AssetInterface, 'type' | 'index'>{
+  id: string;
+}
+
+interface IndexFeatureInterface {
+  index: number;
+  val: FeatureInterface;
+}
+
+export interface SingleInterface {
+  random: boolean;
+  features: IndexFeatureInterface[];
+}
+
+export interface CollectionDataInterface {
+  featureIndex: { index: number, name: string }[];
+  maxIndex: string;
+  maxCombination: number;
 }

@@ -1,15 +1,15 @@
 ﻿import {AxesHelper, BoxGeometry, DoubleSide, Mesh, MeshPhongMaterial, PointLight, AmbientLight} from "three";
 
 export function GetTestCube(): Mesh {
-  let geometry = new BoxGeometry(2, 16, 2);
-  let material = new MeshPhongMaterial( {
+  const geometry = new BoxGeometry(2, 16, 2);
+  const material = new MeshPhongMaterial( {
     color: 0x156289,
     emissive: 0x072534,
     side: DoubleSide,
     flatShading: true
   } );
 
-  let cube = new Mesh(geometry, material);
+  const cube = new Mesh(geometry, material);
   cube.position.set(1, 8, 1);
   return cube;
 }
@@ -20,7 +20,7 @@ export function GetTestAxis(size: number): AxesHelper {
 }
 
 export function GetTestLights(): PointLight[] {
-  let lights = [];
+  const lights: PointLight[] = [];
   lights[ 0 ] = new PointLight( 0xffffff, 1, 0 );
   // lights[ 1 ] = new PointLight( 0xffffff, 3, 0 );
   // lights[ 2 ] = new PointLight( 0xffffff, 3, 0 );
@@ -33,7 +33,7 @@ export function GetTestLights(): PointLight[] {
 }
 
 export function GetAmbientLights(): AmbientLight[] {
-  let lights = [];
+  const lights: AmbientLight[] = [];
   lights[ 0 ] = new AmbientLight( 0x404040 );
   
   return lights;

@@ -1,50 +1,51 @@
 import {IFrameInBound, IFrameOutBound} from "../interfaces/iframe.interface";
-import {IFrameEvents, IFrameValues} from "../enums/common.enum";
+import {IFrameEvent} from "../enums/common.enum";
 import {BasicData, ExportInterface} from "../interfaces/common.interface";
+import {IFRAME_VALUES} from "../constants/common.constant";
 
 export function IFrameReady(onSubscribed: () => void) {
   TellParentReady();
   SetSubscribeEvent(onSubscribed);
 }
 
-export function SetIFrameEvents(onChangePart?: (params?: BasicData) => Promise<void>,
+export function SetIFrameEvents(onChangeFeature?: (params?: BasicData) => Promise<void>,
                                 onExport?: () => Promise<void>,
                                 onChangeSkinColor?: (newSkin?: string) => Promise<void>) {
-  SetOnChangePart(onChangePart);
+  SetOnChangeFeature(onChangeFeature);
   Export(onExport);
   ChangeSkinColor(onChangeSkinColor);
 }
 
 function TellParentReady() {
   const message: IFrameOutBound<void> = {
-    source: IFrameValues.Project,
-    eventName: IFrameEvents.Ready
+    source: IFRAME_VALUES.Project,
+    eventName: IFrameEvent.Ready
   };
   
   window.parent.postMessage(message, '*');
 }
 
 function SetSubscribeEvent(onSubscribed: () => void) {
-  InBoundEventListener(IFrameEvents.Subscribe, onSubscribed);
+  InBoundEventListener(IFrameEvent.Subscribe, onSubscribed);
 }
 
-function SetOnChangePart(onChangePart?: (params?: BasicData) => Promise<void>) {
-  InBoundEventListener(IFrameEvents.ChangePart, onChangePart);
+function SetOnChangeFeature(onChangeFeature?: (params?: BasicData) => Promise<void>) {
+  InBoundEventListener(IFrameEvent.ChangeFeature, onChangeFeature);
 }
 
 function Export(onExport?: () => Promise<void>) {
-  InBoundEventListener(IFrameEvents.Exported, onExport);
+  InBoundEventListener(IFrameEvent.Exported, onExport);
 }
 
 function ChangeSkinColor(onChangeSkin?: (newSkinColor?: string) => Promise<void>) {
-  InBoundEventListener(IFrameEvents.ChangeSkinColor, onChangeSkin);
+  InBoundEventListener(IFrameEvent.ChangeSkinColor, onChangeSkin);
 }
 
-function InBoundEventListener<T>(event: IFrameEvents, onFunc?: ((data?: T) => Promise<void>) | ((data?: T) => void )) {
-  window.addEventListener(IFrameValues.Event, ({data, source}) => {
+function InBoundEventListener<T>(event: IFrameEvent, onFunc?: ((data?: T) => Promise<void>) | ((data?: T) => void )) {
+  window.addEventListener(IFRAME_VALUES.Event, ({data}) => {
     const {target, eventName, payload} = data as IFrameInBound<T>;
-    if(onFunc && target === IFrameValues.Project && eventName === event)
-      onFunc(payload);
+    if(onFunc && target === IFRAME_VALUES.Project && eventName === event)
+      void onFunc(payload);
   });
 }
 
@@ -54,8 +55,8 @@ export function IFrameExportData(data: ExportInterface) {
 
 function SendMessage<T>(sendData: T) {
   const message: IFrameOutBound<T> = {
-    source: IFrameValues.Project,
-    eventName: IFrameEvents.Exported,
+    source: IFRAME_VALUES.Project,
+    eventName: IFrameEvent.Exported,
     data: sendData,
   };
   window.parent.postMessage(message, '*');

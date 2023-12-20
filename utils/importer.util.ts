@@ -1,16 +1,14 @@
-﻿import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
-import {Group} from "three";
+import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
 import {GetFile} from "./firebase.util";
-import {BasicData, PartInfoInterface} from "../interfaces/common.interface";
-import {AccLocationApi, AnimLocationApi, BodyPartLocationApi} from "../interfaces/api.interface";
+import {IsWebUrl, LogError} from "./common.util";
+import {Result} from "../types/common.type";
+import {CommonErrorCode, Module} from "../enums/common.enum";
+import {VRMLoaderPlugin} from "@pixiv/three-vrm";
 
 class ImporterUtil {
   private static _instance: ImporterUtil;
-  private _gltfLoader: GLTFLoader | null;
-  
-  constructor() {
-    this._gltfLoader = null;
-  }
+  private _gltfLoader: GLTFLoader | undefined;
+  private _vrmLoader: GLTFLoader | undefined;
 
   public static Instance() {
     if (ImporterUtil._instance === undefined)
@@ -20,10 +18,21 @@ class ImporterUtil {
   }
 
   public GetGltfLoaderInstance(): GLTFLoader {
-    if(this._gltfLoader === null)
+    if (this._gltfLoader == undefined)
       this._gltfLoader = new GLTFLoader();
 
     return this._gltfLoader;
+  }
+  
+  public GetVrmLoaderInstance(): GLTFLoader {
+    if (this._vrmLoader == undefined) {
+      this._vrmLoader = new GLTFLoader();
+      this._vrmLoader.register((parser) => {
+        return new VRMLoaderPlugin(parser);
+      });
+    }
+
+    return this._vrmLoader;
   }
 }
 
@@ -40,57 +49,59 @@ function ParseAsync(array: ArrayBuffer): Promise<GLTF> {
   });
 }
 
+export async function LoadVrmAsync(vrmLoc: string): Promise<Result<GLTF>> {
+  try {
+    const loader = ImporterUtil.Instance().GetVrmLoaderInstance();
+    const vrm = await loader.loadAsync(vrmLoc);
+    return {success: true, value: vrm};
+  }
+  catch (e) {
+    const msg = "Error loading VRM asset!";
+    void LogError(Module.Importer, msg);
+    return {success: false, errMessage: msg, errCode: CommonErrorCode.InternalError};
+  }
+}
+
 export async function LoadGltfModel(url: string): Promise<GLTF> {
   const loader = ImporterUtil.Instance().GetGltfLoaderInstance();
   return loader.loadAsync(url);
 }
 
-export async function FetchGltfModel(url: string): Promise<GLTF> {
-  const arrayBuffer = await FetchArrayBuffer(url);
-  return ParseAsync(arrayBuffer);
+export async function FetchGltfModel(url: string): Promise<Result<GLTF>> {
+  try {
+    const arrayBuffer = await FetchArrayBuffer(url);
+    const parsed = await ParseAsync(arrayBuffer);
+    return {success: true, value: parsed};
+  }
+  catch(err) {
+    const msg = "Error while fetching external model file!";
+    void LogError(Module.Importer, msg, err);
+    return {success: false, errMessage: msg, errCode: CommonErrorCode.FetchError};
+  }
 }
 
-export async function FirebaseGltfModel(path: string): Promise<GLTF> {
-  const arrayBuffer = await GetFile(path);
-  return ParseAsync(arrayBuffer);
+export async function FirebaseGltfModel(path: string, campaign?: string): Promise<Result<GLTF>> {
+  const fileResult = await GetFile(path, campaign);
+  if (fileResult.success) {
+    const gltf = await ParseAsync(fileResult.value);
+    gltf.scene.traverse(obj => {
+      obj.castShadow = true;
+      // TODO: Add envMapIntensity from campaignConfig
+      // obj.material.envMapIntensity = 7;
+    })
+    return {success: true, value: gltf};
+  }
+  
+  return fileResult;
 }
 
-export async function GetGltfModel(path: string) {
-  if(path.startsWith('http'))
+export async function GetGltfModel(path: string): Promise<Result<GLTF>> {
+  if (IsWebUrl(path))
     return FetchGltfModel(path);
   else
     return FirebaseGltfModel(path);
 }
 
-export function GetPartsData(baseModel: Group, partList: BasicData[], update: boolean = false): Record<string, PartInfoInterface> {
-  const baseParts = baseModel.children[0];
-  let result: Record<string, PartInfoInterface> = {};
-  
-  baseParts.children.forEach((part, index) => {
-    if(partList.some(x => x.val === part.name)) {
-      const foundPart = partList.find(x => x.val === part.name);
-      result[foundPart!.id] = { partIndex: index, featureBase: update ? result[foundPart!.id].featureBase : part.clone() };
-    }
-  });
-
-  return result;
-}
-
 async function FetchArrayBuffer(url: string): Promise<ArrayBuffer> {
   return fetch(url).then(data => data.arrayBuffer());
-}
-
-export async function GetAssetsListByCampaign(campaign?: string | null) {
-  const jsonObject: BodyPartLocationApi[] = await fetch('/api/getFeatureOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
-  return jsonObject;
-}
-
-export async function GetAccessoryListByCampaign(campaign?: string | null) {
-  const jsonObject: AccLocationApi[] = await fetch('/api/getAccessoryOptions' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
-  return jsonObject;
-}
-
-export async function GetAnimationListByCampaign(campaign?: string | null) {
-  const jsonObject: AnimLocationApi[] = await fetch('/api/getAnimations' + (campaign ? ('?campaign=' + campaign) : '')).then(res => res.json());
-  return jsonObject;
 }
