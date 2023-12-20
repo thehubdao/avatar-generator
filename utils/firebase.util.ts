@@ -27,6 +27,7 @@ import {ConvertObject, ConvertType} from "./common/object-converter.util";
 import {SessionUserInfo} from "./common/session.util";
 import {CampaignParameters} from "../interfaces/common.interface";
 import {ParameterNameType} from "../types/firebase.type";
+import {COLLECTION_VALUES} from "../server/constants/collection.constant";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -160,10 +161,31 @@ async function GetDocuments<T>(dbLocation: string, constraintsValues?: AGQueryCo
     const querySnapshot = await getDocs(myQuery);
 
     const data = querySnapshot.docs.map(s => {
-      return {...s.data() as T, id: s.id}
+      return {id: s.id, ...s.data() as T};
     });
     
     return {success: true, value: data};
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, err.code);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
+}
+
+export async function GetSingleDocument<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, docId: string): Promise<Result<T>> {
+  if (!docId) return {success: false, errMessage: "Missing a valid docId!", errCode: CommonErrorCode.MissingInfo};
+  if (dbLocation.split('/').length % 2 === 0)
+    return {success: false, errMessage: "Location is not a collection!", errCode: CommonErrorCode.WrongInfo};
+
+  try {
+    const {doc, getDoc} = await import('@firebase/firestore');
+    const docRef = doc(await FirebaseUtil.Instance().DB(), `${dbLocation}/${docId}`);
+    const leDoc = await getDoc(docRef);
+
+    const data = leDoc.data() as T;
+    return data == undefined ?
+      {success: false, errMessage: "Missing data on collection!", errCode: CommonErrorCode.MissingInfo} :
+      {success: true, value: data};
   } catch (e) {
     const err = e as FirebaseError;
     void LogError(Module.FirebaseUtil, err.message, err.code);
@@ -184,6 +206,8 @@ function GetConstraints(dbLocation: string, constraintsValues?: AGQueryConstrain
       return AccessoryConstraints(constraintsValues);
     case FirestoreLocation.Animations:
       return AnimationConstraints(constraintsValues);
+    case COLLECTION_VALUES.Suffix:
+      return CollectionConstraints(constraintsValues);
     default:
       return [];
   }
@@ -233,6 +257,17 @@ async function AnimationConstraints(constraintsValues: AGQueryConstraints) {
     constraints.push(where(FirestoreFilterValues.Name, "==", name));
   else
     constraints.push(orderBy(FirestoreFilterValues.Name, "asc"));
+
+  return constraints;
+}
+
+async function CollectionConstraints(constraintsValues: AGQueryConstraints) {
+  const constraints: QueryConstraint[] = [];
+  const {collectionStatus} = constraintsValues;
+  const {where} = await import('@firebase/firestore');
+  
+  if (collectionStatus != undefined)
+    constraints.push(where(FirestoreFilterValues.CollectionStatus, "==", collectionStatus));
 
   return constraints;
 }
@@ -668,6 +703,105 @@ export async function DeleteCampaign(campaign: string): Promise<Result<string>> 
     return DeleteDocument(campaignLocation);
   }
   catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, err.code);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
+}
+
+export async function BatchSet(prefix: string, allItems: ({id: string | number} & object)[]): Promise<Result<number>> {
+  try {
+    if (allItems.length === 0) return {success: true, value: 0};
+
+    const highLimit = allItems.length > 500 ? 500 : allItems.length;
+    const {writeBatch, doc} = await import("@firebase/firestore");
+    const dbRef = await FirebaseUtil.Instance().DB();
+
+    let batch = writeBatch(dbRef);
+    let limit = 0;
+    let done = 0;
+
+    for (const item of allItems) {
+      const itemRef = doc(dbRef, `${prefix}/${item.id}`);
+      batch.set(itemRef, item);
+      limit++;
+
+      if (limit >= highLimit) {
+        await batch.commit();
+        batch = writeBatch(dbRef);
+        done += limit;
+        limit = 0;
+      }
+    }
+
+    return {success: true, value: done};
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, err.code);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
+}
+
+export async function BatchUpdate(prefix: string, allItems: [string | number, object][]): Promise<Result<number>> {
+  try {
+    if (allItems.length === 0) return {success: true, value: 0};
+
+    const highLimit = allItems.length > 500 ? 500 : allItems.length;
+    const {writeBatch, doc} = await import("@firebase/firestore");
+    const dbRef = await FirebaseUtil.Instance().DB();
+
+    let batch = writeBatch(dbRef);
+    let limit = 0;
+    let done = 0;
+
+    for (const [key, item] of allItems) {
+      const itemRef = doc(dbRef, `${prefix}/${key}`);
+      batch.update(itemRef, item);
+      limit++;
+
+      if (limit >= highLimit) {
+        await batch.commit();
+        batch = writeBatch(dbRef);
+        done += limit;
+        limit = 0;
+      }
+    }
+
+    return {success: true, value: done};
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, err.message, err.code);
+    return {success: false, errMessage: err.message, errCode: err.code};
+  }
+}
+
+export async function BatchDelete(prefix: string, allItems: (string | number)[]): Promise<Result<number>> {
+  try {
+    if (allItems.length === 0) return {success: true, value: 0};
+    
+    const highLimit = allItems.length > 500 ? 500 : allItems.length;
+    const {writeBatch, doc} = await import("@firebase/firestore");
+    const dbRef = await FirebaseUtil.Instance().DB();
+
+    let batch = writeBatch(dbRef);
+    let limit = 0;
+    let done = 0;
+
+    for (const key of allItems) {
+      const itemRef = doc(dbRef, `${prefix}/${key}`);
+      batch.delete(itemRef);
+      limit++;
+
+      if (limit >= highLimit) {
+        await batch.commit();
+        batch = writeBatch(dbRef);
+        done += limit;
+        limit = 0;
+      }
+    }
+
+    return {success: true, value: done};
+  } catch (e) {
     const err = e as FirebaseError;
     void LogError(Module.FirebaseUtil, err.message, err.code);
     return {success: false, errMessage: err.message, errCode: err.code};
