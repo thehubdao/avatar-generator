@@ -4,10 +4,11 @@ import {GetInfoDB, GetParameter} from "../../../utils/firebase.util";
 import {FirestoreGlobalLocation, FirestoreParameters} from "../../../enums/firebase.enum";
 import {RequestResponse} from "../request.api-handler";
 import {DefaultApiResponse} from "../../enums/api.enum";
-import {LogError, TryAgainTimes} from "../../../utils/common.util";
+import {LogError, RandomArrayElement, TryAgainTimes} from "../../../utils/common.util";
 import {Module} from "../../../enums/common.enum";
 import {CollectionItem} from "../../interfaces/collection.interface";
 import {CollectionStatus} from "../../enums/collection.enum";
+import {COLLECTION_VALUES} from "../../constants/collection.constant";
 
 // Gets one random from the list that is on status waiting
 export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<RandomSet>>) {
@@ -20,12 +21,14 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
     if (!isCampaign)
       return RequestResponse(res, "BadRequest", false, DefaultApiResponse.WrongInput);
     
-    const collectionRoute = `${FirestoreGlobalLocation.Collection}/${campaign}/nft`;
+    const collectionRoute = `${FirestoreGlobalLocation.Collection}/${campaign}/${COLLECTION_VALUES.Suffix}`;
     const collectionList = await GetInfoDB<CollectionItem>(collectionRoute, undefined, {
       collectionStatus: CollectionStatus.NotMinted
     });
     if (!collectionList.success)
       return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
+    if (collectionList.value.length === 0)
+      return RequestResponse(res, "ServerError", false, DefaultApiResponse.GetNoData);
     
     let factor = collectionList.value.find(i => i.id === -1)?.factor;
     let returnItem: CollectionItem | undefined;
@@ -33,7 +36,8 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
     await TryAgainTimes(2, () => {
       const rand = Math.random() * (factor ?? 1);
       let acc = 0;
-      for (const item of collectionList.value) {
+      for (let i = 0; i < collectionList.value.length; i++) {
+        const item = RandomArrayElement(collectionList.value);
         const itemChance = item.chance ?? 0;
         acc += itemChance;
         if (rand < acc) {
@@ -58,7 +62,8 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
 
     const rand = Math.random() * (factor ?? 1);
     let acc = 0;
-    for (const item of collectionList.value) {
+    for (let i = 0; i < collectionList.value.length; i++) {
+      const item = RandomArrayElement(collectionList.value);
       const itemChance = item.chance ?? 0;
       acc += itemChance;
       if (rand < acc) {
