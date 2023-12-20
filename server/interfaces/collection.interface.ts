@@ -2,7 +2,7 @@ import {CollectionStatus} from "../enums/collection.enum";
 
 export interface CollectionPostBody {
   campaign?: string;
-  isUpdate: boolean;
+  isUpdate?: boolean;
 }
 
 export interface CollectionItem {
