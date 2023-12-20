@@ -8,10 +8,12 @@ export enum FirestoreLocation {
 }
 
 export enum FirestoreGlobalLocation {
-    Parameters = 'general/parameters',
-    User = 'user',
-    Campaign = 'campaign',
-    ParametersV2 = 'general/parametersV2',
+    Parameters = "general/parameters",
+    User = "user",
+    Campaign = "campaign",
+    ParametersV2 = "general/parametersV2",
+    Collection = "collection",
+    Process = "process",
 }
 
 export enum FirestoreParameters {
@@ -33,6 +35,7 @@ export enum FirestoreFilterValues {
     Type = 'type',
     Name = 'name',
     Campaign = 'campaign',
+    CollectionStatus = "status",
 }
 
 export enum UserRoleValues {

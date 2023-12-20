@@ -1,8 +1,10 @@
 import {UserInterface} from "../../interfaces/firebase.interface";
 import {UserRoleValues} from "../../enums/firebase.enum";
+import {ProcessInfo} from "../../server/interfaces/process.interface";
 
 export enum ConvertType {
   UserInterface,
+  ProcessInfo,
 }
 
 function NewUserInterface(): UserInterface {
@@ -15,10 +17,20 @@ function NewUserInterface(): UserInterface {
   };
 }
 
+function NewProcessInfo(): ProcessInfo {
+  return {
+    id: '',
+    done: false,
+    request: []
+  };
+}
+
 function GetNewObject(type: ConvertType) {
   switch (type) {
     case ConvertType.UserInterface:
       return NewUserInterface();
+    case ConvertType.ProcessInfo:
+      return NewProcessInfo();
     default:
       return undefined;
   }

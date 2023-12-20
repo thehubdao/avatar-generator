@@ -1,9 +1,11 @@
 ﻿import {UserRoleValues} from "../enums/firebase.enum";
+import {CollectionStatus} from "../server/enums/collection.enum";
 
 export interface AGQueryConstraints {
   campaign?: string;
   type?: string;
   name?: string;
+  collectionStatus?: CollectionStatus;
 }
 
 export interface LogInInterface {
