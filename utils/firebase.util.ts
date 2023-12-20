@@ -173,7 +173,7 @@ async function GetDocuments<T>(dbLocation: string, constraintsValues?: AGQueryCo
 
 export async function GetSingleDocument<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, docId: string): Promise<Result<T>> {
   if (!docId) return {success: false, errMessage: "Missing a valid docId!", errCode: CommonErrorCode.MissingInfo};
-  if (dbLocation.split('/').length % 2 !== 0)
+  if (dbLocation.split('/').length % 2 === 0)
     return {success: false, errMessage: "Location is not a collection!", errCode: CommonErrorCode.WrongInfo};
 
   try {
