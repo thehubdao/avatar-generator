@@ -51,7 +51,7 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
 
     if (returnItem != undefined)
       return RequestResponse(res, "Successful", true, DefaultApiResponse.GetSuccess, {
-        id: returnItem.id,
+        combination: returnItem.id,
         indexValues: returnItem.indexValues,
       });
 
@@ -68,7 +68,7 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
       acc += itemChance;
       if (rand < acc) {
         return RequestResponse(res, "Successful", true, DefaultApiResponse.GetSuccess, {
-          id: item.id,
+          combination: item.id,
           indexValues: item.indexValues,
         });
       }
