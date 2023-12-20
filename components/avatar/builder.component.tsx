@@ -181,7 +181,7 @@ export default function AvatarBuilder({
     if (!(featureList && accessoryList))
       return LogError(Module.AvatarGenerator, "No feature/accessory list!");
 
-    if (campaign && campaign !== GLOBAL_VALUES.BaseCampaign) {
+    if (campaign) {
       exportData?.attributes.push({ id: EXPORT_ATTRIBUTE.Campaign, val: campaign });
     }
 

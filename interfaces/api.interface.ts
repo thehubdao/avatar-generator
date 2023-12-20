@@ -51,3 +51,13 @@ export interface CollectionDataInterface {
   maxIndex: string;
   maxCombination: number;
 }
+
+export interface CollectionDataProcess {
+  id: string;
+  done: boolean;
+}
+
+export interface RandomSet {
+  combination: number;
+  indexValues?: string;
+}
