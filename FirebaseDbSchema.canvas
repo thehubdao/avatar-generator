@@ -1,0 +1,40 @@
+{
+	"nodes":[
+		{"type":"text","text":"# Campaign Collection\n##### {campaign name}\n- owner:  `uuid/string`\n\t- desc: owner user uuid\n- armature:  `string`\n\t- desc: location of AvatarBase\n- accessories: `FeatureBasic[]`\n\t- desc: List of accessories allow to use on the avatar\n- features: `FeatureBasic[]`\n\t- desc: List of features allow to use on the avatar\n- config: `CampaignConfig`\n\t- desc: Different configurations related only to the current campaign\n---\n- Feature Collection\n- Accessory Collection\n- Animation Collection\n- Stage Collection\n- Env_map Collection\n","id":"9489b370e874276a","x":-500,"y":-480,"width":480,"height":480,"color":"6"},
+		{"type":"text","text":"## FeatureBasic\n- meshName: `string`\n- displayName: `string`\n- index: `number`\n- hasCustomIcon: `boolean`\n- iconUrl: `string`\n- isMulticolor: `boolean`\n","id":"f9a977fc0eed09ef","x":-1090,"y":-735,"width":305,"height":260,"color":"2"},
+		{"type":"text","text":"## CampaignConfig\n- changeMaterial?: `ChangeMaterialOption`\n- defAvatarCombination?: `number`\n- defBg?: `string`\n- lights?: `ConfigLight[]`\n- defCam?: `LookAtVectors`\n- defAnimation?: `string`\n- defStage?: `string`\n- defEnvMap?: `string`\n- skin?: `ColorConfig`\n- featuresCamPos?: `Record<string, LookAtVectors>`\n- accCamPos?: `Record<string, LookAtVectors>`\n- featuresSkin?: `Record<string, ColorConfig>`\n- accSkin?: `Record<string, ColorConfig>`","id":"e99fcc59274dfd6c","x":-1240,"y":-455,"width":455,"height":455,"color":"2"},
+		{"type":"text","text":"## ConfigLight\n- type: `LightType`\n- params: `LightParams`\n","id":"fd5d1a29160b293c","x":-1740,"y":-410,"width":380,"height":183,"color":"2"},
+		{"type":"text","text":"## LookAtVectors\n- lookAt?: `AGVector3`\n- pos?: `AGVector3`","id":"deb50ee2cfcdc6b2","x":-1740,"y":-240,"width":380,"height":161,"color":"2"},
+		{"type":"text","text":"## ColorConfig\n- materialName?: `string`\n- defColor?: `string`\n- colorPalette?: `string[]`\n- usePalette?: `boolean`\n","id":"f586146037493282","x":-1740,"y":-80,"width":380,"height":260,"color":"2"},
+		{"type":"text","text":"## ChangeMaterialOption\n- Toon: `'toon'`","id":"acec8ccef5217f72","x":-1740,"y":-605,"width":380,"height":195,"color":"4"},
+		{"type":"text","text":"## LightType\n- PointLight: `'pl'`\n- RectAreaLight: `'ral'`\n- AmbientLight: `'al'`","id":"534f0cd817f33d96","x":-2220,"y":-760,"width":336,"height":211,"color":"4"},
+		{"type":"text","text":"## LightParams\n- color?: `string`\n- intst?: `number`\n- dist?: `number`\n- decay?: `number`\n- width?: `number`\n- height?: `number`\n- pos?: `AGVector3`\n- lAt?: `AGVector3`","id":"5c3800a97e345891","x":-2220,"y":-521,"width":336,"height":401,"color":"2"},
+		{"type":"text","text":"# Feature Collection\n##### {uuid}\n- `FeatureInterface`","id":"6110f7531b4bd567","x":-750,"y":180,"width":300,"height":160,"color":"6"},
+		{"type":"text","text":"# Accessory Collection\n##### {uuid}\n- `FeatureInterface`","id":"e6d3c099a6872462","x":-600,"y":380,"width":340,"height":160,"color":"6"},
+		{"id":"cc153c0db8a97fed","type":"text","text":"# FeatureInterface\n- id: `uuid/string`\n- index: `number`\n- name: `string`\n- type: `string`\n- path: `string`\n- thumb?: `string`","x":-1240,"y":220,"width":341,"height":260,"color":"2"},
+		{"id":"80a527439509e79d","type":"text","text":"# Stage Collection\n##### {uuid}\n- `NoTypeInterface`","x":-380,"y":580,"width":300,"height":160,"color":"6"},
+		{"type":"text","text":"# Env_map Collection\n##### {uuid}\n- `NoTypeInterface`","id":"a6cb500a2914124e","x":-140,"y":760,"width":360,"height":160,"color":"6"},
+		{"id":"cd1f1ba4419dd4bc","type":"text","text":"# NoTypeInterface\n- id: `uuid/string`\n- name: `string`\n- path: `string`\n- thumb?: `string`","x":-1216,"y":680,"width":317,"height":200,"color":"2"},
+		{"type":"text","text":"## AGVector3\n- x: `number`\n- y: `number`\n- z: `number`\n","id":"fef4ec37b276643e","x":-2560,"y":-80,"width":260,"height":200,"color":"2"}
+	],
+	"edges":[
+		{"id":"4dbb5d2279e5bb76","fromNode":"9489b370e874276a","fromSide":"bottom","toNode":"6110f7531b4bd567","toSide":"top"},
+		{"id":"a599ef1c55c98539","fromNode":"9489b370e874276a","fromSide":"bottom","toNode":"e6d3c099a6872462","toSide":"top","color":"2"},
+		{"id":"bff2003a7a034274","fromNode":"9489b370e874276a","fromSide":"left","toNode":"f9a977fc0eed09ef","toSide":"right","toEnd":"none"},
+		{"id":"9d43b0b2e2bda140","fromNode":"e99fcc59274dfd6c","fromSide":"right","toNode":"9489b370e874276a","toSide":"left","toEnd":"none"},
+		{"id":"0e5034b4f32839a5","fromNode":"acec8ccef5217f72","fromSide":"right","toNode":"e99fcc59274dfd6c","toSide":"left","toEnd":"none"},
+		{"id":"2268ee009a25a4bd","fromNode":"fd5d1a29160b293c","fromSide":"right","toNode":"e99fcc59274dfd6c","toSide":"left","toEnd":"none"},
+		{"id":"8ee2e706caf02f5e","fromNode":"534f0cd817f33d96","fromSide":"right","toNode":"fd5d1a29160b293c","toSide":"left","toEnd":"none"},
+		{"id":"ea0ae97e50256859","fromNode":"5c3800a97e345891","fromSide":"right","toNode":"fd5d1a29160b293c","toSide":"left","toEnd":"none"},
+		{"id":"6dc9317646114888","fromNode":"fef4ec37b276643e","fromSide":"right","toNode":"5c3800a97e345891","toSide":"left","toEnd":"none"},
+		{"id":"4aa107c66e3d394f","fromNode":"f586146037493282","fromSide":"right","toNode":"e99fcc59274dfd6c","toSide":"left","toEnd":"none"},
+		{"id":"98be12a523798d77","fromNode":"deb50ee2cfcdc6b2","fromSide":"right","toNode":"e99fcc59274dfd6c","toSide":"left","toEnd":"none"},
+		{"id":"c13a6bce7c6d9867","fromNode":"cc153c0db8a97fed","fromSide":"right","toNode":"6110f7531b4bd567","toSide":"left","toEnd":"none"},
+		{"id":"523e636fb6ec70b2","fromNode":"cc153c0db8a97fed","fromSide":"right","toNode":"e6d3c099a6872462","toSide":"left","toEnd":"none"},
+		{"id":"7867c5edf5cabc36","fromNode":"9489b370e874276a","fromSide":"bottom","toNode":"80a527439509e79d","toSide":"top"},
+		{"id":"d795f44fe01070c3","fromNode":"9489b370e874276a","fromSide":"bottom","toNode":"a6cb500a2914124e","toSide":"top"},
+		{"id":"906f9791e9327213","fromNode":"cd1f1ba4419dd4bc","fromSide":"right","toNode":"80a527439509e79d","toSide":"left","toEnd":"none"},
+		{"id":"ee946097c6c1e573","fromNode":"cd1f1ba4419dd4bc","fromSide":"right","toNode":"a6cb500a2914124e","toSide":"left","toEnd":"none"},
+		{"id":"a49fc5361a4d02aa","fromNode":"fef4ec37b276643e","fromSide":"right","toNode":"deb50ee2cfcdc6b2","toSide":"left","toEnd":"none"}
+	]
+}

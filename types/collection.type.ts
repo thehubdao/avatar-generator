@@ -1,0 +1,1 @@
+export type IndexValues = Map<number, number>;
