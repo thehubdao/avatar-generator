@@ -160,7 +160,7 @@ async function GetDocuments<T>(dbLocation: string, constraintsValues?: AGQueryCo
     const querySnapshot = await getDocs(myQuery);
 
     const data = querySnapshot.docs.map(s => {
-      return {...s.data() as T, id: s.id}
+      return {id: s.id, ...s.data() as T};
     });
     
     return {success: true, value: data};
