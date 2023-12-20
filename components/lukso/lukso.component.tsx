@@ -14,7 +14,6 @@ import LuksoUI from "../../ui/lukso/lukso.ui";
 import TransparentBoxUI from "../../ui/lukso/common/transparentBox.ui";
 
 // Enums
-import { Client } from "../../enums/client.enum";
 import { Module } from "../../enums/common.enum";
 import { LuksoSections } from "../../enums/lukso/common.enum";
 
@@ -38,7 +37,12 @@ let singleData: SingleInterface | undefined;
 let loaderDivElement: HTMLDivElement;
 const isOnIFrame = false;
 
-export default function LuksoComponent({ campaignParams }: { campaignParams?: CampaignParameters }) {
+interface LuksoComponentProps {
+  clientLukso: string;
+  campaignParams?: CampaignParameters;
+}
+
+export default function LuksoComponent({ campaignParams, clientLukso }: LuksoComponentProps) {
   const selectListFeatures = useRef<FeatureBasic[]>(campaignParams?.features ?? []);
   const selectListAccessories = useRef<FeatureBasic[]>(campaignParams?.accessories ?? []);
 
@@ -74,7 +78,7 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
     await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'ffffff');
 
     // Set animation
-    const result = await GetAnimationByCampaignAndName(Client.Lukso, campaignParams?.config.defAnimation);
+    const result = await GetAnimationByCampaignAndName(clientLukso, campaignParams?.config.defAnimation);
     if (result.success) {
       await ChangeStartAnimation(result.value.at(0)?.path);
     }
@@ -91,31 +95,31 @@ export default function LuksoComponent({ campaignParams }: { campaignParams?: Ca
   }
 
   async function getFeatureList() {
-    const result = await GetAssetsListByCampaign(Client.Lukso);
+    const result = await GetAssetsListByCampaign(clientLukso);
     featureList = result.success ? result.value : undefined;
     optionList = MixArrays(optionList, featureList);
     setOptionListShow(FilterList(featureList, "type", selectedCategory));
   }
 
   async function getAccessoryList() {
-    const result = await GetAccessoryListByCampaign(Client.Lukso);
+    const result = await GetAccessoryListByCampaign(clientLukso);
     accessoryList = result.success ? result.value : undefined;
   }
 
   async function getStageList() {
-    const result = await GetStageListByCampaign(Client.Lukso);
+    const result = await GetStageListByCampaign(clientLukso);
     stageList = result.success ? result.value : undefined;
   }
 
   async function getSingleInfo() {
     if (campaignParams?.config.defAvatarCombination == undefined) return;
 
-    const result = await GetAvatarSingleByCampaignCombination(Client.Lukso, campaignParams.config.defAvatarCombination);
+    const result = await GetAvatarSingleByCampaignCombination(clientLukso, campaignParams.config.defAvatarCombination);
     singleData = result.success ? result.value : undefined;
   }
 
   async function getSingleData() {
-    const numResult = await GetAvatarSingleByCampaignCombination(Client.Lukso);
+    const numResult = await GetAvatarSingleByCampaignCombination(clientLukso);
     const result: SingleInterface | undefined = numResult.success ? numResult.value : undefined;
     singleData = result;
   }
