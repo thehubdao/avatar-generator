@@ -209,11 +209,10 @@ export function GetMultiplyNums(maxValues: Map<number, number>) {
   for (let i = maxValues.size - 1; i > 0; i--) {
     const multi = multNums[i + 1] ?? 1;
     const val = maxValues.get(i);
-    // console.log('Iter: ', i, multi, val);
-
     if (val == undefined) return undefined;
 
-    multNums[i] = val * multi;
+    const currentMaxValue = val === 0 ? 1 : val; 
+    multNums[i] = multi * currentMaxValue;
   }
   multNums[maxValues.size] = 1;
   
@@ -245,7 +244,7 @@ export function GetMaxCombinationNum(maxIndexValues: Map<number, number>) {
   let result = 1;
 
   for (const value of maxIndexValues.values()) {
-    result *= value;
+    result *= value !== 0 ? value : 1;
   }
   
   return result;
@@ -376,9 +375,7 @@ export function CalculateChance(current: IndexValues, tierChance: Result<Record<
 }
 
 export function CalculateFactor(iVSize: number, maxAmount: number, tierChance: Result<Record<RandomTier, number>>) {
-  const factor = (tierChance.success ?
-    Math.pow(tierChance.value[RandomTier.Common], iVSize) :
+  return (tierChance.success ?
+    Math.pow(tierChance.value[RandomTier.Common] / 100, iVSize) :
     1 / maxAmount) * 3;
-
-  return Math.round(factor * 100) / 100;
 }
