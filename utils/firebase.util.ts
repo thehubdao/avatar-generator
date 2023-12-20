@@ -713,6 +713,7 @@ export async function BatchSet(prefix: string, allItems: ({id: string | number} 
   try {
     if (allItems.length === 0) return {success: true, value: 0};
 
+    const highLimit = allItems.length > 500 ? 500 : allItems.length;
     const {writeBatch, doc} = await import("@firebase/firestore");
     const dbRef = await FirebaseUtil.Instance().DB();
 
@@ -725,7 +726,7 @@ export async function BatchSet(prefix: string, allItems: ({id: string | number} 
       batch.set(itemRef, item);
       limit++;
 
-      if (limit >= 500) {
+      if (limit >= highLimit) {
         await batch.commit();
         batch = writeBatch(dbRef);
         done += limit;
@@ -745,6 +746,7 @@ export async function BatchUpdate(prefix: string, allItems: [string | number, ob
   try {
     if (allItems.length === 0) return {success: true, value: 0};
 
+    const highLimit = allItems.length > 500 ? 500 : allItems.length;
     const {writeBatch, doc} = await import("@firebase/firestore");
     const dbRef = await FirebaseUtil.Instance().DB();
 
@@ -757,7 +759,7 @@ export async function BatchUpdate(prefix: string, allItems: [string | number, ob
       batch.update(itemRef, item);
       limit++;
 
-      if (limit >= 500) {
+      if (limit >= highLimit) {
         await batch.commit();
         batch = writeBatch(dbRef);
         done += limit;
@@ -776,7 +778,8 @@ export async function BatchUpdate(prefix: string, allItems: [string | number, ob
 export async function BatchDelete(prefix: string, allItems: (string | number)[]): Promise<Result<number>> {
   try {
     if (allItems.length === 0) return {success: true, value: 0};
-
+    
+    const highLimit = allItems.length > 500 ? 500 : allItems.length;
     const {writeBatch, doc} = await import("@firebase/firestore");
     const dbRef = await FirebaseUtil.Instance().DB();
 
@@ -789,7 +792,7 @@ export async function BatchDelete(prefix: string, allItems: (string | number)[])
       batch.delete(itemRef);
       limit++;
 
-      if (limit >= 500) {
+      if (limit >= highLimit) {
         await batch.commit();
         batch = writeBatch(dbRef);
         done += limit;
