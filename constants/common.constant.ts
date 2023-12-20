@@ -1,5 +1,4 @@
 ﻿export const GLOBAL_VALUES = {
-  BaseCampaign: "thehub",
   Acc: "Accessories",
   Config: "Config",
   AccEnd: "Acc",

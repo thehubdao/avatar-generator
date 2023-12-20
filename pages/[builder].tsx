@@ -42,9 +42,18 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
   const {builder, config, bg, ov, ep} = context.query;
 
   let parsedConfig: BasicData[] | undefined = undefined;
-
-  let leCampaign = (builder as string).toLowerCase() ?? GLOBAL_VALUES.BaseCampaign;
-
+  let leCampaign = (builder as string).toLowerCase();
+  
+  const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
+  const isCampaign = campaignsResult.success ? campaignsResult.value.some(c => c === leCampaign) : false;
+  if (!isCampaign) {
+    const baseResult = await GetParameter<string>(undefined, FirestoreParameters.BaseCampaign);
+    if (baseResult.success)
+      leCampaign = baseResult.value;
+    else
+      return {notFound: true};
+  }
+  
   if (config) {
     parsedConfig = Base64ToObj<BasicData[]>(config as string);
     if (parsedConfig && parsedConfig.some(x => x.id === EXPORT_ATTRIBUTE.Campaign)) {
@@ -53,13 +62,6 @@ export const getServerSideProps: GetServerSideProps<AvatarGeneratorProps> = asyn
         leCampaign = configCampaign.val;
     }
   }
-
-  const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
-  const isCampaign = campaignsResult.success ? campaignsResult.value.some(c => c === leCampaign) : false;
-
-  // TODO: either show base campaign (which is what I'm going to do here) or send user to another page (404 or something)
-  if (!isCampaign)
-    leCampaign = GLOBAL_VALUES.BaseCampaign;
 
   const campaignParameters = await GetParameter<CampaignParameters>(leCampaign, CampaignParameterName.All);
   const defBg = campaignParameters.success ? campaignParameters.value.config?.defBg : undefined;
