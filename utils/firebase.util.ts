@@ -27,6 +27,7 @@ import {ConvertObject, ConvertType} from "./common/object-converter.util";
 import {SessionUserInfo} from "./common/session.util";
 import {CampaignParameters} from "../interfaces/common.interface";
 import {ParameterNameType} from "../types/firebase.type";
+import {COLLECTION_VALUES} from "../server/constants/collection.constant";
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -205,7 +206,7 @@ function GetConstraints(dbLocation: string, constraintsValues?: AGQueryConstrain
       return AccessoryConstraints(constraintsValues);
     case FirestoreLocation.Animations:
       return AnimationConstraints(constraintsValues);
-    case FirestoreGlobalLocation.Collection:
+    case COLLECTION_VALUES.Suffix:
       return CollectionConstraints(constraintsValues);
     default:
       return [];
