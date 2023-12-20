@@ -5,7 +5,8 @@ import {DefaultApiResponse} from "../../enums/api.enum";
 import {BatchDelete, BatchSet, BatchUpdate, GetInfoDB, GetParameter} from "../../../utils/firebase.util";
 import {FirestoreGlobalLocation, FirestoreParameters} from "../../../enums/firebase.enum";
 import {
-  CalculateChance, CalculateFactor,
+  CalculateChance,
+  CalculateFactor,
   FindAndReadjustFeatureIndexes,
   GetMaxCombinationNum,
   GetMaxIndexValues,
@@ -26,6 +27,7 @@ import {
   SetProcessError
 } from "../../utils/side-process.util";
 import {CollectionStatus} from "../../enums/collection.enum";
+import {COLLECTION_VALUES} from "../../constants/collection.constant";
 
 export async function GetUriApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<CollectionDataInterface>>) {
   const {collection} = req.query;
@@ -67,7 +69,7 @@ async function CheckCampaign(campaign: string | undefined) {
 }
 
 async function ProcessCollection(campaign: string, update: boolean, processId: string) {
-  const collectionRoute = `${FirestoreGlobalLocation.Collection}/${campaign}/nft`;
+  const collectionRoute = `${FirestoreGlobalLocation.Collection}/${campaign}/${COLLECTION_VALUES.Suffix}`;
   // Check existence of collection
   const collectionItemsResult = await GetInfoDB<CollectionItem>(collectionRoute);
   
@@ -90,7 +92,7 @@ async function ProcessCollection(campaign: string, update: boolean, processId: s
 
   // Count the amount of docs
   // If same amount of maxCombination, all good
-  if (collectionItems.length === maxCombination)
+  if (collectionItems.length === maxCombination + 1)
     return await SetProcessDone(processId);
 
   const multNums = GetMultiplyNums(maxIndexValues);
@@ -140,8 +142,13 @@ async function ProcessCollection(campaign: string, update: boolean, processId: s
   const forCreation: CollectionItem[] = [];
   const forUpdate: [(string | number), Partial<CollectionItem>][] = [];
   const forDelete: (string | number)[] = [];
-  
-  if (collectionItems.length === 0) forCreation.push({id: -1, factor: CalculateFactor(maxIndexValues.size, maxCombination, tierChance)});
+
+  if (collectionItems.length === 0)
+    forCreation.push({
+      id: -1,
+      factor: CalculateFactor(maxIndexValues.size, maxCombination, tierChance),
+      status: CollectionStatus.NotMinted
+    });
   
   for (let i = 0; i < maxCombination; i++) {
     const item = mappedItems.get(i);
@@ -203,8 +210,8 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
     
     const processId = await GenerateProcessId();
     
-    void CreateProcess(processId, campaign!, String(isUpdate));
-    void ProcessCollection(campaign!, isUpdate, processId);
+    void CreateProcess(processId, campaign!, String(!!isUpdate));
+    void ProcessCollection(campaign!, !!isUpdate, processId);
     
     const processStatus = await GetProcess(processId);
     const collectionData: CollectionDataProcess = {
