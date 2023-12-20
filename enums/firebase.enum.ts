@@ -19,6 +19,7 @@ export enum FirestoreGlobalLocation {
 export enum FirestoreParameters {
     Campaigns = "campaigns",
     Clients = "client",
+    BaseCampaign = "baseCampaign",
 }
 
 export enum StorageLocation {
