@@ -19,6 +19,8 @@ interface LuksoUIProps {
   provider: ethers.BrowserProvider | undefined;
   isGettingInfoAboutHasMinted: boolean;
   features?: IndexFeatureInterface[];
+  picture:string
+  setPicture: (picture:string)=>void
 }
 
 export default function LuksoUI({
@@ -33,14 +35,16 @@ export default function LuksoUI({
   hasMinted,
   provider,
   isGettingInfoAboutHasMinted,
-  features
+  features,
+  picture,
+  setPicture
 }: LuksoUIProps) {
 
 
   return (
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
-      {(currentSection === LuksoSections.Main) && <MainSectionUI setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} provider={provider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}/>}
+      {(currentSection === LuksoSections.Main) && <MainSectionUI picture={picture} setPicture = {setPicture} setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} provider={provider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}/>}
       {(currentSection === LuksoSections.Mint) && <MintSectionUI features={features} setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} provider={provider} />}
       {(currentSection === LuksoSections.Edit) && <EditSectionUI features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
     </div>

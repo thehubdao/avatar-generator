@@ -2,7 +2,7 @@ import { LUKSO_BACKEND_URL } from "../../constants/common.constant"
 import { TokenMetadata } from "../../types/metadata.type"
 import { GetRequest, PostRequest } from "../api.util"
 
-type IpfsResponse = {body:TokenMetadata}
+type IpfsResponse = {LSP4Metadata:TokenMetadata}
 
 const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY
 

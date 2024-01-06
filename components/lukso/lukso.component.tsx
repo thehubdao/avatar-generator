@@ -117,7 +117,7 @@ export default function LuksoComponent({
     const [addressToShow, setAddressToShow] = useState<string>('')
     const [
         isGettingInfoAboutHasMinted,
-        
+
     ] = useState<boolean>(false)
 
     const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false)
@@ -125,6 +125,9 @@ export default function LuksoComponent({
         false
     )
     const [{ wallet }] = useConnectWallet()
+
+    const [picture, setPicture] = useState<string>('/resources/images/campaings/full-avatar-lukso.png');
+
     useEffect(() => {
         if (!wallet) return setProvider(undefined)
         const setEtherProviderPromise = () => {
@@ -138,17 +141,17 @@ export default function LuksoComponent({
     useEffect(() => {
         if (!provider) return
         const setTokensMetadataPromise = async () => {
-            if(!wallet) return
+            if (!wallet) return
             const address = wallet.accounts[0].address
             setAddressToShow(address)
-            
+
             await setTokensMetadata(address)
         }
         void setTokensMetadataPromise()
     }, [provider])
 
     useEffect(() => {
-        if(!hasMinted) return
+        if (!hasMinted) return
         void onAvatarBuilderReady()
     }, [hasMinted])
 
@@ -363,16 +366,16 @@ export default function LuksoComponent({
 
     async function setTokensMetadata(address: string) {
         const tokensMetadata = await getTokensMetadata(address)
-
         if (tokensMetadata.length <= 0) {
             return setHasMinted(false)
         }
         const avatarMetadata = await getIPFSData(tokensMetadata[0])
-        const features = Object.entries(avatarMetadata.body).map(
-            ([key, bodyPart]: Array<string | TokenMetadata['body']>) => {
+        const {LSP4Metadata} = avatarMetadata
+        const features = Object.entries(LSP4Metadata.body).map(
+            ([key, bodyPart]: Array<string | BodyPart>) => {
                 return {
-                    index: key,
-                    val: bodyPart as FeatureInterface,
+                    index: Number(key),
+                    val: bodyPart,
                 } as IndexFeatureInterface
             }
         )
@@ -392,6 +395,7 @@ export default function LuksoComponent({
             description: '',
             GLBUrl: '',
             body: {},
+            links: [], assets: [],
         }
 
         try {
@@ -400,13 +404,13 @@ export default function LuksoComponent({
                 const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
                 tokenMetadata.body[bodyIndex] = val as BodyPart
             }
-
             const metadataUrl = await uploadMetadata(tokenMetadata)
             await mint(address, metadataUrl)
             await setTokensMetadata(address)
 
             return { message: 'Your citizen has been created!', success: true }
         } catch (error) {
+            console.log(error)
             return {
                 message:
                     "Looks like you've already claimed your avatar! Remember, each explorer gets just one.",
@@ -559,6 +563,8 @@ export default function LuksoComponent({
                     provider={provider}
                     isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
                     features={singleData?.features}
+                    setPicture={(picture: string) => setPicture(picture)}
+                    picture={picture}
                 />
             </div>
         </MobileLayout>

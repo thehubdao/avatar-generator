@@ -11,18 +11,20 @@ import { AiOutlineLoading } from "react-icons/ai";
 import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
 import { GetCanvasImageUrl } from "../../../components/avatar/viewer.component";
+import { PostRequest } from "../../../utils/api.util";
+import { LUKSO_BACKEND_URL } from "../../../constants/common.constant";
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   hasMinted: boolean
   provider: ethers.BrowserProvider | undefined
   isGettingInfoAboutHasMinted: boolean
+  picture:string
+  setPicture: (picture:string)=>void
 }
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted,picture, setPicture }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
-
-  const [picture, setPicture] = useState<string>('/resources/images/campaings/full-avatar-lukso.png');
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
@@ -43,7 +45,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
     });
   }
 
-  const takePicture = () => {
+  const takePicture = async () => {
     const pic = GetCanvasImageUrl();
     if (pic && pic.length > 0) {
       setPicture(pic);
