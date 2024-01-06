@@ -410,7 +410,6 @@ export default function LuksoComponent({
 
             return { message: 'Your citizen has been created!', success: true }
         } catch (error) {
-            console.log(error)
             return {
                 message:
                     "Looks like you've already claimed your avatar! Remember, each explorer gets just one.",

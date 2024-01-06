@@ -1,10 +1,10 @@
 import { BodyPart } from "./avatar.type"
 
 export type TokenMetadataImage = {
-    "width": Number,
-    "height": Number,
+    "width": number,
+    "height": number,
     "url": string,
-    "verification": {}
+    "verification": object | undefined
 }
 
 export type TokenMetadata = {

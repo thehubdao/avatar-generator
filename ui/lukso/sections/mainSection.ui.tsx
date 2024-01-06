@@ -11,8 +11,7 @@ import { AiOutlineLoading } from "react-icons/ai";
 import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
 import { GetCanvasImageUrl } from "../../../components/avatar/viewer.component";
-import { PostRequest } from "../../../utils/api.util";
-import { LUKSO_BACKEND_URL } from "../../../constants/common.constant";
+
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   hasMinted: boolean
@@ -45,7 +44,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
     });
   }
 
-  const takePicture = async () => {
+  const takePicture = () => {
     const pic = GetCanvasImageUrl();
     if (pic && pic.length > 0) {
       setPicture(pic);

@@ -1,4 +1,3 @@
-import ERC725 from "@erc725/erc725.js";
 import { LUKSO_BACKEND_URL } from "../constants/common.constant";
 import { TokenMetadata } from "../types/metadata.type";
 import { PostRequest } from "./api.util";
