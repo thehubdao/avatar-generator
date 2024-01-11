@@ -8,7 +8,6 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import luksoModule from '@lukso/web3-onboard-config'
 import { ConnectModalOptions } from '@web3-onboard/core/dist/types'
 import { I18nOptions } from '../types/web3onboard.type'
-import { useEffect } from 'react'
 
 const luksoProvider = luksoModule()
 
@@ -24,7 +23,7 @@ const luksoNetwork = {
 
 const chains = [luksoNetwork]
 
-const appInfo = {
+/* const appInfo = {
     name: 'Avatar Lukso',
     icon: '/my_app_icon.svg',
     logo: '<svg> ... </svg>',
@@ -36,7 +35,7 @@ const appInfo = {
         },
     ],
 
-}
+} */
 
 const connectionOptions: ConnectModalOptions = {
     iDontHaveAWalletLink: UP_BROWSER_EXTENSION_URL,
