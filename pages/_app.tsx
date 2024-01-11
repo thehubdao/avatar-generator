@@ -8,6 +8,7 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import luksoModule from '@lukso/web3-onboard-config'
 import { ConnectModalOptions } from '@web3-onboard/core/dist/types'
 import { I18nOptions } from '../types/web3onboard.type'
+import { useEffect } from 'react'
 
 const luksoProvider = luksoModule()
 
@@ -34,6 +35,7 @@ const appInfo = {
             url: UP_BROWSER_EXTENSION_URL,
         },
     ],
+
 }
 
 const connectionOptions: ConnectModalOptions = {
@@ -63,9 +65,21 @@ const wallets = [
 const web3Onboard = init({
     wallets,
     chains,
-    appMetadata: appInfo,
+    /*     appMetadata: appInfo, */
     connect: connectionOptions,
     i18n,
+    accountCenter: {
+        desktop: {
+          enabled: false,
+          position: 'topRight'
+        },
+        mobile: {
+          enabled: false,
+          position: 'topRight'
+        }
+      }
+
+
 })
 
 const workSans = Work_Sans({ subsets: ['latin'], display: 'block' })
@@ -84,6 +98,7 @@ const featuresIcons = FeaturesIcons({
 })
 
 export default function App({ Component, pageProps }: AppProps) {
+
     return (
         <>
             <style jsx global>{`
