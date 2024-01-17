@@ -5,7 +5,7 @@ import Image from 'next/image'
 import MobileLayout from '../../layouts/mobile.layout'
 
 // Components
-import AvatarEditor, {
+import {
     ChangeFeature,
     ChangeSkinColor,
     ChangeStartAnimation,
@@ -515,7 +515,6 @@ export default function LuksoComponent({
                             onlyView
                             selectListAccessories={selectListAccessories.current}
                             selectListFeatures={selectListFeatures.current}
-                            bgOpacity={0}
                             bgColor='FABCE2'
                         />
                     )}
