@@ -93,7 +93,7 @@ export default function LoadingUI({ getloaderDivElement }: LoadingUIProps) {
   }, []);
 
   return (
-    <div ref={parentRef} className={'fixed z-50 top-0 left-0 w-screen h-screen flex justify-center items-center bg-[#FABCE2]'}>
+    <div ref={parentRef} className={'fixed z-50 top-0 left-0 w-screen h-screen flex justify-center items-center bg-[#FFCBDE]'}>
       <canvas ref={canvasRef} className="w-full h-screen fixed top-0 left-0"></canvas>
       <div className="w-full h-screen flex flex-col justify-center items-center">
         <div className="fixed top-0 w-full h-14 flex items-center px-4 justify-between">
@@ -114,7 +114,7 @@ export default function LoadingUI({ getloaderDivElement }: LoadingUIProps) {
               alt="Lukso icon"
             />
             <div className="w-[596px]">
-              <p className="text-4xl mt-7 tracking-[1.21em] text-center">AVATAR HU<span className="tracking-[0em]">B</span></p>
+              <p className="text-5xl mt-7 tracking-[1.17em] text-center">CITIZENS</p>
             </div>
           </div>
           <Loader />
