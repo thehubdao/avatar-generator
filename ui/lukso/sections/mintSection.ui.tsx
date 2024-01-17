@@ -13,6 +13,7 @@ import Loader from "../common/loader.ui";
 import { GetCanvasImageUrl } from "../../../components/avatar/viewer.component";
 import { Delay } from "../../../utils/common.util";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
+import FeatureListUI from "../common/featureList.ui";
 
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
@@ -69,7 +70,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
 
   return (
     <section className={`flex w-full h-full items-center justify-between`}>
-      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isShuffling ? 'flex' : 'hidden'}`}>
+      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isShuffling ? 'flex' : 'hidden'}`}>
         <div className="scale-[3]">
           <Loader />
         </div>
@@ -83,7 +84,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
           heightClass="grow"
           borderSizeClass="border-t-0"
         >
-          <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px] overflow-hidden rounded-lg gradient-radial">
+          <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px] overflow-hidden rounded-lg">
             <Image
               src={picture}
               fill
@@ -92,17 +93,9 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
               className="origin-top scale-[300%] -translate-y-1/4"
             />
           </div>
-          <div className="grid grid-cols-2 mt-20 gap-4 gap-x-14 text-sm 2xl:text-base">
-          {features && features.map((feature, index) => {
-              return (
-                <div key={index}>
-                  <h3 className="uppercase font-bold">{feature.index}</h3>
-                  <p className="lowercase">{feature.val.name}</p>
-                  <p className="capitalize text-xs leading-none text-gray-dark/30">{feature.val.tier ?? '-'}</p>
-                </div>
-              )
-            })}
-          </div>
+          {features && 
+            <FeatureListUI features={features} />
+          }
         </TransparentBox>
       </div>
 
@@ -131,7 +124,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
         <TransparentBox fullWidth border backgroundColorClass="bg-[#FFCBDE]" paddingClass="px-14 2xl:px-28" aditionalClass="gap-6 2xl:gap-8">
           <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10">MINT YOUR CITIZEN</h3>
           <p className="text-base 2xl:text-lg">
-            LUKSO Citizens is a collection of 1764 interoperable Avatars in the LUKSO Blockchain.
+            LUKSO Citizens is a collection of 1764 interoperable Avatars on the LUKSO Blockchain.
           </p>
           <SocialButtonsUI />
           <div className="font-semibold">
