@@ -6,6 +6,7 @@ import { FaDownload } from "react-icons/fa6";
 import { AiOutlineLoading } from "react-icons/ai";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
+import FeatureListUI from "../common/featureList.ui";
 
 interface EditSectionUIProps {
   exportModel: () => Promise<void>;
@@ -51,17 +52,9 @@ export default function EditSectionUI({ exportModel, features }: EditSectionUIPr
               alt="lukso avatar selfie view"
             />
           </div>
-          <div className="grid grid-cols-2 mt-10 2xl:mt-20 gap-4 gap-x-14 text-sm 2xl:text-base">
-            {features && features.map((feature, index) => {
-              return (
-                <div key={index}>
-                  <h3 className="uppercase font-bold">{feature.index}</h3>
-                  <p className="lowercase">{feature.val.name}</p>
-                  <p className="capitalize text-xs leading-none text-gray-dark/30">{feature.val.tier ?? '-'}</p>
-                </div>
-              )
-            })}
-          </div>
+          {features && 
+            <FeatureListUI features={features} />
+          }
         </TransparentBox>
         <div className="h-14 w-full 2xl:h-18 flex whitespace-nowrap">
           <button className="w-full" onClick={() => void handleExportModel()}>

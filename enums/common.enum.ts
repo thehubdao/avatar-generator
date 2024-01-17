@@ -80,6 +80,7 @@ export enum RandomTier {
   Common = "c",
   Rare = "r",
   Epic = "e",
+  Mythical = "m"
 }
 
 /***

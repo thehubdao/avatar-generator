@@ -58,7 +58,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
   return (
     <section className={`flex h-full items-center justify-between`}>
-      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isGettingInfoAboutHasMinted ? 'flex' : 'hidden'}`}>
+      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isGettingInfoAboutHasMinted ? 'flex' : 'hidden'}`}>
         <div className="scale-[3]">
           <Loader />
         </div>
@@ -72,7 +72,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
           heightClass="grow"
           paddingClass="pb-3 px-10"
         >
-          <div className="relative w-full h-1/2 pointer-events-none overflow-hidden gradient-radial rounded-lg">
+          <div className="relative w-full h-1/2 pointer-events-none overflow-hidden rounded-lg">
             <Image
               src={picture}
               fill
@@ -82,7 +82,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             />
           </div>
           <h2 className="font-extrabold text-2xl 2xl:text-4xl pt-5">LUKSO CITIZENS</h2>
-          <p className="text-center text-sm 2xl:text-base pt-2">The scientists at THE HUB developed a digital genome for all the participants of the creator economy. With these identity, luksonians will be able to travel between worlds, games and experiences and impress the world with their creative powers.</p>
+          <p className="text-center text-sm 2xl:text-base pt-2">The scientists at THE HUB developed a digital genome for all the participants of the creator economy. With this identity, luksonians will be able to travel between worlds, games and experiences and impress the world with their creative powers.</p>
         </TransparentBox>
 
         {(provider) && (
@@ -165,11 +165,11 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             heightClass="grow"
           >
             <h3 className="font-semibold text-xl 2xl:text-2xl">Rarety</h3>
-            <div className="mt-5 text-base 2xl:text-lg underline">
-              <p>Common</p>
-              <p>Rare</p>
-              <p>Epic</p>
-              <p>Mythical</p>
+            <div className="mt-5 text-base 2xl:text-lg font-semibold">
+              <p className="text-gray-400">Common</p>
+              <p className="text-sky-400">Rare</p>
+              <p className="text-violet-400">Epic</p>
+              <p className="text-pink-400">Mythical</p>
             </div>
           </TransparentBox>
           <TransparentBox
@@ -179,10 +179,10 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             heightClass="grow"
           >
             <h3 className="font-semibold text-xl 2xl:text-2xl">Deluxe Avatars</h3>
-            <div className="mt-5 text-base 2xl:text-lg underline">
-              <p>Golden</p>
-              <p>Silver</p>
-              <p>Bronce</p>
+            <div className="mt-5 text-base 2xl:text-lg font-semibold">
+              <p className="text-yellow-500">Golden</p>
+              <p className="text-gray-400">Silver</p>
+              <p className="text-yellow-700">Bronce</p>
             </div>
           </TransparentBox>
         </div>
@@ -196,7 +196,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             paddingClass="px-0"
             justifyClass="justify-start"
           >
-            <div className="relative w-full h-1/2 overflow-hidden gradient-radial rounded-lg">
+            <div className="relative w-full h-1/2 overflow-hidden border-b-2 border-white">
               <Image
                 src={picture}
                 fill
@@ -206,7 +206,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
               />
             </div>
             <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">
-              LUKSO Citizens is a collection of 1764 interoperable Avatars in the LUKSO Blockchain.
+              LUKSO Citizens is a collection of 1764 interoperable Avatars on the LUKSO Blockchain.
             </p>
           </TransparentBox>
         </div>

@@ -70,13 +70,14 @@ import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
+import AvatarBuilder from '../avatar/builder.component'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
 let featureList: FeatureInterface[] | undefined
 let accessoryList: FeatureInterface[] | undefined
 let stageList: StageInterface[] | undefined
-let singleData: SingleInterface | undefined
+let singleInitData: SingleInterface | undefined
 let loaderDivElement: HTMLDivElement
 const isOnIFrame = false
 
@@ -91,6 +92,7 @@ export default function LuksoComponent({
     const selectListAccessories = useRef<FeatureBasic[]>(
         campaignParams?.accessories ?? []
     )
+    const [singleData, setSingleData] = useState<SingleInterface | undefined>()
 
     // Loading flags
     const [currentSection, setCurrentSection] = useState<LuksoSections>(
@@ -154,6 +156,10 @@ export default function LuksoComponent({
         if (!hasMinted) return
         void onAvatarBuilderReady()
     }, [hasMinted])
+
+    useEffect(() => {
+        void onAvatarBuilderReady()
+    }, [])
 
     async function onAvatarBuilderReady() {
         setIsLoadingMintedData(true)
@@ -222,7 +228,8 @@ export default function LuksoComponent({
             Client.Lukso,
             campaignParams.config.defAvatarCombination
         )
-        singleData = result.success ? result.value : undefined
+        setSingleData(result.success ? result.value : undefined);
+        singleInitData = result.success ? result.value : undefined
     }
 
     async function getSingleData() {
@@ -232,18 +239,19 @@ export default function LuksoComponent({
         const result: SingleInterface | undefined = numResult.success
             ? numResult.value
             : undefined
-        singleData = result
+        singleInitData = result
+        setSingleData(singleInitData);
     }
 
     async function loadSingleData() {
         // Iterate the features
         // Place the features on the model
-        if (singleData == undefined)
-            return void LogError(Module.Lukso, 'Missing single data!')
+        if (singleInitData === undefined)
+            return void LogError(Module.Lukso, 'Missing single data1111!')
 
         for (const {
             val: { id, path, type, name },
-        } of singleData.features) {
+        } of singleInitData.features) {
             // Set feature on model
             await ChangeFeature(
                 id,
@@ -379,7 +387,7 @@ export default function LuksoComponent({
                 } as IndexFeatureInterface
             }
         )
-        singleData = { random: false, features }
+        setSingleData({ random: false, features });
         setHasMinted(true)
     }
 
@@ -431,7 +439,7 @@ export default function LuksoComponent({
 
     return (
         <MobileLayout>
-            <div className="w-full h-screen bg-[#FABCE2] flex flex-col">
+            <div className="w-full h-screen bg-[#FFCBDE] flex flex-col">
                 {isAccountModalOpen && (
                     <AccountModalUI
                         addressAccount={addressToShow}
@@ -441,53 +449,55 @@ export default function LuksoComponent({
                         }
                     />
                 )}
-                <TransparentBoxUI
-                    fullWidth
-                    border
-                    backgroundColorClass="bg-[#FFCBDE]"
-                    opacityPercentage="50"
-                    borderColorClass="border-white"
-                    borderSizeClass="border-2"
-                    heightClass="h-14"
-                    paddingClass="pl-11"
-                    alignItemsClass="items-stretch"
-                >
-                    <div className="flex flex-row justify-between h-full">
-                        <Image
-                            src="/resources/icons/campaigns/lukso.svg"
-                            width={106}
-                            height={24}
-                            alt="Lukso icon"
-                        />
+                <div className='z-10'>
+                    <TransparentBoxUI
+                        fullWidth
+                        border
+                        backgroundColorClass="bg-[#FFCBDE]"
+                        opacityPercentage="50"
+                        borderColorClass="border-white"
+                        borderSizeClass="border-2"
+                        heightClass="h-14"
+                        paddingClass="pl-11"
+                        alignItemsClass="items-stretch"
+                    >
+                        <div className="flex flex-row justify-between h-full">
+                            <Image
+                                src="/resources/icons/campaigns/lukso.svg"
+                                width={106}
+                                height={24}
+                                alt="Lukso icon"
+                            />
 
-                        {provider ? (
-                            <button
-                                className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2 z-10"
-                                onClick={() => setIsAccountModalOpen(true)}
-                            >
-                                <p className="truncate h-fit text-white">{`${formatearString(
-                                    addressToShow
-                                )}`}</p>
-                            </button>
-                        ) : (
-                            <ConnectWeb3Button
-                                classStyles={
-                                    'w-48 border-l-2 border-white font-bold z-10 text-white'
-                                }
-                                onConnect={() => { }}
+                            {provider ? (
+                                <button
+                                    className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
+                                    onClick={() => setIsAccountModalOpen(true)}
+                                >
+                                    <p className="truncate h-fit text-white">{`${formatearString(
+                                        addressToShow
+                                    )}`}</p>
+                                </button>
+                            ) : (
+                                <ConnectWeb3Button
+                                    classStyles={
+                                        'w-48 border-l-2 border-white font-bold text-white'
+                                    }
+                                    onConnect={() => { }}
 
-                            >
-                                <>Login with your UP!</>
-                            </ConnectWeb3Button>
-                        )}
-                    </div>
-                </TransparentBoxUI>
+                                >
+                                    <>Login with your UP!</>
+                                </ConnectWeb3Button>
+                            )}
+                        </div>
+                    </TransparentBoxUI>
+                </div>
                 {/* CANVAS WRAPPER */}
                 <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
                     {/* CANVAS BACKGROUND */}
                     <div className="w-full h-screen absolute opacity-0" />
                     {/* CANVAS */}
-                    {campaignParams && (
+                    {/* {campaignParams && (
                         <AvatarEditor
                             avatarBasePath={campaignParams.armature}
                             editMode={isEditModeSelected}
@@ -496,10 +506,22 @@ export default function LuksoComponent({
                             defaultCamera={campaignParams.config.defCam}
                             onReady={() => onAvatarBuilderReady()}
                         />
+                    )} */}
+                    {campaignParams && (
+                        <AvatarBuilder
+                            avatarBasePath={campaignParams.armature}
+                            campaign='lukso2'
+                            campaignConfig={campaignParams.config}
+                            onlyView
+                            selectListAccessories={selectListAccessories.current}
+                            selectListFeatures={selectListFeatures.current}
+                            bgOpacity={0}
+                            bgColor='FABCE2'
+                        />
                     )}
                 </div>
                 <div
-                    className={`fixed h-screen w-full flex justify-center items-center bg-[#FABCE2] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
+                    className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
                         }`}
                 >
                     <div className="scale-[3]">
