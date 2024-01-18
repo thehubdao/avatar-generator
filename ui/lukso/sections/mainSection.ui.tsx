@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import TransparentBox from "../common/transparentBox.ui";
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDice } from "react-icons/fa6";
@@ -11,21 +11,34 @@ import { AiOutlineLoading } from "react-icons/ai";
 import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
 import { GetCanvasImageUrl } from "../../../components/avatar/viewer.component";
+import { getSupply } from "../../../utils/web3/contract.util";
+import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
 
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   hasMinted: boolean
   provider: ethers.BrowserProvider | undefined
   isGettingInfoAboutHasMinted: boolean
-  picture:string
-  setPicture: (picture:string)=>void
+  picture: string
+  setPicture: (picture: string) => void
 }
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted,picture, setPicture }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, picture, setPicture }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
+
+  const [avatarSupply, setAvatarSupply] = useState(0)
+
+  useEffect(() => {
+    const setAvatarSupplyPromise = async () => {
+      const supply = await getSupply()
+      if (supply)
+        setAvatarSupply(supply)
+    }
+    void setAvatarSupplyPromise()
+  }, [])
 
   const gsapEnterBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
@@ -78,7 +91,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
               fill
               alt="lukso avatar full body view"
               className="origin-top bottom-0 scale-95"
-              style={{objectFit: "cover"}}
+              style={{ objectFit: "cover" }}
             />
           </div>
           <h2 className="font-extrabold text-2xl 2xl:text-4xl pt-5">LUKSO CITIZENS</h2>
@@ -155,7 +168,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             heightClass="h-[125px]"
           >
             <h3 className="font-extrabold text-xl 2xl:text-2xl">EXCLUSIVE COLLECTION</h3>
-            <p className="text-sm 2xl:text-base">Remaining: 1764</p>
+            <p className="text-sm 2xl:text-base">Remaining: {AVATAR_MAX_SUPPLY - avatarSupply}</p>
           </TransparentBox>
           <TransparentBox
             fullWidth
@@ -201,12 +214,12 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
                 src={picture}
                 fill
                 alt="lukso avatar selfie view"
-                style={{objectFit: "cover"}}
+                style={{ objectFit: "cover" }}
                 className="origin-top scale-[300%] -translate-y-1/4"
               />
             </div>
             <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">
-              LUKSO Citizens is a collection of 1764 interoperable Avatars on the LUKSO Blockchain.
+              LUKSO Citizens is a collection of {AVATAR_MAX_SUPPLY} interoperable Avatars on the LUKSO Blockchain.
             </p>
           </TransparentBox>
         </div>
