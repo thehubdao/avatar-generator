@@ -5,7 +5,7 @@ import Image from "next/image";
 import MobileLayout from "../../layouts/mobile.layout";
 
 // Components
-import AvatarEditor, { ChangeFeature, ChangeSkinColor, ChangeStartAnimation, GetAvatarGLB, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
+import AvatarEditor, { ChangeFeature, ChangeSkinColor, ChangeStartAnimation, GetAvatarGLB, GetAvatarVRM, RemoveStage, SetFeaturesData, SetStage } from "../avatar/editor.component";
 import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "../avatar/viewer.component";
 import HudUI from "../../ui/avatar/hud.ui";
 
@@ -200,22 +200,22 @@ export default function LuksoComponent({ campaignParams, clientLukso }: LuksoCom
 
   async function exportModel() {
     exportData.attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
-    const [picturePromise, modelPromise] = await Promise.all([
-      TakeCanvasPicture(''),
-      GetAvatarGLB()
-    ]);
-    exportData.picture = picturePromise;
+    const [picturePromise, VRMPromise, modelPromise] = await Promise.all([
+        TakeCanvasPicture(''),
+        GetAvatarVRM(),
+        GetAvatarGLB(),
+    ])
+    exportData.picture = picturePromise
     exportData.model = modelPromise.success ? modelPromise.value : undefined;
 
     if (isOnIFrame) {
-      IFrameExportData(exportData);
+        IFrameExportData(exportData)
     } else {
-      if (modelPromise.success)
-        await SaveFile(modelPromise.value, 'model.glb');
-      
-      await SaveFile(exportData.picture, 'picture.png');
-    }
-  }
+        if (VRMPromise.success) await SaveFile(VRMPromise.value, 'model.vrm')
+        if (exportData.model != undefined)
+            await SaveFile(exportData.model, 'model.glb')
+        await SaveFile(exportData.picture, 'picture.png')
+  }}
 
   return (
     <MobileLayout>
