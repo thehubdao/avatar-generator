@@ -10,6 +10,7 @@ import {
     ChangeSkinColor,
     ChangeStartAnimation,
     GetAvatarGLB,
+    GetAvatarVRM,
     RemoveStage,
     SetFeaturesData,
     SetStage,
@@ -356,8 +357,9 @@ export default function LuksoComponent({
         exportData.attributesBase64 = window.btoa(
             JSON.stringify(exportData.attributes)
         )
-        const [picturePromise, modelPromise] = await Promise.all([
+        const [picturePromise, VRMPromise, modelPromise] = await Promise.all([
             TakeCanvasPicture(''),
+            GetAvatarVRM(),
             GetAvatarGLB(),
         ])
         exportData.picture = picturePromise
@@ -366,9 +368,11 @@ export default function LuksoComponent({
         if (isOnIFrame) {
             IFrameExportData(exportData)
         } else {
+            if (VRMPromise.success) await SaveFile(VRMPromise.value, 'model.vrm')
             if (exportData.model != undefined)
                 await SaveFile(exportData.model, 'model.glb')
             await SaveFile(exportData.picture, 'picture.png')
+
         }
     }
 
@@ -378,7 +382,7 @@ export default function LuksoComponent({
             return setHasMinted(false)
         }
         const avatarMetadata = await getIPFSData(tokensMetadata[0])
-        const {LSP4Metadata} = avatarMetadata
+        const { LSP4Metadata } = avatarMetadata
         const features = Object.entries(LSP4Metadata.body).map(
             ([key, bodyPart]: Array<string | BodyPart>) => {
                 return {

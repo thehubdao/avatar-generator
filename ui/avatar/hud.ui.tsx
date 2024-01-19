@@ -100,7 +100,7 @@ export default function HudUI({
             <AGButton full onClickEvent={() => changeView()}>
               <p>EDIT</p>
             </AGButton>
-            <AGButton full onClickEvent={() => exportModel(ModelExtension.GLB)}>
+            <AGButton full onClickEvent={() => exportModel(ModelExtension.VRM)}>
               <p>EXPORT</p>
             </AGButton>
           </>
