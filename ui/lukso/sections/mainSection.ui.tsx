@@ -13,6 +13,8 @@ import Loader from "../common/loader.ui";
 import { GetCanvasImageUrl } from "../../../components/avatar/viewer.component";
 import { getSupply } from "../../../utils/web3/contract.util";
 import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
+import { useConnectWallet } from "@web3-onboard/react";
+import { canMint } from "../../../utils/phase.util";
 
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
@@ -23,6 +25,8 @@ interface MainSectionUIProps {
   setPicture: (picture: string) => void
 }
 
+
+
 export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, picture, setPicture }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
@@ -30,6 +34,8 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
   const [avatarSupply, setAvatarSupply] = useState(0)
+
+  const [{ wallet }] = useConnectWallet()
 
   useEffect(() => {
     const setAvatarSupplyPromise = async () => {
@@ -101,7 +107,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
         {(provider) && (
           <>
             {!isGettingInfoAboutHasMinted ? (
-              <button className="w-full h-fit" onClick={() => void gsapOutBlocks()}>
+              <button className="w-full h-fit disabled:opacity-75" onClick={() => void gsapOutBlocks()} disabled={!canMint(wallet?.accounts[0].address) } >
                 <TransparentBox
                   fullWidth
                   border
@@ -110,7 +116,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
                   aditionalClass="flex-row"
                 >
                   <div className="flex items-center gap-3">
-                    <p className="text-black text-lg 2xl:text-xl">{!hasMinted && "Roll your Citizen" || "Edit your Citizen"} </p>
+                    <p className="text-black text-lg 2xl:text-xl">{canMint(wallet?.accounts[0].address) === false && 'Mint is not available for this address' || !hasMinted && "Roll your Citizen" || "Edit your Citizen"} </p>
                     <FaDice className="text-black text-2xl" />
                   </div>
                 </TransparentBox>

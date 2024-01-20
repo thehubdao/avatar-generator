@@ -82,6 +82,8 @@ let singleInitData: SingleInterface | undefined
 let loaderDivElement: HTMLDivElement
 const isOnIFrame = false
 
+
+
 export default function LuksoComponent({
     campaignParams,
 }: {
@@ -248,7 +250,7 @@ export default function LuksoComponent({
         // Iterate the features
         // Place the features on the model
         if (singleInitData === undefined)
-            return void LogError(Module.Lukso, 'Missing single data1111!')
+            return void LogError(Module.Lukso, 'Missing single data!!!!!')
 
         for (const {
             val: { id, path, type, name },
