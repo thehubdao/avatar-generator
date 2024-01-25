@@ -37,6 +37,8 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
   const [{ wallet }] = useConnectWallet()
 
+
+
   useEffect(() => {
     const setAvatarSupplyPromise = async () => {
       const supply = await getSupply()
