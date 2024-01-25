@@ -13,7 +13,7 @@ interface AccountModalUIProps {
 export default function AccountModalUI({ addressAccount, formatAddress, setIsAccountModalOpen, onDisconnect }: AccountModalUIProps) {
   const [isCopyAddress, setIsCopyAddress] = useState<boolean>(false);
   const [copyAddressMessage, setCopyAddressMessage] = useState<string>("");
-  const [, , disconnect,] = useConnectWallet()
+  const [{ wallet }, , disconnect,] = useConnectWallet()
   async function copyToClipboard(text: string): Promise<void> {
     setIsCopyAddress(true);
 
@@ -61,7 +61,8 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
             </button>
             <button className="w-72 h-fit" onClick={() => {
               void (async () => {
-                await disconnect({ label: 'Universal Profiles' })
+                if (!wallet) return
+                await disconnect({ label: wallet.label })
                 onDisconnect()
               })()
               setIsAccountModalOpen(false)

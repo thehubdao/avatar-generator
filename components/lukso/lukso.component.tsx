@@ -453,7 +453,7 @@ export default function LuksoComponent({
                         setIsAccountModalOpen={(value) =>
                             setIsAccountModalOpen(value)
                         }
-                        onDisconnect={()=>{setCurrentSection(LuksoSections.Main)}}
+                        onDisconnect={() => { setCurrentSection(LuksoSections.Main) }}
                     />
                 )}
                 <div className='z-10'>
