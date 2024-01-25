@@ -2,14 +2,18 @@ import Image from "next/image";
 import TransparentBoxUI from "./transparentBox.ui";
 import { useState } from "react";
 import { useConnectWallet } from "@web3-onboard/react";
+import { GoToPage } from "../../../utils/router.util";
+import { Router, useRouter } from "next/router";
 
 interface AccountModalUIProps {
   addressAccount: string;
   formatAddress: string;
   setIsAccountModalOpen: (value: boolean) => void;
+  onDisconnect: () => void
 }
 
-export default function AccountModalUI({ addressAccount, formatAddress, setIsAccountModalOpen }: AccountModalUIProps) {
+export default function AccountModalUI({ addressAccount, formatAddress, setIsAccountModalOpen, onDisconnect }: AccountModalUIProps) {
+  const router = useRouter()
   const [isCopyAddress, setIsCopyAddress] = useState<boolean>(false);
   const [copyAddressMessage, setCopyAddressMessage] = useState<string>("");
   const [, , disconnect,] = useConnectWallet()
@@ -59,7 +63,10 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
               </TransparentBoxUI>
             </button>
             <button className="w-72 h-fit" onClick={() => {
-              void (async () => { await disconnect({ label: 'Universal Profiles' }) })()
+              void (async () => {
+                await disconnect({ label: 'Universal Profiles' })
+                onDisconnect()
+              })()
               setIsAccountModalOpen(false)
             }}>
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
