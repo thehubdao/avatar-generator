@@ -2,7 +2,6 @@ import Image from "next/image";
 import TransparentBoxUI from "./transparentBox.ui";
 import { useState } from "react";
 import { useConnectWallet } from "@web3-onboard/react";
-import { useRouter } from "next/router";
 
 interface AccountModalUIProps {
   addressAccount: string;
