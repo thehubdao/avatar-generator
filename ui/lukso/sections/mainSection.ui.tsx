@@ -185,7 +185,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             backgroundColorClass="bg-[#FFCBDE]"
             heightClass="grow"
           >
-            <h3 className="font-semibold text-xl 2xl:text-2xl">Rarety</h3>
+            <h3 className="font-semibold text-xl 2xl:text-2xl">Rarity</h3>
             <div className="mt-5 text-base 2xl:text-lg font-semibold">
               <p className="text-gray-400">Common</p>
               <p className="text-sky-400">Rare</p>
