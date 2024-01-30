@@ -10,8 +10,6 @@ import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.c
 import MintSectionModalUI from "../common/mintModal.ui";
 import { BrowserProvider, ethers } from "ethers";
 import Loader from "../common/loader.ui";
-import { GetCanvasImageUrl } from "../../../components/avatar/viewer.component";
-import { Delay } from "../../../utils/common.util";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 import FeatureListUI from "../common/featureList.ui";
 
@@ -21,10 +19,10 @@ interface MintSectionUIProps {
   handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean }>;
   provider: ethers.BrowserProvider | undefined;
   features?: IndexFeatureInterface[];
+  picture: string;
 }
 
-export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, provider, features }: MintSectionUIProps) {
-  const [picture, setPicture] = useState<string>('/resources/images/campaings/full-avatar-lukso.png');
+export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, provider, features, picture }: MintSectionUIProps) {
 
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
@@ -47,25 +45,15 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
     fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION, true, () => setCurrentSection(LuksoSections.Edit));
   }
 
-  const takePicture = () => {
-    const pic = GetCanvasImageUrl();
-    if (pic && pic.length > 0) {
-      setPicture(pic);
-    }
-  }
-
   const handleReRoll = async () => {
     if (isShuffling) return;
     setIsShuffling(true);
     await reRoll();
     setIsShuffling(false);
-    await Delay(200);
-    takePicture();
   }
 
   useEffect(() => {
-    void gsapEnterBlocks(); 
-    takePicture();
+    void gsapEnterBlocks();
   }, [])
 
   return (
