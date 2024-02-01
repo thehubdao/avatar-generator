@@ -10,10 +10,11 @@ import { CampaignAssets, FeatureBasic } from "../../../../interfaces/common.inte
 import { FeatureInterface } from "../../../../interfaces/api.interface";
 import { AiOutlineCloseCircle } from "react-icons/ai";
 import AGButton from "../../../common/ag-button.component";
+import { CampaignDefaultOption } from "../../../../enums/campaign.enum";
 
 interface AssetListProps {
   activedOption: FirestoreLocation;
-  updateDefaultAsset: (element: string, config: string) => Promise<void>;
+  updateDefaultAsset: (element: CampaignDefaultOption, config: string) => Promise<void>;
 }
 
 export default function AssetList({ activedOption, updateDefaultAsset }: AssetListProps) {
@@ -116,25 +117,6 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
     setSearchSuggestionList(filterItems ?? []);
   }
 
-  //* Updates default asset config prop.
-  const handleUpdateDefaultAsset = (config: string) => {
-    let defaultConfigKey = '';
-    switch (activedOption) {
-      case FirestoreLocation.Animations:
-        defaultConfigKey = 'defAnimation';
-        break;
-      case FirestoreLocation.Stages:
-        defaultConfigKey = 'defStage';
-        break;
-      default:
-        break;
-    }
-
-    if (defaultConfigKey) {
-      void updateDefaultAsset(defaultConfigKey, config);
-    }
-  };
-
   return (
     <>
       {/* Display list of assets */}
@@ -197,7 +179,8 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
                   name={asset.name}
                   thumb={asset.thumb}
                   location={activedOption}
-                  updateDefaultAsset={(config: string) => handleUpdateDefaultAsset(config)}
+                  activedOption={activedOption}
+                  updateDefaultAsset={(defaultConfigKey: CampaignDefaultOption, config: string) => updateDefaultAsset(defaultConfigKey, config)}
                 />
               </div>)
             })}

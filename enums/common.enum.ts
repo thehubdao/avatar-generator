@@ -97,3 +97,7 @@ export const enum CommonErrorCode {
   InternalError = 'AG-205',
   NoAuth = 'AG-301'
 }
+
+export enum CommonString {
+  empty = ''
+}

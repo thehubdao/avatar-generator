@@ -11,12 +11,13 @@ import AvatarSingle from "../../../../components/avatar/single.component";
 import ConfigCampaignUI from "./config/configCampaign.ui";
 import CampaignStats from "./campaignStats.ui";
 import { ColorConfig, LookAtVectors } from "../../../../interfaces/common.interface";
+import { CampaignDefaultOption } from "../../../../enums/campaign.enum";
 
 interface EditCampaignUIProps {
   downloadFile: ((path: string) => void) | ((path: string) => Promise<void>);
   updateColorConfig: (Element: string, config: ColorConfig) => Promise<void>;
   updateCameraConfig: (Element: string, config: LookAtVectors) => Promise<void>;
-  updateDefaultAsset: (element: string, config: string) => Promise<void>;
+  updateDefaultAsset: (element: CampaignDefaultOption, config: string) => Promise<void>;
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
@@ -94,7 +95,7 @@ export default function EditCampaignUI({ downloadFile, updateColorConfig, update
             </>
             : <AssetList
               activedOption={navBarOptionSelected}
-              updateDefaultAsset={(element: string, config: string) => updateDefaultAsset(element, config)}
+              updateDefaultAsset={(element: CampaignDefaultOption, config: string) => updateDefaultAsset(element, config)}
             />}
         </div>
       </div>

@@ -2,24 +2,26 @@ import { useRef, useState } from "react";
 import GetImage from "../../../../components/commons/getImage.component";
 import UpdateAsset from "../../../../components/admin/assets/updateAsset.component";
 import AGButton from "../../../common/ag-button.component";
-import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineCloudUpload, AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
+import { AiOutlineCheckCircle, AiOutlineCloseCircle, AiOutlineCloudUpload, AiOutlineDelete, AiOutlineEdit, AiOutlineLoading } from "react-icons/ai";
 import { IoImageOutline } from "react-icons/io5";
 import { DeleteDoc } from "../../../../utils/firebase.util";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { fetchData } from "../../../../store/currentCampaignSlice";
 import { ShowModal } from "../../../../utils/modal.util";
-import { CampaignConfig } from "../../../../interfaces/common.interface";
+import { CampaignDefaultOption } from "../../../../enums/campaign.enum";
+import { CommonString } from "../../../../enums/common.enum";
 
 interface AssetCardProps {
   id: string;
   name: string;
   thumb?: string;
   location: FirestoreLocation;
-  updateDefaultAsset: (config: string) => void;
+  activedOption: string;
+  updateDefaultAsset: (element: CampaignDefaultOption, config: string) => Promise<void>;
 }
 
-export default function AssetCard({ id, name, thumb, location, updateDefaultAsset }: AssetCardProps) {
+export default function AssetCard({ id, name, thumb, location, activedOption, updateDefaultAsset }: AssetCardProps) {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const campaignConfigParams = useAppSelector(state => state.currentCampaign.parameters.config);
 
@@ -29,16 +31,56 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
   const currentFile = useRef<HTMLInputElement>(null);
   const currentThumb = useRef<HTMLInputElement>(null);
 
+  // general states
   const [willDelete, setWillDelete] = useState<boolean>(false);
   const [willEdit, setWillEdit] = useState<boolean>(false);
   const [hasFile, setHasFile] = useState<boolean>(false);
   const [hasThumb, setHasThumb] = useState<boolean>(false);
   const [willUpdateAsset, setWillUpdateAsset] = useState<boolean>(false);
 
-  const DEFAULT_CONFIG_SECTIONS = [FirestoreLocation.Stages, FirestoreLocation.Animations];
-  const DEFAULT_CONFIG_SECTION_KEYS: { [key: string]: keyof CampaignConfig } = {
-    [FirestoreLocation.Stages]: 'defStage',
-    [FirestoreLocation.Animations]: 'defAnimation',
+  // loading
+  const [isDefaultBeingManipulatied, setIsDefaultBeingManipulatied] = useState<boolean>(false);
+
+  const getCurrentDefaultOption = (): CampaignDefaultOption => {
+    switch (activedOption) {
+      case FirestoreLocation.Animations:
+        return CampaignDefaultOption.DefAnimation;
+      case FirestoreLocation.Stages:
+        return CampaignDefaultOption.DefStage;
+      default:
+        return CampaignDefaultOption.NoDef;
+    }
+  }
+
+  const isCurrentAssetSelectedAsDefault = () => {
+    const currentDefaultConfigKey = getCurrentDefaultOption();
+
+    if (currentDefaultConfigKey == CampaignDefaultOption.NoDef)
+      return false
+    return campaignConfigParams[currentDefaultConfigKey] === name
+  }
+
+  const shouldShowDefaultButton = () => {
+    const currentDefaultConfigKey = getCurrentDefaultOption();
+
+    if (currentDefaultConfigKey == CampaignDefaultOption.NoDef)
+      return false
+    return true
+  }
+
+  //* Updates default asset config prop.
+  const handleUpdateDefaultAsset = (config: string) => {
+    const currentDefaultConfigKey = getCurrentDefaultOption();
+
+    setIsDefaultBeingManipulatied(true);
+    void updateDefaultAsset(currentDefaultConfigKey, config).then(() => setIsDefaultBeingManipulatied(false));
+  };
+
+  const handleClearDefaultAsset = () => {
+    const currentDefaultConfigKey = getCurrentDefaultOption();
+
+    setIsDefaultBeingManipulatied(true);
+    void updateDefaultAsset(currentDefaultConfigKey, CommonString.empty).then(() => setIsDefaultBeingManipulatied(false));
   }
 
   const dispatch = useAppDispatch();
@@ -144,16 +186,31 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
                     </div>
                   </div>
                 </>
-                : <div className={`flex ${DEFAULT_CONFIG_SECTIONS.includes(location) ? 'justify-between' : 'justify-end'} items-center w-full`}>
-                  {(DEFAULT_CONFIG_SECTIONS.includes(location)) && (
-                    <AGButton nm fit selected={campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name} onClickEvent={() => updateDefaultAsset(name)}>
-                      {campaignConfigParams[DEFAULT_CONFIG_SECTION_KEYS[location]] === name
-                        ? <div className="text-sm flex items-center gap-1">
-                          <AiOutlineCheckCircle />
-                          <p>default</p>
+                : <div className={`flex ${shouldShowDefaultButton() ? 'justify-between' : 'justify-end'} items-center text-sm`}>
+                  {shouldShowDefaultButton() && (
+                    <>{isDefaultBeingManipulatied
+                      ? <AGButton nm fit>
+                        <div className="w-20 flex justify-center cursor-wait">
+                          <AiOutlineLoading className="animate-spin" />
                         </div>
-                        : <p className="text-sm">Set default</p>}
-                    </AGButton>
+                      </AGButton>
+                      : <>
+                        {isCurrentAssetSelectedAsDefault()
+                          ? <AGButton nm fit selected={isCurrentAssetSelectedAsDefault()} onClickEvent={() => handleClearDefaultAsset()}>
+                            <div className="w-20 flex justify-center items-center gap-1">
+                              <AiOutlineCheckCircle />
+                              <p>default</p>
+                            </div>
+                          </AGButton>
+                          :
+                          <AGButton nm fit selected={isCurrentAssetSelectedAsDefault()} onClickEvent={() => handleUpdateDefaultAsset(name)}>
+                            <div className="w-20 flex justify-center">
+                              <p>Set default</p>
+                            </div>
+                          </AGButton>
+                        }
+                      </>
+                    }</>
                   )}
                   <AGButton nm fit onClickEvent={() => setWillEdit(true)}>
                     <AiOutlineEdit className="group-hover/button:text-purple transition-all duration-300" />

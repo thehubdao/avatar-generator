@@ -6,9 +6,9 @@ import { ShowModal } from "../../../utils/modal.util";
 import { fetchData } from "../../../store/currentCampaignSlice";
 import { FirestoreLocation, StorageLocation } from "../../../enums/firebase.enum";
 import { AuthStateInterface, CampaignParameters, ColorConfig, LookAtVectors } from "../../../interfaces/common.interface";
-import { CameraConfigOption } from "../../../enums/campaign.enum";
+import { CameraConfigOption, CampaignDefaultOption } from "../../../enums/campaign.enum";
 import { GoToPage } from "../../../utils/router.util";
-import { Module, PageLocation } from "../../../enums/common.enum";
+import { Module, PageLocation, CommonString } from "../../../enums/common.enum";
 import { LogError } from "../../../utils/common.util";
 import { useRouter } from "next/navigation";
 
@@ -64,14 +64,17 @@ export default function EditCampaign() {
     }
   }
 
-  const updateDefaultAsset = async (element: string, config: string) => {
+  const updateDefaultAsset = async (element: CampaignDefaultOption, config: string) => {
     const newConfig = { [element]: config };
     const newParameters: Partial<CampaignParameters> = { config: newConfig };
-    // console.log(newParameters, location);
     const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
 
     if (result.success) {
-      ShowModal(`Update ${element} asset default config sucessful`)
+      if (config === CommonString.empty) {
+        ShowModal(`Unselect ${element} asset default config sucessful`);
+      } else {
+        ShowModal(`Select ${element} asset default config sucessful`);
+      }
       void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Parameters }));
     } else {
       ShowModal(`Update ${element} asset default config failed`);
@@ -102,7 +105,7 @@ export default function EditCampaign() {
         downloadFile={(path: string) => downloadFile(path)}
         updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
         updateCameraConfig={(element: string, config: LookAtVectors) => updateCameraConfig(element, config)}
-        updateDefaultAsset={(element: string, config: string) => updateDefaultAsset(element, config)}
+        updateDefaultAsset={(element: CampaignDefaultOption, config: string) => updateDefaultAsset(element, config)}
         uploadAvatarBase={uploadAvatarBase}
       />
     </>
