@@ -256,7 +256,7 @@ export default function LuksoComponent({
                 await SaveFile(modelPromise.value,`${randomCombination}.glb`);
             
         }
-        downloadGLB()
+        void downloadGLB()
 
     }
 
