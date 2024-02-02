@@ -250,6 +250,13 @@ export default function LuksoComponent({
         singleInitData = result
         setSingleData(singleInitData);
         await UpdateAvatarStatus(randomCombination, "Minted")
+        async function downloadGLB() {
+            const modelPromise = await GetAvatarGLB()
+            if (modelPromise.success)
+                await SaveFile(modelPromise.value,`${randomCombination}.glb`);
+            
+        }
+        downloadGLB()
 
     }
 
@@ -276,14 +283,8 @@ export default function LuksoComponent({
     async function reRoll() {
         await getSingleData()
         await loadSingleData()
-        async function downloadGLB() {
-            const modelPromise = await GetAvatarGLB()
-            if (modelPromise.success)
-                await SaveFile(modelPromise.value, 'model.glb');
-            await reRoll()
+        await reRoll()
 
-        }
-        void downloadGLB()
     }
 
     async function updateStage(isEditMode: boolean) {
