@@ -61,10 +61,11 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
     setIsShuffling(false);
     await Delay(200);
     takePicture();
+
   }
 
   useEffect(() => {
-    void gsapEnterBlocks(); 
+    void gsapEnterBlocks();
     takePicture();
   }, [])
 
@@ -89,11 +90,11 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
               src={picture}
               fill
               alt="lukso avatar selfie view"
-              style={{objectFit: 'cover'}}
+              style={{ objectFit: 'cover' }}
               className="origin-top scale-[300%] -translate-y-1/4"
             />
           </div>
-          {features && 
+          {features &&
             <FeatureListUI features={features} />
           }
         </TransparentBox>

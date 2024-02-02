@@ -38,6 +38,7 @@ import {
     GetAnimationByCampaignAndName,
     GetAssetsListByCampaign,
     GetAvatarSingleByCampaignCombination,
+    GetAvatarSingleByCampaignCombinationString,
     GetStageListByCampaign,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
@@ -72,6 +73,7 @@ import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
 import AvatarBuilder from '../avatar/builder.component'
+import { GetRandomCombination, UpdateAvatarStatus } from '../../utils/firebase.util'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -236,14 +238,19 @@ export default function LuksoComponent({
     }
 
     async function getSingleData() {
-        const numResult = await GetAvatarSingleByCampaignCombination(
-            Client.Lukso
+        const randomCombination = await GetRandomCombination()
+        if (
+            !randomCombination) return
+        const numResult = await GetAvatarSingleByCampaignCombinationString(
+            Client.Lukso, randomCombination
         )
         const result: SingleInterface | undefined = numResult.success
             ? numResult.value
             : undefined
         singleInitData = result
         setSingleData(singleInitData);
+        await UpdateAvatarStatus(randomCombination, "Minted")
+
     }
 
     async function loadSingleData() {
@@ -269,6 +276,14 @@ export default function LuksoComponent({
     async function reRoll() {
         await getSingleData()
         await loadSingleData()
+        async function downloadGLB() {
+            const modelPromise = await GetAvatarGLB()
+            if (modelPromise.success)
+                await SaveFile(modelPromise.value, 'model.glb');
+            await reRoll()
+
+        }
+        void downloadGLB()
     }
 
     async function updateStage(isEditMode: boolean) {
@@ -411,15 +426,19 @@ export default function LuksoComponent({
             body: {},
             links: [], assets: [],
         }
-
+        let combinationId = ''
         try {
             for (const feature of features) {
                 const { val } = feature
                 const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
                 tokenMetadata.body[bodyIndex] = val as BodyPart
+                combinationId += val.index.toString() + '-'
             }
+            combinationId = combinationId.slice(0, combinationId.length - 1)
             const metadataUrl = await uploadMetadata(tokenMetadata)
-            await mint(address, metadataUrl)
+
+
+            await mint(address, metadataUrl, combinationId)
             await setTokensMetadata(address)
 
             return { message: 'Your citizen has been created!', success: true }
