@@ -713,7 +713,6 @@ export async function UpdateAvatarStatus(combinationIndexes: string, status: key
   const resultDoc = (await getDocs(whereQuery)).docs[0].ref
 
   await setDoc(resultDoc, { status: AVATAR_STATUS[status] }, { merge: true });
-  await setDoc(resultDoc, { status: AVATAR_STATUS["NotMinted"] }, { merge: true });
 }
 
 export async function GetAvatarStatus(combinationIndexes: string) {
