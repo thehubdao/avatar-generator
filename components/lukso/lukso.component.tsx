@@ -84,7 +84,13 @@ let singleInitData: SingleInterface | undefined
 let loaderDivElement: HTMLDivElement
 const isOnIFrame = false
 
-
+const tokenMetadata: TokenMetadata = {
+    name: '',
+    description: '',
+    GLBUrl: '',
+    body: {},
+    links: [], assets: [],
+}
 
 export default function LuksoComponent({
     campaignParams,
@@ -238,22 +244,28 @@ export default function LuksoComponent({
     }
 
     async function getSingleData() {
-        const randomCombination = await GetRandomCombination()
-        if (
-            !randomCombination) return
         const numResult = await GetAvatarSingleByCampaignCombinationString(
-            Client.Lukso, randomCombination
+            Client.Lukso
         )
         const result: SingleInterface | undefined = numResult.success
             ? numResult.value
             : undefined
         singleInitData = result
         setSingleData(singleInitData);
-        await UpdateAvatarStatus(randomCombination, "Minted")
+        if(!numResult.success) return 
+        let combinationId = ''
+        for (const feature of numResult.value.features) {
+            const { val } = feature
+            const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
+            tokenMetadata.body[bodyIndex] = val as BodyPart
+            combinationId += val.index.toString() + '-'
+        }
+        combinationId = combinationId.slice(0, combinationId.length - 1)
+        await UpdateAvatarStatus(combinationId, "Minted")
         async function downloadGLB() {
             const modelPromise = await GetAvatarGLB()
             if (modelPromise.success)
-                await SaveFile(modelPromise.value,`${randomCombination}.glb`);
+                await SaveFile(modelPromise.value,`${combinationId}.glb`);
             
         }
         void downloadGLB()
@@ -420,13 +432,7 @@ export default function LuksoComponent({
                 success: false,
             }
         const { features } = singleData
-        const tokenMetadata: TokenMetadata = {
-            name: '',
-            description: '',
-            GLBUrl: '',
-            body: {},
-            links: [], assets: [],
-        }
+        
         let combinationId = ''
         try {
             for (const feature of features) {
@@ -537,7 +543,7 @@ export default function LuksoComponent({
                     {campaignParams && (
                         <AvatarBuilder
                             avatarBasePath={campaignParams.armature}
-                            campaign='lukso2'
+                            campaign='lukso female b'
                             campaignConfig={campaignParams.config}
                             onlyView
                             selectListAccessories={selectListAccessories.current}
