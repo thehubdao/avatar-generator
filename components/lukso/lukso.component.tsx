@@ -73,7 +73,7 @@ import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
 import AvatarBuilder from '../avatar/builder.component'
-import { GetRandomCombination, UpdateAvatarStatus } from '../../utils/firebase.util'
+import { UpdateAvatarStatus } from '../../utils/firebase.util'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
