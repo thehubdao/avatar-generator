@@ -31,8 +31,8 @@ export default function FeatureListUI({features}: FeatureListUIProps) {
         features.map((feature, index) => {
           return (
             <div key={index}>
-              <h3 className="uppercase font-bold">{feature.val.type}</h3>
-              <p className="lowercase text-lg">{feature.val.name}</p>
+              <h3 className={`uppercase font-bold ${GetRaretyColor(feature.val.tier)}`}>{feature.val.type}</h3>
+              <p className={`lowercase text-lg`}>{feature.val.name}</p>
               <p className={`capitalize text-sm leading-none ${GetRaretyColor(feature.val.tier)}`}>{feature.val.tier ?? '-'}</p>
             </div>
           )

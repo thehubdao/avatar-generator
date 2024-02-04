@@ -124,7 +124,7 @@ export async function SetEnvironment(bgMap?: string, lightMap?: string, skyboxCo
     else {
       AddBackgroundScene(bgTexture.value.texture);
       if (bgTexture.value.skybox)
-        AddToScene(bgTexture.value.skybox);
+        AddToScene(bgTexture.value.skybox, 'skybox');
     }
   }
 
@@ -175,14 +175,14 @@ export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, 
   async function initEditor() {
     const leLights = GetLights(lights);
     for (const light of leLights) {
-      AddToScene(light);
+      AddToScene(light, 'light');
     }
 
     if (defaultShadow != undefined) {
       const leShadow = GetShadow(defaultShadow);
       if (leShadow != undefined) {
-        AddToScene(leShadow.shadowLight);
-        AddToScene(leShadow.shadowPlane);
+        AddToScene(leShadow.shadowLight, 'shadowLight');
+        AddToScene(leShadow.shadowPlane, 'shadowPlane');
       }
     }
 
@@ -203,7 +203,7 @@ export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, 
     await SetAnimation(_mixer, _avatar, undefined);
 
     TransformObject3dToNewMaterial(_avatar.scene, undefined, changeMaterial);
-    AddToScene(_avatar.scene);
+    AddToScene(_avatar.scene, 'avatar');
     AddMixer(_mixer);
   }
 

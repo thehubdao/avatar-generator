@@ -5,19 +5,21 @@ import Image from 'next/image'
 import MobileLayout from '../../layouts/mobile.layout'
 
 // Components
-import {
+import AvatarEditor, {
     ChangeFeature,
     ChangeSkinColor,
     ChangeStartAnimation,
     GetAvatarGLB,
     GetAvatarVRM,
     RemoveStage,
+    SetEnvironment,
     SetFeaturesData,
     SetStage,
 } from '../avatar/editor.component'
 import {
     AGChangeCamPosition,
     AGChangeLookAtPosition,
+    GetCanvasImageUrl,
     TakeCanvasPicture,
 } from '../avatar/viewer.component'
 import HudComponent from '../../ui/avatar/hud.ui'
@@ -32,12 +34,13 @@ import { Module } from '../../enums/common.enum'
 import { LuksoSections } from '../../enums/lukso/common.enum'
 
 // Utils
-import { FilterList, LogError, MixArrays } from '../../utils/common.util'
+import { Delay, FilterList, LogError, MixArrays } from '../../utils/common.util'
 import {
     GetAccessoryListByCampaign,
     GetAnimationByCampaignAndName,
     GetAssetsListByCampaign,
     GetAvatarSingleByCampaignCombination,
+    GetEnvMapListByCampaign,
     GetStageListByCampaign,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
@@ -46,6 +49,7 @@ import { SaveFile } from '../../utils/exporter.util'
 
 // Interfaces
 import {
+    EnvMapInterface,
     FeatureInterface,
     IndexFeatureInterface,
     SingleInterface,
@@ -71,13 +75,13 @@ import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import AvatarBuilder from '../avatar/builder.component'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
 let featureList: FeatureInterface[] | undefined
 let accessoryList: FeatureInterface[] | undefined
 let stageList: StageInterface[] | undefined
+let envMapList: EnvMapInterface[] | undefined;
 let singleInitData: SingleInterface | undefined
 let loaderDivElement: HTMLDivElement
 const isOnIFrame = false
@@ -160,10 +164,6 @@ export default function LuksoComponent({
         void onAvatarBuilderReady()
     }, [hasMinted])
 
-    useEffect(() => {
-        void onAvatarBuilderReady()
-    }, [])
-
     async function onAvatarBuilderReady() {
         setIsLoadingMintedData(true)
 
@@ -171,6 +171,7 @@ export default function LuksoComponent({
             getFeatureList(),
             getAccessoryList(),
             getStageList(),
+            getEnvironmentMapList(),
             getSingleInfo(),
             !hasMinted && getSingleData(),
         ])
@@ -178,6 +179,10 @@ export default function LuksoComponent({
         optionList = MixArrays(optionList, accessoryList)
 
         await SetFeaturesData(campaignParams?.features ?? [])
+
+        const bgMap = envMapList?.find(em => em.name === campaignParams?.config.envMap?.defBgMap);
+        const lightMap = envMapList?.find(em => em.name === campaignParams?.config.envMap?.defLightMap);
+        await SetEnvironment(bgMap?.path, lightMap?.path, campaignParams?.config.envMap?.skyboxConfig);
 
         // Set features from single
         await loadSingleData()
@@ -203,9 +208,10 @@ export default function LuksoComponent({
         setIsLoadingMintedData(false)
     }
 
-    // async function sleep(ms: number) {
-    //   return new Promise(resolve => setTimeout(resolve, ms));
-    // }
+    async function takePicture() {
+        await Delay(2500);
+        setPicture(GetCanvasImageUrl());
+    }
 
     async function getFeatureList() {
         const result = await GetAssetsListByCampaign(Client.Lukso)
@@ -222,6 +228,11 @@ export default function LuksoComponent({
     async function getStageList() {
         const result = await GetStageListByCampaign(Client.Lukso)
         stageList = result.success ? result.value : undefined
+    }
+
+    async function getEnvironmentMapList() {
+        const result = await GetEnvMapListByCampaign(Client.Lukso);
+        envMapList = result.success ? result.value : undefined;
     }
 
     async function getSingleInfo() {
@@ -264,6 +275,7 @@ export default function LuksoComponent({
                 campaignParams?.config.skin?.defColor ?? 'ffffff'
             )
         }
+        await takePicture();
     }
 
     async function reRoll() {
@@ -503,25 +515,15 @@ export default function LuksoComponent({
                     {/* CANVAS BACKGROUND */}
                     <div className="w-full h-screen absolute opacity-0" />
                     {/* CANVAS */}
-                    {/* {campaignParams && (
+                    {campaignParams && (
                         <AvatarEditor
                             avatarBasePath={campaignParams.armature}
                             editMode={isEditModeSelected}
                             lights={campaignParams.config.lights}
                             defaultShadow={campaignParams.config.defShadow}
                             defaultCamera={campaignParams.config.defCam}
+                            postProcessing={campaignParams.config.postProcessing}
                             onReady={() => onAvatarBuilderReady()}
-                        />
-                    )} */}
-                    {campaignParams && (
-                        <AvatarBuilder
-                            avatarBasePath={campaignParams.armature}
-                            campaign='lukso2'
-                            campaignConfig={campaignParams.config}
-                            onlyView
-                            selectListAccessories={selectListAccessories.current}
-                            selectListFeatures={selectListFeatures.current}
-                            bgColor='FABCE2'
                         />
                     )}
                 </div>
@@ -589,7 +591,6 @@ export default function LuksoComponent({
                     provider={provider}
                     isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
                     features={singleData?.features}
-                    setPicture={(picture: string) => setPicture(picture)}
                     picture={picture}
                 />
             </div>

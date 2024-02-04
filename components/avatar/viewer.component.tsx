@@ -76,6 +76,7 @@ export function AddToScene(toAdd: Object3D, objName?: string) {
   const addedPos = _scene.children.length;
 
   FrustumCulledFalse(toAdd);
+  toAdd.name = objName ?? '';
   _scene.add(toAdd);
 
   if (objName != undefined) _sceneObjs.set(objName, addedPos);
