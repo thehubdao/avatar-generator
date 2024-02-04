@@ -1,7 +1,6 @@
 import { LUKSO_BACKEND_URL } from "../constants/common.constant";
 import { TokenMetadata } from "../types/metadata.type";
 import { PostRequest } from "./api.util";
-import { TakeCanvasPicture } from "../components/avatar/viewer.component";
 
 
 export const uploadMetadata = async (tokenMetadata: TokenMetadata, combinationIndexes: string) => {
@@ -15,7 +14,6 @@ export const uploadMetadata = async (tokenMetadata: TokenMetadata, combinationIn
         }
     }) */
     const imageUrl = `ipfs://${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combinationIndexes}.png`
-    console.log(imageUrl)
     if (!imageUrl) throw new Error("Error uploading image")
 
     tokenMetadata.images = [[{
