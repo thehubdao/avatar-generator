@@ -10,7 +10,6 @@ import ConnectModalUI from "../common/conectModal";
 import { AiOutlineLoading } from "react-icons/ai";
 import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
-import { GetCanvasImageUrl } from "../../../components/avatar/viewer.component";
 import { getSupply } from "../../../utils/web3/contract.util";
 import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
 import { useConnectWallet } from "@web3-onboard/react";
@@ -18,16 +17,15 @@ import { canMint } from "../../../utils/phase.util";
 
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
-  hasMinted: boolean
-  provider: ethers.BrowserProvider | undefined
-  isGettingInfoAboutHasMinted: boolean
-  picture: string
-  setPicture: (picture: string) => void
+  hasMinted: boolean;
+  provider: ethers.BrowserProvider | undefined;
+  isGettingInfoAboutHasMinted: boolean;
+  picture: string;
 }
 
 
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, picture, setPicture }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, picture }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
@@ -65,16 +63,8 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
     });
   }
 
-  const takePicture = () => {
-    const pic = GetCanvasImageUrl();
-    if (pic && pic.length > 0) {
-      setPicture(pic);
-    }
-  }
-
   useLayoutEffect(() => {
     void gsapEnterBlocks();
-    takePicture();
   }, [])
 
   return (
