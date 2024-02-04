@@ -263,23 +263,6 @@ export default function LuksoComponent({
             : undefined
         singleInitData = result
         setSingleData(singleInitData);
-        if(!numResult.success) return 
-        let combinationId = ''
-        for (const feature of numResult.value.features) {
-            const { val } = feature
-            const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
-            tokenMetadata.body[bodyIndex] = val as BodyPart
-            combinationId += val.index.toString() + '-'
-        }
-        combinationId = combinationId.slice(0, combinationId.length - 1)
-        await UpdateAvatarStatus(combinationId, "Minted")
-        async function downloadGLB() {
-            const modelPromise = await GetAvatarGLB()
-            if (modelPromise.success)
-                await SaveFile(modelPromise.value,`${combinationId}.glb`);
-            
-        }
-        void downloadGLB()
 
     }
 
@@ -307,7 +290,6 @@ export default function LuksoComponent({
     async function reRoll() {
         await getSingleData()
         await loadSingleData()
-        await reRoll()
 
     }
 
@@ -454,7 +436,7 @@ export default function LuksoComponent({
                 combinationId += val.index.toString() + '-'
             }
             combinationId = combinationId.slice(0, combinationId.length - 1)
-            const metadataUrl = await uploadMetadata(tokenMetadata)
+            const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
 
 
             await mint(address, metadataUrl, combinationId)

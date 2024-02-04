@@ -26,7 +26,7 @@ import { ConvertObject, ConvertType } from "./common/object-converter.util";
 import { SessionUserInfo } from "./common/session.util";
 import { CampaignParameters } from "../interfaces/common.interface";
 import { ParameterNameType } from "../types/firebase.type";
-
+import {Client} from '../enums/client.enum'
 export type LogInStructure = {
   user: string;
   pass: string;
@@ -707,7 +707,7 @@ async function GetLuksoCampaign() {
 export async function UpdateAvatarStatus(combinationIndexes: string, status: keyof typeof AVATAR_STATUS) {
   if (combinationIndexes == undefined) Raise("Missing avatarId to update status!");
 
-  const location = `collection/${await FirebaseUtil.Instance().Lukso()}/nft`;
+  const location = `collection/${Client.Lukso}/nft`;
   const combinationCollection = collection(await FirebaseUtil.Instance().DB(), location)
   const whereQuery = query(combinationCollection, where("indexValues", "==", combinationIndexes))
   const resultDoc = (await getDocs(whereQuery)).docs[0].ref
@@ -718,7 +718,7 @@ export async function UpdateAvatarStatus(combinationIndexes: string, status: key
 export async function GetAvatarStatus(combinationIndexes: string) {
   if (combinationIndexes == undefined)
     Raise("Missing avatarId to get status!");
-  const location = `collection/${await FirebaseUtil.Instance().Lukso()}/nft`;
+  const location = `collection/${Client.Lukso}/nft`;
     const combinationCollection = collection(await FirebaseUtil.Instance().DB(), location)
     const whereQuery = query(combinationCollection, where("indexValues", "==", combinationIndexes))
     const resultDoc = (await getDocs(whereQuery)).docs[0].ref
