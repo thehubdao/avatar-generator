@@ -267,7 +267,6 @@ export default function LuksoComponent({
     setIsLoadingMintedData(true)
     if (singleInitData === undefined)
       return void LogError(Module.Lukso, 'Missing single data!!!!!')
-    console.log(singleInitData.features)
     let combinationId = ''
     for (const {
       val
@@ -286,7 +285,6 @@ export default function LuksoComponent({
       )
     }
     combinationId = combinationId.slice(0, combinationId.length - 1)
-    console.log(combinationId)
     setCombination(combinationId)
     await takePicture();
     setIsLoadingMintedData(false)
@@ -414,7 +412,7 @@ export default function LuksoComponent({
     const avatarMetadata = await getIPFSData(tokensMetadata[0])
     const { LSP4Metadata } = avatarMetadata
     const features = Object.entries(LSP4Metadata.body).map(
-      ([key, bodyPart]: Array<string | BodyPart>, index) => {
+      ([,bodyPart]: Array<string | BodyPart>, index) => {
         return {
           index,
           val: bodyPart,
