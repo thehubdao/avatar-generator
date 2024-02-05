@@ -39,7 +39,6 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
   const [isLoading, setIsLoading] = useState(false)
 
-const divLoader = useRef<HTMLDivElement>()
 
   useEffect(() => {
     const setAvatarSupplyPromise = async () => {
@@ -222,13 +221,13 @@ const divLoader = useRef<HTMLDivElement>()
                 fill
                 style={{  /* objectFit: "cover"  */}}
                 className=""
-                onAnimationStart={()=>{
-                  console.log("LOADING TRUE")
+
+                onLoadStart={()=>{
                   setIsLoading(true)}}
                 onLoad={()=>{
-                  console.log("LOADING FALSE")
                   setIsLoading(false)}}
                 hidden={isLoading}
+                placeholder="blur"
               />
             </div>
             <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">
