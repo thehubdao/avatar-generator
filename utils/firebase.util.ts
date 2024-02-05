@@ -764,8 +764,7 @@ export async function GetAllCombinations(campaign:string, fromStatus:keyof typeo
 
 
   const combinationCollection1 = collection(await FirebaseUtil.Instance().DB(), location)
-
-  const whereQuery = query(combinationCollection1, where("downloadedStatus", "==", fromStatus))
+  const whereQuery = query(combinationCollection1, where("downloadedStatus", "==", AVATAR_DOWNLOADED_STATUS[fromStatus]))
 
   const resultDocs = (await getDocs(whereQuery)).docs
 

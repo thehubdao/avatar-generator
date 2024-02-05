@@ -245,9 +245,9 @@ export default function LuksoComponent({
 
     async function getSingleData() {
         const combinations = await GetAllCombinations('lukso female b','NotDownloaded')
-        combinations.forEach(async ()=>{
+        combinations.forEach(async (combination)=>{
             const numResult = await GetAvatarSingleByCampaignCombinationString(
-                Client.Lukso
+                Client.Lukso, combination.get('indexValues')
             )
             const result: SingleInterface | undefined = numResult.success
                 ? numResult.value
@@ -270,7 +270,7 @@ export default function LuksoComponent({
                     await SaveFile(modelPromise.value,`${combinationId}.glb`);
                 
             }
-            void downloadGLB()
+            await downloadGLB()
         })
 
 
