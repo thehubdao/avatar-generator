@@ -1,4 +1,4 @@
-import { GetAvatarStatus, GetParameter, UpdateDocObject } from "./firebase.util";
+import { GetAvatarDownloadedStatus, GetAvatarStatus, GetParameter, UpdateDocObject } from "./firebase.util";
 import { FirestoreLocation } from "../enums/firebase.enum";
 import { FeatureInterface } from "../interfaces/api.interface";
 import {
@@ -338,5 +338,11 @@ export const isCombinationNotMinted = async (combinationString: string) => {
   const combinationStatus = await GetAvatarStatus(combinationString)
   if (combinationStatus === 'n') return true
   if(combinationStatus === 'm')return false
+}
+
+export const isCombinationDownloaded = async (combinationString: string) => {
+  const combinationStatus = await GetAvatarDownloadedStatus(combinationString)
+  if (combinationStatus === 'd') return true
+  if(combinationStatus === 'n')return false
 }
 

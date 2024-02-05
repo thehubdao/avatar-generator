@@ -1,5 +1,5 @@
 import { FirebaseApp, FirebaseOptions } from "@firebase/app";
-import { Firestore, QueryConstraint, doc, getDoc, setDoc, query, where,limit, getDocs, collection } from "@firebase/firestore";
+import { Firestore, QueryConstraint, doc, getDoc, setDoc, query, where, limit, getDocs, collection } from "@firebase/firestore";
 import { FirebaseStorage } from "@firebase/storage";
 import { Auth, User, UserCredential } from "@firebase/auth";
 import { FirebaseError } from "@firebase/util";
@@ -36,6 +36,13 @@ export const AVATAR_STATUS = {
   Minted: "m",
   NotMinted: "n",
 } as const;
+
+
+export const AVATAR_DOWNLOADED_STATUS = {
+  Downloaded: "d",
+  NotDownloaded: "n",
+} as const;
+
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -719,17 +726,53 @@ export async function GetAvatarStatus(combinationIndexes: string) {
   if (combinationIndexes == undefined)
     Raise("Missing avatarId to get status!");
   const location = `collection/${await FirebaseUtil.Instance().Lukso()}/nft`;
-    const combinationCollection = collection(await FirebaseUtil.Instance().DB(), location)
-    const whereQuery = query(combinationCollection, where("indexValues", "==", combinationIndexes))
-    const resultDoc = (await getDocs(whereQuery)).docs[0].ref
-    const status = await getDoc(resultDoc);
+  const combinationCollection = collection(await FirebaseUtil.Instance().DB(), location)
+  const whereQuery = query(combinationCollection, where("indexValues", "==", combinationIndexes))
+  const resultDoc = (await getDocs(whereQuery)).docs[0].ref
+  const status = await getDoc(resultDoc);
 
-    return status.get('status') as string
+  return status.get('status') as string
 
 
 }
 
-export async function GetRandomCombination(){
+export async function UpdateDownloadedAvatarStatus(combinationIndexes: string, downloadedStatus: keyof typeof AVATAR_DOWNLOADED_STATUS) {
+  if (combinationIndexes == undefined) Raise("Missing avatarId to update status!");
+
+  const location = `collection/${await FirebaseUtil.Instance().Lukso()}/nft`;
+  const combinationCollection = collection(await FirebaseUtil.Instance().DB(), location)
+  const whereQuery = query(combinationCollection, where("indexValues", "==", combinationIndexes))
+  const resultDoc = (await getDocs(whereQuery)).docs[0].ref
+
+  await setDoc(resultDoc, { downloadedStatus: AVATAR_DOWNLOADED_STATUS[downloadedStatus] }, { merge: true });
+}
+
+export async function GetAvatarDownloadedStatus(combinationIndexes: string) {
+  if (combinationIndexes == undefined)
+    Raise("Missing avatarId to get status!");
+  const location = `collection/${await FirebaseUtil.Instance().Lukso()}/nft`;
+  const combinationCollection = collection(await FirebaseUtil.Instance().DB(), location)
+  const whereQuery = query(combinationCollection, where("indexValues", "==", combinationIndexes))
+  const resultDoc = (await getDocs(whereQuery)).docs[0].ref
+  const status = await getDoc(resultDoc);
+
+  return status.get('downloadedStatus') as string
+}
+
+export async function GetAllCombinations(campaign:string, fromStatus:keyof typeof AVATAR_DOWNLOADED_STATUS) { 
+  const location = `collection/${campaign}/nft`;
+
+
+  const combinationCollection1 = collection(await FirebaseUtil.Instance().DB(), location)
+
+  const whereQuery = query(combinationCollection1, where("downloadedStatus", "==", fromStatus))
+
+  const resultDocs = (await getDocs(whereQuery)).docs
+
+  return resultDocs
+}
+
+export async function GetRandomCombination() {
   const location = `collection/${await FirebaseUtil.Instance().Lukso()}/nft`;
   try {
     const combinationCollection = collection(await FirebaseUtil.Instance().DB(), location)
@@ -737,11 +780,11 @@ export async function GetRandomCombination(){
     const whereQuery = query(limitQuery, where("status", "==", "n"))
 
     const combinations = (await getDocs(whereQuery)).docs
-    const randomIndex =  Math.round(Math.random()*combinations.length) 
-    const combination = await getDoc(combinations[randomIndex].ref);  
+    const randomIndex = Math.round(Math.random() * combinations.length)
+    const combination = await getDoc(combinations[randomIndex].ref);
     return combination.get('indexValues') as string
 
   } catch (error) {
-    return 
+    return
   }
 }

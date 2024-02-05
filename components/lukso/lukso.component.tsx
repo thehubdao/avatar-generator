@@ -73,7 +73,7 @@ import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
 import AvatarBuilder from '../avatar/builder.component'
-import { UpdateAvatarStatus } from '../../utils/firebase.util'
+import { GetAllCombinations, UpdateAvatarStatus, UpdateDownloadedAvatarStatus } from '../../utils/firebase.util'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -244,31 +244,35 @@ export default function LuksoComponent({
     }
 
     async function getSingleData() {
-        const numResult = await GetAvatarSingleByCampaignCombinationString(
-            Client.Lukso
-        )
-        const result: SingleInterface | undefined = numResult.success
-            ? numResult.value
-            : undefined
-        singleInitData = result
-        setSingleData(singleInitData);
-        if(!numResult.success) return 
-        let combinationId = ''
-        for (const feature of numResult.value.features) {
-            const { val } = feature
-            const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
-            tokenMetadata.body[bodyIndex] = val as BodyPart
-            combinationId += val.index.toString() + '-'
-        }
-        combinationId = combinationId.slice(0, combinationId.length - 1)
-        await UpdateAvatarStatus(combinationId, "Minted")
-        async function downloadGLB() {
-            const modelPromise = await GetAvatarGLB()
-            if (modelPromise.success)
-                await SaveFile(modelPromise.value,`${combinationId}.glb`);
-            
-        }
-        void downloadGLB()
+        const combinations = await GetAllCombinations('lukso female b','NotDownloaded')
+        combinations.forEach(async ()=>{
+            const numResult = await GetAvatarSingleByCampaignCombinationString(
+                Client.Lukso
+            )
+            const result: SingleInterface | undefined = numResult.success
+                ? numResult.value
+                : undefined
+            singleInitData = result
+            setSingleData(singleInitData);
+            if(!numResult.success) return 
+            let combinationId = ''
+            for (const feature of numResult.value.features) {
+                const { val } = feature
+                const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
+                tokenMetadata.body[bodyIndex] = val as BodyPart
+                combinationId += val.index.toString() + '-'
+            }
+            combinationId = combinationId.slice(0, combinationId.length - 1)
+            await UpdateDownloadedAvatarStatus(combinationId, "Downloaded")
+            async function downloadGLB() {
+                const modelPromise = await GetAvatarGLB()
+                if (modelPromise.success)
+                    await SaveFile(modelPromise.value,`${combinationId}.glb`);
+                
+            }
+            void downloadGLB()
+        })
+
 
     }
 
@@ -293,10 +297,9 @@ export default function LuksoComponent({
     }
 
     async function reRoll() {
+
         await getSingleData()
         await loadSingleData()
-        await reRoll()
-
     }
 
     async function updateStage(isEditMode: boolean) {

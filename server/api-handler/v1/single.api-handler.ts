@@ -10,7 +10,7 @@ import {
   GetMaxCombinationNum,
   GetMaxIndexValues,
   IndexValuesStringToNumber,
-  NumberToIndexValues, RandomIndexValues, StringToIndexValues, isCombinationNotMinted
+  NumberToIndexValues, RandomIndexValues, StringToIndexValues, isCombinationDownloaded, isCombinationNotMinted
 } from "../../../utils/collection.util";
 import { Base64ToObj, CastStringToInteger, LogError, Raise } from "../../../utils/common.util";
 import { EXPORT_ATTRIBUTE, GLOBAL_VALUES } from "../../../constants/common.constant";
@@ -61,12 +61,6 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
     isRandom = true;
     combinationNum = RandomIndexValues(maxIndexValues, randomBalance, featureValues.featureOptionListData);
     let combinationString = Array.from(combinationNum.values()).toString().replaceAll(',','-')
-    let isNotMinted = await isCombinationNotMinted(combinationString)
-   while (!isNotMinted) {
-    combinationNum = RandomIndexValues(maxIndexValues, randomBalance, featureValues.featureOptionListData);
-    combinationString = Array.from(combinationNum.values()).toString().replaceAll(',','-')
-     isNotMinted = await isCombinationNotMinted(combinationString)
-   } 
   }
 
   // Try get combination
