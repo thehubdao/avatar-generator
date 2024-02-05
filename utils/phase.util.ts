@@ -1,4 +1,3 @@
-import { ethers } from 'ethers'
 import mintWhitelist from '../constants/lukso/mintWhitelist.json'
 import { Phase, phaseMap } from '../types/avatar.type'
 
@@ -11,11 +10,9 @@ export const isAddressWhitelisted = (address: string | undefined) => {
 
 export const canMint = (address: string | undefined) => {
     if (!address) return false
-
-    const formatedAddress = ethers.getAddress(address)
     
     if (currentPhase === phaseMap.publicMintPhase) return true
-    if (currentPhase === phaseMap.whitelistPhase && isAddressWhitelisted(formatedAddress)) return true
+    if (currentPhase === phaseMap.whitelistPhase && isAddressWhitelisted(address)) return true
 
     return false
 }
