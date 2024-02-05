@@ -23,11 +23,11 @@ const luksoNetwork = {
 
 const chains = [luksoNetwork]
 
-/* const appInfo = {
+ const appInfo = {
     name: 'Avatar Lukso',
-    icon: '/my_app_icon.svg',
-    logo: '<svg> ... </svg>',
-    description: 'My LUKSO App using Web3-Onboard',
+    icon: '/resources/images/the-hub-logo-web.svg',
+    logo: '/resources/images/the-hub-logo-web.svg',
+    description: 'LUKSO CITIZENS',
     recommendedInjectedWallets: [
         {
             name: 'Universal Profiles',
@@ -35,7 +35,7 @@ const chains = [luksoNetwork]
         },
     ],
 
-} */
+} 
 
 const connectionOptions: ConnectModalOptions = {
     iDontHaveAWalletLink: UP_BROWSER_EXTENSION_URL,
@@ -64,7 +64,7 @@ const wallets = [
 const web3Onboard = init({
     wallets,
     chains,
-    /*     appMetadata: appInfo, */
+appMetadata: appInfo, 
     connect: connectionOptions,
     i18n,
     accountCenter: {

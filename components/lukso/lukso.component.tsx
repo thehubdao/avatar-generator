@@ -10,7 +10,6 @@ import AvatarEditor, {
   ChangeSkinColor,
   ChangeStartAnimation,
   GetAvatarGLB,
-  GetAvatarVRM,
   RemoveStage,
   SetEnvironment,
   SetFeaturesData,
@@ -385,9 +384,8 @@ export default function LuksoComponent({
     exportData.attributesBase64 = window.btoa(
       JSON.stringify(exportData.attributes)
     )
-    const [picturePromise, VRMPromise, modelPromise] = await Promise.all([
+    const [picturePromise, modelPromise] = await Promise.all([
       TakeCanvasPicture(''),
-      GetAvatarVRM(),
       GetAvatarGLB(),
     ])
     exportData.picture = picturePromise
@@ -396,7 +394,6 @@ export default function LuksoComponent({
     if (isOnIFrame) {
       IFrameExportData(exportData)
     } else {
-      if (VRMPromise.success) await SaveFile(VRMPromise.value, 'model.vrm')
       if (exportData.model != undefined)
         await SaveFile(exportData.model, 'model.glb')
       await SaveFile(exportData.picture, 'picture.png')

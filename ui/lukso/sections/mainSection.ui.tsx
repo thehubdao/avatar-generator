@@ -142,7 +142,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             aditionalClass="flex-row"
           >
             <div className="flex items-center gap-3">
-              <p className="text-black text-lg 2xl:text-xl">Login to Get Your Citizen</p>
+              <p className="text-black text-lg 2xl:text-xl">Login</p>
               <FaWallet className="text-black text-2xl" />
             </div>
           </TransparentBox>
