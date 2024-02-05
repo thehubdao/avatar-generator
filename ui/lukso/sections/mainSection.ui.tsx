@@ -14,6 +14,7 @@ import { getSupply } from "../../../utils/web3/contract.util";
 import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
 import { useConnectWallet } from "@web3-onboard/react";
 import { canMint } from "../../../utils/phase.util";
+import LoadingUI from "./loadingSection.ui";
 
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
@@ -36,7 +37,9 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
   const [{ wallet }] = useConnectWallet()
 
+  const [isLoading, setIsLoading] = useState(false)
 
+const divLoader = useRef<HTMLDivElement>()
 
   useEffect(() => {
     const setAvatarSupplyPromise = async () => {
@@ -210,13 +213,22 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
           >
             <div className="relative w-full h-1/2 overflow-hidden border-b-2 border-white flex justify-end
             flex-col bg-[#d59fba]">
+              {isLoading && <LoadingUI getloaderDivElement={()=>{}} />}
               <Image
                 src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png`}
                 alt="lukso avatar selfie view"
+/*                 width={384}
+                height={384} */
                 fill
                 style={{  /* objectFit: "cover"  */}}
                 className=""
-
+                onAnimationStart={()=>{
+                  console.log("LOADING TRUE")
+                  setIsLoading(true)}}
+                onLoad={()=>{
+                  console.log("LOADING FALSE")
+                  setIsLoading(false)}}
+                hidden={isLoading}
               />
             </div>
             <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">
