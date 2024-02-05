@@ -213,8 +213,6 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
               <Image
                 src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png`}
                 alt="lukso avatar selfie view"
-/*                 width={384}
-                height={384} */
                 fill
                 style={{  /* objectFit: "cover"  */}}
                 className=""
