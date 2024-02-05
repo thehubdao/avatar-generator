@@ -227,7 +227,6 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
                 onLoad={()=>{
                   setIsLoading(false)}}
                 hidden={isLoading}
-                placeholder="blur"
               />
             </div>
             <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">

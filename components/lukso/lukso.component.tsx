@@ -449,7 +449,7 @@ export default function LuksoComponent({
     } catch (error) {
       return {
         message:
-          "Looks like you've already claimed your avatar! Remember, each explorer gets just one.",
+          "Something went wrong. Please try again",
         success: false,
       }
     }
