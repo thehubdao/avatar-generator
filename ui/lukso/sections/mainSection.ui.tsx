@@ -21,11 +21,12 @@ interface MainSectionUIProps {
   provider: ethers.BrowserProvider | undefined;
   isGettingInfoAboutHasMinted: boolean;
   picture: string;
+  combination:string;
 }
 
 
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, picture }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, picture, combination }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
@@ -207,13 +208,17 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             paddingClass="px-0"
             justifyClass="justify-start"
           >
-            <div className="relative w-full h-1/2 overflow-hidden border-b-2 border-white">
+            <div className="relative w-full h-1/2 overflow-hidden border-b-2 border-white flex justify-end
+            flex-col bg-[#d59fba]">
               <Image
-                src={picture}
-                fill
+                src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png`}
                 alt="lukso avatar selfie view"
-                style={{ objectFit: "cover" }}
-                className="origin-top scale-[300%] -translate-y-1/4"
+/*                 width={384}
+                height={384} */
+                fill
+                style={{  /* objectFit: "cover"  */}}
+                className=""
+
               />
             </div>
             <p className="grow flex items-center text-sm 2xl:text-base mx-10 2xl:mx-14">

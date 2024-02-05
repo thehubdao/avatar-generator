@@ -22,7 +22,8 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ["firebasestorage.googleapis.com"],
+    domains: ["firebasestorage.googleapis.com", "nftstorage.link"],
+
   },
   async headers() {
     return [

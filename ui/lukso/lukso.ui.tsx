@@ -20,6 +20,7 @@ interface LuksoUIProps {
   isGettingInfoAboutHasMinted: boolean;
   features?: IndexFeatureInterface[];
   picture:string;
+  combination:string;
 }
 
 export default function LuksoUI({
@@ -36,15 +37,16 @@ export default function LuksoUI({
   isGettingInfoAboutHasMinted,
   features,
   picture,
+  combination
 }: LuksoUIProps) {
 
 
   return (
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
-      {(currentSection === LuksoSections.Main) && <MainSectionUI picture={picture} setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} provider={provider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}/>}
+      {(currentSection === LuksoSections.Main) && <MainSectionUI combination={combination} picture={picture} setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} provider={provider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}/>}
       {(currentSection === LuksoSections.Mint) && <MintSectionUI picture={picture} features={features} setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} provider={provider} />}
-      {(currentSection === LuksoSections.Edit) && <EditSectionUI features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
+      {(currentSection === LuksoSections.Edit) && <EditSectionUI combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
     </div>
   )
 }
