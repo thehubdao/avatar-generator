@@ -10,7 +10,7 @@ import {
   GetMaxCombinationNum,
   GetMaxIndexValues,
   IndexValuesStringToNumber,
-  NumberToIndexValues, RandomIndexValues, StringToIndexValues, isCombinationDownloaded, isCombinationNotMinted
+  NumberToIndexValues, RandomIndexValues, StringToIndexValues
 } from "../../../utils/collection.util";
 import { Base64ToObj, CastStringToInteger, LogError, Raise } from "../../../utils/common.util";
 import { EXPORT_ATTRIBUTE, GLOBAL_VALUES } from "../../../constants/common.constant";
@@ -60,7 +60,6 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
     // random
     isRandom = true;
     combinationNum = RandomIndexValues(maxIndexValues, randomBalance, featureValues.featureOptionListData);
-    let combinationString = Array.from(combinationNum.values()).toString().replaceAll(',','-')
   }
 
   // Try get combination

@@ -73,7 +73,7 @@ import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
 import AvatarBuilder from '../avatar/builder.component'
-import { GetAllCombinations, UpdateAvatarStatus, UpdateDownloadedAvatarStatus } from '../../utils/firebase.util'
+import { GetAllCombinations, UpdateDownloadedAvatarStatus } from '../../utils/firebase.util'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -245,9 +245,12 @@ export default function LuksoComponent({
 
     async function getSingleData() {
         const combinations = await GetAllCombinations('lukso female b','NotDownloaded')
-        combinations.forEach(async (combination)=>{
+        for (let index = 0; index < combinations.length; index++) {
+            const combination = combinations[index]
+            
+        
             const numResult = await GetAvatarSingleByCampaignCombinationString(
-                Client.Lukso, combination.get('indexValues')
+                Client.Lukso, combination.get('indexValues') as string
             )
             const result: SingleInterface | undefined = numResult.success
                 ? numResult.value
@@ -264,14 +267,15 @@ export default function LuksoComponent({
             }
             combinationId = combinationId.slice(0, combinationId.length - 1)
             await UpdateDownloadedAvatarStatus(combinationId, "Downloaded")
-            async function downloadGLB() {
+
+            const downloadGLB = async () => {
                 const modelPromise = await GetAvatarGLB()
                 if (modelPromise.success)
                     await SaveFile(modelPromise.value,`${combinationId}.glb`);
                 
             }
-            await downloadGLB()
-        })
+            void downloadGLB()}
+        
 
 
     }
