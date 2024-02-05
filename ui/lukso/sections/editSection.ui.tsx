@@ -46,6 +46,7 @@ export default function EditSectionUI({combination, exportModel, features }: Edi
           heightClass="grow"
           borderSizeClass="border-t-0 border-b-0"
         >
+          
           <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px]">
             <Image
               src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png`}
