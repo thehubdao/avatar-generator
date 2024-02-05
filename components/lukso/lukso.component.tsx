@@ -106,7 +106,6 @@ export default function LuksoComponent({
   const selectListAccessories = useRef<FeatureBasic[]>(
     campaignParams?.accessories ?? []
   )
-  const [singleData, setSingleData] = useState<SingleInterface | undefined>()
 
   // Loading flags
   const [currentSection, setCurrentSection] = useState<LuksoSections>(
@@ -168,14 +167,12 @@ export default function LuksoComponent({
     void setTokensMetadataPromise()
   }, [provider])
 
-  useEffect(() => {
+/*   useEffect(() => {
     if (!hasMinted) return
     void onAvatarBuilderReady()
-  }, [hasMinted])
+  }, [hasMinted]) */
 
   async function onAvatarBuilderReady() {
-    setIsLoadingMintedData(true)
-
     await Promise.all([
       getFeatureList(),
       getAccessoryList(),
@@ -214,7 +211,6 @@ export default function LuksoComponent({
       !hasMinted && setCurrentSection(LuksoSections.Main)
     })
 
-    setIsLoadingMintedData(false)
   }
 
   async function takePicture() {
@@ -251,7 +247,6 @@ export default function LuksoComponent({
       Client.Lukso,
       campaignParams.config.defAvatarCombination
     )
-    setSingleData(result.success ? result.value : undefined);
     singleInitData = result.success ? result.value : undefined
   }
 
@@ -263,28 +258,24 @@ export default function LuksoComponent({
       ? numResult.value
       : undefined
     singleInitData = result
-    setSingleData(singleInitData);
-    if (!singleInitData) return
-    let combinationId = ''
-    for (const feature of singleInitData.features) {
-      const { val } = feature
-      const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
-      tokenMetadata.body[bodyIndex] = val as BodyPart
-      combinationId += val.index.toString() + '-'
-    }
-    combinationId = combinationId.slice(0, combinationId.length - 1)
-    setCombination(combinationId)
+
   }
 
   async function loadSingleData() {
     // Iterate the features
     // Place the features on the model
+    setIsLoadingMintedData(true)
     if (singleInitData === undefined)
       return void LogError(Module.Lukso, 'Missing single data!!!!!')
-
+    console.log(singleInitData.features)
+    let combinationId = ''
     for (const {
-      val: { id, path, type, name },
+      val
     } of singleInitData.features) {
+      const { id, path, type, name } = val
+      const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
+      tokenMetadata.body[bodyIndex] = val as BodyPart
+      combinationId += val.index.toString() + '-'
       // Set feature on model
       await ChangeFeature(
         id,
@@ -294,7 +285,12 @@ export default function LuksoComponent({
         campaignParams?.config.skin?.defColor ?? 'ffffff'
       )
     }
+    combinationId = combinationId.slice(0, combinationId.length - 1)
+    console.log(combinationId)
+    setCombination(combinationId)
     await takePicture();
+    setIsLoadingMintedData(false)
+
   }
 
   async function reRoll() {
@@ -418,24 +414,26 @@ export default function LuksoComponent({
     const avatarMetadata = await getIPFSData(tokensMetadata[0])
     const { LSP4Metadata } = avatarMetadata
     const features = Object.entries(LSP4Metadata.body).map(
-      ([key, bodyPart]: Array<string | BodyPart>) => {
+      ([key, bodyPart]: Array<string | BodyPart>, index) => {
         return {
-          index: Number(key),
+          index,
           val: bodyPart,
         } as IndexFeatureInterface
       }
     )
-    setSingleData({ random: false, features });
+    singleInitData = { random: false, features }
+    await loadSingleData()
+
     setHasMinted(true)
   }
 
   async function handleClaim(address: string) {
-    if (!singleData)
+    if (!singleInitData)
       return {
         message: 'Error claiming citizen, please try again later!',
         success: false,
       }
-    const { features } = singleData
+    const { features } = singleInitData
 
     let combinationId = ''
     try {
@@ -609,9 +607,9 @@ export default function LuksoComponent({
           hasMinted={hasMinted}
           provider={provider}
           isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
-          features={singleData?.features}
+          features={singleInitData?.features}
           picture={picture}
-          combination = {combination}
+          combination={combination}
         />
       </div>
     </MobileLayout>

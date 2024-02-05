@@ -20,7 +20,7 @@ function ConnectModalUI({ setIsConnecting }: ConnectModalUIProps) {
             <ConnectWeb3Button onConnect={onConnect} classStyles="h-fit" >
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                 <div className="flex items-center gap-3">
-                  <p className="text-black">Login to Get Your Citizen</p>
+                  <p className="text-black">Login</p>
                 </div>
               </TransparentBoxUI>
             </ConnectWeb3Button>
