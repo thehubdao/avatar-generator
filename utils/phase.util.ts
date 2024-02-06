@@ -13,8 +13,8 @@ export const canMint = (address: string | undefined) => {
     if (!address) return false
 
     const formattedAddress = getAddress(address)
-
-    console.log(formattedAddress, address, isAddressWhitelisted(formattedAddress))
+/* 
+    console.log(formattedAddress, address, isAddressWhitelisted(formattedAddress)) */
 
     if (!formattedAddress) return false
 
