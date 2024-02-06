@@ -244,32 +244,22 @@ export default function LuksoComponent({
         singleInitData = result.success ? result.value : undefined
     }
 
-    async function getSingleData(combination?:QueryDocumentSnapshot) {
-        if(!combination) return
+    async function getSingleData(combination?: QueryDocumentSnapshot) {
+        if (!combination) return
         const combinationId = combination.get('indexValues') as string
-        if(!combinationId) return
-           
-        
-            const numResult = await GetAvatarSingleByCampaignCombinationString(
-                Client.Lukso,  combinationId 
-            )
-            const result: SingleInterface | undefined = numResult.success
-                ? numResult.value
-                : undefined
-            singleInitData = result
-            setSingleData(singleInitData);
-            if(!numResult.success) return 
-            await UpdateDownloadedAvatarStatus(combinationId, "Downloaded")
+        if (!combinationId) return
 
-            const downloadGLB = async () => {
-                const modelPromise = await GetAvatarGLB()
-                if (modelPromise.success)
-                    await SaveFile(modelPromise.value,`${combinationId}.glb`);
-                
-            }
-            void downloadGLB()
-        
 
+        const numResult = await GetAvatarSingleByCampaignCombinationString(
+            Client.Lukso, combinationId
+        )
+        const result: SingleInterface | undefined = numResult.success
+            ? numResult.value
+            : undefined
+        singleInitData = result
+        setSingleData(singleInitData);
+        if (!numResult.success) return
+        await UpdateDownloadedAvatarStatus(combinationId, "Downloaded")
 
     }
 
@@ -278,9 +268,9 @@ export default function LuksoComponent({
         // Place the features on the model
         if (singleInitData === undefined)
             return void LogError(Module.Lukso, 'Missing single data!!!!!')
-
+        let combinationId = ''
         for (const {
-            val: { id, path, type, name },
+            val: { id, path, type, name, index },
         } of singleInitData.features) {
             // Set feature on model
             await ChangeFeature(
@@ -290,15 +280,26 @@ export default function LuksoComponent({
                 type,
                 campaignParams?.config.skin?.defColor ?? 'ffffff'
             )
+            combinationId += index.toString() + '-'
+
         }
+        combinationId = combinationId.slice(0, combinationId.length - 1)
+        const downloadGLB = async () => {
+            const modelPromise = await GetAvatarGLB()
+            if (modelPromise.success)
+                await SaveFile(modelPromise.value, `${combinationId}.glb`);
+
+        }
+        await downloadGLB()
     }
 
     async function reRoll() {
-        const combinations = await GetAllCombinations('lukso female b','NotDownloaded')
+        const combinations = await GetAllCombinations('lukso female b', 'NotDownloaded')
         for (let index = 0; index < combinations.length; index++) {
             const combination = combinations[index]
-        await getSingleData(combination)
-        await loadSingleData()}
+            await getSingleData(combination)
+            await loadSingleData()
+        }
     }
 
     async function updateStage(isEditMode: boolean) {
@@ -434,7 +435,7 @@ export default function LuksoComponent({
                 success: false,
             }
         const { features } = singleData
-        
+
         let combinationId = ''
         try {
             for (const feature of features) {
