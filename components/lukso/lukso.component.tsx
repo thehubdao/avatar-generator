@@ -257,8 +257,6 @@ export default function LuksoComponent({
       ? numResult.value
       : undefined
     singleInitData = result
-    console.log(result, "RESULT")
-
   }
 
   async function loadSingleData() {
@@ -285,7 +283,6 @@ export default function LuksoComponent({
       )
     }
     combinationId = combinationId.slice(0, combinationId.length - 1)
-    console.log(combinationId)
     setCombination(combinationId)
     await takePicture();
     setIsLoadingMintedData(false)
@@ -440,11 +437,9 @@ export default function LuksoComponent({
         const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
         tokenMetadata.body[bodyIndex] = val as BodyPart
         tokenMetadata.attributes.push({key:bodyIndex, value:val.name, type:'string'})
-        console.log(val)
         combinationId += val.index.toString() + '-'
       }
       combinationId = combinationId.slice(0, combinationId.length - 1)
-      console.log(combinationId, "UPLOAD METADATA")
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
 
 
