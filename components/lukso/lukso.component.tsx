@@ -437,7 +437,7 @@ export default function LuksoComponent({
         const { val } = feature
         const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
         tokenMetadata.body[bodyIndex] = val as BodyPart
-        tokenMetadata.attributes?.push({key:bodyIndex, value:val.name, type:'string'})
+        tokenMetadata.attributes.push({key:bodyIndex, value:val.name, type:'string'})
         combinationId += val.index.toString() + '-'
       }
       combinationId = combinationId.slice(0, combinationId.length - 1)
