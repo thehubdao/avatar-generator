@@ -10,7 +10,7 @@ const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY
 export const mint = async (address: string, metadataUrl: string, combinationId:string) => {
     const mintRequest = await PostRequest<string>(`${LUKSO_BACKEND_URL}/avatarService/mint`, { address, metadataUrl })
     if (!mintRequest.success) throw new Error("Error minting") 
-    await UpdateAvatarStatus(combinationId, "Minted")
+    /* await UpdateAvatarStatus(combinationId, "Minted") */
 }
 
 export const getTokensMetadata = async (address: string) => {
