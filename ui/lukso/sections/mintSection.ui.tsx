@@ -69,6 +69,11 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
     void gsapEnterBlocks();
   }, [])
 
+  const handleMint = () => {
+    if (isShuffling || waitingCounterToMakeReshuffle !== 0) return;
+    setIsMinting(true)
+  }
+
   return (
     <section className={`flex w-full h-full items-center justify-between`}>
       <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isShuffling ? 'flex' : 'hidden'}`}>
@@ -114,7 +119,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
             </div>
           </TransparentBox>
         </button>
-        <button className="w-full h-fit" onClick={() => setIsMinting(true)}>
+        <button className="w-full h-fit" onClick={() => handleMint() }>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
               Claim
