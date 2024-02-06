@@ -12,6 +12,7 @@ export type TokenMetadata = {
     description: string | "",
     GLBUrl: string,
     images?: Array<Array<TokenMetadataImage>>
+    attributes?: Array<{ key: string, value: string, type: string }>
     links?: [], assets?: [],
     body: {
         head?: BodyPart
