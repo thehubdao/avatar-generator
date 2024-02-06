@@ -116,7 +116,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
           </p>
           <SocialButtonsUI />
           <div className="font-semibold">
-            <p>PUBLIC MINT</p>
+            <p>Senators Mint</p>
           </div>
         </TransparentBox>
       </div>
