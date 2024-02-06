@@ -432,17 +432,19 @@ export default function LuksoComponent({
 
     let combinationId = ''
     try {
+      tokenMetadata.attributes = []
       for (const feature of features) {
         const { val } = feature
         const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
         tokenMetadata.body[bodyIndex] = val as BodyPart
+        tokenMetadata.attributes?.push({key:bodyIndex, value:val.name, type:'string'})
         combinationId += val.index.toString() + '-'
       }
       combinationId = combinationId.slice(0, combinationId.length - 1)
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
 
 
-      await mint(address, metadataUrl, combinationId)
+      await mint(address, metadataUrl, /* combinationId */)
       await setTokensMetadata(address)
 
       return { message: 'Your citizen has been created!', success: true }
