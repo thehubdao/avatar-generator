@@ -739,7 +739,7 @@ export async function GetAvatarStatus(combinationIndexes: string) {
 export async function UpdateDownloadedAvatarStatus(combinationIndexes: string, downloadedStatus: keyof typeof AVATAR_DOWNLOADED_STATUS) {
   if (combinationIndexes == undefined) Raise("Missing avatarId to update status!");
 
-  const location = `collection/${await FirebaseUtil.Instance().Lukso()}/nft`;
+  const location = `collection/${'lukso female b'}/nft`;
   const combinationCollection = collection(await FirebaseUtil.Instance().DB(), location)
   const whereQuery = query(combinationCollection, where("indexValues", "==", combinationIndexes))
   const resultDoc = (await getDocs(whereQuery)).docs[0].ref
@@ -750,7 +750,7 @@ export async function UpdateDownloadedAvatarStatus(combinationIndexes: string, d
 export async function GetAvatarDownloadedStatus(combinationIndexes: string) {
   if (combinationIndexes == undefined)
     Raise("Missing avatarId to get status!");
-  const location = `collection/${await FirebaseUtil.Instance().Lukso()}/nft`;
+  const location = `collection/${'lukso female b'}/nft`;
   const combinationCollection = collection(await FirebaseUtil.Instance().DB(), location)
   const whereQuery = query(combinationCollection, where("indexValues", "==", combinationIndexes))
   const resultDoc = (await getDocs(whereQuery)).docs[0].ref
