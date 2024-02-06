@@ -25,8 +25,8 @@ const chains = [luksoNetwork]
 
  const appInfo = {
     name: 'Avatar Lukso',
-    icon: '/resources/images/BLUE BG LOGO.png',
-    logo: '/resources/images/BLUE BG LOGO.png',
+    icon: '/resources/images/the-hub-logo-web.svg',
+    logo: '/resources/images/the-hub-logo-web.svg',
     description: 'LUKSO CITIZENS',
     recommendedInjectedWallets: [
         {
