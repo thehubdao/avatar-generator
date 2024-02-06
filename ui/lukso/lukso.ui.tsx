@@ -40,6 +40,11 @@ export default function LuksoUI({
   combination
 }: LuksoUIProps) {
 
+  return (
+    <div className="w-full grow text-white text-center">
+      <MintSectionUI picture={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png`} features={features} setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} provider={provider} />
+    </div>
+  )
 
   return (
     <div className="w-full grow text-white text-center">
