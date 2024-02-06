@@ -14,14 +14,21 @@ const luksoProvider = luksoModule()
 const UP_BROWSER_EXTENSION_URL =
     'https://chrome.google.com/webstore/detail/universal-profiles/abpickdkkbnbcoepogfhkhennhfhehfn?hl'
 
-const luksoNetwork = {
+/* const luksoTestnetNetwork = {
     id: '0x42010001',
     token: 'LYXt',
     label: 'Lukso Testnet',
     rpcUrl: 'https://rpc.testnet.lukso.network',
+} */
+
+const luksoMainnetNetwork = {
+    id: '0x42010001',
+    token: 'LYX',
+    label: 'Lukso Mainnet',
+    rpcUrl: 'https://rpc.lukso.gateway.fm',
 }
 
-const chains = [luksoNetwork]
+const chains = [luksoMainnetNetwork]
 
  const appInfo = {
     name: 'Avatar Lukso',
