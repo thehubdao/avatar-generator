@@ -441,9 +441,7 @@ export default function LuksoComponent({
       }
       combinationId = combinationId.slice(0, combinationId.length - 1)
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
-
-
-      await mint(address, metadataUrl, /* combinationId */)
+      await mint(address, metadataUrl, combinationId)
       await setTokensMetadata(address)
 
       return { message: 'Your citizen has been created!', success: true }

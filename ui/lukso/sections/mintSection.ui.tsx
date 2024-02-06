@@ -111,7 +111,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
               {waitingCounterToMakeReshuffle > 0 ? (
-                <p>{`Wait (${waitingCounterToMakeReshuffle} seg)`}</p>
+                <p>{`Wait (${waitingCounterToMakeReshuffle} sec)`}</p>
               ) : (
                 <p>{isShuffling ? 'Shuffling' : 'Reshuffle'}</p>
               )}
