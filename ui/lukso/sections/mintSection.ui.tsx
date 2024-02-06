@@ -30,6 +30,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
 
   const [isShuffling, setIsShuffling] = useState<boolean>(false);
   const [isMinting, setIsMinting] = useState<boolean>(false);
+  const [waitingCounterToMakeReshuffle, setWaitingCounterToMakeReshuffle] = useState<number>(0);
 
   const gsapEnterBlocks = () => {
     if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
@@ -45,11 +46,23 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
     fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION, true, () => setCurrentSection(LuksoSections.Edit));
   }
 
+  const handleWaitingReshuffle = (countValue: number) => {
+    setTimeout(() => {
+      if (countValue >= 0) {
+        setWaitingCounterToMakeReshuffle(countValue);
+        handleWaitingReshuffle(countValue - 1);
+      }
+    }, 1000);
+  }
+
   const handleReRoll = async () => {
-    if (isShuffling) return;
+    if (isShuffling || waitingCounterToMakeReshuffle !== 0) return;
+    const WAIT_COUNTER = 10;
     setIsShuffling(true);
     await reRoll();
+    setWaitingCounterToMakeReshuffle(WAIT_COUNTER);
     setIsShuffling(false);
+    handleWaitingReshuffle(WAIT_COUNTER - 1);
   }
 
   useEffect(() => {
@@ -77,7 +90,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
               src={picture}
               fill
               alt="lukso avatar selfie view"
-/*               style={{ objectFit: 'cover' }} */
+              /*               style={{ objectFit: 'cover' }} */
               className=""
             />
           </div>
@@ -92,7 +105,11 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
         <button className="w-full h-fit" onClick={() => void handleReRoll()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
-              <p>{isShuffling ? 'shuffling' : 'Reshuffle'}</p>
+              {waitingCounterToMakeReshuffle > 0 ? (
+                <p>{`Wait (${waitingCounterToMakeReshuffle} seg)`}</p>
+              ) : (
+                <p>{isShuffling ? 'Shuffling' : 'Reshuffle'}</p>
+              )}
               <BsArrowRepeat className={`${isShuffling ? 'animate-spin' : ''}`} />
             </div>
           </TransparentBox>
