@@ -216,11 +216,9 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
               <Image
                 src={picture}
                 alt="lukso avatar selfie view"
-/*                 width={384}
-                height={384} */
                 fill
-                style={{  /* objectFit: "cover"  */}}
-                className=""
+                style={{ objectFit: "cover"  }}
+                className="origin-top scale-[300%] -translate-y-1/4"
 
                 onLoadStart={()=>{
                   setIsLoading(true)}}
