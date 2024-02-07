@@ -160,7 +160,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
       {/* Exclusive collection */}
       <div ref={exclusiveCollectionRef} className="max-w-[45%] flex flex-row h-[70%] gap-3 translate-x-full">
-        <div className="max-w-[45%] lg:w-[280px] 2xl:w-[345px] h-full flex flex-col">
+        <div className="max-w-[45%] w-[280px] 2xl:w-[345px] h-full flex flex-col">
           <TransparentBox
             fullWidth
             border
