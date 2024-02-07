@@ -2,7 +2,6 @@ import { LUKSO_BACKEND_URL } from "../../constants/common.constant"
 import { TokenMetadata } from "../../types/metadata.type"
 import { GetRequest, PostRequest } from "../api.util"
 import { UpdateAvatarStatus } from "../firebase.util"
-/* import { UpdateAvatarStatus } from "../firebase.util" */
 
 type IpfsResponse = {LSP4Metadata:TokenMetadata}
 
@@ -10,7 +9,7 @@ const IPFS_GATEWAY_URL = 'https://4everland.io/ipfs'
 
 export const mint = async (address: string, metadataUrl: string, combinationId:string) => {
     const mintRequest = await PostRequest<string>(`${LUKSO_BACKEND_URL}/avatarService/mint`, { address, metadataUrl })
-    if (!mintRequest.success) throw new Error("Error minting") 
+    if (!mintRequest.success) throw new Error("Error minting")
     await UpdateAvatarStatus(combinationId, "Minted")
 }
 
