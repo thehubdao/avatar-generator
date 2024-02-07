@@ -87,24 +87,26 @@ export default function HudUI({
     <>
       {/* MOBILE UI */}
       <div className={`fixed flex w-full xl:hidden gap-5 px-10 text-xs font-semibold ${editModeSelected ? 'top-3 justify-around' : 'bottom-5 justify-center'}`}>
-        {editModeSelected
-          ? <>
-            <AGButton full onClickEvent={() => changeView()}>
-              <p>BACK</p>
-            </AGButton>
-            <AGButton full onClickEvent={() => changeView()}>
-              <p>SAVE</p>
-            </AGButton>
-          </>
-          : <>
-            <AGButton full onClickEvent={() => changeView()}>
-              <p>EDIT</p>
-            </AGButton>
-            <AGButton full onClickEvent={() => exportModel(ModelExtension.VRM)}>
-              <p>EXPORT</p>
-            </AGButton>
-          </>
-        }
+        {!isCustomCampaignHud && <>
+          {editModeSelected
+            ? <>
+              <AGButton full onClickEvent={() => changeView()}>
+                <p>BACK</p>
+              </AGButton>
+              <AGButton full onClickEvent={() => changeView()}>
+                <p>SAVE</p>
+              </AGButton>
+            </>
+            : <>
+              <AGButton full onClickEvent={() => changeView()}>
+                <p>EDIT</p>
+              </AGButton>
+              <AGButton full onClickEvent={() => exportModel(ModelExtension.VRM)}>
+                <p>EXPORT</p>
+              </AGButton>
+            </>
+          }
+        </>}
         {
           <div className={`fixed bottom-0 left-0 w-screen bg-slate-100 ${editModeSelected ? 'h-64' : ' h-0'} transition-all duration-300`}>
             <div className="w-full">

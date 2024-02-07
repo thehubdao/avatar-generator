@@ -78,7 +78,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
         </div>
       </div>
       {/* Lukso Avatars */}
-      <div ref={luksoAvatarRef} className="w-[580px] 2xl:w-[688px] -translate-x-full h-[70%] flex flex-col gap-3">
+      <div ref={luksoAvatarRef} className="max-w-[40%] w-[580px] 2xl:w-[688px] -translate-x-full h-[70%] flex flex-col gap-3">
         <TransparentBox
           fullWidth
           border
@@ -159,8 +159,8 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
       }
 
       {/* Exclusive collection */}
-      <div ref={exclusiveCollectionRef} className="flex h-[70%] gap-3 translate-x-full">
-        <div className="w-[280px] 2xl:w-[345px] h-full flex flex-col">
+      <div ref={exclusiveCollectionRef} className="max-w-[45%] flex flex-row h-[70%] gap-3 translate-x-full">
+        <div className="max-w-[45%] lg:w-[280px] 2xl:w-[345px] h-full flex flex-col">
           <TransparentBox
             fullWidth
             border
@@ -201,7 +201,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
           </TransparentBox>
         </div>
 
-        <div className="w-[280px] 2xl:w-[345px] flex">
+        <div className="w-fit lg:w-[280px] 2xl:w-[345px] flex">
           <TransparentBox
             fullWidth
             border
