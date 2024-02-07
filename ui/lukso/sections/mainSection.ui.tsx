@@ -27,7 +27,7 @@ interface MainSectionUIProps {
 
 
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, picture, combination }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, picture }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
@@ -214,7 +214,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             flex-col bg-[#d59fba]">
               {isLoading && <LoadingUI getloaderDivElement={()=>{}} />}
               <Image
-                src={`https://gateway.pinata.cloud/ipfs/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png`}
+                src={picture}
                 alt="lukso avatar selfie view"
 /*                 width={384}
                 height={384} */
