@@ -95,8 +95,8 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
               src={picture}
               fill
               alt="lukso avatar selfie view"
-              /*               style={{ objectFit: 'cover' }} */
-              className=""
+              style={{ objectFit: 'cover' }} 
+              className="origin-top scale-[300%] -translate-y-1/4"
             />
           </div>
           {features &&
