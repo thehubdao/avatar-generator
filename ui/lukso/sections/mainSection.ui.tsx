@@ -214,7 +214,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             flex-col bg-[#d59fba]">
               {isLoading && <LoadingUI getloaderDivElement={()=>{}} />}
               <Image
-                src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png`}
+                src={`https://gateway.pinata.cloud/ipfs/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png`}
                 alt="lukso avatar selfie view"
 /*                 width={384}
                 height={384} */
