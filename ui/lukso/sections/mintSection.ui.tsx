@@ -70,7 +70,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
   }, [])
 
   const handleMint = () => {
-    if (isShuffling || waitingCounterToMakeReshuffle !== 0) return;
+    if (isShuffling) return;
     setIsMinting(true)
   }
 
@@ -120,7 +120,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
           </TransparentBox>
         </button>
         <button className="w-full h-fit" onClick={() => handleMint() } disabled={isShuffling}>
-          <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" aditionalClass={`${(isShuffling || waitingCounterToMakeReshuffle !== 0) && "opacity-70"}`}>
+          <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" aditionalClass={`${(isShuffling) && "opacity-70"}`}>
             <div className="flex items-center gap-3">
               Claim
               <FaArrowRightLong className="text-base" />
