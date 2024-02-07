@@ -40,7 +40,6 @@ export default function LuksoUI({
   combination
 }: LuksoUIProps) {
 
-
   return (
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
