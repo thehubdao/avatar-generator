@@ -7,11 +7,6 @@ type IpfsResponse = {LSP4Metadata:TokenMetadata}
 
 const IPFS_GATEWAY_URL = 'https://4everland.io/ipfs'
 
-export const mint = async (address: string, metadataUrl: string, combinationId:string) => {
-    const mintRequest = await PostRequest<string>(`${LUKSO_BACKEND_URL}/avatarService/mint`, { address, metadataUrl })
-    if (!mintRequest.success) throw new Error("Error minting")
-    await UpdateAvatarStatus(combinationId, "Minted")
-}
 
 export const getTokensMetadata = async (address: string) => {
     const tokensMetadataRequest = await GetRequest<string>(`${LUKSO_BACKEND_URL}/avatarService/getTokensMetadata`, undefined, { address })

@@ -1,6 +1,7 @@
-import { LUKSO_BACKEND_URL } from "../constants/common.constant";
 import { TokenMetadata } from "../types/metadata.type";
-import { PostRequest } from "./api.util";
+import pinataSDK from '@pinata/sdk'
+
+const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_API_KEY, pinataSecretApiKey: process.env.PINATA_API_SECRET })
 
 
 export const uploadMetadata = async (tokenMetadata: TokenMetadata, combinationIndexes: string) => {
@@ -14,8 +15,6 @@ export const uploadMetadata = async (tokenMetadata: TokenMetadata, combinationIn
         verification: {}
     },]]
 
-    const uploadMetadataPostRequest = await PostRequest<string>(`${LUKSO_BACKEND_URL}/metadataService/createMetadata`, { 'LSP4Metadata': tokenMetadata })
-    if (!uploadMetadataPostRequest.success) throw new Error("Error uploading metadata")
-
-    return uploadMetadataPostRequest.value
+    const metadata = await pinata.pinJSONToIPFS(tokenMetadata)
+    return metadata.IpfsHash
 }

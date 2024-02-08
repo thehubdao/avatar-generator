@@ -67,14 +67,14 @@ import { TokenMetadata } from '../../types/metadata.type'
 import { BodyPart } from '../../types/avatar.type'
 import {
   getIPFSData,
-  getTokensMetadata,
-  mint,
+  getTokensMetadata
 } from '../../utils/web3/lukso.util'
 import { ethers } from 'ethers'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
+import { mint } from '../../utils/web3/contract.util'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -441,7 +441,7 @@ export default function LuksoComponent({
       }
       combinationId = combinationId.slice(0, combinationId.length - 1)
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
-      await mint(address, metadataUrl, combinationId)
+      await mint(address, metadataUrl, tokenMetadata)
       await setTokensMetadata(address)
 
       return { message: 'Your citizen has been created!', success: true }
