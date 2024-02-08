@@ -53,6 +53,22 @@
     },
     {
         "inputs": [],
+        "name": "LSP4TokenTypeNotEditable",
+        "type": "error"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "callIndex",
+                "type": "uint256"
+            }
+        ],
+        "name": "LSP8BatchCallFailed",
+        "type": "error"
+    },
+    {
+        "inputs": [],
         "name": "LSP8CannotSendToAddressZero",
         "type": "error"
     },
@@ -174,6 +190,11 @@
         "type": "error"
     },
     {
+        "inputs": [],
+        "name": "LSP8TokenContractCannotHoldValue",
+        "type": "error"
+    },
+    {
         "inputs": [
             {
                 "internalType": "bytes32",
@@ -182,6 +203,21 @@
             }
         ],
         "name": "LSP8TokenIdAlreadyMinted",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LSP8TokenIdFormatNotEditable",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LSP8TokenIdsDataEmptyArray",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "LSP8TokenIdsDataLengthMismatch",
         "type": "error"
     },
     {
@@ -201,35 +237,20 @@
         "type": "error"
     },
     {
-        "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
                 "internalType": "address",
-                "name": "operator",
+                "name": "callerAddress",
                 "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "tokenOwner",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "bytes32",
-                "name": "tokenId",
-                "type": "bytes32"
-            },
-            {
-                "indexed": false,
-                "internalType": "bytes",
-                "name": "operatorNotificationData",
-                "type": "bytes"
             }
         ],
-        "name": "AuthorizedOperator",
-        "type": "event"
+        "name": "OwnableCallerNotTheOwner",
+        "type": "error"
+    },
+    {
+        "inputs": [],
+        "name": "OwnableCannotSetZeroAddressAsOwner",
+        "type": "error"
     },
     {
         "anonymous": false,
@@ -256,17 +277,29 @@
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "previousOwner",
+                "name": "operator",
                 "type": "address"
             },
             {
                 "indexed": true,
                 "internalType": "address",
-                "name": "newOwner",
+                "name": "tokenOwner",
                 "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "tokenId",
+                "type": "bytes32"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes",
+                "name": "operatorNotificationData",
+                "type": "bytes"
             }
         ],
-        "name": "OwnershipTransferred",
+        "name": "OperatorAuthorizationChanged",
         "type": "event"
     },
     {
@@ -292,12 +325,62 @@
             },
             {
                 "indexed": false,
+                "internalType": "bool",
+                "name": "notified",
+                "type": "bool"
+            },
+            {
+                "indexed": false,
                 "internalType": "bytes",
                 "name": "operatorNotificationData",
                 "type": "bytes"
             }
         ],
-        "name": "RevokedOperator",
+        "name": "OperatorRevoked",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "tokenId",
+                "type": "bytes32"
+            },
+            {
+                "indexed": true,
+                "internalType": "bytes32",
+                "name": "dataKey",
+                "type": "bytes32"
+            },
+            {
+                "indexed": false,
+                "internalType": "bytes",
+                "name": "dataValue",
+                "type": "bytes"
+            }
+        ],
+        "name": "TokenIdDataChanged",
         "type": "event"
     },
     {
@@ -330,7 +413,7 @@
             {
                 "indexed": false,
                 "internalType": "bool",
-                "name": "allowNonLSP1Recipient",
+                "name": "force",
                 "type": "bool"
             },
             {
@@ -346,6 +429,19 @@
     {
         "stateMutability": "payable",
         "type": "fallback"
+    },
+    {
+        "inputs": [],
+        "name": "MAX_SUPPLY",
+        "outputs": [
+            {
+                "internalType": "uint16",
+                "name": "",
+                "type": "uint16"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
     },
     {
         "inputs": [
@@ -392,6 +488,25 @@
     {
         "inputs": [
             {
+                "internalType": "bytes[]",
+                "name": "data",
+                "type": "bytes[]"
+            }
+        ],
+        "name": "batchCalls",
+        "outputs": [
+            {
+                "internalType": "bytes[]",
+                "name": "results",
+                "type": "bytes[]"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "bytes32",
                 "name": "dataKey",
                 "type": "bytes32"
@@ -430,6 +545,54 @@
     {
         "inputs": [
             {
+                "internalType": "bytes32[]",
+                "name": "tokenIds",
+                "type": "bytes32[]"
+            },
+            {
+                "internalType": "bytes32[]",
+                "name": "dataKeys",
+                "type": "bytes32[]"
+            }
+        ],
+        "name": "getDataBatchForTokenIds",
+        "outputs": [
+            {
+                "internalType": "bytes[]",
+                "name": "dataValues",
+                "type": "bytes[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "tokenId",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "dataKey",
+                "type": "bytes32"
+            }
+        ],
+        "name": "getDataForTokenId",
+        "outputs": [
+            {
+                "internalType": "bytes",
+                "name": "dataValue",
+                "type": "bytes"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "bytes32",
                 "name": "tokenId",
                 "type": "bytes32"
@@ -441,25 +604,6 @@
                 "internalType": "address[]",
                 "name": "",
                 "type": "address[]"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "bytes",
-                "name": "tokenId",
-                "type": "bytes"
-            }
-        ],
-        "name": "getTokenMetadata",
-        "outputs": [
-            {
-                "internalType": "string",
-                "name": "",
-                "type": "string"
             }
         ],
         "stateMutability": "view",
@@ -500,11 +644,6 @@
                 "internalType": "bytes",
                 "name": "tokenId",
                 "type": "bytes"
-            },
-            {
-                "internalType": "string",
-                "name": "metadataUrl",
-                "type": "string"
             },
             {
                 "internalType": "bytes",
@@ -548,6 +687,11 @@
                 "internalType": "bytes32",
                 "name": "tokenId",
                 "type": "bytes32"
+            },
+            {
+                "internalType": "bool",
+                "name": "notify",
+                "type": "bool"
             },
             {
                 "internalType": "bytes",
@@ -599,17 +743,45 @@
     {
         "inputs": [
             {
-                "internalType": "bytes",
-                "name": "tokenId",
-                "type": "bytes"
+                "internalType": "bytes32[]",
+                "name": "tokenIds",
+                "type": "bytes32[]"
             },
             {
-                "internalType": "string",
-                "name": "metadataUrl",
-                "type": "string"
+                "internalType": "bytes32[]",
+                "name": "dataKeys",
+                "type": "bytes32[]"
+            },
+            {
+                "internalType": "bytes[]",
+                "name": "dataValues",
+                "type": "bytes[]"
             }
         ],
-        "name": "setTokenMetadata",
+        "name": "setDataBatchForTokenIds",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "tokenId",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "bytes32",
+                "name": "dataKey",
+                "type": "bytes32"
+            },
+            {
+                "internalType": "bytes",
+                "name": "dataValue",
+                "type": "bytes"
+            }
+        ],
+        "name": "setDataForTokenId",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -703,7 +875,7 @@
             },
             {
                 "internalType": "bool",
-                "name": "allowNonLSP1Recipient",
+                "name": "force",
                 "type": "bool"
             },
             {
@@ -736,7 +908,7 @@
             },
             {
                 "internalType": "bool[]",
-                "name": "allowNonLSP1Recipient",
+                "name": "force",
                 "type": "bool[]"
             },
             {

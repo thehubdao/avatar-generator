@@ -1,7 +1,7 @@
 import { TokenMetadata } from "../types/metadata.type";
 import pinataSDK from '@pinata/sdk'
 
-const pinata = new pinataSDK({ pinataApiKey: process.env.PINATA_API_KEY, pinataSecretApiKey: process.env.PINATA_API_SECRET })
+const pinata = new pinataSDK({ pinataApiKey: process.env.NEXT_PUBLIC_PINATA_API_KEY, pinataSecretApiKey: process.env.NEXT_PUBLIC_PINATA_API_SECRET })
 
 
 export const uploadMetadata = async (tokenMetadata: TokenMetadata, combinationIndexes: string) => {

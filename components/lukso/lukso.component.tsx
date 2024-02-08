@@ -65,16 +65,12 @@ import {
 import { uploadMetadata } from '../../utils/metadata.util'
 import { TokenMetadata } from '../../types/metadata.type'
 import { BodyPart } from '../../types/avatar.type'
-import {
-  getIPFSData,
-  getTokensMetadata
-} from '../../utils/web3/lukso.util'
 import { ethers } from 'ethers'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { mint } from '../../utils/web3/contract.util'
+import { getTokensMetadata, mint } from '../../utils/web3/contract.util'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -166,10 +162,10 @@ export default function LuksoComponent({
     void setTokensMetadataPromise()
   }, [provider])
 
-/*   useEffect(() => {
-    if (!hasMinted) return
-    void onAvatarBuilderReady()
-  }, [hasMinted]) */
+  /*   useEffect(() => {
+      if (!hasMinted) return
+      void onAvatarBuilderReady()
+    }, [hasMinted]) */
 
   async function onAvatarBuilderReady() {
     await Promise.all([
@@ -401,14 +397,10 @@ export default function LuksoComponent({
   }
 
   async function setTokensMetadata(address: string) {
-    const tokensMetadata = await getTokensMetadata(address)
-    if (tokensMetadata.length <= 0) {
-      return setHasMinted(false)
-    }
-    const avatarMetadata = await getIPFSData(tokensMetadata[0])
-    const { LSP4Metadata } = avatarMetadata
-    const features = Object.entries(LSP4Metadata.body).map(
-      ([,bodyPart]: Array<string | BodyPart>, index) => {
+    const tokenMetadata = await getTokensMetadata(address)
+    if (!tokenMetadata) return setHasMinted(false)
+    const features = Object.entries(tokenMetadata.body).map(
+      ([, bodyPart]: Array<string | BodyPart>, index) => {
         return {
           index,
           val: bodyPart,
@@ -436,15 +428,16 @@ export default function LuksoComponent({
         const { val } = feature
         const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
         tokenMetadata.body[bodyIndex] = val as BodyPart
-        tokenMetadata.attributes.push({key:bodyIndex, value:val.name, type:'string'})
+        tokenMetadata.attributes.push({ key: bodyIndex, value: val.name, type: 'string' })
         combinationId += val.index.toString() + '-'
       }
       combinationId = combinationId.slice(0, combinationId.length - 1)
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
-      await mint(address, metadataUrl, tokenMetadata)
+      const tokenId = await mint(address, metadataUrl, tokenMetadata)
+
       await setTokensMetadata(address)
 
-      return { message: 'Your citizen has been created!', success: true }
+      return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
       return {
         message:

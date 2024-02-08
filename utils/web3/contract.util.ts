@@ -1,8 +1,9 @@
-import ethers, { Contract, getDefaultProvider, TransactionResponse } from 'ethers'
+import { Contract, JsonRpcProvider, TransactionResponse, Wallet } from 'ethers'
 import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
-import axios from 'axios';
 import { TokenMetadata } from '../../types/metadata.type';
+import { getIPFSData } from './lukso.util';
+import { DecodeDataInput } from '@erc725/erc725.js/build/main/src/types/decodeData';
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL
@@ -11,11 +12,11 @@ const config = {
     ipfsGateway: 'ipfs://',
 };
 
-const provider = new ethers.JsonRpcProvider('https://rpc.lukso.gateway.fm');
+const provider = new JsonRpcProvider(RPC_URL);
 
-const signer = new ethers.Wallet(process.env.WALLET_PK!, provider)
+const signer = new Wallet(process.env.NEXT_PUBLIC_WALLET_PK!, provider)
 
-const address = process.env.AVATAR_CONTRACT_ADDRESS!;
+const address = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!;
 
 const schemas = [
     {
@@ -38,48 +39,62 @@ const schemas = [
 const avatarERC725Contract = new ERC725(schemas, address, provider, config);
 const avatarContract = new Contract(address, AvatarContractAbi, provider)
 
-const IPFS_GATEWAY_URL = process.env.IPFS_GATEWAY
+export const mint = async (address: string, metadataIpfsUrl: string, tokenMetadata: TokenMetadata) => {
 
-export const mint = async (address: string, metadataIpfsUrl:string,tokenMetadata: TokenMetadata) => {
-    try {
-        const totalSupply = await avatarContract.totalSupply() as number
-        const encodedTokenId = avatarERC725Contract.encodeValueType(
-            'uint256',
-            totalSupply,
-        )
-        const writableContract = avatarContract.connect(signer) as Contract
-        const mintTx = await writableContract.mint(
-            address,
-            encodedTokenId,
-            '0x') as TransactionResponse
-        await mintTx.wait()
+    const totalSupply = await avatarContract.totalSupply() as number
+    const encodedTokenId = avatarERC725Contract.encodeValueType(
+        'uint256',
+        totalSupply,
+    )
+    const writableContract = avatarContract.connect(signer) as Contract
+    const mintTx = await writableContract.mint(
+        address,
+        encodedTokenId,
+        '0x') as TransactionResponse
+    await mintTx.wait()
 
-        const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
-        const metadataDataValue = avatarERC725Contract.encodeData([
-            {
-                keyName: 'LSP4Metadata',
-                value: {
-                    json: tokenMetadata,
-                    url: metadataIpfsUrl,
-                },
+    const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
+    const metadataDataValue = avatarERC725Contract.encodeData([
+        {
+            keyName: 'LSP4Metadata',
+            value: {
+                json: tokenMetadata,
+                url: metadataIpfsUrl,
             },
-        ])
-        const setDataForTokenIdTx = await writableContract.setDataForTokenId(
-            encodedTokenId, metadataDataKey, metadataDataValue.values[0],)
+        },
+    ])
+    const setDataForTokenIdTx = await writableContract.setDataForTokenId(
+        encodedTokenId, metadataDataKey, metadataDataValue.values[0],) as TransactionResponse
 
-        await setDataForTokenIdTx.wait()
+    await setDataForTokenIdTx.wait()
 
-        return Number(totalSupply)
-    } catch (err) {
-        console.log(err)
-        throw err
-    }
+    return encodedTokenId
+
+
+}
+
+export const getTokensMetadata = async (address: string) => {
+    const tokenIds = await avatarContract.tokenIdsOf(address) as Array<string>
+
+    if (tokenIds.length == 0) return undefined
+
+    const tokenId = tokenIds[0]
+    const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
+    const getDataForTokenIdTx = await avatarContract.getDataForTokenId(
+        tokenId,
+        metadataDataKey
+    ) as DecodeDataInput['value']
+    const decodedData = avatarERC725Contract.decodeData([{ keyName: metadataDataKey, value: getDataForTokenIdTx }]) as Array<{ value: { url: string } }>
+    if (!decodedData) return undefined
+    const metadataUri = decodedData[0].value.url 
+    const tokenMetadata = await getIPFSData(metadataUri)
+
+    return tokenMetadata
 
 }
 
 export const getSupply = async () => {
     if (!AVATAR_CONTRACT_ADDRESS || !RPC_URL) return
-    const provider = getDefaultProvider(RPC_URL)
     const avatarContract = new Contract(AVATAR_CONTRACT_ADDRESS, AvatarContractAbi, provider)
     const totalSupply = Number(await avatarContract.totalSupply())
 

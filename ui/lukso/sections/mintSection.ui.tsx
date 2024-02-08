@@ -16,7 +16,7 @@ import FeatureListUI from "../common/featureList.ui";
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   reRoll: () => Promise<void>;
-  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean }>;
+  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean, tokenId?:string }>;
   provider: ethers.BrowserProvider | undefined;
   features?: IndexFeatureInterface[];
   picture: string;

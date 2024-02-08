@@ -14,7 +14,7 @@ interface LuksoUIProps {
   setIsEditModeSelected: (value: boolean) => void;
   setCurrentSection: (value: LuksoSections) => void;
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
-  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean }>;
+  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean, tokenId?:string }>;
   hasMinted: boolean;
   provider: ethers.BrowserProvider | undefined;
   isGettingInfoAboutHasMinted: boolean;

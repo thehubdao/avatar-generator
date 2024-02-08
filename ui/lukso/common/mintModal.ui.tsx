@@ -7,14 +7,16 @@ import { FaRegCheckCircle } from "react-icons/fa";
 interface MintSectionModalUIPros {
   setIsMinting: (value: boolean) => void;
   provider: BrowserProvider | undefined;
-  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean }>;
+  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean, tokenId?: string }>;
   gsapOutBlocks: () => void
 }
+const universalPageUrl = `https://universal.page/collections/${process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS}/`
 
 export default function MintSectionModalUI({ setIsMinting, provider, handleClaim, gsapOutBlocks }: MintSectionModalUIPros) {
   const [isClaiming, setIsClaiming] = useState<boolean>(false);
   const [isProvidingFeedback, setIsProvidingFeedback] = useState<boolean>(false);
   const [feedbackMessage, setFeedbackMessage] = useState<string>("message");
+  const [feedbackLink, setFeedbackLink] = useState<string>(universalPageUrl)
   const [isFeedbackError, setIsFeedbackError] = useState<boolean>(false);
 
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -34,6 +36,7 @@ export default function MintSectionModalUI({ setIsMinting, provider, handleClaim
 
     if (result.success) {
       await delay(5000);
+      setFeedbackLink(universalPageUrl + result.tokenId)
       setIsMinting(false);
       gsapOutBlocks();
     }
@@ -77,6 +80,7 @@ export default function MintSectionModalUI({ setIsMinting, provider, handleClaim
               <>
                 <h3 className="text-2xl">Congratulations!</h3>
                 <p>{feedbackMessage}</p>
+                <a href={feedbackLink}>Go to universal page!</a>
                 <FaRegCheckCircle className="text-7xl" />
               </>
             ) : (
