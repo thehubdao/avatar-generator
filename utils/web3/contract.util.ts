@@ -58,8 +58,8 @@ export const mint = async (address: string, metadataIpfsUrl: string, tokenMetada
         {
             keyName: 'LSP4Metadata',
             value: {
-                json: tokenMetadata,
-                url: metadataIpfsUrl,
+                json: { 'LSP4Metadata': tokenMetadata },
+                url: `ipfs://${metadataIpfsUrl}`,
             },
         },
     ])
@@ -86,10 +86,10 @@ export const getTokensMetadata = async (address: string) => {
     ) as DecodeDataInput['value']
     const decodedData = avatarERC725Contract.decodeData([{ keyName: metadataDataKey, value: getDataForTokenIdTx }]) as Array<{ value: { url: string } }>
     if (!decodedData) return undefined
-    const metadataUri = decodedData[0].value.url 
+    const metadataUri = decodedData[0].value.url
     const tokenMetadata = await getIPFSData(metadataUri)
 
-    return tokenMetadata
+    return tokenMetadata['LSP4Metadata']
 
 }
 

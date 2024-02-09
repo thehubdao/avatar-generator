@@ -15,6 +15,6 @@ export const uploadMetadata = async (tokenMetadata: TokenMetadata, combinationIn
         verification: {}
     },]]
 
-    const metadata = await pinata.pinJSONToIPFS(tokenMetadata)
+    const metadata = await pinata.pinJSONToIPFS({'LSP4Metadata':tokenMetadata})
     return metadata.IpfsHash
 }
