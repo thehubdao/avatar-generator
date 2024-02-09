@@ -12,8 +12,8 @@ import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
 import { getSupply } from "../../../utils/web3/contract.util";
 import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
-/* import { useConnectWallet } from "@web3-onboard/react"; */
-/* import { canMint } from "../../../utils/phase.util"; */
+import { useConnectWallet } from "@web3-onboard/react";
+import { canMint } from "../../../utils/phase.util";
 import LoadingUI from "./loadingSection.ui";
 
 interface MainSectionUIProps {
@@ -35,7 +35,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
   const [avatarSupply, setAvatarSupply] = useState(0)
 
-/*   const [{ wallet }] = useConnectWallet() */
+  const [{ wallet }] = useConnectWallet()
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -102,7 +102,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
         {(provider) && (
           <>
             {!isGettingInfoAboutHasMinted ? (
-              <button className="w-full h-fit disabled:opacity-75" onClick={() => void gsapOutBlocks()} disabled={true/* !canMint(wallet?.accounts[0].address) */ } >
+              <button className="w-full h-fit disabled:opacity-75" onClick={() => void gsapOutBlocks()} disabled={!canMint(wallet?.accounts[0].address) } >
                 <TransparentBox
                   fullWidth
                   border
@@ -111,7 +111,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
                   aditionalClass="flex-row"
                 >
                   <div className="flex items-center gap-3">
-                    <p className="text-black text-lg 2xl:text-xl">{'Mint is not currently available'/* canMint(wallet?.accounts[0].address) === false && 'Mint is not available for this address' || !hasMinted && "Roll your Citizen" || "Edit your Citizen" */} </p>
+                    <p className="text-black text-lg 2xl:text-xl">{canMint(wallet?.accounts[0].address) === false && 'Mint is not available for this address' || !hasMinted && "Roll your Citizen" || "Edit your Citizen"} </p>
                     <FaDice className="text-black text-2xl" />
                   </div>
                 </TransparentBox>
@@ -135,7 +135,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
           </>
         )
         }
-        {!provider && <button className="w-full h-fit" onClick={() => setIsConnecting(true)}>
+        {!provider && <button className="w-full h-fit" onClick={() => setIsConnecting(true)} disabled={true}>
           <TransparentBox
             fullWidth
             border
@@ -144,7 +144,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             aditionalClass="flex-row"
           >
             <div className="flex items-center gap-3">
-              <p className="text-black text-lg 2xl:text-xl">Login</p>
+              <p className="text-black text-lg 2xl:text-xl">Minting is not currently available</p>
               <FaWallet className="text-black text-2xl" />
             </div>
           </TransparentBox>
