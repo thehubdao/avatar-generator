@@ -12,8 +12,8 @@ import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
 import { getSupply } from "../../../utils/web3/contract.util";
 import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
-import { useConnectWallet } from "@web3-onboard/react";
-import { canMint } from "../../../utils/phase.util";
+/* import { useConnectWallet } from "@web3-onboard/react"; */
+/* import { canMint } from "../../../utils/phase.util"; */
 import LoadingUI from "./loadingSection.ui";
 
 interface MainSectionUIProps {
@@ -35,7 +35,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
   const [avatarSupply, setAvatarSupply] = useState(0)
 
-  const [{ wallet }] = useConnectWallet()
+/*   const [{ wallet }] = useConnectWallet() */
 
   const [isLoading, setIsLoading] = useState(false)
 

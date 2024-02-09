@@ -36,7 +36,6 @@ export default function MintSectionModalUI({ setIsMinting, provider, handleClaim
 
     if (result.success) {
       await delay(5000);
-      console.log(universalPageUrl + result.tokenId)
       setFeedbackLink(universalPageUrl + result.tokenId)
       setIsMinting(false);
       gsapOutBlocks();
