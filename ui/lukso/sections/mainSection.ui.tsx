@@ -102,7 +102,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
         {(provider) && (
           <>
             {!isGettingInfoAboutHasMinted ? (
-              <button className="w-full h-fit disabled:opacity-75" onClick={() => void gsapOutBlocks()} disabled={!canMint(wallet?.accounts[0].address) } >
+              <button className="w-full h-fit disabled:opacity-75" onClick={() => void gsapOutBlocks()} disabled={true/* !canMint(wallet?.accounts[0].address) */ } >
                 <TransparentBox
                   fullWidth
                   border
@@ -111,7 +111,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
                   aditionalClass="flex-row"
                 >
                   <div className="flex items-center gap-3">
-                    <p className="text-black text-lg 2xl:text-xl">{canMint(wallet?.accounts[0].address) === false && 'Mint is not available for this address' || !hasMinted && "Roll your Citizen" || "Edit your Citizen"} </p>
+                    <p className="text-black text-lg 2xl:text-xl">{'Mint is not currently available'/* canMint(wallet?.accounts[0].address) === false && 'Mint is not available for this address' || !hasMinted && "Roll your Citizen" || "Edit your Citizen" */} </p>
                     <FaDice className="text-black text-2xl" />
                   </div>
                 </TransparentBox>
