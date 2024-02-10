@@ -12,7 +12,7 @@ export default function ConnectWeb3Button({ classStyles, children, onConnect }: 
     const [, connect] = useConnectWallet()
 
     return <>
-        <button className={classStyles} onClick={ () => {
+        <button disabled={true} className={classStyles} onClick={ () => {
             void (async ()=>{ await connect()})()
             onConnect()
 

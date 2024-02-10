@@ -506,9 +506,8 @@ export default function LuksoComponent({
                     'w-48 border-l-2 border-white font-bold text-white'
                   }
                   onConnect={() => { }}
-
                 >
-                  <>Login with your UP!</>
+                  <>Minting is not currently available{/* Login with your UP! */}</>
                 </ConnectWeb3Button>
               )}
             </div>
