@@ -1,11 +1,12 @@
-import { Contract, JsonRpcProvider, TransactionResponse, Wallet } from 'ethers'
+import { Contract, JsonRpcProvider, Signer, TransactionResponse, Wallet } from 'ethers'
 import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { TokenMetadata } from '../../types/metadata.type';
 import { getIPFSData } from './lukso.util';
 import { DecodeDataInput } from '@erc725/erc725.js/build/main/src/types/decodeData';
 
-const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS
+const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
+const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL
 
 const config = {
@@ -15,8 +16,6 @@ const config = {
 const provider = new JsonRpcProvider(RPC_URL);
 
 const signer = new Wallet(process.env.NEXT_PUBLIC_WALLET_PK!, provider)
-
-const address = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!;
 
 const schemas = [
     {
@@ -36,18 +35,20 @@ const schemas = [
 ];
 
 
-const avatarERC725Contract = new ERC725(schemas, address, provider, config);
-const avatarContract = new Contract(address, AvatarContractAbi, provider)
+const avatarERC725Contract = new ERC725(schemas, AVATAR_CONTRACT_ADDRESS, provider, config);
+const avatarContract = new Contract(AVATAR_CONTRACT_ADDRESS, AvatarContractAbi, provider)
+const proxyContract = new Contract(AVATAR_PROXY_ADDRESS, AvatarContractAbi, provider)
 
-export const mint = async (address: string, metadataIpfsUrl: string, tokenMetadata: TokenMetadata) => {
+
+export const mint = async (address: string, metadataIpfsUrl: string, tokenMetadata: TokenMetadata, walletSigner:Signer) => {
 
     const totalSupply = await avatarContract.totalSupply() as number
     const encodedTokenId = avatarERC725Contract.encodeValueType(
         'uint256',
         totalSupply,
     )
-    const writableContract = avatarContract.connect(signer) as Contract
-    const mintTx = await writableContract.mint(
+    const writableProxyContract = proxyContract.connect(walletSigner) as Contract
+    const mintTx = await writableProxyContract.mint(
         address,
         encodedTokenId,
         '0x') as TransactionResponse
@@ -63,6 +64,7 @@ export const mint = async (address: string, metadataIpfsUrl: string, tokenMetada
             },
         },
     ])
+    const writableContract = avatarContract.connect(signer) as Contract
     const setDataForTokenIdTx = await writableContract.setDataForTokenId(
         encodedTokenId, metadataDataKey, metadataDataValue.values[0],) as TransactionResponse
 
