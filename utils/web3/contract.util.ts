@@ -1,5 +1,6 @@
 import { Contract, JsonRpcProvider, Signer, TransactionResponse, Wallet } from 'ethers'
 import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
+import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { TokenMetadata } from '../../types/metadata.type';
 import { getIPFSData } from './lukso.util';
@@ -37,7 +38,7 @@ const schemas = [
 
 const avatarERC725Contract = new ERC725(schemas, AVATAR_CONTRACT_ADDRESS, provider, config);
 const avatarContract = new Contract(AVATAR_CONTRACT_ADDRESS, AvatarContractAbi, provider)
-const proxyContract = new Contract(AVATAR_PROXY_ADDRESS, AvatarContractAbi, provider)
+const proxyContract = new Contract(AVATAR_PROXY_ADDRESS, ProxyContractAbi, provider)
 
 
 export const mint = async (address: string, metadataIpfsUrl: string, tokenMetadata: TokenMetadata, walletSigner:Signer) => {
@@ -49,7 +50,6 @@ export const mint = async (address: string, metadataIpfsUrl: string, tokenMetada
     )
     const writableProxyContract = proxyContract.connect(walletSigner) as Contract
     const mintTx = await writableProxyContract.mint(
-        address,
         encodedTokenId,
         '0x') as TransactionResponse
     await mintTx.wait()
@@ -64,7 +64,7 @@ export const mint = async (address: string, metadataIpfsUrl: string, tokenMetada
             },
         },
     ])
-    const writableContract = avatarContract.connect(signer) as Contract
+    const writableContract = writableProxyContract.connect(signer) as Contract
     const setDataForTokenIdTx = await writableContract.setDataForTokenId(
         encodedTokenId, metadataDataKey, metadataDataValue.values[0],) as TransactionResponse
 
