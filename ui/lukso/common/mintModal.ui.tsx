@@ -7,7 +7,7 @@ import { FaRegCheckCircle } from "react-icons/fa";
 interface MintSectionModalUIPros {
   setIsMinting: (value: boolean) => void;
   provider: BrowserProvider | undefined;
-  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean, tokenId?: string }>;
+  handleClaim: (address: string) => Promise<{ message: string, success: boolean, tokenId?: string }>;
   gsapOutBlocks: () => void
 }
 const universalPageUrl = `https://universal.page/collections/${process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS}/`
@@ -23,11 +23,11 @@ export default function MintSectionModalUI({ setIsMinting, provider, handleClaim
 
   const handleButtonClaim = async (): Promise<void> => {
 
-    if (!provider) return
+/*     if (!provider) return
     setIsClaiming(true);
     const signer = await provider.getSigner()
-    const address = await signer.getAddress()
-    const result = await handleClaim(address, provider)
+    const address = await signer.getAddress() */
+    const result = await handleClaim('')
 
     setIsClaiming(false);
     setIsProvidingFeedback(true);

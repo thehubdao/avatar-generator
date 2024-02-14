@@ -40,12 +40,15 @@ const avatarERC725Contract = new ERC725(schemas, address, provider, config);
 const avatarContract = new Contract(address, AvatarContractAbi, provider)
 
 export const mint = async (address: string, metadataIpfsUrl: string, tokenMetadata: TokenMetadata) => {
-
+    if(await getTokensMetadata(address)) {
+        console.log("User has minted")
+        return}
     const totalSupply = await avatarContract.totalSupply() as number
     const encodedTokenId = avatarERC725Contract.encodeValueType(
         'uint256',
         totalSupply,
     )
+    console.log(address, metadataIpfsUrl, tokenMetadata)
     const writableContract = avatarContract.connect(signer) as Contract
     const mintTx = await writableContract.mint(
         address,
@@ -86,7 +89,7 @@ export const getTokensMetadata = async (address: string) => {
     ) as DecodeDataInput['value']
     const decodedData = avatarERC725Contract.decodeData([{ keyName: metadataDataKey, value: getDataForTokenIdTx }]) as Array<{ value: { url: string } }>
     if (!decodedData) return undefined
-    const metadataUri = decodedData[0].value.url
+    const metadataUri = decodedData[0].value.url.split('//')[1]
     const tokenMetadata = await getIPFSData(metadataUri)
 
     return tokenMetadata['LSP4Metadata']

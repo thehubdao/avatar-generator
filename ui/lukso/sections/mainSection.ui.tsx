@@ -99,10 +99,10 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
           <p className="text-center text-sm 2xl:text-base pt-2">The scientists at THE HUB developed a digital genome for all the participants of the creator economy. With this identity, luksonians will be able to travel between worlds, games and experiences and impress the world with their creative powers.</p>
         </TransparentBox>
 
-        {(provider) && (
+        {(true) && (
           <>
-            {!isGettingInfoAboutHasMinted ? (
-              <button className="w-full h-fit disabled:opacity-75" onClick={() => void gsapOutBlocks()} disabled={!canMint(wallet?.accounts[0].address) } >
+            
+              <button className="w-full h-fit disabled:opacity-75" onClick={() => void gsapOutBlocks()} disabled={false } >
                 <TransparentBox
                   fullWidth
                   border
@@ -111,31 +111,16 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
                   aditionalClass="flex-row"
                 >
                   <div className="flex items-center gap-3">
-                    <p className="text-black text-lg 2xl:text-xl">{canMint(wallet?.accounts[0].address) === false && 'Mint is not available for this address' || !hasMinted && "Roll your Citizen" || "Edit your Citizen"} </p>
+                    <p className="text-black text-lg 2xl:text-xl">{"mint"} </p>
                     <FaDice className="text-black text-2xl" />
                   </div>
                 </TransparentBox>
               </button>
-            ) : (
-              <div className="w-full h-fit cursor-wait">
-                <TransparentBox
-                  fullWidth
-                  border
-                  backgroundColorClass="bg-white"
-                  heightClass="h-[70px] 2xl:h-[85px]"
-                  aditionalClass="flex-row"
-                >
-                  <div className="flex items-center gap-3 text-black text-lg 2xl:text-xl">
-                    <p>Obtaining wallet information</p>
-                    <AiOutlineLoading className="animate-spin" />
-                  </div>
-                </TransparentBox>
-              </div>
-            )}
+            
           </>
         )
         }
-        {!provider && <button className="w-full h-fit" onClick={() => setIsConnecting(true)} disabled={true}>
+        {!true && <button className="w-full h-fit" onClick={() => setIsConnecting(true)} disabled={true}>
           <TransparentBox
             fullWidth
             border

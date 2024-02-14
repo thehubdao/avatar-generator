@@ -160,6 +160,7 @@ export function StringToIndexValues(input: string, maxValues: Map<number, number
 }
 
 export function IsValidIndexValues(indexValues: Map<number, number>, maxValues: Map<number, number>) {
+  console.log(indexValues)
   if (indexValues.size === 0) {
     void LogError(Module.CommonUtil, "Empty index values, not valid!");
     return false;

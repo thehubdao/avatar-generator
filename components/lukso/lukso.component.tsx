@@ -238,21 +238,25 @@ export default function LuksoComponent({
   async function getSingleInfo() {
     if (campaignParams?.config.defAvatarCombination == undefined) return
 
-    const result = await GetAvatarSingleByCampaignCombination(
+    const result = await GetAvatarSingleByCampaignCombinationString(
       Client.Lukso,
-      campaignParams.config.defAvatarCombination
+      ''
     )
     singleInitData = result.success ? result.value : undefined
+    console.log(result.success ? result.value : undefined)
   }
 
   async function getSingleData() {
     const numResult = await GetAvatarSingleByCampaignCombinationString(
-      Client.Lukso
+      Client.Lukso,
+      '1-0-5-1-0'
+
     )
     const result: SingleInterface | undefined = numResult.success
       ? numResult.value
       : undefined
     singleInitData = result
+    console.log(result)
   }
 
   async function loadSingleData() {
@@ -432,13 +436,15 @@ export default function LuksoComponent({
         combinationId += val.index.toString() + '-'
       }
       combinationId = combinationId.slice(0, combinationId.length - 1)
+
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
-      const tokenId = await mint(address, metadataUrl, tokenMetadata)
+      const tokenId = await mint('0x14F1a008E721c4e7bf1c0BB3259526b0f5089972', metadataUrl, tokenMetadata)
 
       await setTokensMetadata(address)
 
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
+      console.log(error)
       return {
         message:
           "Something went wrong. Please try again",
@@ -491,7 +497,7 @@ export default function LuksoComponent({
                 alt="Lukso icon"
               />
 
-              {provider ? (
+              {true ? (
                 <button
                   className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
                   onClick={() => setIsAccountModalOpen(true)}

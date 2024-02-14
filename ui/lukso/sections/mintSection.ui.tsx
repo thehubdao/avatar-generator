@@ -16,7 +16,7 @@ import FeatureListUI from "../common/featureList.ui";
 interface MintSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
   reRoll: () => Promise<void>;
-  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean, tokenId?:string }>;
+  handleClaim: (address: string) => Promise<{ message: string, success: boolean, tokenId?:string }>;
   provider: ethers.BrowserProvider | undefined;
   features?: IndexFeatureInterface[];
   picture: string;
@@ -70,6 +70,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
   }, [])
 
   const handleMint = () => {
+    console.log(isShuffling)
     if (isShuffling) return;
     setIsMinting(true)
   }
@@ -119,7 +120,8 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
             </div>
           </TransparentBox>
         </button>
-        <button className="w-full h-fit" onClick={() => handleMint() } disabled={isShuffling}>
+        <button className="w-full h-fit" onClick={() => {
+          handleMint()} } disabled={isShuffling}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" aditionalClass={`${(isShuffling) && "opacity-70"}`}>
             <div className="flex items-center gap-3">
               Claim
@@ -146,7 +148,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
       {isMinting && <MintSectionModalUI
         setIsMinting={(value) => setIsMinting(value)}
         provider={provider}
-        handleClaim={(address, provider) => handleClaim(address, provider)}
+        handleClaim={(address) => handleClaim(address)}
         gsapOutBlocks={() => gsapOutBlocks()}
       />}
     </section>
