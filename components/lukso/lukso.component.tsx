@@ -249,7 +249,7 @@ export default function LuksoComponent({
   async function getSingleData() {
     const numResult = await GetAvatarSingleByCampaignCombinationString(
       Client.Lukso,
-      '1-0-5-1-0'
+      '0-2-0-3-1'
 
     )
     const result: SingleInterface | undefined = numResult.success
