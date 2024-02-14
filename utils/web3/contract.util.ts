@@ -88,7 +88,7 @@ export const getTokensMetadata = async (address: string) => {
     ) as DecodeDataInput['value']
     const decodedData = avatarERC725Contract.decodeData([{ keyName: metadataDataKey, value: getDataForTokenIdTx }]) as Array<{ value: { url: string } }>
     if (!decodedData) return undefined
-    const metadataUri = decodedData[0].value.url
+    const metadataUri = decodedData[0].value.url.split('//')[1]
     const tokenMetadata = await getIPFSData(metadataUri)
 
     return tokenMetadata['LSP4Metadata']
