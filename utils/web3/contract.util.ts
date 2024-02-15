@@ -44,7 +44,8 @@ export const mint = async (address: string, metadataIpfsUrl: string, tokenMetada
         console.log("User has minted")
         return}
     const totalSupply = await avatarContract.totalSupply() as number */
-    const encodedTokenId = '0x000000000000000000000000000000000000000000000000000000000000000f'/*
+    console.log("MINTING")
+    const encodedTokenId = address/*
     console.log(address, metadataIpfsUrl, tokenMetadata) */
     const writableContract = avatarContract.connect(signer) as Contract
 /*     const mintTx = await writableContract.mint(
@@ -63,10 +64,12 @@ export const mint = async (address: string, metadataIpfsUrl: string, tokenMetada
             },
         },
     ])
+    console.log("Setting")
     const setDataForTokenIdTx = await writableContract.setDataForTokenId(
         encodedTokenId, metadataDataKey, metadataDataValue.values[0],) as TransactionResponse
 
     await setDataForTokenIdTx.wait()
+    console.log("Set")
 
     return encodedTokenId
 

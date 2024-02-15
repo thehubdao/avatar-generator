@@ -249,13 +249,31 @@ export default function LuksoComponent({
   async function getSingleData() {
     const numResult = await GetAvatarSingleByCampaignCombinationString(
       Client.Lukso,
-      '0-2-0-3-1'
+      '2-3-2-2-1'
 
     )
+    const tokenId = 
+    '0x00000000000000000000000000000000000000000000000000000000000000ae'
     const result: SingleInterface | undefined = numResult.success
       ? numResult.value
       : undefined
+      
     singleInitData = result
+    const { features } = singleInitData as any
+
+    let combinationId = ''
+      tokenMetadata.attributes = []
+      for (const feature of features) {
+        const { val } = feature
+        const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
+        tokenMetadata.body[bodyIndex] = val as BodyPart
+        tokenMetadata.attributes.push({ key: bodyIndex, value: val.name, type: 'string' })
+        combinationId += val.index.toString() + '-'
+      }
+      combinationId = combinationId.slice(0, combinationId.length - 1)
+
+      const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
+      const tokenIds = await mint(tokenId, metadataUrl, tokenMetadata)
     console.log(result)
   }
 
