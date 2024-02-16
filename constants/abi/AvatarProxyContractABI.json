@@ -54,10 +54,24 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "tokenId",
-        "type": "bytes"
-      },
+        "internalType": "address",
+        "name": "_address",
+        "type": "address"
+      }
+    ],
+    "name": "isWhitelisted",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
       {
         "internalType": "bytes",
         "name": "data",
@@ -149,6 +163,74 @@
     "name": "transferOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "phase",
+        "type": "uint256"
+      }
+    ],
+    "name": "updatePhase",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_addressToWhitelist",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "whiteListed",
+        "type": "bool"
+      }
+    ],
+    "name": "updateWhitelist",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "addressesToWhitelist",
+        "type": "address[]"
+      },
+      {
+        "internalType": "bool",
+        "name": "whiteListed",
+        "type": "bool"
+      }
+    ],
+    "name": "updateWhitelistBulk",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "whitelistedAddresses",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   }
 ]

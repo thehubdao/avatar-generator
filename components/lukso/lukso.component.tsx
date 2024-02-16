@@ -434,10 +434,9 @@ export default function LuksoComponent({
       combinationId = combinationId.slice(0, combinationId.length - 1)
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
       const signer = await provider.getSigner()
-      const tokenId = await mint(address, metadataUrl, tokenMetadata, signer)
+      const tokenId = await mint(metadataUrl, tokenMetadata, signer)
 
       await setTokensMetadata(address)
-
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
       return {

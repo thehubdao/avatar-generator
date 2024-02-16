@@ -22,7 +22,7 @@ interface MainSectionUIProps {
   provider: ethers.BrowserProvider | undefined;
   isGettingInfoAboutHasMinted: boolean;
   picture: string;
-  combination:string;
+  combination: string;
 }
 
 
@@ -36,6 +36,8 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
   const [avatarSupply, setAvatarSupply] = useState(0)
 
   const [{ wallet }] = useConnectWallet()
+
+  const [canUserMint, setCanUserMint] = useState<boolean | undefined>()
 
   const [isLoading, setIsLoading] = useState(false)
 
@@ -65,7 +67,14 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
         setCurrentSection(LuksoSections.Edit);
     });
   }
-
+  useEffect(() => {
+    if (!wallet) return
+    const canUserMintPromise = async() => {
+      const canUserMint = await canMint(wallet?.accounts[0].address)
+      setCanUserMint(canUserMint)
+     }
+     void canUserMintPromise()
+  }, [wallet])
   useLayoutEffect(() => {
     void gsapEnterBlocks();
   }, [])
@@ -102,7 +111,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
         {(provider) && (
           <>
             {!isGettingInfoAboutHasMinted ? (
-              <button className="w-full h-fit disabled:opacity-75" onClick={() => void gsapOutBlocks()} disabled={!canMint(wallet?.accounts[0].address) } >
+              <button className="w-full h-fit disabled:opacity-75" onClick={() => void gsapOutBlocks()} disabled={!canUserMint} >
                 <TransparentBox
                   fullWidth
                   border
@@ -111,7 +120,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
                   aditionalClass="flex-row"
                 >
                   <div className="flex items-center gap-3">
-                    <p className="text-black text-lg 2xl:text-xl">{canMint(wallet?.accounts[0].address) === false && 'Mint is not available for this address' || !hasMinted && "Roll your Citizen" || "Edit your Citizen"} </p>
+                    <p className="text-black text-lg 2xl:text-xl">{canUserMint === false && 'Mint is not available for this address' || !hasMinted && "Roll your Citizen" || "Edit your Citizen"} </p>
                     <FaDice className="text-black text-2xl" />
                   </div>
                 </TransparentBox>
@@ -212,18 +221,20 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
           >
             <div className="relative w-full h-1/2 overflow-hidden border-b-2 border-white flex justify-end
             flex-col bg-[#d59fba]">
-              {isLoading && <LoadingUI getloaderDivElement={()=>{}} />}
+              {isLoading && <LoadingUI getloaderDivElement={() => { }} />}
               <Image
                 src={picture}
                 alt="lukso avatar selfie view"
                 fill
-                style={{ objectFit: "cover"  }}
+                style={{ objectFit: "cover" }}
                 className="origin-top scale-[300%] -translate-y-1/4"
 
-                onLoadStart={()=>{
-                  setIsLoading(true)}}
-                onLoad={()=>{
-                  setIsLoading(false)}}
+                onLoadStart={() => {
+                  setIsLoading(true)
+                }}
+                onLoad={() => {
+                  setIsLoading(false)
+                }}
                 hidden={isLoading}
               />
             </div>

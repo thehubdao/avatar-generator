@@ -41,8 +41,7 @@ const avatarContract = new Contract(AVATAR_CONTRACT_ADDRESS, AvatarContractAbi, 
 const proxyContract = new Contract(AVATAR_PROXY_ADDRESS, ProxyContractAbi, provider)
 
 
-export const mint = async (address: string, metadataIpfsUrl: string, tokenMetadata: TokenMetadata, walletSigner:Signer) => {
-
+export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata, walletSigner: Signer) => {
     const totalSupply = await avatarContract.totalSupply() as number
     const encodedTokenId = avatarERC725Contract.encodeValueType(
         'uint256',
@@ -50,7 +49,6 @@ export const mint = async (address: string, metadataIpfsUrl: string, tokenMetada
     )
     const writableProxyContract = proxyContract.connect(walletSigner) as Contract
     const mintTx = await writableProxyContract.mint(
-        encodedTokenId,
         '0x') as TransactionResponse
     await mintTx.wait()
 
@@ -73,6 +71,11 @@ export const mint = async (address: string, metadataIpfsUrl: string, tokenMetada
     return encodedTokenId
 
 
+}
+
+export const isWhitelisted = async (address: string) => {
+    const isWhitelisted = await proxyContract.isWhitelisted(address) as boolean
+    return isWhitelisted
 }
 
 export const getTokensMetadata = async (address: string) => {
