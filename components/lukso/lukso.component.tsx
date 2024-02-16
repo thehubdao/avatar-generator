@@ -437,6 +437,7 @@ export default function LuksoComponent({
       const tokenId = await mint(metadataUrl, tokenMetadata, signer)
 
       await setTokensMetadata(address)
+      
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
       return {
