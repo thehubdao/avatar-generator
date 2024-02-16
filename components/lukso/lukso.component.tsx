@@ -414,7 +414,7 @@ export default function LuksoComponent({
   }
 
   async function handleClaim(address: string) {
-    if (!singleInitData)
+    if (!singleInitData || !provider)
       return {
         message: 'Error claiming citizen, please try again later!',
         success: false,
@@ -433,7 +433,8 @@ export default function LuksoComponent({
       }
       combinationId = combinationId.slice(0, combinationId.length - 1)
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
-      const tokenId = await mint(address, metadataUrl, tokenMetadata)
+      const signer = await provider.getSigner()
+      const tokenId = await mint(address, metadataUrl, tokenMetadata, signer)
 
       await setTokensMetadata(address)
 
@@ -507,7 +508,7 @@ export default function LuksoComponent({
                   }
                   onConnect={() => { }}
                 >
-                  <>Minting is not currently available{/* Login with your UP! */}</>
+                  <> Login with your UP!</>
                 </ConnectWeb3Button>
               )}
             </div>
