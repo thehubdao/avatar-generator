@@ -71,6 +71,7 @@ import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
 import { getTokensMetadata, mint } from '../../utils/web3/contract.util'
+import { UpdateAvatarStatus } from '../../utils/firebase.util'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -435,9 +436,9 @@ export default function LuksoComponent({
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
       const signer = await provider.getSigner()
       const tokenId = await mint(metadataUrl, tokenMetadata, signer)
-
+      await UpdateAvatarStatus(combinationId,'Minted')
       await setTokensMetadata(address)
-      
+
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
       return {
