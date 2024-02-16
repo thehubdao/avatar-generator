@@ -120,6 +120,6 @@ export async function GetAvatarCombinationByAttributes(campaign: string, attribu
   return PostRequest<number>(ApiRoutesV1.Single, {campaign, attributes: attributesBase64});
 }
 
-export async function RegisterFeaturesDistribution(campaign: string, features: any[]) {
-  return PostRequest<any>(ApiRoutesV1.ReportDistribution, { campaign, features })
+export async function RegisterFeaturesDistribution(campaign: string, features: FeatureInterface[]) {
+  return PostRequest<{ message: string, success: boolean, data: object }>(ApiRoutesV1.ReportDistribution, { campaign, features })
 }

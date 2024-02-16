@@ -1,6 +1,6 @@
 import { GetAvatarStatus, GetParameter, GetTierDistribution, UpdateDocObject } from "./firebase.util";
 import { FirestoreLocation } from "../enums/firebase.enum";
-import { FeatureInterface } from "../interfaces/api.interface";
+import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
 import {
   CastStringToInteger,
   LogError,
@@ -23,12 +23,6 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
 
   featuresResult.value.sort((a, b) => a.index - b.index);
 
-  // Get percent value by tier
-  const tierResult = await GetParameter<any[]>(campaign, CampaignParameterName.Random);
-  if (!tierResult.success)
-    return void LogError(Module.CollectionUtil, `Couldn't find featureList for campaign: ${campaign}`);
-  const tierValues = tierResult.value
-
   // Get tier distribution levels
   const tierDistribution = await GetTierDistribution(campaign)
   // Get FeatureOptionListData
@@ -47,12 +41,12 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
     // Filter features and leave only the available ones
     featureOptionListData.set(
       feature.index,
-      featureData.value.filter((feat: any) => {
-        const featDistribution = tierDistribution.find((dist: any) =>
+      featureData.value.filter((feat: FeatureInterface & { id: string }) => {
+        const featDistribution = tierDistribution.find((dist: TierDistributionInterface) =>
           feat.id === dist.feature_id
         )
-        const belongFeature = feat.type === feature.displayName
-        return belongFeature && featDistribution.available
+        const shouldBelongFeature = feat.type === feature.displayName
+        return shouldBelongFeature && featDistribution?.available
       })
     );
   }
