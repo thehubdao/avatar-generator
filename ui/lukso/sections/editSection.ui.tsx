@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { Fragment, useLayoutEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDownload } from "react-icons/fa6";
@@ -39,7 +39,7 @@ export default function EditSectionUI({picture, exportModel, features }: EditSec
   return (
     <section className={`flex h-full items-center justify-between`}>
       {/* Edit Avatar */}
-      <div ref={editAvatarRef} className="w-[380px] 2xl:w-[461px] h-full -translate-x-full flex flex-col">
+      <div ref={editAvatarRef} className="max-w-[35%] w-[380px] 2xl:w-[461px] h-full -translate-x-full flex flex-col">
         <TransparentBox
           fullWidth
           border
