@@ -1,5 +1,5 @@
 import { FirebaseApp, FirebaseOptions } from "@firebase/app";
-import { Firestore, QueryConstraint, doc, getDoc, setDoc, query, where,limit, getDocs, collection } from "@firebase/firestore";
+import { Firestore, QueryConstraint, doc, getDoc, setDoc, addDoc, query, where, limit, getDocs, collection } from "@firebase/firestore";
 import { FirebaseStorage } from "@firebase/storage";
 import { Auth, User, UserCredential } from "@firebase/auth";
 import { FirebaseError } from "@firebase/util";
@@ -27,6 +27,7 @@ import { SessionUserInfo } from "./common/session.util";
 import { CampaignParameters } from "../interfaces/common.interface";
 import { ParameterNameType } from "../types/firebase.type";
 import {Client} from '../enums/client.enum'
+import { FeatureInterface } from "../interfaces/api.interface";
 export type LogInStructure = {
   user: string;
   pass: string;
@@ -271,6 +272,106 @@ export async function GetFile(path: string, campaign?: string): Promise<Result<A
     void LogError(Module.FirebaseUtil, err.message, e);
     return { success: false, errMessage: err.message, errCode: err.code };
   }
+}
+
+export async function GetTierDistribution(campaign: string): Promise<any> {
+  const distributionPath = `${FirestoreGlobalLocation.Campaign}/${campaign}/tier_distribution`.toLowerCase()
+  const db = await FirebaseUtil.Instance().DB()
+  const ditributionQuery = query(collection(db, distributionPath));
+  const distributionDocs = await getDocs(ditributionQuery);
+  const distributionData = distributionDocs.docs.map(s => {
+    return { ...s.data(), id: s.id }
+  });
+
+  return distributionData
+}
+
+export async function SetTierDistribution(campaign: string): Promise<void> {
+  //const distributionPath = `${FirestoreGlobalLocation.Campaign}/${campaign}`.toLowerCase()
+  const distributionPath = `${FirestoreGlobalLocation.Campaign}/${campaign}/tier_distribution`.toLowerCase()
+  const featuresPath = `${FirestoreGlobalLocation.Campaign}/${campaign}/features`.toLowerCase()
+  const campaignPath = `${FirestoreGlobalLocation.Campaign}/${campaign}`.toLowerCase()
+
+  // connect to the DB
+  const db = await FirebaseUtil.Instance().DB()
+
+  // get features subcollection, list all feature availables by campaign
+  const featuresQuery = query(collection(db, featuresPath));
+  const featuresDocs = await getDocs(featuresQuery);
+  const featuresData = featuresDocs.docs.map(s => {
+    return { ...s.data(), id: s.id }
+  });
+
+  // r_val = random value distribution based by tier
+  const campaignRef  = await doc(db,campaignPath)
+  const campaignDoc = await getDoc(campaignRef)
+  const tierPercents = campaignDoc.get("r_val")
+
+  // get tier distribution subcollection 
+  const distributionData = await GetTierDistribution(campaign)
+
+  // get only missing features for tier distribution data
+  const distributionFeaturesIds = distributionData.reduce((acc: any, obj: any): any => {
+    acc.set(obj.feature_id, obj)
+    return acc
+  }, new Map())
+  const missingFeatureDistributions = featuresData.filter((feat: any) => {
+    return !distributionFeaturesIds.get(feat.id)
+  })
+
+  // Adding missing distribution data for feature
+  missingFeatureDistributions.forEach(async (feature: any) => {
+    const payload = {
+      available: true,
+      used: 0,
+      feature_id: feature.id
+    } 
+    
+    // insert tier dist. document by feature
+    await addDoc(
+      collection(db, distributionPath),
+      payload
+    );
+  })
+}
+
+export async function ResetTierDistribution(campaign: string, startValue = 0): Promise<void> {
+  const distributionPath = `${FirestoreGlobalLocation.Campaign}/${campaign}/tier_distribution`.toLowerCase()
+  
+  const db = await FirebaseUtil.Instance().DB()
+  const distributionQuery = query(collection(db, distributionPath))
+  const distributionDocs = await getDocs(distributionQuery)
+  distributionDocs.docs.forEach(async (dist: any) => {
+    const payload = {
+      used: startValue,
+    }
+    await setDoc(dist.ref, payload, { merge: true });
+  });
+}
+
+export async function AddTierDistribution(campaign: string, feature: FeatureInterface): Promise<void> {
+  const basedInventaryNumber = 1764
+  const distributionPath = `${FirestoreGlobalLocation.Campaign}/${campaign}/tier_distribution`.toLowerCase()
+  const db = await FirebaseUtil.Instance().DB()
+  const distributionQuery = query(collection(db, distributionPath), where("feature_id", "==", feature.id))
+  const distributionDocs = await getDocs(distributionQuery)
+  const distDoc = distributionDocs.docs[0]
+  const dist = distDoc.data()
+  const tierResult = await GetParameter<any[]>(campaign, CampaignParameterName.Random);
+  if (!tierResult.success)
+    return void LogError(Module.CollectionUtil, `Couldn't find featureList for campaign: ${campaign}`);
+  const tierValues = tierResult.value
+    
+  const tierValue = (tierValues as any)[feature.tier]
+  const limitAmount = Math.floor((basedInventaryNumber * tierValue) / 100)
+  const newAmount = (dist as any).used + 1
+  const isAvailable = limitAmount >= newAmount
+  const payload = {
+    used: newAmount,
+    available: isAvailable,
+  }
+
+  return await setDoc(distDoc.ref, payload, { merge: true })
 }
 
 export async function GetParameter<T>(campaign: string | undefined, parameter: ParameterNameType): Promise<Result<T>> {
