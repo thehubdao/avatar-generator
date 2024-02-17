@@ -120,7 +120,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
                   aditionalClass="flex-row"
                 >
                   <div className="flex items-center gap-3">
-                    <p className="text-black text-lg 2xl:text-xl">{canUserMint === false && 'Mint is not available for this address' || !hasMinted && "Roll your Citizen" || "Edit your Citizen"} </p>
+                    <p className="text-black text-lg 2xl:text-xl">{canUserMint === false && 'Mint is not available for this address' || !hasMinted && "Claim or Roll your Citizen" || "Edit your Citizen"} </p>
                     <FaDice className="text-black text-2xl" />
                   </div>
                 </TransparentBox>
