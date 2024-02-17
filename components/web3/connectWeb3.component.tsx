@@ -8,17 +8,19 @@ interface ConnectWeb3ButtonProps {
 
 
 
-export default function ConnectWeb3Button({ classStyles, children, onConnect }: ConnectWeb3ButtonProps) {
+export default function ConnectWeb3Button({ classStyles,/*  children, */ onConnect }: ConnectWeb3ButtonProps) {
     const [, connect] = useConnectWallet()
 
     return <>
-        <button  className={classStyles} onClick={ () => {
+        <button  disabled={true} className={classStyles} onClick={ () => {
             void (async ()=>{ await connect()})()
             onConnect()
+            
 
         }}>
             <div className="flex items-center gap-3 mx-4">
-                {children}
+                Mint will start 4:20 PM EST
+                {/* {children} */}
             </div>
         </button></>
 }
