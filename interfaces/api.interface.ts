@@ -51,3 +51,9 @@ export interface CollectionDataInterface {
   maxIndex: string;
   maxCombination: number;
 }
+
+export interface TierDistributionInterface {
+  used: number;
+  available: boolean;
+  feature_id: string;
+}

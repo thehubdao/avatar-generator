@@ -1,6 +1,6 @@
-import { GetAvatarStatus, GetParameter, UpdateDocObject } from "./firebase.util";
+import { GetAvatarStatus, GetParameter, GetTierDistribution, UpdateDocObject } from "./firebase.util";
 import { FirestoreLocation } from "../enums/firebase.enum";
-import { FeatureInterface } from "../interfaces/api.interface";
+import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
 import {
   CastStringToInteger,
   LogError,
@@ -23,19 +23,32 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
 
   featuresResult.value.sort((a, b) => a.index - b.index);
 
+  // Get tier distribution levels
+  const tierDistribution = await GetTierDistribution(campaign)
   // Get FeatureOptionListData
   const featureOptionListData: Map<number, FeatureInterface[]> = new Map();
   const featureData = await GetData(campaign);
   if (!featureData.success)
     return void LogError(Module.CollectionUtil, "Could not retrieve feature option data!");
 
+  // Discard features that are not available b/c they reach its amount limit by tier
   for (const feature of featuresResult.value) {
     if (feature.index == undefined) {
       void LogError(Module.CollectionUtil, `Missing index on ${feature.displayName} feature type!`);
       continue;
     }
 
-    featureOptionListData.set(feature.index, featureData.value.filter(f => f.type === feature.displayName));
+    // Filter features and leave only the available ones
+    featureOptionListData.set(
+      feature.index,
+      featureData.value.filter((feat: FeatureInterface & { id: string }) => {
+        const featDistribution = tierDistribution.find((dist: TierDistributionInterface) =>
+          feat.id === dist.feature_id
+        )
+        const shouldBelongFeature = feat.type === feature.displayName
+        return shouldBelongFeature && featDistribution?.available
+      })
+    );
   }
 
   const featureOptionsToUpdate: Map<string, FeatureInterface> = new Map();

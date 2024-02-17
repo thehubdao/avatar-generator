@@ -1,4 +1,5 @@
 export enum FirestoreLocation {
+    TierDistribution = 'tier_distribution',
     Features = 'features',
     Accessories = 'accessories',
     Animations = 'animations',
