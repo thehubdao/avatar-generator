@@ -42,7 +42,6 @@ import {
   GetAvatarSingleByCampaignCombinationString,
   GetEnvMapListByCampaign,
   GetStageListByCampaign,
-  RegisterFeaturesDistribution,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
 import { IFrameExportData } from '../../utils/iframe.util'
