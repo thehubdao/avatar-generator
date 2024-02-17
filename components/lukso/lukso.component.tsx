@@ -415,7 +415,7 @@ export default function LuksoComponent({
     setHasMinted(true)
   }
 
-  async function handleClaim(address:string) {
+  async function handleClaim(address: string) {
     if (!singleInitData || !provider)
       return {
         message: 'Error claiming citizen, please try again later!',
@@ -424,24 +424,24 @@ export default function LuksoComponent({
     const { features } = singleInitData
 
     let combinationId = ''
+    tokenMetadata.attributes = []
+    for (const feature of features) {
+      const { val } = feature
+      const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
+      tokenMetadata.body[bodyIndex] = val as BodyPart
+      tokenMetadata.attributes.push({ key: bodyIndex, value: val.name, type: 'string' })
+      combinationId += val.index.toString() + '-'
+    }
+    combinationId = combinationId.slice(0, combinationId.length - 1)
     try {
-      tokenMetadata.attributes = []
-      for (const feature of features) {
-        const { val } = feature
-        const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
-        tokenMetadata.body[bodyIndex] = val as BodyPart
-        tokenMetadata.attributes.push({ key: bodyIndex, value: val.name, type: 'string' })
-        combinationId += val.index.toString() + '-'
-      }
-      combinationId = combinationId.slice(0, combinationId.length - 1)
-      
+
+
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
       const signer = await provider.getSigner()
       const tokenId = await mint(metadataUrl, tokenMetadata, signer)
 
-      await setTokensMetadata(address) 
+      await setTokensMetadata(address)
       await UpdateAvatarStatus(combinationId, 'Minted')
-      await UpdateAvatarStatus(combinationId, 'NotMinted')
       // update distribution tier based on items selected
       /* await RegisterFeaturesDistribution(
         Client.Lukso,
@@ -450,6 +450,7 @@ export default function LuksoComponent({
 
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
+      await UpdateAvatarStatus(combinationId, 'NotMinted')
       console.log(error)
       return {
         message:
@@ -480,7 +481,11 @@ export default function LuksoComponent({
             setIsAccountModalOpen={(value) =>
               setIsAccountModalOpen(value)
             }
-            onDisconnect={() => { setCurrentSection(LuksoSections.Main) }}
+            onDisconnect={() => {
+
+              setCurrentSection(LuksoSections.Main)
+              reRoll()
+            }}
           />
         )}
         <div className='z-10'>
