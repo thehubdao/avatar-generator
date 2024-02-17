@@ -27,7 +27,7 @@ interface MainSectionUIProps {
 
 
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, picture }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, combination, picture }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
@@ -223,11 +223,11 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             flex-col bg-[#d59fba]">
               {isLoading && <LoadingUI getloaderDivElement={() => { }} />}
               <Image
-                src={picture}
+                src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png${'?pinataGatewayToken=' + process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY }`}
                 alt="lukso avatar selfie view"
                 fill
-                style={{ objectFit: "cover" }}
-                className="origin-top scale-[300%] -translate-y-1/4"
+/*                 style={{ objectFit: "cover" }} */
+/*                 className="origin-top scale-[300%] -translate-y-1/4" */
 
                 onLoadStart={() => {
                   setIsLoading(true)

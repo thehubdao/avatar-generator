@@ -416,7 +416,7 @@ export default function LuksoComponent({
     setHasMinted(true)
   }
 
-  async function handleClaim(address: string) {
+  async function handleClaim(address:string) {
     if (!singleInitData || !provider)
       return {
         message: 'Error claiming citizen, please try again later!',
@@ -440,14 +440,14 @@ export default function LuksoComponent({
       const signer = await provider.getSigner()
       const tokenId = await mint(metadataUrl, tokenMetadata, signer)
 
-      await setTokensMetadata(address)
+      await setTokensMetadata(address) 
       await UpdateAvatarStatus(combinationId, 'Minted')
       await UpdateAvatarStatus(combinationId, 'NotMinted')
       // update distribution tier based on items selected
-      await RegisterFeaturesDistribution(
+      /* await RegisterFeaturesDistribution(
         Client.Lukso,
         features.map(feat => feat.val)
-      )
+      ) */
 
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
