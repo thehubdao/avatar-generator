@@ -144,7 +144,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
           </>
         )
         }
-        {!provider && <button className="w-full h-fit" onClick={() => setIsConnecting(true)} disabled={true} >
+        {!provider && <button className="w-full h-fit" onClick={() => setIsConnecting(true)} >
           <TransparentBox
             fullWidth
             border
@@ -153,7 +153,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             aditionalClass="flex-row"
           >
             <div className="flex items-center gap-3">
-              <p className="text-black text-lg 2xl:text-xl">Mint has not started!</p>
+              <p className="text-black text-lg 2xl:text-xl">Login</p>
               <FaWallet className="text-black text-2xl" />
             </div>
           </TransparentBox>

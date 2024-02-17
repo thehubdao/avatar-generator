@@ -1,4 +1,4 @@
-import { Contract, JsonRpcProvider, Signer, TransactionResponse, Wallet } from 'ethers'
+import { Contract, JsonRpcProvider, Signer, TransactionResponse } from 'ethers'
 import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
@@ -15,8 +15,8 @@ const config = {
 };
 
 const provider = new JsonRpcProvider(RPC_URL);
-
-const signer = new Wallet(process.env.NEXT_PUBLIC_WALLET_PK!, provider)
+/* 
+const signer = new Wallet(process.env.NEXT_PUBLIC_WALLET_PK!, provider) */
 
 const schemas = [
     {
@@ -48,10 +48,6 @@ export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata
         totalSupply,
     )
     const writableProxyContract = proxyContract.connect(walletSigner) as Contract
-    const mintTx = await writableProxyContract.mint(
-        '0x') as TransactionResponse
-    await mintTx.wait()
-
     const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
     const metadataDataValue = avatarERC725Contract.encodeData([
         {
@@ -62,11 +58,9 @@ export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata
             },
         },
     ])
-    const writableContract = writableProxyContract.connect(signer) as Contract
-    const setDataForTokenIdTx = await writableContract.setDataForTokenId(
-        encodedTokenId, metadataDataKey, metadataDataValue.values[0]) as TransactionResponse
-
-    await setDataForTokenIdTx.wait()
+    const mintTx = await writableProxyContract.mint('0x',metadataDataKey, metadataDataValue.values[0],
+        ) as TransactionResponse
+    await mintTx.wait()
 
     return encodedTokenId
 

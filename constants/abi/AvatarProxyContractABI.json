@@ -76,6 +76,16 @@
         "internalType": "bytes",
         "name": "data",
         "type": "bytes"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "dataKey",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes",
+        "name": "dataValue",
+        "type": "bytes"
       }
     ],
     "name": "mint",
