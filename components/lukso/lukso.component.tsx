@@ -72,6 +72,7 @@ import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
 import { getTokensMetadata, mint } from '../../utils/web3/contract.util'
+import { UpdateAvatarStatus } from '../../utils/firebase.util'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -439,7 +440,8 @@ export default function LuksoComponent({
       const tokenId = await mint(metadataUrl, tokenMetadata, signer)
 
       await setTokensMetadata(address)
-      
+      await UpdateAvatarStatus(combinationId, 'Minted')
+      await UpdateAvatarStatus(combinationId, 'NotMinted')
       // update distribution tier based on items selected
       await RegisterFeaturesDistribution(
         Client.Lukso,
