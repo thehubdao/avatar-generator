@@ -485,7 +485,7 @@ export default function LuksoComponent({
             onDisconnect={() => {
 
               setCurrentSection(LuksoSections.Main)
-              reRoll()
+              void reRoll()
             }}
           />
         )}
