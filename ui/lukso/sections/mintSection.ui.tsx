@@ -20,9 +20,10 @@ interface MintSectionUIProps {
   provider: ethers.BrowserProvider | undefined;
   features?: IndexFeatureInterface[];
   picture: string;
+  combination: string;
 }
 
-export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, provider, features, picture }: MintSectionUIProps) {
+export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, provider, features,combination }: MintSectionUIProps) {
 
   const mainFeatureRef = useRef<HTMLDivElement>(null);
   const mintAvatarRef = useRef<HTMLDivElement>(null);
@@ -92,11 +93,11 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
         >
           <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px] overflow-hidden rounded-lg">
             <Image
-              src={picture}
+              src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png${'?pinataGatewayToken=' + process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY }`}
               fill
               alt="lukso avatar selfie view"
-              style={{ objectFit: 'cover' }} 
-              className="origin-top scale-[300%] -translate-y-1/4"
+/*               style={{ objectFit: 'cover' }} 
+              className="origin-top scale-[300%] -translate-y-1/4" */
             />
           </div>
           {features &&

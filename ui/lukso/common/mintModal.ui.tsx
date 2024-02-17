@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {  useState } from "react";
 import { BrowserProvider } from "ethers";
 import TransparentBoxUI from "./transparentBox.ui";
 import Loader from "./loader.ui";
@@ -10,13 +10,13 @@ interface MintSectionModalUIPros {
   handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean, tokenId?: string }>;
   gsapOutBlocks: () => void
 }
-const universalPageUrl = `https://universal.page/collections/${process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS}/`
+const universalPageUrl = `${process.env.NEXT_PUBLIC_UNIVERSAL_PAGE_LINK}/collections/${process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS}/`
 
 export default function MintSectionModalUI({ setIsMinting, provider, handleClaim, gsapOutBlocks }: MintSectionModalUIPros) {
   const [isClaiming, setIsClaiming] = useState<boolean>(false);
   const [isProvidingFeedback, setIsProvidingFeedback] = useState<boolean>(false);
   const [feedbackMessage, setFeedbackMessage] = useState<string>("message");
-  const [feedbackLink, setFeedbackLink] = useState<string>(universalPageUrl)
+  const [feedbackLink, setFeedbackLink] = useState<string>()
   const [isFeedbackError, setIsFeedbackError] = useState<boolean>(false);
 
   const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
@@ -33,10 +33,9 @@ export default function MintSectionModalUI({ setIsMinting, provider, handleClaim
     setIsProvidingFeedback(true);
     setFeedbackMessage(result.message);
     setIsFeedbackError(result.success);
-
     if (result.success) {
-      await delay(5000);
       setFeedbackLink(universalPageUrl + result.tokenId)
+      await delay(5000);
       setIsMinting(false);
       gsapOutBlocks();
     }

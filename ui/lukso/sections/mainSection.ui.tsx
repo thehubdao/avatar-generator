@@ -27,7 +27,7 @@ interface MainSectionUIProps {
 
 
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, picture }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, combination, picture }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
@@ -144,7 +144,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
           </>
         )
         }
-        {!provider && <button className="w-full h-fit" onClick={() => setIsConnecting(true)} >
+        {!provider && <button className="w-full h-fit" onClick={() => setIsConnecting(true)} disabled={true} >
           <TransparentBox
             fullWidth
             border
@@ -153,7 +153,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             aditionalClass="flex-row"
           >
             <div className="flex items-center gap-3">
-              <p className="text-black text-lg 2xl:text-xl">Login</p>
+              <p className="text-black text-lg 2xl:text-xl">Mint has not started!</p>
               <FaWallet className="text-black text-2xl" />
             </div>
           </TransparentBox>
@@ -223,11 +223,11 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             flex-col bg-[#d59fba]">
               {isLoading && <LoadingUI getloaderDivElement={() => { }} />}
               <Image
-                src={picture}
+                src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png${'?pinataGatewayToken=' + process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY }`}
                 alt="lukso avatar selfie view"
                 fill
-                style={{ objectFit: "cover" }}
-                className="origin-top scale-[300%] -translate-y-1/4"
+/*                 style={{ objectFit: "cover" }} */
+/*                 className="origin-top scale-[300%] -translate-y-1/4" */
 
                 onLoadStart={() => {
                   setIsLoading(true)

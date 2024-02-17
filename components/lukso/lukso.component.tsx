@@ -47,6 +47,7 @@ import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
 import { IFrameExportData } from '../../utils/iframe.util'
 import { SaveFile } from '../../utils/exporter.util'
 
+
 // Interfaces
 import {
   EnvMapInterface,
@@ -71,6 +72,7 @@ import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
 import { getTokensMetadata, mint } from '../../utils/web3/contract.util'
+import { UpdateAvatarStatus } from '../../utils/firebase.util'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -413,7 +415,7 @@ export default function LuksoComponent({
     setHasMinted(true)
   }
 
-  async function handleClaim(address: string) {
+  async function handleClaim(address:string) {
     if (!singleInitData || !provider)
       return {
         message: 'Error claiming citizen, please try again later!',
@@ -432,14 +434,23 @@ export default function LuksoComponent({
         combinationId += val.index.toString() + '-'
       }
       combinationId = combinationId.slice(0, combinationId.length - 1)
+      
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
       const signer = await provider.getSigner()
       const tokenId = await mint(metadataUrl, tokenMetadata, signer)
-      /* await UpdateAvatarStatus(combinationId,'Minted') */
-      await setTokensMetadata(address)
+
+      await setTokensMetadata(address) 
+      await UpdateAvatarStatus(combinationId, 'Minted')
+      await UpdateAvatarStatus(combinationId, 'NotMinted')
+      // update distribution tier based on items selected
+      /* await RegisterFeaturesDistribution(
+        Client.Lukso,
+        features.map(feat => feat.val)
+      ) */
 
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
+      console.log(error)
       return {
         message:
           "Something went wrong. Please try again",

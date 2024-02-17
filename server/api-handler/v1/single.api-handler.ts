@@ -62,11 +62,11 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
     combinationNum = RandomIndexValues(maxIndexValues, randomBalance, featureValues.featureOptionListData);
     let combinationString = Array.from(combinationNum.values()).toString().replaceAll(',','-')
     let isNotMinted = await isCombinationNotMinted(combinationString)
-   while (!isNotMinted) {
+    while (!isNotMinted) {
     combinationNum = RandomIndexValues(maxIndexValues, randomBalance, featureValues.featureOptionListData);
     combinationString = Array.from(combinationNum.values()).toString().replaceAll(',','-')
-     isNotMinted = await isCombinationNotMinted(combinationString)
-   } 
+      isNotMinted = await isCombinationNotMinted(combinationString)
+    } 
   }
 
   // Try get combination
