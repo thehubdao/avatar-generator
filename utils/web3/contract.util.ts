@@ -64,7 +64,7 @@ export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata
     ])
     const writableContract = writableProxyContract.connect(signer) as Contract
     const setDataForTokenIdTx = await writableContract.setDataForTokenId(
-        encodedTokenId, metadataDataKey, metadataDataValue.values[0],) as TransactionResponse
+        encodedTokenId, metadataDataKey, metadataDataValue.values[0]) as TransactionResponse
 
     await setDataForTokenIdTx.wait()
 

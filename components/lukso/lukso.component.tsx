@@ -450,6 +450,7 @@ export default function LuksoComponent({
 
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
+      console.log(error)
       return {
         message:
           "Something went wrong. Please try again",
