@@ -42,6 +42,7 @@ import {
   GetAvatarSingleByCampaignCombinationString,
   GetEnvMapListByCampaign,
   GetStageListByCampaign,
+  RegisterFeaturesDistribution,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
 import { IFrameExportData } from '../../utils/iframe.util'
@@ -443,10 +444,10 @@ export default function LuksoComponent({
       await setTokensMetadata(address)
       await UpdateAvatarStatus(combinationId, 'Minted')
       // update distribution tier based on items selected
-      /* await RegisterFeaturesDistribution(
+       await RegisterFeaturesDistribution(
         Client.Lukso,
         features.map(feat => feat.val)
-      ) */
+      ) 
 
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
