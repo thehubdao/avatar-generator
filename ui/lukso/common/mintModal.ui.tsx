@@ -79,7 +79,7 @@ export default function MintSectionModalUI({ setIsMinting, provider, handleClaim
               <>
                 <h3 className="text-2xl">Congratulations!</h3>
                 <p>{feedbackMessage}</p>
-                <a href={feedbackLink}>Go to universal page!</a>
+                <a href={feedbackLink} target="_blank" rel="noopener noreferrer">Go to universal page!</a>
                 <FaRegCheckCircle className="text-7xl" />
               </>
             ) : (
