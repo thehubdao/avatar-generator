@@ -42,11 +42,6 @@ const proxyContract = new Contract(AVATAR_PROXY_ADDRESS, ProxyContractAbi, provi
 
 
 export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata, walletSigner: Signer) => {
-    const totalSupply = await avatarContract.totalSupply() as number
-    const encodedTokenId = avatarERC725Contract.encodeValueType(
-        'uint256',
-        totalSupply,
-    )
     const writableProxyContract = proxyContract.connect(walletSigner) as Contract
     const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
     const metadataDataValue = avatarERC725Contract.encodeData([
@@ -58,10 +53,16 @@ export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata
             },
         },
     ])
-    const mintTx = await writableProxyContract.mint('0x',metadataDataKey, metadataDataValue.values[0],
-        ) as TransactionResponse
+    const mintTx = await writableProxyContract.mint('0x', metadataDataKey, metadataDataValue.values[0],
+    ) as TransactionResponse
     await mintTx.wait()
-
+    
+    const address = await walletSigner.getAddress()
+    const tokenIds = await avatarContract.tokenIdsOf(address) as Array<string>
+    const encodedTokenId = avatarERC725Contract.encodeValueType(
+        'uint256',
+        tokenIds[0],
+    )
     return encodedTokenId
 
 
