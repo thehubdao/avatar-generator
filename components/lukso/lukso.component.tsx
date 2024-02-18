@@ -139,7 +139,7 @@ export default function LuksoComponent({
   )
   const [{ wallet }] = useConnectWallet()
 
-  const [picture, setPicture] = useState<string>('/resources/images/campaings/full-avatar-lukso.png');
+  const [picture, setPicture] = useState<string>('');
 
   const [combination, setCombination] = useState<string>('')
 
