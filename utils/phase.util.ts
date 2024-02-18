@@ -8,6 +8,6 @@ export const isAddressWhitelisted = async (address: string) => {
     return false
 }
 
-export const canMint = async (/* address: string | undefined */) => {
+export const canMint =  (/* address: string | undefined */) => {
     return true
 }
