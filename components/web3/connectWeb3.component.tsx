@@ -17,7 +17,7 @@ export default function ConnectWeb3Button({ classStyles, children, onConnect }: 
             onConnect()
             
 
-        }}>
+        }} disabled={true}>
             <div className="flex items-center gap-3 mx-4">
 
                 {children}
