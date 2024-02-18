@@ -10,15 +10,5 @@ export const isAddressWhitelisted = async (address: string) => {
 }
 
 export const canMint = async (address: string | undefined) => {
-    if (!address) return false
-
-    if (currentPhase === phaseMap.publicMintPhase) return true
-
-    const formattedAddress = getAddress(address)
-
-    if (!formattedAddress) return false
-
-    if (currentPhase === phaseMap.whitelistPhase && await isAddressWhitelisted(formattedAddress)) return true
-
-    return false
+    return true
 }
