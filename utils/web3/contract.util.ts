@@ -52,10 +52,10 @@ export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata
                 url: `ipfs://${metadataIpfsUrl}`,
             },
         },
-    ])
+    ])/*  */
     const mintTx = await writableProxyContract.mint('0x', metadataDataKey, metadataDataValue.values[0],
     ) as TransactionResponse
-    await mintTx.wait()
+    await mintTx.wait();
     
     const address = await walletSigner.getAddress()
     const tokenIds = await avatarContract.tokenIdsOf(address) as Array<string>
