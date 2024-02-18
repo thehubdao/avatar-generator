@@ -1,4 +1,4 @@
-import { GetAvatarStatus, GetParameter, GetTierDistribution, UpdateDocObject } from "./firebase.util";
+import { GetAvatarStatus, GetParameter, GetTierDistribution, GetAllCombinationsAvailable, UpdateDocObject } from "./firebase.util";
 import { FirestoreLocation } from "../enums/firebase.enum";
 import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
 import {
@@ -316,6 +316,30 @@ function GetWinnerTeam(maxIndexValues: Map<number, number>, rVal: Result<Record<
   if (winnerTeam.length !== maxIndexValues.size) return false;
 
   return winnerTeam;
+}
+
+/**
+ * Brings one combination avialable, which it hasn't been mint
+ * 
+ * @param campaign - campaign name
+ * @returns - combination indexes
+ */
+export async function GetCombinationAvailable(campaign: string): Promise<Map<number, number>> {
+  const combinations = await GetAllCombinationsAvailable(campaign)
+  const combinationLength = combinations.length
+  const randomCombinationIndex = Math.ceil(Math.random() * combinationLength)
+  const combination = combinations[randomCombinationIndex]
+
+  // convert to map
+  const combinationMap = combination.indexValues
+    .split("-")
+    .reduce((acc: Map<number, number>, featureIndex: string, positionIndex: number) => {
+      const featIndexNumber = Number(featureIndex)
+      acc.set(positionIndex + 1, featIndexNumber)
+      return acc
+    }, new Map())
+
+  return combinationMap
 }
 
 export function RandomIndexValues(maxIndexValues: Map<number, number>, rVal: Result<Record<RandomTier, number>>, optionList: Map<number, FeatureInterface[]>): Map<number, number> {

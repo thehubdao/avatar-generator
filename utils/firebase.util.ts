@@ -373,6 +373,20 @@ export async function AddTierDistribution(campaign: string, feature: FeatureInte
   return await setDoc(distDoc.ref, payload, { merge: true })
 }
 
+export async function GetAllCombinationsAvailable(
+  campaign: string
+): Promise<{ indexValues: string, status: string }[]> {
+  const collectionPath = `collection/${campaign}/nft`
+  const db = await FirebaseUtil.Instance().DB()
+  const comboQuery = query(collection(db, collectionPath), where("status", "==", "n"))
+  const comboDocs = await getDocs(comboQuery)
+  const combinations = comboDocs.docs.map((comboDoc) => 
+    ({ ...(comboDoc.data()), id: comboDoc.id}) as { indexValues: string, status: string, id: string }
+  )
+
+  return combinations
+}
+
 export async function GetParameter<T>(campaign: string | undefined, parameter: ParameterNameType): Promise<Result<T>> {
   try {
     if (parameter === CampaignParameterName.Missing) Raise("Non existent parameter wanted!");
