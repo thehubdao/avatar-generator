@@ -1,5 +1,4 @@
-import { getAddress } from 'ethers'
-import { Phase, phaseMap } from '../types/avatar.type'
+import { Phase } from '../types/avatar.type'
 import { isWhitelisted } from './web3/contract.util'
 
 export const currentPhase: Phase | undefined = process.env.NEXT_PUBLIC_MINTING_PHASE as Phase
@@ -9,6 +8,6 @@ export const isAddressWhitelisted = async (address: string) => {
     return false
 }
 
-export const canMint = async (address: string | undefined) => {
+export const canMint = async (/* address: string | undefined */) => {
     return true
 }
