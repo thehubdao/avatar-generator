@@ -6,8 +6,7 @@ import {
   LogError,
   ObjectEntries,
   RandomArrayElement,
-  RandomIntMax,
-  SetMapToMap
+  RandomIntMax
 } from "./common.util";
 import { CampaignParameterName, Module, RandomTier } from "../enums/common.enum";
 import { FeatureBasic } from "../interfaces/common.interface";
