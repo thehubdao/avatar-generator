@@ -179,7 +179,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             heightClass="h-[125px]"
           >
             <h3 className="font-extrabold text-xl 2xl:text-2xl">EXCLUSIVE COLLECTION</h3>
-            <p className="text-sm 2xl:text-base">Remaining: {AVATAR_MAX_SUPPLY - avatarSupply}</p>
+            <p className="text-sm 2xl:text-base">Remaining: {0}</p>
           </TransparentBox>
           <TransparentBox
             fullWidth
