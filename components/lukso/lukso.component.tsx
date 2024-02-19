@@ -154,7 +154,7 @@ export default function LuksoComponent({
   }, [wallet])
 
   const sethasSupplyReachedPromise = async () => {
-    const _totalSupply = await totalSupply()
+    const _totalSupply = 1764
     setHasSupplyReached(_totalSupply == 1764)
   }
 

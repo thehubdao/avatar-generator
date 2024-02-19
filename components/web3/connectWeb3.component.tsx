@@ -21,7 +21,7 @@ export default function ConnectWeb3Button({ hasSupplyReached, classStyles, child
         }} disabled={hasSupplyReached}>
             <div className="flex items-center gap-3 mx-4">
 
-                {hasSupplyReached ? "Nft supply has been reached!" : children}
+            Nft supply has been reached!
             </div>
         </button></>
 }
