@@ -69,8 +69,8 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
   }
   useEffect(() => {
     if (!wallet) return
-    const canUserMintPromise = async() => {
-      const canUserMint = await canMint(wallet?.accounts[0].address)
+    const canUserMintPromise = () => {
+      const canUserMint = canMint()
       setCanUserMint(canUserMint)
      }
      void canUserMintPromise()
