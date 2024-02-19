@@ -51,6 +51,11 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
     );
   }
 
+  /** 
+   * ATTENTION: I'm not sure why this code is changing the wearable indexes
+   * It doesn't make sense, it was creating a lot of bugs
+   */
+  /*
   const featureOptionsToUpdate: Map<string, FeatureInterface> = new Map();
   // Process every single one like in the for
   for (const feature of featuresResult.value) {
@@ -62,9 +67,9 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
     // Save the return optionListToUpdate
     SetMapToMap(featureOptionsToUpdate, toUpdate);
   }
-
+  */
   // Update all at the same time
-  await UpdateNewIndexesOnDB(campaign, featureOptionsToUpdate);
+  // await UpdateNewIndexesOnDB(campaign, featureOptionsToUpdate);
   // Return the FeatureOptionListData with the new values
   return { featureList: featuresResult.value, featureOptionListData };
 }
@@ -281,10 +286,10 @@ export function GetCombinationValues(combinationIndexValues: Map<number, number>
   const featureCombination: { index: number, val: FeatureInterface }[] = [];
   for (const [key, val] of Array.from(featureOptionListData.values()).entries()) {
     const feature = val?.find(f => f.index === combinationIndexValues.get(key));
-    if (feature != undefined)
+    if (feature != undefined) {
       featureCombination.push({ index: key, val: feature });
+    }
   }
-
   return featureCombination;
 }
 
@@ -335,7 +340,7 @@ export async function GetCombinationAvailable(campaign: string): Promise<Map<num
     .split("-")
     .reduce((acc: Map<number, number>, featureIndex: string, positionIndex: number) => {
       const featIndexNumber = Number(featureIndex)
-      acc.set(positionIndex + 1, featIndexNumber)
+      acc.set(positionIndex, featIndexNumber)
       return acc
     }, new Map())
 

@@ -40,7 +40,7 @@ function ProcessCombination(combination: string | undefined, maxValues: Map<numb
   return CastStringToInteger(combination);
 }
 
-async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterface>>, campaign: string, combination: string | undefined) {
+async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterface>>, campaign: string, combination: string | undefined) {  
   // On campaign not exist return bad request
   const isCampaign = await CheckCampaign(campaign);
   if (!isCampaign)
