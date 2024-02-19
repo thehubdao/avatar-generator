@@ -4,23 +4,24 @@ interface ConnectWeb3ButtonProps {
     onConnect: () => void
     classStyles: string
     children: JSX.Element | JSX.Element[] | boolean;
+    hasSupplyReached: boolean;
 }
 
 
 
-export default function ConnectWeb3Button({ classStyles, children, onConnect }: ConnectWeb3ButtonProps) {
+export default function ConnectWeb3Button({ hasSupplyReached, classStyles, children, onConnect }: ConnectWeb3ButtonProps) {
     const [, connect] = useConnectWallet()
 
     return <>
-        <button className={classStyles} onClick={ () => {
-            void (async ()=>{ await connect()})()
+        <button className={classStyles} onClick={() => {
+            void (async () => { await connect() })()
             onConnect()
-            
 
-        }} disabled={true}>
+
+        }} disabled={hasSupplyReached}>
             <div className="flex items-center gap-3 mx-4">
 
-                {children}
+                {hasSupplyReached ? "Nft supply has been reached!" : children}
             </div>
         </button></>
 }

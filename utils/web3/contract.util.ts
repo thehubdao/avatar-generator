@@ -56,7 +56,7 @@ export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata
     const mintTx = await writableProxyContract.mint('0x', metadataDataKey, metadataDataValue.values[0],
     ) as TransactionResponse
     await mintTx.wait();
-    
+
     const address = await walletSigner.getAddress()
     const tokenIds = await avatarContract.tokenIdsOf(address) as Array<string>
     const encodedTokenId = avatarERC725Contract.encodeValueType(
@@ -67,6 +67,8 @@ export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata
 
 
 }
+
+export const totalSupply = async () => { return Number(await avatarContract.totalSupply()) }
 
 export const isWhitelisted = async (address: string) => {
     const isWhitelisted = await proxyContract.isWhitelisted(address) as boolean
