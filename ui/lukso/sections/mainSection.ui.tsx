@@ -154,7 +154,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             aditionalClass="flex-row"
           >
             <div className="flex items-center gap-3">
-              <p className="text-black text-lg 2xl:text-xl">{hasSupplyReached ? "Nft supply has been reached!" : "Mint starting at 4:20PM EST"}</p>
+              <p className="text-black text-lg 2xl:text-xl">{hasSupplyReached ? "Nft supply has been reached!" : "Login"}</p>
               <FaWallet className="text-black text-2xl" />
             </div>
           </TransparentBox>

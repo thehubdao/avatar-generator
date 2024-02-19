@@ -532,7 +532,7 @@ export default function LuksoComponent({
                   hasSupplyReached={hasSupplyReached}
                   
                 >
-                  <> Mint starting at 4:20PM EST </>
+                  <> Login </>
                 </ConnectWeb3Button>
               )}
             </div>
