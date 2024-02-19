@@ -72,7 +72,7 @@ import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getTokensMetadata, mint, totalSupply } from '../../utils/web3/contract.util'
+import { getTokensMetadata, mint} from '../../utils/web3/contract.util'
 import { UpdateAvatarStatus } from '../../utils/firebase.util'
 
 const exportData: ExportInterface = { attributes: [] }
@@ -127,7 +127,6 @@ export default function LuksoComponent({
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
   const [hasMinted, setHasMinted] = useState<boolean>(false)
-  const [hasSupplyReached, setHasSupplyReached] = useState<boolean>(false)
   const [addressToShow, setAddressToShow] = useState<string>('')
   const [
     isGettingInfoAboutHasMinted,
@@ -152,16 +151,6 @@ export default function LuksoComponent({
     }
     void setEtherProviderPromise()
   }, [wallet])
-
-  const sethasSupplyReachedPromise = async () => {
-    const _totalSupply = 1764
-    setHasSupplyReached(_totalSupply == 1764)
-  }
-
-  useEffect(() => {
-    void sethasSupplyReachedPromise()
-  }, [])
-
 
   useEffect(() => {
     if (!provider) return
@@ -529,7 +518,7 @@ export default function LuksoComponent({
                     'w-48 border-l-2 border-white font-bold text-white'
                   }
                   onConnect={() => { }}
-                  hasSupplyReached={hasSupplyReached}
+                  hasSupplyReached={true}
                   
                 >
                   <> Login </>
@@ -621,7 +610,7 @@ export default function LuksoComponent({
           features={singleInitData?.features}
           picture={picture}
           combination={combination}
-          hasSupplyReached={hasSupplyReached}
+          hasSupplyReached={true}
         />
       </div>
     </MobileLayout>

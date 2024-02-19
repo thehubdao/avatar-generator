@@ -9,7 +9,7 @@ interface ConnectWeb3ButtonProps {
 
 
 
-export default function ConnectWeb3Button({ hasSupplyReached, classStyles, children, onConnect }: ConnectWeb3ButtonProps) {
+export default function ConnectWeb3Button({ hasSupplyReached, classStyles, onConnect }: ConnectWeb3ButtonProps) {
     const [, connect] = useConnectWallet()
 
     return <>

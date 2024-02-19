@@ -10,7 +10,6 @@ import ConnectModalUI from "../common/conectModal";
 import { AiOutlineLoading } from "react-icons/ai";
 import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
-import { getSupply } from "../../../utils/web3/contract.util";
 import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
 import { useConnectWallet } from "@web3-onboard/react";
 import { canMint } from "../../../utils/phase.util";
@@ -34,23 +33,11 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
-  const [avatarSupply, setAvatarSupply] = useState(0)
-
   const [{ wallet }] = useConnectWallet()
 
   const [canUserMint, setCanUserMint] = useState<boolean | undefined>()
 
   const [isLoading, setIsLoading] = useState(false)
-
-
-  useEffect(() => {
-    const setAvatarSupplyPromise = async () => {
-      const supply = await getSupply()
-      if (supply)
-        setAvatarSupply(supply)
-    }
-    void setAvatarSupplyPromise()
-  }, [])
 
   const gsapEnterBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
