@@ -72,7 +72,7 @@ import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getTokensMetadata, mint } from '../../utils/web3/contract.util'
+import { getTokensMetadata, mint, totalSupply } from '../../utils/web3/contract.util'
 import { UpdateAvatarStatus } from '../../utils/firebase.util'
 
 const exportData: ExportInterface = { attributes: [] }
@@ -127,6 +127,7 @@ export default function LuksoComponent({
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
   const [hasMinted, setHasMinted] = useState<boolean>(false)
+  const [hasSupplyReached, setHasSupplyReached] = useState<boolean>(false)
   const [addressToShow, setAddressToShow] = useState<string>('')
   const [
     isGettingInfoAboutHasMinted,
@@ -152,6 +153,15 @@ export default function LuksoComponent({
     void setEtherProviderPromise()
   }, [wallet])
 
+  const sethasSupplyReachedPromise = async () => {
+    const _totalSupply = await totalSupply()
+    setHasSupplyReached(_totalSupply == 1764)
+  }
+
+  useEffect(() => {
+    void sethasSupplyReachedPromise()
+  }, [])
+
 
   useEffect(() => {
     if (!provider) return
@@ -164,11 +174,6 @@ export default function LuksoComponent({
     }
     void setTokensMetadataPromise()
   }, [provider])
-
-  /*   useEffect(() => {
-      if (!hasMinted) return
-      void onAvatarBuilderReady()
-    }, [hasMinted]) */
 
   async function onAvatarBuilderReady() {
     await Promise.all([
@@ -444,10 +449,10 @@ export default function LuksoComponent({
       await setTokensMetadata(address)
       await UpdateAvatarStatus(combinationId, 'Minted')
       // update distribution tier based on items selected
-       await RegisterFeaturesDistribution(
+      await RegisterFeaturesDistribution(
         Client.Lukso,
         features.map(feat => feat.val)
-      ) 
+      )
 
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
@@ -524,8 +529,10 @@ export default function LuksoComponent({
                     'w-48 border-l-2 border-white font-bold text-white'
                   }
                   onConnect={() => { }}
+                  hasSupplyReached={hasSupplyReached}
+                  
                 >
-                  <> Login with your UP!</>
+                  <> Mint starting at 4:20PM EST </>
                 </ConnectWeb3Button>
               )}
             </div>
@@ -614,6 +621,7 @@ export default function LuksoComponent({
           features={singleInitData?.features}
           picture={picture}
           combination={combination}
+          hasSupplyReached={hasSupplyReached}
         />
       </div>
     </MobileLayout>
