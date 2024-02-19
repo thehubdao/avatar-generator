@@ -135,7 +135,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
         <TransparentBox fullWidth border backgroundColorClass="bg-[#FFCBDE]" paddingClass="px-14 2xl:px-28" aditionalClass="gap-6 2xl:gap-8">
           <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10">MINT YOUR CITIZEN</h3>
           <p className="text-base 2xl:text-lg">
-            LUKSO Citizens is a collection of 1764 interoperable Avatars on the LUKSO Blockchain.
+            LUKSO Citizens is a collection of 1765 interoperable Avatars on the LUKSO Blockchain.
           </p>
           <SocialButtonsUI />
           <div className="font-semibold">
