@@ -244,10 +244,8 @@ export default function LuksoComponent({
         singleInitData = result.success ? result.value : undefined
     }
 
-    async function getSingleData(combination?: QueryDocumentSnapshot) {
-        if (!combination) return
-        const combinationId = combination.get('indexValues') as string
-        if (!combinationId) return
+    async function getSingleData(combinationId?: string) {
+
 
 
         const numResult = await GetAvatarSingleByCampaignCombinationString(
@@ -259,7 +257,6 @@ export default function LuksoComponent({
         singleInitData = result
         setSingleData(singleInitData);
         if (!numResult.success) return
-        await UpdateDownloadedAvatarStatus(combinationId, "Downloaded")
 
     }
 
@@ -294,7 +291,8 @@ export default function LuksoComponent({
     }
 
     async function reRoll() {
-        const combinations = await GetAllCombinations('lukso female b', 'NotDownloaded')
+        const combinations = [
+         "0-0-1-3-1"]
         for (let index = 0; index < combinations.length; index++) {
             const combination = combinations[index]
             await getSingleData(combination)
@@ -546,7 +544,7 @@ export default function LuksoComponent({
                     {campaignParams && (
                         <AvatarBuilder
                             avatarBasePath={campaignParams.armature}
-                            campaign='lukso female b'
+                            campaign='lukso2'
                             campaignConfig={campaignParams.config}
                             onlyView
                             selectListAccessories={selectListAccessories.current}
