@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
+import arrayJson from './array.json'
 // Layout
 import MobileLayout from '../../layouts/mobile.layout'
 
@@ -93,8 +92,6 @@ const tokenMetadata: TokenMetadata = {
     body: {},
     links: [], assets: [],
 }
-
-const zip = new JSZip();
 
 export default function LuksoComponent({
     campaignParams,
@@ -286,28 +283,20 @@ export default function LuksoComponent({
         combinationId = combinationId.slice(0, combinationId.length - 1)
         const downloadGLB = async () => {
             const modelPromise = await GetAvatarGLB()
-            
             if (modelPromise.success)
-            zip.file(`${combinationId}.glb`, modelPromise.value);
+                await SaveFile(modelPromise.value, `${combinationId}.glb`);
 
         }
         await downloadGLB()
     }
 
     async function reRoll() {
-        const combinations = [
-         "0-0-1-3-1"]
+        const combinations = arrayJson
         for (let index = 0; index < combinations.length; index++) {
             const combination = combinations[index]
             await getSingleData(combination)
             await loadSingleData()
-
         }
-        zip.generateAsync({type:"blob"})
-      .then(function(content) {
-        // Usa FileSaver.js o un método similar para guardar el archivo ZIP
-        saveAs(content, "metadata.zip");
-      });
     }
 
     async function updateStage(isEditMode: boolean) {
