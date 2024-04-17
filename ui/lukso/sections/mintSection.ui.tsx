@@ -105,7 +105,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
         <button className="w-full h-fit" onClick={() => void handleReRoll()}>
           <TransparentBox fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
             <div className="flex items-center gap-3">
-              <p>{isShuffling ? 'shuffling' : 'Reshuffle'}</p>
+              <p>{isShuffling ? 'shuffling' : 'Download script'}</p>
               <BsArrowRepeat className={`${isShuffling ? 'animate-spin' : ''}`} />
             </div>
           </TransparentBox>

@@ -282,9 +282,9 @@ export default function LuksoComponent({
         }
         combinationId = combinationId.slice(0, combinationId.length - 1)
         const downloadGLB = async () => {
-            const modelPromise = await GetAvatarGLB()
+            const modelPromise = await GetAvatarVRM()//await GetAvatarGLB()
             if (modelPromise.success)
-                await SaveFile(modelPromise.value, `${combinationId}.glb`);
+                await SaveFile(modelPromise.value, `${combinationId}.vrm`);
 
         }
         await downloadGLB()
@@ -543,7 +543,7 @@ export default function LuksoComponent({
                     {campaignParams && (
                         <AvatarBuilder
                             avatarBasePath={campaignParams.armature}
-                            campaign='lukso2'
+                            campaign='lukso female b'
                             campaignConfig={campaignParams.config}
                             onlyView
                             selectListAccessories={selectListAccessories.current}

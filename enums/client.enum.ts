@@ -1,3 +1,3 @@
 export enum Client {
-  Lukso = 'lukso2'
+  Lukso = 'lukso female b'
 }
