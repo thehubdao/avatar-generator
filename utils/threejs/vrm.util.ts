@@ -110,6 +110,10 @@ export function GenerateVrmBoneData(nodes: GltfNode[] | undefined) {
     const err = e as Error;
     void LogWarning(Module.VrmUtil, err.message, e);
   }
+
+  console.log("NODES: ", nodes)
+  console.log("DEFAULT: ", generatedBones)
+  console.log("equal", generatedBones.length === VRM_HUMAN_BONES_DEFAULT_LENGTH)
   
   const setData: VrmStructure = {
     extensions: {
