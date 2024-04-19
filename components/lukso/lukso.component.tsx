@@ -188,8 +188,8 @@ export default function LuksoComponent({
 
         await SetFeaturesData(campaignParams?.features ?? [])
 
-        // Set features from single
-        await loadSingleData()
+        /* // Set features from single
+        await loadSingleData() */
 
         // Set skin tone
         await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'ffffff')
@@ -254,21 +254,19 @@ export default function LuksoComponent({
         const result: SingleInterface | undefined = numResult.success
             ? numResult.value
             : undefined
-        singleInitData = result
-        setSingleData(singleInitData);
-        if (!numResult.success) return
+     return result
 
     }
 
-    async function loadSingleData() {
+    async function loadSingleData(singleData:any) {
         // Iterate the features
         // Place the features on the model
-        if (singleInitData === undefined)
+        if (singleData === undefined)
             return void LogError(Module.Lukso, 'Missing single data!!!!!')
         let combinationId = ''
         for (const {
             val: { id, path, type, name, index },
-        } of singleInitData.features) {
+        } of singleData.features) {
             // Set feature on model
             await ChangeFeature(
                 id,
@@ -281,21 +279,17 @@ export default function LuksoComponent({
 
         }
         combinationId = combinationId.slice(0, combinationId.length - 1)
-        const downloadGLB = async () => {
-            const modelPromise = await GetAvatarGLB()
-            if (modelPromise.success)
-                await SaveFile(modelPromise.value, `${combinationId}.glb`);
-
-        }
-        await downloadGLB()
+        const modelPromise = await GetAvatarGLB()
+        if (modelPromise.success)
+            await SaveFile(modelPromise.value, `${combinationId}.glb`);
     }
 
     async function reRoll() {
         const combinations = arrayJson
         for (let index = 0; index < combinations.length; index++) {
             const combination = combinations[index]
-            await getSingleData(combination)
-            await loadSingleData()
+            const singleData = await getSingleData(combination)
+            await loadSingleData(singleData)
         }
     }
 
