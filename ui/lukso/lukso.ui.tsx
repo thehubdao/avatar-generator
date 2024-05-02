@@ -6,6 +6,7 @@ import { LuksoSections } from "../../enums/lukso/common.enum";
 import { BrowserProvider, ethers } from "ethers";
 import { IndexFeatureInterface } from "../../interfaces/api.interface";
 import LoginUI from "./sections/loginSection.ui";
+import ConnectModalUI from "./common/conectModal";
 
 interface LuksoUIProps {
   isLoading: boolean;
@@ -15,13 +16,13 @@ interface LuksoUIProps {
   setIsEditModeSelected: (value: boolean) => void;
   setCurrentSection: (value: LuksoSections) => void;
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
-  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean, tokenId?:string }>;
+  handleClaim: (address: string, provider: BrowserProvider) => Promise<{ message: string, success: boolean, tokenId?: string }>;
   hasMinted: boolean;
   provider: ethers.BrowserProvider | undefined;
   isGettingInfoAboutHasMinted: boolean;
   features?: IndexFeatureInterface[];
-  picture:string;
-  combination:string;
+  picture: string;
+  combination: string;
 }
 
 export default function LuksoUI({
@@ -42,10 +43,10 @@ export default function LuksoUI({
 }: LuksoUIProps) {
   return (
     <div className="w-full grow text-white text-center">
-      {!provider && <LoginUI />}
-      {/* {(currentSection === LuksoSections.Main) && <MainSectionUI combination={combination} picture={picture} setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} provider={provider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}/>}
-      {(currentSection === LuksoSections.Mint) && <MintSectionUI combination = {combination} picture={picture} features={features} setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} provider={provider} />}
-      {(currentSection === LuksoSections.Edit) && <EditSectionUI picture={picture} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />} */}
+      {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
+      {(currentSection === LuksoSections.Main) && <MainSectionUI combination={combination} picture={picture} setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} provider={provider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted} />}
+      {(currentSection === LuksoSections.Mint) && <MintSectionUI combination={combination} picture={picture} features={features} setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} provider={provider} />}
+      {(currentSection === LuksoSections.Edit) && <EditSectionUI picture={picture} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
     </div>
   )
 }

@@ -74,6 +74,8 @@ import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
 import { getTokensMetadata, mint } from '../../utils/web3/contract.util'
 import { UpdateAvatarStatus } from '../../utils/firebase.util'
+import LoginUI from '../../ui/lukso/sections/loginSection.ui'
+import ConnectModalUI from '../../ui/lukso/common/conectModal'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -444,10 +446,10 @@ export default function LuksoComponent({
       await setTokensMetadata(address)
       await UpdateAvatarStatus(combinationId, 'Minted')
       // update distribution tier based on items selected
-       await RegisterFeaturesDistribution(
+      await RegisterFeaturesDistribution(
         Client.Lukso,
         features.map(feat => feat.val)
-      ) 
+      )
 
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
@@ -473,149 +475,152 @@ export default function LuksoComponent({
   }
 
   return (
-    <MobileLayout>
-      <div className="w-full h-screen bg-[#FFCBDE] flex flex-col">
-        {isAccountModalOpen && (
-          <AccountModalUI
-            addressAccount={addressToShow}
-            formatAddress={formatearString(addressToShow)}
-            setIsAccountModalOpen={(value) =>
-              setIsAccountModalOpen(value)
-            }
-            onDisconnect={() => {
+    <>
+      <MobileLayout>
+        <>
+          {!provider && <LoginUI />}
+          {provider && <div className="w-full h-screen bg-[#FFCBDE] flex flex-col">
+            {isAccountModalOpen && (
+              <AccountModalUI
+                addressAccount={addressToShow}
+                formatAddress={formatearString(addressToShow)}
+                setIsAccountModalOpen={(value) =>
+                  setIsAccountModalOpen(value)
+                }
+                onDisconnect={() => {
 
-              setCurrentSection(LuksoSections.Main)
-              void reRoll()
-            }}
-          />
-        )}
-        <div className='z-10'>
-          <TransparentBoxUI
-            fullWidth
-            border
-            backgroundColorClass="bg-[#FFCBDE]"
-            opacityPercentage="50"
-            borderColorClass="border-white"
-            borderSizeClass="border-2"
-            heightClass="h-14"
-            paddingClass="pl-11"
-            alignItemsClass="items-stretch"
-          >
-            <div className="flex flex-row justify-between h-full">
-              <Image
-                src="/resources/icons/campaigns/lukso.svg"
-                width={106}
-                height={24}
-                alt="Lukso icon"
+                  setCurrentSection(LuksoSections.Main)
+                  void reRoll()
+                }}
               />
+            )}
+            <div className='z-10'>
+              <TransparentBoxUI
+                fullWidth
+                border
+                backgroundColorClass="bg-[#FFCBDE]"
+                opacityPercentage="50"
+                borderColorClass="border-white"
+                borderSizeClass="border-2"
+                heightClass="h-14"
+                paddingClass="pl-11"
+                alignItemsClass="items-stretch"
+              >
+                <div className="flex flex-row justify-between h-full">
+                  <Image
+                    src="/resources/icons/campaigns/lukso.svg"
+                    width={106}
+                    height={24}
+                    alt="Lukso icon"
+                  />
 
-              {provider ? (
-                <button
-                  className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
-                  onClick={() => setIsAccountModalOpen(true)}
-                >
-                  <p className="truncate h-fit text-white">{`${formatearString(
-                    addressToShow
-                  )}`}</p>
-                </button>
-              ) : (
-                <ConnectWeb3Button
-                  classStyles={
-                    'w-48 border-l-2 border-white font-bold text-white'
-                  }
-                  onConnect={() => { }}
-                >
-                  <> Login with your UP!</>
-                </ConnectWeb3Button>
+                  {provider ? (
+                    <button
+                      className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
+                      onClick={() => setIsAccountModalOpen(true)}
+                    >
+                      <p className="truncate h-fit text-white">{`${formatearString(
+                        addressToShow
+                      )}`}</p>
+                    </button>
+                  ) : (
+                    <ConnectWeb3Button
+                      classStyles={
+                        'w-48 border-l-2 border-white font-bold text-white'
+                      }
+                      onConnect={() => { }}
+                    >
+                      <> Login with your UP!</>
+                    </ConnectWeb3Button>
+                  )}
+                </div>
+              </TransparentBoxUI>
+            </div>
+            {/* CANVAS WRAPPER */}
+            <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+              {/* CANVAS BACKGROUND */}
+              <div className="w-full h-screen absolute opacity-0" />
+              {/* CANVAS */}
+              {campaignParams && (
+                <AvatarEditor
+                  avatarBasePath={campaignParams.armature}
+                  editMode={isEditModeSelected}
+                  lights={campaignParams.config.lights}
+                  defaultShadow={campaignParams.config.defShadow}
+                  defaultCamera={campaignParams.config.defCam}
+                  postProcessing={campaignParams.config.postProcessing}
+                  onReady={() => onAvatarBuilderReady()}
+                />
               )}
             </div>
-          </TransparentBoxUI>
-        </div>
-        {/* CANVAS WRAPPER */}
-        <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-          {/* CANVAS BACKGROUND */}
-          <div className="w-full h-screen absolute opacity-0" />
-          {/* CANVAS */}
-          {campaignParams && (
-            <AvatarEditor
-              avatarBasePath={campaignParams.armature}
-              editMode={isEditModeSelected}
-              lights={campaignParams.config.lights}
-              defaultShadow={campaignParams.config.defShadow}
-              defaultCamera={campaignParams.config.defCam}
-              postProcessing={campaignParams.config.postProcessing}
-              onReady={() => onAvatarBuilderReady()}
+            <div
+              className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
+                }`}
+            >
+              <div className="scale-[3]">
+                <Loader />
+              </div>
+            </div>
+            <div className="fixed z-10">
+              <HudComponent
+                selectedOption={selectedOpc.find(
+                  (e) => e.id === selectedCategory
+                )}
+                editModeSelected={isEditModeSelected}
+                selectListCategory={[
+                  ...selectListFeatures.current,
+                  ...selectListAccessories.current,
+                ]}
+                // optionList
+                optionList={optionListShow}
+                // selectedCategory
+                selectedCategory={selectedCategory}
+                campaignSkinColorConfig={
+                  campaignParams?.config.skin || {}
+                }
+                skinColor={skinColor}
+                changeView={() => {
+                  setIsEditModeSelected(!isEditModeSelected)
+                  void updateStage(!isEditModeSelected)
+                }}
+                // changeCategory
+                onOptionChange={(id, path, name) =>
+                  void onOptionChange(id, path, name)
+                }
+                // onCategoryChange
+                onCategoryTypeChange={(value) =>
+                  onCategoryTypeChange(value)
+                }
+                onSkinColorChange={(value) =>
+                  void onClickChangeSkinColor(value)
+                }
+                exportModel={() => exportModel()}
+                isCustomCampaignHud
+              />
+            </div>
+            <LuksoUI
+              reRoll={reRoll}
+              setIsEditModeSelected={(value) =>
+                setIsEditModeSelected(value)
+              }
+              isLoading={isLoading}
+              currentSection={currentSection}
+              setCurrentSection={(changeSectionValue) =>
+                setCurrentSection(changeSectionValue)
+              }
+              getloaderDivElement={(elementReference) =>
+                getloaderDivElement(elementReference)
+              }
+              exportModel={() => exportModel()}
+              handleClaim={handleClaim}
+              hasMinted={hasMinted}
+              provider={provider}
+              isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
+              features={singleInitData?.features}
+              picture={picture}
+              combination={combination}
             />
-          )}
-        </div>
-        <div
-          className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
-            }`}
-        >
-          <div className="scale-[3]">
-            <Loader />
-          </div>
-        </div>
-        <div className="fixed z-10">
-          <HudComponent
-            selectedOption={selectedOpc.find(
-              (e) => e.id === selectedCategory
-            )}
-            editModeSelected={isEditModeSelected}
-            selectListCategory={[
-              ...selectListFeatures.current,
-              ...selectListAccessories.current,
-            ]}
-            // optionList
-            optionList={optionListShow}
-            // selectedCategory
-            selectedCategory={selectedCategory}
-            campaignSkinColorConfig={
-              campaignParams?.config.skin || {}
-            }
-            skinColor={skinColor}
-            changeView={() => {
-              setIsEditModeSelected(!isEditModeSelected)
-              void updateStage(!isEditModeSelected)
-            }}
-            // changeCategory
-            onOptionChange={(id, path, name) =>
-              void onOptionChange(id, path, name)
-            }
-            // onCategoryChange
-            onCategoryTypeChange={(value) =>
-              onCategoryTypeChange(value)
-            }
-            onSkinColorChange={(value) =>
-              void onClickChangeSkinColor(value)
-            }
-            exportModel={() => exportModel()}
-            isCustomCampaignHud
-          />
-        </div>
-        <LuksoUI
-          reRoll={reRoll}
-          setIsEditModeSelected={(value) =>
-            setIsEditModeSelected(value)
-          }
-          isLoading={isLoading}
-          currentSection={currentSection}
-          setCurrentSection={(changeSectionValue) =>
-            setCurrentSection(changeSectionValue)
-          }
-          getloaderDivElement={(elementReference) =>
-            getloaderDivElement(elementReference)
-          }
-          exportModel={() => exportModel()}
-          handleClaim={handleClaim}
-          hasMinted={hasMinted}
-          provider={provider}
-          isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
-          features={singleInitData?.features}
-          picture={picture}
-          combination={combination}
-        />
-      </div>
-    </MobileLayout>
+          </div>}</>
+      </MobileLayout></>
   )
 }

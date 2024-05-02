@@ -89,7 +89,7 @@ export default function LoginUI() {
   }, []);
 
   return (
-    <div  className={'fixed z-50 top-0 left-0 w-screen h-screen flex justify-center items-center bg-[#FFCBDE]'}>
+    <div  className={'fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-[#FFCBDE] text-white'}>
       <canvas ref={canvasRef} className="w-full h-screen fixed top-0 left-0"></canvas>
       <div className="w-full h-screen flex flex-col justify-center items-center">
         <div className="fixed top-0 w-full h-14 flex items-center px-4 justify-between">

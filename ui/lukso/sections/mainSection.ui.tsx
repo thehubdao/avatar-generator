@@ -15,6 +15,9 @@ import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
 import { useConnectWallet } from "@web3-onboard/react";
 import { canMint } from "../../../utils/phase.util";
 import LoginUI from "./loginSection.ui";
+import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
+import TransparentBoxUI from "../common/transparentBox.ui";
+import LoadingUI from "./loadingSection.ui";
 
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
@@ -81,8 +84,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
   return (
     <>
-      {true && <LoginUI />}
-      {false && <section className={`flex h-full items-center justify-between`}>
+      <section className={`flex h-full items-center justify-between`}>
         <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isGettingInfoAboutHasMinted ? 'flex' : 'hidden'}`}>
           <div className="scale-[3]">
             <Loader />
@@ -223,12 +225,13 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             >
               <div className="relative w-full h-1/2 overflow-hidden border-b-2 border-white flex justify-end
             flex-col bg-[#d59fba]">
+                {isLoading && <LoadingUI getloaderDivElement={() => { }} />} {/* In review! */}
                 <Image
                   src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png${'?pinataGatewayToken=' + process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY}`}
                   alt="lukso avatar selfie view"
                   fill
-                  /*                 style={{ objectFit: "cover" }} */
-                  /*                 className="origin-top scale-[300%] -translate-y-1/4" */
+/*                   style={{ objectFit: "cover" }}
+                  className="origin-top scale-[300%] -translate-y-1/4" */
 
                   onLoadStart={() => {
                     setIsLoading(true)
@@ -245,7 +248,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             </TransparentBox>
           </div>
         </div>
-      </section >}
+      </section >
     </>
   )
 }
