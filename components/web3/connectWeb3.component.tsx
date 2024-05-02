@@ -15,8 +15,6 @@ export default function ConnectWeb3Button({ classStyles, children, onConnect }: 
         <button className={classStyles} onClick={ () => {
             void (async ()=>{ await connect()})()
             onConnect()
-            
-
         }}>
             <div className="flex items-center gap-3 mx-4">
 
