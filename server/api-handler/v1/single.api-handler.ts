@@ -14,15 +14,17 @@ import {
   //RandomIndexValues,
   StringToIndexValues,
   //isCombinationNotMinted,
-  GetCombinationAvailable,
+  RandomIndexValues,
 } from "../../../utils/collection.util";
 import { Base64ToObj, CastStringToInteger, LogError, Raise } from "../../../utils/common.util";
 import { EXPORT_ATTRIBUTE, GLOBAL_VALUES } from "../../../constants/common.constant";
 import { SinglePostBody } from "../../interfaces/single.interface";
 import { BasicData } from "../../../interfaces/common.interface";
 import {
+  CampaignParameterName,
   //CampaignParameterName,
   Module,
+  RandomTier,
   //RandomTier
 } from "../../../enums/common.enum";
 
@@ -57,7 +59,7 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   let combinationNum = ProcessCombination(combination, maxIndexValues);
   let isRandom = false;
 
-  //const randomBalance = await GetParameter<Record<RandomTier, number>>(campaign, CampaignParameterName.Random);
+  const randomBalance = await GetParameter<Record<RandomTier, number>>(campaign, CampaignParameterName.Random);
 
   // Collection util
   // If combination is out of bounds throw error
@@ -67,8 +69,8 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   } else if (combinationNum == undefined) {
     // random
     isRandom = true;
-    //combinationNum = RandomIndexValues(maxIndexValues, randomBalance, featureValues.featureOptionListData);
-    combinationNum = await GetCombinationAvailable(campaign)
+    combinationNum = RandomIndexValues(maxIndexValues, randomBalance, featureValues.featureOptionListData);
+    //combinationNum = await GetCombinationAvailable(campaign)
 
     //let combinationString = Array.from(combinationNum.values()).toString().replaceAll(',','-')
     // @ATTENTION: Stop checking if combination was minted
@@ -89,9 +91,9 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
     console.log("ATTEMPTS: ", attempts)
     */
   }
-
   // Try get combination
   const combinationIndexValues = typeof combinationNum === 'number' ? NumberToIndexValues(combinationNum, maxCombination, maxIndexValues) : combinationNum;
+  console.log(combinationIndexValues)
   if (combinationIndexValues == undefined)
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
 
