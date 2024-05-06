@@ -4,14 +4,17 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { ConfigPostProcessing, ConfigUnrealBloomPass } from '../../interfaces/postProcessing.interface';
 import { PostProcessType } from '../../enums/postProcecssing.enum';
+import { SSAARenderPass } from 'three/examples/jsm/postprocessing/SSAARenderPass';
 
 export function CreateEffectComposer(renderer: WebGLRenderer, scene: Scene, camera: PerspectiveCamera, postProcecssing: ConfigPostProcessing[]): EffectComposer {
   const composer = new EffectComposer(renderer);
+  composer.setPixelRatio( 1 ); // ensure pixel ratio is always 1 for performance reasons
   composer.addPass( GetRenderPass(scene, camera) );
+  composer.addPass( GetSSAAPass(scene, camera) );
   for (const pass of postProcecssing) {
     GetGeneratePassFunction(composer, pass);
   }
-
+  
   return composer;
 }
 
@@ -31,5 +34,9 @@ function GetRenderPass(scene: Scene, camera: PerspectiveCamera): RenderPass {
 
 export function GetUnrealBloomPass( {resolution, strength, radius, threshold}: ConfigUnrealBloomPass): UnrealBloomPass {
   return new UnrealBloomPass(resolution, strength, radius, threshold);
+}
+
+export function GetSSAAPass(scene: Scene, camera: PerspectiveCamera): SSAARenderPass {
+  return new SSAARenderPass( scene, camera );
 }
 
