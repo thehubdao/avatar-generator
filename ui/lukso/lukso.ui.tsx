@@ -19,7 +19,8 @@ interface LuksoUIProps {
   provider: ethers.BrowserProvider | undefined;
   isGettingInfoAboutHasMinted: boolean;
   features?: IndexFeatureInterface[];
-  picture:string;
+  fullBodyPicture:string;
+  facePicture:string;
   combination:string;
   hasSupplyReached:boolean;
 }
@@ -37,16 +38,16 @@ export default function LuksoUI({
   provider,
   isGettingInfoAboutHasMinted,
   features,
-  picture,
-  combination, 
+  fullBodyPicture,
+  facePicture, 
   hasSupplyReached
 }: LuksoUIProps) {
   return (
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
-      {(currentSection === LuksoSections.Main) && <MainSectionUI hasSupplyReached={hasSupplyReached} combination={combination} picture={picture} setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} provider={provider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}/>}
-      {(currentSection === LuksoSections.Mint) && <MintSectionUI combination = {combination} picture={picture} features={features} setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} provider={provider} />}
-      {(currentSection === LuksoSections.Edit) && <EditSectionUI picture={picture} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
+      {(currentSection === LuksoSections.Main) && <MainSectionUI hasSupplyReached={hasSupplyReached} fullBodyPicture={fullBodyPicture} facePicture={facePicture} setCurrentSection={(newSection) => setCurrentSection(newSection)} hasMinted={hasMinted} provider={provider} isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}/>}
+      {(currentSection === LuksoSections.Mint) && <MintSectionUI picture={facePicture} features={features} setCurrentSection={(newSection) => setCurrentSection(newSection)} reRoll={reRoll} handleClaim={handleClaim} provider={provider} />}
+      {(currentSection === LuksoSections.Edit) && <EditSectionUI picture={facePicture} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
     </div>
   )
 }
