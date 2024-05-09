@@ -72,10 +72,11 @@ import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getTokensMetadata, mint } from '../../utils/web3/contract.util'
+import { getCampaignsTokensMetadata, getTokensMetadata, mint } from '../../utils/web3/contract.util'
 import { UpdateAvatarStatus } from '../../utils/firebase.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ConnectModalUI from '../../ui/lukso/common/conectModal'
+import ListUI from '../../ui/lukso/sections/listSection.ui'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -93,6 +94,9 @@ const tokenMetadata: TokenMetadata = {
   GLBUrl: '',
   body: {},
   links: [], assets: [],
+  tokenId: 0,
+  campaign: '',
+  imageUrl: ''
 }
 
 export default function LuksoComponent({
@@ -125,6 +129,8 @@ export default function LuksoComponent({
   const [selectedCategory, setSelectedCategory] = useState<string>(
     selectListFeatures.current[0].displayName ?? ''
   )
+  const [listData, setListData] = useState<Array<TokenMetadata>>()
+  const [currentCombination, setCurrentCombination] = useState<string>()
 
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
@@ -162,15 +168,19 @@ export default function LuksoComponent({
       const address = wallet.accounts[0].address
       setAddressToShow(address)
 
-      await setTokensMetadata(address)
+      //await setTokensMetadata(address)
     }
     void setTokensMetadataPromise()
   }, [provider])
 
-  /*   useEffect(() => {
-      if (!hasMinted) return
-      void onAvatarBuilderReady()
-    }, [hasMinted]) */
+  useEffect(() => {
+    if (!addressToShow) return
+    const getTokensMetadataPromise = async () => {
+      const metadatas = await getCampaignsTokensMetadata(addressToShow)
+      setListData(metadatas)
+    }
+    void getTokensMetadataPromise()
+  }, [addressToShow])
 
   async function onAvatarBuilderReady() {
     await Promise.all([
@@ -401,22 +411,22 @@ export default function LuksoComponent({
     }
   }
 
-  async function setTokensMetadata(address: string) {
-    const tokenMetadata = await getTokensMetadata(address)
-    if (!tokenMetadata) return setHasMinted(false)
-    const features = Object.entries(tokenMetadata.body).map(
-      ([, bodyPart]: Array<string | BodyPart>, index) => {
-        return {
-          index,
-          val: bodyPart,
-        } as IndexFeatureInterface
-      }
-    )
-    singleInitData = { random: false, features }
-    await loadSingleData()
-
-    setHasMinted(true)
-  }
+  /*   async function setTokensMetadata(address: string) {
+      const tokenMetadata = await getTokensMetadata(address)
+      if (!tokenMetadata) return setHasMinted(false)
+      const features = Object.entries(tokenMetadata.body).map(
+        ([, bodyPart]: Array<string | BodyPart>, index) => {
+          return {
+            index,
+            val: bodyPart,
+          } as IndexFeatureInterface
+        }
+      )
+      singleInitData = { random: false, features }
+      await loadSingleData()
+  
+      setHasMinted(true)
+    } */
 
   async function handleClaim(address: string) {
     if (!singleInitData || !provider)
@@ -443,7 +453,7 @@ export default function LuksoComponent({
       const signer = await provider.getSigner()
       const tokenId = await mint(metadataUrl, tokenMetadata, signer)
 
-      await setTokensMetadata(address)
+      /*       await setTokensMetadata(address) */
       await UpdateAvatarStatus(combinationId, 'Minted')
       // update distribution tier based on items selected
       await RegisterFeaturesDistribution(
@@ -536,90 +546,92 @@ export default function LuksoComponent({
                 </div>
               </TransparentBoxUI>
             </div>
-            {/* CANVAS WRAPPER */}
-            <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-              {/* CANVAS BACKGROUND */}
-              <div className="w-full h-screen absolute opacity-0" />
-              {/* CANVAS */}
-              {campaignParams && (
-                <AvatarEditor
-                  avatarBasePath={campaignParams.armature}
-                  editMode={isEditModeSelected}
-                  lights={campaignParams.config.lights}
-                  defaultShadow={campaignParams.config.defShadow}
-                  defaultCamera={campaignParams.config.defCam}
-                  postProcessing={campaignParams.config.postProcessing}
-                  onReady={() => onAvatarBuilderReady()}
-                />
-              )}
-            </div>
-            <div
-              className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
-                }`}
-            >
-              <div className="scale-[3]">
-                <Loader />
-              </div>
-            </div>
-            <div className="fixed z-10">
-              <HudComponent
-                selectedOption={selectedOpc.find(
-                  (e) => e.id === selectedCategory
+            {!currentCombination && <ListUI listData={listData} provider={provider} setCombination={(combination: string) => setCombination(combination)} />}
+            {currentCombination && <>
+              {/* CANVAS WRAPPER */}
+              <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+                {/* CANVAS BACKGROUND */}
+                <div className="w-full h-screen absolute opacity-0" />
+                {/* CANVAS */}
+                {campaignParams && (
+                  <AvatarEditor
+                    avatarBasePath={campaignParams.armature}
+                    editMode={isEditModeSelected}
+                    lights={campaignParams.config.lights}
+                    defaultShadow={campaignParams.config.defShadow}
+                    defaultCamera={campaignParams.config.defCam}
+                    postProcessing={campaignParams.config.postProcessing}
+                    onReady={() => onAvatarBuilderReady()}
+                  />
                 )}
-                editModeSelected={isEditModeSelected}
-                selectListCategory={[
-                  ...selectListFeatures.current,
-                  ...selectListAccessories.current,
-                ]}
-                // optionList
-                optionList={optionListShow}
-                // selectedCategory
-                selectedCategory={selectedCategory}
-                campaignSkinColorConfig={
-                  campaignParams?.config.skin || {}
+              </div>
+              <div
+                className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
+                  }`}
+              >
+                <div className="scale-[3]">
+                  <Loader />
+                </div>
+              </div>
+              <div className="fixed z-10">
+                <HudComponent
+                  selectedOption={selectedOpc.find(
+                    (e) => e.id === selectedCategory
+                  )}
+                  editModeSelected={isEditModeSelected}
+                  selectListCategory={[
+                    ...selectListFeatures.current,
+                    ...selectListAccessories.current,
+                  ]}
+                  // optionList
+                  optionList={optionListShow}
+                  // selectedCategory
+                  selectedCategory={selectedCategory}
+                  campaignSkinColorConfig={
+                    campaignParams?.config.skin || {}
+                  }
+                  skinColor={skinColor}
+                  changeView={() => {
+                    setIsEditModeSelected(!isEditModeSelected)
+                    void updateStage(!isEditModeSelected)
+                  }}
+                  // changeCategory
+                  onOptionChange={(id, path, name) =>
+                    void onOptionChange(id, path, name)
+                  }
+                  // onCategoryChange
+                  onCategoryTypeChange={(value) =>
+                    onCategoryTypeChange(value)
+                  }
+                  onSkinColorChange={(value) =>
+                    void onClickChangeSkinColor(value)
+                  }
+                  exportModel={() => exportModel()}
+                  isCustomCampaignHud
+                />
+              </div>
+              <LuksoUI
+                reRoll={reRoll}
+                setIsEditModeSelected={(value) =>
+                  setIsEditModeSelected(value)
                 }
-                skinColor={skinColor}
-                changeView={() => {
-                  setIsEditModeSelected(!isEditModeSelected)
-                  void updateStage(!isEditModeSelected)
-                }}
-                // changeCategory
-                onOptionChange={(id, path, name) =>
-                  void onOptionChange(id, path, name)
+                isLoading={isLoading}
+                currentSection={currentSection}
+                setCurrentSection={(changeSectionValue) =>
+                  setCurrentSection(changeSectionValue)
                 }
-                // onCategoryChange
-                onCategoryTypeChange={(value) =>
-                  onCategoryTypeChange(value)
-                }
-                onSkinColorChange={(value) =>
-                  void onClickChangeSkinColor(value)
+                getloaderDivElement={(elementReference) =>
+                  getloaderDivElement(elementReference)
                 }
                 exportModel={() => exportModel()}
-                isCustomCampaignHud
-              />
-            </div>
-            <LuksoUI
-              reRoll={reRoll}
-              setIsEditModeSelected={(value) =>
-                setIsEditModeSelected(value)
-              }
-              isLoading={isLoading}
-              currentSection={currentSection}
-              setCurrentSection={(changeSectionValue) =>
-                setCurrentSection(changeSectionValue)
-              }
-              getloaderDivElement={(elementReference) =>
-                getloaderDivElement(elementReference)
-              }
-              exportModel={() => exportModel()}
-              handleClaim={handleClaim}
-              hasMinted={hasMinted}
-              provider={provider}
-              isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
-              features={singleInitData?.features}
-              picture={picture}
-              combination={combination}
-            />
+                handleClaim={handleClaim}
+                hasMinted={hasMinted}
+                provider={provider}
+                isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
+                features={singleInitData?.features}
+                picture={picture}
+                combination={combination}
+              /></>}
           </div>}</>
       </MobileLayout></>
   )

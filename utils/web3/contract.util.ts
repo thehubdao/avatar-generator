@@ -2,9 +2,8 @@ import { Contract, JsonRpcProvider, Signer, TransactionResponse } from 'ethers'
 import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
-import { TokenMetadata } from '../../types/metadata.type';
-import { getIPFSData } from './lukso.util';
-import { DecodeDataInput } from '@erc725/erc725.js/build/main/src/types/decodeData';
+import { Campaign, CampaignData, TokenMetadata } from '../../types/metadata.type';
+import { getIPFSData, getImageUrl } from './lukso.util';
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
@@ -15,8 +14,13 @@ const config = {
 };
 
 const provider = new JsonRpcProvider(RPC_URL);
-/* 
-const signer = new Wallet(process.env.NEXT_PUBLIC_WALLET_PK!, provider) */
+
+const campaignWeb3Data: CampaignData = {
+    'citizens': {
+        contractAddress: '0xeCf25fd57557c363EDA7C3eA01c58C55b631e7C2',
+        baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
+    }, 'creators': { contractAddress: '0x0b0cA7fD6931e0Ecb83ADcee8BC85aA5c1BaaE87', baseCid: '' },
+}
 
 const schemas = [
     {
@@ -56,7 +60,7 @@ export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata
     const mintTx = await writableProxyContract.mint('0x', metadataDataKey, metadataDataValue.values[0],
     ) as TransactionResponse
     await mintTx.wait();
-    
+
     const address = await walletSigner.getAddress()
     const tokenIds = await avatarContract.tokenIdsOf(address) as Array<string>
     const encodedTokenId = avatarERC725Contract.encodeValueType(
@@ -73,24 +77,55 @@ export const isWhitelisted = async (address: string) => {
     return isWhitelisted
 }
 
-export const getTokensMetadata = async (address: string) => {
-    const tokenIds = await avatarContract.tokenIdsOf(address) as Array<string>
+export const getCampaignTokenIds = async (campaignAddress: string, address: string) => {
+    const campaignTokenIds = await getTokensOf(campaignAddress, address)
+    return campaignTokenIds
+}
 
-    if (tokenIds.length == 0) return undefined
-
-    const tokenId = tokenIds[0]
+export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) => {
+    const { contractAddress, baseCid } = campaignWeb3Data[campaign]
+    const contract = new Contract(contractAddress, AvatarContractAbi, provider)
     const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
-    const getDataForTokenIdTx = await avatarContract.getDataForTokenId(
-        tokenId,
-        metadataDataKey
-    ) as DecodeDataInput['value']
-    const decodedData = avatarERC725Contract.decodeData([{ keyName: metadataDataKey, value: getDataForTokenIdTx }]) as Array<{ value: { url: string } }>
-    if (!decodedData) return undefined
-    const metadataUri = decodedData[0].value.url.split('//')[1]
-    const tokenMetadata = await getIPFSData(metadataUri)
+    const metadataKeyArray = tokenIds.map(() => metadataDataKey)
+    const getDataBatchForTokenIdTx = await contract.getDataBatchForTokenIds(
+        tokenIds,
+        metadataKeyArray
+    )
+    const metadataFormattedArray = getDataBatchForTokenIdTx.map((rawData: any) => {
+        return { keyName: metadataDataKey, value: rawData }
+    })
+    const decodedRawData = avatarERC725Contract.decodeData(metadataFormattedArray)
+    const decodedDataArray = JSON.parse(JSON.stringify(decodedRawData))
 
-    return tokenMetadata['LSP4Metadata']
+    const metadatasArray = []
 
+    for (let i = 0; i < tokenIds.length; i++) {
+        const tokenId = Number(tokenIds[i])
+        const decodedData = decodedDataArray[i]
+        const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenId}`
+        if (!baseCid && !decodedData.value) continue
+        const { LSP4Metadata: metadata } = await getIPFSData(metadataUri)
+
+        metadata.tokenId = tokenId
+        metadata.campaign = campaign
+        metadata.imageUrl = getImageUrl(metadata)
+        metadatasArray.push(metadata)
+    }
+
+    return metadatasArray
+}
+
+export const getCampaignsTokensMetadata = async (address: string) => {
+    let campaignsMetadatas = [] as TokenMetadata[]
+    for (const campaign of Object.keys(campaignWeb3Data)) {
+        const typpedCampaign = campaign as keyof typeof campaignWeb3Data
+        const { contractAddress } = campaignWeb3Data[typpedCampaign]
+        const tokenIds: string[] = await getCampaignTokenIds(contractAddress, address)
+        if (!tokenIds) continue
+        const tokensMetadata = await getTokensMetadata(typpedCampaign, tokenIds)
+        campaignsMetadatas = campaignsMetadatas.concat(tokensMetadata)
+    }
+    return campaignsMetadatas
 }
 
 export const getSupply = async () => {
@@ -100,3 +135,13 @@ export const getSupply = async () => {
 
     return totalSupply
 }
+
+export const getTokensOf = async (contractAddress: string, address: string) => {
+    const contract = new Contract(contractAddress, AvatarContractAbi, provider)
+    const tokenIdsResult = await contract.tokenIdsOf(address)
+    const tokenIds = JSON.parse(JSON.stringify(tokenIdsResult))
+    if (tokenIds.length == 0) return
+
+    return tokenIds
+}
+
