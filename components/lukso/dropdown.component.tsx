@@ -26,7 +26,7 @@ export default function CampaignDropdown({ campaigns, setCampaign }: MainSection
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
                 </svg>
             </button>
-            <div id="dropdown" className="absolute top-[42px] z-10 hidden bg-[#fff] divide-y divide-gray-100 shadow w-full">
+            <div id="dropdown" className="min-w-[145px] absolute top-[42px] z-20 hidden bg-[#fff] divide-y divide-gray-100 shadow ">
                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
                     {campaigns?.map((campaign: { campaignName: string, nftName: string, dropdownName: string }) => {
                         const dropdownName = campaign.dropdownName
@@ -34,7 +34,6 @@ export default function CampaignDropdown({ campaigns, setCampaign }: MainSection
                             onClick={() => {
                                 setSelected(campaign)
                                 setCampaign(campaign.campaignName)
-                                console.log(campaign.campaignName)
                             }}>
                             <a className="text-[#1E293B] block px-4 py-2  ">{dropdownName}</a>
                         </li>

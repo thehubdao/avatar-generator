@@ -394,6 +394,7 @@ export async function GetParameter<T>(campaign: string | undefined, parameter: P
     const { doc, getDoc } = await import('@firebase/firestore');
 
     const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}`.toLowerCase() : FirestoreGlobalLocation.ParametersV2;
+    console.log(realLocation, campaign)
     const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
     const leDoc = await getDoc(docRef);
 

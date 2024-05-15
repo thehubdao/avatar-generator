@@ -10,21 +10,13 @@ import {
   GetMaxCombinationNum,
   GetMaxIndexValues,
   IndexValuesStringToNumber,
-  NumberToIndexValues,
-  //RandomIndexValues,
-  StringToIndexValues,
-  //isCombinationNotMinted,
-  GetCombinationAvailable,
+  NumberToIndexValues, RandomIndexValues, StringToIndexValues
 } from "../../../utils/collection.util";
 import { Base64ToObj, CastStringToInteger, LogError, Raise } from "../../../utils/common.util";
 import { EXPORT_ATTRIBUTE, GLOBAL_VALUES } from "../../../constants/common.constant";
 import { SinglePostBody } from "../../interfaces/single.interface";
 import { BasicData } from "../../../interfaces/common.interface";
-import {
-  //CampaignParameterName,
-  Module,
-  //RandomTier
-} from "../../../enums/common.enum";
+import { CampaignParameterName, Module, RandomTier } from "../../../enums/common.enum";
 
 async function CheckCampaign(campaign: string) {
   const campaignsResult = await GetParameter<string[]>(undefined, FirestoreParameters.Campaigns);
@@ -40,7 +32,7 @@ function ProcessCombination(combination: string | undefined, maxValues: Map<numb
   return CastStringToInteger(combination);
 }
 
-async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterface>>, campaign: string, combination: string | undefined) {  
+async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterface>>, campaign: string, combination: string | undefined) {
   // On campaign not exist return bad request
   const isCampaign = await CheckCampaign(campaign);
   if (!isCampaign)
@@ -50,14 +42,15 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   const featureValues = await FindAndReadjustFeatureIndexes(campaign);
   if (featureValues == undefined)
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
+console.log(featureValues)
 
   // On invalid number use random combination
   const maxIndexValues = GetMaxIndexValues(featureValues.featureList, featureValues.featureOptionListData);
   const maxCombination = GetMaxCombinationNum(maxIndexValues);
   let combinationNum = ProcessCombination(combination, maxIndexValues);
   let isRandom = false;
-
-  //const randomBalance = await GetParameter<Record<RandomTier, number>>(campaign, CampaignParameterName.Random);
+/*   console.log(combinationNum, maxIndexValues,maxCombination, featureValues.featureList, featureValues.featureOptionListData) */
+  const randomBalance = await GetParameter<Record<RandomTier, number>>(campaign, CampaignParameterName.Random);
 
   // Collection util
   // If combination is out of bounds throw error
@@ -67,27 +60,7 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   } else if (combinationNum == undefined) {
     // random
     isRandom = true;
-    //combinationNum = RandomIndexValues(maxIndexValues, randomBalance, featureValues.featureOptionListData);
-    combinationNum = await GetCombinationAvailable(campaign)
-
-    //let combinationString = Array.from(combinationNum.values()).toString().replaceAll(',','-')
-    // @ATTENTION: Stop checking if combination was minted
-    // this code below is really slow when are few combinations available to mint
-    // It can take minutes to return for a valid combination
-    // disabling for now
-    // @TODO: improve checking combination
-    /**
-    let isNotMinted = await isCombinationNotMinted(combinationString)
-    let attempts = 0
-    while (!isNotMinted) {
     combinationNum = RandomIndexValues(maxIndexValues, randomBalance, featureValues.featureOptionListData);
-    combinationString = Array.from(combinationNum.values()).toString().replaceAll(',','-')
-      isNotMinted = await isCombinationNotMinted(combinationString)
-      attempts++
-    }
-
-    console.log("ATTEMPTS: ", attempts)
-    */
   }
 
   // Try get combination

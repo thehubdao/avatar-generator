@@ -41,11 +41,8 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
     featureOptionListData.set(
       feature.index,
       featureData.value.filter((feat: FeatureInterface & { id: string }) => {
-        const featDistribution = tierDistribution.find((dist: TierDistributionInterface) =>
-          feat.id === dist.feature_id
-        )
         const shouldBelongFeature = feat.type === feature.displayName
-        return shouldBelongFeature && featDistribution?.available
+        return shouldBelongFeature 
       })
     );
   }
@@ -70,6 +67,7 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Update all at the same time
   // await UpdateNewIndexesOnDB(campaign, featureOptionsToUpdate);
   // Return the FeatureOptionListData with the new values
+  console.log(featureOptionListData)
   return { featureList: featuresResult.value, featureOptionListData };
 }
 

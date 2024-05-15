@@ -2,7 +2,8 @@ export enum LuksoSections {
   Loading,
   Main,
   Mint,
-  Edit
+  Edit,
+  View
 }
 
 export enum TheHubSocialLinks {

@@ -96,7 +96,9 @@ const tokenMetadata: TokenMetadata = {
   links: [], assets: [],
   tokenId: 0,
   campaign: '',
-  imageUrl: ''
+  imageUrl: '',
+  combination: '',
+  images: []
 }
 
 export default function LuksoComponent({
@@ -129,9 +131,9 @@ export default function LuksoComponent({
   const [selectedCategory, setSelectedCategory] = useState<string>(
     selectListFeatures.current[0].displayName ?? ''
   )
-  const [listData, setListData] = useState<Array<TokenMetadata>>()
-  const [currentCombination, setCurrentCombination] = useState<string>()
-
+  const [listData, setListData] = useState<Array<TokenMetadata>>([])
+  const [selectedCombination, setSelectedCombination] = useState<string>()
+  const [selectedCampaign, setSelectedCampaign] = useState<string>()
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
   const [hasMinted, setHasMinted] = useState<boolean>(false)
@@ -140,7 +142,9 @@ export default function LuksoComponent({
     isGettingInfoAboutHasMinted,
 
   ] = useState<boolean>(false)
-
+  const [combinationPictureUrl, setCombinationPictureUrl] = useState<string>(
+    ''
+  )
   const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false)
   const [isLoadingMintedData, setIsLoadingMintedData] = useState<boolean>(
     false
@@ -182,14 +186,14 @@ export default function LuksoComponent({
     void getTokensMetadataPromise()
   }, [addressToShow])
 
-  async function onAvatarBuilderReady() {
+  async function onAvatarBuilderReady(currentCampaign: string, currentCombination: string) {
     await Promise.all([
       getFeatureList(),
       getAccessoryList(),
       getStageList(),
       getEnvironmentMapList(),
       getSingleInfo(),
-      !hasMinted && getSingleData(),
+      getSingleData(currentCampaign, currentCombination),
     ])
 
     optionList = MixArrays(optionList, accessoryList)
@@ -218,7 +222,8 @@ export default function LuksoComponent({
     // fade loader view
     await handleFadeLoader(loaderDivElement, () => {
       setIsLoading(false)
-      !hasMinted && setCurrentSection(LuksoSections.Main)
+      console.log("Set loader to false")
+      setCurrentSection(LuksoSections.View)
     })
 
   }
@@ -260,14 +265,16 @@ export default function LuksoComponent({
     singleInitData = result.success ? result.value : undefined
   }
 
-  async function getSingleData() {
+  async function getSingleData(campaign: string, combination: string) {
+    console.log(combination, campaign, 'Client')
     const numResult = await GetAvatarSingleByCampaignCombinationString(
-      Client.Lukso
+      campaign, combination
     )
     const result: SingleInterface | undefined = numResult.success
       ? numResult.value
       : undefined
     singleInitData = result
+    console.log(result)
   }
 
   async function loadSingleData() {
@@ -301,8 +308,8 @@ export default function LuksoComponent({
   }
 
   async function reRoll() {
-    await getSingleData()
-    await loadSingleData()
+    /*     await getSingleData()
+        await loadSingleData() */
 
   }
 
@@ -546,8 +553,12 @@ export default function LuksoComponent({
                 </div>
               </TransparentBoxUI>
             </div>
-            {!currentCombination && <ListUI listData={listData} provider={provider} setCombination={(combination: string) => setCombination(combination)} />}
-            {currentCombination && <>
+            {!selectedCombination && <ListUI listData={listData} provider={provider} setCombination={(campaign: string, combination: string, combinationPictureUrl: string) => {
+              setSelectedCampaign(campaign)
+              setSelectedCombination(combination)
+              setCombinationPictureUrl(combinationPictureUrl)
+            }} />}
+            {selectedCombination && selectedCampaign && <>
               {/* CANVAS WRAPPER */}
               <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
                 {/* CANVAS BACKGROUND */}
@@ -561,7 +572,7 @@ export default function LuksoComponent({
                     defaultShadow={campaignParams.config.defShadow}
                     defaultCamera={campaignParams.config.defCam}
                     postProcessing={campaignParams.config.postProcessing}
-                    onReady={() => onAvatarBuilderReady()}
+                    onReady={() => onAvatarBuilderReady(selectedCampaign, selectedCombination)}
                   />
                 )}
               </div>
@@ -611,27 +622,18 @@ export default function LuksoComponent({
                 />
               </div>
               <LuksoUI
-                reRoll={reRoll}
-                setIsEditModeSelected={(value) =>
-                  setIsEditModeSelected(value)
-                }
+                setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
                 isLoading={isLoading}
                 currentSection={currentSection}
-                setCurrentSection={(changeSectionValue) =>
-                  setCurrentSection(changeSectionValue)
-                }
-                getloaderDivElement={(elementReference) =>
-                  getloaderDivElement(elementReference)
-                }
+                setCurrentSection={(changeSectionValue) => setCurrentSection(changeSectionValue)}
+                getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
                 exportModel={() => exportModel()}
-                handleClaim={handleClaim}
                 hasMinted={hasMinted}
                 provider={provider}
                 isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
                 features={singleInitData?.features}
                 picture={picture}
-                combination={combination}
-              /></>}
+                combination={combination} combinationPictureUrl={combinationPictureUrl} /></>}
           </div>}</>
       </MobileLayout></>
   )
