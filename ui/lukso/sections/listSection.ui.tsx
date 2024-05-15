@@ -38,7 +38,6 @@ const filterByCampaign = (campaign: string, listData: TokenMetadata[]) => {
 
 const filterByTokenId = (tokenId: string, listData: TokenMetadata[]) => {
     return listData.filter((data: TokenMetadata) => {
-        console.log(data.tokenId.toString().includes(tokenId), data.tokenId.toString(), tokenId)
         return data.tokenId.toString().includes(tokenId)
     })
 }
@@ -60,7 +59,6 @@ export default function ListUI({ listData, setCombination }: MainSectionUIProps)
 
         const listDatafilteredByCampaign = filterByCampaign(selectedCampaign, listData)
         const listDatafilteredByTokenId = filterByTokenId(selectedTokenId, listDatafilteredByCampaign)
-        console.log(listDatafilteredByCampaign, listDatafilteredByTokenId)
         setProcessedListData(listDatafilteredByTokenId)
     }, [selectedCampaign])
 

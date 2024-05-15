@@ -222,7 +222,6 @@ export default function LuksoComponent({
     // fade loader view
     await handleFadeLoader(loaderDivElement, () => {
       setIsLoading(false)
-      console.log("Set loader to false")
       setCurrentSection(LuksoSections.View)
     })
 
@@ -266,7 +265,6 @@ export default function LuksoComponent({
   }
 
   async function getSingleData(campaign: string, combination: string) {
-    console.log(combination, campaign, 'Client')
     const numResult = await GetAvatarSingleByCampaignCombinationString(
       campaign, combination
     )
@@ -274,7 +272,6 @@ export default function LuksoComponent({
       ? numResult.value
       : undefined
     singleInitData = result
-    console.log(result)
   }
 
   async function loadSingleData() {
@@ -471,7 +468,6 @@ export default function LuksoComponent({
       return { message: 'Your citizen has been created.', success: true, tokenId }
     } catch (error) {
       await UpdateAvatarStatus(combinationId, 'NotMinted')
-      console.log(error)
       return {
         message:
           "Something went wrong. Please try again",

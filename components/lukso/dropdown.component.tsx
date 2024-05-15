@@ -12,7 +12,6 @@ export default function CampaignDropdown({ campaigns, setCampaign }: MainSection
     useEffect(() => {
         if (isDropdownDisplayed === undefined) return
         const element = document.getElementById('dropdown')
-        console.log(element)
         element?.classList.toggle('hidden')
     }, [isDropdownDisplayed])
 

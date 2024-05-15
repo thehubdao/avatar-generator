@@ -67,7 +67,6 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Update all at the same time
   // await UpdateNewIndexesOnDB(campaign, featureOptionsToUpdate);
   // Return the FeatureOptionListData with the new values
-  console.log(featureOptionListData)
   return { featureList: featuresResult.value, featureOptionListData };
 }
 

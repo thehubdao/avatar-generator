@@ -394,7 +394,6 @@ export async function GetParameter<T>(campaign: string | undefined, parameter: P
     const { doc, getDoc } = await import('@firebase/firestore');
 
     const realLocation = campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign}`.toLowerCase() : FirestoreGlobalLocation.ParametersV2;
-    console.log(realLocation, campaign)
     const docRef = doc(await FirebaseUtil.Instance().DB(), realLocation);
     const leDoc = await getDoc(docRef);
 
@@ -451,7 +450,6 @@ export async function UpdateDocObject(location: FirestoreLocation | FirestoreGlo
     const newDocName = docName == undefined ? '' : `/${docName}`;
 
     // eslint-disable-next-line no-console
-    console.log('Update doc loc', newLocation, newDocName);
     const docRef = doc(await FirebaseUtil.Instance().DB(), `${newLocation}${newDocName}`);
     await setDoc(docRef, data, { merge: true });
     return { success: true, value: true };
