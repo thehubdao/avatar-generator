@@ -14,10 +14,9 @@ export default function ConnectWeb3Button({ classStyles, children, onConnect }: 
     return <>
         <button className={classStyles} onClick={ () => {
             void (async ()=>{ 
-            try{
-                console.log("Connect")
+           
                 await connect()
-            console.log("COnnectTT")}catch(err){console.log(err)}})()
+            })()
             onConnect()
         }}>
             <div className="flex items-center gap-3 mx-4">
