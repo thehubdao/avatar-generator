@@ -12,7 +12,7 @@ import { SlPencil } from "react-icons/sl";
 
 interface MainSectionUIProps {
     provider: ethers.BrowserProvider | undefined;
-    setCombination: (campaign: string, combination: string,combinationPictureUrl:string) => void;
+    setCombination: (campaign: string, combination: string, combinationPictureUrl: string) => void;
     listData: TokenMetadata[]
 }
 
@@ -24,11 +24,11 @@ const campaignLabels = {
         nftName: 'Choose Campaign',
         dropdownName: 'Choose Campaign'
     },
-    'citizens': {
+    'lukso female b': {
         campaignName: 'lukso female b',
         nftName: 'Lukso Citizen',
         dropdownName: 'Citizens'
-    }, 'creators': { campaignName: 'lukso2', nftName: 'Lukso Creator', dropdownName: 'Creators' }
+    }, 'lukso2': { campaignName: 'lukso2', nftName: 'Lukso Creator', dropdownName: 'Creators' }
 }
 
 
@@ -89,12 +89,16 @@ export default function ListUI({ listData, setCombination }: MainSectionUIProps)
             </div>
             {/* Card List section */}
             {processedListData && <div className="flex-wrap flex flex-row p-3 min-w-[822px] bg-[#ffcaddbf] border-2 border-solid border-white">
-                {processedListData.map(({ tokenId,campaign, imageUrl, combination }: TokenMetadata) => {
-                    const campaignDBName = campaignLabels[campaign as keyof typeof campaignLabels].campaignName 
+                {processedListData.map(({ tokenId, campaign, imageUrl, combination, body }: TokenMetadata) => {
+                    const campaignDBName = campaignLabels[campaign as keyof typeof campaignLabels].campaignName
                     /* ATTENTION:
                     CAMPAIGN REAL NAMES AND CAMPAIGN NAME ON DB IS DIFFERENT AND SHOULD BE TOOK INTO ACOUNT,
                     RECOMMENDABLE TO CHANGE IT IN FUTURE.
                      */
+
+                    if (!combination) 
+                        combination = Object.values(body).map(({ index }) => { return index }).join('-')
+                    
                     return <>
                         <div key={campaignDBName + tokenId} className="ml-2 bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white">
                             <div className='relative flex flex-col'>

@@ -87,6 +87,7 @@ export interface CampaignParameters {
   accessories?: FeatureBasic[];
   config: CampaignConfig;
   r_val?: Record<RandomTier, number>;
+  campaign?:string
 }
 
 export interface CampaignAssets {

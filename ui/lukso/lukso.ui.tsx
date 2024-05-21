@@ -23,6 +23,7 @@ interface LuksoUIProps {
   picture: string;
   combination: string;
   combinationPictureUrl: string;
+  onClickBackButton: () => void
 }
 
 export default function LuksoUI({
@@ -35,12 +36,13 @@ export default function LuksoUI({
   features,
   picture,
   combination,
-  combinationPictureUrl
+  combinationPictureUrl,
+  onClickBackButton
 }: LuksoUIProps) {
   return (
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
-      {(currentSection === LuksoSections.View) && <ViewSectionUI combinationPictureUrl={combinationPictureUrl} combination={combination} picture={picture} features={features} setCurrentSection={(newSection) => setCurrentSection(newSection)} />}
+      {(currentSection === LuksoSections.View) && <ViewSectionUI onClickBackButton={onClickBackButton} combinationPictureUrl={combinationPictureUrl} combination={combination} picture={picture} features={features} setCurrentSection={(newSection) => setCurrentSection(newSection)} />}
       {(currentSection === LuksoSections.Edit) && <EditSectionUI picture={picture} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} />}
     </div>
   )

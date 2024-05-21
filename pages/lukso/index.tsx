@@ -1,30 +1,30 @@
-import { GetServerSideProps } from "next";
 import LuksoComponent from "../../components/lukso/lukso.component";
 import { GetParameter } from "../../utils/firebase.util";
 import { CampaignParameters } from "../../interfaces/common.interface";
 import { CampaignParameterName, Module } from "../../enums/common.enum";
 import { LogError, RemoveUndefinedProperties } from "../../utils/common.util";
-import { Client } from "../../enums/client.enum";
+import { useEffect, useState } from "react";
 
-interface LuksoAvatarViewProps {
-  campaignParams?: CampaignParameters;
-}
+export default function LuksoAvatarView() {
+  const [campaign, setCampaign] = useState<string>()
+  const [campaignParams, setCampaignParams] = useState<CampaignParameters>()
 
-export default function LuksoAvatarView({ campaignParams }: LuksoAvatarViewProps) {
-  return <LuksoComponent campaignParams={campaignParams} />
-}
+  const getCampaignParams = async () => {
+    const campaignParameters = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
+    if (campaignParameters.success) {
+      campaignParameters.value.campaign = campaign
+      setCampaignParams(RemoveUndefinedProperties(campaignParameters.value))
+    } else void LogError(Module.Lukso, 'Error on getting campaign parameters');
 
-export const getServerSideProps: GetServerSideProps<LuksoAvatarViewProps> = async () => {
-  const campaignParameters = await GetParameter<CampaignParameters>(Client.Lukso, CampaignParameterName.All);
-  let returnProps: LuksoAvatarViewProps;
-  if (campaignParameters.success) {
-    returnProps = { campaignParams: campaignParameters.value };
-  } else {
-    void LogError(Module.Lukso, 'Error on getting campaign parameters');
-    returnProps = {}
   }
 
-  return {
-    props: RemoveUndefinedProperties(returnProps)
-  };
+
+  useEffect(() => {
+    if (!campaign) return setCampaignParams(undefined)
+    getCampaignParams()
+  }, [campaign])
+  
+  return <LuksoComponent campaignParams={campaignParams} setCampaign={(_campaign: string | undefined) => {
+    setCampaign(_campaign)
+  }} />
 }

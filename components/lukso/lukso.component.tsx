@@ -28,7 +28,6 @@ import LuksoUI from '../../ui/lukso/lukso.ui'
 import TransparentBoxUI from '../../ui/lukso/common/transparentBox.ui'
 
 // Enums
-import { Client } from '../../enums/client.enum'
 import { Module } from '../../enums/common.enum'
 import { LuksoSections } from '../../enums/lukso/common.enum'
 
@@ -53,7 +52,6 @@ import { SaveFile } from '../../utils/exporter.util'
 import {
   EnvMapInterface,
   FeatureInterface,
-  IndexFeatureInterface,
   SingleInterface,
   StageInterface,
 } from '../../interfaces/api.interface'
@@ -72,10 +70,9 @@ import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getCampaignsTokensMetadata, getTokensMetadata, mint } from '../../utils/web3/contract.util'
+import { getCampaignsTokensMetadata, mint } from '../../utils/web3/contract.util'
 import { UpdateAvatarStatus } from '../../utils/firebase.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
-import ConnectModalUI from '../../ui/lukso/common/conectModal'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 
 const exportData: ExportInterface = { attributes: [] }
@@ -103,16 +100,11 @@ const tokenMetadata: TokenMetadata = {
 
 export default function LuksoComponent({
   campaignParams,
+  setCampaign,
 }: {
-  campaignParams?: CampaignParameters
+  campaignParams?: CampaignParameters,
+  setCampaign: (campaign: string | undefined) => void
 }) {
-  const selectListFeatures = useRef<FeatureBasic[]>(
-    campaignParams?.features ?? []
-  )
-  const selectListAccessories = useRef<FeatureBasic[]>(
-    campaignParams?.accessories ?? []
-  )
-
   // Loading flags
   const [currentSection, setCurrentSection] = useState<LuksoSections>(
     LuksoSections.Loading
@@ -129,11 +121,11 @@ export default function LuksoComponent({
     campaignParams?.config.skin?.defColor ?? 'FFFFFF'
   )
   const [selectedCategory, setSelectedCategory] = useState<string>(
-    selectListFeatures.current[0].displayName ?? ''
+    ''
   )
   const [listData, setListData] = useState<Array<TokenMetadata>>([])
   const [selectedCombination, setSelectedCombination] = useState<string>()
-  const [selectedCampaign, setSelectedCampaign] = useState<string>()
+
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
   const [hasMinted, setHasMinted] = useState<boolean>(false)
@@ -152,8 +144,6 @@ export default function LuksoComponent({
   const [{ wallet }] = useConnectWallet()
 
   const [picture, setPicture] = useState<string>('');
-
-  const [combination, setCombination] = useState<string>('')
 
   useEffect(() => {
     if (!wallet) return setProvider(undefined)
@@ -186,14 +176,20 @@ export default function LuksoComponent({
     void getTokensMetadataPromise()
   }, [addressToShow])
 
-  async function onAvatarBuilderReady(currentCampaign: string, currentCombination: string) {
+  useEffect(() => {
+    if (!campaignParams || !campaignParams?.features) return
+    setSelectedCategory(campaignParams?.features[0].displayName)
+  }, [campaignParams])
+
+  async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
+    if (!campaign) return
     await Promise.all([
       getFeatureList(),
       getAccessoryList(),
       getStageList(),
       getEnvironmentMapList(),
       getSingleInfo(),
-      getSingleData(currentCampaign, currentCombination),
+      getSingleData(campaign, currentCombination),
     ])
 
     optionList = MixArrays(optionList, accessoryList)
@@ -212,7 +208,7 @@ export default function LuksoComponent({
 
     // Set animation
     const result = await GetAnimationByCampaignAndName(
-      Client.Lukso,
+      campaignParams?.campaign,
       campaignParams?.config.defAnimation
     )
     if (result.success) {
@@ -233,32 +229,33 @@ export default function LuksoComponent({
   }
 
   async function getFeatureList() {
-    const result = await GetAssetsListByCampaign(Client.Lukso)
+    const result = await GetAssetsListByCampaign(campaignParams?.campaign)
     featureList = result.success ? result.value : undefined
     optionList = MixArrays(optionList, featureList)
     setOptionListShow(FilterList(featureList, 'type', selectedCategory))
   }
 
   async function getAccessoryList() {
-    const result = await GetAccessoryListByCampaign(Client.Lukso)
+    const result = await GetAccessoryListByCampaign(campaignParams?.campaign)
     accessoryList = result.success ? result.value : undefined
   }
 
   async function getStageList() {
-    const result = await GetStageListByCampaign(Client.Lukso)
+    const result = await GetStageListByCampaign(campaignParams?.campaign)
     stageList = result.success ? result.value : undefined
   }
 
   async function getEnvironmentMapList() {
-    const result = await GetEnvMapListByCampaign(Client.Lukso);
+    if (!campaignParams?.campaign) return
+    const result = await GetEnvMapListByCampaign(campaignParams?.campaign);
     envMapList = result.success ? result.value : undefined;
   }
 
   async function getSingleInfo() {
-    if (campaignParams?.config.defAvatarCombination == undefined) return
+    if (campaignParams?.config.defAvatarCombination == undefined || !campaignParams?.campaign) return
 
     const result = await GetAvatarSingleByCampaignCombination(
-      Client.Lukso,
+      campaignParams?.campaign,
       campaignParams.config.defAvatarCombination
     )
     singleInitData = result.success ? result.value : undefined
@@ -298,7 +295,7 @@ export default function LuksoComponent({
       )
     }
     combinationId = combinationId.slice(0, combinationId.length - 1)
-    setCombination(combinationId)
+
     await takePicture();
     setIsLoadingMintedData(false)
 
@@ -415,67 +412,6 @@ export default function LuksoComponent({
     }
   }
 
-  /*   async function setTokensMetadata(address: string) {
-      const tokenMetadata = await getTokensMetadata(address)
-      if (!tokenMetadata) return setHasMinted(false)
-      const features = Object.entries(tokenMetadata.body).map(
-        ([, bodyPart]: Array<string | BodyPart>, index) => {
-          return {
-            index,
-            val: bodyPart,
-          } as IndexFeatureInterface
-        }
-      )
-      singleInitData = { random: false, features }
-      await loadSingleData()
-  
-      setHasMinted(true)
-    } */
-
-  async function handleClaim(address: string) {
-    if (!singleInitData || !provider)
-      return {
-        message: 'Error claiming citizen, please try again later!',
-        success: false,
-      }
-    const { features } = singleInitData
-
-    let combinationId = ''
-    tokenMetadata.attributes = []
-    for (const feature of features) {
-      const { val } = feature
-      const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
-      tokenMetadata.body[bodyIndex] = val as BodyPart
-      tokenMetadata.attributes.push({ key: bodyIndex, value: val.name, type: 'string' })
-      combinationId += val.index.toString() + '-'
-    }
-    combinationId = combinationId.slice(0, combinationId.length - 1)
-    try {
-
-
-      const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
-      const signer = await provider.getSigner()
-      const tokenId = await mint(metadataUrl, tokenMetadata, signer)
-
-      /*       await setTokensMetadata(address) */
-      await UpdateAvatarStatus(combinationId, 'Minted')
-      // update distribution tier based on items selected
-      await RegisterFeaturesDistribution(
-        Client.Lukso,
-        features.map(feat => feat.val)
-      )
-
-      return { message: 'Your citizen has been created.', success: true, tokenId }
-    } catch (error) {
-      await UpdateAvatarStatus(combinationId, 'NotMinted')
-      return {
-        message:
-          "Something went wrong. Please try again",
-        success: false,
-      }
-    }
-  }
-
   function formatearString(inputString: string): string {
     if (inputString.length < 8) {
       return 'El string debe tener al menos 8 caracteres'
@@ -549,28 +485,30 @@ export default function LuksoComponent({
                 </div>
               </TransparentBoxUI>
             </div>
-            {!selectedCombination && <ListUI listData={listData} provider={provider} setCombination={(campaign: string, combination: string, combinationPictureUrl: string) => {
-              setSelectedCampaign(campaign)
+            {!selectedCombination && <ListUI listData={listData} provider={provider} setCombination={(_campaign: string, combination: string, combinationPictureUrl: string) => {
+              setIsLoading(true)
+              if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
               setSelectedCombination(combination)
               setCombinationPictureUrl(combinationPictureUrl)
+
             }} />}
-            {selectedCombination && selectedCampaign && <>
+            {selectedCombination && campaignParams?.campaign && campaignParams && <>
               {/* CANVAS WRAPPER */}
               <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
                 {/* CANVAS BACKGROUND */}
                 <div className="w-full h-screen absolute opacity-0" />
                 {/* CANVAS */}
-                {campaignParams && (
-                  <AvatarEditor
-                    avatarBasePath={campaignParams.armature}
-                    editMode={isEditModeSelected}
-                    lights={campaignParams.config.lights}
-                    defaultShadow={campaignParams.config.defShadow}
-                    defaultCamera={campaignParams.config.defCam}
-                    postProcessing={campaignParams.config.postProcessing}
-                    onReady={() => onAvatarBuilderReady(selectedCampaign, selectedCombination)}
-                  />
-                )}
+
+                {campaignParams?.campaign && <AvatarEditor
+                  avatarBasePath={campaignParams.armature}
+                  editMode={isEditModeSelected}
+                  lights={campaignParams.config.lights}
+                  defaultShadow={campaignParams.config.defShadow}
+                  defaultCamera={campaignParams.config.defCam}
+                  postProcessing={campaignParams.config.postProcessing}
+                  onReady={() => onAvatarBuilderReady(selectedCombination, campaignParams.campaign)}
+                />}
+
               </div>
               <div
                 className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
@@ -586,10 +524,10 @@ export default function LuksoComponent({
                     (e) => e.id === selectedCategory
                   )}
                   editModeSelected={isEditModeSelected}
-                  selectListCategory={[
-                    ...selectListFeatures.current,
-                    ...selectListAccessories.current,
-                  ]}
+                  selectListCategory={campaignParams.features && campaignParams.accessories && [
+                    ...campaignParams.features,
+                    ...campaignParams.accessories,
+                  ] || []}
                   // optionList
                   optionList={optionListShow}
                   // selectedCategory
@@ -629,7 +567,11 @@ export default function LuksoComponent({
                 isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
                 features={singleInitData?.features}
                 picture={picture}
-                combination={combination} combinationPictureUrl={combinationPictureUrl} /></>}
+                combination={selectedCombination} combinationPictureUrl={combinationPictureUrl}
+                onClickBackButton={() => { setSelectedCombination(undefined)
+                  setCampaign(undefined)
+                 }}
+              /></>}
           </div>}</>
       </MobileLayout></>
   )

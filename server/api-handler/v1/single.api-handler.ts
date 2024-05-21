@@ -42,7 +42,6 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   const featureValues = await FindAndReadjustFeatureIndexes(campaign);
   if (featureValues == undefined)
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
-console.log(featureValues)
 
   // On invalid number use random combination
   const maxIndexValues = GetMaxIndexValues(featureValues.featureList, featureValues.featureOptionListData);

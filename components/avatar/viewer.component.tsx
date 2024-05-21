@@ -156,7 +156,7 @@ export function GetCanvasImageUrl() {
     void LogError(Module.Viewer, 'Missing scene');
     return ''
   }
-  return(_renderer.domElement.toDataURL())
+  return (_renderer.domElement.toDataURL())
 }
 
 //#endregion
@@ -184,7 +184,10 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
       .catch(err => console.error(err));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => { 
+      threeCanvas.current?.remove() }
   }, []);
+
 
 
   async function preload() {

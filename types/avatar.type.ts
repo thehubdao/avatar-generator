@@ -3,6 +3,7 @@ export type BodyPart = {
     path: string
     thumb: string
     id: string
+    index:number
 }
 
 export const phaseMap = { whitelistPhase: 'whitelistPhase',airdropPhase: 'airdropPhase', publicMintPhase: 'publicMintPhase' }
