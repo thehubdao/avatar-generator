@@ -33,7 +33,7 @@ import { Module } from '../../enums/common.enum'
 import { LuksoSections } from '../../enums/lukso/common.enum'
 
 // Utils
-import { Delay, FilterList, LogError, MixArrays } from '../../utils/common.util'
+import { FilterList, LogError, MixArrays } from '../../utils/common.util'
 import {
   GetAccessoryListByCampaign,
   GetAnimationByCampaignAndName,
@@ -74,6 +74,7 @@ import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
 import { getTokensMetadata, mint} from '../../utils/web3/contract.util'
 import { UpdateAvatarStatus } from '../../utils/firebase.util'
+import { Vector3 } from 'three'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -139,7 +140,8 @@ export default function LuksoComponent({
   )
   const [{ wallet }] = useConnectWallet()
 
-  const [picture, setPicture] = useState<string>('');
+  const [fullBodyPicture, setFullBodyPicture] = useState<string>('');
+  const [facePicture, setFacePicture] = useState<string>('');
 
   const [combination, setCombination] = useState<string>('')
 
@@ -193,6 +195,9 @@ export default function LuksoComponent({
       Client.Lukso,
       campaignParams?.config.defAnimation
     )
+    // take picture from scene
+    await takePicture();
+    
     if (result.success) {
       await ChangeStartAnimation(result.value.at(0)?.path)
     }
@@ -206,8 +211,8 @@ export default function LuksoComponent({
   }
 
   async function takePicture() {
-    await Delay(2500);
-    setPicture(GetCanvasImageUrl());
+    setFullBodyPicture(await GetCanvasImageUrl());
+    setFacePicture(await GetCanvasImageUrl(new Vector3(0,1.7,0.5)));
   }
 
   async function getFeatureList() {
@@ -277,14 +282,13 @@ export default function LuksoComponent({
     }
     combinationId = combinationId.slice(0, combinationId.length - 1)
     setCombination(combinationId)
-    await takePicture();
     setIsLoadingMintedData(false)
-
   }
 
   async function reRoll() {
-    await getSingleData()
-    await loadSingleData()
+    await getSingleData();
+    await loadSingleData();
+    await takePicture();
 
   }
 
@@ -405,7 +409,8 @@ export default function LuksoComponent({
       }
     )
     singleInitData = { random: false, features }
-    await loadSingleData()
+    await loadSingleData();
+    await takePicture();
 
     setHasMinted(true)
   }
@@ -608,7 +613,8 @@ export default function LuksoComponent({
           provider={provider}
           isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
           features={singleInitData?.features}
-          picture={picture}
+          fullBodyPicture={fullBodyPicture}
+          facePicture={facePicture}
           combination={combination}
           hasSupplyReached={true}
         />

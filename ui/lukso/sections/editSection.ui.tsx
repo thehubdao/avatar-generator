@@ -12,11 +12,11 @@ interface EditSectionUIProps {
   exportModel: () => Promise<void>;
   setIsEditModeSelected: (value: boolean) => void;
   features?: IndexFeatureInterface[];
-  combination:string;
+  combination?:string;
   picture:string;
 }
 
-export default function EditSectionUI({exportModel, features, combination }: EditSectionUIProps) {
+export default function EditSectionUI({exportModel, features, combination, picture }: EditSectionUIProps) {
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
 
   const editAvatarRef = useRef<HTMLDivElement>(null);
@@ -50,8 +50,14 @@ export default function EditSectionUI({exportModel, features, combination }: Edi
 
           <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px]">
             <Image
-              src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png${'?pinataGatewayToken=' + process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY }`}
+              // src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png${'?pinataGatewayToken=' + process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY }`}
+              src={combination === undefined ? 
+                picture
+                :
+                `${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png${'?pinataGatewayToken=' + process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY }`
+              }
               fill
+              style={{ objectFit: (combination === undefined ? "cover":undefined) }}
               alt="lukso avatar selfie view"
             />
           </div>

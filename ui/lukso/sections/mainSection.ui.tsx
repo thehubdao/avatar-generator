@@ -20,14 +20,15 @@ interface MainSectionUIProps {
   hasMinted: boolean;
   provider: ethers.BrowserProvider | undefined;
   isGettingInfoAboutHasMinted: boolean;
-  picture: string;
-  combination: string;
+  fullBodyPicture: string;
+  facePicture: string;
+  combination?: string;
   hasSupplyReached: boolean;
 }
 
 
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, combination, picture, hasSupplyReached }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, combination, fullBodyPicture, facePicture, hasSupplyReached }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
@@ -68,7 +69,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
   }, [])
 
   return (
-    <section className={`flex h-full items-center justify-between`}>
+    <section className={`flex h-full items-center justify-between overflow-hidden`}>
       <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isGettingInfoAboutHasMinted ? 'flex' : 'hidden'}`}>
         <div className="scale-[3]">
           <Loader />
@@ -85,7 +86,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
         >
           <div className="relative w-full h-1/2 pointer-events-none overflow-hidden rounded-lg">
             <Image
-              src={picture}
+              src={fullBodyPicture}
               fill
               alt="lukso avatar full body view"
               className="origin-top bottom-0 scale-95"
@@ -211,10 +212,14 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             flex-col bg-[#d59fba]">
               {isLoading && <LoadingUI getloaderDivElement={() => { }} />}
               <Image
-                src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png${'?pinataGatewayToken=' + process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY}`}
+                src={combination === undefined ? 
+                  facePicture
+                  :
+                  `${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png${'?pinataGatewayToken=' + process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY}`
+                }
                 alt="lukso avatar selfie view"
                 fill
-                /*                 style={{ objectFit: "cover" }} */
+                style={{ objectFit: (combination === undefined ? "cover":undefined) }}
                 /*                 className="origin-top scale-[300%] -translate-y-1/4" */
 
                 onLoadStart={() => {
