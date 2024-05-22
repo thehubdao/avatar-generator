@@ -10,7 +10,6 @@ import ConnectModalUI from "../common/conectModal";
 import { AiOutlineLoading } from "react-icons/ai";
 import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
-import { getSupply } from "../../../utils/web3/contract.util";
 import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
 import { useConnectWallet } from "@web3-onboard/react";
 import { canMint } from "../../../utils/phase.util";
@@ -26,33 +25,22 @@ interface MainSectionUIProps {
   isGettingInfoAboutHasMinted: boolean;
   picture: string;
   combination: string;
+  hasSupplyReached: boolean;
 }
 
 
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, combination, picture }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, combination, picture, hasSupplyReached }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
-
-  const [avatarSupply, setAvatarSupply] = useState(0)
 
   const [{ wallet }] = useConnectWallet()
 
   const [canUserMint, setCanUserMint] = useState<boolean | undefined>()
 
   const [isLoading, setIsLoading] = useState(false)
-
-
-  useEffect(() => {
-    const setAvatarSupplyPromise = async () => {
-      const supply = await getSupply()
-      if (supply)
-        setAvatarSupply(supply)
-    }
-    void setAvatarSupplyPromise()
-  }, [])
 
   const gsapEnterBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
@@ -182,7 +170,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
               heightClass="h-[125px]"
             >
               <h3 className="font-extrabold text-xl 2xl:text-2xl">EXCLUSIVE COLLECTION</h3>
-              <p className="text-sm 2xl:text-base">Remaining: {AVATAR_MAX_SUPPLY - avatarSupply}</p>
+              <p className="text-sm 2xl:text-base">Remaining: {AVATAR_MAX_SUPPLY}</p>
             </TransparentBox>
             <TransparentBox
               fullWidth

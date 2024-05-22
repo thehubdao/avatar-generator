@@ -72,6 +72,8 @@ export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata
 
 }
 
+export const totalSupply = async () => { return Number(await avatarContract.totalSupply()) }
+
 export const isWhitelisted = async (address: string) => {
     const isWhitelisted = await proxyContract.isWhitelisted(address) as boolean
     return isWhitelisted

@@ -70,8 +70,7 @@ import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getCampaignsTokensMetadata, mint } from '../../utils/web3/contract.util'
-import { UpdateAvatarStatus } from '../../utils/firebase.util'
+import { getCampaignsTokensMetadata } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 
@@ -153,7 +152,6 @@ export default function LuksoComponent({
     }
     void setEtherProviderPromise()
   }, [wallet])
-
 
   useEffect(() => {
     if (!provider) return
@@ -462,26 +460,6 @@ export default function LuksoComponent({
                     height={24}
                     alt="Lukso icon"
                   />
-
-                  {provider ? (
-                    <button
-                      className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
-                      onClick={() => setIsAccountModalOpen(true)}
-                    >
-                      <p className="truncate h-fit text-white">{`${formatearString(
-                        addressToShow
-                      )}`}</p>
-                    </button>
-                  ) : (
-                    <ConnectWeb3Button
-                      classStyles={
-                        'w-48 border-l-2 border-white font-bold text-white'
-                      }
-                      onConnect={() => { }}
-                    >
-                      <> Login with your UP!</>
-                    </ConnectWeb3Button>
-                  )}
                 </div>
               </TransparentBoxUI>
             </div>
