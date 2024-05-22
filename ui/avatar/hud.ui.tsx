@@ -13,6 +13,7 @@ import HudFeatureTitleUI from "./common/hudTitle.ui";
 import { RemovedAcc } from "../../utils/common.util";
 import ExportButtonUI from "./common/exportButton.ui";
 import { ModelExtension } from "../../enums/export.enum";
+import TransparentBoxUI from "../lukso/common/transparentBox.ui";
 
 interface HudUIProps {
 
@@ -152,8 +153,10 @@ export default function HudUI({
       />}
       {/* DESKTOP UI */}
       <div className={`fixed inset-0 ${editModeSelected ? 'w-[58%]' : 'w-0'} overflow-hidden h-screen bg-bg hidden xl:block transition-all duration-300`}>
+       
         {/* CAMPAIGN HEADER SIGN */}
         {!isCustomCampaignHud && <div className="fixed flex right-0 top-0 justify-center items-center gap-1 py-3 px-8 max-w-lg">
+          
           <div className="-z-10 absolute -left-10 h-full w-[180%] skew-x-[45deg] bg-bg" />
           <Image
             priority
@@ -172,6 +175,7 @@ export default function HudUI({
         </div>}
         {/* WRAPPER */}
         <div className={`w-full h-full grid grid-cols-[148px_minmax(100px,_1fr)] ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 duration-200'} transition-all`}>
+
           {/* FEATURES SECTION */}
           <div className="h-screen">
             <FeatureSelector

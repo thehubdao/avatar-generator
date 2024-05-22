@@ -218,7 +218,7 @@ export default function LuksoComponent({
     // fade loader view
     await handleFadeLoader(loaderDivElement, () => {
       setIsLoading(false)
-      setCurrentSection(LuksoSections.View)
+      setCurrentSection(LuksoSections.Edit)
     })
 
   }
@@ -485,13 +485,25 @@ export default function LuksoComponent({
                 </div>
               </TransparentBoxUI>
             </div>
-            {!selectedCombination && <ListUI listData={listData} provider={provider} setCombination={(_campaign: string, combination: string, combinationPictureUrl: string) => {
-              setIsLoading(true)
-              if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-              setSelectedCombination(combination)
-              setCombinationPictureUrl(combinationPictureUrl)
+            {!selectedCombination && <ListUI listData={listData} provider={provider} onClickViewButton={
+              (_campaign: string, _combination: string, _combinationPictureUrl: string) => {
+                setIsLoading(true)
+                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                if (selectedCombination != _combination) setSelectedCombination(_combination)
+                if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                setIsEditModeSelected(false)
 
-            }} />}
+              }
+            } onClickEditButton={
+              (_campaign: string, _combination: string, _combinationPictureUrl: string) => {
+                setIsLoading(true)
+                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                if (selectedCombination != _combination) setSelectedCombination(_combination)
+                if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                setIsEditModeSelected(true)
+              }
+            } />}
             {selectedCombination && campaignParams?.campaign && campaignParams && <>
               {/* CANVAS WRAPPER */}
               <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
@@ -568,10 +580,11 @@ export default function LuksoComponent({
                 features={singleInitData?.features}
                 picture={picture}
                 combination={selectedCombination} combinationPictureUrl={combinationPictureUrl}
-                onClickBackButton={() => { setSelectedCombination(undefined)
+                onClickBackButton={() => {
+                  setSelectedCombination(undefined)
                   setCampaign(undefined)
-                 }}
-              /></>}
+                  console.log("ON CLICK")
+                } } goEditMode={()=>setIsEditModeSelected(true) }              /></>}
           </div>}</>
       </MobileLayout></>
   )

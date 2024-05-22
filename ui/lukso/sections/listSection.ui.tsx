@@ -12,8 +12,10 @@ import { SlPencil } from "react-icons/sl";
 
 interface MainSectionUIProps {
     provider: ethers.BrowserProvider | undefined;
-    setCombination: (campaign: string, combination: string, combinationPictureUrl: string) => void;
     listData: TokenMetadata[]
+    onClickViewButton: (campaign: string, combination: string, combinationPictureUrl: string) => void;
+    onClickEditButton: (campaign: string, combination: string, combinationPictureUrl: string) => void;
+
 }
 
 
@@ -42,7 +44,7 @@ const filterByTokenId = (tokenId: string, listData: TokenMetadata[]) => {
     })
 }
 
-export default function ListUI({ listData, setCombination }: MainSectionUIProps) {
+export default function ListUI({ listData, onClickViewButton, onClickEditButton }: MainSectionUIProps) {
     const [processedListData, setProcessedListData] = useState<Array<TokenMetadata>>()
     const [selectedCampaign, setSelectedCampaign] = useState<string>('all')
     const [selectedTokenId, setSelectedTokenId] = useState<string>('')
@@ -96,9 +98,9 @@ export default function ListUI({ listData, setCombination }: MainSectionUIProps)
                     RECOMMENDABLE TO CHANGE IT IN FUTURE.
                      */
 
-                    if (!combination) 
+                    if (!combination)
                         combination = Object.values(body).map(({ index }) => { return index }).join('-')
-                    
+
                     return <>
                         <div key={campaignDBName + tokenId} className="ml-2 bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white">
                             <div className='relative flex flex-col'>
@@ -107,9 +109,9 @@ export default function ListUI({ listData, setCombination }: MainSectionUIProps)
                                     <div className="hidden flex-col z-10 justify-center items-center absolute top-[0] group-hover:flex h-[254px] w-[254px] bg-[#ffcadd69] rounded-[10px_10px_0px_0px] border-[1.58px] border-solid border-white" >
 
                                         <div className="px-10 w-full mb-2">
-                                            <div onClick={() => {
-                                                setCombination(campaignDBName, combination, imageUrl)
-                                            }}>
+                                            <div onClick={() =>
+                                                onClickViewButton(campaignDBName, combination, imageUrl)
+                                            }>
                                                 <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
                                                     <div className="flex items-center gap-3">
                                                         <p className="text-black">View</p>
@@ -117,12 +119,13 @@ export default function ListUI({ listData, setCombination }: MainSectionUIProps)
                                                     </div>
                                                 </TransparentBoxUI></div></div>
                                         <div className="px-10 w-full">
-                                            <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
-                                                <div className="flex items-center gap-3">
-                                                    <p className="text-black">Edit</p>
-                                                    <SlPencil />
-                                                </div>
-                                            </TransparentBoxUI></div>
+                                            <div onClick={() => onClickEditButton(campaignDBName, combination, imageUrl)}>
+                                                <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
+                                                    <div className="flex items-center gap-3">
+                                                        <p className="text-black">Edit</p>
+                                                        <SlPencil />
+                                                    </div>
+                                                </TransparentBoxUI></div></div>
 
                                     </div>
                                 </div>

@@ -7,16 +7,19 @@ import { AiOutlineLoading } from "react-icons/ai";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 import FeatureListUI from "../common/featureList.ui";
+import TransparentBoxUI from "../common/transparentBox.ui";
 
 interface EditSectionUIProps {
   exportModel: () => Promise<void>;
   setIsEditModeSelected: (value: boolean) => void;
   features?: IndexFeatureInterface[];
-  combination:string;
-  picture:string;
+  combination: string;
+  picture: string;
+  onClickBackButton: () => void
+  goEditMode: ()=>void
 }
 
-export default function EditSectionUI({exportModel, features, combination }: EditSectionUIProps) {
+export default function EditSectionUI({goEditMode, onClickBackButton, exportModel, features, picture }: EditSectionUIProps) {
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
 
   const editAvatarRef = useRef<HTMLDivElement>(null);
@@ -40,6 +43,7 @@ export default function EditSectionUI({exportModel, features, combination }: Edi
     <section className={`flex h-full items-center justify-between`}>
       {/* Edit Avatar */}
       <div ref={editAvatarRef} className="max-w-[35%] w-[380px] 2xl:w-[461px] h-full -translate-x-full flex flex-col">
+
         <TransparentBox
           fullWidth
           border
@@ -47,20 +51,28 @@ export default function EditSectionUI({exportModel, features, combination }: Edi
           heightClass="grow"
           borderSizeClass="border-t-0 border-b-0"
         >
-
+          <div className="relative px-10 w-full mb-2 bottom-[250px]">
+            <div onClick={
+              onClickBackButton
+            }>
+              <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
+                <div className="flex items-center gap-3">
+                  <p className="text-black">Go Back</p>
+                </div>
+              </TransparentBoxUI></div></div>
           <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px]">
             <Image
-              src={`${process.env.NEXT_PUBLIC_IPFS_GATEWAY}/${process.env.NEXT_PUBLIC_IPFS_IMAGE_URL}/${combination}.png${'?pinataGatewayToken=' + process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY }`}
+              src={picture}
               fill
               alt="lukso avatar selfie view"
             />
           </div>
-          {features && 
+          {features &&
             <FeatureListUI features={features} />
           }
         </TransparentBox>
         <div className="h-14 w-full 2xl:h-18 flex whitespace-nowrap">
-          <button className="w-full" onClick={() => void handleExportModel()}>
+          <button className="w-[75%]" onClick={() => void handleExportModel()}>
             <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
               <div className="flex items-center gap-3 text-black">
                 {isExportingModel ?
@@ -74,6 +86,17 @@ export default function EditSectionUI({exportModel, features, combination }: Edi
                     <FaDownload />
                   </>
                 }
+              </div>
+            </TransparentBox>
+          </button>
+          <button className="w-[25%]" onClick={() => void goEditMode()}>
+            <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
+              <div className="flex items-center gap-3 text-black">
+                <>
+                  <p className="text-base 2xl:text-lg">Edit</p>
+                  <FaDownload />
+                </>
+
               </div>
             </TransparentBox>
           </button>
