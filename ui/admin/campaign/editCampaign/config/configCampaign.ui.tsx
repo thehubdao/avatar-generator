@@ -15,6 +15,10 @@ import { BsLightbulb } from "react-icons/bs";
 import { CampaignConfig, ColorConfig, FeatureBasic, LookAtVectors } from "../../../../../interfaces/common.interface";
 import { CameraConfigOption, CampaignConfigOption } from "../../../../../enums/campaign.enum";
 import CameraConfigUI from "./cameraConfig.ui";
+import LightConfigUI from "./lightConfig.ui";
+import { ConfigLight } from "../../../../../interfaces/light.interface";
+import { INDEX_OUT_LIGHT_ARRAY, LIGHT_TYPE_LABELS } from "../../../../../constants/lightType.constant";
+import { ShowModal } from "../../../../../utils/modal.util";
 
 interface ConfigCampaignProps {
   configData?: CampaignConfig;
@@ -22,18 +26,20 @@ interface ConfigCampaignProps {
   downloadAvatarBase: (() => void) | (() => Promise<void>);
   updateColorConfig: (element: string, colorConfig: ColorConfig) => Promise<void>;
   updateCameraConfig: (element: string, colorConfig: LookAtVectors) => Promise<void>;
+  updateLightConfig: (config: ConfigLight[]) => Promise<boolean>;
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
-export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig, uploadAvatarBase }: ConfigCampaignProps) {
+export default function ConfigCampaignUI({ configData, featuresList, downloadAvatarBase, updateColorConfig, updateCameraConfig, uploadAvatarBase, updateLightConfig }: ConfigCampaignProps) {
   const [shouldOpenConfig, setShouldOpenConfig] = useState<boolean>(false);
   const [configOption, setConfigOption] = useState<string>(CampaignConfigOption.Base);
   const [colorOption, setColorOption] = useState<string>('avatarHubSkin'); //TODO make enum to color config
   const [camOption, setCamOption] = useState<string>(CameraConfigOption.DefCam);
+  const [lightOption, setLightOption] = useState<number>((configData?.lights && configData.lights.length > 0) ? 0 : INDEX_OUT_LIGHT_ARRAY.create_light); // light index
   const [hasNewAvatarBase, setHasNewAvatarBase] = useState<boolean>(false);
 
-  const colorConfig = useRef<HTMLSelectElement>(null);
   const camConfig = useRef<HTMLSelectElement>(null);
+  const colorConfig = useRef<HTMLSelectElement>(null);
   const avatarBaseFile = useRef<HTMLInputElement>(null);
 
   const changeConfigOption = (e: MouseEvent<HTMLDivElement>, destiny: string) => {
@@ -52,6 +58,17 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
     target.classList.add('opacity-100', 'text-purple', 'bg-opacity-100', 'shadow-none');
 
     setConfigOption(destiny);
+  }
+
+  const handleUpdateLight = async (config: ConfigLight[], messages: { success: string, error: string }, newLightOption: number) => {
+    const isSuccess = await updateLightConfig(config);
+
+    if (!isSuccess) {
+      ShowModal(messages.error);
+    } else {
+      ShowModal(messages.success);
+      setLightOption(newLightOption);
+    }
   }
 
   const changeColorConfigOption = () => {
@@ -179,12 +196,11 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                   </div>
                 }
                 {/* SPECIFIC LIGHT CONFIG */}
-                {
-                  configOption === CampaignConfigOption.Light &&
-                  <div className="bg-bg shadow-inset-hard rounded-xl p-4 w-fit">
+                {configOption === CampaignConfigOption.Light &&
+                  <div className="bg-bg shadow-inset-hard rounded-xl p-4 w-fit min-w-[300px]">
                     <div className="flex gap-2 items-center">
                       <div className="w-8 h-8 text-base bg-purple text-white rounded-full flex justify-center items-center">
-                        <AiOutlineVideoCamera />
+                        <BsLightbulb className="pointer-events-none" />
                       </div>
                       <p className="font-poppins font-bold text-purple">LIGHTS</p>
                     </div>
@@ -192,27 +208,27 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                       <div className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none">
                         <MdKeyboardArrowDown />
                       </div>
-                      <select name="" id="" className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer">
-                        <option defaultValue={'Skin color'} className="bg-bg py-2 px-4">Default light</option>
+                      <select
+                        className="bg-bg shadow-flat-medium hover:shadow-flat-hard w-full h-[48px] py-2 px-4 rounded-lg cursor-pointer"
+                        onChange={(e) => setLightOption(Number(e.target.value))}
+                        value={lightOption}
+                      >
+                        {/** TODO: REMOVE NO LIGHTS OPTION */}
+                        {configData?.lights
+                          ? configData.lights.map((light, index) => <option key={index} value={index} className="bg-bg py-2 px-4">{LIGHT_TYPE_LABELS[light.type]}</option>)
+                          : <option value={INDEX_OUT_LIGHT_ARRAY.no_lights} className="bg-bg py-2 px-4" disabled>no lights</option>}
+                        {/* TODO: REMOVE ADD NEW LIGHT OPTION WHEN COMPLETE ALL MAX LIGHTS OPTIONS */}
+                        <option value={INDEX_OUT_LIGHT_ARRAY.create_light} className="bg-bg py-2 px-4">Add new light</option>
                       </select>
                     </div>
-                    <p className="font-poppins font-medium text-purple pt-4 mt-2 px-2">Light position:</p>
-                    <div className="flex gap-4 px-2">
-                      <div className="flex items-center gap-2">
-                        <p>X:</p>
-                        <input type="number" className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg" defaultValue={configData?.lights ? configData?.lights[0].params.pos?.x : 0} />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <p>Y:</p>
-                        <input type="number" className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg" defaultValue={configData?.lights ? configData?.lights[0].params.pos?.y : 0} />
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <p>Z:</p>
-                        <input type="number" className="shadow-inset-soft px-4 py-2 my-2 min-h-[48px] w-20 rounded-lg text-center bg-bg" defaultValue={configData?.lights ? configData?.lights[0].params.pos?.z : 0} />
-                      </div>
-                    </div>
-                  </div>
-                }
+                    <LightConfigUI
+                      lightOption={lightOption}
+                      lights={configData?.lights}
+                      updateLightConfig={(config: ConfigLight[], messages: { success: string, error: string }, newLightOption: number) => {
+                        void handleUpdateLight(config, messages, newLightOption);
+                      }}
+                    />
+                  </div>}
               </div>
             </div>
           </div >
@@ -233,7 +249,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
               <div onClick={e => changeConfigOption(e, CampaignConfigOption.Camera)} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer">
                 <AiOutlineVideoCamera className="pointer-events-none" />
               </div>
-              <div onClick={e => changeConfigOption(e, CampaignConfigOption.Light)} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer hidden">
+              <div onClick={e => changeConfigOption(e, CampaignConfigOption.Light)} className="w-10 h-10 text-2xl text-white bg-white bg-opacity-30 shadow-inset-soft hover:opacity-70 rounded-full flex justify-center items-center opacity-40 cursor-pointer">
                 <BsLightbulb className="pointer-events-none" />
               </div>
             </div>

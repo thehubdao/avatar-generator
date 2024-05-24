@@ -11,16 +11,18 @@ import AvatarSingle from "../../../../components/avatar/single.component";
 import ConfigCampaignUI from "./config/configCampaign.ui";
 import CampaignStats from "./campaignStats.ui";
 import { ColorConfig, LookAtVectors } from "../../../../interfaces/common.interface";
+import { ConfigLight } from "../../../../interfaces/light.interface";
 
 interface EditCampaignUIProps {
   downloadFile: ((path: string) => void) | ((path: string) => Promise<void>);
-  updateColorConfig: (Element: string, config: ColorConfig) => Promise<void>;
-  updateCameraConfig: (Element: string, config: LookAtVectors) => Promise<void>;
+  updateColorConfig: (element: string, config: ColorConfig) => Promise<void>;
+  updateCameraConfig: (element: string, config: LookAtVectors) => Promise<void>;
+  updateLightConfig: (config: ConfigLight[]) => Promise<boolean>;
   updateDefaultAsset: (element: string, config: string) => Promise<void>;
   uploadAvatarBase: (avatarBase: File | undefined) => Promise<void>;
 }
 
-export default function EditCampaignUI({ downloadFile, updateColorConfig, updateCameraConfig, uploadAvatarBase, updateDefaultAsset }: EditCampaignUIProps) {
+export default function EditCampaignUI({ downloadFile, updateColorConfig, updateCameraConfig, uploadAvatarBase, updateLightConfig, updateDefaultAsset }: EditCampaignUIProps) {
   // GET DATA FROM REDUX STORE
   const campaignName = useAppSelector(state => state.currentCampaign.name);
   const campaignParameters = useAppSelector(state => state.currentCampaign.parameters);
@@ -80,7 +82,8 @@ export default function EditCampaignUI({ downloadFile, updateColorConfig, update
                     featuresList={campaignParameters.features}
                     downloadAvatarBase={() => downloadAvatarBase()}
                     updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
-                    updateCameraConfig={(Element: string, config: LookAtVectors) => updateCameraConfig(Element, config)}
+                    updateCameraConfig={(element: string, config: LookAtVectors) => updateCameraConfig(element, config)}
+                    updateLightConfig={(config: ConfigLight[]) => updateLightConfig(config)}
                     uploadAvatarBase={uploadAvatarBase}
                   />
                   <CampaignStats

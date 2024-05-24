@@ -11,6 +11,7 @@ import { GoToPage } from "../../../utils/router.util";
 import { Module, PageLocation } from "../../../enums/common.enum";
 import { LogError } from "../../../utils/common.util";
 import { useRouter } from "next/navigation";
+import { ConfigLight } from "../../../interfaces/light.interface";
 
 export default function EditCampaign() {
   const campaignName = useAppSelector(state => state.currentCampaign.name);
@@ -64,11 +65,19 @@ export default function EditCampaign() {
     }
   }
 
-  const updateDefaultAsset = async (element: string, config: string) => {
-    const newConfig = { [element]: config };
-    const newParameters: Partial<CampaignParameters> = { config: newConfig };
-    // console.log(newParameters, location);
+  const updateLightConfig = async (config: ConfigLight[]) => {
+    const newParameters: Partial<CampaignParameters> = { config: { lights: config } };
     const result = await UpdateDocObject(FirestoreLocation.Parameters, newParameters, campaignName);
+
+    if (result.success)
+      void dispatch(fetchData({ campaign: campaignName, location: FirestoreLocation.Parameters }));
+
+    return (result.success);
+    // ShowModal(`Update ${element} light config sucessful`)
+  }
+
+  const updateDefaultAsset = async (element: string, config: string) => {
+    const result = await UpdateDocObject(FirestoreLocation.Parameters, { config: { [element]: config } }, campaignName);
 
     if (result.success) {
       ShowModal(`Update ${element} asset default config sucessful`)
@@ -102,6 +111,7 @@ export default function EditCampaign() {
         downloadFile={(path: string) => downloadFile(path)}
         updateColorConfig={(element: string, config: ColorConfig) => updateColorConfig(element, config)}
         updateCameraConfig={(element: string, config: LookAtVectors) => updateCameraConfig(element, config)}
+        updateLightConfig={(config: ConfigLight[]) => updateLightConfig(config)}
         updateDefaultAsset={(element: string, config: string) => updateDefaultAsset(element, config)}
         uploadAvatarBase={uploadAvatarBase}
       />
