@@ -16,6 +16,7 @@ export const getIPFSData = async (cid: string) => {
 export const getImageUrl = (metadata: TokenMetadata) => {
     const ipfsUrl = metadata.images[0][0].url
     const cid = ipfsUrl.split('//')[1]
-    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+    /* const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}` */
+    const imageUrl = `https://ipfs.io/ipfs/${cid}`
     return imageUrl
 }

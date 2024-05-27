@@ -22,7 +22,7 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ["firebasestorage.googleapis.com", "nftstorage.link", "gateway.pinata.cloud", "lukso.mypinata.cloud"],
+    domains: ["firebasestorage.googleapis.com", "nftstorage.link", "gateway.pinata.cloud", "lukso.mypinata.cloud", "ipfs.io"],
 
   },
   async headers() {

@@ -12,7 +12,7 @@ import { SlPencil } from "react-icons/sl";
 
 interface MainSectionUIProps {
     provider: ethers.BrowserProvider | undefined;
-    listData: TokenMetadata[]
+    listData: TokenMetadata[] | undefined
     onClickViewButton: (campaign: string, combination: string, combinationPictureUrl: string) => void;
     onClickEditButton: (campaign: string, combination: string, combinationPictureUrl: string) => void;
 
@@ -48,14 +48,17 @@ export default function ListUI({ listData, onClickViewButton, onClickEditButton 
     const [processedListData, setProcessedListData] = useState<Array<TokenMetadata>>()
     const [selectedCampaign, setSelectedCampaign] = useState<string>('all')
     const [selectedTokenId, setSelectedTokenId] = useState<string>('')
-
+    const [isLoading, setIsLoading] = useState<boolean>(true)
 
     useEffect(() => {
+        if (!listData) return
         setProcessedListData(listData)
+        setIsLoading(false)
+        console.log(listData)
     }, [listData])
 
     useEffect(() => {
-        if (!processedListData) return
+        if (!listData) return
         if (selectedCampaign === 'all')
             return setProcessedListData(filterByTokenId(selectedTokenId, listData))
 
@@ -65,7 +68,7 @@ export default function ListUI({ listData, onClickViewButton, onClickEditButton 
     }, [selectedCampaign])
 
     useEffect(() => {
-        if (!processedListData) return
+        if (!listData) return
 
         const listDatafilteredByTokenId = filterByTokenId(selectedTokenId, listData)
 
@@ -90,8 +93,12 @@ export default function ListUI({ listData, onClickViewButton, onClickEditButton 
                 <CampaignDropdown setCampaign={(campaign) => { setSelectedCampaign(campaign) }} campaigns={Object.values(campaignLabels)} />
             </div>
             {/* Card List section */}
-            {processedListData && <div className="flex-wrap flex flex-row p-3 min-w-[822px] bg-[#ffcaddbf] border-2 border-solid border-white">
-                {processedListData.map(({ tokenId, campaign, imageUrl, combination, body }: TokenMetadata) => {
+            {<div className="grid-cols-4 grid  p-3 min-h-[300px] max-h-[588px] min-w-[822px] bg-[#ffcaddbf] border-2 border-solid border-white overflow-y-scroll" >
+                {isLoading && <svg className="top-[40%] left-[50%] relative animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24" style={{ 'border': 'inherit' }}>
+                </svg>
+
+                }
+                {processedListData && processedListData.map(({ tokenId, campaign, imageUrl, combination, body }: TokenMetadata) => {
                     const campaignDBName = campaignLabels[campaign as keyof typeof campaignLabels].campaignName
                     /* ATTENTION:
                     CAMPAIGN REAL NAMES AND CAMPAIGN NAME ON DB IS DIFFERENT AND SHOULD BE TOOK INTO ACOUNT,
@@ -102,43 +109,41 @@ export default function ListUI({ listData, onClickViewButton, onClickEditButton 
                         combination = Object.values(body).map(({ index }) => { return index }).join('-')
 
                     return <>
-                        <div key={campaignDBName + tokenId} className="ml-2 bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white">
-                            <div className='relative flex flex-col'>
-                                <div className="group">
-                                    <Image src={imageUrl} alt={"NFT Image"} className="rounded-[10px_10px_0px_0px] " width={254} height={300} />
-                                    <div className="hidden flex-col z-10 justify-center items-center absolute top-[0] group-hover:flex h-[254px] w-[254px] bg-[#ffcadd69] rounded-[10px_10px_0px_0px] border-[1.58px] border-solid border-white" >
+                        <div key={campaignDBName + tokenId} className="relative ml-2 mb-2 bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white">
 
-                                        <div className="px-10 w-full mb-2">
-                                            <div onClick={() =>
-                                                onClickViewButton(campaignDBName, combination, imageUrl)
-                                            }>
-                                                <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
-                                                    <div className="flex items-center gap-3">
-                                                        <p className="text-black">View</p>
-                                                        <FaRegEye />
-                                                    </div>
-                                                </TransparentBoxUI></div></div>
-                                        <div className="px-10 w-full">
-                                            <div onClick={() => onClickEditButton(campaignDBName, combination, imageUrl)}>
-                                                <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
-                                                    <div className="flex items-center gap-3">
-                                                        <p className="text-black">Edit</p>
-                                                        <SlPencil />
-                                                    </div>
-                                                </TransparentBoxUI></div></div>
+                            <div className="group">
+                                <Image src={imageUrl} alt={"NFT Image"} className="rounded-[10px_10px_0px_0px] " width={254} height={300} />
+                                <div className="hidden flex-col z-10 justify-center items-center absolute top-[0] group-hover:flex h-[254px] w-[254px] bg-[#ffcadd69] rounded-[10px_10px_0px_0px] border-[1.58px] border-solid border-white" >
 
+                                    <div className="px-10 w-full mb-2">
+                                        <div onClick={() =>
+                                            onClickViewButton(campaignDBName, combination, imageUrl)
+                                        }>
+                                            <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
+                                                <div className="flex items-center gap-3">
+                                                    <p className="text-black">View</p>
+                                                    <FaRegEye />
+                                                </div>
+                                            </TransparentBoxUI></div>
                                     </div>
-                                </div>
-                                <div className="absolute top-[6px] left-[6px] w-[45px] h-[20px] bg-slate-800 rounded-[13px] p-1 m-[-10]">
-                                    <div className="w-[40px] text-center [font-family:'Work_Sans',Helvetica] font-normal text-white text-[12px] tracking-[0] leading-[normal]">
-                                        {`#${tokenId}`}
-                                    </div>
-                                </div>
+                                    <div className="px-10 w-full">
+                                        <div onClick={() => onClickEditButton(campaignDBName, combination, imageUrl)}>
+                                            <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
+                                                <div className="flex items-center gap-3">
+                                                    <p className="text-black">Edit</p>
+                                                    <SlPencil />
+                                                </div>
+                                            </TransparentBoxUI></div></div>
 
-                                <div className="text-center p-1 [font-family:'Work_Sans',Helvetica] font-medium text-slate-800 text-[14px] tracking-[0] leading-[normal]">
-                                    {`${campaignLabels[campaign as keyof typeof campaignLabels].nftName} #${tokenId}`}
                                 </div>
-
+                            </div>
+                            <div className="text-center p-1 [font-family:'Work_Sans',Helvetica] font-medium text-slate-800 text-[14px] tracking-[0] leading-[normal]">
+                                {`${campaignLabels[campaign as keyof typeof campaignLabels].nftName} #${tokenId}`}
+                            </div>
+                            <div className="absolute top-[6px] left-[6px] w-[45px] h-[20px] bg-slate-800 rounded-[13px] p-1 m-[-10]">
+                                <div className="w-[40px] text-center [font-family:'Work_Sans',Helvetica] font-normal text-white text-[12px] tracking-[0] leading-[normal]">
+                                    {`#${tokenId}`}
+                                </div>
                             </div>
                         </div >
 
