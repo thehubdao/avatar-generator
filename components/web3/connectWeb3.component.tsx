@@ -4,11 +4,12 @@ interface ConnectWeb3ButtonProps {
     onConnect: () => void
     classStyles: string
     children: JSX.Element | JSX.Element[] | boolean;
+    hasSupplyReached: boolean;
 }
 
 
 
-export default function ConnectWeb3Button({ classStyles, children, onConnect }: ConnectWeb3ButtonProps) {
+export default function ConnectWeb3Button({ children, classStyles, onConnect }: ConnectWeb3ButtonProps) {
     const [, connect] = useConnectWallet()
 
     return <>
@@ -20,7 +21,6 @@ export default function ConnectWeb3Button({ classStyles, children, onConnect }: 
             onConnect()
         }}>
             <div className="flex items-center gap-3 mx-4">
-
                 {children}
             </div>
         </button></>
