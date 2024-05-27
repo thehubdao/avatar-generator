@@ -122,7 +122,7 @@ export default function LuksoComponent({
   const [selectedCategory, setSelectedCategory] = useState<string>(
     ''
   )
-  const [listData, setListData] = useState<Array<TokenMetadata>>([])
+  const [listData, setListData] = useState<Array<TokenMetadata>>()
   const [selectedCombination, setSelectedCombination] = useState<string>()
 
   // Web3 state

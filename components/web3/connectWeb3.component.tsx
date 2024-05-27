@@ -9,7 +9,7 @@ interface ConnectWeb3ButtonProps {
 
 
 
-export default function ConnectWeb3Button({ hasSupplyReached, classStyles, onConnect }: ConnectWeb3ButtonProps) {
+export default function ConnectWeb3Button({ children, classStyles, onConnect }: ConnectWeb3ButtonProps) {
     const [, connect] = useConnectWallet()
 
     return <>
@@ -21,8 +21,7 @@ export default function ConnectWeb3Button({ hasSupplyReached, classStyles, onCon
             onConnect()
         }}>
             <div className="flex items-center gap-3 mx-4">
-
-            Nft supply has been reached!
+                {children}
             </div>
         </button></>
 }

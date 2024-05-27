@@ -15,11 +15,22 @@ const config = {
 
 const provider = new JsonRpcProvider(RPC_URL);
 
-const campaignWeb3Data: CampaignData = {
+//TESTNET
+
+/* const campaignWeb3Data: CampaignData = {
     'lukso2': {
         contractAddress: '0xeCf25fd57557c363EDA7C3eA01c58C55b631e7C2',
         baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
     }, 'lukso female b': { contractAddress: '0x0b0cA7fD6931e0Ecb83ADcee8BC85aA5c1BaaE87', baseCid: '' },
+} */
+
+//MAINNET
+
+const campaignWeb3Data: CampaignData = {
+    'lukso2': {
+        contractAddress: '0x74654920356257981f6b63a65ad72d4d9bc21929',
+        baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
+    }, 'lukso female b': { contractAddress: '0x754a5d007d5f1188ef0db892ee115a7c01b38fa3', baseCid: '' },
 }
 
 const schemas = [
@@ -100,14 +111,12 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
     const decodedDataArray = JSON.parse(JSON.stringify(decodedRawData))
 
     const metadatasArray = []
-
     for (let i = 0; i < tokenIds.length; i++) {
         const tokenId = Number(tokenIds[i])
         const decodedData = decodedDataArray[i]
         const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenId}`
         if (!baseCid && !decodedData.value) continue
         const { LSP4Metadata: metadata } = await getIPFSData(metadataUri)
-
         metadata.tokenId = tokenId
         metadata.campaign = campaign
         metadata.imageUrl = getImageUrl(metadata)
