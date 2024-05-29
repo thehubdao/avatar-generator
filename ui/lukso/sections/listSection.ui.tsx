@@ -13,8 +13,8 @@ import { SlPencil } from "react-icons/sl";
 interface MainSectionUIProps {
     provider: ethers.BrowserProvider | undefined;
     listData: TokenMetadata[] | undefined
-    onClickViewButton: (campaign: string, combination: string, combinationPictureUrl: string) => void;
-    onClickEditButton: (campaign: string, combination: string, combinationPictureUrl: string) => void;
+    onClickViewButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
+    onClickEditButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
 
 }
 
@@ -98,16 +98,16 @@ export default function ListUI({ listData, onClickViewButton, onClickEditButton 
                 </svg>
 
                 }
-                {processedListData && processedListData.map(({ tokenId, campaign, imageUrl, combination, body }: TokenMetadata) => {
+                {processedListData && processedListData.map(({ tokenId, campaign, imageUrl, combination, body, baseCombination }: TokenMetadata) => {
                     const campaignDBName = campaignLabels[campaign as keyof typeof campaignLabels].campaignName
                     /* ATTENTION:
                     CAMPAIGN REAL NAMES AND CAMPAIGN NAME ON DB IS DIFFERENT AND SHOULD BE TOOK INTO ACOUNT,
                     RECOMMENDABLE TO CHANGE IT IN FUTURE.
                      */
 
-                    if (!combination)
-                        combination = Object.values(body).map(({ index }) => { return index }).join('-')
-
+                    if (!combination) combination = Object.values(body).map(({ index }) => { return index }).join('-')
+                    if (!baseCombination) baseCombination = combination
+                    
                     return <>
                         <div key={campaignDBName + tokenId} className="relative ml-2 mb-2 bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white">
 
@@ -117,7 +117,7 @@ export default function ListUI({ listData, onClickViewButton, onClickEditButton 
 
                                     <div className="px-10 w-full mb-2">
                                         <div onClick={() =>
-                                            onClickViewButton(campaignDBName, combination, imageUrl)
+                                            onClickViewButton(campaignDBName, combination, baseCombination, imageUrl)
                                         }>
                                             <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
                                                 <div className="flex items-center gap-3">
@@ -127,7 +127,7 @@ export default function ListUI({ listData, onClickViewButton, onClickEditButton 
                                             </TransparentBoxUI></div>
                                     </div>
                                     <div className="px-10 w-full">
-                                        <div onClick={() => onClickEditButton(campaignDBName, combination, imageUrl)}>
+                                        <div onClick={() => onClickEditButton(campaignDBName, combination, baseCombination, imageUrl)}>
                                             <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
                                                 <div className="flex items-center gap-3">
                                                     <p className="text-black">Edit</p>

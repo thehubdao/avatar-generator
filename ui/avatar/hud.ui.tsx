@@ -69,6 +69,22 @@ export default function HudUI({
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
 
+  useEffect(() => {
+    return
+    console.log(selectListCategory,
+      optionList,
+      selectedCategory,
+      selectedOption,
+      campaignSkinColorConfig,
+      skinColor,
+      onSkinColorChange,
+      editModeSelected,
+      changeView,
+      exportModel,
+      isCustomCampaignHud,
+      exportAllow)
+  })
+
   //* todo, change this to redux to control screen size.
   // * This function allows us to know if the page has a width greater than 1536px.
   useEffect(() => {
@@ -153,10 +169,10 @@ export default function HudUI({
       />}
       {/* DESKTOP UI */}
       <div className={`fixed inset-0 ${editModeSelected ? 'w-[58%]' : 'w-0'} overflow-hidden h-screen bg-bg hidden xl:block transition-all duration-300`}>
-       
+
         {/* CAMPAIGN HEADER SIGN */}
         {!isCustomCampaignHud && <div className="fixed flex right-0 top-0 justify-center items-center gap-1 py-3 px-8 max-w-lg">
-          
+
           <div className="-z-10 absolute -left-10 h-full w-[180%] skew-x-[45deg] bg-bg" />
           <Image
             priority

@@ -156,3 +156,12 @@ export const getTokensOf = async (contractAddress: string, address: string) => {
     return tokenIds
 }
 
+export const getUserFeatures = async (contractAddress: string, address: string) => {
+    const contract = new Contract(contractAddress, AvatarContractAbi, provider)
+    const tokenIdsResult = await contract.tokenIdsOf(address)
+    const tokenIds = JSON.parse(JSON.stringify(tokenIdsResult))
+    if (tokenIds.length == 0) return
+
+    return tokenIds
+}
+

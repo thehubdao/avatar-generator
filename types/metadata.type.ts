@@ -9,7 +9,8 @@ export type TokenMetadataImage = {
 
 export type TokenMetadata = {
     imageUrl: string
-    combination:string
+    combination: string
+    baseCombination?: string
     campaign: string
     tokenId: number
     name: string | "",
@@ -30,7 +31,7 @@ export const campaigns = { 'lukso2': 'lukso2', 'lukso female b': 'lukso female b
 
 export type Campaign = keyof typeof campaigns
 
-export type CampaignData = { [campaign in Campaign]: {contractAddress:string, baseCid:string} }
+export type CampaignData = { [campaign in Campaign]: { contractAddress: string, baseCid: string } }
 
-export type CampaignMetadata = { 
+export type CampaignMetadata = {
     [campaign in Campaign]: TokenMetadata[] }

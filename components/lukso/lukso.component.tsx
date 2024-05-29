@@ -120,11 +120,11 @@ export default function LuksoComponent({
     campaignParams?.config.skin?.defColor ?? 'FFFFFF'
   )
   const [selectedCategory, setSelectedCategory] = useState<string>(
-    ''
+    'head'
   )
   const [listData, setListData] = useState<Array<TokenMetadata>>()
   const [selectedCombination, setSelectedCombination] = useState<string>()
-
+  const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>()
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
   const [hasMinted, setHasMinted] = useState<boolean>(false)
@@ -182,15 +182,15 @@ export default function LuksoComponent({
   async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
     if (!campaign) return
     await Promise.all([
-      getFeatureList(),
-      getAccessoryList(),
+      /*       getFeatureList(), */
+      /*       getAccessoryList(), */
       getStageList(),
       getEnvironmentMapList(),
       getSingleInfo(),
       getSingleData(campaign, currentCombination),
     ])
 
-    optionList = MixArrays(optionList, accessoryList)
+
 
     await SetFeaturesData(campaignParams?.features ?? [])
 
@@ -230,7 +230,29 @@ export default function LuksoComponent({
     const result = await GetAssetsListByCampaign(campaignParams?.campaign)
     featureList = result.success ? result.value : undefined
     optionList = MixArrays(optionList, featureList)
-    setOptionListShow(FilterList(featureList, 'type', selectedCategory))
+    optionList = MixArrays(optionList, accessoryList)
+
+    const combinationIndexes = selectedBaseCombination?.split('-')
+    let filteredOptionList: FeatureInterface[] = []
+    combinationIndexes?.forEach((featureIndex: string, index) => {
+      const filteredArray = optionList?.filter((val) => {
+        const categoryIndex = campaignParams?.features?.find((category) => {
+          return category.displayName === val.type
+        })?.index
+
+        if (!categoryIndex) return
+
+        return categoryIndex - 1 === index && val.index.toString() === featureIndex
+      })
+      if (!filteredArray) return
+      filteredOptionList = filteredOptionList.concat(filteredArray)
+    })
+    optionList = filteredOptionList
+
+    const filteredList = FilterList(optionList, 'type', selectedCategory)
+
+    return setOptionListShow(filteredList)
+
   }
 
   async function getAccessoryList() {
@@ -267,6 +289,11 @@ export default function LuksoComponent({
       ? numResult.value
       : undefined
     singleInitData = result
+    await getAccessoryList()
+    await getFeatureList()
+
+
+    singleInitData?.features.forEach((feature) => { addReplaceAttribute(feature.val.type, feature.val.name) })
   }
 
   async function loadSingleData() {
@@ -464,20 +491,21 @@ export default function LuksoComponent({
               </TransparentBoxUI>
             </div>
             {!selectedCombination && <ListUI listData={listData} provider={provider} onClickViewButton={
-              (_campaign: string, _combination: string, _combinationPictureUrl: string) => {
+              (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
                 setIsLoading(true)
                 if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
                 if (selectedCombination != _combination) setSelectedCombination(_combination)
+                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
                 if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
                 setIsEditModeSelected(false)
 
               }
             } onClickEditButton={
-              (_campaign: string, _combination: string, _combinationPictureUrl: string) => {
+              (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
                 setIsLoading(true)
                 if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
                 if (selectedCombination != _combination) setSelectedCombination(_combination)
+                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
                 if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
                 setIsEditModeSelected(true)
               }
@@ -561,8 +589,7 @@ export default function LuksoComponent({
                 onClickBackButton={() => {
                   setSelectedCombination(undefined)
                   setCampaign(undefined)
-                  console.log("ON CLICK")
-                } } goEditMode={()=>setIsEditModeSelected(true) }              /></>}
+                }} goEditMode={() => setIsEditModeSelected(true)} /></>}
           </div>}</>
       </MobileLayout></>
   )
