@@ -4,7 +4,6 @@ interface ConnectWeb3ButtonProps {
     onConnect: () => void
     classStyles: string
     children: JSX.Element | JSX.Element[] | boolean;
-    hasSupplyReached: boolean;
 }
 
 

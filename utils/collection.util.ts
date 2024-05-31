@@ -1,6 +1,6 @@
-import { GetAvatarStatus, GetParameter, GetTierDistribution, GetAllCombinationsAvailable, UpdateDocObject } from "./firebase.util";
+import { GetAvatarStatus, GetParameter, GetAllCombinationsAvailable, UpdateDocObject } from "./firebase.util";
 import { FirestoreLocation } from "../enums/firebase.enum";
-import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
+import { FeatureInterface } from "../interfaces/api.interface";
 import {
   CastStringToInteger,
   LogError,
@@ -22,8 +22,6 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
 
   featuresResult.value.sort((a, b) => a.index - b.index);
 
-  // Get tier distribution levels
-  const tierDistribution = await GetTierDistribution(campaign)
   // Get FeatureOptionListData
   const featureOptionListData: Map<number, FeatureInterface[]> = new Map();
   const featureData = await GetData(campaign);

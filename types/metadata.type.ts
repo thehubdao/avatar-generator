@@ -10,7 +10,7 @@ export type TokenMetadataImage = {
 export type TokenMetadata = {
     imageUrl: string
     combination: string
-    baseCombination?: string
+    baseCombination: string
     campaign: string
     tokenId: number
     name: string | "",

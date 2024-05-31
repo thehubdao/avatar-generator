@@ -13,7 +13,6 @@ import HudFeatureTitleUI from "./common/hudTitle.ui";
 import { RemovedAcc } from "../../utils/common.util";
 import ExportButtonUI from "./common/exportButton.ui";
 import { ModelExtension } from "../../enums/export.enum";
-import TransparentBoxUI from "../lukso/common/transparentBox.ui";
 
 interface HudUIProps {
 

@@ -21,7 +21,7 @@ export default function LuksoAvatarView() {
 
   useEffect(() => {
     if (!campaign) return setCampaignParams(undefined)
-    getCampaignParams()
+    void getCampaignParams()
   }, [campaign])
   
   return <LuksoComponent campaignParams={campaignParams} setCampaign={(_campaign: string | undefined) => {

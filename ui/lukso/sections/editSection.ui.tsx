@@ -19,7 +19,7 @@ interface EditSectionUIProps {
   goEditMode: () => void
 }
 
-export default function EditSectionUI({ goEditMode, onClickBackButton, exportModel, features, picture, combination }: EditSectionUIProps) {
+export default function EditSectionUI({ goEditMode, onClickBackButton, exportModel, features, picture }: EditSectionUIProps) {
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
 
   const editAvatarRef = useRef<HTMLDivElement>(null);

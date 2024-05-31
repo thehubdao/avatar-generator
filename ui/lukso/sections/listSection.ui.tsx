@@ -35,7 +35,7 @@ const campaignLabels = {
 
 
 const filterByCampaign = (campaign: string, listData: TokenMetadata[]) => {
-    return listData.filter((data: any) => data.campaign === campaign)
+    return listData.filter((data: TokenMetadata) => data.campaign === campaign)
 }
 
 const filterByTokenId = (tokenId: string, listData: TokenMetadata[]) => {

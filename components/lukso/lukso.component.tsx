@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
 // Layout
@@ -41,7 +41,6 @@ import {
   GetAvatarSingleByCampaignCombinationString,
   GetEnvMapListByCampaign,
   GetStageListByCampaign,
-  RegisterFeaturesDistribution,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
 import { IFrameExportData } from '../../utils/iframe.util'
@@ -59,14 +58,11 @@ import {
   BasicData,
   CampaignParameters,
   ExportInterface,
-  FeatureBasic,
   LookAtVectors,
 } from '../../interfaces/common.interface'
-import { uploadMetadata } from '../../utils/metadata.util'
 import { TokenMetadata } from '../../types/metadata.type'
 import { BodyPart } from '../../types/avatar.type'
 import { ethers } from 'ethers'
-import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
@@ -94,7 +90,8 @@ const tokenMetadata: TokenMetadata = {
   campaign: '',
   imageUrl: '',
   combination: '',
-  images: []
+  images: [],
+  baseCombination: ''
 }
 
 export default function LuksoComponent({
@@ -127,7 +124,6 @@ export default function LuksoComponent({
   const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>()
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
-  const [hasMinted, setHasMinted] = useState<boolean>(false)
   const [addressToShow, setAddressToShow] = useState<string>('')
   const [
     isGettingInfoAboutHasMinted,
@@ -154,15 +150,12 @@ export default function LuksoComponent({
   }, [wallet])
 
   useEffect(() => {
-    if (!provider) return
-    const setTokensMetadataPromise = async () => {
-      if (!wallet) return
-      const address = wallet.accounts[0].address
-      setAddressToShow(address)
+    if (!provider || !wallet)  return
 
-      //await setTokensMetadata(address)
-    }
-    void setTokensMetadataPromise()
+    const address = wallet.accounts[0].address
+
+    setAddressToShow(address)
+    
   }, [provider])
 
   useEffect(() => {
@@ -250,7 +243,7 @@ export default function LuksoComponent({
     optionList = filteredOptionList
 
     const filteredList = FilterList(optionList, 'type', selectedCategory)
-
+    console.log(optionList, filteredList)
     return setOptionListShow(filteredList)
 
   }
@@ -302,14 +295,13 @@ export default function LuksoComponent({
     setIsLoadingMintedData(true)
     if (singleInitData === undefined)
       return void LogError(Module.Lukso, 'Missing single data!!!!!')
-    let combinationId = ''
+
     for (const {
       val
     } of singleInitData.features) {
       const { id, path, type, name } = val
       const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
       tokenMetadata.body[bodyIndex] = val as BodyPart
-      combinationId += val.index.toString() + '-'
       // Set feature on model
       await ChangeFeature(
         id,
@@ -319,7 +311,6 @@ export default function LuksoComponent({
         campaignParams?.config.skin?.defColor ?? 'ffffff'
       )
     }
-    combinationId = combinationId.slice(0, combinationId.length - 1)
 
     await takePicture();
     setIsLoadingMintedData(false)
@@ -577,10 +568,8 @@ export default function LuksoComponent({
                 setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
                 isLoading={isLoading}
                 currentSection={currentSection}
-                setCurrentSection={(changeSectionValue) => setCurrentSection(changeSectionValue)}
                 getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
                 exportModel={() => exportModel()}
-                hasMinted={hasMinted}
                 provider={provider}
                 isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
                 features={singleInitData?.features}
@@ -589,6 +578,8 @@ export default function LuksoComponent({
                 onClickBackButton={() => {
                   setSelectedCombination(undefined)
                   setCampaign(undefined)
+                  setSelectedCategory('head')
+                  optionList = []
                 }} goEditMode={() => setIsEditModeSelected(true)} /></>}
           </div>}</>
       </MobileLayout></>
