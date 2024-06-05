@@ -3,7 +3,7 @@ import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { Campaign, CampaignData, TokenMetadata } from '../../types/metadata.type';
-import { getIPFSData, getImageUrl } from './lukso.util';
+import { getIPFSData } from './lukso.util';
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
@@ -104,7 +104,7 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
         tokenIds,
         metadataKeyArray
     )
-    const metadataFormattedArray = getDataBatchForTokenIdsTx.map((rawData:string) => {
+    const metadataFormattedArray = getDataBatchForTokenIdsTx.map((rawData: string) => {
         return { keyName: metadataDataKey, value: rawData }
     })
     const decodedRawData = avatarERC725Contract.decodeData(metadataFormattedArray)
@@ -119,7 +119,11 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
         const { LSP4Metadata: metadata } = await getIPFSData(metadataUri)
         metadata.tokenId = tokenId
         metadata.campaign = campaign
-        metadata.imageUrl = getImageUrl(metadata)
+
+        if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
+
+        metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
+
         metadatasArray.push(metadata)
     }
 
@@ -149,7 +153,7 @@ export const getSupply = async () => {
 
 export const getTokensOf = async (contractAddress: string, address: string) => {
     const contract = new Contract(contractAddress, AvatarContractAbi, provider)
-    const tokenIdsResult:string = await contract.tokenIdsOf(address) 
+    const tokenIdsResult: string = await contract.tokenIdsOf(address)
 
     const tokenIds = tokenIdsResult.toString().split(',')
 
