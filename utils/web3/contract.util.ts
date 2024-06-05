@@ -112,19 +112,20 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
 
     const metadatasArray = []
     for (let i = 0; i < tokenIds.length; i++) {
-        const tokenId = Number(tokenIds[i])
-        const decodedData = decodedDataArray[i]
-        const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenId}`
-        if (!baseCid && !decodedData.value) continue
-        const { LSP4Metadata: metadata } = await getIPFSData(metadataUri)
-        metadata.tokenId = tokenId
-        metadata.campaign = campaign
+        try {
+            const tokenId = Number(tokenIds[i])
+            const decodedData = decodedDataArray[i]
+            const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenId}`
+            if (!baseCid && !decodedData.value) continue
+            const { LSP4Metadata: metadata } = await getIPFSData(metadataUri)
+            metadata.tokenId = tokenId
+            metadata.campaign = campaign
+            if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
 
-        if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
+            metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
 
-        metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
-
-        metadatasArray.push(metadata)
+            metadatasArray.push(metadata)
+        } catch (err) { }
     }
 
     return metadatasArray
