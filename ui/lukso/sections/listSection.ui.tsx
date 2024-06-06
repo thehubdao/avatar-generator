@@ -4,13 +4,11 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { TokenMetadata } from "../../../types/metadata.type";
 import CampaignDropdown from "../../../components/lukso/dropdown.component";
-import TransparentBoxUI from "../common/transparentBox.ui";
-import { FaRegEye } from "react-icons/fa6";
-import { SlPencil } from "react-icons/sl";
+import ListItem from "../common/listItem";
 
 
 
-interface MainSectionUIProps {
+interface ListSectionUIProps {
     provider: ethers.BrowserProvider | undefined;
     listData: TokenMetadata[] | undefined
     onClickViewButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
@@ -44,7 +42,7 @@ const filterByTokenId = (tokenId: string, listData: TokenMetadata[]) => {
     })
 }
 
-export default function ListUI({ listData, onClickViewButton, onClickEditButton }: MainSectionUIProps) {
+export default function ListUI({ listData, onClickViewButton, onClickEditButton }: ListSectionUIProps) {
     const [processedListData, setProcessedListData] = useState<Array<TokenMetadata>>()
     const [selectedCampaign, setSelectedCampaign] = useState<string>('all')
     const [selectedTokenId, setSelectedTokenId] = useState<string>('')
@@ -98,56 +96,17 @@ export default function ListUI({ listData, onClickViewButton, onClickEditButton 
                 </svg>
 
                 }
-                {processedListData && processedListData.map(({ tokenId, campaign, imageUrl, combination, body, baseCombination }: TokenMetadata) => {
+                {processedListData && processedListData.map(({ tokenId, campaign, imageUrl, combination, baseCombination, fallbackImageUrl }: TokenMetadata) => {
                     const campaignDBName = campaignLabels[campaign as keyof typeof campaignLabels].campaignName
+                    const nftName = campaignLabels[campaign as keyof typeof campaignLabels].nftName
                     /* ATTENTION:
                     CAMPAIGN REAL NAMES AND CAMPAIGN NAME ON DB IS DIFFERENT AND SHOULD BE TOOK INTO ACOUNT,
                     RECOMMENDABLE TO CHANGE IT IN FUTURE.
                      */
 
-                    if (!combination) combination = Object.values(body).map(({ index }) => { return index }).join('-')
                     if (!baseCombination) baseCombination = combination
-                    
-                    return <>
-                        <div key={campaignDBName + tokenId} className="relative ml-2 mb-2 bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white">
 
-                            <div className="group">
-                                <Image src={imageUrl} alt={"NFT Image"} className="rounded-[10px_10px_0px_0px] " width={254} height={300} />
-                                <div className="hidden flex-col z-10 justify-center items-center absolute top-[0] group-hover:flex h-[254px] w-[254px] bg-[#ffcadd69] rounded-[10px_10px_0px_0px] border-[1.58px] border-solid border-white" >
-
-                                    <div className="px-10 w-full mb-2">
-                                        <div onClick={() =>
-                                            onClickViewButton(campaignDBName, combination, baseCombination, imageUrl)
-                                        }>
-                                            <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
-                                                <div className="flex items-center gap-3">
-                                                    <p className="text-black">View</p>
-                                                    <FaRegEye />
-                                                </div>
-                                            </TransparentBoxUI></div>
-                                    </div>
-                                    <div className="px-10 w-full">
-                                        <div onClick={() => onClickEditButton(campaignDBName, combination, baseCombination, imageUrl)}>
-                                            <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
-                                                <div className="flex items-center gap-3">
-                                                    <p className="text-black">Edit</p>
-                                                    <SlPencil />
-                                                </div>
-                                            </TransparentBoxUI></div></div>
-
-                                </div>
-                            </div>
-                            <div className="text-center p-1 [font-family:'Work_Sans',Helvetica] font-medium text-slate-800 text-[14px] tracking-[0] leading-[normal]">
-                                {`${campaignLabels[campaign as keyof typeof campaignLabels].nftName} #${tokenId}`}
-                            </div>
-                            <div className="absolute top-[6px] left-[6px] w-[45px] h-[20px] bg-slate-800 rounded-[13px] p-1 m-[-10]">
-                                <div className="w-[40px] text-center [font-family:'Work_Sans',Helvetica] font-normal text-white text-[12px] tracking-[0] leading-[normal]">
-                                    {`#${tokenId}`}
-                                </div>
-                            </div>
-                        </div >
-
-                    </>
+                    return <ListItem key={campaignDBName + tokenId} campaignDBName={campaignDBName} nftName={nftName} onClickViewButton={onClickViewButton} onClickEditButton={onClickEditButton} fallbackImageUrl={fallbackImageUrl} imageUrl={imageUrl} combination={combination} baseCombination={baseCombination} tokenId={tokenId} />
                 })}</div>}
         </div >
 

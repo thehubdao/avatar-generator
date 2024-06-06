@@ -8,6 +8,7 @@ export type TokenMetadataImage = {
 }
 
 export type TokenMetadata = {
+    fallbackImageUrl: string
     imageUrl: string
     combination: string
     baseCombination: string

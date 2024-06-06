@@ -3,7 +3,7 @@ import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { Campaign, CampaignData, TokenMetadata } from '../../types/metadata.type';
-import { getIPFSData } from './lukso.util';
+import { getIPFSData, getImageUrl } from './lukso.util';
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
@@ -123,7 +123,7 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
             if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
 
             metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
-
+            metadata.fallbackImageUrl = getImageUrl(metadata) 
             metadatasArray.push(metadata)
         } catch (err) { console.log(err) }
     }

@@ -91,7 +91,8 @@ const tokenMetadata: TokenMetadata = {
   imageUrl: '',
   combination: '',
   images: [],
-  baseCombination: ''
+  baseCombination: '',
+  fallbackImageUrl: ''
 }
 
 export default function LuksoComponent({
