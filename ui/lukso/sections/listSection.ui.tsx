@@ -2,7 +2,7 @@ import Image from "next/image";
 import { CiSearch } from "react-icons/ci";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { TokenMetadata } from "../../../types/metadata.type";
+import { TokenId } from "../../../types/metadata.type";
 import CampaignDropdown from "../../../components/lukso/dropdown.component";
 import ListItem from "../common/listItem";
 
@@ -10,7 +10,7 @@ import ListItem from "../common/listItem";
 
 interface ListSectionUIProps {
     provider: ethers.BrowserProvider | undefined;
-    listData: TokenMetadata[] | undefined
+    tokenIdList: TokenId[] | undefined
     onClickViewButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
     onClickEditButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
 
@@ -24,51 +24,50 @@ const campaignLabels = {
         nftName: 'Choose Campaign',
         dropdownName: 'Choose Campaign'
     },
-    'VRM_FEMALE': {
-        campaignName: 'VRM_FEMALE',
+    'lukso female b': {
+        campaignName: 'lukso female b',
         nftName: 'Lukso Citizen',
         dropdownName: 'Lukso Citizens'
-    }, 'VRM_MALE': { campaignName: 'VRM_MALE', nftName: 'Lukso Creator', dropdownName: 'Lukso Creators' }
+    }, 'lukso2': { campaignName: 'lukso2', nftName: 'Lukso Creator', dropdownName: 'Lukso Creators' }
 }
 
 
-const filterByCampaign = (campaign: string, listData: TokenMetadata[]) => {
-    return listData.filter((data: TokenMetadata) => data.campaign === campaign)
+const filterByCampaign = (campaign: string, listData: TokenId[]) => {
+    return listData.filter((data: TokenId) => data.campaign === campaign)
 }
 
-const filterByTokenId = (tokenId: string, listData: TokenMetadata[]) => {
-    return listData.filter((data: TokenMetadata) => {
+const filterByTokenId = (tokenId: string, listData: TokenId[]) => {
+    return listData.filter((data: TokenId) => {
         return data.tokenId.toString().includes(tokenId)
     })
 }
 
-export default function ListUI({ listData, onClickViewButton, onClickEditButton }: ListSectionUIProps) {
-    const [processedListData, setProcessedListData] = useState<Array<TokenMetadata>>()
+export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButton }: ListSectionUIProps) {
+    const [processedListData, setProcessedListData] = useState<TokenId[]>()
     const [selectedCampaign, setSelectedCampaign] = useState<string>('all')
     const [selectedTokenId, setSelectedTokenId] = useState<string>('')
     const [isLoading, setIsLoading] = useState<boolean>(true)
 
     useEffect(() => {
-        if (!listData) return
-        setProcessedListData(listData)
+        if (!tokenIdList) return
+        setProcessedListData(tokenIdList)
         setIsLoading(false)
-        console.log(listData)
-    }, [listData])
+    }, [tokenIdList])
 
     useEffect(() => {
-        if (!listData) return
+        if (!tokenIdList) return
         if (selectedCampaign === 'all')
-            return setProcessedListData(filterByTokenId(selectedTokenId, listData))
+            return setProcessedListData(filterByTokenId(selectedTokenId, tokenIdList))
 
-        const listDatafilteredByCampaign = filterByCampaign(selectedCampaign, listData)
+        const listDatafilteredByCampaign = filterByCampaign(selectedCampaign, tokenIdList)
         const listDatafilteredByTokenId = filterByTokenId(selectedTokenId, listDatafilteredByCampaign)
         setProcessedListData(listDatafilteredByTokenId)
     }, [selectedCampaign])
 
     useEffect(() => {
-        if (!listData) return
+        if (!tokenIdList) return
 
-        const listDatafilteredByTokenId = filterByTokenId(selectedTokenId, listData)
+        const listDatafilteredByTokenId = filterByTokenId(selectedTokenId, tokenIdList)
 
         if (selectedCampaign === 'all') return setProcessedListData(listDatafilteredByTokenId)
 
@@ -96,17 +95,15 @@ export default function ListUI({ listData, onClickViewButton, onClickEditButton 
                 </svg>
 
                 }
-                {processedListData && processedListData.map(({ tokenId, campaign, imageUrl, combination, baseCombination, fallbackImageUrl }: TokenMetadata) => {
+                {processedListData && processedListData.map((tokenMetadata: TokenId) => {
+                    const { tokenId, campaign } = tokenMetadata
                     const campaignDBName = campaignLabels[campaign as keyof typeof campaignLabels].campaignName
                     const nftName = campaignLabels[campaign as keyof typeof campaignLabels].nftName
                     /* ATTENTION:
                     CAMPAIGN REAL NAMES AND CAMPAIGN NAME ON DB IS DIFFERENT AND SHOULD BE TOOK INTO ACOUNT,
                     RECOMMENDABLE TO CHANGE IT IN FUTURE.
                      */
-
-                    if (!baseCombination) baseCombination = combination
-
-                    return <ListItem key={campaignDBName + tokenId} campaignDBName={campaignDBName} nftName={nftName} onClickViewButton={onClickViewButton} onClickEditButton={onClickEditButton} fallbackImageUrl={fallbackImageUrl} imageUrl={imageUrl} combination={combination} baseCombination={baseCombination} tokenId={tokenId} />
+                    return  <ListItem key={campaignDBName + tokenId} campaignDBName={campaignDBName} nftName={nftName} onClickViewButton={onClickViewButton} onClickEditButton={onClickEditButton} tokenId={tokenMetadata} />
                 })}</div>}
         </div >
 

@@ -1,9 +1,9 @@
 
 
 export enum Client {
-  Lukso = 'VRM_MALE'
+  Lukso = 'lukso2'
 }
 
-export let currentCampaign = 'VRM_MALE'
+export let currentCampaign = 'lukso2'
 
 export const setCurrentCampaign = (campaign: string) => { currentCampaign = campaign }

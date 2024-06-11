@@ -68,21 +68,6 @@ export default function HudUI({
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
 
-  useEffect(() => {
-    return
-    console.log(selectListCategory,
-      optionList,
-      selectedCategory,
-      selectedOption,
-      campaignSkinColorConfig,
-      skinColor,
-      onSkinColorChange,
-      editModeSelected,
-      changeView,
-      exportModel,
-      isCustomCampaignHud,
-      exportAllow)
-  })
 
   //* todo, change this to redux to control screen size.
   // * This function allows us to know if the page has a width greater than 1536px.

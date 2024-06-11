@@ -104,7 +104,6 @@ const featuresIcons = FeaturesIcons({
 })
 
 export default function App({ Component, pageProps }: AppProps) {
-
     return (
         <>
             <style jsx global>{`

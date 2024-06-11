@@ -2,7 +2,7 @@ import { Contract, JsonRpcProvider, Signer, TransactionResponse } from 'ethers'
 import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
-import { Campaign, CampaignData, TokenMetadata } from '../../types/metadata.type';
+import { Campaign, CampaignData, TokenId, TokenMetadata } from '../../types/metadata.type';
 import { getIPFSData, getImageUrl } from './lukso.util';
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
@@ -18,19 +18,19 @@ const provider = new JsonRpcProvider(RPC_URL);
 //TESTNET
 
 /* const campaignWeb3Data: CampaignData = {
-    'VRM_MALE': {
+    'lukso2': {
         contractAddress: '0xeCf25fd57557c363EDA7C3eA01c58C55b631e7C2',
         baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
-    }, 'VRM_FEMALE': { contractAddress: '0x0b0cA7fD6931e0Ecb83ADcee8BC85aA5c1BaaE87', baseCid: '' },
+    }, 'lukso female b': { contractAddress: '0x0b0cA7fD6931e0Ecb83ADcee8BC85aA5c1BaaE87', baseCid: '' },
 } */
 
 //MAINNET
 
 const campaignWeb3Data: CampaignData = {
-    'VRM_MALE': {
+    'lukso2': {
         contractAddress: '0x74654920356257981f6b63a65ad72d4d9bc21929',
         baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
-    }, 'VRM_FEMALE': { contractAddress: '0x754a5d007d5f1188ef0db892ee115a7c01b38fa3', baseCid: '' },
+    }, 'lukso female b': { contractAddress: '0x754a5d007d5f1188ef0db892ee115a7c01b38fa3', baseCid: '' },
 }
 
 const schemas = [
@@ -95,6 +95,63 @@ export const getCampaignTokenIds = async (campaignAddress: string, address: stri
     return campaignTokenIds
 }
 
+export const getCampaignsTokenIds = async (address: string) => {
+    let campaignsTokenIds = [] as TokenId[]
+    for (const campaign of Object.keys(campaignWeb3Data)) {
+        const typpedCampaign = campaign as keyof typeof campaignWeb3Data
+        const { contractAddress } = campaignWeb3Data[typpedCampaign]
+        const tokenIds: string[] = await getCampaignTokenIds(contractAddress, address)
+        const tokensMetadataUrls = await getCampaignTokenMetadataUris(campaign as Campaign, tokenIds)
+
+        if (!tokenIds) continue
+
+        const formattedTokenIds = tokenIds.map((tokenId, index) => {
+            const metadataUri = tokensMetadataUrls[index]
+            return { tokenId: Number(tokenId).toString(), campaign, metadataUri } as TokenId
+        })
+        campaignsTokenIds = campaignsTokenIds.concat(formattedTokenIds)
+    }
+    return campaignsTokenIds
+}
+
+
+
+export const getCampaignTokenMetadataUris = async (campaign: Campaign, tokenIds: string[]) => {
+    const { contractAddress } = campaignWeb3Data[campaign]
+    const contract = new Contract(contractAddress, AvatarContractAbi, provider)
+    const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
+    const metadataKeyArray = tokenIds.map(() => metadataDataKey)
+    const getDataBatchForTokenIdsTx = await contract.getDataBatchForTokenIds(
+        tokenIds,
+        metadataKeyArray
+    )
+    const metadataFormattedArray = getDataBatchForTokenIdsTx.map((rawData: string) => {
+        return { keyName: metadataDataKey, value: rawData }
+    })
+    const decodedRawData = avatarERC725Contract.decodeData(metadataFormattedArray)
+    const decodedDataArray = JSON.parse(JSON.stringify(decodedRawData))
+    const formattedDataArray = decodedDataArray.map((data: { value: {url:string}; }, index: number) => {
+        const { value: metadataUri } = data
+        const { baseCid } = campaignWeb3Data[campaign]
+        return metadataUri ? metadataUri.url.split('//')[1] : `${baseCid}/${Number(tokenIds[index])}`
+    })
+
+    return formattedDataArray
+}
+
+export const getTokenMetadata = async (tokenId: TokenId) => {
+    const { LSP4Metadata: metadata } = await getIPFSData(tokenId.metadataUri)
+    metadata.tokenId = tokenId.tokenId
+    metadata.campaign = tokenId.campaign
+
+    if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
+    if (!metadata.baseCombination) metadata.baseCombination = metadata.combination
+    metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tokenId.campaign}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
+    metadata.fallbackImageUrl = getImageUrl(metadata)
+
+    return metadata
+}
+
 export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) => {
     const { contractAddress, baseCid } = campaignWeb3Data[campaign]
     const contract = new Contract(contractAddress, AvatarContractAbi, provider)
@@ -113,18 +170,12 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
     const metadatasArray = []
     for (let i = 0; i < tokenIds.length; i++) {
         try {
-            const tokenId = Number(tokenIds[i])
+            const tokenId = Number(tokenIds[i]).toString()
             const decodedData = decodedDataArray[i]
             const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenId}`
             if (!baseCid && !decodedData.value) continue
-            const { LSP4Metadata: metadata } = await getIPFSData(metadataUri)
-            metadata.tokenId = tokenId
-            metadata.campaign = campaign
-            if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
-
-            metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
-            metadata.fallbackImageUrl = getImageUrl(metadata) 
-            metadatasArray.push(metadata)
+            const tokenMetadata = await getTokenMetadata({ metadataUri, campaign, tokenId })
+            metadatasArray.push(tokenMetadata)
         } catch (err) { console.log(err) }
     }
 

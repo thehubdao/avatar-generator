@@ -60,13 +60,13 @@ import {
   ExportInterface,
   LookAtVectors,
 } from '../../interfaces/common.interface'
-import { TokenMetadata } from '../../types/metadata.type'
+import { TokenId, TokenMetadata } from '../../types/metadata.type'
 import { BodyPart } from '../../types/avatar.type'
 import { ethers } from 'ethers'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getCampaignsTokensMetadata } from '../../utils/web3/contract.util'
+import { getCampaignsTokenIds } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 
@@ -86,7 +86,7 @@ const tokenMetadata: TokenMetadata = {
   GLBUrl: '',
   body: {},
   links: [], assets: [],
-  tokenId: 0,
+  tokenId: '',
   campaign: '',
   imageUrl: '',
   combination: '',
@@ -120,7 +120,7 @@ export default function LuksoComponent({
   const [selectedCategory, setSelectedCategory] = useState<string>(
     'head'
   )
-  const [listData, setListData] = useState<Array<TokenMetadata>>()
+  const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
   const [selectedCombination, setSelectedCombination] = useState<string>()
   const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>()
   // Web3 state
@@ -162,8 +162,8 @@ export default function LuksoComponent({
   useEffect(() => {
     if (!addressToShow) return
     const getTokensMetadataPromise = async () => {
-      const metadatas = await getCampaignsTokensMetadata(addressToShow)
-      setListData(metadatas)
+      const tokenIds = await getCampaignsTokenIds(addressToShow)
+      setTokenIdList(tokenIds)
     }
     void getTokensMetadataPromise()
   }, [addressToShow])
@@ -244,7 +244,7 @@ export default function LuksoComponent({
     optionList = filteredOptionList
 
     const filteredList = FilterList(optionList, 'type', selectedCategory)
-    console.log(optionList, filteredList)
+    
     return setOptionListShow(filteredList)
 
   }
@@ -482,7 +482,7 @@ export default function LuksoComponent({
                 </div>
               </TransparentBoxUI>
             </div>
-            {!selectedCombination && <ListUI listData={listData} provider={provider} onClickViewButton={
+            {!selectedCombination && <ListUI tokenIdList={tokenIdList} provider={provider} onClickViewButton={
               (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
                 setIsLoading(true)
                 if (campaignParams?.campaign != _campaign) setCampaign(_campaign)

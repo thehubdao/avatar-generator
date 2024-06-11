@@ -13,7 +13,7 @@ export type TokenMetadata = {
     combination: string
     baseCombination: string
     campaign: string
-    tokenId: number
+    tokenId: string
     name: string | "",
     description: string | "",
     GLBUrl: string,
@@ -28,7 +28,9 @@ export type TokenMetadata = {
     }
 }
 
-export const campaigns = { 'VRM_MALE': 'VRM_MALE', 'VRM_FEMALE': 'VRM_FEMALE' }
+export type TokenId = { tokenId: string, campaign: string, metadataUri:string }
+
+export const campaigns = { 'lukso2': 'lukso2', 'lukso female b': 'lukso female b' }
 
 export type Campaign = keyof typeof campaigns
 
