@@ -30,7 +30,7 @@ export type TokenMetadata = {
 
 export type TokenId = { tokenId: string, campaign: string, metadataUri:string }
 
-export const campaigns = { 'lukso2': 'lukso2', 'lukso female b': 'lukso female b' }
+export const campaigns = { 'vrm_male': 'vrm_male', 'vrm_female': 'vrm_female' }
 
 export type Campaign = keyof typeof campaigns
 

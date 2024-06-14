@@ -18,19 +18,19 @@ const provider = new JsonRpcProvider(RPC_URL);
 //TESTNET
 
 /* const campaignWeb3Data: CampaignData = {
-    'lukso2': {
+    'vrm_male': {
         contractAddress: '0xeCf25fd57557c363EDA7C3eA01c58C55b631e7C2',
         baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
-    }, 'lukso female b': { contractAddress: '0x0b0cA7fD6931e0Ecb83ADcee8BC85aA5c1BaaE87', baseCid: '' },
+    }, 'vrm_female': { contractAddress: '0x0b0cA7fD6931e0Ecb83ADcee8BC85aA5c1BaaE87', baseCid: '' },
 } */
 
 //MAINNET
 
 const campaignWeb3Data: CampaignData = {
-    'lukso2': {
+    'vrm_male': {
         contractAddress: '0x74654920356257981f6b63a65ad72d4d9bc21929',
         baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
-    }, 'lukso female b': { contractAddress: '0x754a5d007d5f1188ef0db892ee115a7c01b38fa3', baseCid: '' },
+    }, 'vrm_female': { contractAddress: '0x754a5d007d5f1188ef0db892ee115a7c01b38fa3', baseCid: '' },
 }
 
 const schemas = [
@@ -139,6 +139,8 @@ export const getCampaignTokenMetadataUris = async (campaign: Campaign, tokenIds:
     return formattedDataArray
 }
 
+const tempCampaignSwitch={'vrm_male':'lukso2', 'vrm_female':'lukso female b'}
+
 export const getTokenMetadata = async (tokenId: TokenId) => {
     const { LSP4Metadata: metadata } = await getIPFSData(tokenId.metadataUri)
     metadata.tokenId = tokenId.tokenId
@@ -146,7 +148,7 @@ export const getTokenMetadata = async (tokenId: TokenId) => {
 
     if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
     if (!metadata.baseCombination) metadata.baseCombination = metadata.combination
-    metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tokenId.campaign}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
+    metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch]}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
     metadata.fallbackImageUrl = getImageUrl(metadata)
 
     return metadata

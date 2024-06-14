@@ -24,11 +24,11 @@ const campaignLabels = {
         nftName: 'Choose Campaign',
         dropdownName: 'Choose Campaign'
     },
-    'lukso female b': {
-        campaignName: 'lukso female b',
+    'vrm_female': {
+        campaignName: 'vrm_female',
         nftName: 'Lukso Citizen',
         dropdownName: 'Lukso Citizens'
-    }, 'lukso2': { campaignName: 'lukso2', nftName: 'Lukso Creator', dropdownName: 'Lukso Creators' }
+    }, 'vrm_male': { campaignName: 'vrm_male', nftName: 'Lukso Creator', dropdownName: 'Lukso Creators' }
 }
 
 

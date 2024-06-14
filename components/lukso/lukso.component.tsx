@@ -80,6 +80,7 @@ let singleInitData: SingleInterface | undefined
 let loaderDivElement: HTMLDivElement
 const isOnIFrame = false
 
+
 const tokenMetadata: TokenMetadata = {
   name: '',
   description: '',
