@@ -169,7 +169,7 @@ export default function AvatarBuilder({
   }
 
   const exportFromIFrame = () => {
-    return exportModel(ModelExtension.GLB);
+    return exportModel(ModelExtension.VRM);
   }
 
   async function loadPreData() {

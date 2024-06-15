@@ -41,9 +41,57 @@ export const VRM_HUMANOID_BONES = [
   "leftUpperArm",
   "leftLowerArm",
   "leftHand",
+  "leftShoulder",
   "rightUpperArm",
   "rightLowerArm",
-  "rightHand"
+  "rightHand",
+  "rightShoulder",
+  // fingers
+  // left thumb
+  "leftThumbProximal",
+  "leftThumbIntermediate",
+  "leftThumbDistal",
+  // left index
+  "leftIndexProximal",
+  "leftIndexIntermediate",
+  "leftIndexDistal",
+  // left middle
+  "leftMiddleProximal",
+  "leftMiddleIntermediate",
+  "leftMiddleDistal",
+  // left ring
+  "leftRingProximal",
+  "leftRingIntermediate",
+  "leftRingDistal",
+  // left little
+  "leftLittleProximal",
+  "leftLittleIntermediate",
+  "leftLittleDistal",
+
+  //right thumb
+  "rightThumbProximal",
+  "rightThumbIntermediate",
+  "rightThumbDistal",
+
+  //right index
+  "rightIndexProximal",
+  "rightIndexIntermediate",
+  "rightIndexDistal",
+
+  //right middle
+  "rightMiddleProximal",
+  "rightMiddleIntermediate",
+  "rightMiddleDistal",
+
+  //right ring
+  "rightRingProximal",
+  "rightRingIntermediate",
+  "rightRingDistal",
+
+  //right ring
+  "rightLittleProximal",
+  "rightLittleIntermediate",
+  "rightLittleDistal",
 ] as const;
 
 // ^ obligatory list of bones for vrm0
@@ -93,7 +141,57 @@ export const MIXAMO_BONE = [
   "mixamorigRightLeg",
   "mixamorigRightArm",
   "mixamorigRightUpLeg",
-  "mixamorigSpine1"
+  "mixamorigSpine1",
+
+  // **Optionals**
+  // shoulders
+  "mixamorigRightShoulder",
+  "mixamorigLeftShoulder",
+
+  // fingers
+  // left thumb
+  "mixamorigLeftHandThumb1",
+  "mixamorigLeftHandThumb2",
+  "mixamorigLeftHandThumb3",
+  // left index
+  "mixamorigLeftHandIndex1",
+  "mixamorigLeftHandIndex2",
+  "mixamorigLeftHandIndex3",
+  // left middle
+  "mixamorigLeftHandMiddle1",
+  "mixamorigLeftHandMiddle2",
+  "mixamorigLeftHandMiddle3",
+  // left ring
+  "mixamorigLeftHandRing1",
+  "mixamorigLeftHandRing2",
+  "mixamorigLeftHandRing3",
+  // left little
+  "mixamorigLeftHandPinky1",
+  "mixamorigLeftHandPinky2",
+  "mixamorigLeftHandPinky3",
+
+  // right thumb
+  "mixamorigRightHandThumb1",
+  "mixamorigRightHandThumb2",
+  "mixamorigRightHandThumb3",
+  // right index
+  "mixamorigRightHandIndex1",
+  "mixamorigRightHandIndex2",
+  "mixamorigRightHandIndex3",
+  // right middle
+  "mixamorigRightHandMiddle1",
+  "mixamorigRightHandMiddle2",
+  "mixamorigRightHandMiddle3",
+  // right ring
+  "mixamorigRightHandRing1",
+  "mixamorigRightHandRing2",
+  "mixamorigRightHandRing3",
+  // right little
+  "mixamorigRightHandPinky1",
+  "mixamorigRightHandPinky2",
+  "mixamorigRightHandPinky3",
+
+
 ] as const;
 
 export const VRM_META_DEFAULT: VrmMetadata = {
@@ -111,7 +209,7 @@ export const VRM_META_DEFAULT: VrmMetadata = {
   otherLicenseUrl: "",
 } as const;
 
-export const VRM_HUMAN_BONES_DEFAULT: VrmHumanBone[] = [
+export const VRM_HUMAN_BONES_DEFAULT: any[] = [
   {
     bone: "hips",
     node: 64,
@@ -196,7 +294,167 @@ export const VRM_HUMAN_BONES_DEFAULT: VrmHumanBone[] = [
     bone: "rightHand",
     node: 47,
     useDefaultValues: true
-  }
+  },
+  {
+    bone: "leftShoulder",
+    node: 26,
+    useDefaultValues: true
+  },
+  {
+    bone: "rightShoulder",
+    node: 50,
+    useDefaultValues: true
+  },
+  {
+      "bone": "leftThumbProximal",
+      "node": 6,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftThumbIntermediate",
+      "node": 5,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftThumbDistal",
+      "node": 4,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftIndexProximal",
+      "node": 10,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftIndexIntermediate",
+      "node": 9,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftIndexDistal",
+      "node": 8,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftMiddleProximal",
+      "node": 14,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftMiddleIntermediate",
+      "node": 13,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftMiddleDistal",
+      "node": 12,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftRingProximal",
+      "node": 18,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftRingIntermediate",
+      "node": 17,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftRingDistal",
+      "node": 16,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftLittleProximal",
+      "node": 22,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftLittleIntermediate",
+      "node": 21,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "leftLittleDistal",
+      "node": 20,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightThumbProximal",
+      "node": 30,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightThumbIntermediate",
+      "node": 29,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightThumbDistal",
+      "node": 28,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightIndexProximal",
+      "node": 34,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightIndexIntermediate",
+      "node": 33,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightIndexDistal",
+      "node": 32,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightMiddleProximal",
+      "node": 38,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightMiddleIntermediate",
+      "node": 37,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightMiddleDistal",
+      "node": 36,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightRingProximal",
+      "node": 42,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightRingIntermediate",
+      "node": 41,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightRingDistal",
+      "node": 40,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightLittleProximal",
+      "node": 46,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightLittleIntermediate",
+      "node": 45,
+      "useDefaultValue": true
+  },
+  {
+      "bone": "rightLittleDistal",
+      "node": 44,
+      "useDefaultValue": true
+  },
 ];
 
 export const VRM_HUMAN_BONES_DEFAULT_LENGTH = VRM_HUMAN_BONES_DEFAULT.length;
@@ -385,7 +643,7 @@ export const VRM_BASE: VrmStructure = {
   }
 };
 
-export const VRM_MAP_MIXAMO: Record<VrmHumanoidBones, MixamoBone> = {
+export const VRM_MAP_MIXAMO: Record<any, any> = {
   "chest": "mixamorigSpine2",
   "head": "mixamorigHead",
   "hips": "mixamorigHips",
@@ -395,6 +653,7 @@ export const VRM_MAP_MIXAMO: Record<VrmHumanoidBones, MixamoBone> = {
   "leftLowerLeg": "mixamorigLeftLeg",
   "leftUpperArm": "mixamorigLeftArm",
   "leftUpperLeg": "mixamorigLeftUpLeg",
+  "leftShoulder": "mixamorigLeftShoulder",
   "neck": "mixamorigNeck",
   "rightFoot": "mixamorigRightFoot",
   "rightHand": "mixamorigRightHand",
@@ -402,5 +661,54 @@ export const VRM_MAP_MIXAMO: Record<VrmHumanoidBones, MixamoBone> = {
   "rightLowerLeg": "mixamorigRightLeg",
   "rightUpperArm": "mixamorigRightArm",
   "rightUpperLeg": "mixamorigRightUpLeg",
+  "rightShoulder": "mixamorigRightShoulder",
   "spine": "mixamorigSpine1",
+
+  // fingers
+  // left thumb
+  "leftThumbProximal": "mixamorigLeftHandThumb1",
+  "leftThumbIntermediate": "mixamorigLeftHandThumb2",
+  "leftThumbDistal": "mixamorigLeftHandThumb3",
+  // left index
+  "leftIndexProximal": "mixamorigLeftHandIndex1",
+  "leftIndexIntermediate": "mixamorigLeftHandIndex2",
+  "leftIndexDistal": "mixamorigLeftHandIndex3",
+  // left middle
+  "leftMiddleProximal": "mixamorigLeftHandMiddle1",
+  "leftMiddleIntermediate": "mixamorigLeftHandMiddle2",
+  "leftMiddleDistal": "mixamorigLeftHandMiddle3",
+  // left ring
+  "leftRingProximal": "mixamorigLeftHandRing1",
+  "leftRingIntermediate": "mixamorigLeftHandRing2",
+  "leftRingDistal": "mixamorigLeftHandRing3",
+  // left little
+  "leftLittleProximal": "mixamorigLeftHandPinky1",
+  "leftLittleIntermediate": "mixamorigLeftHandPinky2",
+  "leftLittleDistal": "mixamorigLeftHandPinky3",
+
+  //right thumb
+  "rightThumbProximal": "mixamorigRightHandThumb1",
+  "rightThumbIntermediate": "mixamorigRightHandThumb2",
+  "rightThumbDistal": "mixamorigRightHandThumb3",
+
+  //right index
+  "rightIndexProximal": "mixamorigRightHandIndex1",
+  "rightIndexIntermediate": "mixamorigRightHandIndex2",
+  "rightIndexDistal": "mixamorigRightHandIndex3",
+
+  //right middle
+  "rightMiddleProximal": "mixamorigRightHandMiddle1",
+  "rightMiddleIntermediate": "mixamorigRightHandMiddle2",
+  "rightMiddleDistal": "mixamorigRightHandMiddle3",
+
+  //right ring
+  "rightRingProximal": "mixamorigRightHandRing1",
+  "rightRingIntermediate": "mixamorigRightHandRing2",
+  "rightRingDistal": "mixamorigRightHandRing3",
+
+  //right ring
+  "rightLittleProximal": "mixamorigRightHandPinky1",
+  "rightLittleIntermediate": "mixamorigRightHandPinky2",
+  "rightLittleDistal": "mixamorigRightHandPinky3",
+
 } as const;

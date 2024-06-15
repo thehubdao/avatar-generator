@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
-
+import arrayJson from './array.json'
 // Layout
 import MobileLayout from '../../layouts/mobile.layout'
 
@@ -69,6 +69,9 @@ import { useConnectWallet } from '@web3-onboard/react'
 import { getCampaignsTokenIds } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
+import AvatarBuilder from '../avatar/builder.component'
+import { GetAllCombinations, UpdateDownloadedAvatarStatus } from '../../utils/firebase.util'
+import { QueryDocumentSnapshot } from '@firebase/firestore'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -426,7 +429,6 @@ export default function LuksoComponent({
       if (exportData.model != undefined)
         await SaveFile(exportData.model, 'model.glb')
       await SaveFile(exportData.picture, 'picture.png')
-
     }
   }
 
