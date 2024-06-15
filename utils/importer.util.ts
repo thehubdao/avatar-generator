@@ -3,7 +3,6 @@ import {GetFile} from "./firebase.util";
 import {IsWebUrl, LogError} from "./common.util";
 import {Result} from "../types/common.type";
 import {CommonErrorCode, Module} from "../enums/common.enum";
-import {VRMLoaderPlugin} from "@pixiv/three-vrm";
 
 class ImporterUtil {
   private static _instance: ImporterUtil;
@@ -27,9 +26,9 @@ class ImporterUtil {
   public GetVrmLoaderInstance(): GLTFLoader {
     if (this._vrmLoader == undefined) {
       this._vrmLoader = new GLTFLoader();
-      this._vrmLoader.register((parser) => {
+/*       this._vrmLoader.register((parser) => {
         return new VRMLoaderPlugin(parser);
-      });
+      }); */
     }
 
     return this._vrmLoader;

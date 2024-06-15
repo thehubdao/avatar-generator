@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDownload } from "react-icons/fa6";
@@ -16,13 +16,15 @@ interface EditSectionUIProps {
   combination: string;
   picture: string;
   onClickBackButton: () => void
-  goEditMode: ()=>void
+  goEditMode: () => void
 }
 
-export default function EditSectionUI({goEditMode, onClickBackButton, exportModel, features, picture, combination }: EditSectionUIProps) {
+export default function EditSectionUI({ goEditMode, onClickBackButton, exportModel, features, picture }: EditSectionUIProps) {
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
- 
+
   const editAvatarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { console.log(features) }, [features])
 
   const gsapEnterBlocks = () => {
     if (!editAvatarRef.current) return

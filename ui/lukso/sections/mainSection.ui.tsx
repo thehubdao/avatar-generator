@@ -13,9 +13,6 @@ import Loader from "../common/loader.ui";
 import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
 import { useConnectWallet } from "@web3-onboard/react";
 import { canMint } from "../../../utils/phase.util";
-import LoginUI from "./loginSection.ui";
-import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
-import TransparentBoxUI from "../common/transparentBox.ui";
 import LoadingUI from "./loadingSection.ui";
 
 interface MainSectionUIProps {
@@ -25,12 +22,11 @@ interface MainSectionUIProps {
   isGettingInfoAboutHasMinted: boolean;
   picture: string;
   combination: string;
-  hasSupplyReached: boolean;
 }
 
 
 
-export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, combination, picture, hasSupplyReached }: MainSectionUIProps) {
+export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, combination, picture }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 

@@ -14,7 +14,7 @@ const luksoProvider = luksoModule()
 const UP_BROWSER_EXTENSION_URL =
     'https://chrome.google.com/webstore/detail/universal-profiles/abpickdkkbnbcoepogfhkhennhfhehfn?hl'
 
-/* const luksoTestnetNetwork = {
+    /* const luksoTestnetNetwork = {
     id: '0x42010001',
     token: 'LYXt',
     label: 'Lukso Testnet',
@@ -104,7 +104,6 @@ const featuresIcons = FeaturesIcons({
 })
 
 export default function App({ Component, pageProps }: AppProps) {
-
     return (
         <>
             <style jsx global>{`

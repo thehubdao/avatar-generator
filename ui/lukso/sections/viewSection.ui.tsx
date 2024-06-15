@@ -2,17 +2,12 @@ import Image from "next/image"
 import { useEffect, useRef } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock, fadeInOutBlock } from "../../../utils/gsap/block_in_out.util";
-import { BsArrowRepeat } from "react-icons/bs";
-import { FaArrowRightLong } from "react-icons/fa6";
-import SocialButtonsUI from "../common/socialButtons.ui";
-import { LuksoSections } from "../../../enums/lukso/common.enum";
 import { DURATION_ANIMATION_SECTION } from "../../../constants/lukso/animation.constant";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 import FeatureListUI from "../common/featureList.ui";
 import TransparentBoxUI from "../common/transparentBox.ui";
 
 interface MintSectionUIProps {
-    setCurrentSection: (value: LuksoSections) => void;
     features?: IndexFeatureInterface[];
     picture: string;
     combination: string;
@@ -20,7 +15,7 @@ interface MintSectionUIProps {
     onClickBackButton: () => void
 }
 
-export default function ViewSectionUI({ onClickBackButton, setCurrentSection, features, combinationPictureUrl }: MintSectionUIProps) {
+export default function ViewSectionUI({ onClickBackButton, features, combinationPictureUrl }: MintSectionUIProps) {
 
     const mainFeatureRef = useRef<HTMLDivElement>(null);
     const mintAvatarRef = useRef<HTMLDivElement>(null);
@@ -33,12 +28,12 @@ export default function ViewSectionUI({ onClickBackButton, setCurrentSection, fe
         fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION);
     }
 
-    const gsapOutBlocks = () => {
+/*     const gsapOutBlocks = () => {
         if (!mainFeatureRef.current || !mintAvatarRef.current || !buttonRef.current) return
         translationInOutBlock(mainFeatureRef.current, DURATION_ANIMATION_SECTION, true);
         translationInOutBlock(mintAvatarRef.current, DURATION_ANIMATION_SECTION, true, true);
         fadeInOutBlock(buttonRef.current, DURATION_ANIMATION_SECTION, true, () => setCurrentSection(LuksoSections.Edit));
-    }
+    } */
 
     useEffect(() => {
         void gsapEnterBlocks();

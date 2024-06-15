@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 import arrayJson from './array.json'
 // Layout
@@ -41,7 +41,6 @@ import {
   GetAvatarSingleByCampaignCombinationString,
   GetEnvMapListByCampaign,
   GetStageListByCampaign,
-  RegisterFeaturesDistribution,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
 import { IFrameExportData } from '../../utils/iframe.util'
@@ -59,18 +58,15 @@ import {
   BasicData,
   CampaignParameters,
   ExportInterface,
-  FeatureBasic,
   LookAtVectors,
 } from '../../interfaces/common.interface'
-import { uploadMetadata } from '../../utils/metadata.util'
-import { TokenMetadata } from '../../types/metadata.type'
+import { TokenId, TokenMetadata } from '../../types/metadata.type'
 import { BodyPart } from '../../types/avatar.type'
 import { ethers } from 'ethers'
-import ConnectWeb3Button from '../web3/connectWeb3.component'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getCampaignsTokensMetadata } from '../../utils/web3/contract.util'
+import { getCampaignsTokenIds } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 import AvatarBuilder from '../avatar/builder.component'
@@ -87,17 +83,20 @@ let singleInitData: SingleInterface | undefined
 let loaderDivElement: HTMLDivElement
 const isOnIFrame = false
 
+
 const tokenMetadata: TokenMetadata = {
   name: '',
   description: '',
   GLBUrl: '',
   body: {},
   links: [], assets: [],
-  tokenId: 0,
+  tokenId: '',
   campaign: '',
   imageUrl: '',
   combination: '',
-  images: []
+  images: [],
+  baseCombination: '',
+  fallbackImageUrl: ''
 }
 
 export default function LuksoComponent({
@@ -123,14 +122,13 @@ export default function LuksoComponent({
     campaignParams?.config.skin?.defColor ?? 'FFFFFF'
   )
   const [selectedCategory, setSelectedCategory] = useState<string>(
-    ''
+    'head'
   )
-  const [listData, setListData] = useState<Array<TokenMetadata>>()
+  const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
   const [selectedCombination, setSelectedCombination] = useState<string>()
-
+  const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>()
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
-  const [hasMinted, setHasMinted] = useState<boolean>(false)
   const [addressToShow, setAddressToShow] = useState<string>('')
   const [
     isGettingInfoAboutHasMinted,
@@ -157,22 +155,19 @@ export default function LuksoComponent({
   }, [wallet])
 
   useEffect(() => {
-    if (!provider) return
-    const setTokensMetadataPromise = async () => {
-      if (!wallet) return
-      const address = wallet.accounts[0].address
-      setAddressToShow(address)
+    if (!provider || !wallet)  return
 
-      //await setTokensMetadata(address)
-    }
-    void setTokensMetadataPromise()
+    const address = wallet.accounts[0].address
+
+    setAddressToShow(address)
+    
   }, [provider])
 
   useEffect(() => {
     if (!addressToShow) return
     const getTokensMetadataPromise = async () => {
-      const metadatas = await getCampaignsTokensMetadata(addressToShow)
-      setListData(metadatas)
+      const tokenIds = await getCampaignsTokenIds(addressToShow)
+      setTokenIdList(tokenIds)
     }
     void getTokensMetadataPromise()
   }, [addressToShow])
@@ -185,15 +180,15 @@ export default function LuksoComponent({
   async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
     if (!campaign) return
     await Promise.all([
-      getFeatureList(),
-      getAccessoryList(),
+      /*       getFeatureList(), */
+      /*       getAccessoryList(), */
       getStageList(),
       getEnvironmentMapList(),
       getSingleInfo(),
       getSingleData(campaign, currentCombination),
     ])
 
-    optionList = MixArrays(optionList, accessoryList)
+
 
     await SetFeaturesData(campaignParams?.features ?? [])
 
@@ -233,7 +228,29 @@ export default function LuksoComponent({
     const result = await GetAssetsListByCampaign(campaignParams?.campaign)
     featureList = result.success ? result.value : undefined
     optionList = MixArrays(optionList, featureList)
-    setOptionListShow(FilterList(featureList, 'type', selectedCategory))
+    optionList = MixArrays(optionList, accessoryList)
+
+    const combinationIndexes = selectedBaseCombination?.split('-')
+    let filteredOptionList: FeatureInterface[] = []
+    combinationIndexes?.forEach((featureIndex: string, index) => {
+      const filteredArray = optionList?.filter((val) => {
+        const categoryIndex = campaignParams?.features?.find((category) => {
+          return category.displayName === val.type
+        })?.index
+
+        if (!categoryIndex) return
+
+        return categoryIndex - 1 === index && val.index.toString() === featureIndex
+      })
+      if (!filteredArray) return
+      filteredOptionList = filteredOptionList.concat(filteredArray)
+    })
+    optionList = filteredOptionList
+
+    const filteredList = FilterList(optionList, 'type', selectedCategory)
+    
+    return setOptionListShow(filteredList)
+
   }
 
   async function getAccessoryList() {
@@ -270,6 +287,11 @@ export default function LuksoComponent({
       ? numResult.value
       : undefined
     singleInitData = result
+    await getAccessoryList()
+    await getFeatureList()
+
+
+    singleInitData?.features.forEach((feature) => { addReplaceAttribute(feature.val.type, feature.val.name) })
   }
 
   async function loadSingleData() {
@@ -278,14 +300,13 @@ export default function LuksoComponent({
     setIsLoadingMintedData(true)
     if (singleInitData === undefined)
       return void LogError(Module.Lukso, 'Missing single data!!!!!')
-    let combinationId = ''
+
     for (const {
       val
     } of singleInitData.features) {
       const { id, path, type, name } = val
       const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
       tokenMetadata.body[bodyIndex] = val as BodyPart
-      combinationId += val.index.toString() + '-'
       // Set feature on model
       await ChangeFeature(
         id,
@@ -295,7 +316,6 @@ export default function LuksoComponent({
         campaignParams?.config.skin?.defColor ?? 'ffffff'
       )
     }
-    combinationId = combinationId.slice(0, combinationId.length - 1)
 
     await takePicture();
     setIsLoadingMintedData(false)
@@ -465,21 +485,22 @@ export default function LuksoComponent({
                 </div>
               </TransparentBoxUI>
             </div>
-            {!selectedCombination && <ListUI listData={listData} provider={provider} onClickViewButton={
-              (_campaign: string, _combination: string, _combinationPictureUrl: string) => {
+            {!selectedCombination && <ListUI tokenIdList={tokenIdList} provider={provider} onClickViewButton={
+              (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
                 setIsLoading(true)
                 if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
                 if (selectedCombination != _combination) setSelectedCombination(_combination)
+                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
                 if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
                 setIsEditModeSelected(false)
 
               }
             } onClickEditButton={
-              (_campaign: string, _combination: string, _combinationPictureUrl: string) => {
+              (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
                 setIsLoading(true)
                 if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
                 if (selectedCombination != _combination) setSelectedCombination(_combination)
+                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
                 if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
                 setIsEditModeSelected(true)
               }
@@ -551,10 +572,8 @@ export default function LuksoComponent({
                 setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
                 isLoading={isLoading}
                 currentSection={currentSection}
-                setCurrentSection={(changeSectionValue) => setCurrentSection(changeSectionValue)}
                 getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
                 exportModel={() => exportModel()}
-                hasMinted={hasMinted}
                 provider={provider}
                 isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
                 features={singleInitData?.features}
@@ -563,8 +582,9 @@ export default function LuksoComponent({
                 onClickBackButton={() => {
                   setSelectedCombination(undefined)
                   setCampaign(undefined)
-                  console.log("ON CLICK")
-                } } goEditMode={()=>setIsEditModeSelected(true) }              /></>}
+                  setSelectedCategory('head')
+                  optionList = []
+                }} goEditMode={() => setIsEditModeSelected(true)} /></>}
           </div>}</>
       </MobileLayout></>
   )

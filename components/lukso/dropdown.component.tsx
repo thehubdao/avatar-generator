@@ -29,7 +29,7 @@ export default function CampaignDropdown({ campaigns, setCampaign }: MainSection
                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
                     {campaigns?.map((campaign: { campaignName: string, nftName: string, dropdownName: string }) => {
                         const dropdownName = campaign.dropdownName
-                        return <li className={`hover:bg-[#FFEEF4] hover:cursor-pointer ${campaign == selected ? 'bg-[#FFEEF4]' : ''}`}
+                        return <li key={dropdownName} className={`hover:bg-[#FFEEF4] hover:cursor-pointer ${campaign == selected ? 'bg-[#FFEEF4]' : ''}`}
                             onClick={() => {
                                 setSelected(campaign)
                                 setCampaign(campaign.campaignName)

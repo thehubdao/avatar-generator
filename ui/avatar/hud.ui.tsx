@@ -13,7 +13,6 @@ import HudFeatureTitleUI from "./common/hudTitle.ui";
 import { RemovedAcc } from "../../utils/common.util";
 import ExportButtonUI from "./common/exportButton.ui";
 import { ModelExtension } from "../../enums/export.enum";
-import TransparentBoxUI from "../lukso/common/transparentBox.ui";
 
 interface HudUIProps {
 
@@ -68,6 +67,7 @@ export default function HudUI({
 }: HudUIProps) {
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
+
 
   //* todo, change this to redux to control screen size.
   // * This function allows us to know if the page has a width greater than 1536px.
@@ -153,10 +153,10 @@ export default function HudUI({
       />}
       {/* DESKTOP UI */}
       <div className={`fixed inset-0 ${editModeSelected ? 'w-[58%]' : 'w-0'} overflow-hidden h-screen bg-bg hidden xl:block transition-all duration-300`}>
-       
+
         {/* CAMPAIGN HEADER SIGN */}
         {!isCustomCampaignHud && <div className="fixed flex right-0 top-0 justify-center items-center gap-1 py-3 px-8 max-w-lg">
-          
+
           <div className="-z-10 absolute -left-10 h-full w-[180%] skew-x-[45deg] bg-bg" />
           <Image
             priority
