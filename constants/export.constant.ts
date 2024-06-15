@@ -1,5 +1,4 @@
-﻿import {VrmHumanBone, VrmMetadata, VrmStructure} from "../interfaces/export.interface";
-import {MixamoBone, VrmHumanoidBones} from "../types/export.type";
+﻿import {VrmMetadata, VrmStructure} from "../interfaces/export.interface";
 
 export const VRM_SPEC_VERSION = [ "0.0" ] as const;
 
