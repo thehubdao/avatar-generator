@@ -9,6 +9,7 @@ import AvatarEditor, {
   ChangeSkinColor,
   ChangeStartAnimation,
   GetAvatarGLB,
+  GetAvatarVRM,
   RemoveStage,
   SetEnvironment,
   SetFeaturesData,
@@ -68,6 +69,7 @@ import { useConnectWallet } from '@web3-onboard/react'
 import { getCampaignsTokenIds } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
+import ConnectWeb3Button from '../web3/connectWeb3.component'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -151,18 +153,19 @@ export default function LuksoComponent({
   }, [wallet])
 
   useEffect(() => {
-    if (!provider || !wallet)  return
+    if (!provider || !wallet) return
 
     const address = wallet.accounts[0].address
 
     setAddressToShow(address)
-    
+
   }, [provider])
 
   useEffect(() => {
     if (!addressToShow) return
     const getTokensMetadataPromise = async () => {
       const tokenIds = await getCampaignsTokenIds(addressToShow)
+      console.log(tokenIds)
       setTokenIdList(tokenIds)
     }
     void getTokensMetadataPromise()
@@ -244,7 +247,7 @@ export default function LuksoComponent({
     optionList = filteredOptionList
 
     const filteredList = FilterList(optionList, 'type', selectedCategory)
-    
+
     return setOptionListShow(filteredList)
 
   }
@@ -412,18 +415,24 @@ export default function LuksoComponent({
     exportData.attributesBase64 = window.btoa(
       JSON.stringify(exportData.attributes)
     )
-    const [picturePromise, modelPromise] = await Promise.all([
+    const [picturePromise, modelPromise, vrmPromise] = await Promise.all([
       TakeCanvasPicture(''),
       GetAvatarGLB(),
+      GetAvatarVRM()
+      //TODO: add VRM request function
     ])
     exportData.picture = picturePromise
     exportData.model = modelPromise.success ? modelPromise.value : undefined;
-
+    const vrmModel = vrmPromise.success ? vrmPromise.value : undefined;
     if (isOnIFrame) {
       IFrameExportData(exportData)
     } else {
-      if (exportData.model != undefined)
+      //TODO: Add SaveFile for VRM
+      if (exportData.model != undefined) {
         await SaveFile(exportData.model, 'model.glb')
+        const baseVRM = await SaveFile(vrmModel, 'model.vrm')
+      }
+
       await SaveFile(exportData.picture, 'picture.png')
     }
   }
@@ -478,6 +487,26 @@ export default function LuksoComponent({
                     height={24}
                     alt="Lukso icon"
                   />
+
+                  {provider ? (
+                    <button
+                      className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
+                      onClick={() => setIsAccountModalOpen(true)}
+                    >
+                      <p className="truncate h-fit text-white">{`${formatearString(
+                        addressToShow
+                      )}`}</p>
+                    </button>
+                  ) : (
+                    <ConnectWeb3Button
+                      classStyles={
+                        'w-48 border-l-2 border-white font-bold text-white'
+                      }
+                      onConnect={() => { }}
+                    >
+                      <> Login with your UP!</>
+                    </ConnectWeb3Button>
+                  )}
                 </div>
               </TransparentBoxUI>
             </div>
