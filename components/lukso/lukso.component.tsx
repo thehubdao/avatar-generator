@@ -462,9 +462,10 @@ export default function LuksoComponent({
                   setIsAccountModalOpen(value)
                 }
                 onDisconnect={() => {
-
                   setCurrentSection(LuksoSections.Main)
-                  void reRoll()
+                  setSelectedBaseCombination(undefined)
+                  setSelectedCombination(undefined)
+                  setTokenIdList(undefined)
                 }}
               />
             )}

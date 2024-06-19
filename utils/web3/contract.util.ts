@@ -102,16 +102,17 @@ export const getCampaignsTokenIds = async (address: string) => {
         const typpedCampaign = campaign as keyof typeof campaignWeb3Data
         const { contractAddress } = campaignWeb3Data[typpedCampaign]
         const tokenIds: string[] = await getCampaignTokenIds(contractAddress, address)
+        console.log(tokenIds, "TOKEN IDS")
+        if (!tokenIds || tokenIds.length == 0) continue
+
         const tokensMetadataUrls = await getCampaignTokenMetadataUris(campaign as Campaign, tokenIds)
-
-        if (!tokenIds) continue
-
         const formattedTokenIds = tokenIds.map((tokenId, index) => {
             const metadataUri = tokensMetadataUrls[index]
             return { tokenId: Number(tokenId).toString(), campaign, metadataUri } as TokenId
         })
         campaignsTokenIds = campaignsTokenIds.concat(formattedTokenIds)
     }
+
     return campaignsTokenIds
 }
 
@@ -131,7 +132,7 @@ export const getCampaignTokenMetadataUris = async (campaign: Campaign, tokenIds:
     })
     const decodedRawData = avatarERC725Contract.decodeData(metadataFormattedArray)
     const decodedDataArray = JSON.parse(JSON.stringify(decodedRawData))
-    const formattedDataArray = decodedDataArray.map((data: { value: {url:string}; }, index: number) => {
+    const formattedDataArray = decodedDataArray.map((data: { value: { url: string }; }, index: number) => {
         const { value: metadataUri } = data
         const { baseCid } = campaignWeb3Data[campaign]
         return metadataUri ? metadataUri.url.split('//')[1] : `${baseCid}/${Number(tokenIds[index])}`
@@ -140,7 +141,7 @@ export const getCampaignTokenMetadataUris = async (campaign: Campaign, tokenIds:
     return formattedDataArray
 }
 
-const tempCampaignSwitch={'vrm_male':'lukso2', 'vrm_female':'lukso female b'}
+const tempCampaignSwitch = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b' }
 
 export const getTokenMetadata = async (tokenId: TokenId) => {
     const { LSP4Metadata: metadata } = await getIPFSData(tokenId.metadataUri)
@@ -186,7 +187,6 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
 }
 
 export const getCampaignsTokensMetadata = async (address: string) => {
-    /*
     let campaignsMetadatas = [] as TokenMetadata[]
     for (const campaign of Object.keys(campaignWeb3Data)) {
         const typpedCampaign = campaign as keyof typeof campaignWeb3Data
@@ -197,9 +197,6 @@ export const getCampaignsTokensMetadata = async (address: string) => {
         campaignsMetadatas = campaignsMetadatas.concat(tokensMetadata)
     }
     return campaignsMetadatas
-    */
-    
-    return TOKEN_ID_MOCK
 }
 
 export const getSupply = async () => {
@@ -216,7 +213,7 @@ export const getTokensOf = async (contractAddress: string, address: string) => {
 
     const tokenIds = tokenIdsResult.toString().split(',')
 
-    if (tokenIds.length == 0) return []
+    if (tokenIds[0] === "") return []
 
     return tokenIds
 }
