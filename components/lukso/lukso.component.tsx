@@ -73,8 +73,6 @@ import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
 import AvatarBuilder from '../avatar/builder.component'
-import { GetAllCombinations, UpdateDownloadedAvatarStatus } from '../../utils/firebase.util'
-import { QueryDocumentSnapshot } from '@firebase/firestore'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -537,7 +535,7 @@ export default function LuksoComponent({
                     {campaignParams && (
                         <AvatarBuilder
                             avatarBasePath={campaignParams.armature}
-                            campaign='lukso2'
+                            campaign='vrm_female'
                             campaignConfig={campaignParams.config}
                             onlyView
                             selectListAccessories={selectListAccessories.current}
