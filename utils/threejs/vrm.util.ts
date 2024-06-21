@@ -216,7 +216,7 @@ export function GenerateVrmScene(model: Object3D) {
   // Create a matrix
   const matrix = new Matrix4();
   // Rotate the matrix
-  matrix.makeRotationX(Math.PI / 2);
+  /* matrix.makeRotationX(Math.PI / 2);
   // rotate the object using the matrix
   actualBones.position.applyMatrix4(matrix);
   
@@ -231,7 +231,7 @@ export function GenerateVrmScene(model: Object3D) {
   
   // Rotate bones on own axis
   actualBones.rotateX(Math.PI / 2);
-  actualBones.rotateY(Math.PI);
+  actualBones.rotateY(Math.PI); */
 
   sceneReal.children.push(actualBones);
   sceneReal.children.push(leSkinnedMesh);
