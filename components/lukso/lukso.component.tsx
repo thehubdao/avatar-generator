@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import Image from 'next/image'
 // Layout
 import MobileLayout from '../../layouts/mobile.layout'
-
+import combinationsArray from './array.json'
 // Components
 import AvatarEditor, {
   ChangeFeature,
@@ -179,8 +179,6 @@ export default function LuksoComponent({
   async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
     if (!campaign) return
     await Promise.all([
-      /*       getFeatureList(), */
-      /*       getAccessoryList(), */
       getStageList(),
       getEnvironmentMapList(),
       getSingleInfo(),
@@ -194,7 +192,14 @@ export default function LuksoComponent({
     const bgMap = envMapList?.find(em => em.name === campaignParams?.config.envMap?.defBgMap);
     const lightMap = envMapList?.find(em => em.name === campaignParams?.config.envMap?.defLightMap);
     await SetEnvironment(bgMap?.path, lightMap?.path, campaignParams?.config.envMap?.skyboxConfig);
+    const combArray = combinationsArray
 
+    for (let i = 0; i < combArray.length; i++) {
+        const combination = combArray[i];
+       await getSingleData('vrm_female', combination)
+        await loadSingleData()
+        await exportModel(combination)
+    }
     // Set features from single
     await loadSingleData()
 
@@ -411,29 +416,24 @@ export default function LuksoComponent({
     loaderDivElement = elementReference
   }
 
-  async function exportModel() {
+  async function exportModel(combination:string) {
     exportData.attributesBase64 = window.btoa(
       JSON.stringify(exportData.attributes)
     )
-    const [picturePromise, modelPromise, vrmPromise] = await Promise.all([
-      TakeCanvasPicture(''),
+    const [modelPromise ] = await Promise.all([
+/*       TakeCanvasPicture(''), */
       GetAvatarGLB(),
-      GetAvatarVRM()
+/*       GetAvatarVRM() */
       //TODO: add VRM request function
     ])
-    exportData.picture = picturePromise
     exportData.model = modelPromise.success ? modelPromise.value : undefined;
-    const vrmModel = vrmPromise.success ? vrmPromise.value : undefined;
     if (isOnIFrame) {
       IFrameExportData(exportData)
     } else {
       //TODO: Add SaveFile for VRM
       if (exportData.model != undefined) {
-        await SaveFile(exportData.model, 'model.glb')
-        const baseVRM = await SaveFile(vrmModel, 'model.vrm')
+        await SaveFile(exportData.model, `${combination}.glb`)
       }
-
-      await SaveFile(exportData.picture, 'picture.png')
     }
   }
 
@@ -589,7 +589,7 @@ export default function LuksoComponent({
                   onSkinColorChange={(value) =>
                     void onClickChangeSkinColor(value)
                   }
-                  exportModel={() => exportModel()}
+                  exportModel={() => exportModel(selectedBaseCombination!)}
                   isCustomCampaignHud
                 />
               </div>
@@ -598,7 +598,7 @@ export default function LuksoComponent({
                 isLoading={isLoading}
                 currentSection={currentSection}
                 getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
-                exportModel={() => exportModel()}
+                exportModel={() => exportModel(selectedBaseCombination!)}
                 provider={provider}
                 isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
                 features={singleInitData?.features}
