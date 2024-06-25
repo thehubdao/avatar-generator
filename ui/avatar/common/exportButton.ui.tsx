@@ -58,9 +58,9 @@ export default function ExportButtonUI({ children, onClickEvent, allowExtension 
               )
             }) :
               <AGButton key={ModelExtension.GLB} full onClickEvent={() => optionClickHandler(ModelExtension.GLB)}>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center">
                   <AiOutlineCloudDownload />
-                  <p className="uppercase">{ModelExtension.GLB}</p>
+                  { /*<p className="uppercase">{ModelExtension.GLB}</p>  */ }
                 </div>
               </AGButton>
           }

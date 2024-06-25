@@ -19,5 +19,5 @@ export const IFRAME_VALUES = {
 } as const;
 
 export const LUKSO_BACKEND_URL = process.env.NEXT_PUBLIC_LUKSO_BACKEND_URL
-
+export const VRM_PROCESS_SERVICE_URL = process.env.NEXT_PUBLIC_VRM_PROCESS_SERVICE_URL || ""
 export const AVATAR_MAX_SUPPLY = 1764

@@ -172,7 +172,11 @@ export function GenerateVrmScene(model: Object3D) {
     
     if (IsSkinnedMesh(obj)) {
       skinnedMeshArray.push(obj);
-      geometryArray.push(obj.geometry.clone());
+      geometryArray.push({
+        ...obj.geometry.clone(),
+        morphTargetsRelative: false,
+        morphAttributes: {}
+      } as BufferGeometry);
       const mat = obj.material;
       if (mat instanceof Material) {
         materialArray.push(mat.clone());
@@ -193,6 +197,7 @@ export function GenerateVrmScene(model: Object3D) {
   }
 
   const firstSM = skinnedMeshArray[0];
+  firstSM.skeleton.pose()
   const matrixCopy = firstSM.skeleton.boneInverses.map(b => b.clone());
   const actualBones = firstSM.skeleton.bones[0].clone(true);
   const boneArray: Bone[] = [];
@@ -230,7 +235,7 @@ export function GenerateVrmScene(model: Object3D) {
   // leSkinnedMesh.scale.applyMatrix4(matrixScale);
   
   // Rotate bones on own axis
-  actualBones.rotateX(Math.PI / 2);
+  //actualBones.rotateX(Math.PI / 2);
   actualBones.rotateY(Math.PI);
 
   sceneReal.children.push(actualBones);

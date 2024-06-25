@@ -36,5 +36,7 @@ export default class GLTFExporterAddVrmData implements GLTFExporterPlugin {
       
       extensionsUsed[this.name] = true;
     }
+
+    console.log("DATA: ", json)
   }
 }
