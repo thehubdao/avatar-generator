@@ -10,6 +10,7 @@ import {LogError} from "./common.util";
 import {Result} from "../types/common.type";
 import {CommonErrorCode, Module} from "../enums/common.enum";
 import {ApiRoutesV1} from "../enums/api.enum";
+import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
 
 //#region Generic
 type QueryParams = {[p: string]: string | number | undefined | null};
@@ -75,6 +76,24 @@ export async function PostRequest<T>(url: string, obj?: object): Promise<Result<
     const err = e as Error;
     void LogError(Module.ApiUtil, "Error on post request");
     return {success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError};
+  }
+}
+
+export async function PostRequestVRMProcessFile(VRMFile: Blob): Promise<Blob> {
+  try {
+    const formData = new FormData()
+    formData.append("file", VRMFile)
+    // in case, consider to add metadata to the payload
+    formData.append("metadata", "vrm-file")
+    const response = await fetch(`${VRM_PROCESS_SERVICE_URL}/vrm-process`, { method: "POST", body: formData })
+    const processedFile = await response.blob()
+
+    return processedFile
+  
+  } catch(fail) {
+    console.error(fail)
+
+    throw fail
   }
 }
 

@@ -84,7 +84,7 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
                   </>
                   :
                   <>
-                    <p className="text-base 2xl:text-lg">Download GLB</p>
+                    <p className="text-base 2xl:text-lg">Download</p>
                     <FaDownload />
                   </>
                 }
