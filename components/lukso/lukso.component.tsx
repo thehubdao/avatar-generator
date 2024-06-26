@@ -258,21 +258,22 @@ export default function LuksoComponent({
     const result: SingleInterface | undefined = numResult.success
       ? numResult.value
       : undefined
-      console.log(result, numResult)
     singleInitData = result
     const { features } = singleInitData as any
-console.log(features)
     let combinationId = ''
       tokenMetadata.attributes = []
       for (const feature of features) {
         const { val } = feature
-        const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
-        tokenMetadata.body[bodyIndex] = val as BodyPart
+        let bodyIndex = val.type.toLowerCase() 
+        tokenMetadata.body[bodyIndex] = val 
+        if(bodyIndex == 'head') bodyIndex = 'hair'
+        if(bodyIndex == 'shoes') bodyIndex = 'feet'
+        if(bodyIndex == 'face') bodyIndex = 'accesories'
         tokenMetadata.attributes.push({ key: bodyIndex, value: val.name, type: 'string' })
         combinationId += val.index.toString() + '-'
       }
       combinationId = combinationId.slice(0, combinationId.length - 1)
-
+console.log(combinationId, tokenId)
       const metadataUrl = await uploadMetadata(tokenMetadata, combinationId)
       const tokenIds = await mint(tokenId, metadataUrl, tokenMetadata)
     console.log(result)
