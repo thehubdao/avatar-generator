@@ -4,7 +4,6 @@ import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { Campaign, CampaignData, TokenId, TokenMetadata } from '../../types/metadata.type';
 import { getIPFSData, getImageUrl } from './lukso.util';
-import TOKEN_ID_MOCK from "./tokenIdMocks"
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
@@ -186,7 +185,6 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
 }
 
 export const getCampaignsTokensMetadata = async (address: string) => {
-    /*
     let campaignsMetadatas = [] as TokenMetadata[]
     for (const campaign of Object.keys(campaignWeb3Data)) {
         const typpedCampaign = campaign as keyof typeof campaignWeb3Data
@@ -197,9 +195,6 @@ export const getCampaignsTokensMetadata = async (address: string) => {
         campaignsMetadatas = campaignsMetadatas.concat(tokensMetadata)
     }
     return campaignsMetadatas
-    */
-    
-    return TOKEN_ID_MOCK
 }
 
 export const getSupply = async () => {
