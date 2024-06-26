@@ -150,8 +150,7 @@ export function GenerateVrmMetaData(meta: VrmMetadata | undefined) {
 }
 
 export function GenerateVrmScene(model: Object3D) {
-  let scaleFactor = 1;
-  
+
   // Create new scene, this one has the new structure
   const sceneReal = new Scene();
   sceneReal.name = "Scene";
@@ -163,9 +162,6 @@ export function GenerateVrmScene(model: Object3D) {
 
   // Find scale, skinnedMeshArray, geometryArray and materialArray
   model.traverse(obj => {
-    if (obj.name === "Armature")
-      scaleFactor = obj.scale.x;
-    
     if (IsSkinnedMesh(obj)) {
       skinnedMeshArray.push(obj);
       geometryArray.push({
@@ -215,7 +211,7 @@ export function GenerateVrmScene(model: Object3D) {
   leSkinnedMesh.bind(newSkeleton, identity);
   
   // Create a matrix
-  const matrix = new Matrix4();
+
   // Rotate the matrix
   /* matrix.makeRotationX(Math.PI / 2);
   // rotate the object using the matrix

@@ -418,7 +418,7 @@ export default function LuksoComponent({
       //TODO: Add SaveFile for VRM
       if (exportData.model != undefined) {
         await SaveFile(exportData.model, 'model.glb')
-        const baseVRM = await SaveFile(vrmModel, 'model.vrm')
+        await SaveFile(vrmModel, 'model.vrm')
       }
 
       await SaveFile(exportData.picture, 'picture.png')
