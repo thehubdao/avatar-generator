@@ -128,10 +128,6 @@ export default function LuksoComponent({
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
   const [addressToShow, setAddressToShow] = useState<string>('')
-  const [
-    isGettingInfoAboutHasMinted,
-
-  ] = useState<boolean>(false)
   const [combinationPictureUrl, setCombinationPictureUrl] = useState<string>(
     ''
   )
@@ -179,8 +175,6 @@ export default function LuksoComponent({
   async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
     if (!campaign) return
     await Promise.all([
-      /*       getFeatureList(), */
-      /*       getAccessoryList(), */
       getStageList(),
       getEnvironmentMapList(),
       getSingleInfo(),
@@ -318,12 +312,6 @@ export default function LuksoComponent({
 
     await takePicture();
     setIsLoadingMintedData(false)
-
-  }
-
-  async function reRoll() {
-    /*     await getSingleData()
-        await loadSingleData() */
 
   }
 
@@ -601,7 +589,6 @@ export default function LuksoComponent({
                 getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
                 exportModel={() => exportModel()}
                 provider={provider}
-                isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
                 features={singleInitData?.features}
                 picture={picture}
                 combination={selectedCombination} combinationPictureUrl={combinationPictureUrl}

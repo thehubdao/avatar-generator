@@ -5,6 +5,7 @@ import { ethers } from "ethers";
 import { TokenId } from "../../../types/metadata.type";
 import CampaignDropdown from "../../../components/lukso/dropdown.component";
 import ListItem from "../common/listItem";
+import TransparentBoxUI from "../common/transparentBox.ui";
 
 
 
@@ -90,11 +91,17 @@ export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButt
                 <CampaignDropdown setCampaign={(campaign) => { setSelectedCampaign(campaign) }} campaigns={Object.values(campaignLabels)} />
             </div>
             {/* Card List section */}
-            {<div className="grid-cols-4 grid  p-3 min-h-[300px] max-h-[588px] min-w-[822px] bg-[#ffcaddbf] border-2 border-solid border-white overflow-y-scroll" >
+            {<div className={`${processedListData?.length == 0 && 'grid-cols-1'} grid-cols-4 grid  p-3 min-h-[300px] max-h-[588px] min-w-[822px] bg-[#ffcaddbf] border-2 border-solid border-white overflow-y-scroll`} >
                 {isLoading && <svg className="top-[40%] left-[50%] relative animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24" style={{ 'border': 'inherit' }}>
                 </svg>
 
                 }
+                {processedListData?.length == 0 && <div className="flex flex-col justify-center items-center"><span className="text-[#C25399]">You do not own any citizens.</span>
+                    <div className="w-[150px] mt-3"> <a className="flex items-center" target="_blank" href="https://universal.page/profiles/lukso/0xfa39a2207f1d1c1cec32502000481f0fef660384?tab=created"><TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0px]">
+                        
+                            <p className="text-black font-semibold">Buy Here</p>
+                        
+                    </TransparentBoxUI></a></div></div>}
                 {processedListData && processedListData.map((tokenMetadata: TokenId) => {
                     const { tokenId, campaign } = tokenMetadata
                     const campaignDBName = campaignLabels[campaign as keyof typeof campaignLabels].campaignName
@@ -103,7 +110,7 @@ export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButt
                     CAMPAIGN REAL NAMES AND CAMPAIGN NAME ON DB IS DIFFERENT AND SHOULD BE TOOK INTO ACOUNT,
                     RECOMMENDABLE TO CHANGE IT IN FUTURE.
                      */
-                    return  <ListItem key={campaignDBName + tokenId} campaignDBName={campaignDBName} nftName={nftName} onClickViewButton={onClickViewButton} onClickEditButton={onClickEditButton} tokenId={tokenMetadata} />
+                    return <ListItem key={campaignDBName + tokenId} campaignDBName={campaignDBName} nftName={nftName} onClickViewButton={onClickViewButton} onClickEditButton={onClickEditButton} tokenId={tokenMetadata} />
                 })}</div>}
         </div >
 

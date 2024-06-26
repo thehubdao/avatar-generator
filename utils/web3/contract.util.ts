@@ -101,7 +101,6 @@ export const getCampaignsTokenIds = async (address: string) => {
         const typpedCampaign = campaign as keyof typeof campaignWeb3Data
         const { contractAddress } = campaignWeb3Data[typpedCampaign]
         const tokenIds: string[] = await getCampaignTokenIds(contractAddress, address)
-        console.log(tokenIds, "TOKEN IDS")
         if (!tokenIds || tokenIds.length == 0) continue
 
         const tokensMetadataUrls = await getCampaignTokenMetadataUris(campaign as Campaign, tokenIds)
@@ -111,7 +110,6 @@ export const getCampaignsTokenIds = async (address: string) => {
         })
         campaignsTokenIds = campaignsTokenIds.concat(formattedTokenIds)
     }
-
     return campaignsTokenIds
 }
 

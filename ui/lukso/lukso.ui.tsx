@@ -12,7 +12,6 @@ interface LuksoUIProps {
   setIsEditModeSelected: (value: boolean) => void;
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
   provider: ethers.BrowserProvider | undefined;
-  isGettingInfoAboutHasMinted: boolean;
   features?: IndexFeatureInterface[];
   picture: string;
   combination: string;
