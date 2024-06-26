@@ -49,7 +49,6 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
     // Save the return optionListToUpdate
     SetMapToMap(featureOptionsToUpdate, toUpdate);
   }
-
   // Update all at the same time
   await UpdateNewIndexesOnDB(campaign, featureOptionsToUpdate);
   // Return the FeatureOptionListData with the new values

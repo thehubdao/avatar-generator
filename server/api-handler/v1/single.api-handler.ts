@@ -37,12 +37,11 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   const isCampaign = await CheckCampaign(campaign);
   if (!isCampaign)
     return RequestResponse(res, "BadRequest", false, DefaultApiResponse.WrongInput);
-
   // Update index on campaign
   const featureValues = await FindAndReadjustFeatureIndexes(campaign);
+  console.log(featureValues)
   if (featureValues == undefined)
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
-
   // On invalid number use random combination
   const maxIndexValues = GetMaxIndexValues(featureValues.featureList, featureValues.featureOptionListData);
   const maxCombination = GetMaxCombinationNum(maxIndexValues);
@@ -50,7 +49,6 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   let isRandom = false;
 
   const randomBalance = await GetParameter<Record<RandomTier, number>>(campaign, CampaignParameterName.Random);
-
   // Collection util
   // If combination is out of bounds throw error
   if (typeof combinationNum === 'number' && (combinationNum < 0 || combinationNum > maxCombination)) {
@@ -73,7 +71,6 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   const combinationIndexValues = typeof combinationNum === 'number' ? NumberToIndexValues(combinationNum, maxCombination, maxIndexValues) : combinationNum;
   if (combinationIndexValues == undefined)
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
-
   // get values combination
   const featureCombination = GetCombinationValues(combinationIndexValues, featureValues.featureOptionListData);
   const result: SingleInterface = {
@@ -95,6 +92,7 @@ export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<Ap
 export async function GetUriApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<SingleInterface>>) {
   const { single } = req.query;
   const [campaign, combination] = single as string[];
+  console.log(campaign,combination)
 
   return await ProcessAndGetData(res, campaign, combination);
 }

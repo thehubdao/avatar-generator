@@ -247,20 +247,21 @@ export default function LuksoComponent({
   }
 
   async function getSingleData() {
+    console.log("Get single")
     const numResult = await GetAvatarSingleByCampaignCombinationString(
       Client.Lukso,
-      '2-3-2-2-1'
-
+      '3-5-9-4-4'
     )
+    console.log(numResult)
     const tokenId = 
-    '0x00000000000000000000000000000000000000000000000000000000000000ae'
+    '0x0000000000000000000000000000000000000000000000000000000000000288'
     const result: SingleInterface | undefined = numResult.success
       ? numResult.value
       : undefined
-      
+      console.log(result, numResult)
     singleInitData = result
     const { features } = singleInitData as any
-
+console.log(features)
     let combinationId = ''
       tokenMetadata.attributes = []
       for (const feature of features) {
