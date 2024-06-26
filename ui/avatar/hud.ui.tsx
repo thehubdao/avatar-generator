@@ -44,7 +44,7 @@ interface HudUIProps {
 
   editModeSelected: boolean;
   changeView: () => void;
-  exportModel: (type: ModelExtension) => Promise<void>;
+  exportModel: () => Promise<void>;
   isCustomCampaignHud?: boolean;
   exportAllow?: ModelExtension[];
 }
@@ -102,7 +102,7 @@ export default function HudUI({
               <AGButton full onClickEvent={() => changeView()}>
                 <p>EDIT</p>
               </AGButton>
-              <AGButton full onClickEvent={() => exportModel(ModelExtension.VRM)}>
+              <AGButton full onClickEvent={() => exportModel()}>
                 <p>EXPORT</p>
               </AGButton>
             </>
@@ -236,7 +236,7 @@ export default function HudUI({
               <p className="font-poppins text-center w-[120px] py-2">EDIT</p>
             </div>
           </AGButton>
-          <ExportButtonUI allowExtension={exportAllow} onClickEvent={(type) => exportModel(type)} >
+          <ExportButtonUI allowExtension={exportAllow} onClickEvent={() => exportModel()} >
             <div className="flex items-center justify-between">
               <p className="font-poppins text-center w-[120px] py-2">EXPORT</p>
             </div>

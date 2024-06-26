@@ -1,4 +1,4 @@
-﻿import {VrmMetadata, VrmStructure} from "../interfaces/export.interface";
+﻿import {VrmHumanBone, VrmMetadata, VrmStructure} from "../interfaces/export.interface";
 
 export const VRM_SPEC_VERSION = [ "0.0" ] as const;
 
@@ -45,6 +45,10 @@ export const VRM_HUMANOID_BONES = [
   "rightLowerArm",
   "rightHand",
   "rightShoulder",
+  "leftEye",
+  "rightEye",
+  "leftToes",
+  "rightToes",
   // fingers
   // left thumb
   "leftThumbProximal",
@@ -144,8 +148,8 @@ export const MIXAMO_BONE = [
 
   // **Optionals**
   // shoulders
-  "mixamorigRightShoulder",
-  "mixamorigLeftShoulder",
+  "shoulderR",
+  "shoulderL",
 
   // fingers
   // left thumb
@@ -208,252 +212,272 @@ export const VRM_META_DEFAULT: VrmMetadata = {
   otherLicenseUrl: "",
 } as const;
 
-export const VRM_HUMAN_BONES_DEFAULT: any[] = [
+export const VRM_HUMAN_BONES_DEFAULT: VrmHumanBone[] = [
   {
-    bone: "hips",
-    node: 64,
-    useDefaultValues: true
+      "bone": "chest",
+      "node": 42,
+      "useDefaultValues": true
   },
   {
-    bone: "spine",
-    node: 53,
-    useDefaultValues: true
+      "bone": "head",
+      "node": 2,
+      "useDefaultValues": true
   },
   {
-    bone: "chest",
-    node: 51,
-    useDefaultValues: true
+      "bone": "hips",
+      "node": 52,
+      "useDefaultValues": true
   },
   {
-    bone: "neck",
-    node: 2,
-    useDefaultValues: true
+      "bone": "neck",
+      "node": 3,
+      "useDefaultValues": true
   },
   {
-    bone: "head",
-    node: 1,
-    useDefaultValues: true
+      "bone": "spine",
+      "node": 43,
+      "useDefaultValues": true
   },
   {
-    bone: "leftUpperLeg",
-    node: 58,
-    useDefaultValues: true
+      "bone": "leftFoot",
+      "node": 45,
+      "useDefaultValues": true
   },
   {
-    bone: "leftLowerLeg",
-    node: 57,
-    useDefaultValues: true
+      "bone": "leftHand",
+      "node": 19,
+      "useDefaultValues": true
   },
   {
-    bone: "leftFoot",
-    node: 56,
-    useDefaultValues: true
+      "bone": "leftLowerArm",
+      "node": 20,
+      "useDefaultValues": true
   },
   {
-    bone: "rightUpperLeg",
-    node: 63,
-    useDefaultValues: true
+      "bone": "leftLowerLeg",
+      "node": 46,
+      "useDefaultValues": true
   },
   {
-    bone: "rightLowerLeg",
-    node: 62,
-    useDefaultValues: true
+      "bone": "leftUpperArm",
+      "node": 21,
+      "useDefaultValues": true
   },
   {
-    bone: "rightFoot",
-    node: 61,
-    useDefaultValues: true
+      "bone": "leftUpperLeg",
+      "node": 47,
+      "useDefaultValues": true
   },
   {
-    bone: "leftUpperArm",
-    node: 25,
-    useDefaultValues: true
+      "bone": "leftShoulder",
+      "node": 22,
+      "useDefaultValues": true
   },
   {
-    bone: "leftLowerArm",
-    node: 24,
-    useDefaultValues: true
+      "bone": "leftToes",
+      "node": 44,
+      "useDefaultValues": true
   },
   {
-    bone: "leftHand",
-    node: 23,
-    useDefaultValues: true
+      "bone": "leftEye",
+      "node": 0,
+      "useDefaultValues": true
   },
   {
-    bone: "rightUpperArm",
-    node: 49,
-    useDefaultValues: true
+      "bone": "rightFoot",
+      "node": 49,
+      "useDefaultValues": true
   },
   {
-    bone: "rightLowerArm",
-    node: 48,
-    useDefaultValues: true
+      "bone": "rightHand",
+      "node": 38,
+      "useDefaultValues": true
   },
   {
-    bone: "rightHand",
-    node: 47,
-    useDefaultValues: true
+      "bone": "rightLowerArm",
+      "node": 39,
+      "useDefaultValues": true
   },
   {
-    bone: "leftShoulder",
-    node: 26,
-    useDefaultValues: true
+      "bone": "rightLowerLeg",
+      "node": 50,
+      "useDefaultValues": true
   },
   {
-    bone: "rightShoulder",
-    node: 50,
-    useDefaultValues: true
+      "bone": "rightUpperArm",
+      "node": 40,
+      "useDefaultValues": true
+  },
+  {
+      "bone": "rightUpperLeg",
+      "node": 51,
+      "useDefaultValues": true
+  },
+  {
+      "bone": "rightShoulder",
+      "node": 41,
+      "useDefaultValues": true
+  },
+  {
+      "bone": "rightToes",
+      "node": 48,
+      "useDefaultValues": true
+  },
+  {
+      "bone": "rightEye",
+      "node": 1,
+      "useDefaultValues": true
   },
   {
       "bone": "leftThumbProximal",
       "node": 6,
-      "useDefaultValue": true
+      "useDefaultValues": true
   },
   {
       "bone": "leftThumbIntermediate",
       "node": 5,
-      "useDefaultValue": true
+      "useDefaultValues": true
   },
   {
       "bone": "leftThumbDistal",
       "node": 4,
-      "useDefaultValue": true
+      "useDefaultValues": true
   },
   {
       "bone": "leftIndexProximal",
-      "node": 10,
-      "useDefaultValue": true
+      "node": 9,
+      "useDefaultValues": true
   },
   {
       "bone": "leftIndexIntermediate",
-      "node": 9,
-      "useDefaultValue": true
+      "node": 8,
+      "useDefaultValues": true
   },
   {
       "bone": "leftIndexDistal",
-      "node": 8,
-      "useDefaultValue": true
+      "node": 7,
+      "useDefaultValues": true
   },
   {
       "bone": "leftMiddleProximal",
-      "node": 14,
-      "useDefaultValue": true
+      "node": 12,
+      "useDefaultValues": true
   },
   {
       "bone": "leftMiddleIntermediate",
-      "node": 13,
-      "useDefaultValue": true
+      "node": 11,
+      "useDefaultValues": true
   },
   {
       "bone": "leftMiddleDistal",
-      "node": 12,
-      "useDefaultValue": true
+      "node": 10,
+      "useDefaultValues": true
   },
   {
       "bone": "leftRingProximal",
-      "node": 18,
-      "useDefaultValue": true
+      "node": 15,
+      "useDefaultValues": true
   },
   {
       "bone": "leftRingIntermediate",
-      "node": 17,
-      "useDefaultValue": true
+      "node": 14,
+      "useDefaultValues": true
   },
   {
       "bone": "leftRingDistal",
-      "node": 16,
-      "useDefaultValue": true
+      "node": 13,
+      "useDefaultValues": true
   },
   {
       "bone": "leftLittleProximal",
-      "node": 22,
-      "useDefaultValue": true
+      "node": 18,
+      "useDefaultValues": true
   },
   {
       "bone": "leftLittleIntermediate",
-      "node": 21,
-      "useDefaultValue": true
+      "node": 17,
+      "useDefaultValues": true
   },
   {
       "bone": "leftLittleDistal",
-      "node": 20,
-      "useDefaultValue": true
+      "node": 16,
+      "useDefaultValues": true
   },
   {
       "bone": "rightThumbProximal",
-      "node": 30,
-      "useDefaultValue": true
+      "node": 25,
+      "useDefaultValues": true
   },
   {
       "bone": "rightThumbIntermediate",
-      "node": 29,
-      "useDefaultValue": true
+      "node": 24,
+      "useDefaultValues": true
   },
   {
       "bone": "rightThumbDistal",
-      "node": 28,
-      "useDefaultValue": true
+      "node": 23,
+      "useDefaultValues": true
   },
   {
       "bone": "rightIndexProximal",
-      "node": 34,
-      "useDefaultValue": true
+      "node": 28,
+      "useDefaultValues": true
   },
   {
       "bone": "rightIndexIntermediate",
-      "node": 33,
-      "useDefaultValue": true
+      "node": 27,
+      "useDefaultValues": true
   },
   {
       "bone": "rightIndexDistal",
-      "node": 32,
-      "useDefaultValue": true
+      "node": 26,
+      "useDefaultValues": true
   },
   {
       "bone": "rightMiddleProximal",
-      "node": 38,
-      "useDefaultValue": true
+      "node": 31,
+      "useDefaultValues": true
   },
   {
       "bone": "rightMiddleIntermediate",
-      "node": 37,
-      "useDefaultValue": true
+      "node": 30,
+      "useDefaultValues": true
   },
   {
       "bone": "rightMiddleDistal",
-      "node": 36,
-      "useDefaultValue": true
+      "node": 29,
+      "useDefaultValues": true
   },
   {
       "bone": "rightRingProximal",
-      "node": 42,
-      "useDefaultValue": true
+      "node": 34,
+      "useDefaultValues": true
   },
   {
       "bone": "rightRingIntermediate",
-      "node": 41,
-      "useDefaultValue": true
+      "node": 33,
+      "useDefaultValues": true
   },
   {
       "bone": "rightRingDistal",
-      "node": 40,
-      "useDefaultValue": true
+      "node": 32,
+      "useDefaultValues": true
   },
   {
       "bone": "rightLittleProximal",
-      "node": 46,
-      "useDefaultValue": true
+      "node": 37,
+      "useDefaultValues": true
   },
   {
       "bone": "rightLittleIntermediate",
-      "node": 45,
-      "useDefaultValue": true
+      "node": 36,
+      "useDefaultValues": true
   },
   {
       "bone": "rightLittleDistal",
-      "node": 44,
-      "useDefaultValue": true
-  },
+      "node": 35,
+      "useDefaultValues": true
+  }
 ];
 
 export const VRM_HUMAN_BONES_DEFAULT_LENGTH = VRM_HUMAN_BONES_DEFAULT.length;
@@ -642,72 +666,77 @@ export const VRM_BASE: VrmStructure = {
   }
 };
 
-export const VRM_MAP_MIXAMO: Record<any, any> = {
-  "chest": "mixamorigSpine2",
-  "head": "mixamorigHead",
-  "hips": "mixamorigHips",
-  "leftFoot": "mixamorigLeftFoot",
-  "leftHand": "mixamorigLeftHand",
-  "leftLowerArm": "mixamorigLeftForeArm",
-  "leftLowerLeg": "mixamorigLeftLeg",
-  "leftUpperArm": "mixamorigLeftArm",
-  "leftUpperLeg": "mixamorigLeftUpLeg",
-  "leftShoulder": "mixamorigLeftShoulder",
-  "neck": "mixamorigNeck",
-  "rightFoot": "mixamorigRightFoot",
-  "rightHand": "mixamorigRightHand",
-  "rightLowerArm": "mixamorigRightForeArm",
-  "rightLowerLeg": "mixamorigRightLeg",
-  "rightUpperArm": "mixamorigRightArm",
-  "rightUpperLeg": "mixamorigRightUpLeg",
-  "rightShoulder": "mixamorigRightShoulder",
-  "spine": "mixamorigSpine1",
+export const VRM_MAP_MIXAMO: Record<string, string> = {
+  "chest": "chest",
+  "head": "head",
+  "hips": "hips",
+  "neck": "neck",
+  "spine": "spine",
+  "leftFoot": "footL",
+  "leftHand": "handL",
+  "leftLowerArm": "lower_armL",
+  "leftLowerLeg": "lower_legL",
+  "leftUpperArm": "upper_armL",
+  "leftUpperLeg": "upper_legL",
+  "leftShoulder": "shoulderL",
+  "leftToes": "toesL",
+  "leftEye": "eyeL",
+  
+  "rightFoot": "footR",
+  "rightHand": "handR",
+  "rightLowerArm": "lower_armR",
+  "rightLowerLeg": "lower_legR",
+  "rightUpperArm": "upper_armR",
+  "rightUpperLeg": "upper_legR",
+  "rightShoulder": "shoulderR",
+  "rightToes": "toesR",
+  "rightEye": "eyeR",
 
   // fingers
   // left thumb
-  "leftThumbProximal": "mixamorigLeftHandThumb1",
-  "leftThumbIntermediate": "mixamorigLeftHandThumb2",
-  "leftThumbDistal": "mixamorigLeftHandThumb3",
+  "leftThumbProximal": "thumb_proximalL",
+  "leftThumbIntermediate": "thumb_intermediateL",
+  "leftThumbDistal": "thumb_distalL",
   // left index
-  "leftIndexProximal": "mixamorigLeftHandIndex1",
-  "leftIndexIntermediate": "mixamorigLeftHandIndex2",
-  "leftIndexDistal": "mixamorigLeftHandIndex3",
+  "leftIndexProximal": "index_proximalL",
+  "leftIndexIntermediate": "index_intermediateL",
+  "leftIndexDistal": "index_distalL",
   // left middle
-  "leftMiddleProximal": "mixamorigLeftHandMiddle1",
-  "leftMiddleIntermediate": "mixamorigLeftHandMiddle2",
-  "leftMiddleDistal": "mixamorigLeftHandMiddle3",
+  "leftMiddleProximal": "middle_proximalL",
+  "leftMiddleIntermediate": "middle_intermediateL",
+  "leftMiddleDistal": "middle_distalL",
   // left ring
-  "leftRingProximal": "mixamorigLeftHandRing1",
-  "leftRingIntermediate": "mixamorigLeftHandRing2",
-  "leftRingDistal": "mixamorigLeftHandRing3",
+  "leftRingProximal": "ring_proximalL",
+  "leftRingIntermediate": "ring_intermediateL",
+  "leftRingDistal": "ring_distalL",
   // left little
-  "leftLittleProximal": "mixamorigLeftHandPinky1",
-  "leftLittleIntermediate": "mixamorigLeftHandPinky2",
-  "leftLittleDistal": "mixamorigLeftHandPinky3",
+  "leftLittleProximal": "little_proximalL",
+  "leftLittleIntermediate": "little_intermediateL",
+  "leftLittleDistal": "little_distalL",
 
   //right thumb
-  "rightThumbProximal": "mixamorigRightHandThumb1",
-  "rightThumbIntermediate": "mixamorigRightHandThumb2",
-  "rightThumbDistal": "mixamorigRightHandThumb3",
+  "rightThumbProximal": "thumb_proximalR",
+  "rightThumbIntermediate": "thumb_intermediateR",
+  "rightThumbDistal": "thumb_distalR",
 
   //right index
-  "rightIndexProximal": "mixamorigRightHandIndex1",
-  "rightIndexIntermediate": "mixamorigRightHandIndex2",
-  "rightIndexDistal": "mixamorigRightHandIndex3",
+  "rightIndexProximal": "index_proximalR",
+  "rightIndexIntermediate": "index_intermediateR",
+  "rightIndexDistal": "index_distalR",
 
   //right middle
-  "rightMiddleProximal": "mixamorigRightHandMiddle1",
-  "rightMiddleIntermediate": "mixamorigRightHandMiddle2",
-  "rightMiddleDistal": "mixamorigRightHandMiddle3",
+  "rightMiddleProximal": "middle_proximalR",
+  "rightMiddleIntermediate": "middle_intermediateR",
+  "rightMiddleDistal": "middle_distalR",
 
   //right ring
-  "rightRingProximal": "mixamorigRightHandRing1",
-  "rightRingIntermediate": "mixamorigRightHandRing2",
-  "rightRingDistal": "mixamorigRightHandRing3",
+  "rightRingProximal": "ring_proximalR",
+  "rightRingIntermediate": "ring_intermediateR",
+  "rightRingDistal": "ring_distalR",
 
   //right ring
-  "rightLittleProximal": "mixamorigRightHandPinky1",
-  "rightLittleIntermediate": "mixamorigRightHandPinky2",
-  "rightLittleDistal": "mixamorigRightHandPinky3",
+  "rightLittleProximal": "little_proximalR",
+  "rightLittleIntermediate": "little_intermediateR",
+  "rightLittleDistal": "little_distalR",
 
 } as const;

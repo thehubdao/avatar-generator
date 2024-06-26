@@ -25,7 +25,8 @@ import {
   GetAssetsListByCampaign, GetAvatarCombinationByAttributes,
   GetAvatarSingleByCampaignCombination,
   GetEnvMapListByCampaign,
-  GetStageListByCampaign
+  GetStageListByCampaign,
+  PostRequestVRMProcessFile,
 } from "../../utils/api.util";
 import { SaveFile } from "../../utils/exporter.util";
 import AGLoading from "../../ui/common/ag-loading.component";
@@ -46,7 +47,6 @@ import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "
 import {Result} from "../../types/common.type";
 import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../constants/common.constant";
 import {GenerateVrmMetaData} from "../../utils/threejs/vrm.util";
-import { ModelExtension } from "../../enums/export.enum";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -169,7 +169,7 @@ export default function AvatarBuilder({
   }
 
   const exportFromIFrame = () => {
-    return exportModel(ModelExtension.VRM);
+    return exportModel();
   }
 
   async function loadPreData() {
@@ -375,29 +375,34 @@ export default function AvatarBuilder({
     setSelectedOpc([...exportData.attributes]);
   }
 
-  async function exportModel(type: ModelExtension) {
+  async function exportModel() {
     // TODO: Add metadata from user
     GenerateVrmMetaData(undefined);
     
     const attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
     
     exportData.attributesBase64 = attributesBase64;
-    const [picturePromise, modelPromise, combinationPromise] = await Promise.all([
+    const [picturePromise, modelVRMPromise, modelGLBPromise, combinationPromise] = await Promise.all([
       TakeCanvasPicture(),
-      type === ModelExtension.VRM ? GetAvatarVRM() : GetAvatarGLB(),
+      GetAvatarVRM(),
+      GetAvatarGLB(),
       GetAvatarCombinationByAttributes(campaign, attributesBase64)
     ]);
     exportData.picture = picturePromise;
-    exportData.model = modelPromise.success ? modelPromise.value : undefined;
+    const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
+    const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
     exportData.combination = combinationPromise.success ? combinationPromise.value : undefined;
 
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
-      if (modelPromise.success)
-        await SaveFile(modelPromise.value, `model.${type}`);
-
-      await SaveFile(exportData.picture, 'picture.png');
+      console.log("EXPORTING VRM, GLB and image...")
+      if (modelVRMPromise.success && modelGLBPromise.success) {
+        const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
+        await SaveFile(refinedModelVRM, `avatar.vrm`);
+        await SaveFile(modelGLB, `model.glb`);
+        await SaveFile(exportData.picture, 'picture.png');
+      }
     }
   }
 
@@ -478,7 +483,7 @@ export default function AvatarBuilder({
 
 
               onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
-              exportModel={(type) => exportModel(type)}
+              exportModel={() => exportModel()}
               exportAllow={campaignConfig.extraExport}
             />
           }
