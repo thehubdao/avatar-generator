@@ -538,7 +538,7 @@ export default function LuksoComponent({
 
               </div>
               <div
-                className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
+                className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoading ? 'flex' : 'hidden'
                   }`}
               >
                 <div className="scale-[3]">
@@ -584,7 +584,7 @@ export default function LuksoComponent({
               </div>
               <LuksoUI
                 setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
-                isLoading={isLoading}
+                isLoading={false}
                 currentSection={currentSection}
                 getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
                 exportModel={() => exportModel()}
