@@ -40,7 +40,7 @@ export default function ListItem({ campaignDBName, onClickViewButton, onClickEdi
                     const imageRequest = await fetch(tokenMetadata.fallbackImageUrl)
                     const imageBlob = await imageRequest.blob()
                     const imageFile = new File([imageBlob], `${tokenMetadata.combination}.png`)
-                    const path = await UploadFile(imageFile, StorageLocation.AvatarImages, undefined, tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch])
+                    await UploadFile(imageFile, StorageLocation.AvatarImages, undefined, tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch])
                     setDidError(true)
                 }}
             />
