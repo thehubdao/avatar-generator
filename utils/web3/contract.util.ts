@@ -15,6 +15,8 @@ const config = {
 
 const provider = new JsonRpcProvider(RPC_URL);
 
+export const tempCampaignSwitch = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b' }
+
 //TESTNET
 
 /* const campaignWeb3Data: CampaignData = {
@@ -138,7 +140,7 @@ export const getCampaignTokenMetadataUris = async (campaign: Campaign, tokenIds:
     return formattedDataArray
 }
 
-const tempCampaignSwitch = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b' }
+
 
 export const getTokenMetadata = async (tokenId: TokenId) => {
     const { LSP4Metadata: metadata } = await getIPFSData(tokenId.metadataUri)

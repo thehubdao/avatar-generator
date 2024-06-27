@@ -3,8 +3,10 @@ import TransparentBoxUI from "../common/transparentBox.ui";
 import { FaRegEye } from "react-icons/fa6";
 import { SlPencil } from "react-icons/sl";
 import { useEffect, useState } from "react";
-import { getTokenMetadata } from "../../../utils/web3/contract.util";
+import { getTokenMetadata, tempCampaignSwitch } from "../../../utils/web3/contract.util";
 import { TokenId } from "../../../types/metadata.type";
+import { UploadFile } from "../../../utils/firebase.util";
+import { StorageLocation } from "../../../enums/firebase.enum";
 
 interface ListItemProps {
     campaignDBName: string;
@@ -29,12 +31,18 @@ export default function ListItem({ campaignDBName, onClickViewButton, onClickEdi
     return <div key={campaignDBName + tokenId} className="relative ml-2 mb-2 bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white">
         {tokenMetadata && <><div className="group">
             <Image
-                src={!didError ? tokenMetadata.imageUrl : tokenMetadata.fallbackImageUrl}
+                src={!didError ? tokenMetadata.imageUrl : tokenMetadata.imageUrl}
                 alt={"NFT Image"}
                 className="rounded-[10px_10px_0px_0px]"
                 width={254}
                 height={300}
-                onError={() => setDidError(true)}
+                onError={async () => {
+                    const imageRequest = await fetch(tokenMetadata.fallbackImageUrl)
+                    const imageBlob = await imageRequest.blob()
+                    const imageFile = new File([imageBlob], `${tokenMetadata.combination}.png`)
+                    await UploadFile(imageFile, StorageLocation.AvatarImages, undefined, tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch])
+                    setDidError(true)
+                }}
             />
             <div className="hidden flex-col z-10 justify-center items-center absolute top-[0] group-hover:flex h-[254px] w-[254px] bg-[#ffcadd69] rounded-[10px_10px_0px_0px] border-[1.58px] border-solid border-white">
                 <div className="px-10 w-full mb-2">

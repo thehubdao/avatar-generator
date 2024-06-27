@@ -531,7 +531,7 @@ export async function UploadFile(file: File | null | undefined, fileType: Storag
 
   const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
   const realSection = sectionType ? '/' + sectionType.toLowerCase().replace('acc', '') : '';
-  const newName = uuidv4();
+  const newName = file.name ? file.name : uuidv4();
 
   const fileRef = ref(await FirebaseUtil.Instance().Storage(), `${campaignSection}${fileType}${realSection}/${newName}`);
   const log = await uploadBytes(fileRef, file);
