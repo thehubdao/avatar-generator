@@ -9,7 +9,6 @@ import TransparentBoxUI from "../common/transparentBox.ui";
 
 interface MintSectionUIProps {
     features?: IndexFeatureInterface[];
-    picture: string;
     combination: string;
     combinationPictureUrl: string
     onClickBackButton: () => void

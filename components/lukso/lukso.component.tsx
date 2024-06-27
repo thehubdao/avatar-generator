@@ -18,7 +18,6 @@ import AvatarEditor, {
 import {
   AGChangeCamPosition,
   AGChangeLookAtPosition,
-  GetCanvasImageUrl,
   TakeCanvasPicture,
 } from '../avatar/viewer.component'
 import HudComponent from '../../ui/avatar/hud.ui'
@@ -32,7 +31,7 @@ import { Module } from '../../enums/common.enum'
 import { LuksoSections } from '../../enums/lukso/common.enum'
 
 // Utils
-import { Delay, FilterList, LogError, MixArrays } from '../../utils/common.util'
+import { FilterList, LogError, MixArrays } from '../../utils/common.util'
 import {
   GetAccessoryListByCampaign,
   GetAnimationByCampaignAndName,
@@ -132,12 +131,7 @@ export default function LuksoComponent({
     ''
   )
   const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false)
-  const [isLoadingMintedData, setIsLoadingMintedData] = useState<boolean>(
-    false
-  )
   const [{ wallet }] = useConnectWallet()
-
-  const [picture, setPicture] = useState<string>('');
 
   useEffect(() => {
     if (!wallet) return setProvider(undefined)
@@ -212,11 +206,6 @@ export default function LuksoComponent({
 
   }
 
-  async function takePicture() {
-    await Delay(2500);
-    setPicture(GetCanvasImageUrl());
-  }
-
   async function getFeatureList() {
     const result = await GetAssetsListByCampaign(campaignParams?.campaign)
     featureList = result.success ? result.value : undefined
@@ -288,9 +277,9 @@ export default function LuksoComponent({
   }
 
   async function loadSingleData() {
+    setIsLoading(true)
     // Iterate the features
     // Place the features on the model
-    setIsLoadingMintedData(true)
     if (singleInitData === undefined)
       return void LogError(Module.Lukso, 'Missing single data!!!!!')
 
@@ -309,9 +298,7 @@ export default function LuksoComponent({
         campaignParams?.config.skin?.defColor ?? 'ffffff'
       )
     }
-
-    await takePicture();
-    setIsLoadingMintedData(false)
+    setIsLoading(false)
 
   }
 
@@ -538,7 +525,7 @@ export default function LuksoComponent({
 
               </div>
               <div
-                className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
+                className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoading ? 'flex' : 'hidden'
                   }`}
               >
                 <div className="scale-[3]">
@@ -584,13 +571,12 @@ export default function LuksoComponent({
               </div>
               <LuksoUI
                 setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
-                isLoading={isLoading}
+                isLoading={false}
                 currentSection={currentSection}
                 getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
                 exportModel={() => exportModel()}
                 provider={provider}
                 features={singleInitData?.features}
-                picture={picture}
                 combination={selectedCombination} combinationPictureUrl={combinationPictureUrl}
                 onClickBackButton={() => {
                   setSelectedCombination(undefined)
