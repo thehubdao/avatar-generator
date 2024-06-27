@@ -16,7 +16,7 @@ interface LuksoUIProps {
   combination: string;
   combinationPictureUrl: string;
   onClickBackButton: () => void
-  goEditMode: ()=>void
+  goEditMode: () => void
 }
 
 export default function LuksoUI({
@@ -35,8 +35,8 @@ export default function LuksoUI({
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
       {(currentSection === LuksoSections.View) && <ViewSectionUI onClickBackButton={onClickBackButton} combinationPictureUrl={combinationPictureUrl} combination={combination} features={features} />}
-      {(currentSection === LuksoSections.Edit) && <EditSectionUI picture={combinationPictureUrl} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} onClickBackButton={onClickBackButton} 
-      goEditMode={goEditMode} />}
+      {(currentSection === LuksoSections.Edit) && <EditSectionUI picture={combinationPictureUrl} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} onClickBackButton={onClickBackButton}
+        goEditMode={goEditMode} />}
     </div>
   )
 }
