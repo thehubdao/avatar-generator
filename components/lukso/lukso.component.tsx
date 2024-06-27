@@ -458,7 +458,7 @@ export default function LuksoComponent({
               >
                 <div className="flex flex-row justify-between h-full">
                   <Image
-                    src="/resources/icons/campaigns/lukso.svg"
+                    src="resources/icons/campaigns/portal.svg"
                     width={106}
                     height={24}
                     alt="Lukso icon"

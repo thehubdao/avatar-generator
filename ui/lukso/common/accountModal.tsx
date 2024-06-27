@@ -38,7 +38,7 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
       <TransparentBoxUI fullWidth border heightClass="h-fit min-h-[240px]" backgroundColorClass="bg-[#FFCBDE]">
         <div className="min-w-[515px] flex flex-col gap-4 justify-center items-center">
           <Image
-            src='/resources/icons/campaigns/lukso.svg'
+            src='resources/icons/campaigns/portal.svg'
             width={106}
             height={24}
             alt="Lukso icon"

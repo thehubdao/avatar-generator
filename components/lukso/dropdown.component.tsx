@@ -22,7 +22,7 @@ export default function CampaignDropdown({ campaigns, setCampaign }: MainSection
                 {!selected && 'Choose Campaign'}
                 {selected && selected.dropdownName}
                 <svg className="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4" />
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
                 </svg>
             </button>
             <div id="dropdown" className="min-w-[145px] absolute top-[42px] z-20 hidden bg-[#fff] divide-y divide-gray-100 shadow ">

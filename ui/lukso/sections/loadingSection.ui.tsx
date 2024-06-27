@@ -98,7 +98,7 @@ export default function LoadingUI({ getloaderDivElement }: LoadingUIProps) {
       <div className="w-full h-screen flex flex-col justify-center items-center">
         <div className="fixed top-0 w-full h-14 flex items-center px-4 justify-between">
           <Image
-            src='/resources/icons/campaigns/lukso.svg'
+            src='resources/icons/campaigns/portal.svg'
             width={106}
             height={24}
             alt="Lukso icon"
@@ -108,14 +108,11 @@ export default function LoadingUI({ getloaderDivElement }: LoadingUIProps) {
         <div className="fixed flex flex-col justify-center items-center gap-8">
           <div>
             <Image
-              src='/resources/icons/campaigns/lukso.svg'
+              src='resources/icons/campaigns/portal.svg'
               width={596}
               height={138}
               alt="Lukso icon"
             />
-            <div className="w-[596px]">
-              <p className="text-5xl mt-7 tracking-[1.17em] text-center">CITIZENS</p>
-            </div>
           </div>
           <Loader />
         </div>

@@ -81,7 +81,7 @@ export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButt
     return (
         <div className="flex justify-center flex-col items-center h-full w-full">  {/* Your collection text image */}
             <div className="text-white font text-6xl font-extrabold ">
-                <Image src="/resources/images/collection_text.png" className="mb-[150px]" alt={""} width='990' height='38' />
+                <Image src="/resources/images/collection_text.png" className="mb-[150px] w-auto h-auto" alt={""} width='990' height='38' /> 
             </div>
             {/* Navigator section */}
             <div className="flex flex-row min-w-[822px] justify-between mb-5">

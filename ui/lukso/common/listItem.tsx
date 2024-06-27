@@ -33,7 +33,7 @@ export default function ListItem({ campaignDBName, onClickViewButton, onClickEdi
             <Image
                 src={!didError ? tokenMetadata.imageUrl : tokenMetadata.imageUrl}
                 alt={"NFT Image"}
-                className="rounded-[10px_10px_0px_0px]"
+                className="rounded-[10px_10px_0px_0px] w-auto h-auto"
                 width={254}
                 height={300}
                 onError={async () => {
