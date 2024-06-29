@@ -53,7 +53,7 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
           heightClass="grow"
           borderSizeClass="border-t-0 border-b-0"
         >
-          <div className="relative px-10 w-full mb-2 bottom-[250px]">
+          <div className="absolute px-10 w-full mb-2 top-[50px]">
             <div onClick={
               onClickBackButton
             }>
