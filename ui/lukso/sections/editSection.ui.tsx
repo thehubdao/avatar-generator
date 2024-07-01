@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDownload } from "react-icons/fa6";

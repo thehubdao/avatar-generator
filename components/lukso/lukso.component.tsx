@@ -59,7 +59,7 @@ import {
   ExportInterface,
   LookAtVectors,
 } from '../../interfaces/common.interface'
-import { CampaignDrops, Drop, TokenId, TokenMetadata } from '../../types/metadata.type'
+import { CampaignDrops, TokenId, TokenMetadata } from '../../types/metadata.type'
 import { BodyPart } from '../../types/avatar.type'
 import { ethers } from 'ethers'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
@@ -224,9 +224,10 @@ export default function LuksoComponent({
 
     const combinationIndexes = selectedBaseCombination?.split('-')
     let filteredOptionList: FeatureInterface[] = []
+    //This algorithm can be done in a better way, change it in the future.
+    // Get features from combination and make them visible on avatar edit mode.
     combinationIndexes?.forEach((featureIndex: string, index) => {
       const filteredArray = optionList?.filter((val) => {
-        console.log(campaignParams?.features)
         const categoryIndex = campaignParams?.features?.find((category) => {
           return category.displayName === val.type
         })?.index

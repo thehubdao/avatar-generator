@@ -5,7 +5,7 @@ import WerableContractAbi from '../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { Campaign, CampaignData, CampaignDrops, Drop, TokenId, TokenMetadata } from '../../types/metadata.type';
 import { getIPFSData, getImageUrl } from './lukso.util';
-import { GetCollectionDocs, GetCollectionList } from '../firebase.util';
+import { GetCollectionDocs } from '../firebase.util';
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
