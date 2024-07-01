@@ -10,7 +10,7 @@ import {
   WebGLRenderer
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { LogError, LogWarning } from "../../utils/common.util";
+import { Delay, LogError, LogWarning } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import {
   FrustumCulledFalse,
@@ -151,12 +151,32 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
   });
 }
 
-export function GetCanvasImageUrl() {
+export async function GetCanvasImageUrl(pos?: Vector3) {
   if (_renderer == undefined) {
     void LogError(Module.Viewer, 'Missing scene');
     return ''
   }
-  return (_renderer.domElement.toDataURL())
+
+  if (_camera === undefined) {
+    void LogError(Module.Viewer, 'Missing camera');
+    return ''
+  }
+
+  let shot: string;
+
+  if (pos !== undefined) {
+    const lastPos = new Vector3(_camera?.position.x, _camera?.position.y, _camera?.position.z);
+    const lastTarget = new Vector3(_controls?.target.x, _controls?.target.y, _controls?.target.z);
+    _camera?.position.set(pos.x, pos.y, pos.z);
+    _controls?.target.set(0, 1.65, 0);
+    await Delay(100);
+    shot = _renderer.domElement.toDataURL();
+    _camera.position.set(lastPos.x, lastPos.y, lastPos.z);
+    _controls?.target.set(lastTarget.x, lastTarget.y, lastTarget.z);
+  } else {
+    shot = _renderer.domElement.toDataURL();
+  }
+  return(shot)
 }
 
 //#endregion

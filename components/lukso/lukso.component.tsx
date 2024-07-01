@@ -204,6 +204,7 @@ export default function LuksoComponent({
       campaignParams?.campaign,
       campaignParams?.config.defAnimation
     )
+    
     if (result.success) {
       await ChangeStartAnimation(result.value.at(0)?.path)
     }

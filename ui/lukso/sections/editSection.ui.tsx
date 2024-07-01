@@ -19,7 +19,7 @@ interface EditSectionUIProps {
   goEditMode: () => void
 }
 
-export default function EditSectionUI({ goEditMode, onClickBackButton, exportModel, features, picture }: EditSectionUIProps) {
+export default function EditSectionUI({ goEditMode, onClickBackButton, exportModel, features }: EditSectionUIProps) {
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
 
   const editAvatarRef = useRef<HTMLDivElement>(null);
@@ -60,13 +60,6 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
                   <p className="text-black">Go Back</p>
                 </div>
               </TransparentBoxUI></div></div>
-          <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px]">
-            <Image
-              src={picture}
-              fill
-              alt="lukso avatar selfie view"
-            />
-          </div>
           {features &&
             <FeatureListUI features={features} />
           }
