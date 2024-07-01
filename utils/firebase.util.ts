@@ -26,7 +26,7 @@ import { ConvertObject, ConvertType } from "./common/object-converter.util";
 import { SessionUserInfo } from "./common/session.util";
 import { CampaignParameters } from "../interfaces/common.interface";
 import { ParameterNameType } from "../types/firebase.type";
-import {Client} from '../enums/client.enum'
+import { Client } from '../enums/client.enum'
 import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
 export type LogInStructure = {
   user: string;
@@ -328,8 +328,8 @@ export async function SetTierDistribution(campaign: string): Promise<void> {
       available: true,
       used: 0,
       feature_id: feature.id
-    } 
-    
+    }
+
     // insert tier dist. document by feature
     await addDoc(
       collection(db, distributionPath),
@@ -341,7 +341,7 @@ export async function SetTierDistribution(campaign: string): Promise<void> {
 
 export async function ResetTierDistribution(campaign: string, startValue = 0): Promise<void> {
   const distributionPath = `${FirestoreGlobalLocation.Campaign}/${campaign}/tier_distribution`.toLowerCase()
-  
+
   const db = await FirebaseUtil.Instance().DB()
   const distributionQuery = query(collection(db, distributionPath))
   const distributionDocs = await getDocs(distributionQuery)
@@ -361,13 +361,13 @@ export async function AddTierDistribution(campaign: string, feature: FeatureInte
   const distributionDocs = await getDocs(distributionQuery)
   const distDoc = distributionDocs.docs[0]
   const dist = distDoc.data()
-  const tierResult = await GetParameter<{[key: string]: number}>(
+  const tierResult = await GetParameter<{ [key: string]: number }>(
     campaign, CampaignParameterName.Random
   );
   if (!tierResult.success)
     return void LogError(Module.CollectionUtil, `Couldn't find featureList for campaign: ${campaign}`);
   const tierValues = tierResult.value
-    
+
   const tierValue = tierValues[feature.tier]
   const limitAmount = Math.floor((basedInventaryNumber * tierValue) / 100)
   const newAmount = (dist as TierDistributionInterface).used + 1
@@ -387,8 +387,8 @@ export async function GetAllCombinationsAvailable(
   const db = await FirebaseUtil.Instance().DB()
   const comboQuery = query(collection(db, collectionPath), where("status", "==", "n"))
   const comboDocs = await getDocs(comboQuery)
-  const combinations = comboDocs.docs.map((comboDoc) => 
-    ({ ...(comboDoc.data()), id: comboDoc.id}) as { indexValues: string, status: string, id: string }
+  const combinations = comboDocs.docs.map((comboDoc) =>
+    ({ ...(comboDoc.data()), id: comboDoc.id }) as { indexValues: string, status: string, id: string }
   )
 
   return combinations
@@ -436,6 +436,8 @@ export async function GetParameters<T>(campaign?: string, ...parameters: Paramet
 
   return result;
 }
+
+
 
 function CampaignLocation(campaign?: string) {
   return campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}/` : '';
@@ -726,6 +728,13 @@ export async function GetCollectionList(dbLocation: string | FirestoreGlobalLoca
   });
 }
 
+export async function GetCollectionDocs(dbLocation: string | FirestoreGlobalLocation) {
+  const { collection, getDocs } = await import('@firebase/firestore');
+
+  const querySnapshot = await getDocs(collection(await FirebaseUtil.Instance().DB(), dbLocation));
+  return querySnapshot.docs.map((doc) => doc.data())
+}
+
 export async function UpdateAdminCampaigns(): Promise<Result<boolean>> {
   try {
     const { doc, setDoc } = await import('@firebase/firestore');
@@ -872,7 +881,7 @@ export async function GetAvatarDownloadedStatus(combinationIndexes: string) {
   return status.get('downloadedStatus') as string
 }
 
-export async function GetAllCombinations(campaign:string, fromStatus:keyof typeof AVATAR_DOWNLOADED_STATUS) { 
+export async function GetAllCombinations(campaign: string, fromStatus: keyof typeof AVATAR_DOWNLOADED_STATUS) {
   const location = `collection/${campaign}/nft`;
 
 

@@ -24,8 +24,6 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
 
   const editAvatarRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => { console.log(features) }, [features])
-
   const gsapEnterBlocks = () => {
     if (!editAvatarRef.current) return
     translationInOutBlock(editAvatarRef.current, DURATION_ANIMATION_SECTION);

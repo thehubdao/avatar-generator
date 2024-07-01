@@ -1,9 +1,11 @@
 import { Contract, JsonRpcProvider, Signer, TransactionResponse } from 'ethers'
 import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
+import WerableContractAbi from '../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
-import { Campaign, CampaignData, TokenId, TokenMetadata } from '../../types/metadata.type';
+import { Campaign, CampaignData, CampaignDrops, Drop, TokenId, TokenMetadata } from '../../types/metadata.type';
 import { getIPFSData, getImageUrl } from './lukso.util';
+import { GetCollectionDocs, GetCollectionList } from '../firebase.util';
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
@@ -217,12 +219,29 @@ export const getTokensOf = async (contractAddress: string, address: string) => {
     return tokenIds
 }
 
-export const getUserFeatures = async (contractAddress: string, address: string) => {
-    const contract = new Contract(contractAddress, AvatarContractAbi, provider)
-    const tokenIdsResult = await contract.tokenIdsOf(address)
-    const tokenIds = JSON.parse(JSON.stringify(tokenIdsResult))
-    if (tokenIds.length == 0) return
+export const getCampaignUserFeatures = async (address: string, campaign: string) => {
+    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
+    const features: Drop[] = []
+    for (let i = 0; i < dropsData.length; i++) {
+        const drop = dropsData[i];
+        const { contract_address } = drop
+        const contract = new Contract(contract_address, WerableContractAbi, provider)
+        const tokenBalance = await contract.balanceOf(address)
+        if (Number(tokenBalance) > 0) features.push(drop)
+    }
+    return features
+}
 
-    return tokenIds
+
+export const getUserFeatures = async (address: string) => {
+    const features: CampaignDrops = {
+        vrm_male: [],
+        vrm_female: []
+    }
+    for (const campaign of Object.keys(campaignWeb3Data)) {
+        const campaignUserFeatures = await getCampaignUserFeatures(address, campaign)
+        features[campaign as keyof typeof campaignWeb3Data] = campaignUserFeatures
+    }
+    return features
 }
 

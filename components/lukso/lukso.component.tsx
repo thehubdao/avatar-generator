@@ -59,13 +59,13 @@ import {
   ExportInterface,
   LookAtVectors,
 } from '../../interfaces/common.interface'
-import { TokenId, TokenMetadata } from '../../types/metadata.type'
+import { CampaignDrops, Drop, TokenId, TokenMetadata } from '../../types/metadata.type'
 import { BodyPart } from '../../types/avatar.type'
 import { ethers } from 'ethers'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getCampaignsTokenIds } from '../../utils/web3/contract.util'
+import { getCampaignsTokenIds, getUserFeatures } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
@@ -111,6 +111,7 @@ export default function LuksoComponent({
 
   // Edit state
   const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>()
+  const [dropList, setDropList] = useState<CampaignDrops>({ vrm_male: [], vrm_female: [] })
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false)
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
     exportData.attributes
@@ -134,6 +135,16 @@ export default function LuksoComponent({
   const [{ wallet }] = useConnectWallet()
 
   useEffect(() => {
+    if (!addressToShow) return
+    const featuresPromise = async () => {
+      const features = await getUserFeatures(addressToShow)
+
+      setDropList(features)
+    }
+    featuresPromise()
+  }, [addressToShow])
+
+  useEffect(() => {
     if (!wallet) return setProvider(undefined)
     const setEtherProviderPromise = () => {
       const _etherProvider = new ethers.BrowserProvider(wallet.provider, 'any')
@@ -155,7 +166,6 @@ export default function LuksoComponent({
     if (!addressToShow) return
     const getTokensMetadataPromise = async () => {
       const tokenIds = await getCampaignsTokenIds(addressToShow)
-      console.log(tokenIds)
       setTokenIdList(tokenIds)
     }
     void getTokensMetadataPromise()
@@ -216,6 +226,7 @@ export default function LuksoComponent({
     let filteredOptionList: FeatureInterface[] = []
     combinationIndexes?.forEach((featureIndex: string, index) => {
       const filteredArray = optionList?.filter((val) => {
+        console.log(campaignParams?.features)
         const categoryIndex = campaignParams?.features?.find((category) => {
           return category.displayName === val.type
         })?.index
@@ -224,9 +235,21 @@ export default function LuksoComponent({
 
         return categoryIndex - 1 === index && val.index.toString() === featureIndex
       })
+
       if (!filteredArray) return
+
       filteredOptionList = filteredOptionList.concat(filteredArray)
     })
+
+    const campaignDropList = dropList[campaignParams?.campaign as keyof typeof dropList]
+
+    if (campaignDropList) {
+      const formattedDropList = campaignDropList.map((val) => {
+        return optionList?.find((option) => option.type === val.type && val.index === option.index) as FeatureInterface
+      })
+      filteredOptionList = filteredOptionList.concat(formattedDropList)
+    }
+
     optionList = filteredOptionList
 
     const filteredList = FilterList(optionList, 'type', selectedCategory)
