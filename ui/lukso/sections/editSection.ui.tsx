@@ -1,4 +1,3 @@
-import Image from "next/image"
 import { useLayoutEffect, useRef, useState } from "react"
 import TransparentBox from "../common/transparentBox.ui"
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";

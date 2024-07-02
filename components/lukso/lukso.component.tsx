@@ -40,9 +40,9 @@ import {
   GetAvatarSingleByCampaignCombinationString,
   GetEnvMapListByCampaign,
   GetStageListByCampaign,
+  PostRequestVRMProcessFile,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
-import { IFrameExportData } from '../../utils/iframe.util'
 import { SaveFile } from '../../utils/exporter.util'
 
 
@@ -78,7 +78,6 @@ let stageList: StageInterface[] | undefined
 let envMapList: EnvMapInterface[] | undefined;
 let singleInitData: SingleInterface | undefined
 let loaderDivElement: HTMLDivElement
-const isOnIFrame = false
 
 
 const tokenMetadata: TokenMetadata = {
@@ -415,25 +414,19 @@ export default function LuksoComponent({
     exportData.attributesBase64 = window.btoa(
       JSON.stringify(exportData.attributes)
     )
-    const [picturePromise, modelPromise, vrmPromise] = await Promise.all([
-      TakeCanvasPicture(''),
+    const [picturePromise, modelGLBPromise, modelVRMPromise] = await Promise.all([
+      TakeCanvasPicture(),
       GetAvatarGLB(),
       GetAvatarVRM()
-      //TODO: add VRM request function
-    ])
-    exportData.picture = picturePromise
-    exportData.model = modelPromise.success ? modelPromise.value : undefined;
-    const vrmModel = vrmPromise.success ? vrmPromise.value : undefined;
-    if (isOnIFrame) {
-      IFrameExportData(exportData)
-    } else {
-      //TODO: Add SaveFile for VRM
-      if (exportData.model != undefined) {
-        await SaveFile(exportData.model, 'model.glb')
-        await SaveFile(vrmModel, 'model.vrm')
-      }
-
-      await SaveFile(exportData.picture, 'picture.png')
+    ]);
+    console.log("EXPORTING VRM, GLB and image...")
+    const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
+    const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
+    if (modelVRMPromise.success && modelGLBPromise.success) {
+      const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
+      await SaveFile(refinedModelVRM, `avatar.vrm`);
+      await SaveFile(modelGLB, `model.glb`);
+      await SaveFile(picturePromise, 'picture.png');
     }
   }
 
