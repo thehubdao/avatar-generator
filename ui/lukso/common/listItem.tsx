@@ -44,7 +44,7 @@ export default function ListItem({ campaignDBName, onClickViewButton, onClickEdi
                     setDidError(true)
                 }}
             />
-            <div className="hidden flex-col z-10 justify-center items-center absolute top-[0] group-hover:flex h-[254px] w-[254px] bg-[#ffcadd69] rounded-[10px_10px_0px_0px] border-[1.58px] border-solid border-white">
+            <div className="hidden flex-col z-10 justify-center items-center absolute top-[0] group-hover:flex h-[256px] w-[256px] bg-[#ffcadd69] rounded-[10px_10px_0px_0px] border-[1.58px] border-solid border-white">
                 <div className="px-10 w-full mb-2">
                     <div onClick={() =>
                         onClickViewButton(campaignDBName, tokenMetadata.combination, tokenMetadata.baseCombination, tokenMetadata.imageUrl)
