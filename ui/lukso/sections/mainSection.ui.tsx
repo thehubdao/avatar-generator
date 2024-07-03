@@ -69,7 +69,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
   return (
     <>
       <section className={`flex h-full items-center justify-between`}>
-        <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isGettingInfoAboutHasMinted ? 'flex' : 'hidden'}`}>
+        <div className={`fixed h-screen w-full flex justify-center items-center bg-client-primary top-14 duration-100 transition-all ${isGettingInfoAboutHasMinted ? 'flex' : 'hidden'}`}>
           <div className="scale-[3]">
             <Loader />
           </div>
@@ -79,7 +79,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
           <TransparentBox
             fullWidth
             border
-            backgroundColorClass="bg-[#FFCBDE]"
+            backgroundColorClass="bg-client-primary"
             heightClass="grow"
             paddingClass="pb-3 px-10"
           >
@@ -162,7 +162,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
               fullWidth
               border
               borderSizeClass="border-b-0"
-              backgroundColorClass="bg-[#FFCBDE]"
+              backgroundColorClass="bg-client-primary"
               heightClass="h-[125px]"
             >
               <h3 className="font-extrabold text-xl 2xl:text-2xl">EXCLUSIVE COLLECTION</h3>
@@ -172,7 +172,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
               fullWidth
               border
               borderSizeClass="border-b-0"
-              backgroundColorClass="bg-[#FFCBDE]"
+              backgroundColorClass="bg-client-primary"
               heightClass="grow"
             >
               <h3 className="font-semibold text-xl 2xl:text-2xl">Rarity</h3>
@@ -186,7 +186,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             <TransparentBox
               fullWidth
               border
-              backgroundColorClass="bg-[#FFCBDE]"
+              backgroundColorClass="bg-client-primary"
               heightClass="grow"
             >
               <h3 className="font-semibold text-xl 2xl:text-2xl">Deluxe Avatars</h3>
@@ -202,7 +202,7 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
             <TransparentBox
               fullWidth
               border
-              backgroundColorClass="bg-[#FFCBDE]"
+              backgroundColorClass="bg-client-primary"
               heightClass="grow"
               paddingClass="px-0"
               justifyClass="justify-start"
