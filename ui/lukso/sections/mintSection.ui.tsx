@@ -77,7 +77,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
 
   return (
     <section className={`flex w-full h-full items-center justify-between`}>
-      <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isShuffling ? 'flex' : 'hidden'}`}>
+      <div className={`fixed h-screen w-full flex justify-center items-center bg-client-primary top-14 duration-100 transition-all ${isShuffling ? 'flex' : 'hidden'}`}>
         <div className="scale-[3]">
           <Loader />
         </div>
@@ -87,7 +87,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
         <TransparentBox
           fullWidth
           border
-          backgroundColorClass="bg-[#FFCBDE]"
+          backgroundColorClass="bg-client-primary"
           heightClass="grow"
           borderSizeClass="border-t-0"
         >
@@ -137,7 +137,7 @@ export default function MintSectionUI({ setCurrentSection, reRoll, handleClaim, 
 
       {/* Mint your avatar */}
       <div ref={mintAvatarRef} className="max-w-[35%] w-[460px] 2xl:w-[564px] translate-x-full h-[70%]">
-        <TransparentBox fullWidth border backgroundColorClass="bg-[#FFCBDE]" paddingClass="px-14 2xl:px-28" aditionalClass="gap-6 2xl:gap-8">
+        <TransparentBox fullWidth border backgroundColorClass="bg-client-primary" paddingClass="px-14 2xl:px-28" aditionalClass="gap-6 2xl:gap-8">
           <h3 className="font-semibold  text-xl 2xl:text-2xl mb-10">MINT YOUR CITIZEN</h3>
           <p className="text-base 2xl:text-lg">
             LUKSO Citizens is a collection of 1765 interoperable Avatars on the LUKSO Blockchain.

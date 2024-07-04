@@ -26,7 +26,7 @@ function GetRaretyColor(opc: RandomTier) {
 
 export default function FeatureListUI({features}: FeatureListUIProps) {
   return (
-    <div className="grid grid-cols-2 mt-20 gap-4 gap-x-14 text-sm 2xl:text-base w-full">
+    <div className="grid grid-cols-2 py-10 gap-4 gap-x-14 text-sm 2xl:text-base w-full">
       {
         features.map((feature, index) => {
           return (

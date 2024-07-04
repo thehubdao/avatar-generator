@@ -78,7 +78,7 @@ export enum CampaignParameterName {
 
 export enum RandomTier {
   Common = "common",
-  Rare = "rare",
+  Rare = "uncommon",
   Epic = "epic",
   Mythical = "mythical"
 }

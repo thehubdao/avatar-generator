@@ -19,7 +19,7 @@ interface EditSectionUIProps {
   goEditMode: () => void
 }
 
-export default function EditSectionUI({ goEditMode, onClickBackButton, exportModel, features,picture }: EditSectionUIProps) {
+export default function EditSectionUI({ goEditMode, onClickBackButton, exportModel, features, picture }: EditSectionUIProps) {
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
 
   const editAvatarRef = useRef<HTMLDivElement>(null);
@@ -43,28 +43,30 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
     <section className={`flex h-full items-center justify-between`}>
       {/* Edit Avatar */}
       <div ref={editAvatarRef} className="max-w-[35%] w-[380px] 2xl:w-[461px] h-full -translate-x-full flex flex-col">
-
         <TransparentBox
           fullWidth
           border
-          backgroundColorClass="bg-[#FFCBDE]"
+          backgroundColorClass="bg-client-primary"
           heightClass="grow"
           borderSizeClass="border-t-0 border-b-0"
         >
-          <div className="absolute px-10 w-full mb-2 top-[50px]">
-            <div onClick={
-              onClickBackButton
-            }>
+          {/* GO BACK BUTTON */}
+          <div className="p-2 w-full mb-2 top-[50px]">
+            <div onClick={() => onClickBackButton()}>
               <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
                 <div className="flex items-center gap-3">
                   <p className="text-black">Go Back</p>
                 </div>
-              </TransparentBoxUI></div></div>
-              <div className="relative w-[208px] 2xl:w-[347px] h-[180px] 2xl:h-[301px]">
+              </TransparentBoxUI>
+            </div>
+          </div>
+          {/* FACE IMAGE */}
+          <div className="relative w-[208px] 2xl:w-[347px] h-[208px] 2xl:h-[347px]">
             <Image
               src={picture}
               fill
               alt="lukso avatar selfie view"
+              style={{ objectFit: "cover" }}
             />
           </div>
           {features &&

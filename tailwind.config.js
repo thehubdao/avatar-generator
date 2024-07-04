@@ -30,7 +30,10 @@
           orange: '#F38630',
           blue: '#006cad',
           red: '#fa5953',
-          light: 'rgba(255,255,255,0.4)'
+          light: 'rgba(255,255,255,0.4)',
+          client: {
+            primary: '#FFCBDE',
+          }
         },
         boxShadow: {
           'flat-soft':'-2.81481px -2.81481px 6.6296px #FFFFFF, 2.81481px 2.81481px 6.6296px #D3D9E6',

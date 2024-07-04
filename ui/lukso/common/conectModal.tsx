@@ -12,7 +12,7 @@ function ConnectModalUI({ setIsConnecting }: ConnectModalUIProps) {
 
   return (
     <div className="z-10 bg-black bg-opacity-30 w-full h-screen fixed top-0 flex justify-center items-center">
-      <TransparentBoxUI fullWidth border heightClass="h-fit min-h-[240px]" backgroundColorClass="bg-[#FFCBDE]">
+      <TransparentBoxUI fullWidth border heightClass="h-fit min-h-[240px]" backgroundColorClass="bg-client-primary">
       
           <div className="flex flex-col justify-center items-center gap-4">
             <h3 className="text-2xl">Connect Wallet!</h3>

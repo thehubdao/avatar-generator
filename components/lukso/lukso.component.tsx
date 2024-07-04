@@ -203,7 +203,7 @@ export default function LuksoComponent({
       campaignParams?.campaign,
       campaignParams?.config.defAnimation
     )
-    
+
     if (result.success) {
       await ChangeStartAnimation(result.value.at(0)?.path)
     }
@@ -442,31 +442,39 @@ export default function LuksoComponent({
   }
 
   return (
-    <>
-      <MobileLayout>
-        <>
-          {!provider && <LoginUI />}
-          {provider && <div className="w-full h-screen bg-[#FFCBDE] flex flex-col">
-            {isAccountModalOpen && (
-              <AccountModalUI
-                addressAccount={addressToShow}
-                formatAddress={formatearString(addressToShow)}
-                setIsAccountModalOpen={(value) =>
-                  setIsAccountModalOpen(value)
-                }
-                onDisconnect={() => {
-                  setCurrentSection(LuksoSections.Main)
-                  setSelectedBaseCombination(undefined)
-                  setSelectedCombination(undefined)
-                  setTokenIdList(undefined)
-                }}
-              />
-            )}
+    <MobileLayout>
+      <>
+        {/* LOGIN */}
+        {!provider &&
+          <LoginUI />
+        }
+        {/* MAIN VIEW */}
+        {provider &&
+          <div className="w-full h-screen bg-client-primary flex flex-col">
+            {/* ACCOUNT MODAL */}
+            {isAccountModalOpen &&
+              (
+                <AccountModalUI
+                  addressAccount={addressToShow}
+                  formatAddress={formatearString(addressToShow)}
+                  setIsAccountModalOpen={(value) =>
+                    setIsAccountModalOpen(value)
+                  }
+                  onDisconnect={() => {
+                    setCurrentSection(LuksoSections.Main)
+                    setSelectedBaseCombination(undefined)
+                    setSelectedCombination(undefined)
+                    setTokenIdList(undefined)
+                  }}
+                />
+              )
+            }
+            {/* HEADER TAB */}
             <div className='z-10'>
               <TransparentBoxUI
                 fullWidth
                 border
-                backgroundColorClass="bg-[#FFCBDE]"
+                backgroundColorClass="bg-client-primary"
                 opacityPercentage="50"
                 borderColorClass="border-white"
                 borderSizeClass="border-2"
@@ -475,134 +483,151 @@ export default function LuksoComponent({
                 alignItemsClass="items-stretch"
               >
                 <div className="flex flex-row justify-between h-full">
+                  {/* LOGO UI */}
                   <Image
                     src="resources/icons/campaigns/portal.svg"
                     width={106}
                     height={24}
                     alt="Lukso icon"
                   />
-
-                  {provider ? (
-                    <button
-                      className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
-                      onClick={() => setIsAccountModalOpen(true)}
-                    >
-                      <p className="truncate h-fit text-white">{`${formatearString(
-                        addressToShow
-                      )}`}</p>
-                    </button>
-                  ) : (
-                    <ConnectWeb3Button
-                      classStyles={
-                        'w-48 border-l-2 border-white font-bold text-white'
-                      }
-                      onConnect={() => { }}
-                    >
-                      <> Login with your UP!</>
-                    </ConnectWeb3Button>
-                  )}
+                  {/* WALLET/CONNECT BUTTON UI */}
+                  {provider ?
+                    (
+                      <button
+                        className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
+                        onClick={() => setIsAccountModalOpen(true)}
+                      >
+                        <p className="truncate h-fit text-white">
+                          {formatearString(addressToShow)}
+                        </p>
+                      </button>
+                    ) : (
+                      <ConnectWeb3Button
+                        classStyles={
+                          'w-48 border-l-2 border-white font-bold text-white'
+                        }
+                        onConnect={() => { }}
+                      >
+                        <> Login with your UP!</>
+                      </ConnectWeb3Button>
+                    )
+                  }
                 </div>
               </TransparentBoxUI>
             </div>
-            {!selectedCombination && <ListUI tokenIdList={tokenIdList} provider={provider} onClickViewButton={
-              (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
-                setIsLoading(true)
-                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-                if (selectedCombination != _combination) setSelectedCombination(_combination)
-                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
-                if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
-                setIsEditModeSelected(false)
-
-              }
-            } onClickEditButton={
-              (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
-                setIsLoading(true)
-                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-                if (selectedCombination != _combination) setSelectedCombination(_combination)
-                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
-                if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
-                setIsEditModeSelected(true)
-              }
-            } />}
-            {selectedCombination && campaignParams?.campaign && campaignParams && <>
-              {/* CANVAS WRAPPER */}
-              <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-                {/* CANVAS BACKGROUND */}
-                <div className="w-full h-screen absolute opacity-0" />
-                {/* CANVAS */}
-
-                {campaignParams?.campaign && <AvatarEditor
-                  avatarBasePath={campaignParams.armature}
-                  editMode={isEditModeSelected}
-                  lights={campaignParams.config.lights}
-                  defaultShadow={campaignParams.config.defShadow}
-                  defaultCamera={campaignParams.config.defCam}
-                  postProcessing={campaignParams.config.postProcessing}
-                  onReady={() => onAvatarBuilderReady(selectedCombination, campaignParams.campaign)}
-                />}
-
-              </div>
-              <div
-                className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoading ? 'flex' : 'hidden'
-                  }`}
-              >
-                <div className="scale-[3]">
-                  <Loader />
-                </div>
-              </div>
-              <div className="fixed z-10">
-                <HudComponent
-                  selectedOption={selectedOpc.find(
-                    (e) => e.id === selectedCategory
-                  )}
-                  editModeSelected={isEditModeSelected}
-                  selectListCategory={campaignParams.features && campaignParams.accessories && [
-                    ...campaignParams.features,
-                    ...campaignParams.accessories,
-                  ] || []}
-                  // optionList
-                  optionList={optionListShow}
-                  // selectedCategory
-                  selectedCategory={selectedCategory}
-                  campaignSkinColorConfig={
-                    campaignParams?.config.skin || {}
-                  }
-                  skinColor={skinColor}
-                  changeView={() => {
-                    setIsEditModeSelected(!isEditModeSelected)
-                    void updateStage(!isEditModeSelected)
-                  }}
-                  // changeCategory
-                  onOptionChange={(id, path, name) =>
-                    void onOptionChange(id, path, name)
-                  }
-                  // onCategoryChange
-                  onCategoryTypeChange={(value) =>
-                    onCategoryTypeChange(value)
-                  }
-                  onSkinColorChange={(value) =>
-                    void onClickChangeSkinColor(value)
-                  }
-                  exportModel={() => exportModel()}
-                  isCustomCampaignHud
-                />
-              </div>
-              <LuksoUI
-                setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
-                isLoading={false}
-                currentSection={currentSection}
-                getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
-                exportModel={() => exportModel()}
+            {/* COLLECTION LIST */}
+            {!selectedCombination &&
+              <ListUI
+                tokenIdList={tokenIdList}
                 provider={provider}
-                features={singleInitData?.features}
-                combination={selectedCombination} combinationPictureUrl={combinationPictureUrl}
-                onClickBackButton={() => {
-                  setSelectedCombination(undefined)
-                  setCampaign(undefined)
-                  setSelectedCategory('head')
-                  optionList = []
-                }} goEditMode={() => setIsEditModeSelected(true)} /></>}
-          </div>}</>
-      </MobileLayout></>
+                onClickViewButton={
+                  (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
+                    setIsLoading(true)
+                    if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                    if (selectedCombination != _combination) setSelectedCombination(_combination)
+                    if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
+                    if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                    setIsEditModeSelected(false)
+                  }
+                }
+                onClickEditButton={
+                  (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
+                    setIsLoading(true)
+                    if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                    if (selectedCombination != _combination) setSelectedCombination(_combination)
+                    if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
+                    if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                    setIsEditModeSelected(true)
+                  }
+                }
+              />
+            }
+            {/* CAMPAIGN VIEWER */}
+            {selectedCombination && campaignParams?.campaign && campaignParams &&
+              <>
+                {/* CANVAS WRAPPER */}
+                <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+                  {/* CANVAS BACKGROUND */}
+                  <div className="w-full h-screen absolute opacity-0" />
+                  {/* CANVAS */}
+                  {campaignParams?.campaign &&
+                    <AvatarEditor
+                      avatarBasePath={campaignParams.armature}
+                      editMode={isEditModeSelected}
+                      lights={campaignParams.config.lights}
+                      defaultShadow={campaignParams.config.defShadow}
+                      defaultCamera={campaignParams.config.defCam}
+                      postProcessing={campaignParams.config.postProcessing}
+                      onReady={() => onAvatarBuilderReady(selectedCombination, campaignParams.campaign)}
+                    />
+                  }
+                </div>
+                {/* LOADER */}
+                <div className={`fixed h-screen w-full flex justify-center items-center bg-client-primary top-14 duration-100 transition-all ${isLoading ? 'flex' : 'hidden'}`}>
+                  <div className="scale-[3]">
+                    <Loader />
+                  </div>
+                </div>
+                {/* EDITOR HUD */}
+                <div className="fixed z-10">
+                  <HudComponent
+                    selectedOption={selectedOpc.find(
+                      (e) => e.id === selectedCategory
+                    )}
+                    editModeSelected={isEditModeSelected}
+                    selectListCategory={campaignParams.features && campaignParams.accessories && [
+                      ...campaignParams.features,
+                      ...campaignParams.accessories,
+                    ] || []}
+                    // optionList
+                    optionList={optionListShow}
+                    // selectedCategory
+                    selectedCategory={selectedCategory}
+                    campaignSkinColorConfig={
+                      campaignParams?.config.skin || {}
+                    }
+                    skinColor={skinColor}
+                    changeView={() => {
+                      setIsEditModeSelected(!isEditModeSelected)
+                      void updateStage(!isEditModeSelected)
+                    }}
+                    // changeCategory
+                    onOptionChange={(id, path, name) =>
+                      void onOptionChange(id, path, name)
+                    }
+                    // onCategoryChange
+                    onCategoryTypeChange={(value) =>
+                      onCategoryTypeChange(value)
+                    }
+                    onSkinColorChange={(value) =>
+                      void onClickChangeSkinColor(value)
+                    }
+                    exportModel={() => exportModel()}
+                    isCustomCampaignHud
+                  />
+                </div>
+                {/* LUKSO HUD */}
+                <LuksoUI
+                  setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
+                  isLoading={false}
+                  currentSection={currentSection}
+                  getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
+                  exportModel={() => exportModel()}
+                  provider={provider}
+                  features={singleInitData?.features}
+                  combination={selectedCombination} combinationPictureUrl={combinationPictureUrl}
+                  onClickBackButton={() => {
+                    setSelectedCombination(undefined)
+                    setCampaign(undefined)
+                    setSelectedCategory('head')
+                    optionList = []
+                  }} goEditMode={() => setIsEditModeSelected(true)}
+                />
+              </>
+            }
+          </div>
+        }
+      </>
+    </MobileLayout>
   )
 }
