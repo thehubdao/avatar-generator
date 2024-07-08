@@ -47,6 +47,7 @@ export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButt
   const [selectedCampaign, setSelectedCampaign] = useState<string>('all')
   const [selectedTokenId, setSelectedTokenId] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
+  const [shouldReveal, setReveal] = useState(false);
 
   useEffect(() => {
     if (!tokenIdList) return
@@ -77,29 +78,42 @@ export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButt
   }, [selectedTokenId])
 
   return (
-    <div className="flex flex-col justify-around items-center h-full w-full">
+    <div className="flex flex-col items-center gap-8 pt-10 h-full w-full ">
       {/* Your collection text image */}
       <div className="">
-        <Image src="/resources/images/collection_text.png" className="w-auto h-auto" alt={""} width='990' height='38' />
+        <Image
+          src="/resources/images/collection_text.png"
+          className={`${shouldReveal ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
+          alt={""}
+          width='990'
+          height='38'
+          onLoadingComplete={() => setReveal(true)}
+        />
       </div>
-      <div>
+      {/* LIST LOADER */}
+      {isLoading &&
+        <div className={`w-full h-full flex justify-center items-center ${isLoading ? 'flex' : 'hidden'}`}>
+          <div className="flex flex-col justify-center items-center">
+            <Loader />
+            <h2 className="text-white font-light">Loading campaigns...</h2>
+          </div>
+        </div>
+      }
+      <div className={` opacity-0 ${isLoading ? 'invisible' : 'visible opacity-100'} transition-opacity duration-500 delay-500`}>
         {/* Navigator section */}
         <div className="flex flex-row min-w-[822px] justify-between mb-5">
           <div className="flex flex-row min-w-[650px]">
-            <div className="h-full bg-[#ffcaddbf] border-2 border-solid border-white border-r-0"><CiSearch className="text-white w-[38px] h-[38px]" /></div>
-            <div className="w-full h-full bg-[#ffffffbf] border-2 border-solid border-white flex justify-center"><input type='number' onChange={(e) => { setSelectedTokenId(e.target.value) }} className="placeholder:text-[#1E293B] text-[15px] w-[99%] bg-[#ffffff00] h-full focus-visible:outline-none" placeholder='Search by Token ID' /></div>
+            <div className="h-full border-2 border-solid border-white border-r-0 flex justify-center items-center">
+              <CiSearch className="text-white w-9 h-9" />
+            </div>
+            <div className="w-full h-full border-2 border-solid border-white flex justify-center">
+              <input type='number' onChange={(e) => { setSelectedTokenId(e.target.value) }} className="w-full text-sm h-full px-2 focus-visible:outline-none bg-white/20 hover:bg-white/70 focus:bg-white/70 transition-colors duration-500 placeholder:text-gray-dark/80" placeholder='Search by Token ID' />
+            </div>
           </div>
           <CampaignDropdown setCampaign={(campaign) => { setSelectedCampaign(campaign) }} campaigns={Object.values(campaignLabels)} />
         </div>
         {/* Card List section */}
-        <div className={`${processedListData?.length == 0 || isLoading ? 'grid-cols-1' : 'grid-cols-4'}  grid  p-3 min-h-[300px] max-h-[62vh] min-w-[822px] bg-[#ffcaddbf] border-2 border-solid border-white overflow-y-auto`} >
-          {isLoading && 
-            <div className={`flex justify-center items-center bg-client-primary top-14 duration-100 transition-all ${isLoading ? 'flex' : 'hidden'}`}>
-              <div className="scale-[2]">
-                <Loader />
-              </div>
-            </div>
-          }
+        <div className={`relative ${processedListData?.length == 0 || isLoading ? 'grid-cols-1' : 'grid-cols-4'}  grid  p-3 min-h-[318px] max-h-[60vh] min-w-[822px] max-w-[1092px] overflow-hidden bg-[#ffcaddbf] border-2 border-solid border-white overflow-y-auto`} >
           {processedListData?.length == 0 &&
             <div className="flex flex-col justify-center items-center"><span className="text-[#C25399]">You do not own any citizens.</span>
               <div className="w-[150px] mt-3">
