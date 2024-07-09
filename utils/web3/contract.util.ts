@@ -6,6 +6,7 @@ import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { Campaign, CampaignData, CampaignDrops, Drop, TokenId, TokenMetadata } from '../../types/metadata.type';
 import { getIPFSData, getImageUrl } from './lukso.util';
 import { GetCollectionDocs } from '../firebase.util';
+import noMetadataTokens from '../../constants/lukso/NoMetadataTokens.json'
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
@@ -104,7 +105,10 @@ export const getCampaignsTokenIds = async (address: string) => {
     for (const campaign of Object.keys(campaignWeb3Data)) {
         const typpedCampaign = campaign as keyof typeof campaignWeb3Data
         const { contractAddress } = campaignWeb3Data[typpedCampaign]
-        const tokenIds: string[] = await getCampaignTokenIds(contractAddress, address)
+        let tokenIds: string[] = await getCampaignTokenIds(contractAddress, address)
+
+        if (campaign === 'vrm_female') tokenIds = tokenIds.filter((tokenId) => !noMetadataTokens.includes(Number(tokenId)))
+
         if (!tokenIds || tokenIds.length == 0) continue
 
         const tokensMetadataUrls = await getCampaignTokenMetadataUris(campaign as Campaign, tokenIds)

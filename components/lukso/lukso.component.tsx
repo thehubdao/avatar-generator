@@ -245,6 +245,7 @@ export default function LuksoComponent({
     const campaignDropList = dropList[campaignParams?.campaign as keyof typeof dropList]
 
     if (campaignDropList) {
+      console.log(campaignDropList)
       const formattedDropList = campaignDropList.map((val) => {
         return optionList?.find((option) => option.type === val.type && val.index === option.index) as FeatureInterface
       })
@@ -252,7 +253,7 @@ export default function LuksoComponent({
     }
 
     optionList = filteredOptionList
-
+    console.log(optionList)
     const filteredList = FilterList(optionList, 'type', selectedCategory)
 
     return setOptionListShow(filteredList)
