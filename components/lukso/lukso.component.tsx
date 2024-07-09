@@ -549,7 +549,7 @@ export default function LuksoComponent({
                 {/* CANVAS WRAPPER */}
                 <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
                   {/* CANVAS BACKGROUND */}
-                  <div className="w-full h-screen absolute opacity-0" />
+                  <div className="w-full h-screen absolute inset-0 bg-client-primary" />
                   {/* CANVAS */}
                   {campaignParams?.campaign &&
                     <AvatarEditor
@@ -564,7 +564,7 @@ export default function LuksoComponent({
                   }
                 </div>
                 {/* LOADER */}
-                <div className={`fixed h-screen w-full flex justify-center items-center bg-client-primary top-14 duration-100 transition-all ${isLoading ? 'flex' : 'hidden'}`}>
+                <div className={`fixed inset-0 h-screen w-full flex justify-center items-center bg-client-primary duration-100 transition-all ${isLoading ? 'flex' : 'hidden'}`}>
                   <div className="scale-[3]">
                     <Loader />
                   </div>
