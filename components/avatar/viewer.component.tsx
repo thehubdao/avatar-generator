@@ -2,6 +2,8 @@ import { useEffect, useRef } from "react";
 import {
   AnimationMixer,
   Clock,
+  Material,
+  Mesh,
   Object3D,
   PerspectiveCamera,
   Scene,
@@ -43,6 +45,8 @@ const _clock: Clock = new Clock();
 
 let _tanFOV: number | undefined;
 let _windowHeight: number | undefined;
+
+let _animReq: number;
 
 export function AddMixer(newMixer: AnimationMixer) {
   if (!_mixers.some(m => m === newMixer))
@@ -196,7 +200,6 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
   useEffect(() => {
     const componentDidMount = async () => {
       await initScene();
-
       await onReady()
     };
 
@@ -205,7 +208,12 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     return () => { 
-      threeCanvas.current?.remove() }
+      window.removeEventListener('resize', onWindowResize, false);
+      cancelAnimationFrame(_animReq);
+      disposeScene();
+      
+      threeCanvas.current?.remove();
+    }
   }, []);
 
 
@@ -243,6 +251,42 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
     _willCameraMove = false;
   }
 
+  function disposeScene() {
+    if(_renderer === undefined) return LogWarning(Module.Viewer, "Error disposing renderer, renderer is undefined");
+    if(_scene === undefined) return LogWarning(Module.Viewer, "Error disposing scene, scene is undefined");
+
+    const cleanMaterial = (material: Material) => {
+      material.dispose();
+
+      // dispose textures
+      for (const key of Object.keys(material)) {
+        const value = material[key as keyof Material];
+        if (value && typeof value === 'object' && 'minFilter' in value) {
+          value.dispose();
+        }
+      }
+    }
+
+    _scene.traverse(object => {
+      if (!(object as Mesh).isMesh) return
+
+      const mesh = object as Mesh;
+
+      if ((mesh.material as Material).isMaterial) {
+        cleanMaterial(mesh.material as Material);
+      } else {
+        // an array of materials
+        for (const material of (mesh.material as Material[])) cleanMaterial(material);
+      }
+
+      mesh.geometry.dispose();
+    })
+
+    // _renderer.dispose();
+    // _scene.clear();
+    _renderer.forceContextLoss();
+  }
+
   const onWindowResize = () => {
     if (_scene == undefined) return void LogError(Module.Viewer, "Missing scene on resize!");
     if (_renderer == undefined) return void LogError(Module.Viewer, "Missing Renderer on resize!");
@@ -268,7 +312,7 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
     if (_camera == undefined) return void LogError(Module.Viewer, "Missing Camera for rendering!");
     if (_controls == undefined) return void LogError(Module.Viewer, "Missing camera controls!");
 
-    requestAnimationFrame(Animate);
+    _animReq = requestAnimationFrame(Animate);
 
     const delta = _clock.getDelta();
 
