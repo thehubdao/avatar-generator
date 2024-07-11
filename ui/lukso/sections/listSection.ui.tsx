@@ -2,7 +2,7 @@ import Image from "next/image";
 import { CiSearch } from "react-icons/ci";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { TokenId } from "../../../types/metadata.type";
+import { TokenId, TokenMetadata } from "../../../types/metadata.type";
 import CampaignDropdown from "../../../components/lukso/dropdown.component";
 import ListItem from "../common/listItem";
 import TransparentBoxUI from "../common/transparentBox.ui";
@@ -11,8 +11,8 @@ import Loader from "../common/loader.ui";
 interface ListSectionUIProps {
   provider: ethers.BrowserProvider | undefined;
   tokenIdList: TokenId[] | undefined
-  onClickViewButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
-  onClickEditButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
+  onClickViewButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata: TokenMetadata, tokenId: number) => void;
+  onClickEditButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata: TokenMetadata, tokenId: number) => void
 
 }
 

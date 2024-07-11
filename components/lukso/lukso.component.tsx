@@ -40,6 +40,7 @@ import {
   GetAvatarSingleByCampaignCombinationString,
   GetEnvMapListByCampaign,
   GetStageListByCampaign,
+  PostRequestThumbnailProcessFile,
   PostRequestVRMProcessFile,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
@@ -65,10 +66,13 @@ import { ethers } from 'ethers'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getCampaignsTokenIds, getUserFeatures } from '../../utils/web3/contract.util'
+import { getCampaignsTokenIds, getUserFeatures, setTokenMetadata, tempCampaignSwitch } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
+import { uploadMetadata } from '../../utils/metadata.util'
+import { UploadFile } from '../../utils/firebase.util'
+import { StorageLocation } from '../../enums/firebase.enum'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -124,6 +128,8 @@ export default function LuksoComponent({
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
   const [selectedCombination, setSelectedCombination] = useState<string>()
   const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>()
+  const [selectedTokenId, setSelectedTokenId] = useState<number>()
+  const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>()
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
   const [addressToShow, setAddressToShow] = useState<string>('')
@@ -245,7 +251,6 @@ export default function LuksoComponent({
     const campaignDropList = dropList[campaignParams?.campaign as keyof typeof dropList]
 
     if (campaignDropList) {
-      console.log(campaignDropList)
       const formattedDropList = campaignDropList.map((val) => {
         return optionList?.find((option) => option.type === val.type && val.index === option.index) as FeatureInterface
       })
@@ -344,6 +349,11 @@ export default function LuksoComponent({
     name: string,
     _selectedCategory: string = selectedCategory
   ) {
+    const currentFeatures = singleInitData?.features
+    const changedFeature = optionList?.find((feature) => feature.type === _selectedCategory && feature.id === id)
+    const currentFeaturesTypeIndex = currentFeatures?.findIndex((feature) => feature.val.type === _selectedCategory)
+
+    if (currentFeaturesTypeIndex && changedFeature && singleInitData) singleInitData.features[currentFeaturesTypeIndex].val = changedFeature
     await ChangeFeature(
       id,
       path,
@@ -355,6 +365,28 @@ export default function LuksoComponent({
     )
 
     addReplaceAttribute(_selectedCategory, name)
+  }
+
+  //Saves avatar new combination to NFT metadata
+  async function saveCombination() {
+    const newCombination = singleInitData?.features.map((feature) => feature.val.index).join('-')
+
+    if (newCombination == selectedCombination || !campaignParams || !campaignParams.campaign || !selectedTokenId || !newCombination || !selectedMetadata) return
+
+    const newMetadata = selectedMetadata
+    newMetadata.combination = newCombination
+    newMetadata.attributes = []
+
+    const thumbnailBlob = await getAvatarThumbnail()
+    console.log(thumbnailBlob)
+    singleInitData?.features.forEach((feature) => {
+      newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
+      newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body] = feature.val as BodyPart
+    })
+    const metadataUri = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, campaignParams.campaign)
+    const metadataUrl = `ipfs://${metadataUri}`
+    await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
+
   }
 
   function addReplaceAttribute(addId: string, addValue: string) {
@@ -429,6 +461,13 @@ export default function LuksoComponent({
       await SaveFile(modelGLB, `model.glb`);
       await SaveFile(picturePromise, 'picture.png');
     }
+  }
+
+  const getAvatarThumbnail = async () => {
+    const avatarVRMPromise = await GetAvatarVRM()
+    const modelVRM = avatarVRMPromise.success ? avatarVRMPromise.value : undefined;
+    const thumbnail = await PostRequestThumbnailProcessFile(modelVRM as Blob)
+    return thumbnail
   }
 
   function formatearString(inputString: string): string {
@@ -522,22 +561,26 @@ export default function LuksoComponent({
                 tokenIdList={tokenIdList}
                 provider={provider}
                 onClickViewButton={
-                  (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
+                  (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
                     setIsLoading(true)
                     if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
                     if (selectedCombination != _combination) setSelectedCombination(_combination)
                     if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
                     if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                    if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
+                    if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
                     setIsEditModeSelected(false)
                   }
                 }
                 onClickEditButton={
-                  (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
+                  (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
                     setIsLoading(true)
                     if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
                     if (selectedCombination != _combination) setSelectedCombination(_combination)
                     if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
                     if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                    if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
+                    if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
                     setIsEditModeSelected(true)
                   }
                 }
@@ -589,6 +632,7 @@ export default function LuksoComponent({
                     }
                     skinColor={skinColor}
                     changeView={() => {
+                      saveCombination()
                       setIsEditModeSelected(!isEditModeSelected)
                       void updateStage(!isEditModeSelected)
                     }}

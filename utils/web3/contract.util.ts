@@ -1,4 +1,4 @@
-import { Contract, JsonRpcProvider, Signer, TransactionResponse } from 'ethers'
+import { Contract, ethers, JsonRpcProvider, Signer, TransactionResponse } from 'ethers'
 import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import WerableContractAbi from '../../constants/abi/WearableContractABI.json'
@@ -7,16 +7,30 @@ import { Campaign, CampaignData, CampaignDrops, Drop, TokenId, TokenMetadata } f
 import { getIPFSData, getImageUrl } from './lukso.util';
 import { GetCollectionDocs } from '../firebase.util';
 import noMetadataTokens from '../../constants/lukso/NoMetadataTokens.json'
+import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
+
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL
+const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS;
+const PK = process.env.NEXT_PUBLIC_PK!
 
 const config = {
     ipfsGateway: 'ipfs://',
 };
 
 const provider = new JsonRpcProvider(RPC_URL);
+
+const universalProfile = new ethers.Contract(
+    UNIVERSAL_PROFILE_ADDRESS as string,
+    UniversalProfileABI,
+    provider,
+);
+
+const EOA = new ethers.Wallet(PK).connect(provider);
+
+const OPERATION_CALL = 0;
 
 export const tempCampaignSwitch = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b' }
 
@@ -59,6 +73,14 @@ const schemas = [
 const avatarERC725Contract = new ERC725(schemas, AVATAR_CONTRACT_ADDRESS, provider, config);
 const avatarContract = new Contract(AVATAR_CONTRACT_ADDRESS, AvatarContractAbi, provider)
 const proxyContract = new Contract(AVATAR_PROXY_ADDRESS, ProxyContractAbi, provider)
+
+function toHex64(num: number) {
+    let hex = num.toString(16);
+
+    hex = hex.padStart(64, '0');
+
+    return '0x' + hex;
+}
 
 
 export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata, walletSigner: Signer) => {
@@ -118,6 +140,7 @@ export const getCampaignsTokenIds = async (address: string) => {
         })
         campaignsTokenIds = campaignsTokenIds.concat(formattedTokenIds)
     }
+    console.log(campaignsTokenIds)
     return campaignsTokenIds
 }
 
@@ -249,3 +272,30 @@ export const getUserFeatures = async (address: string) => {
     return features
 }
 
+export const setTokenMetadata = async (campaign: Campaign, tokenId: number, tokenMetadata: TokenMetadata, metadataUrl:string) => {
+    const targetContractAddress = campaignWeb3Data[campaign].contractAddress
+    const avatarContract = new ethers.Contract(
+        targetContractAddress,
+        AvatarContractAbi,
+        provider,
+    );
+
+    const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
+    const metadataDataValue = avatarERC725Contract.encodeData([
+        {
+            keyName: 'LSP4Metadata',
+            value: {
+                json: { "LSP4Metadata": tokenMetadata },
+                url: metadataUrl,
+            },
+        },
+    ])
+    console.log(toHex64(tokenId))
+    const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [toHex64(tokenId), metadataDataKey, metadataDataValue.values[0]])
+    const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
+        targetContractAddress, // address zero
+        0, // amount to the fund the contract with when deploying
+        setMetadataDataEncodedFunction
+    )
+    tx.wait()
+} 

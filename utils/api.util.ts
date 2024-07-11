@@ -97,6 +97,24 @@ export async function PostRequestVRMProcessFile(VRMFile: Blob): Promise<Blob> {
   }
 }
 
+export async function PostRequestThumbnailProcessFile(VRMFile: Blob): Promise<Blob> {
+  try {
+    const formData = new FormData()
+    formData.append("file", VRMFile)
+    // in case, consider to add metadata to the payload
+    formData.append("metadata", "vrm-file")
+    const response = await fetch(`${VRM_PROCESS_SERVICE_URL}/create-thumbnail`, { method: "POST", body: formData })
+    const processedFile = await response.blob()
+
+    return processedFile
+  
+  } catch(fail) {
+    console.error(fail)
+
+    throw fail
+  }
+}
+
 //#endregion
 
 export async function GetAssetsListByCampaign(campaign?: string | null) {

@@ -4,7 +4,7 @@ import { FaRegEye } from "react-icons/fa6";
 import { SlPencil } from "react-icons/sl";
 import { useEffect, useState } from "react";
 import { getTokenMetadata, tempCampaignSwitch } from "../../../utils/web3/contract.util";
-import { TokenId } from "../../../types/metadata.type";
+import { TokenId, TokenMetadata } from "../../../types/metadata.type";
 import { UploadFile } from "../../../utils/firebase.util";
 import { StorageLocation } from "../../../enums/firebase.enum";
 import Loader from "./loader.ui";
@@ -12,13 +12,13 @@ import Loader from "./loader.ui";
 interface ListItemProps {
   campaignDBName: string;
   nftName: string;
-  onClickViewButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
-  onClickEditButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
+  onClickViewButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata:TokenMetadata, tokenId:number) => void;
+  onClickEditButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata:TokenMetadata, tokenId:number) => void;
   tokenId: TokenId
 }
 
 export default function ListItem({ campaignDBName, onClickViewButton, onClickEditButton, nftName, tokenId }: ListItemProps) {
-  const [tokenMetadata, setTokenMetadata] = useState<{ imageUrl: string, fallbackImageUrl: string, combination: string, baseCombination: string }>()
+  const [tokenMetadata, setTokenMetadata] = useState<TokenMetadata>()
   const [didError, setDidError] = useState(false);
   const [shouldReveal, setShouldReveal] = useState(false);
 
@@ -58,7 +58,7 @@ export default function ListItem({ campaignDBName, onClickViewButton, onClickEdi
           <div className="flex flex-col z-10 justify-center items-center absolute inset-0 opacity-0 group-hover:opacity-100 h-[256px] w-full rounded-[10px_10px_0px_0px] backdrop-blur-sm transition-opacity duration-500">
             <div className="px-10 w-full mb-2">
               <div onClick={() =>
-                onClickViewButton(campaignDBName, tokenMetadata.combination, tokenMetadata.baseCombination, tokenMetadata.imageUrl)
+                onClickViewButton(campaignDBName, tokenMetadata.combination, tokenMetadata.baseCombination, tokenMetadata.imageUrl, tokenMetadata, Number(tokenId.tokenId))
               }>
                 <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
                   <div className="flex items-center gap-3">
@@ -69,7 +69,7 @@ export default function ListItem({ campaignDBName, onClickViewButton, onClickEdi
               </div>
             </div>
             <div className="px-10 w-full">
-              <div onClick={() => onClickEditButton(campaignDBName, tokenMetadata.combination, tokenMetadata.baseCombination, tokenMetadata.imageUrl)}>
+              <div onClick={() => onClickEditButton(campaignDBName, tokenMetadata.combination, tokenMetadata.baseCombination, tokenMetadata.imageUrl, tokenMetadata, Number(tokenId.tokenId))}>
                 <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
                   <div className="flex items-center gap-3">
                     <p className="text-black">Edit</p>
