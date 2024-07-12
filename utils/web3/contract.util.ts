@@ -312,11 +312,11 @@ export const burnDrop = async (from: string, campaign: string, drop: BodyPart) =
 
     const dropContract = new Contract(dropPair.contract_address, WerableContractAbi, provider)
 
-/*     const burnEncondedFunction = avatarContract.interface.encodeFunctionData('burn', [toHex64(tokenId), metadataDataKey, metadataDataValue.values[0]])
+    const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1])
     const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
-        targetContractAddress, // address zero
+        dropPair.contract_address,
         0, // amount to the fund the contract with when deploying
-        setMetadataDataEncodedFunction
+        burnEncondedFunction
     )
-    tx.wait() */
+    tx.wait()
 }
