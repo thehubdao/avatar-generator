@@ -66,7 +66,7 @@ import { ethers } from 'ethers'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getCampaignsTokenIds, getUserFeatures, setTokenMetadata, tempCampaignSwitch } from '../../utils/web3/contract.util'
+import { burnDrop, getCampaignsTokenIds, getUserFeatures, setTokenMetadata, tempCampaignSwitch } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
@@ -377,16 +377,28 @@ export default function LuksoComponent({
     newMetadata.combination = newCombination
     newMetadata.attributes = []
 
-    const thumbnailBlob = await getAvatarThumbnail()
-    console.log(thumbnailBlob)
+    const thumbnailBlob = await getAvatarThumbnail() 
+
+    const burnDropArray:BodyPart[] = []
+
     singleInitData?.features.forEach((feature) => {
       newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
-      newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body] = feature.val as BodyPart
+      const bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
+      if (bodyFeature && bodyFeature.name != feature.val.name) {
+        newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body] = feature.val as BodyPart
+
+        burnDropArray.push(bodyFeature)
+      }
     })
     const metadataUri = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, campaignParams.campaign)
     const metadataUrl = `ipfs://${metadataUri}`
     await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
-
+    for (let i = 0; i < burnDropArray.length; i++) {
+      const drop = burnDropArray[i];
+      await burnDrop(addressToShow, campaignParams.campaign, drop)
+      
+    }
+    
   }
 
   function addReplaceAttribute(addId: string, addValue: string) {
@@ -464,9 +476,9 @@ export default function LuksoComponent({
   }
 
   const getAvatarThumbnail = async () => {
-    const avatarVRMPromise = await GetAvatarVRM()
-    const modelVRM = avatarVRMPromise.success ? avatarVRMPromise.value : undefined;
-    const thumbnail = await PostRequestThumbnailProcessFile(modelVRM as Blob)
+    const avatarGLBPromise = await GetAvatarGLB()
+    const modelGLB = avatarGLBPromise.success ? avatarGLBPromise.value : undefined;
+    const thumbnail = await PostRequestThumbnailProcessFile(modelGLB as Blob)
     return thumbnail
   }
 

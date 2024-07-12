@@ -8,6 +8,7 @@ import { getIPFSData, getImageUrl } from './lukso.util';
 import { GetCollectionDocs } from '../firebase.util';
 import noMetadataTokens from '../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
+import { BodyPart } from '../../types/avatar.type';
 
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
@@ -272,7 +273,7 @@ export const getUserFeatures = async (address: string) => {
     return features
 }
 
-export const setTokenMetadata = async (campaign: Campaign, tokenId: number, tokenMetadata: TokenMetadata, metadataUrl:string) => {
+export const setTokenMetadata = async (campaign: Campaign, tokenId: number, tokenMetadata: TokenMetadata, metadataUrl: string) => {
     const targetContractAddress = campaignWeb3Data[campaign].contractAddress
     const avatarContract = new ethers.Contract(
         targetContractAddress,
@@ -298,4 +299,24 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: number, toke
         setMetadataDataEncodedFunction
     )
     tx.wait()
-} 
+}
+
+export const burnDrop = async (from: string, campaign: string, drop: BodyPart) => {
+    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
+
+    if (!dropsData) return
+
+    const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name })
+
+    if (!dropPair) return
+
+    const dropContract = new Contract(dropPair.contract_address, WerableContractAbi, provider)
+
+/*     const burnEncondedFunction = avatarContract.interface.encodeFunctionData('burn', [toHex64(tokenId), metadataDataKey, metadataDataValue.values[0]])
+    const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
+        targetContractAddress, // address zero
+        0, // amount to the fund the contract with when deploying
+        setMetadataDataEncodedFunction
+    )
+    tx.wait() */
+}
