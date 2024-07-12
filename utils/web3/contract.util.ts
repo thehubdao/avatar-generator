@@ -250,6 +250,6 @@ export const getUserFeatures = async (address: string) => {
 }
 
 
-export const burnDrop = async (from: string, campaign:string) => {
+/* export const burnDrop = async (from: string, campaign:string) => {
     const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
- }
+ } */
