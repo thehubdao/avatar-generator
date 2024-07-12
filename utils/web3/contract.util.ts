@@ -249,3 +249,7 @@ export const getUserFeatures = async (address: string) => {
     return features
 }
 
+
+export const burnDrop = async (from: string, campaign:string) => {
+    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
+ }
