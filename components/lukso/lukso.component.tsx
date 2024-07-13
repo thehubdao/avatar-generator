@@ -60,19 +60,17 @@ import {
   ExportInterface,
   LookAtVectors,
 } from '../../interfaces/common.interface'
-import { CampaignDrops, TokenId, TokenMetadata } from '../../types/metadata.type'
+import { Campaign, CampaignDrops, TokenId, TokenMetadata } from '../../types/metadata.type'
 import { BodyPart } from '../../types/avatar.type'
 import { ethers } from 'ethers'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { burnDrop, getCampaignsTokenIds, getUserFeatures, setTokenMetadata, tempCampaignSwitch } from '../../utils/web3/contract.util'
+import { getCampaignsTokenIds, getUserFeatures, setTokenMetadata } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
 import { uploadMetadata } from '../../utils/metadata.util'
-import { UploadFile } from '../../utils/firebase.util'
-import { StorageLocation } from '../../enums/firebase.enum'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -104,7 +102,7 @@ export default function LuksoComponent({
   setCampaign,
 }: {
   campaignParams?: CampaignParameters,
-  setCampaign: (campaign: string | undefined) => void
+  setCampaign: (campaign: Campaign | undefined) => void
 }) {
   // Loading flags
   const [currentSection, setCurrentSection] = useState<LuksoSections>(
@@ -393,11 +391,11 @@ export default function LuksoComponent({
     const metadataUri = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, campaignParams.campaign)
     const metadataUrl = `ipfs://${metadataUri}`
     await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
-    for (let i = 0; i < burnDropArray.length; i++) {
+/*     for (let i = 0; i < burnDropArray.length; i++) {
       const drop = burnDropArray[i];
       await burnDrop(addressToShow, campaignParams.campaign, drop)
       
-    }
+    } */
     
   }
 
@@ -573,7 +571,7 @@ export default function LuksoComponent({
                 tokenIdList={tokenIdList}
                 provider={provider}
                 onClickViewButton={
-                  (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
+                  (_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
                     setIsLoading(true)
                     if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
                     if (selectedCombination != _combination) setSelectedCombination(_combination)
@@ -585,7 +583,7 @@ export default function LuksoComponent({
                   }
                 }
                 onClickEditButton={
-                  (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
+                  (_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
                     setIsLoading(true)
                     if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
                     if (selectedCombination != _combination) setSelectedCombination(_combination)

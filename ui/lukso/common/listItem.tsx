@@ -4,16 +4,16 @@ import { FaRegEye } from "react-icons/fa6";
 import { SlPencil } from "react-icons/sl";
 import { useEffect, useState } from "react";
 import { getTokenMetadata, tempCampaignSwitch } from "../../../utils/web3/contract.util";
-import { TokenId, TokenMetadata } from "../../../types/metadata.type";
+import { Campaign, TokenId, TokenMetadata } from "../../../types/metadata.type";
 import { UploadFile } from "../../../utils/firebase.util";
 import { StorageLocation } from "../../../enums/firebase.enum";
 import Loader from "./loader.ui";
 
 interface ListItemProps {
-  campaignDBName: string;
+  campaignDBName: Campaign;
   nftName: string;
-  onClickViewButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata:TokenMetadata, tokenId:number) => void;
-  onClickEditButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata:TokenMetadata, tokenId:number) => void;
+  onClickViewButton: (campaign: Campaign, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata:TokenMetadata, tokenId:number) => void;
+  onClickEditButton: (campaign: Campaign, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata:TokenMetadata, tokenId:number) => void;
   tokenId: TokenId
 }
 

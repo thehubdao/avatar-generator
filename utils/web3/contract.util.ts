@@ -75,7 +75,7 @@ const avatarERC725Contract = new ERC725(schemas, AVATAR_CONTRACT_ADDRESS, provid
 const avatarContract = new Contract(AVATAR_CONTRACT_ADDRESS, AvatarContractAbi, provider)
 const proxyContract = new Contract(AVATAR_PROXY_ADDRESS, ProxyContractAbi, provider)
 
-function toHex64(num: number) {
+function ToHex64(num: number) {
     let hex = num.toString(16);
 
     hex = hex.padStart(64, '0');
@@ -255,6 +255,7 @@ export const getCampaignUserFeatures = async (address: string, campaign: string)
         const { contract_address } = drop
         const contract = new Contract(contract_address, WerableContractAbi, provider)
         const tokenBalance = await contract.balanceOf(address)
+        console.log(Number(tokenBalance))
         if (Number(tokenBalance) > 0) features.push(drop)
     }
     return features
@@ -291,8 +292,8 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: number, toke
             },
         },
     ])
-    console.log(toHex64(tokenId))
-    const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [toHex64(tokenId), metadataDataKey, metadataDataValue.values[0]])
+    console.log(ToHex64(tokenId))
+    const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [ToHex64(tokenId), metadataDataKey, metadataDataValue.values[0]])
     const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         targetContractAddress, // address zero
         0, // amount to the fund the contract with when deploying
@@ -311,7 +312,7 @@ export const burnDrop = async (from: string, campaign: string, drop: BodyPart) =
     if (!dropPair) return
 
     const dropContract = new Contract(dropPair.contract_address, WerableContractAbi, provider)
-
+    console.log(dropPair.contract_address)
     const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1])
     const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         dropPair.contract_address,

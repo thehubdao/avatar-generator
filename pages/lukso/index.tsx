@@ -4,11 +4,12 @@ import { CampaignParameters } from "../../interfaces/common.interface";
 import { CampaignParameterName, Module } from "../../enums/common.enum";
 import { LogError, RemoveUndefinedProperties } from "../../utils/common.util";
 import { useEffect, useState } from "react";
+import { Campaign } from "../../types/metadata.type";
 
 
 
 export default function LuksoAvatarView() {
-  const [campaign, setCampaign] = useState<string>()
+  const [campaign, setCampaign] = useState<Campaign>()
   const [campaignParams, setCampaignParams] = useState<CampaignParameters>()
 
   const getCampaignParams = async () => {
@@ -26,7 +27,7 @@ export default function LuksoAvatarView() {
     void getCampaignParams()
   }, [campaign])
   
-  return <LuksoComponent campaignParams={campaignParams} setCampaign={(_campaign: string | undefined) => {
+  return <LuksoComponent campaignParams={campaignParams} setCampaign={(_campaign: Campaign | undefined) => {
     setCampaign(_campaign)
   }} />
 }
