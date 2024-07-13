@@ -66,7 +66,7 @@ import { ethers } from 'ethers'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getCampaignsTokenIds, getUserFeatures, setTokenMetadata } from '../../utils/web3/contract.util'
+import { burnDrop, getCampaignsTokenIds, getUserFeatures, setTokenMetadata } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
@@ -391,11 +391,11 @@ export default function LuksoComponent({
     const metadataUri = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, campaignParams.campaign)
     const metadataUrl = `ipfs://${metadataUri}`
     await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
-/*     for (let i = 0; i < burnDropArray.length; i++) {
+     for (let i = 0; i < burnDropArray.length; i++) {
       const drop = burnDropArray[i];
       await burnDrop(addressToShow, campaignParams.campaign, drop)
       
-    } */
+    } 
     
   }
 
