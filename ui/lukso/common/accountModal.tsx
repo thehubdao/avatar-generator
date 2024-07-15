@@ -34,7 +34,7 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
   }
 
   return (
-    <div className="z-10 bg-black bg-opacity-30 w-full h-screen fixed top-0 flex justify-center items-center">
+    <div className="z-50 bg-black bg-opacity-30 w-full h-screen fixed top-0 flex justify-center items-center">
       <TransparentBoxUI fullWidth border heightClass="h-fit min-h-[240px]" backgroundColorClass="bg-client-primary">
         <div className="min-w-[515px] flex flex-col gap-4 justify-center items-center">
           <Image
