@@ -215,7 +215,6 @@ export default function LuksoComponent({
     // fade loader view
     await handleFadeLoader(loaderDivElement, () => {
       setIsLoading(false)
-      setCurrentSection(LuksoSections.Edit)
     })
 
   }
@@ -326,8 +325,6 @@ export default function LuksoComponent({
         campaignParams?.config.skin?.defColor ?? 'ffffff'
       )
     }
-    setIsLoading(false)
-
   }
 
   async function updateStage(isEditMode: boolean) {
@@ -580,6 +577,7 @@ export default function LuksoComponent({
                     if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
                     if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
                     setIsEditModeSelected(false)
+                    setCurrentSection(LuksoSections.Edit)
                   }
                 }
                 onClickEditButton={
@@ -592,6 +590,7 @@ export default function LuksoComponent({
                     if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
                     if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
                     setIsEditModeSelected(true)
+                    setCurrentSection(LuksoSections.Edit)
                   }
                 }
               />
@@ -617,9 +616,9 @@ export default function LuksoComponent({
                   }
                 </div>
                 {/* LOADER */}
-                <div className={`fixed inset-0 h-screen w-full flex justify-center items-center bg-client-primary duration-100 transition-all ${isLoading ? 'flex' : 'hidden'}`}>
+                <div className={`fixed inset-0 h-screen w-full flex justify-center items-center bg-client-primary ${isLoading ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-all duration-1000`}>
                   <div className="scale-[3]">
-                    <Loader />
+                    <Loader size={100}/>
                   </div>
                 </div>
                 {/* EDITOR HUD */}
@@ -675,6 +674,7 @@ export default function LuksoComponent({
                     setSelectedCombination(undefined)
                     setCampaign(undefined)
                     setSelectedCategory('head')
+                    singleInitData = undefined
                     optionList = []
                   }} goEditMode={() => setIsEditModeSelected(true)}
                 />
