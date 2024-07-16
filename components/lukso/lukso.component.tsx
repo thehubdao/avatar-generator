@@ -71,6 +71,7 @@ import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
 import { uploadMetadata } from '../../utils/metadata.util'
+import Toastify from 'toastify-js'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -136,6 +137,20 @@ export default function LuksoComponent({
   )
   const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false)
   const [{ wallet }] = useConnectWallet()
+
+//Notification on save combination
+
+  const saveNotification = Toastify({
+    text: "The changes are being saved onchain, it might take up to 4 minutes for them to be effective. Do not leave the app.",
+    gravity: "bottom", // `top` or `bottom`
+    position: "center", // `left`, `center` or `right`
+    stopOnFocus: true, // Prevents dismissing of toast on hover
+    duration:0,
+    className:"!text-[#C25399]",
+    style: {
+      background: "#FFD9EF",
+    },
+  })
 
   useEffect(() => {
     if (!addressToShow) return
@@ -368,6 +383,8 @@ export default function LuksoComponent({
 
     if (newCombination == selectedCombination || !campaignParams || !campaignParams.campaign || !selectedTokenId || !newCombination || !selectedMetadata) return
 
+    saveNotification.showToast()
+
     const newMetadata = selectedMetadata
     newMetadata.combination = newCombination
     newMetadata.attributes = []
@@ -393,6 +410,7 @@ export default function LuksoComponent({
       await burnDrop(addressToShow, campaignParams.campaign, drop)
       
     } 
+    saveNotification.hideToast()
     
   }
 
