@@ -692,6 +692,7 @@ export default function LuksoComponent({
                     setSelectedCombination(undefined)
                     setCampaign(undefined)
                     setSelectedCategory('head')
+                    setOptionListShow([])
                     singleInitData = undefined
                     optionList = []
                   }} goEditMode={() => setIsEditModeSelected(true)}
