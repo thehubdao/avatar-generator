@@ -138,15 +138,15 @@ export default function LuksoComponent({
   const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false)
   const [{ wallet }] = useConnectWallet()
 
-//Notification on save combination
+  //Notification on save combination
 
   const saveNotification = Toastify({
     text: "The changes are being saved onchain, it might take up to 4 minutes for them to be effective. Do not leave the app.",
     gravity: "bottom", // `top` or `bottom`
     position: "center", // `left`, `center` or `right`
     stopOnFocus: true, // Prevents dismissing of toast on hover
-    duration:0,
-    className:"!text-[#C25399]",
+    duration: 0,
+    className: "!text-[#C25399]",
     style: {
       background: "#FFD9EF",
     },
@@ -389,9 +389,9 @@ export default function LuksoComponent({
     newMetadata.combination = newCombination
     newMetadata.attributes = []
 
-    const thumbnailBlob = await getAvatarThumbnail() 
+    const thumbnailBlob = await getAvatarThumbnail()
 
-    const burnDropArray:BodyPart[] = []
+    const burnDropArray: BodyPart[] = []
 
     singleInitData?.features.forEach((feature) => {
       newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
@@ -402,16 +402,25 @@ export default function LuksoComponent({
         burnDropArray.push(bodyFeature)
       }
     })
-    const metadataUri = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, campaignParams.campaign)
-    const metadataUrl = `ipfs://${metadataUri}`
+    const metadataObject = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, campaignParams.campaign)
+    const _tokenIdList = tokenIdList as TokenId[]
+    const tokenIdIndex = _tokenIdList?.findIndex(({ tokenId }) => Number(tokenId) === selectedTokenId)
+    if (tokenIdIndex) {
+      console.log(selectedTokenId, tokenIdIndex, _tokenIdList)
+      _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
+    }
+
+    setTokenIdList(_tokenIdList)
+    const metadataUrl = `ipfs://${metadataObject.uri}`
     await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
-     for (let i = 0; i < burnDropArray.length; i++) {
+    setCombinationPictureUrl(`https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams.campaign}%2Favatar_images%2F${newCombination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`)
+    for (let i = 0; i < burnDropArray.length; i++) {
       const drop = burnDropArray[i];
       await burnDrop(addressToShow, campaignParams.campaign, drop)
-      
-    } 
+
+    }
     saveNotification.hideToast()
-    
+
   }
 
   function addReplaceAttribute(addId: string, addValue: string) {
@@ -636,7 +645,7 @@ export default function LuksoComponent({
                 {/* LOADER */}
                 <div className={`fixed inset-0 h-screen w-full flex justify-center items-center bg-client-primary ${isLoading ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-all duration-1000`}>
                   <div className="scale-[3]">
-                    <Loader size={100}/>
+                    <Loader size={100} />
                   </div>
                 </div>
                 {/* EDITOR HUD */}

@@ -22,5 +22,5 @@ export const uploadMetadata = async (tokenMetadata: TokenMetadata, metadataThumb
     },]]
 
     const metadata = await pinata.pinJSONToIPFS({'LSP4Metadata':tokenMetadata})
-    return metadata.IpfsHash
+    return {uri:metadata.IpfsHash, imageUrl}
 }

@@ -28,7 +28,7 @@ export type TokenMetadata = {
     }
 }
 
-export type TokenId = { tokenId: string, campaign: string, metadataUri:string }
+export type TokenId = { tokenId: string, campaign: string, metadataUri:string}
 
 export const campaigns = { 'vrm_male': 'vrm_male', 'vrm_female': 'vrm_female' }
 
