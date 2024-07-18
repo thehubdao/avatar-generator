@@ -75,12 +75,9 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
             <Image
               src={picture}
               fill
-              alt="lukso avatar selfie view"
               style={{ objectFit: "cover" }}
               className={`opacity-0 ${shouldReveal ? 'scale-100 opacity-100' : 'scale-125'} transition-all duration-1000 ease-out`}
-
-              onLoadingComplete={() => setShouldReveal(true)}
-            />
+              onLoadingComplete={() => setShouldReveal(true)} alt={""}            />
           </div>
           {features ?
             <FeatureListUI features={features} />

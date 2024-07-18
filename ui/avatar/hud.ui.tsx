@@ -48,6 +48,7 @@ interface HudUIProps {
   exportModel: () => Promise<void>;
   isCustomCampaignHud?: boolean;
   exportAllow?: ModelExtension[];
+  onClickBackButton: () => void
 }
 
 export default function HudUI({
@@ -64,7 +65,8 @@ export default function HudUI({
   changeView,
   exportModel,
   isCustomCampaignHud,
-  exportAllow
+  exportAllow,
+  onClickBackButton
 }: HudUIProps) {
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
@@ -198,11 +200,17 @@ export default function HudUI({
 
             {/* TITLE SECTION */}
             <div className="text-gray-normal pt-10 2xl:pt-0">
-              <div className="fixed right-0 bottom-0 flex justify-end pb-6 pt-12 2xl:static">
-                <AGButton onClickEvent={() => setIsSaveModalOpen(true)} nm={isWindowGreaterThan1536}>
-                  <p className="font-poppins text-center w-[240px] py-2">SAVE</p>
-                </AGButton>
-              </div>
+              <div className="flex justify-end">
+                <div className="fixed right-0 bottom-0  pb-6 pt-12 2xl:static">
+                  <AGButton onClickEvent={() => onClickBackButton()} nm={isWindowGreaterThan1536}>
+                    <p className="font-poppins text-center w-[240px] py-2">GO BACK</p>
+                  </AGButton>
+                </div>
+                <div className="fixed right-0 bottom-0 pb-6 pt-12 2xl:static">
+                  <AGButton onClickEvent={() => setIsSaveModalOpen(true)} nm={isWindowGreaterThan1536}>
+                    <p className="font-poppins text-center w-[240px] py-2">SAVE</p>
+                  </AGButton>
+                </div></div>
               <div className="w-full">
                 <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
                 <HudFeatureTitleUI selectedFeature={RemovedAcc(selectedCategory)} />
