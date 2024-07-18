@@ -13,6 +13,7 @@ import HudFeatureTitleUI from "./common/hudTitle.ui";
 import { RemovedAcc } from "../../utils/common.util";
 import ExportButtonUI from "./common/exportButton.ui";
 import { ModelExtension } from "../../enums/export.enum";
+import SaveModalUI from "../lukso/common/saveModal";
 
 interface HudUIProps {
 
@@ -47,6 +48,7 @@ interface HudUIProps {
   exportModel: () => Promise<void>;
   isCustomCampaignHud?: boolean;
   exportAllow?: ModelExtension[];
+  onClickBackButton: () => void
 }
 
 export default function HudUI({
@@ -63,10 +65,13 @@ export default function HudUI({
   changeView,
   exportModel,
   isCustomCampaignHud,
-  exportAllow
+  exportAllow,
+  onClickBackButton
 }: HudUIProps) {
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false)
+
 
 
   //* todo, change this to redux to control screen size.
@@ -81,6 +86,7 @@ export default function HudUI({
 
     return () => {
       window.removeEventListener('resize', handleResize);
+
     };
   }, []);
 
@@ -110,7 +116,9 @@ export default function HudUI({
         </>}
         {
           <div className={`fixed bottom-0 left-0 w-screen bg-slate-100 ${editModeSelected ? 'h-64' : ' h-0'} transition-all duration-300`}>
+
             <div className="w-full">
+
               {/* FEATURES SELECTOR */}
               <div className="w-full">
                 <MobileFeatureSelectorUI
@@ -175,7 +183,9 @@ export default function HudUI({
         </div>}
         {/* WRAPPER */}
         <div className={`w-full h-full grid grid-cols-[148px_minmax(100px,_1fr)] ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 duration-200'} transition-all`}>
-
+          {isSaveModalOpen && <SaveModalUI setIsSaveModalOpen={(bol: boolean) => setIsSaveModalOpen(bol)} onSave={() => {
+            changeView()
+          }} />}
           {/* FEATURES SECTION */}
           <div className="h-screen">
             <FeatureSelector
@@ -184,15 +194,23 @@ export default function HudUI({
               onCategoryChange={(value: string) => onCategoryTypeChange(value)}
             />
           </div>
+
           {/* EDIT SECTION */}
           <div className="flex flex-col justify-between w-full px-8">
+
             {/* TITLE SECTION */}
             <div className="text-gray-normal pt-10 2xl:pt-0">
-              <div className="fixed right-0 bottom-0 flex justify-end pb-6 pt-12 2xl:static">
-                <AGButton onClickEvent={() => changeView()} nm={isWindowGreaterThan1536}>
-                  <p className="font-poppins text-center w-[240px] py-2">SAVE</p>
-                </AGButton>
-              </div>
+              <div className="flex justify-end">
+                <div className="fixed right-0 bottom-0  pb-6 pt-12 2xl:static">
+                  <AGButton onClickEvent={() => onClickBackButton()} nm={isWindowGreaterThan1536}>
+                    <p className="font-poppins text-center w-[240px] py-2">GO BACK</p>
+                  </AGButton>
+                </div>
+                <div className="fixed right-0 bottom-0 pb-6 pt-12 2xl:static">
+                  <AGButton onClickEvent={() => setIsSaveModalOpen(true)} nm={isWindowGreaterThan1536}>
+                    <p className="font-poppins text-center w-[240px] py-2">SAVE</p>
+                  </AGButton>
+                </div></div>
               <div className="w-full">
                 <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
                 <HudFeatureTitleUI selectedFeature={RemovedAcc(selectedCategory)} />

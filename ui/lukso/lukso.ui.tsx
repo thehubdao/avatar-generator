@@ -3,7 +3,6 @@ import LoadingUI from "./sections/loadingSection.ui";
 import { LuksoSections } from "../../enums/lukso/common.enum";
 import { ethers } from "ethers";
 import { IndexFeatureInterface } from "../../interfaces/api.interface";
-import ViewSectionUI from "./sections/viewSection.ui";
 
 interface LuksoUIProps {
   isLoading: boolean;
@@ -34,8 +33,7 @@ export default function LuksoUI({
   return (
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
-      {(currentSection === LuksoSections.View) && <ViewSectionUI onClickBackButton={onClickBackButton} combinationPictureUrl={combinationPictureUrl} combination={combination} features={features} />}
-      {(currentSection === LuksoSections.Edit) && <EditSectionUI picture={combinationPictureUrl} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} onClickBackButton={onClickBackButton}
+      {(currentSection === LuksoSections.Edit) && <EditSectionUI onClickBackButton={onClickBackButton} picture={combinationPictureUrl} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel}
         goEditMode={goEditMode} />}
     </div>
   )

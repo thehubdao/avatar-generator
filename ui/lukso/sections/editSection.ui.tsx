@@ -7,6 +7,7 @@ import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 import FeatureListUI from "../common/featureList.ui";
 import TransparentBoxUI from "../common/transparentBox.ui";
 import LogoUI from "../common/logo.ui";
+import Toastify from "toastify-js";
 
 interface EditSectionUIProps {
   exportModel: () => Promise<void>;
@@ -22,11 +23,25 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
   const [shouldReveal, setShouldReveal] = useState(false);
 
+  const downloadNotification = Toastify({
+    text: "Your Citizen is being downloaded, please wait.",
+    gravity: "bottom", // `top` or `bottom`
+    position: "center", // `left`, `center` or `right`
+    stopOnFocus: true, // Prevents dismissing of toast on hover
+    duration:0,
+    className:"!text-[#C25399]",
+    style: {
+      background: "#FFD9EF",
+    },
+  })
+
   const editAvatarRef = useRef<HTMLDivElement>(null);
 
   const handleExportModel = async () => {
     setIsExportingModel(true);
+    downloadNotification.showToast()
     await exportModel();
+    downloadNotification.hideToast()
     setIsExportingModel(false);
   }
 
@@ -60,12 +75,9 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
             <Image
               src={picture}
               fill
-              alt="lukso avatar selfie view"
               style={{ objectFit: "cover" }}
               className={`opacity-0 ${shouldReveal ? 'scale-100 opacity-100' : 'scale-125'} transition-all duration-1000 ease-out`}
-
-              onLoadingComplete={() => setShouldReveal(true)}
-            />
+              onLoadingComplete={() => setShouldReveal(true)} alt={""}            />
           </div>
           {features ?
             <FeatureListUI features={features} />

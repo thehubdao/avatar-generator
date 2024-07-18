@@ -2,7 +2,7 @@ import Image from "next/image";
 import { CiSearch } from "react-icons/ci";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
-import { TokenId } from "../../../types/metadata.type";
+import { Campaign, TokenId, TokenMetadata } from "../../../types/metadata.type";
 import CampaignDropdown from "../../../components/lukso/dropdown.component";
 import ListItem from "../common/listItem";
 import TransparentBoxUI from "../common/transparentBox.ui";
@@ -11,8 +11,8 @@ import Loader from "../common/loader.ui";
 interface ListSectionUIProps {
   provider: ethers.BrowserProvider | undefined;
   tokenIdList: TokenId[] | undefined
-  onClickViewButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
-  onClickEditButton: (campaign: string, combination: string, baseCombination: string, combinationPictureUrl: string) => void;
+  onClickViewButton: (campaign: Campaign, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata: TokenMetadata, tokenId: number) => void;
+  onClickEditButton: (campaign: Campaign, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata: TokenMetadata, tokenId: number) => void
 
 }
 
@@ -128,7 +128,7 @@ export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButt
           {processedListData &&
             processedListData.map((tokenMetadata: TokenId) => {
               const { tokenId, campaign } = tokenMetadata
-              const campaignDBName = campaignLabels[campaign as keyof typeof campaignLabels].campaignName
+              const campaignDBName = campaignLabels[campaign as keyof typeof campaignLabels].campaignName as Campaign
               const nftName = campaignLabels[campaign as keyof typeof campaignLabels].nftName
               /* ATTENTION:
               CAMPAIGN REAL NAMES AND CAMPAIGN NAME ON DB IS DIFFERENT AND SHOULD BE TOOK INTO ACOUNT,

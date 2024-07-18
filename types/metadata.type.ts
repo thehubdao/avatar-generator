@@ -28,7 +28,7 @@ export type TokenMetadata = {
     }
 }
 
-export type TokenId = { tokenId: string, campaign: string, metadataUri:string }
+export type TokenId = { tokenId: string, campaign: string, metadataUri:string}
 
 export const campaigns = { 'vrm_male': 'vrm_male', 'vrm_female': 'vrm_female' }
 
@@ -38,7 +38,7 @@ export type CampaignData = { [campaign in Campaign]: { contractAddress: string, 
 
 export type CampaignDrops = { [campaign in Campaign]: Drop[] }
 
-export type Drop = {contract_address:string, index:number, type:string}
+export type Drop = {contract_address:string, index:number, type:string, name:string}
 
 export type CampaignMetadata = {
     [campaign in Campaign]: TokenMetadata[] }

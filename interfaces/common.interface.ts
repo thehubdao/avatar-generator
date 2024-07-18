@@ -10,6 +10,7 @@ import { ConfigShadow } from "./shadow.interface";
 import { ReactNode } from "react";
 import { ConfigPostProcessing } from "./postProcessing.interface";
 import {ModelExtension} from "../enums/export.enum";
+import { Campaign } from "../types/metadata.type";
 
 export interface BasicData {
   id: string;
@@ -87,7 +88,7 @@ export interface CampaignParameters {
   accessories?: FeatureBasic[];
   config: CampaignConfig;
   r_val?: Record<RandomTier, number>;
-  campaign?:string
+  campaign?:Campaign
 }
 
 export interface CampaignAssets {

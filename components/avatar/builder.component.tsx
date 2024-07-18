@@ -445,47 +445,42 @@ export default function AvatarBuilder({
         <>
           {!onlyView &&
             <HudUI
-              selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
+            selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
 
-              editModeSelected={isEditModeSelected}
+            editModeSelected={isEditModeSelected}
 
-              selectListCategory={[...selectListFeatures, ...selectListAccessories]}
-              // selectListFeatures={[...selectListFeatures, ...selectListAccessories]}
-              // selectListAccessories={selectListAccessories}
+            selectListCategory={[...selectListFeatures, ...selectListAccessories]}
+            // selectListFeatures={[...selectListFeatures, ...selectListAccessories]}
+            // selectListAccessories={selectListAccessories}
+            // optionList
+            optionList={optionListShow}
+            // featureList={featureListShow}
+            // accessoryList={accessoryListShow}
+            // selectedCategory
+            selectedCategory={selectedCategory}
+            // selectedFeature={selectedFeature}
+            // selectedAcc={selectedAcc}
+            campaignSkinColorConfig={campaignConfig.skin || {}}
+            skinColor={skinColor}
+            changeView={() => {
+              setIsEditModeSelected(!isEditModeSelected);
+              void updateStage(!isEditModeSelected);
+              updateCamMode(!isEditModeSelected);
+            } }
 
-              // optionList
-              optionList={optionListShow}
-              // featureList={featureListShow}
-              // accessoryList={accessoryListShow}
-
-              // selectedCategory
-              selectedCategory={selectedCategory}
-              // selectedFeature={selectedFeature}
-              // selectedAcc={selectedAcc}
-
-              campaignSkinColorConfig={campaignConfig.skin || {}}
-              skinColor={skinColor}
-              changeView={() => {
-                setIsEditModeSelected(!isEditModeSelected);
-                void updateStage(!isEditModeSelected);
-                updateCamMode(!isEditModeSelected);
-              }}
-
-              // changeCategory
-              onOptionChange={(id: string, path: string, name: string) => void onOptionChange(id, path, name)}
-              // changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
-              // changeAccessory={(id: string, path: string, name: string) => void onChangeAccessory(id, path, name)}
-
-              // onCategoryChange
-              onCategoryTypeChange={(value: string) => onCategoryTypeChange(value)}
-              // onFeatureTypeChange={(value: string) => onFeatureTypeChange(value)}
-              // onAccessoryTypeChange={(value: string) => onAccessoryTypeChange(value)}
-
-
-              onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
-              exportModel={() => exportModel()}
-              exportAllow={campaignConfig.extraExport}
-            />
+            // changeCategory
+            onOptionChange={(id: string, path: string, name: string) => void onOptionChange(id, path, name)}
+            // changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
+            // changeAccessory={(id: string, path: string, name: string) => void onChangeAccessory(id, path, name)}
+            // onCategoryChange
+            onCategoryTypeChange={(value: string) => onCategoryTypeChange(value)}
+            // onFeatureTypeChange={(value: string) => onFeatureTypeChange(value)}
+            // onAccessoryTypeChange={(value: string) => onAccessoryTypeChange(value)}
+            onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
+            exportModel={() => exportModel()}
+            exportAllow={campaignConfig.extraExport} onClickBackButton={function (): void {
+              throw new Error("Function not implemented.");
+            } }            />
           }
         </>
       }
