@@ -28,7 +28,7 @@ export default function ListItem({ campaignDBName, onClickViewButton, onClickEdi
       setTokenMetadata(tokenMetadata)
     }
     setTokenMetadataPromise()
-  }, [])
+  }, [tokenId])
 
   return <div key={campaignDBName + tokenId} className="relative ml-2 mb-2 bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white overflow-hidden flex flex-col items-center">
     {!shouldReveal &&

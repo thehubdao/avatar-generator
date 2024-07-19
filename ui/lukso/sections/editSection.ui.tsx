@@ -28,8 +28,8 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
     gravity: "bottom", // `top` or `bottom`
     position: "center", // `left`, `center` or `right`
     stopOnFocus: true, // Prevents dismissing of toast on hover
-    duration:0,
-    className:"!text-[#C25399]",
+    duration: 0,
+    className: "!text-[#C25399]",
     style: {
       background: "#FFD9EF",
     },
@@ -70,14 +70,17 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
           {/* FACE IMAGE */}
           <div className="relative w-[208px] 2xl:w-[347px] h-[208px] 2xl:h-[347px] bg-white/25 overflow-hidden">
             <div className="absolute inset-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-              <LogoUI/>
+              <LogoUI />
             </div>
-            <Image
+            {picture != '' && <Image
               src={picture}
               fill
               style={{ objectFit: "cover" }}
               className={`opacity-0 ${shouldReveal ? 'scale-100 opacity-100' : 'scale-125'} transition-all duration-1000 ease-out`}
-              onLoadingComplete={() => setShouldReveal(true)} alt={""}            />
+              onLoadingComplete={() => {
+
+                setShouldReveal(true)
+              }} alt={""} />}
           </div>
           {features ?
             <FeatureListUI features={features} />
