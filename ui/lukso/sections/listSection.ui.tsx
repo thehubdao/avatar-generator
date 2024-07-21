@@ -22,7 +22,7 @@ const campaignLabels = {
   'all': {
     campaignName: 'all',
     nftName: 'Choose Campaign',
-    dropdownName: 'Choose Campaign'
+    dropdownName: 'All'
   },
   'vrm_female': {
     campaignName: 'vrm_female',
