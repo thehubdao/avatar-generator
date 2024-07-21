@@ -25,10 +25,11 @@ export default function ListItem({ campaignDBName, onClickViewButton, onClickEdi
   useEffect(() => {
     const setTokenMetadataPromise = async () => {
       const tokenMetadata = await getTokenMetadata(tokenId);
+      console.log("SETTING TOKEN METADATA")
       setTokenMetadata(tokenMetadata)
     }
     setTokenMetadataPromise()
-  }, [tokenId])
+  }, [tokenId.metadataUri])
 
   return <div key={campaignDBName + tokenId} className="relative ml-2 mb-2 bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white overflow-hidden flex flex-col items-center">
     {!shouldReveal &&
