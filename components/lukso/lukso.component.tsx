@@ -194,7 +194,7 @@ export default function LuksoComponent({
     setSelectedCategory(campaignParams?.features[0].displayName)
   }, [campaignParams])
 
-  useEffect(()=>{console.log(tokenIdList)},[tokenIdList])
+  useEffect(() => { console.log(tokenIdList) }, [tokenIdList])
 
   async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
     if (!campaign) return
@@ -400,10 +400,6 @@ export default function LuksoComponent({
 
     const thumbnailBlob = await getAvatarThumbnail()
 
-
-
-    console.log("SET TO LOADING", _tokenIdList)
-
     setTokenIdList(_tokenIdList.slice())
 
     const burnDropArray: BodyPart[] = []
@@ -411,32 +407,30 @@ export default function LuksoComponent({
     singleInitData?.features.forEach((feature) => {
       newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
       const bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
+      console.log(bodyFeature?.name, feature.val.name)
       if (bodyFeature && bodyFeature.name != feature.val.name) {
         newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body] = feature.val as BodyPart
 
-        burnDropArray.push(bodyFeature)
+        burnDropArray.push(feature.val as BodyPart)
       }
     })
+    console.log(burnDropArray)
     const metadataObject = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, campaignParams.campaign)
 
     _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
 
-console.log("Set new uri", _tokenIdList)
     setTokenIdList(_tokenIdList.slice())
     const metadataUrl = `ipfs://${metadataObject.uri}`
     await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
     setCombinationPictureUrl(metadataObject.imageUrl)
-    console.log(metadataObject, combinationPictureUrl)
+
     for (let i = 0; i < burnDropArray.length; i++) {
       const drop = burnDropArray[i];
       await burnDrop(addressToShow, campaignParams.campaign, drop)
 
     }
     saveNotification.hideToast()
-
   }
-
-  useEffect(() => { console.log("TOKEN ID LIST", tokenIdList) }, [tokenIdList])
 
   function addReplaceAttribute(addId: string, addValue: string) {
     if (exportData && exportData.attributes.some((x) => x.id === addId)) {

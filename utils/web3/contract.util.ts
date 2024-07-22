@@ -304,11 +304,11 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: number, toke
 
 export const burnDrop = async (from: string, campaign: string, drop: BodyPart) => {
     const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
-
+console.log(dropsData)
     if (!dropsData) return
 
     const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name })
-
+console.log(dropPair,drop.name, dropsData,"DROP PAIR")
     if (!dropPair) return
 
     const dropContract = new Contract(dropPair.contract_address, WerableContractAbi, provider)
