@@ -82,7 +82,7 @@ export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButt
       {/* Your collection text image */}
       <div className="">
         <Image
-          src="/resources/images/collection_text.png"
+          src="/resources/images/citizens_text.png"
           className={`${shouldReveal ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
           alt={""}
           width='990'

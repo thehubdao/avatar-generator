@@ -2,6 +2,7 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import TransparentBox from "../common/transparentBox.ui";
 import { FaDownload } from "react-icons/fa6";
+import { BsFillBackpackFill } from "react-icons/bs";
 import { AiOutlineLoading } from "react-icons/ai";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 import FeatureListUI from "../common/featureList.ui";
@@ -113,6 +114,7 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
               <div className="flex items-center gap-3 text-black">
                 <>
                   <p className="text-base 2xl:text-lg">My Wardrobe</p>
+                  <BsFillBackpackFill/>
                   
                 </>
 
