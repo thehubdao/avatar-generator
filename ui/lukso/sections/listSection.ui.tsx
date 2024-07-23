@@ -85,7 +85,7 @@ export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButt
           src="/resources/images/citizens_text.png"
           className={`${shouldReveal ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
           alt={""}
-          width='990'
+          width='800'
           height='38'
           onLoadingComplete={() => setReveal(true)}
         />
