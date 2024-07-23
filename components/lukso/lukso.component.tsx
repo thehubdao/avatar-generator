@@ -394,7 +394,7 @@ export default function LuksoComponent({
   //Saves avatar new combination to NFT metadata
   async function saveCombination() {
     const newCombination = singleInitData?.features.map((feature) => feature.val.index).join('-')
-
+    console.log(newCombination, selectedCombination, "Comparing combis")
     if (newCombination == selectedCombination || !campaignParams || !campaignParams.campaign || !selectedTokenId || !newCombination || !selectedMetadata) return
 
     setCombinationPictureUrl('')
@@ -435,6 +435,7 @@ export default function LuksoComponent({
       const metadataUrl = `ipfs://${metadataObject.uri}`
       await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
       setCombinationPictureUrl(metadataObject.imageUrl)
+      setSelectedCombination(newCombination)
 
       for (let i = 0; i < burnDropArray.length; i++) {
         const drop = burnDropArray[i];

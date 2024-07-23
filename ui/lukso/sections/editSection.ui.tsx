@@ -109,7 +109,7 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
               </div>
             </TransparentBox>
           </button>
-          <button className="w-[35%]" onClick={() => void goEditMode()}>
+          <button className="w-[50%]" onClick={() => void goEditMode()}>
             <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
               <div className="flex items-center gap-3 text-black">
                 <>
