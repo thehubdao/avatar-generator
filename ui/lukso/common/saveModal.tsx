@@ -21,7 +21,7 @@ export default function SaveModalUI({ setIsSaveModalOpen, onSave }: SaveModalUIP
                         alt="Lukso icon"
                     />
                     <h1 className="text-2xl font-bold text-white">Save This Combination</h1>
-                    <h3 className="text-white px-[200px]">Are you sure that you want to save this wearable combination? If you are using a custom wearable it will be burnt and you will not be able to use it again on a different Citizen.</h3>
+                    <h3 className="text-white px-[200px]">Are you sure that you want to save this wearable combination? If you are using a custom <br/> wearable it will be burnt and you will not be able to use it again on a different Citizen.</h3>
                     <div className="flex flex-wrap justify-between gap-3">
                         <button className="w-72 h-fit" onClick={() => { closeModal() }}>
                             <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
