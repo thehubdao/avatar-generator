@@ -235,14 +235,14 @@ export default function HudUI({
               />
             </div>
             {/* SKIN COLOR SECTION */}
-            <div className={`py-8 ${campaignSkinColorConfig.usePalette ? '' : 'invisible'}`}>
+{/*             <div className={`py-8 ${campaignSkinColorConfig.usePalette ? '' : 'invisible'}`}>
               <h2 className="font-poppins pb-2">SKIN COLOR</h2>
               <ColorSelector
                 list={campaignSkinColorConfig.colorPalette}
                 activeColor={skinColor}
                 handleClick={(value: string) => void onSkinColorChange(value)}
               />
-            </div>
+            </div> */}
 
           </div>
         </div>
