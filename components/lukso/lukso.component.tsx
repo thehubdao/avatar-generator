@@ -694,7 +694,7 @@ export default function LuksoComponent({
                     onCategoryTypeChange={(value) => onCategoryTypeChange(value)}
                     onSkinColorChange={(value) => void onClickChangeSkinColor(value)}
                     exportModel={() => exportModel()}
-                    isCustomCampaignHud onClickBackButton={onBackView} />
+                    isCustomCampaignHud onClickBackButton={()=>setIsEditModeSelected(false)} />
                 </div>
                 {/* LUKSO HUD */}
                 <LuksoUI
@@ -706,8 +706,8 @@ export default function LuksoComponent({
                   provider={provider}
                   features={singleInitData?.features}
                   combination={selectedCombination} combinationPictureUrl={combinationPictureUrl}
-                  onClickBackButton={onBackView
-                  } goEditMode={() => setIsEditModeSelected(true)}
+                  onClickBackButton={onBackView}
+                  goEditMode={() => setIsEditModeSelected(true)}
                 />
               </>
             }

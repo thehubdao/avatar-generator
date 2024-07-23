@@ -208,7 +208,7 @@ export default function HudUI({
                 </div>
                 <div className="fixed right-0 bottom-0 pb-6 pt-12 2xl:static">
                   <AGButton onClickEvent={() => setIsSaveModalOpen(true)} nm={isWindowGreaterThan1536}>
-                    <p className="font-poppins text-center w-[240px] py-2">SAVE</p>
+                    <p className="font-poppins text-center w-[300px] py-2">SAVE COMBINATION</p>
                   </AGButton>
                 </div></div>
               <div className="w-full">

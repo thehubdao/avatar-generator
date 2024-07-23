@@ -62,7 +62,7 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
             <div onClick={() => onClickBackButton()}>
               <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0]">
                 <div className="flex items-center gap-3">
-                  <p className="text-black">Go Back</p>
+                  <p className="text-black">My Citizens</p>
                 </div>
               </TransparentBoxUI>
             </div>
@@ -108,12 +108,12 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
               </div>
             </TransparentBox>
           </button>
-          <button className="w-[25%]" onClick={() => void goEditMode()}>
+          <button className="w-[35%]" onClick={() => void goEditMode()}>
             <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
               <div className="flex items-center gap-3 text-black">
                 <>
-                  <p className="text-base 2xl:text-lg">Edit</p>
-                  <FaDownload />
+                  <p className="text-base 2xl:text-lg">My Wardrobe</p>
+                  
                 </>
 
               </div>
