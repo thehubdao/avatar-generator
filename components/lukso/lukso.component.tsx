@@ -442,7 +442,8 @@ export default function LuksoComponent({
 
       }
       saveNotification.hideToast()
-    } catch { 
+    } catch(err) { 
+      console.log(err)
       saveNotification.hideToast()
       saveErrorNotification.showToast()
       setTokenIdList(tokenIdList?.slice())
