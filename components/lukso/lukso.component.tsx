@@ -152,6 +152,18 @@ export default function LuksoComponent({
     },
   })
 
+  const saveErrorNotification = Toastify({
+    text: "Error, please try it again!",
+    gravity: "bottom", // `top` or `bottom`
+    position: "center", // `left`, `center` or `right`
+    stopOnFocus: true, // Prevents dismissing of toast on hover
+    duration: 10000,
+    className: "!text-[#C25399]",
+    style: {
+      background: "#FFD9EF",
+    },
+  })
+
   useEffect(() => {
     if (!addressToShow) return
     const featuresPromise = async () => {
@@ -386,50 +398,55 @@ export default function LuksoComponent({
     if (newCombination == selectedCombination || !campaignParams || !campaignParams.campaign || !selectedTokenId || !newCombination || !selectedMetadata) return
 
     setCombinationPictureUrl('')
-
     saveNotification.showToast()
+    try {
+      
 
-    const newMetadata = selectedMetadata
-    newMetadata.combination = newCombination
-    newMetadata.attributes = []
+      const newMetadata = selectedMetadata
+      newMetadata.combination = newCombination
+      newMetadata.attributes = []
 
-    const _tokenIdList = tokenIdList?.slice() as TokenId[]
-    const tokenIdIndex = _tokenIdList?.findIndex(({ tokenId }) => Number(tokenId) === selectedTokenId)
+      const _tokenIdList = tokenIdList?.slice() as TokenId[]
+      const tokenIdIndex = _tokenIdList?.findIndex(({ tokenId }) => Number(tokenId) === selectedTokenId)
 
-    _tokenIdList[tokenIdIndex].metadataUri = 'LOADING'
+      _tokenIdList[tokenIdIndex].metadataUri = 'LOADING'
 
-    const thumbnailBlob = await getAvatarThumbnail()
+      const thumbnailBlob = await getAvatarThumbnail()
 
-    setTokenIdList(_tokenIdList.slice())
+      setTokenIdList(_tokenIdList.slice())
 
-    const burnDropArray: BodyPart[] = []
+      const burnDropArray: BodyPart[] = []
 
-    singleInitData?.features.forEach((feature) => {
-      newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
-      const bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
-      console.log(bodyFeature?.name, feature.val.name)
-      if (bodyFeature && bodyFeature.name != feature.val.name) {
-        newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body] = feature.val as BodyPart
+      singleInitData?.features.forEach((feature) => {
+        newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
+        const bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
+        console.log(bodyFeature?.name, feature.val.name)
+        if (bodyFeature && bodyFeature.name != feature.val.name) {
+          newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body] = feature.val as BodyPart
 
-        burnDropArray.push(feature.val as BodyPart)
+          burnDropArray.push(feature.val as BodyPart)
+        }
+      })
+      const metadataObject = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, campaignParams.campaign)
+
+      _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
+
+      setTokenIdList(_tokenIdList.slice())
+      const metadataUrl = `ipfs://${metadataObject.uri}`
+      await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
+      setCombinationPictureUrl(metadataObject.imageUrl)
+
+      for (let i = 0; i < burnDropArray.length; i++) {
+        const drop = burnDropArray[i];
+        await burnDrop(addressToShow, campaignParams.campaign, drop)
+
       }
-    })
-    console.log(burnDropArray)
-    const metadataObject = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, campaignParams.campaign)
-
-    _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
-
-    setTokenIdList(_tokenIdList.slice())
-    const metadataUrl = `ipfs://${metadataObject.uri}`
-    await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
-    setCombinationPictureUrl(metadataObject.imageUrl)
-
-    for (let i = 0; i < burnDropArray.length; i++) {
-      const drop = burnDropArray[i];
-      await burnDrop(addressToShow, campaignParams.campaign, drop)
-
+      saveNotification.hideToast()
+    } catch { 
+      saveNotification.hideToast()
+      saveErrorNotification.showToast()
+      setTokenIdList(tokenIdList?.slice())
     }
-    saveNotification.hideToast()
   }
 
   function addReplaceAttribute(addId: string, addValue: string) {
@@ -694,7 +711,7 @@ export default function LuksoComponent({
                     onCategoryTypeChange={(value) => onCategoryTypeChange(value)}
                     onSkinColorChange={(value) => void onClickChangeSkinColor(value)}
                     exportModel={() => exportModel()}
-                    isCustomCampaignHud onClickBackButton={()=>setIsEditModeSelected(false)} />
+                    isCustomCampaignHud onClickBackButton={() => setIsEditModeSelected(false)} />
                 </div>
                 {/* LUKSO HUD */}
                 <LuksoUI
