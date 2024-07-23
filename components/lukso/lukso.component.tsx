@@ -662,10 +662,10 @@ export default function LuksoComponent({
             {selectedCombination && campaignParams?.campaign && campaignParams &&
               <>
                 {/* CANVAS WRAPPER */}
-{/*                 <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-                  {/* CANVAS BACKGROUND }
+                <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+                  {/* CANVAS BACKGROUND */}
                   <div className="w-full h-screen absolute inset-0 bg-client-primary" />
-                  {/* CANVAS }
+                  {/* CANVAS */}
                   {campaignParams?.campaign &&
                     <AvatarEditor
                       avatarBasePath={campaignParams.armature}
@@ -677,7 +677,7 @@ export default function LuksoComponent({
                       onReady={() => onAvatarBuilderReady(selectedCombination, campaignParams.campaign)}
                     />
                   }
-                </div> */}
+                </div> 
                 {/* LOADER */}
                 <div className={`fixed inset-0 h-screen w-full flex ${isEditModeSelected?'justify-end pr-[22.5rem]':'justify-center'} items-center bg-client-primary ${isLoading ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-all duration-1000`}>
                   <div className="scale-[3]">
