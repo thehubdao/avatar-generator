@@ -399,6 +399,7 @@ export default function LuksoComponent({
     if (newCombination == selectedCombination || !campaignParams || !campaignParams.campaign || !selectedTokenId || !newCombination || !selectedMetadata) return
 
     setCombinationPictureUrl('')
+    setSelectedCombination(newCombination)
     saveNotification.showToast()
     try {
       
@@ -417,7 +418,7 @@ export default function LuksoComponent({
       setTokenIdList(_tokenIdList.slice())
 
       const burnDropArray: BodyPart[] = []
-
+console.log(singleInitData?.features)
       singleInitData?.features.forEach((feature) => {
         newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
         const bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
@@ -436,8 +437,7 @@ export default function LuksoComponent({
       const metadataUrl = `ipfs://${metadataObject.uri}`
       await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
       setCombinationPictureUrl(metadataObject.imageUrl)
-      if(selectedCombination != currentCombination) setSelectedCombination(newCombination)
-
+      console.log(burnDropArray)
       for (let i = 0; i < burnDropArray.length; i++) {
         const drop = burnDropArray[i];
         await burnDrop(addressToShow, campaignParams.campaign, drop)
@@ -449,6 +449,7 @@ export default function LuksoComponent({
       saveNotification.hideToast()
       saveErrorNotification.showToast()
       setTokenIdList(tokenIdList?.slice())
+      setSelectedCombination(currentCombination)
     }
   }
 
