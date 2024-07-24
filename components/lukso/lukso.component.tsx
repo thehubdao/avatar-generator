@@ -395,6 +395,8 @@ export default function LuksoComponent({
   async function saveCombination() {
     const newCombination = singleInitData?.features.map((feature) => feature.val.index).join('-')
     const currentCombination = selectedBaseCombination?.slice()
+    const currentCampaign = campaignParams?.campaign as Campaign
+    const currentFeatures = singleInitData?.features
     console.log(newCombination, currentCombination, selectedCombination, "Comparing combis")
     if (newCombination == selectedCombination || !campaignParams || !campaignParams.campaign || !selectedTokenId || !newCombination || !selectedMetadata) return
 
@@ -418,8 +420,8 @@ export default function LuksoComponent({
       setTokenIdList(_tokenIdList.slice())
 
       const burnDropArray: BodyPart[] = []
-console.log(singleInitData?.features)
-      singleInitData?.features.forEach((feature) => {
+
+currentFeatures?.forEach((feature) => {
         newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
         const bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
         console.log(bodyFeature?.name, feature.val.name)
@@ -429,18 +431,18 @@ console.log(singleInitData?.features)
           burnDropArray.push(feature.val as BodyPart)
         }
       })
-      const metadataObject = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, campaignParams.campaign)
+      const metadataObject = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, currentCampaign)
 
       _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
 
       setTokenIdList(_tokenIdList.slice())
       const metadataUrl = `ipfs://${metadataObject.uri}`
-      await setTokenMetadata(campaignParams.campaign, selectedTokenId, selectedMetadata, metadataUrl)
+      await setTokenMetadata(currentCampaign, selectedTokenId, selectedMetadata, metadataUrl)
       setCombinationPictureUrl(metadataObject.imageUrl)
       console.log(burnDropArray)
       for (let i = 0; i < burnDropArray.length; i++) {
         const drop = burnDropArray[i];
-        await burnDrop(addressToShow, campaignParams.campaign, drop)
+        await burnDrop(addressToShow, currentCampaign, drop)
 
       }
       saveNotification.hideToast()
