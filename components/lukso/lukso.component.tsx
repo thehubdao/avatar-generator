@@ -440,7 +440,6 @@ export default function LuksoComponent({
       for (let i = 0; i < burnDropArray.length; i++) {
         const drop = burnDropArray[i];
         await burnDrop(addressToShow, campaignParams.campaign, drop)
-
       }
       saveNotification.hideToast()
     } catch(err) { 
