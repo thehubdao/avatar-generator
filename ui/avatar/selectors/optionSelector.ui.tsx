@@ -28,7 +28,8 @@ export default function OptionSelectorUI({ list, activeOption, handleClick }: Op
           )
         })
         : // Make void list validation and loading view
-        <div className="bg-black/25"> <LogoUI/></div>}
+        <div className="w-1/6 translate-x-[200%] flex justify-center"> <LogoUI colorSecundary="rgba(25, 216, 243, 0.3)"/></div>
+      }
     </div>
   )
 }
