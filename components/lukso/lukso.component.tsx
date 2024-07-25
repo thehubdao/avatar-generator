@@ -451,7 +451,6 @@ currentFeatures?.forEach((feature) => {
       saveNotification.hideToast()
       saveErrorNotification.showToast()
       setTokenIdList(tokenIdList?.slice())
-      setSelectedCombination(currentCombination)
     }
   }
 
