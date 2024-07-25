@@ -31,15 +31,15 @@ export default function ListItem({ campaignDBName, onClickViewButton, onClickEdi
     setTokenMetadataPromise()
   }, [tokenId.metadataUri])
 
-  return <div key={campaignDBName + tokenId} className="relative ml-2 mb-2 bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white overflow-hidden flex flex-col items-center">
+  return <div key={campaignDBName + tokenId} className="w-full relative bg-[#ffffffbf] rounded-[10px_10px_10px_10px] border-[1.58px] border-solid border-white overflow-hidden flex flex-col items-center">
     {!shouldReveal &&
-      <div className="absolute w-full h-full bg-client-primary flex justify-center items-center z-10">
+      <div className="w-64 h-64 bg-client-primary flex justify-center items-center z-10">
         <Loader />
       </div>
     }
     {tokenMetadata &&
       <>
-        <div className="group w-64 h-64 overflow-hidden">
+        <div className={`group w-64 h-64 overflow-hidden ${shouldReveal ? 'relative' : 'absolute'}`}>
           <Image
             src={!didError ? tokenMetadata.imageUrl : tokenMetadata.imageUrl}
             alt={"NFT Image"}
