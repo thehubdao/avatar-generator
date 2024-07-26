@@ -113,7 +113,7 @@ export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButt
           <CampaignDropdown setCampaign={(campaign) => { setSelectedCampaign(campaign) }} campaigns={Object.values(campaignLabels)} />
         </div>
         {/* Card List section */}
-        <div className={`relative ${processedListData?.length == 0 || isLoading ? 'grid-cols-1' : 'grid-cols-4'}  grid  p-3 min-h-[318px] max-h-[60vh] min-w-[822px] max-w-[1092px] overflow-hidden bg-[#ffcaddbf] border-2 border-solid border-white overflow-y-auto`} >
+        <div className={`relative grid ${processedListData?.length == 0 || isLoading ? 'grid-cols-1' : 'grid-cols-4'} gap-2 p-3 min-h-[318px] max-h-[60vh] min-w-[822px] max-w-[1092px] overflow-hidden bg-[#ffcaddbf] border-2 border-solid border-white overflow-y-auto`} >
           {processedListData?.length == 0 &&
             <div className="flex flex-col justify-center items-center"><span className="text-[#C25399]">You do not own any citizens.</span>
               <div className="w-[150px] mt-3">
