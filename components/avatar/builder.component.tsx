@@ -396,7 +396,6 @@ export default function AvatarBuilder({
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
-      console.log("EXPORTING VRM, GLB and image...")
       if (modelVRMPromise.success && modelGLBPromise.success) {
         const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
         await SaveFile(refinedModelVRM, `avatar.vrm`);

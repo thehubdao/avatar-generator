@@ -141,7 +141,6 @@ export const getCampaignsTokenIds = async (address: string) => {
         })
         campaignsTokenIds = campaignsTokenIds.concat(formattedTokenIds)
     }
-    console.log(campaignsTokenIds)
     return campaignsTokenIds
 }
 
@@ -292,7 +291,7 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: number, toke
             },
         },
     ])
-    console.log(ToHex64(tokenId))
+    console.log(ToHex64(tokenId), tokenId)
     const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [ToHex64(tokenId), metadataDataKey, metadataDataValue.values[0]])
     const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         targetContractAddress, // address zero

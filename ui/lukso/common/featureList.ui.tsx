@@ -32,7 +32,6 @@ export default function FeatureListUI({features}: FeatureListUIProps) {
   useEffect(() => {
     if (DOM.current) {
       const arrayEl = gsap.utils.toArray(DOM.current.children);
-      console.log(arrayEl);
       
       gsap.to(arrayEl, {
         opacity: 1,

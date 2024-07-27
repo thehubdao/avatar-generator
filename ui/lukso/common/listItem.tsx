@@ -25,7 +25,6 @@ export default function ListItem({ campaignDBName, onClickViewButton, onClickEdi
   useEffect(() => {
     const setTokenMetadataPromise = async () => {
       const tokenMetadata = await getTokenMetadata(tokenId);
-      console.log("SETTING TOKEN METADATA")
       setTokenMetadata(tokenMetadata)
     }
     setTokenMetadataPromise()
