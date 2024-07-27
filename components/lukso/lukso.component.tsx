@@ -393,7 +393,6 @@ export default function LuksoComponent({
   //Saves avatar new combination to NFT metadata
   async function saveCombination() {
     const newCombination = singleInitData?.features.map((feature) => feature.val.index).join('-')
-    const currentCombination = selectedBaseCombination?.slice()
     const currentCampaign = campaignParams?.campaign as Campaign
     const currentFeatures = singleInitData?.features
 
