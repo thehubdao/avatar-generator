@@ -254,7 +254,7 @@ export default function LuksoComponent({
     optionList = MixArrays(optionList, featureList)
     optionList = MixArrays(optionList, accessoryList)
 
-    const combinationIndexes = selectedBaseCombination?.split('-')!
+    const combinationIndexes = selectedBaseCombination?.split('-')
     let filteredOptionList: FeatureInterface[] = []
     //This algorithm can be done in a better way, change it in the future.
     // Get features from combination and make them visible on avatar edit mode.
@@ -282,9 +282,9 @@ console.log(combinationIndexes)
       }).filter((val)=>{
         const categoryIndex = campaignParams?.features?.find((category) => {
           return category.displayName === val.type
-        })?.index! 
+        })?.index
 
-        console.log(categoryIndex)
+        if(!categoryIndex || !combinationIndexes) return true
 
         return !combinationIndexes[categoryIndex - 1]?.includes(val.index.toString())})
       filteredOptionList = filteredOptionList.concat(formattedDropList)
