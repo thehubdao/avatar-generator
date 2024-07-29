@@ -254,7 +254,7 @@ export default function LuksoComponent({
     optionList = MixArrays(optionList, featureList)
     optionList = MixArrays(optionList, accessoryList)
 
-    const combinationIndexes = selectedBaseCombination?.split('-')
+    const combinationIndexes = selectedBaseCombination?.split('-')!
     let filteredOptionList: FeatureInterface[] = []
     //This algorithm can be done in a better way, change it in the future.
     // Get features from combination and make them visible on avatar edit mode.
@@ -275,17 +275,24 @@ export default function LuksoComponent({
     })
 
     const campaignDropList = dropList[campaignParams?.campaign as keyof typeof dropList]
-
+console.log(combinationIndexes)
     if (campaignDropList) {
       const formattedDropList = campaignDropList.map((val) => {
         return optionList?.find((option) => option.type === val.type && val.index === option.index) as FeatureInterface
-      })
+      }).filter((val)=>{
+        const categoryIndex = campaignParams?.features?.find((category) => {
+          return category.displayName === val.type
+        })?.index! 
+
+        console.log(categoryIndex)
+
+        return !combinationIndexes[categoryIndex - 1]?.includes(val.index.toString())})
       filteredOptionList = filteredOptionList.concat(formattedDropList)
     }
 
     optionList = filteredOptionList
     const filteredList = FilterList(optionList, 'type', selectedCategory)
-
+console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
     return setOptionListShow(filteredList)
 
   }
@@ -472,6 +479,7 @@ export default function LuksoComponent({
 
   function onCategoryTypeChange(value: string) {
     setSelectedCategory(value)
+    console.log(FilterList(optionList, 'type', value), optionList)
     setOptionListShow(FilterList(optionList, 'type', value))
     updateFeatureCamPosition(value, {
       ...campaignParams?.config.featuresCamPos,
