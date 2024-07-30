@@ -384,12 +384,13 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
     const currentFeaturesTypeIndex = currentFeatures?.findIndex((feature) => feature.val.type === _selectedCategory)
 
     if (currentFeaturesTypeIndex && changedFeature && singleInitData) singleInitData.features[currentFeaturesTypeIndex].val = changedFeature
+    
     await ChangeFeature(
       id,
       path,
       name,
       _selectedCategory,
-      skinColor,
+      campaignParams?.config.skin?.defColor ?? skinColor,
       campaignParams?.config.skin?.materialName,
       campaignParams?.config.changeMaterial
     )
