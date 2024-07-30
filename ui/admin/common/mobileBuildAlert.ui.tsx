@@ -33,7 +33,7 @@ const socialMediaData: Record<SocialMedia, SocialMediaDataProps> = {
 export default function MobileBuildAlert() {
   return (
     <div className="w-full min-h-[calc(100vh-176px)] flex flex-col items-center max-w-lg m-auto justify-between">
-      <h1 className="font-humane text-9xl text-gray-normal">COMMING SOON</h1>
+      <h1 className="font-humane text-9xl text-gray-normal">COMING SOON IN MOBILE</h1>
       <p className="text-center">We are working on the mobile version, while we finalize the details we invite you to visit us on desktop version. If you want to learn more about us, we invite you to contact us through our social networks.</p>
       <div className="w-fit">
         <AGButton nm full onClickEvent={() => { window.open(ExternalLink.TheHub, "_blank"); }}>

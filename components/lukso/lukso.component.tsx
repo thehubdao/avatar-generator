@@ -206,7 +206,7 @@ export default function LuksoComponent({
     setSelectedCategory(campaignParams?.features[0].displayName)
   }, [campaignParams])
 
-  useEffect(() => { console.log(tokenIdList) }, [tokenIdList])
+  useEffect(() => { console.log(tokenIdList, "TOKEN ID LIST CHANGE") }, [tokenIdList])
 
   async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
     if (!campaign) return
@@ -275,18 +275,24 @@ export default function LuksoComponent({
     })
 
     const campaignDropList = dropList[campaignParams?.campaign as keyof typeof dropList]
-
+console.log(combinationIndexes)
     if (campaignDropList) {
       const formattedDropList = campaignDropList.map((val) => {
         return optionList?.find((option) => option.type === val.type && val.index === option.index) as FeatureInterface
-      })
+      }).filter((val)=>{
+        const categoryIndex = campaignParams?.features?.find((category) => {
+          return category.displayName === val.type
+        })?.index
+
+        if(!categoryIndex || !combinationIndexes) return true
+
+        return !combinationIndexes[categoryIndex - 1]?.includes(val.index.toString())})
       filteredOptionList = filteredOptionList.concat(formattedDropList)
     }
 
     optionList = filteredOptionList
-    console.log(optionList)
     const filteredList = FilterList(optionList, 'type', selectedCategory)
-
+console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
     return setOptionListShow(filteredList)
 
   }
@@ -394,37 +400,37 @@ export default function LuksoComponent({
   //Saves avatar new combination to NFT metadata
   async function saveCombination() {
     const newCombination = singleInitData?.features.map((feature) => feature.val.index).join('-')
-    const currentCombination = selectedBaseCombination?.slice()
     const currentCampaign = campaignParams?.campaign as Campaign
     const currentFeatures = singleInitData?.features
-    console.log(newCombination, currentCombination, selectedCombination, "Comparing combis")
+
     if (newCombination == selectedCombination || !campaignParams || !campaignParams.campaign || !selectedTokenId || !newCombination || !selectedMetadata) return
 
     setCombinationPictureUrl('')
     setSelectedCombination(newCombination)
     saveNotification.showToast()
+
+    const newMetadata = selectedMetadata
+    newMetadata.combination = newCombination
+    newMetadata.attributes = []
+
+    const _tokenIdList = tokenIdList?.slice() as TokenId[]
+
+    const tokenIdIndex = _tokenIdList?.findIndex(({ tokenId }) => Number(tokenId) === selectedTokenId)
+
+    const originalMetadataUri = _tokenIdList[tokenIdIndex].metadataUri
+
+    _tokenIdList[tokenIdIndex].metadataUri = 'LOADING'
+
+    setTokenIdList(_tokenIdList.slice())
     try {
-      
-
-      const newMetadata = selectedMetadata
-      newMetadata.combination = newCombination
-      newMetadata.attributes = []
-
-      const _tokenIdList = tokenIdList?.slice() as TokenId[]
-      const tokenIdIndex = _tokenIdList?.findIndex(({ tokenId }) => Number(tokenId) === selectedTokenId)
-
-      _tokenIdList[tokenIdIndex].metadataUri = 'LOADING'
-
       const thumbnailBlob = await getAvatarThumbnail()
-
-      setTokenIdList(_tokenIdList.slice())
 
       const burnDropArray: BodyPart[] = []
 
-currentFeatures?.forEach((feature) => {
+      currentFeatures?.forEach((feature) => {
         newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
         const bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
-        console.log(bodyFeature?.name, feature.val.name)
+
         if (bodyFeature && bodyFeature.name != feature.val.name) {
           newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body] = feature.val as BodyPart
 
@@ -439,19 +445,20 @@ currentFeatures?.forEach((feature) => {
       const metadataUrl = `ipfs://${metadataObject.uri}`
       await setTokenMetadata(currentCampaign, selectedTokenId, selectedMetadata, metadataUrl)
       setCombinationPictureUrl(metadataObject.imageUrl)
-      console.log(burnDropArray)
+
       for (let i = 0; i < burnDropArray.length; i++) {
         const drop = burnDropArray[i];
         await burnDrop(addressToShow, currentCampaign, drop)
 
       }
       saveNotification.hideToast()
-    } catch(err) { 
+    } catch (err) {
       console.log(err)
+      _tokenIdList[tokenIdIndex].metadataUri = originalMetadataUri
+      onBackView()
       saveNotification.hideToast()
       saveErrorNotification.showToast()
-      setTokenIdList(tokenIdList?.slice())
-      setSelectedCombination(currentCombination)
+      setTokenIdList(_tokenIdList?.slice())
     }
   }
 
@@ -472,6 +479,7 @@ currentFeatures?.forEach((feature) => {
 
   function onCategoryTypeChange(value: string) {
     setSelectedCategory(value)
+    console.log(FilterList(optionList, 'type', value), optionList)
     setOptionListShow(FilterList(optionList, 'type', value))
     updateFeatureCamPosition(value, {
       ...campaignParams?.config.featuresCamPos,
@@ -682,9 +690,9 @@ currentFeatures?.forEach((feature) => {
                       onReady={() => onAvatarBuilderReady(selectedCombination, campaignParams.campaign)}
                     />
                   }
-                </div> 
+                </div>
                 {/* LOADER */}
-                <div className={`fixed inset-0 h-screen w-full flex ${isEditModeSelected?'justify-end pr-[22.5rem]':'justify-center'} items-center bg-client-primary ${isLoading ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-all duration-1000`}>
+                <div className={`fixed inset-0 h-screen w-full flex ${isEditModeSelected ? 'justify-end pr-[22.5rem]' : 'justify-center'} items-center bg-client-primary ${isLoading ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-all duration-1000`}>
                   <div className="scale-[3]">
                     <Loader size={100} />
                   </div>
