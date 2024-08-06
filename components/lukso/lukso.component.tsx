@@ -32,7 +32,6 @@ import { LuksoSections } from '../../enums/lukso/common.enum'
 // Utils
 import { FilterList, LogError, MixArrays } from '../../utils/common.util'
 import {
-  FetchBlob,
   GetAccessoryListByCampaign,
   GetAnimationByCampaignAndName,
   GetAssetsListByCampaign,
