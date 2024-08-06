@@ -1,5 +1,6 @@
 import { FeatureInterface } from "../../../interfaces/api.interface";
 import { BasicData } from "../../../interfaces/common.interface";
+import LogoUI from "../../lukso/common/logo.ui";
 import OptionCardUI from "./optionCard.ui";
 import {MouseEvent} from "react";
 
@@ -26,8 +27,9 @@ export default function OptionSelectorUI({ list, activeOption, handleClick }: Op
             </div>
           )
         })
-        :
-        <p>no options</p>}
+        : // Make void list validation and loading view
+        <div className="w-1/6 translate-x-[200%] flex justify-center"> <LogoUI colorSecundary="rgba(25, 216, 243, 0.3)"/></div>
+      }
     </div>
   )
 }

@@ -18,8 +18,6 @@ import AvatarEditor, {
 import {
   AGChangeCamPosition,
   AGChangeLookAtPosition,
-  GetCanvasImageUrl,
-  TakeCanvasPicture,
 } from '../avatar/viewer.component'
 import HudComponent from '../../ui/avatar/hud.ui'
 
@@ -32,8 +30,9 @@ import { Module } from '../../enums/common.enum'
 import { LuksoSections } from '../../enums/lukso/common.enum'
 
 // Utils
-import { Delay, FilterList, LogError, MixArrays } from '../../utils/common.util'
+import { FilterList, LogError, MixArrays } from '../../utils/common.util'
 import {
+  FetchBlob,
   GetAccessoryListByCampaign,
   GetAnimationByCampaignAndName,
   GetAssetsListByCampaign,
@@ -41,9 +40,10 @@ import {
   GetAvatarSingleByCampaignCombinationString,
   GetEnvMapListByCampaign,
   GetStageListByCampaign,
+  PostRequestThumbnailProcessFile,
+  PostRequestVRMProcessFile,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
-import { IFrameExportData } from '../../utils/iframe.util'
 import { SaveFile } from '../../utils/exporter.util'
 
 
@@ -60,16 +60,20 @@ import {
   ExportInterface,
   LookAtVectors,
 } from '../../interfaces/common.interface'
-import { TokenId, TokenMetadata } from '../../types/metadata.type'
+import { Campaign, CampaignDrops, TokenId, TokenMetadata } from '../../types/metadata.type'
 import { BodyPart } from '../../types/avatar.type'
 import { ethers } from 'ethers'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
-import { getCampaignsTokenIds } from '../../utils/web3/contract.util'
+import { burnDrop, getCampaignsTokenIds, getUserFeatures, setTokenMetadata } from '../../utils/web3/contract.util'
 import LoginUI from '../../ui/lukso/sections/loginSection.ui'
 import ListUI from '../../ui/lukso/sections/listSection.ui'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
+import { uploadMetadata } from '../../utils/metadata.util'
+import Toastify from 'toastify-js'
+import { StorageLocation } from '../../enums/firebase.enum'
+import { UploadFile } from '../../utils/firebase.util'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -79,7 +83,6 @@ let stageList: StageInterface[] | undefined
 let envMapList: EnvMapInterface[] | undefined;
 let singleInitData: SingleInterface | undefined
 let loaderDivElement: HTMLDivElement
-const isOnIFrame = false
 
 
 const tokenMetadata: TokenMetadata = {
@@ -102,7 +105,7 @@ export default function LuksoComponent({
   setCampaign,
 }: {
   campaignParams?: CampaignParameters,
-  setCampaign: (campaign: string | undefined) => void
+  setCampaign: (campaign: Campaign | undefined) => void
 }) {
   // Loading flags
   const [currentSection, setCurrentSection] = useState<LuksoSections>(
@@ -112,6 +115,7 @@ export default function LuksoComponent({
 
   // Edit state
   const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>()
+  const [dropList, setDropList] = useState<CampaignDrops>({ vrm_male: [], vrm_female: [] })
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false)
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
     exportData.attributes
@@ -125,23 +129,52 @@ export default function LuksoComponent({
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
   const [selectedCombination, setSelectedCombination] = useState<string>()
   const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>()
+  const [selectedTokenId, setSelectedTokenId] = useState<number>()
+  const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>()
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
   const [addressToShow, setAddressToShow] = useState<string>('')
-  const [
-    isGettingInfoAboutHasMinted,
-
-  ] = useState<boolean>(false)
   const [combinationPictureUrl, setCombinationPictureUrl] = useState<string>(
     ''
   )
   const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false)
-  const [isLoadingMintedData, setIsLoadingMintedData] = useState<boolean>(
-    false
-  )
   const [{ wallet }] = useConnectWallet()
 
-  const [picture, setPicture] = useState<string>('');
+  //Notification on save combination
+
+  const saveNotification = Toastify({
+    text: "The changes are being saved onchain, it might take up to 4 minutes for them to be effective. Do not leave the app.",
+    gravity: "bottom", // `top` or `bottom`
+    position: "center", // `left`, `center` or `right`
+    stopOnFocus: true, // Prevents dismissing of toast on hover
+    duration: 0,
+    className: "!text-[#C25399]",
+    style: {
+      background: "#FFD9EF",
+    },
+  })
+
+  const saveErrorNotification = Toastify({
+    text: "Error, please try it again!",
+    gravity: "bottom", // `top` or `bottom`
+    position: "center", // `left`, `center` or `right`
+    stopOnFocus: true, // Prevents dismissing of toast on hover
+    duration: 10000,
+    className: "!text-[#C25399]",
+    style: {
+      background: "#FFD9EF",
+    },
+  })
+
+  useEffect(() => {
+    if (!addressToShow) return
+    const featuresPromise = async () => {
+      const features = await getUserFeatures(addressToShow)
+
+      setDropList(features)
+    }
+    featuresPromise()
+  }, [addressToShow])
 
   useEffect(() => {
     if (!wallet) return setProvider(undefined)
@@ -165,7 +198,6 @@ export default function LuksoComponent({
     if (!addressToShow) return
     const getTokensMetadataPromise = async () => {
       const tokenIds = await getCampaignsTokenIds(addressToShow)
-      console.log(tokenIds)
       setTokenIdList(tokenIds)
     }
     void getTokensMetadataPromise()
@@ -175,6 +207,8 @@ export default function LuksoComponent({
     if (!campaignParams || !campaignParams?.features) return
     setSelectedCategory(campaignParams?.features[0].displayName)
   }, [campaignParams])
+
+  useEffect(() => { console.log(tokenIdList, "TOKEN ID LIST CHANGE") }, [tokenIdList])
 
   async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
     if (!campaign) return
@@ -211,6 +245,7 @@ export default function LuksoComponent({
       campaignParams?.campaign,
       campaignParams?.config.defAnimation
     )
+
     if (result.success) {
       await ChangeStartAnimation(result.value.at(0)?.path)
     }
@@ -218,14 +253,8 @@ export default function LuksoComponent({
     // fade loader view
     await handleFadeLoader(loaderDivElement, () => {
       setIsLoading(false)
-      setCurrentSection(LuksoSections.Edit)
     })
 
-  }
-
-  async function takePicture() {
-    await Delay(2500);
-    setPicture(GetCanvasImageUrl());
   }
 
   async function getFeatureList() {
@@ -236,6 +265,8 @@ export default function LuksoComponent({
 
     const combinationIndexes = selectedBaseCombination?.split('-')
     let filteredOptionList: FeatureInterface[] = []
+    //This algorithm can be done in a better way, change it in the future.
+    // Get features from combination and make them visible on avatar edit mode.
     combinationIndexes?.forEach((featureIndex: string, index) => {
       const filteredArray = optionList?.filter((val) => {
         const categoryIndex = campaignParams?.features?.find((category) => {
@@ -246,13 +277,31 @@ export default function LuksoComponent({
 
         return categoryIndex - 1 === index && val.index.toString() === featureIndex
       })
+
       if (!filteredArray) return
+
       filteredOptionList = filteredOptionList.concat(filteredArray)
     })
+
+    const campaignDropList = dropList[campaignParams?.campaign as keyof typeof dropList]
+console.log(combinationIndexes)
+    if (campaignDropList) {
+      const formattedDropList = campaignDropList.map((val) => {
+        return optionList?.find((option) => option.type === val.type && val.index === option.index) as FeatureInterface
+      }).filter((val)=>{
+        const categoryIndex = campaignParams?.features?.find((category) => {
+          return category.displayName === val.type
+        })?.index
+
+        if(!categoryIndex || !combinationIndexes) return true
+
+        return !combinationIndexes[categoryIndex - 1]?.includes(val.index.toString())})
+      filteredOptionList = filteredOptionList.concat(formattedDropList)
+    }
+
     optionList = filteredOptionList
-
     const filteredList = FilterList(optionList, 'type', selectedCategory)
-
+console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
     return setOptionListShow(filteredList)
 
   }
@@ -299,9 +348,9 @@ export default function LuksoComponent({
   }
 
   async function loadSingleData() {
+    setIsLoading(true)
     // Iterate the features
     // Place the features on the model
-    setIsLoadingMintedData(true)
     if (singleInitData === undefined)
       return void LogError(Module.Lukso, 'Missing single data!!!!!')
 
@@ -320,16 +369,6 @@ export default function LuksoComponent({
         campaignParams?.config.skin?.defColor ?? 'ffffff'
       )
     }
-
-    await takePicture();
-    setIsLoadingMintedData(false)
-
-  }
-
-  async function reRoll() {
-    /*     await getSingleData()
-        await loadSingleData() */
-
   }
 
   async function updateStage(isEditMode: boolean) {
@@ -349,17 +388,88 @@ export default function LuksoComponent({
     name: string,
     _selectedCategory: string = selectedCategory
   ) {
+    const currentFeatures = singleInitData?.features
+    const changedFeature = optionList?.find((feature) => feature.type === _selectedCategory && feature.id === id)
+    const currentFeaturesTypeIndex = currentFeatures?.findIndex((feature) => feature.val.type === _selectedCategory)
+
+    if (currentFeaturesTypeIndex && changedFeature && singleInitData) singleInitData.features[currentFeaturesTypeIndex].val = changedFeature
+    
     await ChangeFeature(
       id,
       path,
       name,
       _selectedCategory,
-      skinColor,
+      campaignParams?.config.skin?.defColor ?? skinColor,
       campaignParams?.config.skin?.materialName,
       campaignParams?.config.changeMaterial
     )
 
     addReplaceAttribute(_selectedCategory, name)
+  }
+
+  //Saves avatar new combination to NFT metadata
+  async function saveCombination() {
+    const newCombination = singleInitData?.features.map((feature) => feature.val.index).join('-')
+    const currentCampaign = campaignParams?.campaign as Campaign
+    const currentFeatures = singleInitData?.features
+
+    if (newCombination == selectedCombination || !campaignParams || !campaignParams.campaign || !selectedTokenId || !newCombination || !selectedMetadata) return
+
+    setCombinationPictureUrl('')
+    setSelectedCombination(newCombination)
+    saveNotification.showToast()
+
+    const newMetadata = selectedMetadata
+    newMetadata.combination = newCombination
+    newMetadata.attributes = []
+
+    const _tokenIdList = tokenIdList?.slice() as TokenId[]
+
+    const tokenIdIndex = _tokenIdList?.findIndex(({ tokenId }) => Number(tokenId) === selectedTokenId)
+
+    const originalMetadataUri = _tokenIdList[tokenIdIndex].metadataUri
+
+    _tokenIdList[tokenIdIndex].metadataUri = 'LOADING'
+
+    setTokenIdList(_tokenIdList.slice())
+    try {
+      const thumbnailBlob = await getAvatarThumbnail()
+
+      const burnDropArray: BodyPart[] = []
+
+      currentFeatures?.forEach((feature) => {
+        newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
+        const bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
+
+        if (bodyFeature && bodyFeature.name != feature.val.name) {
+          newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body] = feature.val as BodyPart
+
+          burnDropArray.push(feature.val as BodyPart)
+        }
+      })
+      const metadataObject = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, currentCampaign)
+
+      _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
+
+      setTokenIdList(_tokenIdList.slice())
+      const metadataUrl = `ipfs://${metadataObject.uri}`
+      await setTokenMetadata(currentCampaign, selectedTokenId, selectedMetadata, metadataUrl)
+      setCombinationPictureUrl(metadataObject.imageUrl)
+
+      for (let i = 0; i < burnDropArray.length; i++) {
+        const drop = burnDropArray[i];
+        await burnDrop(addressToShow, currentCampaign, drop)
+
+      }
+      saveNotification.hideToast()
+    } catch (err) {
+      console.log(err)
+      _tokenIdList[tokenIdIndex].metadataUri = originalMetadataUri
+      onBackView()
+      saveNotification.hideToast()
+      saveErrorNotification.showToast()
+      setTokenIdList(_tokenIdList?.slice())
+    }
   }
 
   function addReplaceAttribute(addId: string, addValue: string) {
@@ -379,6 +489,7 @@ export default function LuksoComponent({
 
   function onCategoryTypeChange(value: string) {
     setSelectedCategory(value)
+    console.log(FilterList(optionList, 'type', value), optionList)
     setOptionListShow(FilterList(optionList, 'type', value))
     updateFeatureCamPosition(value, {
       ...campaignParams?.config.featuresCamPos,
@@ -420,21 +531,25 @@ export default function LuksoComponent({
     exportData.attributesBase64 = window.btoa(
       JSON.stringify(exportData.attributes)
     )
-    const [modelPromise ] = await Promise.all([
-/*       TakeCanvasPicture(''), */
+    const [modelGLBPromise, modelVRMPromise] = await Promise.all([
       GetAvatarGLB(),
-/*       GetAvatarVRM() */
-      //TODO: add VRM request function
-    ])
-    exportData.model = modelPromise.success ? modelPromise.value : undefined;
-    if (isOnIFrame) {
-      IFrameExportData(exportData)
-    } else {
-      //TODO: Add SaveFile for VRM
-      if (exportData.model != undefined) {
-        await SaveFile(exportData.model, `${combination}.glb`)
-      }
+      GetAvatarVRM()
+    ]);
+    console.log("Downloading for " + combination)
+    const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
+    const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
+    if (modelVRMPromise.success && modelGLBPromise.success) {
+      const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
+      await UploadFile(new File([refinedModelVRM], `${combination}.vrm`), StorageLocation.AvatarVrms, undefined, campaignParams?.campaign)
+      await SaveFile(modelGLB, `${combination}.glb`)
     }
+  }
+
+  const getAvatarThumbnail = async () => {
+    const avatarGLBPromise = await GetAvatarGLB()
+    const modelGLB = avatarGLBPromise.success ? avatarGLBPromise.value : undefined;
+    const thumbnail = await PostRequestThumbnailProcessFile(modelGLB as Blob)
+    return thumbnail
   }
 
   function formatearString(inputString: string): string {
@@ -448,31 +563,49 @@ export default function LuksoComponent({
     return `(${primerosCuatro}...${ultimosCuatro})`
   }
 
-  return (
-    <>
-      <MobileLayout>
-        <>
-          {!provider && <LoginUI />}
-          {provider && <div className="w-full h-screen bg-[#FFCBDE] flex flex-col">
-            {isAccountModalOpen && (
-              <AccountModalUI
-                addressAccount={addressToShow}
-                formatAddress={formatearString(addressToShow)}
-                setIsAccountModalOpen={(value) =>
-                  setIsAccountModalOpen(value)
-                }
-                onDisconnect={() => {
+  const onBackView = () => {
+    setSelectedCombination(undefined)
+    setCampaign(undefined)
+    setSelectedCategory('head')
+    setOptionListShow([])
+    singleInitData = undefined
+    optionList = []
+  }
 
-                  setCurrentSection(LuksoSections.Main)
-                  void reRoll()
-                }}
-              />
-            )}
+  return (
+    <MobileLayout>
+      <>
+        {/* LOGIN */}
+        {!provider &&
+          <LoginUI />
+        }
+        {/* MAIN VIEW */}
+        {provider &&
+          <div className="w-full h-screen bg-client-primary flex flex-col">
+            {/* ACCOUNT MODAL */}
+            {isAccountModalOpen &&
+              (
+                <AccountModalUI
+                  addressAccount={addressToShow}
+                  formatAddress={formatearString(addressToShow)}
+                  setIsAccountModalOpen={(value) =>
+                    setIsAccountModalOpen(value)
+                  }
+                  onDisconnect={() => {
+                    setCurrentSection(LuksoSections.Main)
+                    setSelectedBaseCombination(undefined)
+                    setSelectedCombination(undefined)
+                    setTokenIdList(undefined)
+                  }}
+                />
+              )
+            }
+            {/* HEADER TAB */}
             <div className='z-10'>
               <TransparentBoxUI
                 fullWidth
                 border
-                backgroundColorClass="bg-[#FFCBDE]"
+                backgroundColorClass="bg-client-primary"
                 opacityPercentage="50"
                 borderColorClass="border-white"
                 borderSizeClass="border-2"
@@ -481,136 +614,145 @@ export default function LuksoComponent({
                 alignItemsClass="items-stretch"
               >
                 <div className="flex flex-row justify-between h-full">
+                  {/* LOGO UI */}
                   <Image
-                    src="/resources/icons/campaigns/lukso.svg"
+                    src="resources/icons/campaigns/portal.svg"
                     width={106}
                     height={24}
                     alt="Lukso icon"
                   />
-
-                  {provider ? (
-                    <button
-                      className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
-                      onClick={() => setIsAccountModalOpen(true)}
-                    >
-                      <p className="truncate h-fit text-white">{`${formatearString(
-                        addressToShow
-                      )}`}</p>
-                    </button>
-                  ) : (
-                    <ConnectWeb3Button
-                      classStyles={
-                        'w-48 border-l-2 border-white font-bold text-white'
-                      }
-                      onConnect={() => { }}
-                    >
-                      <> Login with your UP!</>
-                    </ConnectWeb3Button>
-                  )}
+                  {/* WALLET/CONNECT BUTTON UI */}
+                  {provider ?
+                    (
+                      <button
+                        className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
+                        onClick={() => setIsAccountModalOpen(true)}
+                      >
+                        <p className="truncate h-fit text-white">
+                          {formatearString(addressToShow)}
+                        </p>
+                      </button>
+                    ) : (
+                      <ConnectWeb3Button
+                        classStyles={
+                          'w-48 border-l-2 border-white font-bold text-white'
+                        }
+                        onConnect={() => { }}
+                      >
+                        <> Login with your UP!</>
+                      </ConnectWeb3Button>
+                    )
+                  }
                 </div>
               </TransparentBoxUI>
             </div>
-            {!selectedCombination && <ListUI tokenIdList={tokenIdList} provider={provider} onClickViewButton={
-              (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
-                setIsLoading(true)
-                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-                if (selectedCombination != _combination) setSelectedCombination(_combination)
-                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
-                if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
-                setIsEditModeSelected(false)
-
-              }
-            } onClickEditButton={
-              (_campaign: string, _combination: string, _baseCombination: string, _combinationPictureUrl: string) => {
-                setIsLoading(true)
-                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-                if (selectedCombination != _combination) setSelectedCombination(_combination)
-                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
-                if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
-                setIsEditModeSelected(true)
-              }
-            } />}
-            {selectedCombination && campaignParams?.campaign && campaignParams && <>
-              {/* CANVAS WRAPPER */}
-              <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-                {/* CANVAS BACKGROUND */}
-                <div className="w-full h-screen absolute opacity-0" />
-                {/* CANVAS */}
-
-                {campaignParams?.campaign && <AvatarEditor
-                  avatarBasePath={campaignParams.armature}
-                  editMode={isEditModeSelected}
-                  lights={campaignParams.config.lights}
-                  defaultShadow={campaignParams.config.defShadow}
-                  defaultCamera={campaignParams.config.defCam}
-                  postProcessing={campaignParams.config.postProcessing}
-                  onReady={() => onAvatarBuilderReady(selectedCombination, campaignParams.campaign)}
-                />}
-
-              </div>
-              <div
-                className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isLoadingMintedData ? 'flex' : 'hidden'
-                  }`}
-              >
-                <div className="scale-[3]">
-                  <Loader />
-                </div>
-              </div>
-              <div className="fixed z-10">
-                <HudComponent
-                  selectedOption={selectedOpc.find(
-                    (e) => e.id === selectedCategory
-                  )}
-                  editModeSelected={isEditModeSelected}
-                  selectListCategory={campaignParams.features && campaignParams.accessories && [
-                    ...campaignParams.features,
-                    ...campaignParams.accessories,
-                  ] || []}
-                  // optionList
-                  optionList={optionListShow}
-                  // selectedCategory
-                  selectedCategory={selectedCategory}
-                  campaignSkinColorConfig={
-                    campaignParams?.config.skin || {}
-                  }
-                  skinColor={skinColor}
-                  changeView={() => {
-                    setIsEditModeSelected(!isEditModeSelected)
-                    void updateStage(!isEditModeSelected)
-                  }}
-                  // changeCategory
-                  onOptionChange={(id, path, name) =>
-                    void onOptionChange(id, path, name)
-                  }
-                  // onCategoryChange
-                  onCategoryTypeChange={(value) =>
-                    onCategoryTypeChange(value)
-                  }
-                  onSkinColorChange={(value) =>
-                    void onClickChangeSkinColor(value)
-                  }
-                  exportModel={() => exportModel(selectedBaseCombination!)}
-                  isCustomCampaignHud
-                />
-              </div>
-              <LuksoUI
-                setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
-                isLoading={isLoading}
-                currentSection={currentSection}
-                getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
-                exportModel={() => exportModel(selectedBaseCombination!)}
+            {/* COLLECTION LIST */}
+            {!selectedCombination &&
+              <ListUI
+                tokenIdList={tokenIdList}
                 provider={provider}
-                isGettingInfoAboutHasMinted={isGettingInfoAboutHasMinted}
-                features={singleInitData?.features}
-                picture={picture}
-                combination={selectedCombination} combinationPictureUrl={combinationPictureUrl}
-                onClickBackButton={() => {
-                  setSelectedCombination(undefined)
-                  setCampaign(undefined)
-                  setSelectedCategory('head')
-                  optionList = []
-                }} goEditMode={() => setIsEditModeSelected(true)} /></>}
-          </div>}</>
-      </MobileLayout></>
+                onClickViewButton={
+                  (_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
+                    setIsLoading(true)
+                    if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                    if (selectedCombination != _combination) setSelectedCombination(_combination)
+                    if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
+                    if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                    if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
+                    if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
+                    setIsEditModeSelected(false)
+                    setCurrentSection(LuksoSections.Edit)
+                  }
+                }
+                onClickEditButton={
+                  (_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
+                    setIsLoading(true)
+                    if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                    if (selectedCombination != _combination) setSelectedCombination(_combination)
+                    if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
+                    if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                    if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
+                    if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
+                    setIsEditModeSelected(true)
+                    setCurrentSection(LuksoSections.Edit)
+                  }
+                }
+              />
+            }
+            {/* CAMPAIGN VIEWER */}
+            {selectedCombination && campaignParams?.campaign && campaignParams &&
+              <>
+                {/* CANVAS WRAPPER */}
+                <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+                  {/* CANVAS BACKGROUND */}
+                  <div className="w-full h-screen absolute inset-0 bg-client-primary" />
+                  {/* CANVAS */}
+                  {campaignParams?.campaign &&
+                    <AvatarEditor
+                      avatarBasePath={campaignParams.armature}
+                      editMode={isEditModeSelected}
+                      lights={campaignParams.config.lights}
+                      defaultShadow={campaignParams.config.defShadow}
+                      defaultCamera={campaignParams.config.defCam}
+                      postProcessing={campaignParams.config.postProcessing}
+                      onReady={() => onAvatarBuilderReady(selectedCombination, campaignParams.campaign)}
+                    />
+                  }
+                </div>
+                {/* LOADER */}
+                <div className={`fixed inset-0 h-screen w-full flex ${isEditModeSelected ? 'justify-end pr-[22.5rem]' : 'justify-center'} items-center bg-client-primary ${isLoading ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'} transition-all duration-1000`}>
+                  <div className="scale-[3]">
+                    <Loader size={100} />
+                  </div>
+                </div>
+                {/* EDITOR HUD */}
+                <div className="fixed z-10">
+                  <HudComponent
+                    selectedOption={selectedOpc.find(
+                      (e) => e.id === selectedCategory
+                    )}
+                    editModeSelected={isEditModeSelected}
+                    selectListCategory={campaignParams.features && campaignParams.accessories && [
+                      ...campaignParams.features,
+                      ...campaignParams.accessories,
+                    ] || []}
+                    // optionList
+                    optionList={optionListShow}
+                    // selectedCategory
+                    selectedCategory={selectedCategory}
+                    campaignSkinColorConfig={campaignParams?.config.skin || {}}
+                    skinColor={skinColor}
+                    changeView={() => {
+                      saveCombination()
+                      setIsEditModeSelected(!isEditModeSelected)
+                      void updateStage(!isEditModeSelected)
+                    }}
+                    // changeCategory
+                    onOptionChange={(id, path, name) => void onOptionChange(id, path, name)}
+                    // onCategoryChange
+                    onCategoryTypeChange={(value) => onCategoryTypeChange(value)}
+                    onSkinColorChange={(value) => void onClickChangeSkinColor(value)}
+                    exportModel={async () => {}}
+                    isCustomCampaignHud onClickBackButton={() => setIsEditModeSelected(false)} />
+                </div>
+                {/* LUKSO HUD */}
+                <LuksoUI
+                  setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
+                  isLoading={false}
+                  currentSection={currentSection}
+                  getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
+                  exportModel={async () => {}}
+                  provider={provider}
+                  features={singleInitData?.features}
+                  combination={selectedCombination} combinationPictureUrl={combinationPictureUrl}
+                  onClickBackButton={onBackView}
+                  goEditMode={() => setIsEditModeSelected(true)}
+                />
+              </>
+            }
+          </div>
+        }
+      </>
+    </MobileLayout>
   )
 }

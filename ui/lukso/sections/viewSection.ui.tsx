@@ -9,7 +9,6 @@ import TransparentBoxUI from "../common/transparentBox.ui";
 
 interface MintSectionUIProps {
     features?: IndexFeatureInterface[];
-    picture: string;
     combination: string;
     combinationPictureUrl: string
     onClickBackButton: () => void
@@ -41,7 +40,7 @@ export default function ViewSectionUI({ onClickBackButton, features, combination
 
     return (
         <section className={`flex w-full h-full items-center justify-between`}>
-            {/*             <div className={`fixed h-screen w-full flex justify-center items-center bg-[#FFCBDE] top-14 duration-100 transition-all ${isShuffling ? 'flex' : 'hidden'}`}>
+            {/*             <div className={`fixed h-screen w-full flex justify-center items-center bg-client-primary top-14 duration-100 transition-all ${isShuffling ? 'flex' : 'hidden'}`}>
                 <div className="scale-[3]">
                     <Loader />
                 </div>
@@ -53,7 +52,7 @@ export default function ViewSectionUI({ onClickBackButton, features, combination
                 <TransparentBox
                     fullWidth
                     border
-                    backgroundColorClass="bg-[#FFCBDE]"
+                    backgroundColorClass="bg-client-primary"
                     heightClass="grow"
                     borderSizeClass="border-t-0"
                 >

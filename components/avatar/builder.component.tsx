@@ -25,7 +25,8 @@ import {
   GetAssetsListByCampaign, GetAvatarCombinationByAttributes,
   GetAvatarSingleByCampaignCombination,
   GetEnvMapListByCampaign,
-  GetStageListByCampaign
+  GetStageListByCampaign,
+  PostRequestVRMProcessFile,
 } from "../../utils/api.util";
 import { SaveFile } from "../../utils/exporter.util";
 import AGLoading from "../../ui/common/ag-loading.component";
@@ -46,7 +47,6 @@ import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "
 import {Result} from "../../types/common.type";
 import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../constants/common.constant";
 import {GenerateVrmMetaData} from "../../utils/threejs/vrm.util";
-import { ModelExtension } from "../../enums/export.enum";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -169,7 +169,7 @@ export default function AvatarBuilder({
   }
 
   const exportFromIFrame = () => {
-    return exportModel(ModelExtension.VRM);
+    return exportModel();
   }
 
   async function loadPreData() {
@@ -375,29 +375,33 @@ export default function AvatarBuilder({
     setSelectedOpc([...exportData.attributes]);
   }
 
-  async function exportModel(type: ModelExtension) {
+  async function exportModel() {
     // TODO: Add metadata from user
     GenerateVrmMetaData(undefined);
     
     const attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
     
     exportData.attributesBase64 = attributesBase64;
-    const [picturePromise, modelPromise, combinationPromise] = await Promise.all([
+    const [picturePromise, modelVRMPromise, modelGLBPromise, combinationPromise] = await Promise.all([
       TakeCanvasPicture(),
-      type === ModelExtension.VRM ? GetAvatarVRM() : GetAvatarGLB(),
+      GetAvatarVRM(),
+      GetAvatarGLB(),
       GetAvatarCombinationByAttributes(campaign, attributesBase64)
     ]);
     exportData.picture = picturePromise;
-    exportData.model = modelPromise.success ? modelPromise.value : undefined;
+    const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
+    const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
     exportData.combination = combinationPromise.success ? combinationPromise.value : undefined;
 
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
-      if (modelPromise.success)
-        await SaveFile(modelPromise.value, `model.${type}`);
-
-      await SaveFile(exportData.picture, 'picture.png');
+      if (modelVRMPromise.success && modelGLBPromise.success) {
+        const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
+        await SaveFile(refinedModelVRM, `avatar.vrm`);
+        await SaveFile(modelGLB, `model.glb`);
+        await SaveFile(exportData.picture, 'picture.png');
+      }
     }
   }
 
@@ -440,47 +444,42 @@ export default function AvatarBuilder({
         <>
           {!onlyView &&
             <HudUI
-              selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
+            selectedOption={selectedOpc.find(e => e.id === selectedCategory)}
 
-              editModeSelected={isEditModeSelected}
+            editModeSelected={isEditModeSelected}
 
-              selectListCategory={[...selectListFeatures, ...selectListAccessories]}
-              // selectListFeatures={[...selectListFeatures, ...selectListAccessories]}
-              // selectListAccessories={selectListAccessories}
+            selectListCategory={[...selectListFeatures, ...selectListAccessories]}
+            // selectListFeatures={[...selectListFeatures, ...selectListAccessories]}
+            // selectListAccessories={selectListAccessories}
+            // optionList
+            optionList={optionListShow}
+            // featureList={featureListShow}
+            // accessoryList={accessoryListShow}
+            // selectedCategory
+            selectedCategory={selectedCategory}
+            // selectedFeature={selectedFeature}
+            // selectedAcc={selectedAcc}
+            campaignSkinColorConfig={campaignConfig.skin || {}}
+            skinColor={skinColor}
+            changeView={() => {
+              setIsEditModeSelected(!isEditModeSelected);
+              void updateStage(!isEditModeSelected);
+              updateCamMode(!isEditModeSelected);
+            } }
 
-              // optionList
-              optionList={optionListShow}
-              // featureList={featureListShow}
-              // accessoryList={accessoryListShow}
-
-              // selectedCategory
-              selectedCategory={selectedCategory}
-              // selectedFeature={selectedFeature}
-              // selectedAcc={selectedAcc}
-
-              campaignSkinColorConfig={campaignConfig.skin || {}}
-              skinColor={skinColor}
-              changeView={() => {
-                setIsEditModeSelected(!isEditModeSelected);
-                void updateStage(!isEditModeSelected);
-                updateCamMode(!isEditModeSelected);
-              }}
-
-              // changeCategory
-              onOptionChange={(id: string, path: string, name: string) => void onOptionChange(id, path, name)}
-              // changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
-              // changeAccessory={(id: string, path: string, name: string) => void onChangeAccessory(id, path, name)}
-
-              // onCategoryChange
-              onCategoryTypeChange={(value: string) => onCategoryTypeChange(value)}
-              // onFeatureTypeChange={(value: string) => onFeatureTypeChange(value)}
-              // onAccessoryTypeChange={(value: string) => onAccessoryTypeChange(value)}
-
-
-              onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
-              exportModel={(type) => exportModel(type)}
-              exportAllow={campaignConfig.extraExport}
-            />
+            // changeCategory
+            onOptionChange={(id: string, path: string, name: string) => void onOptionChange(id, path, name)}
+            // changeFeature={(id: string, path: string, name: string) => void onChangeFeature(id, path, name)}
+            // changeAccessory={(id: string, path: string, name: string) => void onChangeAccessory(id, path, name)}
+            // onCategoryChange
+            onCategoryTypeChange={(value: string) => onCategoryTypeChange(value)}
+            // onFeatureTypeChange={(value: string) => onFeatureTypeChange(value)}
+            // onAccessoryTypeChange={(value: string) => onAccessoryTypeChange(value)}
+            onSkinColorChange={(value: string) => void onClickChangeSkinColor(value)}
+            exportModel={() => exportModel()}
+            exportAllow={campaignConfig.extraExport} onClickBackButton={function (): void {
+              throw new Error("Function not implemented.");
+            } }            />
           }
         </>
       }

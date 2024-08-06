@@ -1,20 +1,21 @@
-import {useRef, useState} from "react";
-import {Module} from "../../enums/common.enum";
-import {FeatureBasic} from "../../interfaces/common.interface";
-import {AnimationInterface, FeatureInterface} from "../../interfaces/api.interface";
-import {GetAnimationListByCampaign, GetAssetsListByCampaign} from "../../utils/api.util";
+import { useRef, useState } from "react";
+import { Module } from "../../enums/common.enum";
+import { FeatureBasic } from "../../interfaces/common.interface";
+import { AnimationInterface, FeatureInterface } from "../../interfaces/api.interface";
+import { GetAnimationListByCampaign, GetAssetsListByCampaign, PostRequestVRMProcessFile } from "../../utils/api.util";
 import AvatarEditor, {
   ChangeFeature,
   ChangeSkinColor,
   ChangeStartAnimation,
   GetAvatarGLB,
+  GetAvatarVRM,
   SetFeaturesData
 } from "../avatar/editor.component";
 import AGLoading from "../../ui/common/ag-loading.component";
-import {Delay, LogError, LogWarning, SetMapToMap} from "../../utils/common.util";
+import { Delay, LogError, LogWarning, SetMapToMap } from "../../utils/common.util";
 import AGButton from "../../ui/common/ag-button.component";
-import {TakeCanvasPicture} from "../avatar/viewer.component";
-import {SaveFile} from "../../utils/exporter.util";
+import { TakeCanvasPicture } from "../avatar/viewer.component";
+import { SaveFile } from "../../utils/exporter.util";
 import {
   IndexValuesToNumber,
   NumberToIndexValues,
@@ -22,7 +23,7 @@ import {
   GetMaxIndexValues,
   GetMinIndexValues, GetMaxCombinationNum
 } from "../../utils/collection.util";
-import {ChangeMaterialOption} from "../../enums/model.enum";
+import { ChangeMaterialOption } from "../../enums/model.enum";
 
 let _didReachEnd = false;
 let _start: Map<number, number> | undefined;
@@ -102,13 +103,13 @@ interface AvatarCollectionProps {
 }
 
 export default function AvatarCollection({
-                                           campaign,
-                                           avatarBasePath,
-                                           featureList,
-                                           skinColor,
-                                           defaultAnimation, 
-                                           changeMaterial
-                                         }: AvatarCollectionProps) {
+  campaign,
+  avatarBasePath,
+  featureList,
+  skinColor,
+  defaultAnimation,
+  changeMaterial
+}: AvatarCollectionProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [maxCombination, setMaxCombination] = useState<number>(0);
   const [currentIteration, setCurrentIteration] = useState<number>();
@@ -149,7 +150,7 @@ export default function AvatarCollection({
   }
 
   // TODO review meshName
-  async function getFeatureList(featureList: FeatureBasic[]) { 
+  async function getFeatureList(featureList: FeatureBasic[]) {
     const featureData = await GetAssetsListByCampaign(campaign);
     if (!featureData.success) return LogError(Module.CollectionComponent, "Could not retrieve feature option data!");
 
@@ -199,14 +200,21 @@ export default function AvatarCollection({
   async function onExport() {
     // console.log("Doing export!");
     // Maybe add on iframe
-    const [picturePromise, modelPromise] = await Promise.all([
+    const [picturePromise, modelGLBPromise, modelVRMPromise] = await Promise.all([
       TakeCanvasPicture(),
-      GetAvatarGLB()
+      GetAvatarGLB(),
+      GetAvatarVRM()
     ]);
+    console.log("EXPORTING VRM, GLB and image...")
+    const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
+    const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
+    if (modelVRMPromise.success && modelGLBPromise.success) {
+      const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
+      await SaveFile(refinedModelVRM, `avatar.vrm`);
+      await SaveFile(modelGLB, `model.glb`);
+      await SaveFile(picturePromise, 'picture.png');
+    }
 
-    if (modelPromise.success)
-      await SaveFile(modelPromise.value, 'model.glb');
-    await SaveFile(picturePromise, 'picture.png');
   }
 
   async function processSingle() {
@@ -285,9 +293,9 @@ export default function AvatarCollection({
           <p>Current: <span>{currentIteration}</span></p>
           <p>Max Combination: <span>{maxCombination}</span></p>
           <p>Start:</p><input type="number" min={0} max={maxCombination}
-                              onChange={(e) => onChangeStartValue(e.target.valueAsNumber)}/>
+            onChange={(e) => onChangeStartValue(e.target.valueAsNumber)} />
           <p>End:</p><input type="number" min={0} max={maxCombination}
-                            onChange={(e) => onChangeEndValue(e.target.valueAsNumber)}/>
+            onChange={(e) => onChangeEndValue(e.target.valueAsNumber)} />
         </div>
         <AGButton onClickEvent={() => onClickDoCollection()}>Start</AGButton>
         <AGButton onClickEvent={() => onClickStopCollection()}>Stop</AGButton>
@@ -298,13 +306,13 @@ export default function AvatarCollection({
 
   return (
     <>
-      <AGLoading loading={isLoading} transparency/>
+      <AGLoading loading={isLoading} transparency />
       {isDoable ?
         <>
           {mahUi()}
           <AvatarEditor avatarBasePath={avatarBasePath}
-                        onReady={() => onCollectionReady()}
-                        changeMaterial={changeMaterial}
+            onReady={() => onCollectionReady()}
+            changeMaterial={changeMaterial}
           />
         </>
         :

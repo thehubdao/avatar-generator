@@ -3,7 +3,6 @@ import LoadingUI from "./sections/loadingSection.ui";
 import { LuksoSections } from "../../enums/lukso/common.enum";
 import { ethers } from "ethers";
 import { IndexFeatureInterface } from "../../interfaces/api.interface";
-import ViewSectionUI from "./sections/viewSection.ui";
 
 interface LuksoUIProps {
   isLoading: boolean;
@@ -12,13 +11,11 @@ interface LuksoUIProps {
   setIsEditModeSelected: (value: boolean) => void;
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
   provider: ethers.BrowserProvider | undefined;
-  isGettingInfoAboutHasMinted: boolean;
   features?: IndexFeatureInterface[];
-  picture: string;
   combination: string;
   combinationPictureUrl: string;
   onClickBackButton: () => void
-  goEditMode: ()=>void
+  goEditMode: () => void
 }
 
 export default function LuksoUI({
@@ -28,7 +25,6 @@ export default function LuksoUI({
   getloaderDivElement,
   exportModel,
   features,
-  picture,
   combination,
   combinationPictureUrl,
   onClickBackButton,
@@ -37,9 +33,8 @@ export default function LuksoUI({
   return (
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
-      {(currentSection === LuksoSections.View) && <ViewSectionUI onClickBackButton={onClickBackButton} combinationPictureUrl={combinationPictureUrl} combination={combination} picture={picture} features={features} />}
-      {(currentSection === LuksoSections.Edit) && <EditSectionUI picture={combinationPictureUrl} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel} onClickBackButton={onClickBackButton} 
-      goEditMode={goEditMode} />}
+      {(currentSection === LuksoSections.Edit) && <EditSectionUI onClickBackButton={onClickBackButton} picture={combinationPictureUrl} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel}
+        goEditMode={goEditMode} />}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import luksoModule from '@lukso/web3-onboard-config'
 import { ConnectModalOptions } from '@web3-onboard/core/dist/types'
 import { I18nOptions } from '../types/web3onboard.type'
+import "toastify-js/src/toastify.css"
 
 const luksoProvider = luksoModule()
 

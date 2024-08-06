@@ -28,6 +28,8 @@ export enum StorageLocation {
     Missing = 'missing',
     Stage = 'stage',
     EnvMap = 'env_map',
+    AvatarImages = 'avatar_images',
+    AvatarVrms = 'avatar_vrms'
 }
 
 export enum FirestoreFilterValues {

@@ -89,12 +89,12 @@ export default function LoginUI() {
   }, []);
 
   return (
-    <div  className={'fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-[#FFCBDE] text-white'}>
+    <div  className={'fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-client-primary text-white'}>
       <canvas ref={canvasRef} className="w-full h-screen fixed top-0 left-0"></canvas>
       <div className="w-full h-screen flex flex-col justify-center items-center">
         <div className="fixed top-0 w-full h-14 flex items-center px-4 justify-between">
           <Image
-            src='/resources/icons/campaigns/lukso.svg'
+            src='resources/icons/campaigns/portal.svg'
             width={106}
             height={24}
             alt="Lukso icon"
@@ -104,14 +104,11 @@ export default function LoginUI() {
         <div className="fixed flex flex-col justify-center items-center gap-8">
           <div>
             <Image
-              src='/resources/icons/campaigns/lukso.svg'
+              src='resources/icons/campaigns/portal.svg'
               width={596}
               height={138}
               alt="Lukso icon"
             />
-            <div className="w-[596px]">
-              <p className="text-5xl mt-7 tracking-[1.17em] text-center">CITIZENS</p>
-            </div>
           </div>
           <ConnectWeb3Button classStyles="h-fit" onConnect={()=>{}} >
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >

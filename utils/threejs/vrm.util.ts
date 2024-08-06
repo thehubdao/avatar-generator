@@ -111,10 +111,6 @@ export function GenerateVrmBoneData(nodes: GltfNode[] | undefined) {
     void LogWarning(Module.VrmUtil, err.message, e);
   }
 
-  console.log("NODES: ", nodes)
-  console.log("DEFAULT: ", generatedBones)
-  console.log("equal", generatedBones.length === VRM_HUMAN_BONES_DEFAULT_LENGTH)
-  
   const setData: VrmStructure = {
     extensions: {
       VRM: {
@@ -154,8 +150,7 @@ export function GenerateVrmMetaData(meta: VrmMetadata | undefined) {
 }
 
 export function GenerateVrmScene(model: Object3D) {
-  let scaleFactor = 1;
-  
+
   // Create new scene, this one has the new structure
   const sceneReal = new Scene();
   sceneReal.name = "Scene";
@@ -167,12 +162,13 @@ export function GenerateVrmScene(model: Object3D) {
 
   // Find scale, skinnedMeshArray, geometryArray and materialArray
   model.traverse(obj => {
-    if (obj.name === "Armature")
-      scaleFactor = obj.scale.x;
-    
     if (IsSkinnedMesh(obj)) {
       skinnedMeshArray.push(obj);
-      geometryArray.push(obj.geometry.clone());
+      geometryArray.push({
+        ...obj.geometry.clone(),
+        morphTargetsRelative: false,
+        morphAttributes: {}
+      } as BufferGeometry);
       const mat = obj.material;
       if (mat instanceof Material) {
         materialArray.push(mat.clone());
@@ -193,6 +189,7 @@ export function GenerateVrmScene(model: Object3D) {
   }
 
   const firstSM = skinnedMeshArray[0];
+  firstSM.skeleton.pose()
   const matrixCopy = firstSM.skeleton.boneInverses.map(b => b.clone());
   const actualBones = firstSM.skeleton.bones[0].clone(true);
   const boneArray: Bone[] = [];
@@ -214,9 +211,9 @@ export function GenerateVrmScene(model: Object3D) {
   leSkinnedMesh.bind(newSkeleton, identity);
   
   // Create a matrix
-  const matrix = new Matrix4();
+
   // Rotate the matrix
-  matrix.makeRotationX(Math.PI / 2);
+  /* matrix.makeRotationX(Math.PI / 2);
   // rotate the object using the matrix
   actualBones.position.applyMatrix4(matrix);
   
@@ -231,6 +228,8 @@ export function GenerateVrmScene(model: Object3D) {
   
   // Rotate bones on own axis
   actualBones.rotateX(Math.PI / 2);
+  actualBones.rotateY(Math.PI); */
+  //actualBones.rotateX(Math.PI / 2);
   actualBones.rotateY(Math.PI);
 
   sceneReal.children.push(actualBones);
