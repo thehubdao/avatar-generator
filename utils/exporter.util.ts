@@ -46,6 +46,7 @@ export async function ExportModelGlb(model: GLTF | undefined, pose?: Record<stri
 
 export async function ExportObjectGlb(object: Object3D | undefined, pose?: Record<string, BoneMatrix | undefined>): Promise<Result<Blob>> {
   try {
+    console.log(object)
     if (object == undefined)
       Raise("Model can't be undefined if trying to export!");
 

@@ -229,7 +229,7 @@ export default function LuksoComponent({
 
     for (let i = 0; i < combArray.length; i++) {
         const combination = combArray[i];
-       await getSingleData('vrm_female', combination)
+       await getSingleData(campaignParams?.campaign as string, combination)
         await loadSingleData()
         await exportModel(combination)
     }
@@ -360,12 +360,14 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
       const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
       tokenMetadata.body[bodyIndex] = val as BodyPart
       // Set feature on model
+      console.log(campaignParams?.config.skin?.defColor, name,
+        type,)
       await ChangeFeature(
         id,
         path,
         name,
         type,
-        campaignParams?.config.skin?.defColor ?? 'ffffff'
+        campaignParams?.config.skin?.defColor ?? skinColor
       )
     }
   }
@@ -530,6 +532,7 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
     exportData.attributesBase64 = window.btoa(
       JSON.stringify(exportData.attributes)
     )
+    console.log(campaignParams?.campaign)
     const [modelGLBPromise, modelVRMPromise] = await Promise.all([
       GetAvatarGLB(),
       GetAvatarVRM()

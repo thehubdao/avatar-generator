@@ -130,6 +130,7 @@ function ChangeSkeleton(newFeature: Object3D, baseSkeleton: Skeleton, changeMate
         await changeMaterial(object, tone);
 
       if (skinColor) {
+        console.log(skinColor)
         const matRef = object.material as MeshStandardMaterial;
         if (matRef.name.startsWith(skinMatName)) {
           matRef.color.set(`#${skinColor}`);
