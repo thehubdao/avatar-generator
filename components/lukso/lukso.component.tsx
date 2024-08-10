@@ -206,8 +206,6 @@ export default function LuksoComponent({
     setSelectedCategory(campaignParams?.features[0].displayName)
   }, [campaignParams])
 
-  useEffect(() => { console.log(tokenIdList, "TOKEN ID LIST CHANGE") }, [tokenIdList])
-
   async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
     if (!campaign) return
     await Promise.all([
@@ -383,8 +381,10 @@ export default function LuksoComponent({
     const currentFeatures = singleInitData?.features
     const changedFeature = optionList?.find((feature) => feature.type === _selectedCategory && feature.id === id)
     const currentFeaturesTypeIndex = currentFeatures?.findIndex((feature) => feature.val.type === _selectedCategory)
-
-    if (currentFeaturesTypeIndex && changedFeature && singleInitData) singleInitData.features[currentFeaturesTypeIndex].val = changedFeature
+   
+    if (currentFeaturesTypeIndex != undefined && changedFeature && singleInitData) {
+      singleInitData.features[currentFeaturesTypeIndex].val = changedFeature
+    }
 
     await ChangeFeature(
       id,
@@ -482,7 +482,6 @@ export default function LuksoComponent({
 
   function onCategoryTypeChange(value: string) {
     setSelectedCategory(value)
-    console.log(FilterList(optionList, 'type', value), optionList)
     setOptionListShow(FilterList(optionList, 'type', value))
     updateFeatureCamPosition(value, {
       ...campaignParams?.config.featuresCamPos,
