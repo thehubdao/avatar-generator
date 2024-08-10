@@ -275,24 +275,25 @@ export default function LuksoComponent({
     })
 
     const campaignDropList = dropList[campaignParams?.campaign as keyof typeof dropList]
-console.log(combinationIndexes)
+    console.log(combinationIndexes)
     if (campaignDropList) {
       const formattedDropList = campaignDropList.map((val) => {
         return optionList?.find((option) => option.type === val.type && val.index === option.index) as FeatureInterface
-      }).filter((val)=>{
+      }).filter((val) => {
         const categoryIndex = campaignParams?.features?.find((category) => {
           return category.displayName === val.type
         })?.index
 
-        if(!categoryIndex || !combinationIndexes) return true
+        if (!categoryIndex || !combinationIndexes) return true
 
-        return !combinationIndexes[categoryIndex - 1]?.includes(val.index.toString())})
+        return !combinationIndexes[categoryIndex - 1]?.includes(val.index.toString())
+      })
       filteredOptionList = filteredOptionList.concat(formattedDropList)
     }
 
     optionList = filteredOptionList
     const filteredList = FilterList(optionList, 'type', selectedCategory)
-console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
+    console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
     return setOptionListShow(filteredList)
 
   }
@@ -384,7 +385,7 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
     const currentFeaturesTypeIndex = currentFeatures?.findIndex((feature) => feature.val.type === _selectedCategory)
 
     if (currentFeaturesTypeIndex && changedFeature && singleInitData) singleInitData.features[currentFeaturesTypeIndex].val = changedFeature
-    
+
     await ChangeFeature(
       id,
       path,
@@ -424,7 +425,7 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
 
     setTokenIdList(_tokenIdList.slice())
     try {
-      const thumbnailBlob = await getAvatarThumbnail()
+      const thumbnailBlob = (currentCampaign == 'vrm_female') ? undefined : await getAvatarThumbnail()
 
       const burnDropArray: BodyPart[] = []
 
@@ -438,6 +439,7 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
           burnDropArray.push(feature.val as BodyPart)
         }
       })
+
       const metadataObject = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, currentCampaign)
 
       _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
