@@ -227,10 +227,11 @@ export default function LuksoComponent({
     await SetEnvironment(bgMap?.path, lightMap?.path, campaignParams?.config.envMap?.skyboxConfig);
     const combArray = combinationsArray
 
-    for (let i = 0; i < 1; i++) {
+    for (let i = 0; i < combArray.length; i++) {
         const combination = combArray[i];
        await getSingleData(campaignParams?.campaign as string, combination)
         await loadSingleData()
+        await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'ffffff')
         await exportModel(combination)
     }
     // Set features from single
@@ -300,7 +301,7 @@ console.log(combinationIndexes)
 
     optionList = filteredOptionList
     const filteredList = FilterList(optionList, 'type', selectedCategory)
-console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
+
     return setOptionListShow(filteredList)
 
   }
@@ -360,8 +361,6 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
       const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
       tokenMetadata.body[bodyIndex] = val as BodyPart
       // Set feature on model
-      console.log(campaignParams?.config.skin?.defColor, name,
-        type,)
       await ChangeFeature(
         id,
         path,
