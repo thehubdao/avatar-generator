@@ -381,7 +381,7 @@ export default function LuksoComponent({
     const currentFeatures = singleInitData?.features
     const changedFeature = optionList?.find((feature) => feature.type === _selectedCategory && feature.id === id)
     const currentFeaturesTypeIndex = currentFeatures?.findIndex((feature) => feature.val.type === _selectedCategory)
-   
+
     if (currentFeaturesTypeIndex != undefined && changedFeature && singleInitData) {
       singleInitData.features[currentFeaturesTypeIndex].val = changedFeature
     }
@@ -428,9 +428,11 @@ export default function LuksoComponent({
       const thumbnailBlob = (currentCampaign == 'vrm_female') ? undefined : await getAvatarThumbnail()
 
       const burnDropArray: BodyPart[] = []
+      //NOTE: female campaign has it's types different from the DB
+      const femaleCampaignBodyTypes = { head: 'hair', face: 'accesories', legs: 'legs', chest: 'chest', shoes: 'feet' }
 
       currentFeatures?.forEach((feature) => {
-        newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
+        newMetadata.attributes?.push({ key: currentCampaign == 'vrm_female' ? femaleCampaignBodyTypes[feature.val.type.toLowerCase() as keyof typeof femaleCampaignBodyTypes] : feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
         const bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
 
         if (bodyFeature && bodyFeature.name != feature.val.name) {
@@ -446,7 +448,7 @@ export default function LuksoComponent({
 
       setTokenIdList(_tokenIdList.slice())
       const metadataUrl = `ipfs://${metadataObject.uri}`
-      await setTokenMetadata(currentCampaign, selectedTokenId, selectedMetadata, metadataUrl)
+      await setTokenMetadata(currentCampaign, selectedTokenId, newMetadata, metadataUrl)
       setCombinationPictureUrl(metadataObject.imageUrl)
 
       for (let i = 0; i < burnDropArray.length; i++) {
