@@ -95,6 +95,7 @@ export async function FirebaseGltfModel(path: string, campaign?: string): Promis
 }
 
 export async function GetGltfModel(path: string): Promise<Result<GLTF>> {
+  console.log(path, IsWebUrl(path))
   if (IsWebUrl(path))
     return FetchGltfModel(path);
   else

@@ -227,7 +227,7 @@ export default function LuksoComponent({
     await SetEnvironment(bgMap?.path, lightMap?.path, campaignParams?.config.envMap?.skyboxConfig);
     const combArray = combinationsArray
 
-    for (let i = 0; i < combArray.length; i++) {
+    for (let i = 0; i < 1; i++) {
         const combination = combArray[i];
        await getSingleData(campaignParams?.campaign as string, combination)
         await loadSingleData()

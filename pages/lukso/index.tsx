@@ -16,6 +16,7 @@ export default function LuksoAvatarView() {
     const campaignParameters = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
     if (campaignParameters.success) {
       campaignParameters.value.campaign = campaign
+      console.log(RemoveUndefinedProperties(campaignParameters.value))
       setCampaignParams(RemoveUndefinedProperties(campaignParameters.value))
     } else void LogError(Module.Lukso, 'Error on getting campaign parameters');
 

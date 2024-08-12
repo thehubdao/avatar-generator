@@ -187,6 +187,7 @@ export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, 
     }
 
     const getAvatarBaseResult = await GetGltfModel(avatarBasePath);
+    console.log(getAvatarBaseResult)
     if (!getAvatarBaseResult.success) {
       ShowModal(getAvatarBaseResult.errMessage);
       return;
