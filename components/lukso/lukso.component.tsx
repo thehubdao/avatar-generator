@@ -72,6 +72,7 @@ import ListUI from '../../ui/lukso/sections/listSection.ui'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
 import { uploadMetadata } from '../../utils/metadata.util'
 import Toastify from 'toastify-js'
+import { SelectableCampaign } from '../../types/common.type'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -129,6 +130,12 @@ export default function LuksoComponent({
   const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>()
   const [selectedTokenId, setSelectedTokenId] = useState<number>()
   const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>()
+
+  // listSection filter state
+  const [selectedFilterCampaign, setSelectedFilterCampaign] = useState<string>('all')
+  const [selectedFilterTokenId, setSelectedFilterTokenId] = useState<string>('')
+  const [selectedDropdownField, setSelectedDropdownField] = useState<SelectableCampaign>()
+
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
   const [addressToShow, setAddressToShow] = useState<string>('')
@@ -645,35 +652,30 @@ export default function LuksoComponent({
             {/* COLLECTION LIST */}
             {!selectedCombination &&
               <ListUI
-                tokenIdList={tokenIdList}
-                provider={provider}
-                onClickViewButton={
-                  (_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
-                    setIsLoading(true)
-                    if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-                    if (selectedCombination != _combination) setSelectedCombination(_combination)
-                    if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
-                    if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
-                    if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
-                    if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
-                    setIsEditModeSelected(false)
-                    setCurrentSection(LuksoSections.Edit)
-                  }
-                }
-                onClickEditButton={
-                  (_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
-                    setIsLoading(true)
-                    if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-                    if (selectedCombination != _combination) setSelectedCombination(_combination)
-                    if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
-                    if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
-                    if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
-                    if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
-                    setIsEditModeSelected(true)
-                    setCurrentSection(LuksoSections.Edit)
-                  }
-                }
-              />
+              tokenIdList={tokenIdList}
+              provider={provider}
+              onClickViewButton={(_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
+                setIsLoading(true)
+                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                if (selectedCombination != _combination) setSelectedCombination(_combination)
+                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
+                if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
+                if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
+                setIsEditModeSelected(false)
+                setCurrentSection(LuksoSections.Edit)
+              } }
+              onClickEditButton={(_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
+                setIsLoading(true)
+                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                if (selectedCombination != _combination) setSelectedCombination(_combination)
+                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
+                if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
+                if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
+                setIsEditModeSelected(true)
+                setCurrentSection(LuksoSections.Edit)
+              } } selectedCampaign={selectedFilterCampaign} setSelectedCampaign={setSelectedFilterCampaign} selectedTokenId={selectedFilterTokenId} setSelectedTokenId={setSelectedFilterTokenId} selectedDropdownField={selectedDropdownField} setSelectedDropdownField={setSelectedDropdownField } />
             }
             {/* CAMPAIGN VIEWER */}
             {selectedCombination && campaignParams?.campaign && campaignParams &&

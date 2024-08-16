@@ -19,3 +19,5 @@ type ResultFail = {
 }
 
 export type Result<T> = ResultSuccessful<T> | ResultFail;
+
+export type SelectableCampaign  = { campaignName: string, nftName: string, dropdownName: string }
