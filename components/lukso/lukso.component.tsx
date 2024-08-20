@@ -73,7 +73,7 @@ import ConnectWeb3Button from '../web3/connectWeb3.component'
 import { uploadMetadata } from '../../utils/metadata.util'
 import Toastify from 'toastify-js'
 import { SelectableCampaign } from '../../types/common.type'
-import { FileCampaignNameLabel } from '../../constants/lukso/labels.constant'
+import { fileCampaignNameLabel } from '../../constants/lukso/labels.constant'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -541,7 +541,7 @@ export default function LuksoComponent({
     console.log("EXPORTING VRM, GLB and image...")
     const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
     const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
-    const filesName = FileCampaignNameLabel[campaignParams?.campaign as Campaign] + selectedTokenId
+    const filesName = fileCampaignNameLabel[campaignParams?.campaign as Campaign] + selectedTokenId
     if (modelVRMPromise.success && modelGLBPromise.success) {
       const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
       await SaveFile(refinedModelVRM, `${filesName}.vrm`);
