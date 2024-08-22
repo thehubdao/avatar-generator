@@ -40,7 +40,6 @@ import {
   GetAvatarSingleByCampaignCombinationString,
   GetEnvMapListByCampaign,
   GetStageListByCampaign,
-  PostRequestThumbnailProcessFile,
   PostRequestVRMProcessFile,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
@@ -548,13 +547,13 @@ export default function LuksoComponent({
     }
   }
 
-  const getAvatarThumbnail = async () => {
+/*   const getAvatarThumbnail = async () => {
     const avatarGLBPromise = await GetAvatarGLB()
     const modelGLB = avatarGLBPromise.success ? avatarGLBPromise.value : undefined;
     const thumbnail = await PostRequestThumbnailProcessFile(modelGLB as Blob)
     return thumbnail
   }
-
+ */
   function formatearString(inputString: string): string {
     if (inputString.length < 8) {
       return 'El string debe tener al menos 8 caracteres'
