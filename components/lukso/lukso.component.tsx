@@ -433,8 +433,6 @@ export default function LuksoComponent({
 
     setTokenIdList(_tokenIdList.slice())
     try {
-      const thumbnailBlob = (currentCampaign == 'vrm_female') ? undefined : await getAvatarThumbnail()
-
       const burnDropArray: BodyPart[] = []
       //NOTE: female campaign has it's types different from the DB
       const femaleCampaignBodyTypes = { head: 'hair', face: 'accesories', legs: 'legs', chest: 'chest', shoes: 'feet' }
@@ -450,7 +448,7 @@ export default function LuksoComponent({
         }
       })
 
-      const metadataObject = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, currentCampaign)
+      const metadataObject = await uploadMetadata(newMetadata, undefined, newCombination, currentCampaign)
 
       _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
 
