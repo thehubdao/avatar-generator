@@ -9,7 +9,6 @@ import AvatarEditor, {
   ChangeSkinColor,
   ChangeStartAnimation,
   GetAvatarGLB,
-  GetAvatarVRM,
   RemoveStage,
   SetEnvironment,
   SetFeaturesData,
@@ -40,7 +39,6 @@ import {
   GetAvatarSingleByCampaignCombinationString,
   GetEnvMapListByCampaign,
   GetStageListByCampaign,
-  PostRequestVRMProcessFile,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
 import { SaveFile } from '../../utils/exporter.util'
@@ -73,6 +71,7 @@ import { uploadMetadata } from '../../utils/metadata.util'
 import Toastify from 'toastify-js'
 import { SelectableCampaign } from '../../types/common.type'
 import { fileCampaignNameLabel } from '../../constants/lukso/labels.constant'
+import { StorageLocation } from '../../enums/firebase.enum'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -530,18 +529,18 @@ export default function LuksoComponent({
     exportData.attributesBase64 = window.btoa(
       JSON.stringify(exportData.attributes)
     )
+    const vrmStorageUrl=`https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${selectedCombination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`
     const [picturePromise, modelGLBPromise, modelVRMPromise] = await Promise.all([
       FetchBlob(combinationPictureUrl),
       GetAvatarGLB(),
-      GetAvatarVRM()
+      FetchBlob(vrmStorageUrl)
     ]);
     console.log("EXPORTING VRM, GLB and image...")
-    const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
+    const modelVRM = modelVRMPromise
     const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
     const filesName = fileCampaignNameLabel[campaignParams?.campaign as Campaign] + selectedTokenId
-    if (modelVRMPromise.success && modelGLBPromise.success) {
-      const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
-      await SaveFile(refinedModelVRM, `${filesName}.vrm`);
+    if (modelVRM && modelGLBPromise.success) {
+      await SaveFile(modelVRM, `${filesName}.vrm`);
       await SaveFile(modelGLB, `${filesName}.glb`);
       await SaveFile(picturePromise, `${filesName}.png`);
     }
