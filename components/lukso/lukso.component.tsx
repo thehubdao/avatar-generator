@@ -735,7 +735,7 @@ export default function LuksoComponent({
                 {/* LUKSO HUD */}
                 <LuksoUI
                   setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
-                  isLoading={false}
+                  isLoading={isLoading}
                   currentSection={currentSection}
                   getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
                   exportModel={() => exportModel()}
