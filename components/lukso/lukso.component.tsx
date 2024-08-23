@@ -147,7 +147,7 @@ export default function LuksoComponent({
   //Notification on save combination
 
   const saveNotification = Toastify({
-    text: "The changes are being saved onchain, it might take up to 4 minutes for them to be effective. Do not leave the app.",
+    text: "The changes are being saved onchain, it might take up to 20 seconds for them to be effective. Do not leave the app.",
     gravity: "bottom", // `top` or `bottom`
     position: "center", // `left`, `center` or `right`
     stopOnFocus: true, // Prevents dismissing of toast on hover

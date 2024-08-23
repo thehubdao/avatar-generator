@@ -18,9 +18,10 @@ interface EditSectionUIProps {
   picture: string;
   onClickBackButton: () => void
   goEditMode: () => void
+  isLoading: boolean
 }
 
-export default function EditSectionUI({ goEditMode, onClickBackButton, exportModel, features, picture }: EditSectionUIProps) {
+export default function EditSectionUI({ goEditMode, onClickBackButton, exportModel, features, picture, isLoading }: EditSectionUIProps) {
   const [isExportingModel, setIsExportingModel] = useState<boolean>(false);
   const [shouldReveal, setShouldReveal] = useState(false);
 
@@ -91,7 +92,7 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
             </div>
           }
         </TransparentBox>
-        <div className="h-14 w-full 2xl:h-18 flex whitespace-nowrap">
+        {!isLoading && <div className="h-14 w-full 2xl:h-18 flex whitespace-nowrap">
           <button className="w-[75%]" onClick={() => void handleExportModel()}>
             <TransparentBox fullWidth border backgroundColorClass="bg-white" borderSizeClass="border-r-0">
               <div className="flex items-center gap-3 text-black">
@@ -114,14 +115,14 @@ export default function EditSectionUI({ goEditMode, onClickBackButton, exportMod
               <div className="flex items-center gap-3 text-black">
                 <>
                   <p className="text-base 2xl:text-lg">My Wardrobe</p>
-                  <BsFillBackpackFill/>
-                  
+                  <BsFillBackpackFill />
+
                 </>
 
               </div>
             </TransparentBox>
           </button>
-        </div>
+        </div>}
       </div>
     </div>
   )
