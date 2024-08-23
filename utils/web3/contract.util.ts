@@ -247,11 +247,13 @@ export const getTokensOf = async (contractAddress: string, address: string) => {
 }
 
 export const getCampaignUserFeatures = async (address: string, campaign: string) => {
+    console.log(address, campaign)
     const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
     const features: Drop[] = []
     for (let i = 0; i < dropsData.length; i++) {
         const drop = dropsData[i];
         const { contract_address } = drop
+        console.log(contract_address)
         const contract = new Contract(contract_address, WerableContractAbi, provider)
         const tokenBalance = await contract.balanceOf(address)
         console.log(Number(tokenBalance))

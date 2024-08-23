@@ -9,7 +9,6 @@ import AvatarEditor, {
   ChangeSkinColor,
   ChangeStartAnimation,
   GetAvatarGLB,
-  GetAvatarVRM,
   RemoveStage,
   SetEnvironment,
   SetFeaturesData,
@@ -40,8 +39,6 @@ import {
   GetAvatarSingleByCampaignCombinationString,
   GetEnvMapListByCampaign,
   GetStageListByCampaign,
-  PostRequestThumbnailProcessFile,
-  PostRequestVRMProcessFile,
 } from '../../utils/api.util'
 import { fadeInOutBlock } from '../../utils/gsap/block_in_out.util'
 import { SaveFile } from '../../utils/exporter.util'
@@ -72,6 +69,9 @@ import ListUI from '../../ui/lukso/sections/listSection.ui'
 import ConnectWeb3Button from '../web3/connectWeb3.component'
 import { uploadMetadata } from '../../utils/metadata.util'
 import Toastify from 'toastify-js'
+import { SelectableCampaign } from '../../types/common.type'
+import { fileCampaignNameLabel } from '../../constants/lukso/labels.constant'
+import { StorageLocation } from '../../enums/firebase.enum'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -129,6 +129,12 @@ export default function LuksoComponent({
   const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>()
   const [selectedTokenId, setSelectedTokenId] = useState<number>()
   const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>()
+
+  // listSection filter state
+  const [selectedFilterCampaign, setSelectedFilterCampaign] = useState<string>('all')
+  const [selectedFilterTokenId, setSelectedFilterTokenId] = useState<string>('')
+  const [selectedDropdownField, setSelectedDropdownField] = useState<SelectableCampaign>()
+
   // Web3 state
   const [provider, setProvider] = useState<ethers.BrowserProvider>()
   const [addressToShow, setAddressToShow] = useState<string>('')
@@ -206,8 +212,6 @@ export default function LuksoComponent({
     setSelectedCategory(campaignParams?.features[0].displayName)
   }, [campaignParams])
 
-  useEffect(() => { console.log(tokenIdList, "TOKEN ID LIST CHANGE") }, [tokenIdList])
-
   async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
     if (!campaign) return
     await Promise.all([
@@ -275,24 +279,25 @@ export default function LuksoComponent({
     })
 
     const campaignDropList = dropList[campaignParams?.campaign as keyof typeof dropList]
-console.log(combinationIndexes)
+    console.log(combinationIndexes)
     if (campaignDropList) {
       const formattedDropList = campaignDropList.map((val) => {
         return optionList?.find((option) => option.type === val.type && val.index === option.index) as FeatureInterface
-      }).filter((val)=>{
+      }).filter((val) => {
         const categoryIndex = campaignParams?.features?.find((category) => {
           return category.displayName === val.type
         })?.index
 
-        if(!categoryIndex || !combinationIndexes) return true
+        if (!categoryIndex || !combinationIndexes) return true
 
-        return !combinationIndexes[categoryIndex - 1]?.includes(val.index.toString())})
+        return !combinationIndexes[categoryIndex - 1]?.includes(val.index.toString())
+      })
       filteredOptionList = filteredOptionList.concat(formattedDropList)
     }
 
     optionList = filteredOptionList
     const filteredList = FilterList(optionList, 'type', selectedCategory)
-console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
+    console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
     return setOptionListShow(filteredList)
 
   }
@@ -383,8 +388,10 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
     const changedFeature = optionList?.find((feature) => feature.type === _selectedCategory && feature.id === id)
     const currentFeaturesTypeIndex = currentFeatures?.findIndex((feature) => feature.val.type === _selectedCategory)
 
-    if (currentFeaturesTypeIndex && changedFeature && singleInitData) singleInitData.features[currentFeaturesTypeIndex].val = changedFeature
-    
+    if (currentFeaturesTypeIndex != undefined && changedFeature && singleInitData) {
+      singleInitData.features[currentFeaturesTypeIndex].val = changedFeature
+    }
+
     await ChangeFeature(
       id,
       path,
@@ -424,12 +431,12 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
 
     setTokenIdList(_tokenIdList.slice())
     try {
-      const thumbnailBlob = await getAvatarThumbnail()
-
       const burnDropArray: BodyPart[] = []
+      //NOTE: female campaign has it's types different from the DB
+      const femaleCampaignBodyTypes = { head: 'hair', face: 'accesories', legs: 'legs', chest: 'chest', shoes: 'feet' }
 
       currentFeatures?.forEach((feature) => {
-        newMetadata.attributes?.push({ key: feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
+        newMetadata.attributes?.push({ key: currentCampaign == 'vrm_female' ? femaleCampaignBodyTypes[feature.val.type.toLowerCase() as keyof typeof femaleCampaignBodyTypes] : feature.val.type.toLowerCase(), value: feature.val.name, type: 'string' })
         const bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
 
         if (bodyFeature && bodyFeature.name != feature.val.name) {
@@ -438,13 +445,14 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
           burnDropArray.push(feature.val as BodyPart)
         }
       })
-      const metadataObject = await uploadMetadata(newMetadata, thumbnailBlob, newCombination, currentCampaign)
+
+      const metadataObject = await uploadMetadata(newMetadata, undefined, newCombination, currentCampaign)
 
       _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
 
       setTokenIdList(_tokenIdList.slice())
       const metadataUrl = `ipfs://${metadataObject.uri}`
-      await setTokenMetadata(currentCampaign, selectedTokenId, selectedMetadata, metadataUrl)
+      await setTokenMetadata(currentCampaign, selectedTokenId, newMetadata, metadataUrl)
       setCombinationPictureUrl(metadataObject.imageUrl)
 
       for (let i = 0; i < burnDropArray.length; i++) {
@@ -480,7 +488,6 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
 
   function onCategoryTypeChange(value: string) {
     setSelectedCategory(value)
-    console.log(FilterList(optionList, 'type', value), optionList)
     setOptionListShow(FilterList(optionList, 'type', value))
     updateFeatureCamPosition(value, {
       ...campaignParams?.config.featuresCamPos,
@@ -522,29 +529,30 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
     exportData.attributesBase64 = window.btoa(
       JSON.stringify(exportData.attributes)
     )
+    const vrmStorageUrl=`https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${selectedCombination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`
     const [picturePromise, modelGLBPromise, modelVRMPromise] = await Promise.all([
       FetchBlob(combinationPictureUrl),
       GetAvatarGLB(),
-      GetAvatarVRM()
+      FetchBlob(vrmStorageUrl)
     ]);
     console.log("EXPORTING VRM, GLB and image...")
-    const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
+    const modelVRM = modelVRMPromise
     const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
-    if (modelVRMPromise.success && modelGLBPromise.success) {
-      const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
-      await SaveFile(refinedModelVRM, `avatar.vrm`);
-      await SaveFile(modelGLB, `model.glb`);
-      await SaveFile(picturePromise, 'picture.png');
+    const filesName = fileCampaignNameLabel[campaignParams?.campaign as Campaign] + selectedTokenId
+    if (modelVRM && modelGLBPromise.success) {
+      await SaveFile(modelVRM, `${filesName}.vrm`);
+      await SaveFile(modelGLB, `${filesName}.glb`);
+      await SaveFile(picturePromise, `${filesName}.png`);
     }
   }
 
-  const getAvatarThumbnail = async () => {
+/*   const getAvatarThumbnail = async () => {
     const avatarGLBPromise = await GetAvatarGLB()
     const modelGLB = avatarGLBPromise.success ? avatarGLBPromise.value : undefined;
     const thumbnail = await PostRequestThumbnailProcessFile(modelGLB as Blob)
     return thumbnail
   }
-
+ */
   function formatearString(inputString: string): string {
     if (inputString.length < 8) {
       return 'El string debe tener al menos 8 caracteres'
@@ -642,35 +650,30 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
             {/* COLLECTION LIST */}
             {!selectedCombination &&
               <ListUI
-                tokenIdList={tokenIdList}
-                provider={provider}
-                onClickViewButton={
-                  (_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
-                    setIsLoading(true)
-                    if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-                    if (selectedCombination != _combination) setSelectedCombination(_combination)
-                    if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
-                    if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
-                    if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
-                    if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
-                    setIsEditModeSelected(false)
-                    setCurrentSection(LuksoSections.Edit)
-                  }
-                }
-                onClickEditButton={
-                  (_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
-                    setIsLoading(true)
-                    if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
-                    if (selectedCombination != _combination) setSelectedCombination(_combination)
-                    if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
-                    if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
-                    if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
-                    if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
-                    setIsEditModeSelected(true)
-                    setCurrentSection(LuksoSections.Edit)
-                  }
-                }
-              />
+              tokenIdList={tokenIdList}
+              provider={provider}
+              onClickViewButton={(_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
+                setIsLoading(true)
+                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                if (selectedCombination != _combination) setSelectedCombination(_combination)
+                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
+                if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
+                if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
+                setIsEditModeSelected(false)
+                setCurrentSection(LuksoSections.Edit)
+              } }
+              onClickEditButton={(_campaign: Campaign, _combination: string, _baseCombination: string, _combinationPictureUrl: string, _tokenMetadata: TokenMetadata, _tokenId: number) => {
+                setIsLoading(true)
+                if (campaignParams?.campaign != _campaign) setCampaign(_campaign)
+                if (selectedCombination != _combination) setSelectedCombination(_combination)
+                if (selectedBaseCombination != _baseCombination) setSelectedBaseCombination(_baseCombination)
+                if (combinationPictureUrl != _combinationPictureUrl) setCombinationPictureUrl(_combinationPictureUrl)
+                if (selectedMetadata != _tokenMetadata) setSelectedMetadata(_tokenMetadata)
+                if (selectedTokenId != _tokenId) setSelectedTokenId(_tokenId)
+                setIsEditModeSelected(true)
+                setCurrentSection(LuksoSections.Edit)
+              } } selectedCampaign={selectedFilterCampaign} setSelectedCampaign={setSelectedFilterCampaign} selectedTokenId={selectedFilterTokenId} setSelectedTokenId={setSelectedFilterTokenId} selectedDropdownField={selectedDropdownField} setSelectedDropdownField={setSelectedDropdownField } />
             }
             {/* CAMPAIGN VIEWER */}
             {selectedCombination && campaignParams?.campaign && campaignParams &&
@@ -731,7 +734,7 @@ console.log(filteredOptionList, "FILTERED LIST", selectedBaseCombination)
                 {/* LUKSO HUD */}
                 <LuksoUI
                   setIsEditModeSelected={(value) => setIsEditModeSelected(value)}
-                  isLoading={false}
+                  isLoading={isLoading}
                   currentSection={currentSection}
                   getloaderDivElement={(elementReference) => getloaderDivElement(elementReference)}
                   exportModel={() => exportModel()}

@@ -33,7 +33,7 @@ export default function LuksoUI({
   return (
     <div className="w-full grow text-white text-center">
       {isLoading && <LoadingUI getloaderDivElement={getloaderDivElement} />}
-      {(currentSection === LuksoSections.Edit) && <EditSectionUI onClickBackButton={onClickBackButton} picture={combinationPictureUrl} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel}
+      {!isLoading && (currentSection === LuksoSections.Edit) && <EditSectionUI onClickBackButton={onClickBackButton} picture={combinationPictureUrl} combination={combination} features={features} setIsEditModeSelected={setIsEditModeSelected} exportModel={exportModel}
         goEditMode={goEditMode} />}
     </div>
   )

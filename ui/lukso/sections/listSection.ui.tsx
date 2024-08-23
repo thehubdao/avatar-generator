@@ -7,13 +7,19 @@ import CampaignDropdown from "../../../components/lukso/dropdown.component";
 import ListItem from "../common/listItem";
 import TransparentBoxUI from "../common/transparentBox.ui";
 import Loader from "../common/loader.ui";
+import { SelectableCampaign } from "../../../types/common.type";
 
 interface ListSectionUIProps {
   provider: ethers.BrowserProvider | undefined;
   tokenIdList: TokenId[] | undefined
+  selectedCampaign: string
+  setSelectedCampaign: (campaign: string) => void
+  selectedTokenId:string,
+  setSelectedTokenId: (tokenId:string)=>void
   onClickViewButton: (campaign: Campaign, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata: TokenMetadata, tokenId: number) => void;
   onClickEditButton: (campaign: Campaign, combination: string, baseCombination: string, combinationPictureUrl: string, tokenMetadata: TokenMetadata, tokenId: number) => void
-
+  selectedDropdownField: SelectableCampaign  | undefined
+  setSelectedDropdownField: (selected: SelectableCampaign) => void
 }
 
 
@@ -42,10 +48,8 @@ const filterByTokenId = (tokenId: string, listData: TokenId[]) => {
   })
 }
 
-export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButton }: ListSectionUIProps) {
+export default function ListUI({ selectedDropdownField, setSelectedDropdownField, tokenIdList, onClickViewButton, onClickEditButton, selectedCampaign, setSelectedCampaign, selectedTokenId, setSelectedTokenId }: ListSectionUIProps) {
   const [processedListData, setProcessedListData] = useState<TokenId[]>()
-  const [selectedCampaign, setSelectedCampaign] = useState<string>('all')
-  const [selectedTokenId, setSelectedTokenId] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(true)
   const [shouldReveal, setReveal] = useState(false);
 
@@ -107,10 +111,10 @@ export default function ListUI({ tokenIdList, onClickViewButton, onClickEditButt
               <CiSearch className="text-white w-9 h-9" />
             </div>
             <div className="w-full h-full border-2 border-solid border-white flex justify-center">
-              <input type='number' onChange={(e) => { setSelectedTokenId(e.target.value) }} className="w-full text-sm h-full px-2 focus-visible:outline-none bg-white/20 hover:bg-white/70 focus:bg-white/70 transition-colors duration-500 placeholder:text-gray-dark/80" placeholder='Search by Token ID' />
+              <input type='number' value={selectedTokenId} onChange={(e) => { setSelectedTokenId(e.target.value) }} className="w-full text-sm h-full px-2 focus-visible:outline-none bg-white/20 hover:bg-white/70 focus:bg-white/70 transition-colors duration-500 placeholder:text-gray-dark/80" placeholder='Search by Token ID' />
             </div>
           </div>
-          <CampaignDropdown setCampaign={(campaign) => { setSelectedCampaign(campaign) }} campaigns={Object.values(campaignLabels)} />
+          <CampaignDropdown setCampaign={(campaign) => { setSelectedCampaign(campaign); } } campaigns={Object.values(campaignLabels)} selected={selectedDropdownField} setSelected={setSelectedDropdownField } />
         </div>
         {/* Card List section */}
         <div className={`relative grid ${processedListData?.length == 0 || isLoading ? 'grid-cols-1' : 'grid-cols-4'} gap-2 p-3 min-h-[318px] max-h-[60vh] min-w-[822px] max-w-[1092px] overflow-hidden bg-[#ffcaddbf] border-2 border-solid border-white overflow-y-auto`} >
