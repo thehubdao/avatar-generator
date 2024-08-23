@@ -21,7 +21,6 @@ export default function LuksoUI({
   setIsEditModeSelected,
   isLoading,
   currentSection,
-  getloaderDivElement,
   exportModel,
   features,
   combination,
