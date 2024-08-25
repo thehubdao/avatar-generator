@@ -147,7 +147,7 @@ export default function LuksoComponent({
   //Notification on save combination
 
   const saveNotification = Toastify({
-    text: "The changes are being saved onchain, it might take up to 4 minutes for them to be effective. Do not leave the app.",
+    text: "The changes are being saved onchain, it might take up to 20 seconds for them to be effective. Do not leave the app.",
     gravity: "bottom", // `top` or `bottom`
     position: "center", // `left`, `center` or `right`
     stopOnFocus: true, // Prevents dismissing of toast on hover
@@ -704,32 +704,33 @@ export default function LuksoComponent({
                 {/* EDITOR HUD */}
                 <div className="fixed z-10">
                   <HudComponent
-                    selectedOption={selectedOpc.find(
-                      (e) => e.id === selectedCategory
-                    )}
-                    editModeSelected={isEditModeSelected}
-                    selectListCategory={campaignParams.features && campaignParams.accessories && [
-                      ...campaignParams.features,
-                      ...campaignParams.accessories,
-                    ] || []}
-                    // optionList
-                    optionList={optionListShow}
-                    // selectedCategory
-                    selectedCategory={selectedCategory}
-                    campaignSkinColorConfig={campaignParams?.config.skin || {}}
-                    skinColor={skinColor}
-                    changeView={() => {
-                      saveCombination()
-                      setIsEditModeSelected(!isEditModeSelected)
-                      void updateStage(!isEditModeSelected)
-                    }}
-                    // changeCategory
-                    onOptionChange={(id, path, name) => void onOptionChange(id, path, name)}
-                    // onCategoryChange
-                    onCategoryTypeChange={(value) => onCategoryTypeChange(value)}
-                    onSkinColorChange={(value) => void onClickChangeSkinColor(value)}
-                    exportModel={() => exportModel()}
-                    isCustomCampaignHud onClickBackButton={() => setIsEditModeSelected(false)} />
+                  selectedOption={selectedOpc.find(
+                    (e) => e.id === selectedCategory
+                  )}
+                  editModeSelected={isEditModeSelected}
+                  selectListCategory={campaignParams.features && campaignParams.accessories && [
+                    ...campaignParams.features,
+                    ...campaignParams.accessories,
+                  ] || []}
+                  // optionList
+                  optionList={optionListShow}
+                  // selectedCategory
+                  selectedCategory={selectedCategory}
+                  campaignSkinColorConfig={campaignParams?.config.skin || {}}
+                  skinColor={skinColor}
+                  changeView={() => {
+                    saveCombination()
+                    setIsEditModeSelected(!isEditModeSelected)
+                    void updateStage(!isEditModeSelected)
+                  } }
+                  // changeCategory
+                  onOptionChange={(id, path, name) => void onOptionChange(id, path, name)}
+                  // onCategoryChange
+                  onCategoryTypeChange={(value) => onCategoryTypeChange(value)}
+                  onSkinColorChange={(value) => void onClickChangeSkinColor(value)}
+                  exportModel={() => exportModel()}
+                  isCustomCampaignHud onClickBackButton={() => setIsEditModeSelected(false)} 
+                  isLoading={isLoading} />
                 </div>
                 {/* LUKSO HUD */}
                 <LuksoUI

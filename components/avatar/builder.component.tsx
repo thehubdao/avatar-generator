@@ -479,7 +479,7 @@ export default function AvatarBuilder({
             exportModel={() => exportModel()}
             exportAllow={campaignConfig.extraExport} onClickBackButton={function (): void {
               throw new Error("Function not implemented.");
-            } }            />
+            } } isLoading={isLoading}            />
           }
         </>
       }
