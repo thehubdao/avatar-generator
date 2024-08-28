@@ -49,6 +49,7 @@ interface HudUIProps {
   isCustomCampaignHud?: boolean;
   exportAllow?: ModelExtension[];
   onClickBackButton: () => void
+  isLoading: boolean
 }
 
 export default function HudUI({
@@ -66,7 +67,8 @@ export default function HudUI({
   exportModel,
   isCustomCampaignHud,
   exportAllow,
-  onClickBackButton
+  onClickBackButton,
+  isLoading
 }: HudUIProps) {
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
@@ -146,7 +148,7 @@ export default function HudUI({
                 <MobileOptionSelectorUI
                   list={optionList}
                   activeOption={selectedOption}
-                  handleClick={(id: string, path: string, name: string) => onOptionChange(id, path, name)}
+                  handleClick={(id: string, path: string, name: string) => { isLoading ? undefined : onOptionChange(id, path, name) }}
                 />
               }
             </div>
@@ -235,7 +237,7 @@ export default function HudUI({
               />
             </div>
             {/* SKIN COLOR SECTION */}
-{/*             <div className={`py-8 ${campaignSkinColorConfig.usePalette ? '' : 'invisible'}`}>
+            {/*             <div className={`py-8 ${campaignSkinColorConfig.usePalette ? '' : 'invisible'}`}>
               <h2 className="font-poppins pb-2">SKIN COLOR</h2>
               <ColorSelector
                 list={campaignSkinColorConfig.colorPalette}

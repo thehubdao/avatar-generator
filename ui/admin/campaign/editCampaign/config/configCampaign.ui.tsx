@@ -93,7 +93,7 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                       <AGButton fit nm onClickEvent={() => downloadAvatarBase()}>
                         <div className="flex items-center p-2 gap-2">
                           <AiOutlineCloudDownload />
-                          <p>Download</p>
+                          <p>Download VRM</p>
                         </div>
                       </AGButton>
                     </div>
