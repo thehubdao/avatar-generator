@@ -141,7 +141,9 @@ export const getCampaignsTokenIds = async (address: string) => {
         })
         campaignsTokenIds = campaignsTokenIds.concat(formattedTokenIds)
     }
-    return [
+    return campaignsTokenIds
+    
+    /* [
         {
             "tokenId": "2614",
             "campaign": "vrm_male",
@@ -151,7 +153,7 @@ export const getCampaignsTokenIds = async (address: string) => {
             "tokenId": "2615",
             "campaign": "vrm_male",
             "metadataUri": "QmTAEcNBkhYfFLP2uQyVGNdyTDVBoTKTpqCpat4rKFm2DF"},
-    ]
+    ] */
 }
 
 
