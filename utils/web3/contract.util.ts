@@ -142,6 +142,18 @@ export const getCampaignsTokenIds = async (address: string) => {
         campaignsTokenIds = campaignsTokenIds.concat(formattedTokenIds)
     }
     return campaignsTokenIds
+    
+    /* [
+        {
+            "tokenId": "2614",
+            "campaign": "vrm_male",
+            "metadataUri": "QmedjZydgFG93XHAyK1MmbuuXSm2Jgs9Nh5nMZPVaQJDWY"
+        },
+        {
+            "tokenId": "2615",
+            "campaign": "vrm_male",
+            "metadataUri": "QmTAEcNBkhYfFLP2uQyVGNdyTDVBoTKTpqCpat4rKFm2DF"},
+    ] */
 }
 
 
@@ -247,16 +259,14 @@ export const getTokensOf = async (contractAddress: string, address: string) => {
 }
 
 export const getCampaignUserFeatures = async (address: string, campaign: string) => {
-    console.log(address, campaign)
     const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
     const features: Drop[] = []
     for (let i = 0; i < dropsData.length; i++) {
         const drop = dropsData[i];
         const { contract_address } = drop
-        console.log(contract_address)
+
         const contract = new Contract(contract_address, WerableContractAbi, provider)
         const tokenBalance = await contract.balanceOf(address)
-        console.log(Number(tokenBalance))
         if (Number(tokenBalance) > 0) features.push(drop)
     }
     return features
@@ -293,7 +303,6 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: number, toke
             },
         },
     ])
-    console.log(ToHex64(tokenId), tokenId)
     const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [ToHex64(tokenId), metadataDataKey, metadataDataValue.values[0]])
     const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         targetContractAddress, // address zero
@@ -305,7 +314,6 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: number, toke
 
 export const burnDrop = async (from: string, campaign: string, drop: BodyPart) => {
     const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
-console.log(dropsData)
     if (!dropsData) return
 
     const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name })
