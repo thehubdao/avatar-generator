@@ -121,7 +121,7 @@ export default function ListUI({ selectedDropdownField, setSelectedDropdownField
           {processedListData?.length == 0 &&
             <div className="flex flex-col justify-center items-center"><span className="text-[#C25399]">You do not own any citizens.</span>
               <div className="w-[150px] mt-3">
-                <a className="flex items-center" target="_blank" href="https://universal.page/profiles/lukso/0xfa39a2207f1d1c1cec32502000481f0fef660384?tab=created">
+                <a className="flex items-center" target="_blank" href="https://universal.page/collections/lukso/0x754a5d007d5f1188ef0db892ee115a7c01b38fa3">
                   <TransparentBoxUI aditionalClass="cursor-pointer" fullWidth border backgroundColorClass="bg-white" heightClass="h-12" paddingClass="p-[0px]">
                     <p className="text-black font-semibold">Buy Here</p>
                   </TransparentBoxUI>
