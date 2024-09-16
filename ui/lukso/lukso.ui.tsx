@@ -1,6 +1,5 @@
 import EditSectionUI from "./sections/editSection.ui";
 import { LuksoSections } from "../../enums/lukso/common.enum";
-import { ethers } from "ethers";
 import { IndexFeatureInterface } from "../../interfaces/api.interface";
 
 interface LuksoUIProps {
@@ -9,7 +8,6 @@ interface LuksoUIProps {
   exportModel: () => Promise<void>;
   setIsEditModeSelected: (value: boolean) => void;
   getloaderDivElement: (elementReference: HTMLDivElement) => void;
-  provider: ethers.BrowserProvider | undefined;
   features?: IndexFeatureInterface[];
   combination: string;
   combinationPictureUrl: string;

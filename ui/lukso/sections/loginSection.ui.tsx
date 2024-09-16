@@ -9,9 +9,12 @@ import { Module } from "../../../enums/common.enum";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 import TransparentBoxUI from "../common/transparentBox.ui";
 
+interface LoginUIProps {
+  setIsSigned?: (signed: boolean) => void;
+}
 
 
-export default function LoginUI() {
+export default function LoginUI({setIsSigned}: LoginUIProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const compileShader = (gl: WebGLRenderingContext, source: string, type: number) => {
     const shader = gl.createShader(type);
@@ -110,7 +113,7 @@ export default function LoginUI() {
               alt="Lukso icon"
             />
           </div>
-          <ConnectWeb3Button classStyles="h-fit" onConnect={()=>{}} >
+          <ConnectWeb3Button classStyles="h-fit" setIsSigned={setIsSigned} >
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                 <div className="flex items-center gap-3">
                   <p className="text-black">Login to manage your citizens</p>
