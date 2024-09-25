@@ -14,6 +14,7 @@
         fontFamily: {
           'work': ['var(--work-font)', 'sans-serif'],
           'humane': ['var(--humane-font)', 'sans-serif'],
+          'monument': ['var(--monument-font)', 'sans-serif'],
           'poppins': ['var(--poppins-font)', 'sans-serif'],
           'featuresIcons': ['var(--features-icons-font)', 'sans-serif'],
         },
@@ -33,6 +34,11 @@
           light: 'rgba(255,255,255,0.4)',
           client: {
             primary: '#FFCBDE',
+          },
+          citizens: {
+            dark: '#1b1b1b',
+            gray: '#E6E6E6',
+            blue: '#19B5F3'
           }
         },
         boxShadow: {
