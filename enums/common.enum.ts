@@ -57,6 +57,7 @@ export enum Module {
   Importer = "ThreeJsImporterUtil",
   Lukso = 'LuksoComponent',
   VrmUtil = "VrmUtil",
+  Citizens = "Citizens"
 }
 
 export enum EmailResult {
