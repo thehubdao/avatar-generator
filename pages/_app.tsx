@@ -1,6 +1,7 @@
 import './../styles/globals.css'
 import { Work_Sans, Poppins } from '@next/font/google'
 import Humane from '@next/font/local'
+import MonumentFont from '@next/font/local'
 import FeaturesIcons from '@next/font/local'
 import { AppProps } from 'next/app'
 import { Web3OnboardProvider, init } from '@web3-onboard/react'
@@ -99,6 +100,10 @@ const humane = Humane({
     src: '../styles/fonts/Humane-Medium.woff2',
     display: 'block',
 })
+const monument = MonumentFont({
+    src: '../styles/fonts/MonumentExtended-Ultrabold.woff2',
+    display: 'block',
+})
 const featuresIcons = FeaturesIcons({
     src: '../public/resources/icons/fontsets/icomoon.woff',
     display: 'block',
@@ -111,6 +116,7 @@ export default function App({ Component, pageProps }: AppProps) {
                 :root {
                     --work-font: ${workSans.style.fontFamily};
                     --humane-font: ${humane.style.fontFamily};
+                    --monument-font: ${monument.style.fontFamily};
                     --poppins-font: ${poppins.style.fontFamily};
                     --features-icons-font: ${featuresIcons.style.fontFamily};
                 }
