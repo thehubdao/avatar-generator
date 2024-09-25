@@ -19,7 +19,7 @@ export default function ConnectWeb3Button({ children, classStyles, onConnect }: 
             })()
             onConnect()
         }}>
-            <div className="flex items-center gap-3 mx-4">
+            <div className="flex items-center">
                 {children}
             </div>
         </button></>
