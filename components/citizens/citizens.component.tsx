@@ -7,6 +7,7 @@ import CampaignList from "../../ui/citizens/common/campaignList.ui";
 import Image from "next/image";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import AvatarEditor from "../avatar/editor.component";
+import CitizensUI from "../../ui/citizens/citizens.ui";
 
 interface CitizensComponentProps {
   campaignParams?: CampaignParameters;
@@ -75,7 +76,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, }: Citi
 
   return (
     <MobileLayout>
-      <div className="w-full min-h-screen bg-[#202020]">
+      <div className="w-full min-h-screen bg-[#202020] font-work">
 
         {!provider ?
           <LoginUI />
@@ -90,34 +91,37 @@ export default function CitizensComponent({ campaignParams, setCampaign, }: Citi
             </div>
             :
             campaignParams && campaignParams.campaign ?
-              <div>
-                <AvatarEditor
-                  avatarBasePath={
-                    campaignParams.armature
-                  }
-                  editMode={false}
-                  lights={
-                    campaignParams.config.lights
-                  }
-                  defaultShadow={
-                    campaignParams.config
-                      .defShadow
-                  }
-                  defaultCamera={
-                    campaignParams.config.defCam
-                  }
-                  postProcessing={
-                    campaignParams.config
-                      .postProcessing
-                  }
-                  onReady={() =>
-                    onAvatarBuilderReady(
-                      selectedCombination,
-                      campaignParams.campaign
-                    )
-                  }
-                />
-              </div>
+              <>
+                <div>
+                  <AvatarEditor
+                    avatarBasePath={
+                      campaignParams.armature
+                    }
+                    editMode={false}
+                    lights={
+                      campaignParams.config.lights
+                    }
+                    defaultShadow={
+                      campaignParams.config
+                        .defShadow
+                    }
+                    defaultCamera={
+                      campaignParams.config.defCam
+                    }
+                    postProcessing={
+                      campaignParams.config
+                        .postProcessing
+                    }
+                    onReady={() =>
+                      onAvatarBuilderReady(
+                        selectedCombination,
+                        campaignParams.campaign
+                      )
+                    }
+                  />
+                </div>
+                <CitizensUI />
+              </>
               :
               <div className="w-full h-screen flex justify-center items-center">
                 <p className="font-monument text-white">Something is wrong!</p>
@@ -125,7 +129,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, }: Citi
         }
 
         {/* HEADER */}
-        <div className="fixed w-fit h-fit inset-3">
+        <div className="fixed w-fit h-fit left-4 top-8">
           <Image
             src='/resources/images/the-hub-logo-white.svg'
             alt="the hub icon"
@@ -133,7 +137,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, }: Citi
             height={32}
           />
         </div>
-        <div className="fixed top-3 right-3">
+        <div className="fixed top-8 right-4">
           <ConnectButton isConnected={provider} />
         </div>
       </div>
