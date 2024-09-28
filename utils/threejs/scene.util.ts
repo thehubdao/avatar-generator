@@ -38,7 +38,7 @@ export function GetBaseCamera(defPos?: AGVector3): PerspectiveCamera {
   if (defPos != undefined)
     camera.position.set(defPos.x, defPos.y, defPos.z);
   else 
-    camera.position.set(0.5, 0.5, 3.5);
+    camera.position.set(0, 1.7, 2.6);
   
   return camera;
 }
@@ -63,7 +63,7 @@ export function GetBaseCameraControls(camera: PerspectiveCamera, domElement: HTM
   if (defLookAt != undefined)
     controls.target.set(defLookAt.x, defLookAt.y, defLookAt.z);
   else
-    controls.target.set(0, 0.7, 0);
+    controls.target.set(0, 1, 0);
   
   controls.enablePan = pan;
   
