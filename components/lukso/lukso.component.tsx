@@ -191,7 +191,7 @@ export default function LuksoComponent({
         },
     })
 
-    const { followerCount, isLoading: isLoadingFollowers } = useFollowerCount(addressToShow)
+    const { followerCount} = useFollowerCount(addressToShow)
 
     useEffect(() => {
         if (!addressToShow) return

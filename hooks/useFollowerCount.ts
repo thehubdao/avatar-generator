@@ -1,49 +1,37 @@
 import { useState, useEffect } from 'react';
-import { ERC725, ERC725JSONSchema } from '@erc725/erc725.js';
-import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import { ethers } from 'ethers';
 
+const LSP26_ADDRESS = '0xf01103E5a9909Fc0DBe8166dA7085e0285daDDcA';
+
+const LSP26_ABI = [
+  {
+    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
+    name: 'followerCount',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
+
 export function useFollowerCount(address: string) {
-  const [followerCount, setFollowerCount] = useState<number>(-1);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+    const [followerCount, setFollowerCount] = useState<number>(-1);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
     async function fetchFollowerCount() {
-      if (!address) return;
+      if (!address) {
+        setIsLoading(false);
+        return;
+      }
 
       setIsLoading(true);
       try {
-        // Usar ethers 6 para crear el proveedor
         const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-        
-        const erc725 = new ERC725(
-          LSP3ProfileSchema as ERC725JSONSchema[],
-          address,
-          provider,
-          {
-            ipfsGateway: 'https://api.universalprofile.cloud/ipfs',
-          }
-        );
+        const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
 
-        const profileMetadata = await erc725.fetchData('LSP3Profile');
-
-        if (profileMetadata.value && typeof profileMetadata.value === 'object') {
-          const tags = (profileMetadata.value as any).LSP3Profile?.tags;
-          if (tags && Array.isArray(tags)) {
-            const followerTag = tags.find((tag: string) => tag.startsWith('FOLLOWER:'));
-            if (followerTag) {
-              const count = parseInt(followerTag.split(':')[1], 10);
-              setFollowerCount(isNaN(count) ? 0 : count);
-            } else {
-              setFollowerCount(0);
-            }
-          } else {
-            setFollowerCount(0);
-          }
-        } else {
-          setFollowerCount(0);
-        }
+        const count = await lsp26Contract.followerCount(address);
+        setFollowerCount(Number(count));
       } catch (err) {
         console.error('Error fetching follower count:', err);
         setError(err instanceof Error ? err : new Error('An error occurred while fetching follower count'));
