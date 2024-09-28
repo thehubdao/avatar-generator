@@ -80,6 +80,7 @@ import Toastify from 'toastify-js'
 import { SelectableCampaign } from '../../types/common.type'
 import { fileCampaignNameLabel } from '../../constants/lukso/labels.constant'
 import { StorageLocation } from '../../enums/firebase.enum'
+import FollowerCount from './followerCount'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -731,10 +732,7 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
                                         </button>
                                     ) : (
                                         <ConnectWeb3Button
-                                             classStyles={
-                                                'w-48 border-l-2 border-white font-bold text-white'
-                                            }
-
+                          classStyles={'w-48 border-l-2 border-white font-bold text-white'} setIsSigned={()=>{}} 
                                         >
                                             <> Login with your UP!</>
                                         </ConnectWeb3Button>
@@ -742,6 +740,7 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
                                 </div>
                             </TransparentBoxUI>
                         </div>
+                        {addressToShow && <FollowerCount address={addressToShow} />}
                         {/* COLLECTION LIST */}
                         {!selectedCombination && (
                             <ListUI
