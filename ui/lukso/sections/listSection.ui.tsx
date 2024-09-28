@@ -1,7 +1,6 @@
 import Image from "next/image";
 import { CiSearch } from "react-icons/ci";
 import { useEffect, useState } from "react";
-import { ethers } from "ethers";
 import { Campaign, TokenId, TokenMetadata } from "../../../types/metadata.type";
 import CampaignDropdown from "../../../components/lukso/dropdown.component";
 import ListItem from "../common/listItem";
@@ -10,7 +9,6 @@ import Loader from "../common/loader.ui";
 import { SelectableCampaign } from "../../../types/common.type";
 
 interface ListSectionUIProps {
-  provider: ethers.BrowserProvider | undefined;
   tokenIdList: TokenId[] | undefined
   selectedCampaign: string
   setSelectedCampaign: (campaign: string) => void
