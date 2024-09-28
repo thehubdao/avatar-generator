@@ -81,7 +81,6 @@ import { SelectableCampaign } from '../../types/common.type'
 import { fileCampaignNameLabel } from '../../constants/lukso/labels.constant'
 import { StorageLocation } from '../../enums/firebase.enum'
 import { useFollowerCount } from '../../hooks/useFollowerCount'
-import FollowerCount from './followerCount'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -744,7 +743,6 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
                                 </div>
                             </TransparentBoxUI>
                         </div>
-                        {addressToShow && <FollowerCount address={addressToShow} />}
                         {/* COLLECTION LIST */}
                         {!selectedCombination && (
                             <ListUI
