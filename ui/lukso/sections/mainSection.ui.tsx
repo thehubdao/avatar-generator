@@ -150,8 +150,6 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
         {
           isConnecting && <ConnectModalUI
-
-            setIsConnecting={(value) => setIsConnecting(value)}
           />
         }
 

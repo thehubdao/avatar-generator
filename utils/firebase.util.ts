@@ -28,6 +28,8 @@ import { CampaignParameters } from "../interfaces/common.interface";
 import { ParameterNameType } from "../types/firebase.type";
 import { Client } from '../enums/client.enum'
 import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
+import { Timestamp } from 'firebase/firestore';
+
 export type LogInStructure = {
   user: string;
   pass: string;
@@ -907,5 +909,38 @@ export async function GetRandomCombination() {
 
   } catch (error) {
     return
+  }
+}
+
+export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> {
+  if (address == undefined) Raise("Missing address to update last login date!");
+
+  try {
+    const location = `${FirestoreGlobalLocation.User}/${address.toLowerCase()}`;
+    const userDocRef = doc(await FirebaseUtil.Instance().DB(), location);
+
+    const userDoc = await getDoc(userDocRef);
+
+    if (userDoc.exists()) {
+      // If the user exists, only update lastLogin
+      await setDoc(userDocRef, { lastLogin: Timestamp.now() }, { merge: true });
+    } else {
+      // If the user doesn't exist, create a new document with all fields
+      await setDoc(userDocRef, {
+        account: '',
+        campaign: [],
+        email: '',
+        name: '',
+        role: 1,
+        address: address.toLowerCase(),
+        lastLogin: Timestamp.now()
+      });
+    }
+
+    return { success: true, value: true };
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error updating last login date for address ${address}: ${err.message}`);
+    return { success: false, errMessage: err.message, errCode: err.code };
   }
 }

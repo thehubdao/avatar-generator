@@ -7,10 +7,11 @@ interface AccountModalUIProps {
   addressAccount: string;
   formatAddress: string;
   setIsAccountModalOpen: (value: boolean) => void;
-  onDisconnect: () => void
+  onDisconnect: () => void;
+  followerCount: number; 
 }
 
-export default function AccountModalUI({ addressAccount, formatAddress, setIsAccountModalOpen, onDisconnect }: AccountModalUIProps) {
+export default function AccountModalUI({ addressAccount, formatAddress, setIsAccountModalOpen, onDisconnect, followerCount }: AccountModalUIProps) {
   const [isCopyAddress, setIsCopyAddress] = useState<boolean>(false);
   const [copyAddressMessage, setCopyAddressMessage] = useState<string>("");
   const [{ wallet }, , disconnect,] = useConnectWallet()
@@ -44,6 +45,7 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
             alt="Lukso icon"
           />
           <h3 className="text-2xl font-bold text-white">Account: {formatAddress}</h3>
+          <p className="text-white">Followers: {followerCount}</p> {/* Add this line */}
           <div className="flex flex-wrap justify-between w-full gap-3">
             <button className="w-72 h-fit" onClick={() => { setIsAccountModalOpen(false) }}>
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >

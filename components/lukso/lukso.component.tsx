@@ -63,7 +63,6 @@ import {
     TokenMetadata,
 } from '../../types/metadata.type'
 import { BodyPart } from '../../types/avatar.type'
-import { ethers } from 'ethers'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
 import { useConnectWallet } from '@web3-onboard/react'
@@ -81,6 +80,7 @@ import Toastify from 'toastify-js'
 import { SelectableCampaign } from '../../types/common.type'
 import { fileCampaignNameLabel } from '../../constants/lukso/labels.constant'
 import { StorageLocation } from '../../enums/firebase.enum'
+import { useFollowerCount } from '../../hooks/useFollowerCount'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -154,13 +154,14 @@ export default function LuksoComponent({
     >()
 
     // Web3 state
-    const [provider, setProvider] = useState<ethers.BrowserProvider>()
     const [addressToShow, setAddressToShow] = useState<string>('')
     const [combinationPictureUrl, setCombinationPictureUrl] = useState<string>(
         ''
     )
     const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false)
     const [{ wallet }] = useConnectWallet()
+    const [isSigned, setIsSigned] = useState(false)
+
 
     //Notification on save combination
 
@@ -189,6 +190,8 @@ export default function LuksoComponent({
         },
     })
 
+    const { followerCount} = useFollowerCount(addressToShow)
+
     useEffect(() => {
         if (!addressToShow) return
         const featuresPromise = async () => {
@@ -200,24 +203,12 @@ export default function LuksoComponent({
     }, [addressToShow])
 
     useEffect(() => {
-        if (!wallet) return setProvider(undefined)
-        const setEtherProviderPromise = () => {
-            const _etherProvider = new ethers.BrowserProvider(
-                wallet.provider,
-                'any'
-            )
-            setProvider(_etherProvider)
-        }
-        void setEtherProviderPromise()
-    }, [wallet])
-
-    useEffect(() => {
-        if (!provider || !wallet) return
+        if (!isSigned || !wallet) return
 
         const address = wallet.accounts[0].address
 
         setAddressToShow(address)
-    }, [provider])
+    }, [isSigned])
 
     useEffect(() => {
         if (!addressToShow) return
@@ -688,9 +679,9 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
         <MobileLayout>
             <>
                 {/* LOGIN */}
-                {!provider && <LoginUI />}
+                {!isSigned && <LoginUI setIsSigned={(signed)=>setIsSigned(signed)} />}
                 {/* MAIN VIEW */}
-                {provider && (
+                {isSigned && (
                     <div className="w-full h-screen bg-client-primary flex flex-col">
                         {/* ACCOUNT MODAL */}
                         {isAccountModalOpen && (
@@ -706,6 +697,7 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
                                     setSelectedCombination(undefined)
                                     setTokenIdList(undefined)
                                 }}
+                                followerCount={followerCount}
                             />
                         )}
                         {/* HEADER TAB */}
@@ -730,7 +722,7 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
                                         alt="Lukso icon"
                                     />
                                     {/* WALLET/CONNECT BUTTON UI */}
-                                    {provider ? (
+                                    {isSigned ? (
                                         <button
                                             className="h-full w-48 flex justify-center items-center border-l-2 border-white px-2"
                                             onClick={() =>
@@ -743,10 +735,7 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
                                         </button>
                                     ) : (
                                         <ConnectWeb3Button
-                                            classStyles={
-                                                'w-48 border-l-2 border-white font-bold text-white'
-                                            }
-                                            onConnect={() => {}}
+                          classStyles={'w-48 border-l-2 border-white font-bold text-white'} setIsSigned={()=>{}} 
                                         >
                                             <> Login with your UP!</>
                                         </ConnectWeb3Button>
@@ -758,7 +747,6 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
                         {!selectedCombination && (
                             <ListUI
                                 tokenIdList={tokenIdList}
-                                provider={provider}
                                 onClickViewButton={(
                                     _campaign: Campaign,
                                     _combination: string,
@@ -967,7 +955,6 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
                                             )
                                         }
                                         exportModel={() => exportModel()}
-                                        provider={provider}
                                         features={singleInitData?.features}
                                         combination={selectedCombination}
                                         combinationPictureUrl={
