@@ -23,7 +23,14 @@ const nextConfig = {
   },
   images: {
     domains: ["firebasestorage.googleapis.com", "nftstorage.link", "gateway.pinata.cloud", "lukso.mypinata.cloud", "ipfs.io"],
-
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'lipsum.app',
+        port: '',
+        pathname: '/random/**',
+      },
+    ],
   },
   async headers() {
     return [

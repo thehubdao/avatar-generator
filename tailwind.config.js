@@ -14,6 +14,7 @@
         fontFamily: {
           'work': ['var(--work-font)', 'sans-serif'],
           'humane': ['var(--humane-font)', 'sans-serif'],
+          'monument': ['var(--monument-font)', 'sans-serif'],
           'poppins': ['var(--poppins-font)', 'sans-serif'],
           'featuresIcons': ['var(--features-icons-font)', 'sans-serif'],
         },
@@ -33,9 +34,16 @@
           light: 'rgba(255,255,255,0.4)',
           client: {
             primary: '#FFCBDE',
+          },
+          citizens: {
+            dark: '#1b1b1b',
+            gray: '#E6E6E6',
+            blue: '#19B5F3'
           }
         },
         boxShadow: {
+          'citizens-btn':'inset 0px 1px 0px 0px #FFFFFF1A, inset 0px -1px 0px 0px #FFFFFF0D',
+          'citizens-img':'16px 12px 32px 0px #0C0D0F, -12px -8px 32px 0px #24262B',
           'flat-soft':'-2.81481px -2.81481px 6.6296px #FFFFFF, 2.81481px 2.81481px 6.6296px #D3D9E6',
           'flat-medium':'-5.81481px -5.81481px 12.6296px #FFFFFF, 5.81481px 5.81481px 12.6296px #D3D9E6',
           'flat-hard':'-8.78261px -8.78261px 17.5652px #FFFFFF, 8.78261px 8.78261px 17.5652px #D3D9E6',
