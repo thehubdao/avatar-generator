@@ -10,7 +10,7 @@ import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 import TransparentBoxUI from "../common/transparentBox.ui";
 
 interface LoginUIProps {
-  setIsSigned?: (signed: boolean) => void;
+  setIsSigned: (signed: boolean) => void;
 }
 
 

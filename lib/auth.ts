@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { ethers } from 'ethers';
 import UniversalProfileContract from '../constants/abi/UniversalProfileABI.json';
-import { updateLastLoginDate } from '../utils/firebase.util';
+import { UpdateLastLoginDate } from '../utils/firebase.util';
 
 export async function generateSessionToken(address: string, message: string, signature: string): Promise<string> {
   // Verificar la firma usando el contrato Universal Profile de LUKSO
@@ -20,7 +20,7 @@ export async function generateSessionToken(address: string, message: string, sig
   }
 
   // Actualizar la última fecha de conexión en Firebase
-  await updateLastLoginDate(address);
+  await UpdateLastLoginDate(address);
 
   // Generar JWT token
   const token = jwt.sign(

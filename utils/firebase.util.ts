@@ -912,7 +912,7 @@ export async function GetRandomCombination() {
   }
 }
 
-export async function updateLastLoginDate(address: string): Promise<Result<boolean>> {
+export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> {
   if (address == undefined) Raise("Missing address to update last login date!");
 
   try {

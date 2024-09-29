@@ -33,7 +33,7 @@ export default function ConnectWeb3Button({ children, classStyles, setIsSigned }
             uri: window.location.origin,
             version: '1',
             chainId: Number(connectedChain.id),
-            nonce: await createNonce(),
+            nonce: await CreateNonce(),
             resources: ['https://terms.website.com'],
         })
 
@@ -124,9 +124,6 @@ export default function ConnectWeb3Button({ children, classStyles, setIsSigned }
     )
 }
 
-// Función auxiliar (debe implementarse o importarse)
-async function createNonce(): Promise<string> {
-    // Implementa la lógica para generar un nonce único
-    // Puede ser una llamada a tu backend o una generación local
+async function CreateNonce(): Promise<string> {
     return Math.random().toString(36).substring(2, 15)
 }
