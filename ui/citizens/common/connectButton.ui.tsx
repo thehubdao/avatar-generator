@@ -3,17 +3,21 @@ import ArrowSVG from "./SVG/arrowSVG.ui";
 import Image from "next/image";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 import StarSVG from "./SVG/starSVG.ui";
+import { useFollowCount } from "../../../hooks/useFollowCount";
 
 interface ConnectButtonProps {
-  isConnected?: boolean;
+  isSigned?: boolean;
+  setIsSigned: (signed: boolean) => void;
+  address: string | undefined;
 }
 
-export default function ConnectButton({ isConnected = false }: ConnectButtonProps) {
+export default function ConnectButton({ isSigned = false, setIsSigned, address }: ConnectButtonProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
+  const { followerCount, followingCount } = useFollowCount(address)
   return (
     <div className="relative w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">
       {
-        isConnected ?
+        isSigned ?
           <>
             <button className="w-full flex justify-between items-center p-1" onClick={() => setIsOpen(!isOpen)}>
               <div>
@@ -21,7 +25,7 @@ export default function ConnectButton({ isConnected = false }: ConnectButtonProp
               </div>
               <div>
                 <p className="font-light text-lg">
-                  Patabrava.eth
+                  {address}
                 </p>
               </div>
               <div className={`w-9 h-9 flex justify-center items-center ${isOpen ? 'rotate-180' : ''}`}>
@@ -46,11 +50,11 @@ export default function ConnectButton({ isConnected = false }: ConnectButtonProp
                   <p className="w-full font-light text-center text-2xl pt-4 pb-1 truncate">Patabrava.eth</p>
                   <div className="w-full flex justify-between">
                     <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-4">
-                      <p>2115</p>
+                      <p>{followerCount}</p>
                       <p>Followers</p>
                     </div>
                     <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-4">
-                      <p>450</p>
+                      <p>{followingCount}</p>
                       <p>Following</p>
                     </div>
                   </div>
@@ -66,7 +70,7 @@ export default function ConnectButton({ isConnected = false }: ConnectButtonProp
             }
           </>
           :
-          <ConnectWeb3Button classStyles="w-full h-full" onConnect={() => { }} >
+          <ConnectWeb3Button classStyles="w-full h-full" setIsSigned={setIsSigned} >
             <div className="w-full h-full font-light text-lg">
               Connect
             </div>

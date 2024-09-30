@@ -11,15 +11,23 @@ const LSP26_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
+  {
+    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
+    name: 'followingCount',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
 ];
 
-export function useFollowerCount(address: string) {
+export function useFollowCount(address: string | undefined) {
     const [followerCount, setFollowerCount] = useState<number>(-1);
+    const [followingCount, setfollowingCount] = useState<number>(-1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    async function fetchFollowerCount() {
+    async function fetchFollowCount() {
       if (!address) {
         setIsLoading(false);
         return;
@@ -30,8 +38,11 @@ export function useFollowerCount(address: string) {
         const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
         const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
 
-        const count = await lsp26Contract.followerCount(address);
-        setFollowerCount(Number(count));
+        const followerCount = await lsp26Contract.followerCount(address);
+        const followingCount = await lsp26Contract.followingCount(address);
+
+        setFollowerCount(Number(followerCount));
+        setfollowingCount(Number(followingCount));
       } catch (err) {
         console.error('Error fetching follower count:', err);
         setError(err instanceof Error ? err : new Error('An error occurred while fetching follower count'));
@@ -41,8 +52,8 @@ export function useFollowerCount(address: string) {
       }
     }
 
-    fetchFollowerCount();
+    fetchFollowCount();
   }, [address]);
 
-  return { followerCount, isLoading, error };
+  return { followerCount, followingCount, isLoading, error };
 }

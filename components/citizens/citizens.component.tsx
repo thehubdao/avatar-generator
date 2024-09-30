@@ -1,27 +1,55 @@
 import { useEffect, useState } from "react";
 import { CampaignParameters } from "../../interfaces/common.interface";
 import MobileLayout from "../../layouts/mobile.layout";
-import { Campaign } from "../../types/metadata.type";
+import { Campaign, TokenId } from "../../types/metadata.type";
 import LoginUI from "../../ui/citizens/sections/login.ui";
 import CampaignList from "../../ui/citizens/common/campaignList.ui";
 import Image from "next/image";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import AvatarEditor from "../avatar/editor.component";
 import CitizensUI from "../../ui/citizens/citizens.ui";
+import { useConnectWallet } from "@web3-onboard/react";
+import { getCampaignsTokenIds } from "../../utils/web3/contract.util";
 
 interface CitizensComponentProps {
   campaignParams?: CampaignParameters;
   setCampaign: (campaign: Campaign | undefined) => void;
 }
 
-export default function CitizensComponent({ campaignParams, setCampaign, }: CitizensComponentProps) {
-  const [provider, setProvider] = useState<boolean>(false); // false: log out, true: logged in
-  const [selectedCombination, setSelectedCombination] = useState<string>();
+export default function CitizensComponent({ campaignParams, }: CitizensComponentProps) {
+  const [isSigned, setIsSigned] = useState<boolean>(false); // false: log out, true: logged in
+  const [selectedCombination] = useState<string>('');
 
+
+  const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
+
+  const [{ wallet }] = useConnectWallet()
+
+  const [, setTokenIdList] = useState<TokenId[]>()
+
+
+  
   useEffect(() => {
     console.log('Campaign params: ', campaignParams);
     // setCampaign('vrm_female');
   }, [])
+
+  useEffect(() => {
+    if (!isSigned || !wallet) return
+
+    const address = wallet.accounts[0].address
+
+    setWalletAddress(address)
+}, [isSigned])
+
+useEffect(() => {
+  if (!walletAddress) return
+  const getTokensMetadataPromise = async () => {
+      const tokenIds = await getCampaignsTokenIds(walletAddress)
+      setTokenIdList(tokenIds)
+  }
+  void getTokensMetadataPromise()
+}, [walletAddress])
 
   async function onAvatarBuilderReady(
     currentCombination: string,
@@ -78,7 +106,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, }: Citi
     <MobileLayout>
       <div className="w-full min-h-screen bg-[#202020] font-work">
 
-        {!provider ?
+        {!isSigned ?
           <LoginUI />
           :
           !selectedCombination ?
@@ -138,7 +166,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, }: Citi
           />
         </div>
         <div className="fixed top-8 right-4">
-          <ConnectButton isConnected={provider} />
+          <ConnectButton isSigned={isSigned} setIsSigned={(isSigned)=>{setIsSigned(isSigned)}} address={walletAddress}/>
         </div>
       </div>
     </MobileLayout>

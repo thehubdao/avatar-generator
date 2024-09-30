@@ -80,7 +80,7 @@ import Toastify from 'toastify-js'
 import { SelectableCampaign } from '../../types/common.type'
 import { fileCampaignNameLabel } from '../../constants/lukso/labels.constant'
 import { StorageLocation } from '../../enums/firebase.enum'
-import { useFollowerCount } from '../../hooks/useFollowerCount'
+import { useFollowCount } from '../../hooks/useFollowCount'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -190,7 +190,7 @@ export default function LuksoComponent({
         },
     })
 
-    const { followerCount} = useFollowerCount(addressToShow)
+    const { followerCount} = useFollowCount(addressToShow)
 
     useEffect(() => {
         if (!addressToShow) return
