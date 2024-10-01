@@ -28,7 +28,7 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'lipsum.app',
         port: '',
-        pathname: '/random/**',
+        pathname: '/**',
       },
     ],
   },
