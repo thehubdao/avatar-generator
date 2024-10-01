@@ -62,7 +62,6 @@ export default function DetailsUI() {
               <Button className="w-full" label="Download" handleClick={() => {}} light withIcon>
                 <DownloadSVG />
               </Button>
-              <Button className="px-8" label="Backpack" handleClick={() => {}} light textStiles="w-full text-center"/>
             </div>
           </>
           :
