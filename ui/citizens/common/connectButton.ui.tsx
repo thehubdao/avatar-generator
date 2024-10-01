@@ -23,9 +23,9 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
               <div>
                 <div className="w-9 h-9 bg-red rounded-full" />
               </div>
-              <div>
-                <p className="font-light text-lg">
-                  {address}
+              <div className="truncate">
+                <p className="font-light text-sm px-4 truncate">
+                  {address ?? 'No name'}
                 </p>
               </div>
               <div className={`w-9 h-9 flex justify-center items-center ${isOpen ? 'rotate-180' : ''}`}>
@@ -47,7 +47,7 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
                   </div>
                 </div>
                 <div className="flex flex-col items-center max-w-[240px] px-5">
-                  <p className="w-full font-light text-center text-2xl pt-4 pb-1 truncate">Patabrava.eth</p>
+                  <p className="w-full font-light text-center text-2xl pt-4 pb-1 truncate">{address ?? 'No name'}</p>
                   <div className="w-full flex justify-between">
                     <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-4">
                       <p>{followerCount}</p>
