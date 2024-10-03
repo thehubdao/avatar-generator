@@ -16,6 +16,7 @@ import SocialDiscordSVG from "../../ui/citizens/common/SVG/socialDiscordSVG.ui";
 import Link from "next/link";
 import SocialInstagramSVG from "../../ui/citizens/common/SVG/socialInstagramSVG.ui";
 import SocialXSVG from "../../ui/citizens/common/SVG/socialXSVG.ui";
+import { CitizensSections, TheHubSocialLinks } from "../../enums/citizens/common.enum";
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -51,8 +52,10 @@ interface CitizensComponentProps {
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
   const [isSigned, setIsSigned] = useState<boolean>(false); // false: log out, true: logged in
-  const [collectionList] = useState<CitizensCollection[] | null | undefined>(); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
+  const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [selectedCombination] = useState<string>('vrm_female');
+
+  const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
 
 
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
@@ -138,13 +141,13 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   return (
     <MobileLayout>
-      <div className="w-full min-h-screen bg-[#202020] font-work">
+      <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
         {!isSigned ?
           <LoginUI collections={collectionList} />
           :
           campaignParams && campaignParams.campaign ?
             <>
-              <div>
+              <div className="fixed inset-0 w-full h-screen">
                 <AvatarEditor
                   avatarBasePath={
                     campaignParams.armature
@@ -172,11 +175,19 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   }
                 />
               </div>
-              <CitizensUI />
+              <CitizensUI currentSection={currentSection} />
+              {/* nav */}
+              <div className="fixed top-8 left-1/2 -translate-x-1/2 flex gap-4 z-10">
+                <Button label="backpack" withIcon handleClick={() => { }} />
+                <Button label="collection" withIcon handleClick={() => {setCurrentSection(CitizensSections.Collection)}} />
+                <Button label="leaderboard" withIcon handleClick={() => { }} />
+                <Button label="play" withIcon handleClick={() => {setCurrentSection(CitizensSections.View)}} />
+              </div>
             </>
             :
-            <div className="w-full h-screen flex justify-center items-center">
-              <p className="font-monument text-white">Something is wrong!</p>
+            <div className="w-full h-screen flex flex-col justify-center items-center gap-4">
+              <p className=" text-white text-xl font-light">Loading</p>
+              <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
             </div>
         }
 
@@ -201,13 +212,13 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         }
         {!isSigned &&
           <div className="flex gap-4 fixed bottom-8 right-6">
-            <Link href={'https://x.com/thehub_dao'}>
+            <Link href={TheHubSocialLinks.SocialX}>
               <SocialXSVG />
             </Link>
-            <Link href={'https://www.instagram.com/thehub_dao/'}>
+            <Link href={TheHubSocialLinks.SocialInstagram}>
               <SocialInstagramSVG />
             </Link>
-            <Link href={'https://discord.gg/3KvUpQayxp'}>
+            <Link href={TheHubSocialLinks.Discord}>
               <SocialDiscordSVG />
             </Link>
           </div>
