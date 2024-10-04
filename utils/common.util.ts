@@ -1,6 +1,6 @@
-﻿import {CommonErrorCode, EmailResult, Module} from "../enums/common.enum";
-import {GLOBAL_VALUES} from "../constants/common.constant";
-import {Result} from "../types/common.type";
+﻿import { CommonErrorCode, EmailResult, Module } from "../enums/common.enum";
+import { GLOBAL_VALUES } from "../constants/common.constant";
+import { Result } from "../types/common.type";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
@@ -9,12 +9,12 @@ export function RandomArrayElement<T>(array: T[]) {
 // Maybe save a log at some point either through api or just firebase
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function LogError(origin: string | Module, message: string, err?: unknown) {
-  console.error(`${origin} - `, message, err != undefined && {error: err});
+  console.error(`${origin} - `, message, err != undefined && { error: err });
 }
 
 // eslint-disable-next-line @typescript-eslint/require-await
 export async function LogWarning(origin: string | Module, message: string, err?: unknown) {
-  console.warn(`${origin} - `, message, err != undefined && {error: err});
+  console.warn(`${origin} - `, message, err != undefined && { error: err });
 }
 
 export function Delay(ms: number) {
@@ -58,13 +58,13 @@ export function SetMapToMap<TKey, TValue>(leMap: Map<TKey, TValue>, toAdd: Map<T
   }
 }
 
-export function RemoveUndefinedProperties<T>(obj: T)  {
-  const clone = {...obj};
+export function RemoveUndefinedProperties<T>(obj: T) {
+  const clone = { ...obj };
   for (const k in clone) {
     if (clone[k] == undefined)
       delete clone[k];
   }
-  
+
   return clone;
 }
 
@@ -76,8 +76,8 @@ export function CastStringToInteger(toCast: string) {
 export function CastStringToNum(toCast: string): Result<number> {
   const num = +toCast;
   return isNaN(num) ?
-    {success: false, errMessage: `Input string: "${toCast}", can't be cast as number!`, errCode: CommonErrorCode.WrongInfo} :
-    {success: true, value: num};
+    { success: false, errMessage: `Input string: "${toCast}", can't be cast as number!`, errCode: CommonErrorCode.WrongInfo } :
+    { success: true, value: num };
 }
 
 export function RandomNumBetween(min: number, max: number) {
@@ -95,7 +95,7 @@ export function RandomIntMax(max: number) {
 export function ColorStringToHexString(color: string | undefined) {
   if (color == undefined) return undefined;
   if (color.length !== 6) return undefined;
-  
+
   return `#${color}`;
 }
 
@@ -109,7 +109,7 @@ export function MixArrays<T>(arr1: T[] | undefined, arr2: T[] | undefined) {
 
 export function RemovedAcc(text: string | undefined) {
   if (text == undefined || !text.endsWith(GLOBAL_VALUES.AccEnd)) return text;
-  
+
   return text.slice(0, - GLOBAL_VALUES.AccEnd.length);
 }
 
@@ -132,4 +132,16 @@ export function GetDateNum() {
 
 export function ObjectEntries<TKey extends (string | number | symbol), TValue>(obj: Record<TKey, TValue>) {
   return Object.entries(obj) as unknown as [TKey, TValue][];
+}
+
+export function FormatWalletAddress(address: string, splitCount: number = 4): string {
+  if (address.length < 8) {
+    LogWarning(Module.CommonUtil,'El string debe tener al menos 8 caracteres');
+    return address;
+  }
+
+  const primerosCuatro = address.slice(0, splitCount)
+  const ultimosCuatro = address.slice(-splitCount)
+
+  return `${primerosCuatro}...${ultimosCuatro}`
 }
