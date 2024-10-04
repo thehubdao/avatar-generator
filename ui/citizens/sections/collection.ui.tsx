@@ -1,61 +1,12 @@
-import { useState } from "react";
-import { CitizensCollection } from "../../../interfaces/citizens.interface";
+import { useState, useEffect } from "react";
 import Button from "../common/button.ui";
 import CampaignCard from "../common/campaignCard.ui";
 import PlusSVG from "../common/SVG/plusSVG.ui";
 import SearchSVG from "../common/SVG/searchSVG.ui";
 import ArrowSVG from "../common/SVG/arrowSVG.ui";
-
-const CITIZENS: CitizensCollection[] = [
-  {
-    name: 'Collection 01',
-    image: 'https://lipsum.app/id/24/280x300/'
-  },
-  {
-    name: 'Collection 02',
-    image: 'https://lipsum.app/id/25/280x300/'
-  },
-  {
-    name: 'Collection 03',
-    image: 'https://lipsum.app/id/26/280x300/'
-  },
-  {
-    name: 'Collection 04',
-    image: 'https://lipsum.app/id/27/280x300/'
-  },
-  {
-    name: 'Collection 05',
-    image: 'https://lipsum.app/id/28/280x300/'
-  },
-  {
-    name: 'Collection 06',
-    image: 'https://lipsum.app/id/29/280x300/'
-  },
-  {
-    name: 'Collection 07',
-    image: 'https://lipsum.app/id/24/280x300/'
-  },
-  {
-    name: 'Collection 08',
-    image: 'https://lipsum.app/id/25/280x300/'
-  },
-  {
-    name: 'Collection 09',
-    image: 'https://lipsum.app/id/26/280x300/'
-  },
-  {
-    name: 'Collection 10',
-    image: 'https://lipsum.app/id/27/280x300/'
-  },
-  {
-    name: 'Collection 11',
-    image: 'https://lipsum.app/id/28/280x300/'
-  },
-  {
-    name: 'Collection 12',
-    image: 'https://lipsum.app/id/29/280x300/'
-  }
-]
+import { TokenId, TokenMetadata } from "../../../types/metadata.type";
+import { getTokenMetadata } from "../../../utils/web3/contract.util";
+import { campaignLabels } from "../../../constants/lukso/labels.constant";
 
 const CAMPAIGNS: string[] = [
   'Campaign 01',
@@ -74,11 +25,34 @@ const CAMPAIGNS: string[] = [
   // 'Campaign 14',
 ]
 
-export default function Collection() {
-  const [tokenID, setTokenId] = useState<string>();
-  const [selectedCapmpaign, setSelectedCampaign] = useState<string>(CAMPAIGNS[1]);
+interface CollectionProps {
+  tokenIdList?: TokenId[];
+}
+
+export default function Collection({ tokenIdList }: CollectionProps) {
+  const [tokenID, setTokenId] = useState<string>("");
+  const [selectedCampaign, setSelectedCampaign] = useState<string>(CAMPAIGNS[1]);
 
   const [isCampaignSelectorOpen, setIsCampaignSelectorOpen] = useState<boolean>(false);
+
+  const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>([]);
+
+  useEffect(() => {
+    const loadTokenMetadata = async () => {
+      if (tokenIdList) {
+        for (const tokenIdMetadata of tokenIdList) {
+          try {
+            const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
+            setLoadedTokens(prev => [...prev, tokenMetadata]);
+          } catch (error) {
+            console.error(`Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
+          }
+        }
+      }
+    };
+
+    loadTokenMetadata();
+  }, [tokenIdList]);
 
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] py-32">
@@ -104,11 +78,11 @@ export default function Collection() {
             </label>
             <div className="relative">
               <Button label="CHOOSE CAMPAIGN" handleClick={() => { setIsCampaignSelectorOpen(!isCampaignSelectorOpen) }} withIcon textStiles="px-4">
-                <div className={`${isCampaignSelectorOpen ? 'rotate-180':''}`}>
-                  <ArrowSVG className="fill-white"/>
+                <div className={`${isCampaignSelectorOpen ? 'rotate-180' : ''}`}>
+                  <ArrowSVG className="fill-white" />
                 </div>
               </Button>
-              <p className="absolute top-full right-0 px-2 mt-1 text-xs text-white/20">{selectedCapmpaign}</p>
+              <p className="absolute top-full right-0 px-2 mt-1 text-xs text-white/20">{selectedCampaign}</p>
               {isCampaignSelectorOpen &&
                 <div className="absolute top-full w-full max-h-96 overflow-y-auto rounded-2xl mt-2 p-4 bg-citizens-dark shadow-citizens-btn z-10">
                   {
@@ -126,11 +100,16 @@ export default function Collection() {
             </div>
           </div>
           <div className="flex flex-wrap justify-center gap-4 p-8">
-            {
-              CITIZENS.map((el, i) => (
-                <CampaignCard key={i} title={el.name} imgSrc={el.image} imgAlt={el.name} small light />
-              ))
-            }
+            {loadedTokens.map((tokenMetadata) => (
+              <CampaignCard
+                key={tokenMetadata.campaign + tokenMetadata.tokenId}
+                title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
+                imgSrc={tokenMetadata.imageUrl}
+                imgAlt={tokenMetadata.name}
+                small
+                light
+              />
+            ))}
           </div>
           <div className="w-full pb-8">
             <Button label="LOAD MORE" handleClick={() => { }} withIcon className="mx-auto">

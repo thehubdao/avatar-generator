@@ -55,14 +55,14 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [selectedCombination] = useState<string>('vrm_female');
 
-  const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
+  const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.Collection);
 
 
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
 
   const [{ wallet }] = useConnectWallet()
 
-  const [, setTokenIdList] = useState<TokenId[]>()
+  const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
 
 
 
@@ -175,7 +175,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   }
                 />
               </div>
-              <CitizensUI currentSection={currentSection} />
+              <CitizensUI currentSection={currentSection} tokenIdList={tokenIdList} />
               {/* nav */}
               <div className="fixed top-8 left-1/2 -translate-x-1/2 flex gap-4 z-10">
                 <Button label="backpack" withIcon handleClick={() => { }} />

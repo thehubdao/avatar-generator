@@ -1,13 +1,15 @@
 import { CitizensSections } from "../../enums/citizens/common.enum";
+import { TokenId } from "../../types/metadata.type";
 import DetailsUI from "./common/details.ui";
 import Notifications from "./common/notifications.ui";
 import Collection from "./sections/collection.ui";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
+  tokenIdList?: TokenId[];
 }
 
-export default function CitizensUI({ currentSection }: CitizensUIProps) {
+export default function CitizensUI({ currentSection, tokenIdList }: CitizensUIProps) {
   return (
     <>
       {
@@ -22,7 +24,7 @@ export default function CitizensUI({ currentSection }: CitizensUIProps) {
       {
         currentSection === CitizensSections.Collection &&
         <>
-          <Collection />
+          <Collection tokenIdList={tokenIdList}/>
         </>
       }
     </>
