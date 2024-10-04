@@ -3,9 +3,11 @@ import Button from "./button.ui";
 import PlusSVG from "./SVG/plusSVG.ui";
 import { useState } from "react";
 import DownloadSVG from "./SVG/downloadSVG.ui";
+import Modal from "./modal.ui";
 
 export default function DetailsUI() {
   const [isOpen, setIsOpen] = useState<boolean>();
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   return (
     <div className="fixed bottom-8 left-4 w-[419px]">
       {
@@ -59,7 +61,7 @@ export default function DetailsUI() {
               </div>
             </div>
             <div className="w-full gap-4 flex">
-              <Button className="w-full" label="Download" handleClick={() => {}} light withIcon>
+              <Button className="w-full" label="Download" handleClick={() => { setIsModalOpen(true) }} light withIcon>
                 <DownloadSVG />
               </Button>
             </div>
@@ -69,7 +71,21 @@ export default function DetailsUI() {
             <PlusSVG />
           </Button>
       }
-
+      {isModalOpen &&
+        <Modal handleClose={() => setIsModalOpen(false)}>
+          <div className="grid justify-items-center">
+            <div className="text-center text-white grid gap-4">
+              <p className="font-bold text-2xl">Select Download Type</p>
+              <p className="text-lg">and experience the 3D Web</p>
+            </div>
+            <div className="grid gap-4 pt-8">
+              <Button label="Download VRM" light handleClick={() => { }} />
+              <Button label="Download GLB" light handleClick={() => { }} />
+              <Button label="Download PNG" light handleClick={() => { }} />
+            </div>
+          </div>
+        </Modal>
+      }
     </div>
   )
 }
