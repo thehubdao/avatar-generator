@@ -104,10 +104,12 @@ export default function Collection({ tokenIdList }: CollectionProps) {
               <CampaignCard
                 key={tokenMetadata.campaign + tokenMetadata.tokenId}
                 title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
+                tokenID={tokenMetadata.tokenId}
                 imgSrc={tokenMetadata.imageUrl}
                 imgAlt={tokenMetadata.name}
                 small
                 light
+                overlayText="USE CITIZEN"
               />
             ))}
           </div>
