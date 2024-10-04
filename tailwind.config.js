@@ -38,7 +38,8 @@
           citizens: {
             dark: '#1b1b1d',
             gray: '#E6E6E6',
-            blue: '#19B5F3'
+            blue: '#19B5F3',
+            bluedark: '#1E293B' 
           }
         },
         boxShadow: {
