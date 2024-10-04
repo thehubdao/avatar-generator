@@ -4,6 +4,7 @@ import Image from "next/image";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 import StarSVG from "./SVG/starSVG.ui";
 import { useFollowCount } from "../../../hooks/useFollowCount";
+import { FormatWalletAddress } from "../../../utils/common.util";
 
 interface ConnectButtonProps {
   isSigned?: boolean;
@@ -24,8 +25,8 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
                 <div className="w-9 h-9 bg-red rounded-full" />
               </div>
               <div className="truncate">
-                <p className="font-light text-sm px-4 truncate">
-                  {address ?? 'No name'}
+                <p className="font-light text-lg px-4 truncate">
+                  {address ? FormatWalletAddress(address, 6) : 'No name'}
                 </p>
               </div>
               <div className={`w-9 h-9 flex justify-center items-center ${isOpen ? 'rotate-180' : ''}`}>
@@ -47,7 +48,9 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
                   </div>
                 </div>
                 <div className="flex flex-col items-center max-w-[240px] px-5">
-                  <p className="w-full font-light text-center text-2xl pt-4 pb-1 truncate">{address ?? 'No name'}</p>
+                  <p className="w-full font-light text-center text-2xl pt-4 pb-1 truncate">
+                    {address ? FormatWalletAddress(address, 6) : 'No name'}
+                  </p>
                   <div className="w-full flex justify-between">
                     <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-4">
                       <p>{followerCount}</p>
