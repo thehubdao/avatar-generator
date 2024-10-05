@@ -176,13 +176,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                 />
               </div>
               <CitizensUI currentSection={currentSection} tokenIdList={tokenIdList} />
-              {/* nav */}
-              <div className="fixed top-8 left-1/2 -translate-x-1/2 flex gap-4 z-10">
-                <Button label="backpack" withIcon handleClick={() => { }} />
-                <Button label="collection" withIcon handleClick={() => {setCurrentSection(CitizensSections.Collection)}} />
-                <Button label="leaderboard" withIcon handleClick={() => { }} />
-                <Button label="play" withIcon handleClick={() => {setCurrentSection(CitizensSections.View)}} />
-              </div>
             </>
             :
             <div className="w-full h-screen flex flex-col justify-center items-center gap-4">
@@ -192,26 +185,41 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         }
 
         {/* HEADER */}
-        <div className="fixed w-fit h-fit left-6 top-8">
-          <Image
-            src='/resources/images/the-hub-logo-white.svg'
-            alt="the hub icon"
-            width={182}
-            height={32}
-          />
-        </div>
-        {(collectionList || collectionList === null || isSigned) &&
-          <div className="fixed top-8 right-6 flex gap-4">
-            {!isSigned &&
-              <Button label="About" handleClick={() => { }} withIcon textStiles="text-start pl-2">
-                <ArrowLinkSVG />
-              </Button>
-            }
-            <ConnectButton isSigned={isSigned} setIsSigned={(isSigned) => { setIsSigned(isSigned) }} address={walletAddress} />
+        <div className="fixed inset-0 w-full h-fit flex justify-between items-center pt-8 px-6">
+          {/* LOGO THE HUB */}
+          <div className="w-fit h-fit">
+            <Image
+              src='/resources/images/the-hub-logo-white.svg'
+              alt="the hub icon"
+              width={182}
+              height={32}
+            />
           </div>
-        }
+          {/* NAVBAR */}
+          {isSigned &&
+            <div className="flex gap-4">
+              <Button label="homebase" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { setCurrentSection(CitizensSections.View) }} />
+              <Button label="backpack" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
+              <Button label="collection" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { setCurrentSection(CitizensSections.Collection) }} />
+              <Button label="leaderboard" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
+              <Button label="play" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
+            </div>
+          }
+          {/* CONNECT BUTTON */}
+          {(collectionList || collectionList === null || isSigned) &&
+            <div className="flex gap-4">
+              {!isSigned &&
+                <Button label="About" handleClick={() => { }} withIcon textStiles="text-start pl-2">
+                  <ArrowLinkSVG />
+                </Button>
+              }
+              <ConnectButton isSigned={isSigned} setIsSigned={(isSigned) => { setIsSigned(isSigned) }} address={walletAddress} />
+            </div>
+          }
+        </div>
+        {/* SOCIAL */}
         {!isSigned &&
-          <div className="flex gap-4 fixed bottom-8 right-6">
+          <div className="fixed bottom-8 right-6 flex gap-4 ">
             <Link href={TheHubSocialLinks.SocialX}>
               <SocialXSVG />
             </Link>
