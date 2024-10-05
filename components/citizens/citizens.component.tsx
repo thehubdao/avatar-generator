@@ -83,7 +83,7 @@ interface CitizensComponentProps {
 }
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
-  const [isSigned, setIsSigned] = useState<boolean>(true); // false: log out, true: logged in
+  const [isSigned, setIsSigned] = useState<boolean>(false); // false: log out, true: logged in
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
 
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
