@@ -9,11 +9,17 @@ interface CampaignCardProps {
   small?: boolean;
   overlayText?: string;
   selected?: boolean;
+  handleClick?: () => void;
 }
 
-export default function CampaignCard({ title, tokenID, imgSrc, imgAlt, light = false, small = false, overlayText, selected = false }: CampaignCardProps) {
+export default function CampaignCard({ title, tokenID, imgSrc, imgAlt, light = false, small = false, overlayText, selected = false, handleClick }: CampaignCardProps) {
+
+  function onCardClicked() {
+    if(handleClick) handleClick();
+  }
+
   return (
-    <div className={`group relative ${small ? 'w-[228px] h-[272px]' : 'w-[280px] h-[388px]'} rounded-2xl overflow-hidden cursor-pointer ${selected ? 'border-4 border-white' : ''}`}>
+    <div className={`group relative ${small ? 'w-[228px] h-[272px]' : 'w-[280px] h-[388px]'} rounded-2xl overflow-hidden cursor-pointer ${selected ? 'border-4 border-white' : ''}`} onClick={() => onCardClicked()}>
       <div className={`relative w-full ${small ? 'h-[228px]' : 'h-[300px]'}`}>
         <Image src={imgSrc} alt={imgAlt} fill className="object-cover" />
         {overlayText && !selected &&
