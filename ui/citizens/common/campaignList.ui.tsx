@@ -7,10 +7,10 @@ import 'swiper/css';
 
 interface CampaignListProps {
   collections: CitizensCollection[];
-
+  handleCardSelection?: () => void;
 }
 
-export default function CampaignList({ collections }: CampaignListProps) {
+export default function CampaignList({ collections, handleCardSelection }: CampaignListProps) {
   return (
     <div className="w-full mx-auto">
       <Swiper
@@ -25,7 +25,10 @@ export default function CampaignList({ collections }: CampaignListProps) {
         {
           collections.map((el, i) => (
             <SwiperSlide key={i} className="w-96">
-              <CampaignCard title={el.name} imgSrc={el.image} imgAlt={el.name} />
+              {/* <ConnectWeb3Button classStyles="w-full h-full" setIsSigned={() => {if(handleCardSelection) handleCardSelection()}} >
+                <CampaignCard title={el.name} imgSrc={el.image} imgAlt={el.name} overlayText="LOG IN" />
+              </ConnectWeb3Button> */}
+              <CampaignCard title={el.name} imgSrc={el.image} imgAlt={el.name} overlayText="LOG IN" handleClick={() => {if(handleCardSelection) handleCardSelection()}}/>
             </SwiperSlide>
           ))
         }
