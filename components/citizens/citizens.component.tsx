@@ -1,4 +1,3 @@
-import { useEffect, useState, useCallback } from "react";
 import { BasicData, CampaignParameters, ExportInterface } from "../../interfaces/common.interface";
 import MobileLayout from "../../layouts/mobile.layout";
 import { Campaign, CampaignDrops, TokenId, TokenMetadata } from "../../types/metadata.type";
@@ -22,14 +21,19 @@ import AvatarEditor, {
   ChangeFeature,
   ChangeSkinColor,
   ChangeStartAnimation,
+  GetAvatarGLB,
   SetEnvironment,
   SetFeaturesData,
 } from '../avatar/editor.component'
-import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetStageListByCampaign, GetAvatarSingleByCampaignCombinationString, GetAvatarSingleByCampaignCombination, GetAssetsListByCampaign, GetAnimationByCampaignAndName } from "../../utils/api.util";
+import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetStageListByCampaign, GetAvatarSingleByCampaignCombinationString, GetAvatarSingleByCampaignCombination, GetAssetsListByCampaign, GetAnimationByCampaignAndName, FetchBlob } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { collection } from "firebase/firestore";
 import { Module } from "../../enums/common.enum";
+import { fileCampaignNameLabel } from "../../constants/lukso/labels.constant";
+import { SaveFile } from "../../utils/exporter.util";
+import { StorageLocation } from "../../enums/firebase.enum";
+import { useCallback, useEffect, useState } from "react";
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -59,7 +63,6 @@ const COLLECTIONS: CitizensCollection[] = [
 ]
 
 
-
 interface CitizensComponentProps {
   campaignParams?: CampaignParameters;
   setCampaign: (campaign?: Campaign) => void;
@@ -79,21 +82,48 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
 
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.Collection);
-  const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>()
-  const [dropList, setDropList] = useState<CampaignDrops>({
-    vrm_male: [],
-    vrm_female: [],
-  })
-  const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
-    exportData.attributes
-  )
-  const [selectedCategory, setSelectedCategory] = useState<string>('head')
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
 
   const [{ wallet }] = useConnectWallet()
 
+  // Edit state
+  // const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>()
+  // const [dropList, setDropList] = useState<CampaignDrops>({
+  //   vrm_male: [],
+  //   vrm_female: [],
+  // })
+  // const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false)
+  // const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
+  //   exportData.attributes
+  // )
+  // const [skinColor, setSkinColor] = useState<string>(
+  //   campaignParams?.config.skin?.defColor ?? 'FFFFFF'
+  // )
+  // const [selectedCategory, setSelectedCategory] = useState<string>('head')
+  // const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
+  // const [selectedCombination, setSelectedCombination] = useState<string>('vrm_male')
+  // const [selectedBaseCombination, setSelectedBaseCombination] = useState<
+  //   string
+  // >()
+  // const [selectedTokenId, setSelectedTokenId] = useState<number>()
+  // const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>()
+
+  const [, setOptionListShow] = useState<FeatureInterface[]>()
+  const [dropList,] = useState<CampaignDrops>({
+    vrm_male: [],
+    vrm_female: [],
+  })
+  const [isEditModeSelected,] = useState<boolean>(false)
+  const [, setSelectedOpc] = useState<BasicData[]>(
+    exportData.attributes
+  )
+  const [selectedCategory,] = useState<string>('head')
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
   const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>([]); // Add this state
+
+  const [combinationPictureUrl, ] = useState<string>('')
 
   const [currentCollection, setCurrentCollection] = useState<CollectionType>({
     campaign: campaignParams?.campaign as Campaign,
@@ -110,8 +140,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     setCurrentCollection(newCollection);
     setCampaign(newCollection.campaign); // This updates the parent state
   }, [setCampaign]);
-
-  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   useEffect(() => {
     if (!isSigned || !wallet) return
@@ -350,13 +378,39 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     }
 
 
-
-    setIsLoading(false)
-
     // fade loader view
     /*     await handleFadeLoader(loaderDivElement, () => {
           setIsLoading(false)
         }) */
+  }
+
+  async function exportModel() {
+    exportData.attributesBase64 = window.btoa(
+      JSON.stringify(exportData.attributes)
+    )
+    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${currentCollection.baseCombination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`
+    const [
+      picturePromise,
+      modelGLBPromise,
+      modelVRMPromise,
+    ] = await Promise.all([
+      FetchBlob(currentCollection.tokenMetadata.imageUrl),
+      GetAvatarGLB(),
+      FetchBlob(vrmStorageUrl),
+    ])
+    console.log('EXPORTING VRM, GLB and image...')
+    const modelVRM = modelVRMPromise
+    const modelGLB = modelGLBPromise.success
+      ? modelGLBPromise.value
+      : undefined
+    const filesName =
+      fileCampaignNameLabel[campaignParams?.campaign as Campaign] +
+      currentCollection.tokenMetadata.tokenId
+    if (modelVRM && modelGLBPromise.success) {
+      await SaveFile(modelVRM, `${filesName}.vrm`)
+      await SaveFile(modelGLB, `${filesName}.glb`)
+      await SaveFile(picturePromise, `${filesName}.png`)
+    }
   }
   return (
     <MobileLayout>
@@ -371,7 +425,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   avatarBasePath={
                     campaignParams.armature
                   }
-                  editMode={false}
+                  editMode={isEditModeSelected}
                   lights={
                     campaignParams.config.lights
                   }
@@ -399,6 +453,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                 loadedTokens={loadedTokens}
                 currentCollection={currentCollection}
                 updateCollection={updateCollection}
+                features={singleInitData?.features} exportModel={() => exportModel()}
               />
               {/* nav */}
               <div className="fixed top-8 left-1/2 -translate-x-1/2 flex gap-4 z-10">
@@ -419,26 +474,41 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         }
 
         {/* HEADER */}
-        <div className="fixed w-fit h-fit left-6 top-8">
-          <Image
-            src='/resources/images/the-hub-logo-white.svg'
-            alt="the hub icon"
-            width={182}
-            height={32}
-          />
-        </div>
-        {(collectionList || collectionList === null || isSigned) &&
-          <div className="fixed top-8 right-6 flex gap-4">
-            {!isSigned &&
-              <Button label="About" handleClick={() => { }} withIcon textStiles="text-start pl-2">
-                <ArrowLinkSVG />
-              </Button>
-            }
-            <ConnectButton isSigned={isSigned} setIsSigned={(isSigned) => { setIsSigned(isSigned) }} address={walletAddress} />
+        <div className="fixed inset-0 w-full h-fit flex justify-between items-center pt-8 px-6">
+          {/* LOGO THE HUB */}
+          <div className="w-fit h-fit">
+            <Image
+              src='/resources/images/the-hub-logo-white.svg'
+              alt="the hub icon"
+              width={182}
+              height={32}
+            />
           </div>
-        }
+          {/* NAVBAR */}
+          {isSigned &&
+            <div className="flex gap-4">
+              <Button label="homebase" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { setCurrentSection(CitizensSections.View) }} />
+              <Button label="backpack" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
+              <Button label="collection" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { setCurrentSection(CitizensSections.Collection) }} />
+              <Button label="leaderboard" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
+              <Button label="play" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
+            </div>
+          }
+          {/* CONNECT BUTTON */}
+          {(collectionList || collectionList === null || isSigned) &&
+            <div className="flex gap-4">
+              {!isSigned &&
+                <Button label="About" handleClick={() => { }} withIcon textStiles="text-start pl-2">
+                  <ArrowLinkSVG />
+                </Button>
+              }
+              <ConnectButton isSigned={isSigned} setIsSigned={(isSigned) => { setIsSigned(isSigned) }} address={walletAddress} />
+            </div>
+          }
+        </div>
+        {/* SOCIAL */}
         {!isSigned &&
-          <div className="flex gap-4 fixed bottom-8 right-6">
+          <div className="fixed bottom-8 right-6 flex gap-4 ">
             <Link href={TheHubSocialLinks.SocialX}>
               <SocialXSVG />
             </Link>

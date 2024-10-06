@@ -16,7 +16,7 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { followerCount, followingCount } = useFollowCount(address)
   return (
-    <div className="relative w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">
+    <div className="relative w-fit 2xl:w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">
       {
         isSigned ?
           <>
@@ -35,7 +35,7 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
             </button>
             {
               isOpen &&
-              <div className="absolute top-full left-0 w-full grid grid-cols-[144px_1fr] bg-white mt-3 rounded-[20px] overflow-hidden">
+              <div className="absolute top-full right-0 w-[376px] grid grid-cols-[144px_1fr] bg-white mt-3 rounded-[20px] overflow-hidden">
                 <div className="relative h-full w-36">
                   <Image src={'https://lipsum.app/random/280x300/'} alt="1" fill className="object-cover" />
                   <div className="absolute left-1/2 bottom-2 -translate-x-1/2 flex justify-between items-center gap-2 bg-white p-1 rounded-full">
@@ -75,7 +75,7 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
           :
           <ConnectWeb3Button classStyles="w-full h-full" setIsSigned={setIsSigned} >
             <div className="w-full h-full font-light text-lg">
-              Connect
+              Log in
             </div>
           </ConnectWeb3Button>
 

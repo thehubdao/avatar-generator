@@ -9,16 +9,21 @@ interface CampaignCardProps {
   small?: boolean;
   overlayText?: string;
   selected?: boolean;
-  onClick: () => void;
+  handleClick?: () => void;
 }
 
-export default function CampaignCard({ title, tokenID, imgSrc, imgAlt, light = false, small = false, overlayText, selected = false, onClick }: CampaignCardProps) {
+export default function CampaignCard({ title, tokenID, imgSrc, imgAlt, light = false, small = false, overlayText, selected = false, handleClick }: CampaignCardProps) {
+
+  function onCardClicked() {
+    if(handleClick) handleClick();
+  }
+
   return (
-    <div className={`group relative ${small ? 'w-[228px] h-[272px]' : 'w-[280px] h-[388px]'} rounded-2xl overflow-hidden cursor-pointer ${selected ? 'border-4 border-white' : ''}`}>
+    <div className={`group relative ${small ? 'w-[228px] h-[272px]' : 'w-[280px] h-[388px]'} rounded-2xl overflow-hidden cursor-pointer ${selected ? 'border-4 border-white' : ''}`} onClick={() => onCardClicked()}>
       <div className={`relative w-full ${small ? 'h-[228px]' : 'h-[300px]'}`}>
         <Image src={imgSrc} alt={imgAlt} fill className="object-cover" />
         {overlayText && !selected &&
-          <div onClick={onClick} className="absolute w-full h-full flex justify-center items-center bg-citizens-dark/75 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div onClick={handleClick} className="absolute w-full h-full flex justify-center items-center bg-citizens-dark/75 opacity-0 group-hover:opacity-100 transition-opacity">
             <p className="font-light text-lg text-white">{overlayText}</p>
           </div>
         }

@@ -1,6 +1,7 @@
 import { CitizensSections } from "../../enums/citizens/common.enum";
+import { IndexFeatureInterface } from "../../interfaces/api.interface";
 import { CollectionType } from "../../types/avatar.type";
-import { TokenMetadata, Campaign } from "../../types/metadata.type";
+import { TokenMetadata, Campaign, TokenId } from "../../types/metadata.type";
 import DetailsUI from "./common/details.ui";
 import Notifications from "./common/notifications.ui";
 import Collection from "./sections/collection.ui";
@@ -10,20 +11,20 @@ interface CitizensUIProps {
   loadedTokens?: TokenMetadata[];
   currentCollection: CollectionType;
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
+  features?: IndexFeatureInterface[];
+  exportModel: () => Promise<void>;
 }
 
-export default function CitizensUI({
-  currentSection,
-  loadedTokens,
-  currentCollection,
-  updateCollection
-}: CitizensUIProps) {
+
+export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel }: CitizensUIProps) {
   return (
     <>
       {currentSection === CitizensSections.View && (
         <>
           {/* details */}
-          <DetailsUI />
+          {features &&
+            <DetailsUI data={features} handleDownload={() => exportModel()}/>
+          }
           {/* notifications */}
           <Notifications />
         </>

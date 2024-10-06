@@ -4,8 +4,15 @@ import PlusSVG from "./SVG/plusSVG.ui";
 import { useState } from "react";
 import DownloadSVG from "./SVG/downloadSVG.ui";
 import Modal from "./modal.ui";
+import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 
-export default function DetailsUI() {
+interface DetailsUIProps {
+  data: IndexFeatureInterface[];
+  handleDownload: () => Promise<void>;
+}
+
+export default function DetailsUI({ data, handleDownload }: DetailsUIProps) {
+
   const [isOpen, setIsOpen] = useState<boolean>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   return (
@@ -26,38 +33,14 @@ export default function DetailsUI() {
                 </div>
               </div>
               <div className="grid grid-cols-2 justify-items-center gap-4 px-8 pb-8">
-                <div className="grid justify-items-center">
-                  <h3 className="uppercase">TOP</h3>
-                  <p className="capitalize">Information</p>
-                </div>
-                <div className="grid justify-items-center">
-                  <h3 className="uppercase">TOP</h3>
-                  <p className="capitalize">Information</p>
-                </div>
-                <div className="grid justify-items-center">
-                  <h3 className="uppercase">TOP</h3>
-                  <p className="capitalize">Information</p>
-                </div>
-                <div className="grid justify-items-center">
-                  <h3 className="uppercase">TOP</h3>
-                  <p className="capitalize">Information</p>
-                </div>
-                <div className="grid justify-items-center">
-                  <h3 className="uppercase">TOP</h3>
-                  <p className="capitalize">Information</p>
-                </div>
-                <div className="grid justify-items-center">
-                  <h3 className="uppercase">TOP</h3>
-                  <p className="capitalize">Information</p>
-                </div>
-                <div className="grid justify-items-center">
-                  <h3 className="uppercase">TOP</h3>
-                  <p className="capitalize">Information</p>
-                </div>
-                <div className="grid justify-items-center">
-                  <h3 className="uppercase">TOP</h3>
-                  <p className="capitalize">Information</p>
-                </div>
+                {
+                  data.map((item, index) => (
+                    <div key={index} className="grid justify-items-center">
+                      <h3 className="uppercase">{item.val.type}</h3>
+                      <p className="capitalize">{item.val.name}</p>
+                    </div>
+                  ))
+                }
               </div>
             </div>
             <div className="w-full gap-4 flex">
@@ -79,7 +62,7 @@ export default function DetailsUI() {
               <p className="text-lg">and experience the 3D Web</p>
             </div>
             <div className="grid gap-4 pt-8">
-              <Button label="Download VRM" light handleClick={() => { }} />
+              <Button label="Download VRM" light handleClick={() => { handleDownload() }} />
               <Button label="Download GLB" light handleClick={() => { }} />
               <Button label="Download PNG" light handleClick={() => { }} />
             </div>
