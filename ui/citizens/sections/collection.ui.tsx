@@ -4,9 +4,9 @@ import CampaignCard from "../common/campaignCard.ui";
 import PlusSVG from "../common/SVG/plusSVG.ui";
 import SearchSVG from "../common/SVG/searchSVG.ui";
 import ArrowSVG from "../common/SVG/arrowSVG.ui";
-import { TokenId, TokenMetadata } from "../../../types/metadata.type";
-import { getTokenMetadata } from "../../../utils/web3/contract.util";
+import { TokenMetadata, Campaign } from "../../../types/metadata.type";
 import { campaignLabels } from "../../../constants/lukso/labels.constant";
+import { CollectionType } from "../../../types/avatar.type";
 
 const CAMPAIGNS: string[] = [
   'Campaign 01',
@@ -15,44 +15,30 @@ const CAMPAIGNS: string[] = [
   'Campaign 04',
   'Campaign 05',
   'Campaign 06',
-  // 'Campaign 07',
-  // 'Campaign 08',
-  // 'Campaign 09',
-  // 'Campaign 10',
-  // 'Campaign 11',
-  // 'Campaign 12',
-  // 'Campaign 13',
-  // 'Campaign 14',
-]
+];
 
 interface CollectionProps {
-  tokenIdList?: TokenId[];
+  loadedTokens?: TokenMetadata[];
+  currentCollection:CollectionType
+  updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
 }
 
-export default function Collection({ tokenIdList }: CollectionProps) {
+export default function Collection({
+  loadedTokens,
+  updateCollection
+}: CollectionProps) {
   const [tokenID, setTokenId] = useState<string>("");
   const [selectedCampaign, setSelectedCampaign] = useState<string>(CAMPAIGNS[1]);
-
+  const [selectedTokenId, setSelectedTokenId] = useState<string | null>(null);
   const [isCampaignSelectorOpen, setIsCampaignSelectorOpen] = useState<boolean>(false);
 
-  const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>([]);
-
-  useEffect(() => {
-    const loadTokenMetadata = async () => {
-      if (tokenIdList) {
-        for (const tokenIdMetadata of tokenIdList) {
-          try {
-            const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
-            setLoadedTokens(prev => [...prev, tokenMetadata]);
-          } catch (error) {
-            console.error(`Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
-          }
-        }
-      }
-    };
-
-    loadTokenMetadata();
-  }, [tokenIdList]);
+  const handleCardClick = (tokenId: string, tokenMetadata: TokenMetadata) => {
+    setSelectedTokenId(tokenId === selectedTokenId ? null : tokenId);
+    if (tokenId !== selectedTokenId) {
+      const { campaign: newCampaign, combination: newCombination } = tokenMetadata;
+      updateCollection(newCampaign as Campaign, newCombination, tokenMetadata);
+    }
+  };
 
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] py-32">
@@ -100,7 +86,7 @@ export default function Collection({ tokenIdList }: CollectionProps) {
             </div>
           </div>
           <div className="flex flex-wrap justify-center gap-4 p-8">
-            {loadedTokens.map((tokenMetadata) => (
+            {loadedTokens && loadedTokens.map((tokenMetadata) => (
               <CampaignCard
                 key={tokenMetadata.campaign + tokenMetadata.tokenId}
                 title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
@@ -109,7 +95,9 @@ export default function Collection({ tokenIdList }: CollectionProps) {
                 imgAlt={tokenMetadata.name}
                 small
                 light
-                overlayText="USE CITIZEN"
+                overlayText={selectedTokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
+                onClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
+                selected={selectedTokenId === tokenMetadata.tokenId}
               />
             ))}
           </div>
@@ -121,5 +109,5 @@ export default function Collection({ tokenIdList }: CollectionProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

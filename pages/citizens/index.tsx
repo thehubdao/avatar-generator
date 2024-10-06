@@ -5,6 +5,7 @@ import { GetParameter } from "../../utils/firebase.util";
 import { CampaignParameterName, Module } from "../../enums/common.enum";
 import { LogError, RemoveUndefinedProperties } from "../../utils/common.util";
 import CitizensComponent from "../../components/citizens/citizens.component";
+import { CollectionType } from "../../types/avatar.type";
 
 export default function CitizensView() {
   const [campaign, setCampaign] = useState<Campaign>()
@@ -19,11 +20,12 @@ export default function CitizensView() {
   }
 
   useEffect(() => {
+    console.log('campaign', campaign);
     if (!campaign) return setCampaignParams(undefined)
     void getCampaignParams()
   }, [campaign])
 
-  return <CitizensComponent campaignParams={campaignParams} setCampaign={(_campaign: Campaign | undefined) => {
+  return <CitizensComponent campaignParams={campaignParams} setCampaign={(_campaign?: Campaign) => {
     setCampaign(_campaign)
   }} />
 }

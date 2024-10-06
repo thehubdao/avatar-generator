@@ -110,7 +110,7 @@ export default function AvatarCollection({
   defaultAnimation,
   changeMaterial
 }: AvatarCollectionProps) {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [maxCombination, setMaxCombination] = useState<number>(0);
   const [currentIteration, setCurrentIteration] = useState<number>();
 

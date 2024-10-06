@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
-import { CampaignParameters } from "../../interfaces/common.interface";
+import { useEffect, useState, useCallback } from "react";
+import { BasicData, CampaignParameters, ExportInterface } from "../../interfaces/common.interface";
 import MobileLayout from "../../layouts/mobile.layout";
-import { Campaign, TokenId } from "../../types/metadata.type";
+import { Campaign, CampaignDrops, TokenId, TokenMetadata } from "../../types/metadata.type";
 import LoginUI from "../../ui/citizens/sections/login.ui";
 import Image from "next/image";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
-import AvatarEditor from "../avatar/editor.component";
 import CitizensUI from "../../ui/citizens/citizens.ui";
 import { useConnectWallet } from "@web3-onboard/react";
 import { getCampaignsTokenIds } from "../../utils/web3/contract.util";
@@ -17,6 +16,20 @@ import Link from "next/link";
 import SocialInstagramSVG from "../../ui/citizens/common/SVG/socialInstagramSVG.ui";
 import SocialXSVG from "../../ui/citizens/common/SVG/socialXSVG.ui";
 import { CitizensSections, TheHubSocialLinks } from "../../enums/citizens/common.enum";
+import { getTokenMetadata } from "../../utils/web3/contract.util"; // Add this import
+import { BodyPart, CollectionType } from "../../types/avatar.type";
+import AvatarEditor, {
+  ChangeFeature,
+  ChangeSkinColor,
+  ChangeStartAnimation,
+  SetEnvironment,
+  SetFeaturesData,
+} from '../avatar/editor.component'
+import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetStageListByCampaign, GetAvatarSingleByCampaignCombinationString, GetAvatarSingleByCampaignCombination, GetAssetsListByCampaign, GetAnimationByCampaignAndName } from "../../utils/api.util";
+import { EnvMapInterface, FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
+import { FilterList, LogError, MixArrays } from "../../utils/common.util";
+import { collection } from "firebase/firestore";
+import { Module } from "../../enums/common.enum";
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -45,31 +58,60 @@ const COLLECTIONS: CitizensCollection[] = [
   // }
 ]
 
+
+
 interface CitizensComponentProps {
   campaignParams?: CampaignParameters;
-  setCampaign: (campaign: Campaign | undefined) => void;
+  setCampaign: (campaign?: Campaign) => void;
 }
+
+const exportData: ExportInterface = { attributes: [] }
+let stageList: StageInterface[] | undefined
+let envMapList: EnvMapInterface[] | undefined
+let singleInitData: SingleInterface | undefined
+let accessoryList: FeatureInterface[] | undefined
+let optionList: FeatureInterface[] | undefined
+let featureList: FeatureInterface[] | undefined
+
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
   const [isSigned, setIsSigned] = useState<boolean>(false); // false: log out, true: logged in
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
-  const [selectedCombination] = useState<string>('vrm_female');
 
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.Collection);
-
-
+  const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>()
+  const [dropList, setDropList] = useState<CampaignDrops>({
+    vrm_male: [],
+    vrm_female: [],
+  })
+  const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
+    exportData.attributes
+  )
+  const [selectedCategory, setSelectedCategory] = useState<string>('head')
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
 
   const [{ wallet }] = useConnectWallet()
 
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
+  const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>([]); // Add this state
 
+  const [currentCollection, setCurrentCollection] = useState<CollectionType>({
+    campaign: campaignParams?.campaign as Campaign,
+    baseCombination: '',
+    tokenMetadata: {} as TokenMetadata
+  });
 
+  const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => {
+    const newCollection: CollectionType = {
+      campaign: newCampaign, baseCombination: newCombination,
+      tokenMetadata
+    };
+    console.log('newCollection: ', newCollection);
+    setCurrentCollection(newCollection);
+    setCampaign(newCollection.campaign); // This updates the parent state
+  }, [setCampaign]);
 
-  useEffect(() => {
-    console.log('Campaign params: ', campaignParams);
-    setCampaign('vrm_female');
-  }, [])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
 
   useEffect(() => {
     if (!isSigned || !wallet) return
@@ -88,67 +130,244 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     void getTokensMetadataPromise()
   }, [walletAddress])
 
+  useEffect(() => {
+    const loadTokenMetadata = async () => {
+      if (tokenIdList) {
+        const promises = tokenIdList.map(async (tokenIdMetadata) => {
+          try {
+            const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
+            setLoadedTokens(prevTokens => [...prevTokens, tokenMetadata]);
+            return tokenMetadata;
+          } catch (error) {
+            console.error(`Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
+            return null;
+          }
+        });
+
+        await Promise.all(promises);
+      }
+    };
+
+    setLoadedTokens([]); // Reset loadedTokens before starting new load
+    loadTokenMetadata();
+  }, [tokenIdList]);
+
+  async function getStageList() {
+    const result = await GetStageListByCampaign(campaignParams?.campaign)
+    stageList = result.success ? result.value : undefined
+  }
+
+  async function getEnvironmentMapList() {
+    if (!campaignParams?.campaign) return
+    const result = await GetEnvMapListByCampaign(campaignParams?.campaign)
+    envMapList = result.success ? result.value : undefined
+  }
+
+  async function getSingleInfo() {
+    if (
+      campaignParams?.config.defAvatarCombination == undefined ||
+      !campaignParams?.campaign
+    )
+      return
+
+    const result = await GetAvatarSingleByCampaignCombination(
+      campaignParams?.campaign,
+      campaignParams.config.defAvatarCombination
+    )
+    singleInitData = result.success ? result.value : undefined
+  }
+
+  async function getAccessoryList() {
+    const result = await GetAccessoryListByCampaign(
+      campaignParams?.campaign
+    )
+    accessoryList = result.success ? result.value : undefined
+  }
+
+  async function getFeatureList() {
+    const result = await GetAssetsListByCampaign(campaignParams?.campaign)
+    featureList = result.success ? result.value : undefined
+    optionList = MixArrays(optionList, featureList)
+    optionList = MixArrays(optionList, accessoryList)
+
+    const combinationIndexes = currentCollection.baseCombination?.split('-')
+    let filteredOptionList: FeatureInterface[] = []
+    //This algorithm can be done in a better way, change it in the future.
+    // Get features from combination and make them visible on avatar edit mode.
+    combinationIndexes?.forEach((featureIndex: string, index) => {
+      const filteredArray = optionList?.filter((val) => {
+        const categoryIndex = campaignParams?.features?.find(
+          (category) => {
+            return category.displayName === val.type
+          }
+        )?.index
+
+        if (!categoryIndex) return
+
+        return (
+          categoryIndex - 1 === index &&
+          val.index.toString() === featureIndex
+        )
+      })
+
+      if (!filteredArray) return
+
+      filteredOptionList = filteredOptionList.concat(filteredArray)
+    })
+
+    const campaignDropList =
+      dropList[campaignParams?.campaign as keyof typeof dropList]
+    if (campaignDropList) {
+      const formattedDropList = campaignDropList
+        .map((val) => {
+          return optionList?.find(
+            (option) =>
+              option.type === val.type &&
+              val.index === option.index
+          ) as FeatureInterface
+        })
+        .filter((val) => {
+          const categoryIndex = campaignParams?.features?.find(
+            (category) => {
+              return category.displayName === val.type
+            }
+          )?.index
+
+          if (!categoryIndex || !combinationIndexes) return true
+
+          return !combinationIndexes[categoryIndex - 1]?.includes(
+            val.index.toString()
+          )
+        })
+      filteredOptionList = filteredOptionList.concat(formattedDropList)
+    }
+
+    optionList = filteredOptionList
+    const filteredList = FilterList(optionList, 'type', selectedCategory)
+    return setOptionListShow(filteredList)
+  }
+
+  function addReplaceAttribute(addId: string, addValue: string) {
+    if (exportData && exportData.attributes.some((x) => x.id === addId)) {
+      const oldAttribute = exportData.attributes.find(
+        (x) => x.id === addId
+      )
+      if (oldAttribute) oldAttribute.val = addValue
+
+      setSelectedOpc([...exportData.attributes])
+      return
+    }
+
+    exportData?.attributes.push({ id: addId, val: addValue })
+    setSelectedOpc([...exportData.attributes])
+  }
+
+  async function getSingleData(campaign: string, combination: string) {
+    const numResult = await GetAvatarSingleByCampaignCombinationString(
+      campaign,
+      combination
+    )
+    const result: SingleInterface | undefined = numResult.success
+      ? numResult.value
+      : undefined
+    singleInitData = result
+    await getAccessoryList()
+    await getFeatureList()
+
+    singleInitData?.features.forEach((feature) => {
+      addReplaceAttribute(feature.val.type, feature.val.name)
+    })
+  }
+
+  async function loadSingleData() {
+    /* setIsLoading(true) */
+    // Iterate the features
+    // Place the features on the model
+    if (singleInitData === undefined)
+      return void LogError(Module.Lukso, 'Missing single data!!!!!')
+
+    for (const { val } of singleInitData.features) {
+      const { id, path, type, name } = val
+      const { tokenMetadata } = currentCollection
+      const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
+      tokenMetadata.body[bodyIndex] = val as BodyPart
+      // Set feature on model
+      await ChangeFeature(
+        id,
+        path,
+        name,
+        type,
+        campaignParams?.config.skin?.defColor ?? 'ffffff'
+      )
+    }
+  }
+
   async function onAvatarBuilderReady(
     currentCombination: string,
     campaign?: string
   ) {
+    console.log('currentCombination: ', currentCombination);
+    console.log('campaign: ', campaign);
     if (!campaign) return
 
     console.log('onAvatarBuilderReady');
 
-    // await Promise.all([
-    //   getStageList(),
-    //   getEnvironmentMapList(),
-    //   getSingleInfo(),
-    //   getSingleData(campaign, currentCombination),
-    // ])
+    await Promise.all([
+      getStageList(),
+      getEnvironmentMapList(),
+      getSingleInfo(),
+      getSingleData(campaign, currentCombination),
+    ])
 
-    // await SetFeaturesData(campaignParams?.features ?? [])
+    await SetFeaturesData(campaignParams?.features ?? [])
 
-    // const bgMap = envMapList?.find(
-    //   (em) => em.name === campaignParams?.config.envMap?.defBgMap
-    // )
-    // const lightMap = envMapList?.find(
-    //   (em) => em.name === campaignParams?.config.envMap?.defLightMap
-    // )
-    // await SetEnvironment(
-    //   bgMap?.path,
-    //   lightMap?.path,
-    //   campaignParams?.config.envMap?.skyboxConfig
-    // )
+    const bgMap = envMapList?.find(
+      (em) => em.name === campaignParams?.config.envMap?.defBgMap
+    )
+    const lightMap = envMapList?.find(
+      (em) => em.name === campaignParams?.config.envMap?.defLightMap
+    )
+    await SetEnvironment(
+      bgMap?.path,
+      lightMap?.path,
+      campaignParams?.config.envMap?.skyboxConfig
+    )
 
     // Set features from single
-    // await loadSingleData()
+    await loadSingleData()
 
     // Set skin tone
-    // await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'ffffff')
+    await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'ffffff')
 
     // Set animation
-    // const result = await GetAnimationByCampaignAndName(
-    //   campaignParams?.campaign,
-    //   campaignParams?.config.defAnimation
-    // )
+    const result = await GetAnimationByCampaignAndName(
+      campaignParams?.campaign,
+      campaignParams?.config.defAnimation
+    )
 
-    // if (result.success) {
-    //   await ChangeStartAnimation(result.value.at(0)?.path)
-    // }
+    if (result.success) {
+      await ChangeStartAnimation(result.value.at(0)?.path)
+    }
+
+
+
+    setIsLoading(false)
 
     // fade loader view
-    // await handleFadeLoader(loaderDivElement, () => {
-    //   setIsLoading(false)
-    // })
+    /*     await handleFadeLoader(loaderDivElement, () => {
+          setIsLoading(false)
+        }) */
   }
-
   return (
     <MobileLayout>
       <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
         {!isSigned ?
           <LoginUI collections={collectionList} />
           :
-          campaignParams && campaignParams.campaign ?
+          
             <>
               <div className="fixed inset-0 w-full h-screen">
-                <AvatarEditor
+                {currentCollection.baseCombination && campaignParams && campaignParams.campaign &&<AvatarEditor
                   avatarBasePath={
                     campaignParams.armature
                   }
@@ -169,26 +388,34 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   }
                   onReady={() =>
                     onAvatarBuilderReady(
-                      selectedCombination,
-                      campaignParams.campaign
+                      currentCollection.baseCombination,
+                      currentCollection.campaign
                     )
                   }
-                />
+                />}
               </div>
-              <CitizensUI currentSection={currentSection} tokenIdList={tokenIdList} />
+              <CitizensUI
+                currentSection={currentSection}
+                loadedTokens={loadedTokens}
+                currentCollection={currentCollection}
+                updateCollection={updateCollection}
+              />
               {/* nav */}
               <div className="fixed top-8 left-1/2 -translate-x-1/2 flex gap-4 z-10">
                 <Button label="backpack" withIcon handleClick={() => { }} />
-                <Button label="collection" withIcon handleClick={() => {setCurrentSection(CitizensSections.Collection)}} />
+                <Button label="collection" withIcon handleClick={() => {
+                  setCampaign(undefined)
+                  setCurrentSection(CitizensSections.Collection)
+                }} />
                 <Button label="leaderboard" withIcon handleClick={() => { }} />
-                <Button label="play" withIcon handleClick={() => {setCurrentSection(CitizensSections.View)}} />
+                <Button label="play" withIcon handleClick={() => { setCurrentSection(CitizensSections.View) }} />
               </div>
             </>
-            :
-            <div className="w-full h-screen flex flex-col justify-center items-center gap-4">
+            
+/*             <div className="w-full h-screen flex flex-col justify-center items-center gap-4">
               <p className=" text-white text-xl font-light">Loading</p>
               <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
-            </div>
+            </div> */
         }
 
         {/* HEADER */}

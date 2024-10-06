@@ -167,6 +167,7 @@ interface AvatarEditorProps {
  * @component
  */
 export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, lights, postProcessing, defaultShadow, defaultCamera, editMode, enablePan }: AvatarEditorProps) {
+
   async function onAvatarEditorReady() {
     await initEditor();
     await onReady();

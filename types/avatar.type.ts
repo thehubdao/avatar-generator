@@ -1,3 +1,5 @@
+import { Campaign, TokenMetadata } from "./metadata.type"
+
 export type BodyPart = {
     name: string
     path: string
@@ -10,4 +12,8 @@ export const phaseMap = { whitelistPhase: 'whitelistPhase',airdropPhase: 'airdro
 
 export type Phase = keyof typeof phaseMap
 
-
+export interface CollectionType {
+    campaign: Campaign;
+    baseCombination: string;
+    tokenMetadata: TokenMetadata
+  }
