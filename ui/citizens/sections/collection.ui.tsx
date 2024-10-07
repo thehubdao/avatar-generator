@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Button from "../common/button.ui";
 import CampaignCard from "../common/campaignCard.ui";
 import PlusSVG from "../common/SVG/plusSVG.ui";
@@ -25,25 +25,20 @@ interface CollectionProps {
 
 export default function Collection({
   loadedTokens,
-  updateCollection
+  updateCollection,
+  currentCollection
 }: CollectionProps) {
   const [tokenID, setTokenId] = useState<string>("");
-  const [selectedCampaign, setSelectedCampaign] = useState<string>(CAMPAIGNS[1]);
-  const [selectedTokenId, setSelectedTokenId] = useState<string | null>(null);
   const [isCampaignSelectorOpen, setIsCampaignSelectorOpen] = useState<boolean>(false);
 
   const handleCardClick = (tokenId: string, tokenMetadata: TokenMetadata) => {
-    setSelectedTokenId(tokenId === selectedTokenId ? null : tokenId);
-    if (tokenId !== selectedTokenId) {
+    if (tokenId !== currentCollection.tokenMetadata.tokenId) {
       const { campaign: newCampaign, combination: newCombination } = tokenMetadata;
       updateCollection(newCampaign as Campaign, newCombination, tokenMetadata);
     }
   };
 
-useEffect(() => {
-  if(!loadedTokens) return 
-  handleCardClick(loadedTokens[0].tokenId, loadedTokens[0])
-}, []);
+
 
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] py-32">
@@ -73,13 +68,12 @@ useEffect(() => {
                   <ArrowSVG className="fill-white" />
                 </div>
               </Button>
-              <p className="absolute top-full right-0 px-2 mt-1 text-xs text-white/20">{selectedCampaign}</p>
+              <p className="absolute top-full right-0 px-2 mt-1 text-xs text-white/20">{currentCollection.campaign}</p>
               {isCampaignSelectorOpen &&
                 <div className="absolute top-full w-full max-h-96 overflow-y-auto rounded-2xl mt-2 p-4 bg-citizens-dark shadow-citizens-btn z-10">
                   {
                     CAMPAIGNS.map((campaign, index) => (
                       <div key={index} className="py-2 cursor-pointer border-b border-white/10 last:border-none" onClick={() => {
-                        setSelectedCampaign(campaign);
                         setIsCampaignSelectorOpen(false);
                       }}>
                         <p className="text-white truncate">{campaign}</p>
@@ -100,9 +94,9 @@ useEffect(() => {
                 imgAlt={tokenMetadata.name}
                 small
                 light
-                overlayText={selectedTokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
+                overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
                 handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
-                selected={selectedTokenId === tokenMetadata.tokenId}
+                selected={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId}
               />
             ))}
           </div>

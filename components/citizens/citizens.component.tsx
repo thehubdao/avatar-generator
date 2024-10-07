@@ -144,9 +144,12 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   useEffect(() => {
     const loadTokenMetadata = async () => {
       if (tokenIdList) {
-        const promises = tokenIdList.map(async (tokenIdMetadata) => {
+        const promises = tokenIdList.map(async (tokenIdMetadata, i) => {
           try {
             const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
+            if (i == 0) {
+              updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.baseCombination, tokenMetadata)
+            }
             setLoadedTokens(prevTokens => [...prevTokens, tokenMetadata]);
             return tokenMetadata;
           } catch (error) {
@@ -158,8 +161,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         await Promise.all(promises);
       }
     };
-
-    setLoadedTokens([]); // Reset loadedTokens before starting new load
+    
     loadTokenMetadata();
   }, [tokenIdList]);
 
@@ -430,7 +432,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
               loadedTokens={loadedTokens}
               currentCollection={currentCollection}
               updateCollection={updateCollection}
-              features={singleInitData?.features} exportModel={() => exportModel()} address={walletAddress ?? ""}            />
+              features={singleInitData?.features} exportModel={() => exportModel()} address={walletAddress ?? ""} />
           </>
 
           /*             <div className="w-full h-screen flex flex-col justify-center items-center gap-4">
