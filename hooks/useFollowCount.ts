@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ethers } from 'ethers';
-import { getFollowerCounts } from '../utils/web3/lukso.util';
+import { GetFollowerCounts } from '../utils/web3/lukso.util';
 
 
 
@@ -19,7 +18,7 @@ export function useFollowCount(address: string | undefined) {
 
       setIsLoading(true);
       try {
-        const { followerCount, followingCount } = await getFollowerCounts(address);
+        const { followerCount, followingCount } = await GetFollowerCounts(address);
 
         setFollowerCount(followerCount);
         setfollowingCount(followingCount);

@@ -39,7 +39,7 @@ export const getImageUrl = (metadata: TokenMetadata) => {
     return imageUrl
 }
 
-export async function getFollowerCounts(address: string): Promise<{ followerCount: number, followingCount: number }> {
+export async function GetFollowerCounts(address: string): Promise<{ followerCount: number, followingCount: number }> {
     const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
   

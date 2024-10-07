@@ -33,7 +33,7 @@ import { deleteDoc, doc, getDoc, orderBy, Timestamp } from 'firebase/firestore';
 import { ethers } from 'ethers';
 import jwt from 'jsonwebtoken';
 import UniversalProfileContract from '../constants/abi/UniversalProfileABI.json';
-import { getFollowerCounts } from "./web3/lukso.util";
+import { GetFollowerCounts } from "./web3/lukso.util";
 
 export type LogInStructure = {
   user: string;
@@ -960,7 +960,7 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
       }
 
       // Get current follower and following counts
-      const { followerCount, followingCount } = await getFollowerCounts(address);
+      const { followerCount, followingCount } = await GetFollowerCounts(address);
 
       // Check if follower/following counts have increased
       if (followerCount > (userData.followerCount || 0)) {
@@ -1026,7 +1026,7 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
 
 const BASE_XP_PER_LEVEL = 100; // XP required for the first level
 
-function calculateLevel(xp: number): number {
+function CalculateLevel(xp: number): number {
   let level = 0;
   let xpForNextLevel = BASE_XP_PER_LEVEL;
   let totalXpForCurrentLevel = 0;
@@ -1040,7 +1040,7 @@ function calculateLevel(xp: number): number {
   return level;
 }
 
-function getXpForNextLevel(currentLevel: number): number {
+function GetXpForNextLevel(currentLevel: number): number {
   return BASE_XP_PER_LEVEL * Math.pow(2, currentLevel - 1);
 }
 
@@ -1056,8 +1056,8 @@ export async function UpdateUserXP(userId: string, xpToAdd: number): Promise<Res
     const userData = userDoc.data() as UserInterface;
     const oldLevel = userData.level || 1;
     const newXP = (userData.xp || 0) + xpToAdd;
-    const newLevel = calculateLevel(newXP);
-    const xpForNextLevel = getXpForNextLevel(newLevel);
+    const newLevel = CalculateLevel(newXP);
+    const xpForNextLevel = GetXpForNextLevel(newLevel);
 
     await setDoc(userDocRef, {
       xp: newXP,
@@ -1073,7 +1073,7 @@ export async function UpdateUserXP(userId: string, xpToAdd: number): Promise<Res
   }
 }
 
-export async function generateSessionToken(address: string, message: string, signature: string): Promise<string> {
+export async function GenerateSessionToken(address: string, message: string, signature: string): Promise<string> {
   const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
   const universalProfileContract = new ethers.Contract(
     address,
@@ -1088,7 +1088,7 @@ export async function generateSessionToken(address: string, message: string, sig
     throw new Error('Invalid signature');
   }
 
-  const loginResult = await UpdateLastLoginDate(address);
+  await UpdateLastLoginDate(address);
 
   // Generar JWT token
   const token = jwt.sign(
@@ -1144,7 +1144,7 @@ export async function DeleteUserNotification(userAddress: string, notificationId
   }
 }
 
-export async function getUserXPAndLevel(address: string) {
+export async function GetUserXPAndLevel(address: string) {
   if (!address) return { xp: 0, level: 0, nextLevelXP: 0 };
 
   try {

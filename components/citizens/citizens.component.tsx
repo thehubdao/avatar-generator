@@ -25,10 +25,9 @@ import AvatarEditor, {
   SetEnvironment,
   SetFeaturesData,
 } from '../avatar/editor.component'
-import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetStageListByCampaign, GetAvatarSingleByCampaignCombinationString, GetAvatarSingleByCampaignCombination, GetAssetsListByCampaign, GetAnimationByCampaignAndName, FetchBlob } from "../../utils/api.util";
-import { EnvMapInterface, FeatureInterface, SingleInterface, StageInterface } from "../../interfaces/api.interface";
+import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetAvatarSingleByCampaignCombinationString, GetAvatarSingleByCampaignCombination, GetAssetsListByCampaign, GetAnimationByCampaignAndName, FetchBlob } from "../../utils/api.util";
+import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
-import { collection } from "firebase/firestore";
 import { Module } from "../../enums/common.enum";
 import { fileCampaignNameLabel } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
@@ -57,7 +56,6 @@ interface CitizensComponentProps {
 }
 
 const exportData: ExportInterface = { attributes: [] }
-let stageList: StageInterface[] | undefined
 let envMapList: EnvMapInterface[] | undefined
 let singleInitData: SingleInterface | undefined
 let accessoryList: FeatureInterface[] | undefined
@@ -164,11 +162,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     setLoadedTokens([]); // Reset loadedTokens before starting new load
     loadTokenMetadata();
   }, [tokenIdList]);
-
-  async function getStageList() {
-    const result = await GetStageListByCampaign(campaignParams?.campaign)
-    stageList = result.success ? result.value : undefined
-  }
 
   async function getEnvironmentMapList() {
     if (!campaignParams?.campaign) return
@@ -326,7 +319,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     console.log('onAvatarBuilderReady');
 
     await Promise.all([
-      getStageList(),
       getEnvironmentMapList(),
       getSingleInfo(),
       getSingleData(campaign, currentCombination),

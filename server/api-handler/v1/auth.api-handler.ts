@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse } from "../../../interfaces/api.interface";
 import { RequestResponse } from "../request.api-handler";
 import { DefaultApiResponse } from "../../enums/api.enum";
-import { generateSessionToken } from "../../../utils/firebase.util";
+import { GenerateSessionToken } from "../../../utils/firebase.util";
 
 export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<string>>) {
   const { address, message, signature } = req.body;
@@ -12,7 +12,7 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
   }
 
   try {
-    const token = await generateSessionToken(address, message, signature);
+    const token = await GenerateSessionToken(address, message, signature);
 
     // Set the token as an HTTP-only cookie
     res.setHeader('Set-Cookie', `session=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`);

@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import Button from "./button.ui";
 import NotificationCard from "./notificationCard.ui";
 import PlusSVG from "./SVG/plusSVG.ui";
-import { GetCurrentUser, GetUserNotifications, DeleteUserNotification } from "../../../utils/firebase.util";
+import { GetUserNotifications, DeleteUserNotification } from "../../../utils/firebase.util";
 import { Notification } from "../../../types/firebase.type";
 
-function formatRelativeTime(timestamp: string): string {
+function FormatRelativeTime(timestamp: string): string {
   const now = Date.now();
   const time = new Date(timestamp).getTime();
   const diff = now - time;
@@ -48,7 +48,7 @@ export default function Notifications({address}: {address: string}) {
         // Aplicar el formato de tiempo relativo a cada notificación
         const formattedNotifications = fetchedNotifications.map(notification => ({
           ...notification,
-          time: formatRelativeTime(notification.time)
+          time: FormatRelativeTime(notification.time)
         }));
 
         setNotifications(formattedNotifications);

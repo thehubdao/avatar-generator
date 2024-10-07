@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getUserXPAndLevel } from "../../../utils/firebase.util";
+import { GetUserXPAndLevel } from "../../../utils/firebase.util";
 import ArrowSVG from "./SVG/arrowSVG.ui";
 import Image from "next/image";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
@@ -22,7 +22,7 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
 
   useEffect(() => {
     if (address) {
-      getUserXPAndLevel(address).then(({ xp, level, nextLevelXP }) => {
+      GetUserXPAndLevel(address).then(({ xp, level, nextLevelXP }) => {
         setUserXP(xp);
         setUserLevel(level);
         setNextLevelXP(nextLevelXP);
