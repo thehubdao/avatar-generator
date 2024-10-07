@@ -13,10 +13,11 @@ interface CitizensUIProps {
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
   features?: IndexFeatureInterface[];
   exportModel: () => Promise<void>;
+  address: string;
 }
 
 
-export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel }: CitizensUIProps) {
+export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address }: CitizensUIProps) {
   return (
     <>
       {currentSection === CitizensSections.View && (
@@ -26,15 +27,16 @@ export default function CitizensUI({ currentSection,  currentCollection, updateC
             <DetailsUI data={features} handleDownload={() => exportModel()}/>
           }
           {/* notifications */}
-          <Notifications />
+          <Notifications address={address} />
         </>
       )}
-      {currentSection === CitizensSections.Collection && (
+      {currentSection === CitizensSections.Collection && loadedTokens  && loadedTokens.length > 0 && (
         <>
           <Collection
             loadedTokens={loadedTokens}
             currentCollection={currentCollection}
-            updateCollection={updateCollection}          />
+            updateCollection={updateCollection}
+          />
         </>
       )}
     </>

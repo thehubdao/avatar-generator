@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getUserXPAndLevel } from "../../../utils/firebase.util";
 import ArrowSVG from "./SVG/arrowSVG.ui";
 import Image from "next/image";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
@@ -14,7 +15,21 @@ interface ConnectButtonProps {
 
 export default function ConnectButton({ isSigned = false, setIsSigned, address }: ConnectButtonProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const { followerCount, followingCount } = useFollowCount(address)
+  const { followerCount, followingCount } = useFollowCount(address);
+  const [userXP, setUserXP] = useState(0);
+  const [userLevel, setUserLevel] = useState(0);
+  const [nextLevelXP, setNextLevelXP] = useState(0);
+
+  useEffect(() => {
+    if (address) {
+      getUserXPAndLevel(address).then(({ xp, level, nextLevelXP }) => {
+        setUserXP(xp);
+        setUserLevel(level);
+        setNextLevelXP(nextLevelXP);
+      });
+    }
+  }, [address]);
+
   return (
     <div className="relative w-fit 2xl:w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">
       {
@@ -43,7 +58,7 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
                       <StarSVG />
                     </div>
                     <p className="grow text-xs pr-2">
-                      lvl 23
+                      lvl {userLevel}
                     </p>
                   </div>
                 </div>
@@ -61,12 +76,15 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
                       <p>Following</p>
                     </div>
                   </div>
-                  <p className="text-center pt-1 opacity-50">Creator Points: 555</p>
+                  {/* <p className="text-center pt-1 opacity-50">Creator Points: 555</p> */}
                   <div className="w-full pb-3">
-                    <p className="text-center py-1 opacity-50">XP: 1315/1824</p>
+                    <p className="text-center py-1 opacity-50">XP: {userXP}/{nextLevelXP}</p>
                     <div className="h-1 w-full bg-citizens-gray rounded-full overflow-hidden">
-                      <div className="h-full w-1/2 bg-citizens-blue" />
+                      <div className="h-full w-1/2 bg-citizens-blue" style={{ width: `${(userXP / nextLevelXP) * 100}%` }} />
                     </div>
+                    <p className="text-center text-xs mt-1 opacity-50">
+                      {nextLevelXP - userXP} XP to level {userLevel + 1}
+                    </p>
                   </div>
                 </div>
               </div>

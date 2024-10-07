@@ -3,7 +3,6 @@ import { useConnectWallet } from "@web3-onboard/react"
 import { ethers } from "ethers"
 import { useState } from "react"
 import { SiweMessage } from "siwe"
-import UniversalProfileContract from '@lukso/lsp-smart-contracts/artifacts/UniversalProfile.json'
 
 interface ConnectWeb3ButtonProps {
     classStyles: string;
@@ -44,46 +43,32 @@ export default function ConnectWeb3Button({ children, classStyles, setIsSigned }
                 const signature = await currentSigner.signMessage(message)
                 setIsSigning(false)
                 setIsVerifying(true)
-                
-                const universalProfileContract = new ethers.Contract(
-                    wallet.accounts[0].address,
-                    UniversalProfileContract.abi,
-                    provider
-                )
 
-                const hashedMessage = ethers.hashMessage(message)
+                const response = await fetch('/api/v1/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        address: wallet.accounts[0].address.toLocaleLowerCase(),
+                        message,
+                        signature
+                    }),
+                });
 
-                const isValidSignature = await universalProfileContract.isValidSignature(hashedMessage, signature)
-
-                if (isValidSignature === '0x1626ba7e') {
-                    // Generar JWT token
-                    const response = await fetch('/api/v1/auth/verify', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ 
-                            address: wallet.accounts[0].address, 
-                            message, 
-                            signature 
-                        }),
-                    });
-
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success) {
-                            setIsSigned(true);
-                            console.log('Login successful and JWT token generated!')
-                        } else {
-                            console.error('Login successful, but failed to generate JWT token:', data.message)
-                        }
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        setIsSigned(true);
+                        console.log('Login successful and JWT token generated!')
                     } else {
-                        console.error('Failed to verify authentication')
+                        console.error('Login successful, but failed to generate JWT token:', data.message)
                     }
                 } else {
-                    console.error('Login failed. The signature is not valid.')
+                    console.error('Failed to verify authentication')
                 }
-                
+
+
                 setIsVerifying(false)
             } else {
                 console.error("No signer available")

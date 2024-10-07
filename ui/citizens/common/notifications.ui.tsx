@@ -1,67 +1,78 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Button from "./button.ui";
 import NotificationCard from "./notificationCard.ui";
 import PlusSVG from "./SVG/plusSVG.ui";
+import { GetCurrentUser, GetUserNotifications, DeleteUserNotification } from "../../../utils/firebase.util";
+import { Notification } from "../../../types/firebase.type";
 
-const NOTIFICATIONS = [
-  {
-    title: 'Notification 01',
-    points: 15,
-    time: '5 mins',
-    image: 'https://lipsum.app/id/1/280x300/'
-  },
-  {
-    title: 'Notification 02',
-    points: 15,
-    time: '30 mins',
-    image: 'https://lipsum.app/id/2/280x300/'
-  },
-  {
-    title: 'Notification 03',
-    points: 15,
-    time: '5 mins',
-    image: 'https://lipsum.app/id/3/280x300/'
-  },
-  {
-    title: 'Notification 04',
-    points: 15,
-    time: '30 mins',
-    image: 'https://lipsum.app/id/4/280x300/'
-  },
-  {
-    title: 'Notification 05',
-    points: 15,
-    time: '5 mins',
-    image: 'https://lipsum.app/id/5/280x300/'
-  },
-  {
-    title: 'Notification 06',
-    points: 15,
-    time: '30 mins',
-    image: 'https://lipsum.app/id/6/280x300/'
-  },
-  {
-    title: 'Notification 07',
-    points: 15,
-    time: '5 mins',
-    image: 'https://lipsum.app/id/7/280x300/'
-  },
-  {
-    title: 'Notification 08',
-    points: 15,
-    time: '30 mins',
-    image: 'https://lipsum.app/id/8/280x300/'
+function formatRelativeTime(timestamp: string): string {
+  const now = Date.now();
+  const time = new Date(timestamp).getTime();
+  const diff = now - time;
+  const minute = 60 * 1000;
+  const hour = 60 * minute;
+  const day = 24 * hour;
+  const month = 30 * day;
+  const year = 365 * day;
+
+  if (diff < minute) return 'just now';
+  if (diff < hour) {
+    const mins = Math.floor(diff / minute);
+    return `${mins} ${mins === 1 ? 'min' : 'mins'}`;
   }
-]
+  if (diff < day) {
+    const hours = Math.floor(diff / hour);
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+  }
+  if (diff < month) {
+    const days = Math.floor(diff / day);
+    return `${days} ${days === 1 ? 'day' : 'days'}`;
+  }
+  if (diff < year) {
+    const months = Math.floor(diff / month);
+    return `${months} ${months === 1 ? 'month' : 'months'}`;
+  }
+  const years = Math.floor(diff / year);
+  return `${years} ${years === 1 ? 'year' : 'years'}`;
+}
 
-export default function Notifications() {
-  const [notifications, setNotifications] = useState(NOTIFICATIONS);
+export default function Notifications({address}: {address: string}) {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  function deleteNotification(index: number) {
-    const newNotifications = [...notifications];
-    newNotifications.splice(index, 1);
-    setNotifications(newNotifications);
+  useEffect(() => {
+    async function fetchNotifications() {
+      if (address) {
+        const fetchedNotifications = await GetUserNotifications(address);
+        
+        // Aplicar el formato de tiempo relativo a cada notificación
+        const formattedNotifications = fetchedNotifications.map(notification => ({
+          ...notification,
+          time: formatRelativeTime(notification.time)
+        }));
+
+        setNotifications(formattedNotifications);
+      }
+    }
+
+    fetchNotifications();
+  }, [address]);
+
+  async function deleteNotification(index: number) {
+    const notificationToDelete = notifications[index];
+    
+    if (notificationToDelete.id) {
+      try {
+        await DeleteUserNotification(address, notificationToDelete.id);
+        const newNotifications = notifications.filter((_, i) => i !== index);
+        setNotifications(newNotifications);
+      } catch (error) {
+        console.error("Error deleting notification:", error);
+        // Aquí puedes manejar el error, por ejemplo, mostrando un mensaje al usuario
+      }
+    } else {
+      console.error("Notification doesn't have an ID");
+    }
   }
 
   return (
@@ -73,7 +84,7 @@ export default function Notifications() {
         <div className="grid gap-3 pt-3 max-h-[276px] overflow-hidden">
           {
             notifications.map((el, i) => (
-              <NotificationCard key={i} title={el.title} points={el.points} time={el.time} image={el.image} deleteSelf={() => deleteNotification(i)} />
+              <NotificationCard key={i} title={el.title} points={el.points} time={el.time} deleteSelf={() => deleteNotification(i)} />
             ))
           }
         </div>

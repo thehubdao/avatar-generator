@@ -1,8 +1,9 @@
 import { FirebaseApp, FirebaseOptions } from "@firebase/app";
-import { Firestore, QueryConstraint, doc, getDoc, setDoc, addDoc, query, where, limit, getDocs, collection } from "@firebase/firestore";
+import { Firestore, QueryConstraint, setDoc, addDoc, query, where, limit, getDocs, collection } from "@firebase/firestore";
 import { FirebaseStorage } from "@firebase/storage";
 import { Auth, User, UserCredential } from "@firebase/auth";
 import { FirebaseError } from "@firebase/util";
+import { Notification } from "../types/firebase.type";
 import {
   AuthValues,
   FirestoreFilterValues,
@@ -28,7 +29,11 @@ import { CampaignParameters } from "../interfaces/common.interface";
 import { ParameterNameType } from "../types/firebase.type";
 import { Client } from '../enums/client.enum'
 import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
-import { Timestamp } from 'firebase/firestore';
+import { deleteDoc, doc, getDoc, orderBy, Timestamp } from 'firebase/firestore';
+import { ethers } from 'ethers';
+import jwt from 'jsonwebtoken';
+import UniversalProfileContract from '../constants/abi/UniversalProfileABI.json';
+import { getFollowerCounts } from "./web3/lukso.util";
 
 export type LogInStructure = {
   user: string;
@@ -62,6 +67,7 @@ class FirebaseUtil {
     this._auth = null;
   }
 
+
   public static Instance() {
     if (FirebaseUtil._instance === undefined)
       FirebaseUtil._instance = new FirebaseUtil();
@@ -84,8 +90,10 @@ class FirebaseUtil {
       this._app = initializeApp(config);
     }
 
+
     return this._app;
   }
+
 
   public async Lukso() {
     if (this._luksoCampaign == undefined) {
@@ -621,14 +629,17 @@ export async function HandleNotLoggedIn() {
   return isNotLogIn;
 }
 
-export async function GetUserInfo(userUid: string) {
-  const userLocation = `${FirestoreGlobalLocation.User}/${userUid}`;
-  const userDoc = await GetDocument<UserInterface>(userLocation);
-
-  if (!userDoc.success)
-    return undefined;
-
-  return userDoc.value[0];
+export async function GetUserInfo(userUID: string): Promise<UserInterface | undefined> {
+  const result = await GetInfoDB<UserInterface>(`${FirestoreGlobalLocation.User}/${userUID}`);
+  if (result.success && result.value && result.value.length > 0) {
+    const user = result.value[0];
+    return {
+      ...user,
+      xp: user.xp ?? 0,
+      level: user.level ?? 1
+    };
+  }
+  return undefined;
 }
 
 export async function GetCurrentUserInfo(forceUpdate = false) {
@@ -670,8 +681,13 @@ export async function CreateNewUser(newUser: Partial<UserWithPass>): Promise<Res
 
   // Save user info on db
   if (leUser != undefined) {
-    const realUser = ConvertObject<UserInterface>(newUser, ConvertType.UserInterface);
-    const insertedDoc = await InsertDocWithId(leUser.user.uid, realUser, FirestoreGlobalLocation.User, undefined, false);
+    const baseUser = ConvertObject<UserInterface>(newUser, ConvertType.UserInterface);
+    const userToInsert: UserInterface = {
+      ...baseUser,
+      xp: 0,
+      level: 1
+    };
+    const insertedDoc = await InsertDocWithId(leUser.user.uid, userToInsert, FirestoreGlobalLocation.User, undefined, false);
 
     if (!insertedDoc.success) {
       const { deleteUser } = await import('@firebase/auth');
@@ -776,6 +792,7 @@ export async function UpdateAdminCampaigns(): Promise<Result<boolean>> {
 export async function UpdateCampaignParameter(update: Partial<CampaignParameters>, campaign: string) {
   return await UpdateDocObject(FirestoreLocation.Parameters, update, campaign);
 }
+
 
 async function DeleteDocument(docLocation: string): Promise<Result<string>> {
   try {
@@ -922,8 +939,65 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
     const userDoc = await getDoc(userDocRef);
 
     if (userDoc.exists()) {
-      // If the user exists, only update lastLogin
-      await setDoc(userDocRef, { lastLogin: Timestamp.now() }, { merge: true });
+      const userData = userDoc.data() as UserInterface;
+      const lastLogin = userData.lastLogin?.toDate() || new Date(0);
+      const now = new Date();
+      const isFirstLoginOfDay = lastLogin.getDate() !== now.getDate() ||
+        lastLogin.getMonth() !== now.getMonth() ||
+        lastLogin.getFullYear() !== now.getFullYear();
+
+      if (isFirstLoginOfDay) {
+        const xpResult = await UpdateUserXP(address, 100);
+        if (xpResult.success) {
+          await CreateNotification(address, {
+            title: 'Daily Login Reward',
+            message: `You've earned 100 XP for logging in today!${xpResult.value.leveledUp ? ` Congratulations! You've reached level ${xpResult.value.newLevel}!` : ''}`,
+            points: 100,
+            time: new Date().toISOString(),
+            id:''
+          });
+        }
+      }
+
+      // Get current follower and following counts
+      const { followerCount, followingCount } = await getFollowerCounts(address);
+
+      // Check if follower/following counts have increased
+      if (followerCount > (userData.followerCount || 0)) {
+        const newFollowers = followerCount - (userData.followerCount || 0);
+        const xpGained = newFollowers * 40;
+        const xpResult = await UpdateUserXP(address, xpGained);
+        if (xpResult.success) {
+          await CreateNotification(address, {
+            title: 'New Followers',
+            message: `You've gained ${newFollowers} new follower${newFollowers > 1 ? 's' : ''}! You've earned ${xpGained} XP.${xpResult.value.leveledUp ? ` Congratulations! You've reached level ${xpResult.value.newLevel}!` : ''}`,
+            points: xpGained,
+            time: new Date().toISOString(),
+            id:''
+          });
+        }
+      }
+
+      if (followingCount > (userData.followingCount || 0)) {
+        const newFollowing = followingCount - (userData.followingCount || 0);
+        const xpGained = newFollowing * 10;
+        const xpResult = await UpdateUserXP(address, xpGained);
+        if (xpResult.success) {
+          await CreateNotification(address, {
+            title: 'New Following',
+            message: `You're now following ${newFollowing} new account${newFollowing > 1 ? 's' : ''}! You've earned ${xpGained} XP.${xpResult.value.leveledUp ? ` Congratulations! You've reached level ${xpResult.value.newLevel}!` : ''}`,
+            points: xpGained,
+            time: new Date().toISOString(),
+            id:''
+          });
+        }
+      }
+
+      await setDoc(userDocRef, { 
+        lastLogin: Timestamp.now(),
+        followerCount,
+        followingCount
+      }, { merge: true });
     } else {
       // If the user doesn't exist, create a new document with all fields
       await setDoc(userDocRef, {
@@ -933,7 +1007,12 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         name: '',
         role: 1,
         address: address.toLowerCase(),
-        lastLogin: Timestamp.now()
+        lastLogin: Timestamp.now(),
+        xp: 50,
+        level: 1,
+        xpForNextLevel: 100,
+        followerCount: 0,
+        followingCount: 0
       });
     }
 
@@ -944,3 +1023,148 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
     return { success: false, errMessage: err.message, errCode: err.code };
   }
 }
+
+const BASE_XP_PER_LEVEL = 100; // XP required for the first level
+
+function calculateLevel(xp: number): number {
+  let level = 0;
+  let xpForNextLevel = BASE_XP_PER_LEVEL;
+  let totalXpForCurrentLevel = 0;
+
+  while (xp >= totalXpForCurrentLevel) {
+    level++;
+    totalXpForCurrentLevel += xpForNextLevel;
+    xpForNextLevel *= 2;
+  }
+
+  return level;
+}
+
+function getXpForNextLevel(currentLevel: number): number {
+  return BASE_XP_PER_LEVEL * Math.pow(2, currentLevel - 1);
+}
+
+export async function UpdateUserXP(userId: string, xpToAdd: number): Promise<Result<{ newXP: number, newLevel: number, leveledUp: boolean }>> {
+  try {
+    const userDocRef = doc(await FirebaseUtil.Instance().DB(), `${FirestoreGlobalLocation.User}/${userId}`);
+    const userDoc = await getDoc(userDocRef);
+
+    if (!userDoc.exists()) {
+      return { success: false, errMessage: "User not found", errCode: CommonErrorCode.NotFound };
+    }
+
+    const userData = userDoc.data() as UserInterface;
+    const oldLevel = userData.level || 1;
+    const newXP = (userData.xp || 0) + xpToAdd;
+    const newLevel = calculateLevel(newXP);
+    const xpForNextLevel = getXpForNextLevel(newLevel);
+
+    await setDoc(userDocRef, {
+      xp: newXP,
+      level: newLevel,
+      xpForNextLevel: xpForNextLevel
+    }, { merge: true });
+
+    return { success: true, value: { newXP, newLevel, leveledUp: newLevel > oldLevel } };
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error updating user XP: ${err.message}`);
+    return { success: false, errMessage: err.message, errCode: err.code };
+  }
+}
+
+export async function generateSessionToken(address: string, message: string, signature: string): Promise<string> {
+  const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const universalProfileContract = new ethers.Contract(
+    address,
+    UniversalProfileContract,
+    provider
+  );
+
+  const hashedMessage = ethers.hashMessage(message);
+  const isValidSignature = await universalProfileContract.isValidSignature(hashedMessage, signature);
+
+  if (isValidSignature !== '0x1626ba7e') {
+    throw new Error('Invalid signature');
+  }
+
+  const loginResult = await UpdateLastLoginDate(address);
+
+  // Generar JWT token
+  const token = jwt.sign(
+    {
+      address: address,
+      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24) // 24 hours expiration
+    },
+    process.env.JWT_SECRET as string
+  );
+
+  return token;
+}
+
+export async function CreateNotification(userId: string, notification: { title: string, message: string, points: number, time: string, id: string }): Promise<Result<boolean>> {
+  try {
+    const notificationRef = doc(collection(await FirebaseUtil.Instance().DB(), `${FirestoreGlobalLocation.User}/${userId}/notifications`));
+    notification.id = notificationRef.id;
+    await setDoc(notificationRef, notification);
+    return { success: true, value: true };
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error creating notification: ${err.message}`);
+    return { success: false, errMessage: err.message, errCode: err.code };
+  }
+}
+
+export async function GetUserNotifications(userId: string, limitCount: number = 8): Promise<Notification[]> {
+  try {
+    const notificationsRef = collection(await FirebaseUtil.Instance().DB(), `${FirestoreGlobalLocation.User}/${userId}/notifications`);
+    const q = query(notificationsRef, orderBy("time", "desc"), limit(limitCount));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => doc.data() as Notification);
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error fetching user notifications: ${err.message}`);
+    return [];
+  }
+}
+
+export async function DeleteUserNotification(userAddress: string, notificationId: string): Promise<Result<boolean>> {
+  try {
+    const notificationRef = doc(
+      collection(await FirebaseUtil.Instance().DB(), `${FirestoreGlobalLocation.User}/${userAddress}/notifications`),
+      notificationId
+    );
+    console.log("Notification Ref:", notificationRef.path);
+    await deleteDoc(notificationRef);
+    return { success: true, value: true };
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error deleting user notification: ${err.message}`);
+    return { success: false, errMessage: err.message, errCode: err.code };
+  }
+}
+
+export async function getUserXPAndLevel(address: string) {
+  if (!address) return { xp: 0, level: 0, nextLevelXP: 0 };
+
+  try {
+    const userRef = doc(await FirebaseUtil.Instance().DB(), FirestoreGlobalLocation.User, address.toLowerCase());
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      const userData = userSnap.data();
+      return {
+        xp: userData.xp || 0,
+        level: userData.level || 1,
+        nextLevelXP: userData.xpForNextLevel || 0
+      };
+    } else {
+      return { xp: 0, level: 1, nextLevelXP: 0 };
+    }
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error fetching user XP and level: ${err.message}`);
+    return { xp: 0, level: 1, nextLevelXP: 0 };
+  }
+}
+

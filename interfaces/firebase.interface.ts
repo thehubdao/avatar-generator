@@ -1,4 +1,5 @@
-﻿import {UserRoleValues} from "../enums/firebase.enum";
+﻿import { Timestamp } from "firebase/firestore";
+import {UserRoleValues} from "../enums/firebase.enum";
 
 export interface AGQueryConstraints {
   campaign?: string;
@@ -12,11 +13,16 @@ export interface LogInInterface {
 }
 
 export interface UserInterface {
+  followerCount: number;
+  followingCount: number;
+  lastLogin: Timestamp;
   role: UserRoleValues;
   name: string;
   account: string;
   email: string;
   campaign: string[];
+  xp: number;
+  level: number;
 }
 
 export interface AdminUser extends  UserInterface {

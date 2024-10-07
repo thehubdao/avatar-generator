@@ -40,6 +40,11 @@ export default function Collection({
     }
   };
 
+useEffect(() => {
+  if(!loadedTokens) return 
+  handleCardClick(loadedTokens[0].tokenId, loadedTokens[0])
+}, []);
+
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] py-32">
       <div className="container mx-auto">
@@ -96,7 +101,7 @@ export default function Collection({
                 small
                 light
                 overlayText={selectedTokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
-                onClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
+                handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
                 selected={selectedTokenId === tokenMetadata.tokenId}
               />
             ))}

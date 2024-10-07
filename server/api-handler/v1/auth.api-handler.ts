@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse } from "../../../interfaces/api.interface";
 import { RequestResponse } from "../request.api-handler";
 import { DefaultApiResponse } from "../../enums/api.enum";
-import { generateSessionToken } from "../../../lib/auth";
+import { generateSessionToken } from "../../../utils/firebase.util";
 
 export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<string>>) {
   const { address, message, signature } = req.body;

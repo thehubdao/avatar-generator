@@ -37,29 +37,17 @@ import { useCallback, useEffect, useState } from "react";
 
 const COLLECTIONS: CitizensCollection[] = [
   {
-    name: 'Collection 01',
-    image: 'https://lipsum.app/id/24/280x300/'
+    name: 'Lukso Citizens',
+    image: '/resources/images/campaings/citizens_collection_image.png'
   },
   {
-    name: 'Collection 02',
-    image: 'https://lipsum.app/id/25/280x300/'
+    name: 'Lukso Creators',
+    image: '/resources/images/campaings/creators_collection_image.png'
   },
   {
-    name: 'Collection 03',
-    image: 'https://lipsum.app/id/26/280x300/'
+    name: 'Coming Soon',
+    image: '/resources/images/campaings/coming_soon.jpg'
   }
-  // {
-  //   name: 'Collection 04',
-  //   image: 'https://lipsum.app/id/27/280x300/'
-  // },
-  // {
-  //   name: 'Collection 05',
-  //   image: 'https://lipsum.app/id/28/280x300/'
-  // },
-  // {
-  //   name: 'Collection 06',
-  //   image: 'https://lipsum.app/id/29/280x300/'
-  // }
 ]
 
 
@@ -82,7 +70,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
 
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.Collection);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
 
@@ -121,9 +108,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   )
   const [selectedCategory,] = useState<string>('head')
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
-  const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>([]); // Add this state
-
-  const [combinationPictureUrl, ] = useState<string>('')
+  const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>([]);
 
   const [currentCollection, setCurrentCollection] = useState<CollectionType>({
     campaign: campaignParams?.campaign as Campaign,
@@ -146,7 +131,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
     const address = wallet.accounts[0].address
 
-    setWalletAddress(address)
+    setWalletAddress(address.toLowerCase())
   }, [isSigned])
 
   useEffect(() => {
@@ -418,59 +403,48 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         {!isSigned ?
           <LoginUI collections={collectionList} />
           :
-          
-            <>
-              <div className="fixed inset-0 w-full h-screen">
-                {currentCollection.baseCombination && campaignParams && campaignParams.campaign &&<AvatarEditor
-                  avatarBasePath={
-                    campaignParams.armature
-                  }
-                  editMode={isEditModeSelected}
-                  lights={
-                    campaignParams.config.lights
-                  }
-                  defaultShadow={
-                    campaignParams.config
-                      .defShadow
-                  }
-                  defaultCamera={
-                    campaignParams.config.defCam
-                  }
-                  postProcessing={
-                    campaignParams.config
-                      .postProcessing
-                  }
-                  onReady={() =>
-                    onAvatarBuilderReady(
-                      currentCollection.baseCombination,
-                      currentCollection.campaign
-                    )
-                  }
-                />}
-              </div>
-              <CitizensUI
-                currentSection={currentSection}
-                loadedTokens={loadedTokens}
-                currentCollection={currentCollection}
-                updateCollection={updateCollection}
-                features={singleInitData?.features} exportModel={() => exportModel()}
-              />
-              {/* nav */}
-              <div className="fixed top-8 left-1/2 -translate-x-1/2 flex gap-4 z-10">
-                <Button label="backpack" withIcon handleClick={() => { }} />
-                <Button label="collection" withIcon handleClick={() => {
-                  setCampaign(undefined)
-                  setCurrentSection(CitizensSections.Collection)
-                }} />
-                <Button label="leaderboard" withIcon handleClick={() => { }} />
-                <Button label="play" withIcon handleClick={() => { setCurrentSection(CitizensSections.View) }} />
-              </div>
-            </>
-            
-/*             <div className="w-full h-screen flex flex-col justify-center items-center gap-4">
-              <p className=" text-white text-xl font-light">Loading</p>
-              <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
-            </div> */
+
+          <>
+            <div className="fixed inset-0 w-full h-screen">
+              {currentCollection.baseCombination && campaignParams && campaignParams.campaign && <AvatarEditor
+                avatarBasePath={
+                  campaignParams.armature
+                }
+                editMode={isEditModeSelected}
+                lights={
+                  campaignParams.config.lights
+                }
+                defaultShadow={
+                  campaignParams.config
+                    .defShadow
+                }
+                defaultCamera={
+                  campaignParams.config.defCam
+                }
+                postProcessing={
+                  campaignParams.config
+                    .postProcessing
+                }
+                onReady={() =>
+                  onAvatarBuilderReady(
+                    currentCollection.baseCombination,
+                    currentCollection.campaign
+                  )
+                }
+              />}
+            </div>
+            <CitizensUI
+              currentSection={currentSection}
+              loadedTokens={loadedTokens}
+              currentCollection={currentCollection}
+              updateCollection={updateCollection}
+              features={singleInitData?.features} exportModel={() => exportModel()} address={walletAddress ?? ""}            />
+          </>
+
+          /*             <div className="w-full h-screen flex flex-col justify-center items-center gap-4">
+                        <p className=" text-white text-xl font-light">Loading</p>
+                        <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
+                      </div> */
         }
 
         {/* HEADER */}
@@ -489,7 +463,10 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             <div className="flex gap-4">
               <Button label="homebase" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { setCurrentSection(CitizensSections.View) }} />
               <Button label="backpack" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
-              <Button label="collection" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { setCurrentSection(CitizensSections.Collection) }} />
+              <Button label="collection" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
+                setCampaign(undefined)
+                setCurrentSection(CitizensSections.Collection)
+              }} />
               <Button label="leaderboard" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
               <Button label="play" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
             </div>

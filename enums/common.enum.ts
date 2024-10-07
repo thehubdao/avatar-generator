@@ -97,5 +97,6 @@ export const enum CommonErrorCode {
   MissingInfo = 'AG-201',
   WrongInfo = 'AG-202',
   InternalError = 'AG-205',
-  NoAuth = 'AG-301'
+  NoAuth = 'AG-301',
+  NotFound = 'AG-404'
 }

@@ -6,19 +6,19 @@ interface NotificationCardProps {
   title: string;
   points: number;
   time: string;
-  image: string;
+  image?: string;
   deleteSelf: () => void;
 }
 
 export default function NotificationCard({ title, points, time, image, deleteSelf }: NotificationCardProps) {
   return (
     <div className="flex justify-between items-center py-2 px-2 shadow-citizens-btn rounded-3xl bg-citizens-dark">
-      <div className="relative w-16 h-16 rounded-2xl overflow-hidden">
+      {image && <div className="relative w-16 h-16 rounded-2xl overflow-hidden pr-6">
         <Image src={image} fill alt="" className="object-cover" />
-      </div>
-      <div className="text-sm text-white grow px-12">
+      </div>}
+      <div className="text-sm text-white grow pr-6 pl-1">
         <p>{title}</p>
-        <p className="opacity-50">+{points} Creator points</p>
+        <p className="opacity-50">+{points} XP</p>
         <div className="flex items-center gap-2">
           <ClockSVG />
           <p className="opacity-50">{time} ago</p>
