@@ -1,16 +1,22 @@
+import React, { useState } from 'react';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { CitizensCollection } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 
 // Import Swiper styles
 import 'swiper/css';
+import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 
 interface CampaignListProps {
   collections: CitizensCollection[];
-  handleCardSelection?: () => void;
+  setIsSigned: (isSigned: boolean) => void;
 }
 
-export default function CampaignList({ collections, handleCardSelection }: CampaignListProps) {
+export default function CampaignList({ collections, setIsSigned }: CampaignListProps) {
+  const [isConnecting, setIsConnecting] = useState(false);
+  const [isSigning, setIsSigning] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+
   return (
     <div className="w-full mx-auto">
       <Swiper
@@ -25,10 +31,32 @@ export default function CampaignList({ collections, handleCardSelection }: Campa
         {
           collections.map((el, i) => (
             <SwiperSlide key={i} className="w-96">
-              {/* <ConnectWeb3Button classStyles="w-full h-full" setIsSigned={() => {if(handleCardSelection) handleCardSelection()}} >
-                <CampaignCard title={el.name} imgSrc={el.image} imgAlt={el.name} overlayText="LOG IN" />
-              </ConnectWeb3Button> */}
-              <CampaignCard title={el.name} imgSrc={el.image} imgAlt={el.name} overlayText="LOG IN" handleClick={() => {if(handleCardSelection) handleCardSelection()}}/>
+              <ConnectWeb3Button
+                classStyles="w-full h-full"
+                setIsSigned={setIsSigned}
+                setIsConnecting={setIsConnecting}
+                setIsSigning={setIsSigning}
+                setIsVerifying={setIsVerifying}
+                isConnecting={isConnecting}
+                isSigning={isSigning}
+                isVerifying={isVerifying}
+              >
+                <CampaignCard
+                  title={el.name}
+                  imgSrc={el.image}
+                  imgAlt={el.name}
+                  overlayText={
+                    isConnecting
+                      ? "Connecting..."
+                      : isSigning
+                      ? "Signing..."
+                      : isVerifying
+                      ? "Verifying..."
+                      : "LOG IN"
+                  }
+                />
+              </ConnectWeb3Button>
+              {/* <CampaignCard title={el.name} imgSrc={el.image} imgAlt={el.name} overlayText="LOG IN" handleClick={() => {if(handleCardSelection) handleCardSelection()}}/> */}
             </SwiperSlide>
           ))
         }

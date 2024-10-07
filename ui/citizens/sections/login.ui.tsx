@@ -3,15 +3,16 @@ import CampaignList from "../common/campaignList.ui";
 
 interface LoginUIProps {
   collections?: CitizensCollection[] | null;
+  setIsSigned: (isSigned: boolean) => void;
 }
 
-export default function LoginUI({ collections }: LoginUIProps) {
+export default function LoginUI({ collections, setIsSigned }: LoginUIProps) {
   return (
     <>
       {
         collections ?
           <div className="pt-[15vh] 2xl:pt-[25vh]">
-            <CampaignList collections={collections} />
+            <CampaignList collections={collections} setIsSigned={setIsSigned} />
             <div className="grid justify-items-center pt-4 2xl:pt-10">
               <h1 className="font-monument text-7xl text-white text-center">CITIZENS PORTAL</h1>
               <p className="text-2xl text-white">The home of creators in the 3D Web</p>

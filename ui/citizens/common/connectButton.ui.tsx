@@ -19,6 +19,10 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
   const [userXP, setUserXP] = useState(0);
   const [userLevel, setUserLevel] = useState(0);
   const [nextLevelXP, setNextLevelXP] = useState(0);
+  const [isConnecting, setIsConnecting] = useState(false)
+  const [isSigning, setIsSigning] = useState(false)
+  const [isVerifying, setIsVerifying] = useState(false) 
+
 
   useEffect(() => {
     if (address) {
@@ -91,9 +95,12 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
             }
           </>
           :
-          <ConnectWeb3Button classStyles="w-full h-full" setIsSigned={setIsSigned} >
+          <ConnectWeb3Button classStyles="w-full h-full" setIsSigned={setIsSigned} setIsConnecting={(connecting)=>{setIsConnecting(connecting)}} setIsSigning={(signing)=>{setIsSigning(signing)}} setIsVerifying={(verifying)=>{setIsVerifying(verifying)}} isConnecting={isConnecting} isSigning={isSigning} isVerifying={isVerifying}>
             <div className="w-full h-full font-light text-lg">
-              Log in
+              {isConnecting ? "Connecting..." :
+               isSigning ? "Signing..." :
+               isVerifying ? "Verifying..." :
+               "Log in"}
             </div>
           </ConnectWeb3Button>
 

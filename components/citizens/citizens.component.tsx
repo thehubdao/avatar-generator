@@ -395,7 +395,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     <MobileLayout>
       <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
         {!isSigned ?
-          <LoginUI collections={collectionList} />
+          <LoginUI collections={collectionList} setIsSigned={(isSigned) => { setIsSigned(isSigned) }} />
           :
 
           <>

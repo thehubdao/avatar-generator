@@ -9,13 +9,16 @@ interface ConnectWeb3ButtonProps {
     setIsSigned: (signed: boolean) => void;
     isSigned?: boolean;
     children: React.ReactNode;
+    setIsConnecting: (connecting: boolean) => void;
+    setIsSigning: (signing: boolean) => void;
+    setIsVerifying: (verifying: boolean) => void;   
+    isConnecting: boolean;
+    isSigning: boolean;
+    isVerifying: boolean;   
 }
 
-export default function ConnectWeb3Button({ children, classStyles, setIsSigned }: ConnectWeb3ButtonProps) {
+export default function ConnectWeb3Button({ children, classStyles, setIsSigned,setIsConnecting,setIsSigning,setIsVerifying, isConnecting,isSigning,isVerifying  }: ConnectWeb3ButtonProps) {
     const [{ wallet }, connect] = useConnectWallet()
-    const [isConnecting, setIsConnecting] = useState(false)
-    const [isSigning, setIsSigning] = useState(false)
-    const [isVerifying, setIsVerifying] = useState(false)
 
     const handleSign = async (wallet: WalletState) => {
         if (!wallet) return
@@ -100,10 +103,7 @@ export default function ConnectWeb3Button({ children, classStyles, setIsSigned }
             disabled={isConnecting || isSigning || isVerifying}
         >
             <div className="flex items-center gap-3 mx-4">
-                {isConnecting ? 'Connecting...' :
-                    isSigning ? 'Signing...' :
-                        isVerifying ? 'Verifying...' :
-                            wallet ? 'Sign' : children}
+                {children}
             </div>
         </button>
     )
