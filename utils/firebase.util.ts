@@ -1027,16 +1027,10 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
 const BASE_XP_PER_LEVEL = 100; // XP required for the first level
 
 function CalculateLevel(xp: number): number {
-  let level = 0;
-  let xpForNextLevel = BASE_XP_PER_LEVEL;
-  let totalXpForCurrentLevel = 0;
-
-  while (xp >= totalXpForCurrentLevel) {
-    level++;
-    totalXpForCurrentLevel += xpForNextLevel;
-    xpForNextLevel *= 2;
-  }
-
+  if (xp < BASE_XP_PER_LEVEL) return 1;
+  
+  const level = Math.floor(Math.log2(xp / BASE_XP_PER_LEVEL) + 2);
+  
   return level;
 }
 
@@ -1057,6 +1051,7 @@ export async function UpdateUserXP(userId: string, xpToAdd: number): Promise<Res
     const oldLevel = userData.level || 1;
     const newXP = (userData.xp || 0) + xpToAdd;
     const newLevel = CalculateLevel(newXP);
+
     const xpForNextLevel = GetXpForNextLevel(newLevel);
 
     await setDoc(userDocRef, {

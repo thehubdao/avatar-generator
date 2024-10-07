@@ -44,7 +44,7 @@ const COLLECTIONS: CitizensCollection[] = [
     image: '/resources/images/campaings/creators_collection_image.png'
   },
   {
-    name: 'Coming Soon',
+    name: 'Based Citizens',
     image: '/resources/images/campaings/coming_soon.jpg'
   }
 ]
@@ -405,9 +405,9 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   campaignParams.armature
                 }
                 editMode={isEditModeSelected}
-                lights={
+/*                 lights={
                   campaignParams.config.lights
-                }
+                } */
                 defaultShadow={
                   campaignParams.config
                     .defShadow
