@@ -1,7 +1,6 @@
 import { ConnectedChain, EIP1193Provider, WalletState } from "@web3-onboard/core"
 import { useConnectWallet } from "@web3-onboard/react"
 import { ethers } from "ethers"
-import { useState } from "react"
 import { SiweMessage } from "siwe"
 
 interface ConnectWeb3ButtonProps {

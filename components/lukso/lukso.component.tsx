@@ -735,8 +735,7 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
                                         </button>
                                     ) : (
                                         <ConnectWeb3Button
-                          classStyles={'w-48 border-l-2 border-white font-bold text-white'} setIsSigned={()=>{}} 
-                                        >
+                                                classStyles={'w-48 border-l-2 border-white font-bold text-white'} setIsSigned={() => { } } setIsConnecting={() => { } } setIsSigning={() => { } } setIsVerifying={() => { } } isConnecting={false} isSigning={false} isVerifying={false}                                        >
                                             <> Login with your UP!</>
                                         </ConnectWeb3Button>
                                     )}
