@@ -335,7 +335,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       (em) => em.name === campaignParams?.config.envMap?.defLightMap
     )
     await SetEnvironment(
-      bgMap?.path,
+      '',
       lightMap?.path,
       campaignParams?.config.envMap?.skyboxConfig
     )
@@ -405,9 +405,9 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   campaignParams.armature
                 }
                 editMode={isEditModeSelected}
-/*                 lights={
+                lights={
                   campaignParams.config.lights
-                } */
+                }
                 defaultShadow={
                   campaignParams.config
                     .defShadow
