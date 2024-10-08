@@ -49,10 +49,10 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
                     isConnecting
                       ? "Connecting..."
                       : isSigning
-                      ? "Signing..."
-                      : isVerifying
-                      ? "Verifying..."
-                      : "LOG IN"
+                        ? "Signing..."
+                        : isVerifying
+                          ? "Verifying..."
+                          : "LOG IN"
                   }
                 />
               </ConnectWeb3Button>
@@ -60,6 +60,15 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
             </SwiperSlide>
           ))
         }
+        <SwiperSlide className="w-96"><CampaignCard
+          title={'Based Citizens'}
+          imgSrc={'/resources/images/campaings/coming_soon.jpg'}
+          imgAlt={'Based Citizens'}
+          overlayText={
+            'Coming Soon'
+          }
+        /></SwiperSlide>
+
       </Swiper>
 
     </div>

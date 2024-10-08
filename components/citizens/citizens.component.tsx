@@ -43,10 +43,6 @@ const COLLECTIONS: CitizensCollection[] = [
     name: 'Lukso Creators',
     image: '/resources/images/campaings/creators_collection_image.png'
   },
-  {
-    name: 'Based Citizens',
-    image: '/resources/images/campaings/coming_soon.jpg'
-  }
 ]
 
 
