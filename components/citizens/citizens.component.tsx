@@ -318,9 +318,9 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
     await SetFeaturesData(campaignParams?.features ?? [])
 
-    const bgMap = envMapList?.find(
+/*     const bgMap = envMapList?.find(
       (em) => em.name === campaignParams?.config.envMap?.defBgMap
-    )
+    ) */
     const lightMap = envMapList?.find(
       (em) => em.name === campaignParams?.config.envMap?.defLightMap
     )
