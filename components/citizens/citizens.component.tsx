@@ -66,34 +66,12 @@ let featureList: FeatureInterface[] | undefined
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
   const [isSigned, setIsSigned] = useState<boolean>(false); // false: log out, true: logged in
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
-
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.Collection);
 
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
 
   const [{ wallet }] = useConnectWallet()
-
-  // Edit state
-  // const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>()
-  // const [dropList, setDropList] = useState<CampaignDrops>({
-  //   vrm_male: [],
-  //   vrm_female: [],
-  // })
-  // const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false)
-  // const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
-  //   exportData.attributes
-  // )
-  // const [skinColor, setSkinColor] = useState<string>(
-  //   campaignParams?.config.skin?.defColor ?? 'FFFFFF'
-  // )
-  // const [selectedCategory, setSelectedCategory] = useState<string>('head')
-  // const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
-  // const [selectedCombination, setSelectedCombination] = useState<string>('vrm_male')
-  // const [selectedBaseCombination, setSelectedBaseCombination] = useState<
-  //   string
-  // >()
-  // const [selectedTokenId, setSelectedTokenId] = useState<number>()
-  // const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>()
 
   const [, setOptionListShow] = useState<FeatureInterface[]>()
   const [dropList,] = useState<CampaignDrops>({
@@ -123,6 +101,26 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     setCurrentCollection(newCollection);
     setCampaign(newCollection.campaign); // This updates the parent state
   }, [setCampaign]);
+
+  // Function to update avatar features based on the current base combination
+  const updateAvatarFeatures = useCallback(async () => {
+    /* if (currentCollection.baseCombination && currentCollection.campaign) {
+      // Fetch the single data for the new combination
+      await getSingleData(currentCollection.campaign, currentCollection.baseCombination);
+      
+      // Update the features data
+      await SetFeaturesData(campaignParams?.features ?? []);
+
+      // Load the new features onto the avatar
+      await loadSingleData();
+    } */
+  }, [currentCollection.baseCombination, currentCollection.campaign, campaignParams]);
+
+  // Use effect to listen for changes in currentCollection.baseCombination
+  useEffect(() => {
+    // Call the function to update avatar features when baseCombination changes
+    void updateAvatarFeatures();
+  }, [updateAvatarFeatures]);
 
   useEffect(() => {
     if (!isSigned || !wallet) return
@@ -161,7 +159,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         await Promise.all(promises);
       }
     };
-    
+
     loadTokenMetadata();
   }, [tokenIdList]);
 
@@ -275,38 +273,34 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       campaign,
       combination
     )
-    const result: SingleInterface | undefined = numResult.success
-      ? numResult.value
-      : undefined
-    singleInitData = result
-    await getAccessoryList()
-    await getFeatureList()
+    singleInitData = numResult.success ? numResult.value : undefined;
+    await getAccessoryList();
+    await getFeatureList();
 
     singleInitData?.features.forEach((feature) => {
-      addReplaceAttribute(feature.val.type, feature.val.name)
-    })
+      addReplaceAttribute(feature.val.type, feature.val.name);
+    });
   }
 
   async function loadSingleData() {
-    /* setIsLoading(true) */
-    // Iterate the features
-    // Place the features on the model
-    if (singleInitData === undefined)
-      return void LogError(Module.Lukso, 'Missing single data!!!!!')
+    if (!singleInitData) {
+      LogError(Module.Lukso, 'Missing single data!');
+      return;
+    }
 
     for (const { val } of singleInitData.features) {
-      const { id, path, type, name } = val
-      const { tokenMetadata } = currentCollection
-      const bodyIndex: keyof typeof tokenMetadata.body = val.type.toLowerCase() as keyof typeof tokenMetadata.body
-      tokenMetadata.body[bodyIndex] = val as BodyPart
-      // Set feature on model
+      const { id, path, type, name } = val;
+      const { tokenMetadata } = currentCollection;
+      const bodyIndex = val.type.toLowerCase() as keyof typeof tokenMetadata.body;
+      tokenMetadata.body[bodyIndex] = val as BodyPart;
+
       await ChangeFeature(
         id,
         path,
         name,
         type,
         campaignParams?.config.skin?.defColor ?? 'ffffff'
-      )
+      );
     }
   }
 
@@ -356,11 +350,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       await ChangeStartAnimation(result.value.at(0)?.path)
     }
 
-
-    // fade loader view
-    /*     await handleFadeLoader(loaderDivElement, () => {
-          setIsLoading(false)
-        }) */
+    setIsLoading(false)
   }
 
   async function exportModel() {
@@ -400,7 +390,8 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
           <>
             <div className="fixed inset-0 w-full h-screen">
-              {currentCollection.baseCombination && campaignParams && campaignParams.campaign && <AvatarEditor
+              {currentCollection.baseCombination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View && <AvatarEditor
+
                 avatarBasePath={
                   campaignParams.armature
                 }
@@ -435,12 +426,16 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
               features={singleInitData?.features} exportModel={() => exportModel()} address={walletAddress ?? ""} />
           </>
 
-          /*             <div className="w-full h-screen flex flex-col justify-center items-center gap-4">
-                        <p className=" text-white text-xl font-light">Loading</p>
-                        <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
-                      </div> */
-        }
 
+        }
+         {/* LOADER */}
+         {
+          isLoading &&
+          <div className="fixed inset-0 w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]">
+            <p className=" text-white text-xl font-light">Loading Citizen</p>
+            <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
+          </div>
+        }
         {/* HEADER */}
         <div className="fixed inset-0 w-full h-fit flex justify-between items-center pt-8 px-6">
           {/* LOGO THE HUB */}
@@ -455,10 +450,12 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
           {/* NAVBAR */}
           {isSigned &&
             <div className="flex gap-4">
-              <Button label="homebase" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { setCurrentSection(CitizensSections.View) }} />
+              <Button label="homebase" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { 
+                setIsLoading(true)
+                setCurrentSection(CitizensSections.View) }} />
               <Button label="backpack" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
               <Button label="collection" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
-                setCampaign(undefined)
+                setIsLoading(false)
                 setCurrentSection(CitizensSections.Collection)
               }} />
               <Button label="leaderboard" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />

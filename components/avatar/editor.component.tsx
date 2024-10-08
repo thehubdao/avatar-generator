@@ -33,6 +33,7 @@ import { GetEnvironmentMap } from "../../utils/threejs/envMap.util";
 import { ConfigShadow } from "../../interfaces/shadow.interface";
 import {GLOBAL_VALUES} from "../../constants/common.constant";
 import { ConfigPostProcessing } from "../../interfaces/postProcessing.interface";
+import { useEffect } from "react";
 
 
 //#region Logic
@@ -167,6 +168,10 @@ interface AvatarEditorProps {
  * @component
  */
 export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, lights, postProcessing, defaultShadow, defaultCamera, editMode, enablePan }: AvatarEditorProps) {
+
+  useEffect(() => {
+    console.log("AvatarEditor component rendered");
+  }, []);
 
   async function onAvatarEditorReady() {
     await initEditor();
