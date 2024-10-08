@@ -169,10 +169,6 @@ interface AvatarEditorProps {
  */
 export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, lights, postProcessing, defaultShadow, defaultCamera, editMode, enablePan }: AvatarEditorProps) {
 
-  useEffect(() => {
-    console.log("AvatarEditor component rendered");
-  }, []);
-
   async function onAvatarEditorReady() {
     await initEditor();
     await onReady();
