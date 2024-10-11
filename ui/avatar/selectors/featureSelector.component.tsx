@@ -34,11 +34,11 @@ function ScrollButton({ position = 'top' }: { position?: 'top' | 'bottom' }) {
     <div className={`absolute h-fit ${boxStyle} z-10`}>
       <button
         onClick={handleClick}
-        className="bg-bg flex justify-center items-center w-[148px] h-[80px]"
+        className="bg-bg dark:bg-citizens-dark flex justify-center items-center w-[148px] h-[80px]"
       >
         <div className={`-rotate-[135deg] w-4 h-4 border-r-[5px] border-b-[5px]`} />
       </button>
-      <div className="bg-gradient-to-b from-slate-100 w-full h-[8px]" />
+      <div className="bg-gradient-to-b from-slate-100 dark:from-citizens-dark w-full h-[8px]" />
     </div>
   )
 }
