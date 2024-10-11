@@ -1,4 +1,4 @@
-import { BasicData, CampaignParameters, ExportInterface } from "../../interfaces/common.interface";
+import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import MobileLayout from "../../layouts/mobile.layout";
 import { Campaign, CampaignDrops, TokenId, TokenMetadata } from "../../types/metadata.type";
 import LoginUI from "../../ui/citizens/sections/login.ui";
@@ -33,6 +33,8 @@ import { fileCampaignNameLabel } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { StorageLocation } from "../../enums/firebase.enum";
 import { useCallback, useEffect, useState } from "react";
+import HudUI from "../../ui/avatar/hud.ui";
+import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -60,7 +62,7 @@ let featureList: FeatureInterface[] | undefined
 
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
-  const [isSigned, setIsSigned] = useState<boolean>(false); // false: log out, true: logged in
+  const [isSigned, setIsSigned] = useState<boolean>(true); // false: log out, true: logged in
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.Collection);
@@ -69,17 +71,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   const [{ wallet }] = useConnectWallet()
 
-  const [, setOptionListShow] = useState<FeatureInterface[]>()
-  const [dropList,] = useState<CampaignDrops>({
-    vrm_male: [],
-    vrm_female: [],
-  })
-  const [isEditModeSelected,] = useState<boolean>(false)
-  const [, setSelectedOpc] = useState<BasicData[]>(
-    exportData.attributes
-  )
-  const [selectedCategory,] = useState<string>('head')
-  const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
   const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>([]);
 
   const [currentCollection, setCurrentCollection] = useState<CollectionType>({
@@ -87,6 +78,26 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     baseCombination: '',
     tokenMetadata: {} as TokenMetadata
   });
+
+  // Edit state
+  const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false);
+  const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>();
+  const [dropList,] = useState<CampaignDrops>({
+    vrm_male: [],
+    vrm_female: [],
+  });
+  const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
+    exportData.attributes
+  );
+  const [skinColor, setSkinColor] = useState<string>(
+    campaignParams?.config.skin?.defColor ?? 'FFFFFF'
+  );
+  const [selectedCategory, setSelectedCategory] = useState<string>('head');
+  const [tokenIdList, setTokenIdList] = useState<TokenId[]>();
+  // const [selectedCombination, setSelectedCombination] = useState<string>();
+  // const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>();
+  // const [selectedTokenId, setSelectedTokenId] = useState<number>();
+  // const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>();
 
   const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => {
     const newCollection: CollectionType = {
@@ -318,14 +329,14 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
     await SetFeaturesData(campaignParams?.features ?? [])
 
-/*     const bgMap = envMapList?.find(
+    const bgMap = envMapList?.find(
       (em) => em.name === campaignParams?.config.envMap?.defBgMap
-    ) */
+    )
     const lightMap = envMapList?.find(
       (em) => em.name === campaignParams?.config.envMap?.defLightMap
     )
     await SetEnvironment(
-      '',
+      bgMap?.path,
       lightMap?.path,
       campaignParams?.config.envMap?.skyboxConfig
     )
@@ -377,15 +388,139 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       await SaveFile(picturePromise, `${filesName}.png`)
     }
   }
+
+  async function onOptionChange(
+    id: string,
+    path: string,
+    name: string,
+    _selectedCategory: string = selectedCategory
+  ) {
+    const currentFeatures = singleInitData?.features
+    const changedFeature = optionList?.find(
+      (feature) => feature.type === _selectedCategory && feature.id === id
+    )
+    const currentFeaturesTypeIndex = currentFeatures?.findIndex(
+      (feature) => feature.val.type === _selectedCategory
+    )
+
+    if (
+      currentFeaturesTypeIndex != undefined &&
+      changedFeature &&
+      singleInitData
+    ) {
+      singleInitData.features[
+        currentFeaturesTypeIndex
+      ].val = changedFeature
+    }
+
+    await ChangeFeature(
+      id,
+      path,
+      name,
+      _selectedCategory,
+      campaignParams?.config.skin?.defColor ?? skinColor,
+      campaignParams?.config.skin?.materialName,
+      campaignParams?.config.changeMaterial
+    )
+
+    addReplaceAttribute(_selectedCategory, name)
+  }
+
+  function onCategoryTypeChange(value: string) {
+    setSelectedCategory(value)
+    setOptionListShow(FilterList(optionList, 'type', value))
+    updateFeatureCamPosition(value, {
+      ...campaignParams?.config.featuresCamPos,
+      ...campaignParams?.config.accCamPos,
+    })
+  }
+
+  function updateFeatureCamPosition(
+    index: string,
+    posLocation?: Record<string, LookAtVectors>
+  ) {
+    const confRef = posLocation ? posLocation[index] : undefined
+    if (confRef == undefined) return
+
+    AGChangeCamPosition(confRef.pos)
+    AGChangeLookAtPosition(confRef.lookAt)
+  }
+
+  async function onClickChangeSkinColor(newSkinColor = skinColor) {
+    await ChangeSkinColor(
+      newSkinColor,
+      campaignParams?.config.skin?.materialName
+    )
+    setSkinColor(newSkinColor)
+  }
+
   return (
     <MobileLayout>
       <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
         {!isSigned ?
           <LoginUI collections={collectionList} setIsSigned={(isSigned) => { setIsSigned(isSigned) }} />
           :
-
           <>
-            <div className="fixed inset-0 w-full h-screen">
+            {/* EDITOR HUD */}
+            <div className="fixed z-10 dark">
+              {currentCollection.baseCombination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View &&
+                <HudUI
+                  selectedOption={selectedOpc.find(
+                    (e) => e.id === selectedCategory
+                  )}
+                  editModeSelected={
+                    isEditModeSelected
+                  }
+                  selectListCategory={
+                    (campaignParams.features &&
+                      campaignParams.accessories && [
+                        ...campaignParams.features,
+                        ...campaignParams.accessories,
+                      ]) ||
+                    []
+                  }
+                  // optionList
+                  optionList={optionListShow}
+                  // selectedCategory
+                  selectedCategory={selectedCategory}
+                  campaignSkinColorConfig={
+                    campaignParams?.config.skin ||
+                    {}
+                  }
+                  skinColor={skinColor}
+                  changeView={() => {
+                    // saveCombination() @GabCh15 tiene la misma funcionalidad de lukso?
+                    setIsEditModeSelected(!isEditModeSelected)
+                    // void updateStage(!isEditModeSelected) @GabCh15 tiene la misma funcionalidad de lukso?
+                  }}
+                  // changeCategory
+                  onOptionChange={(id, path, name) =>
+                    void onOptionChange(
+                      id,
+                      path,
+                      name
+                    )
+                  }
+                  // onCategoryChange
+                  onCategoryTypeChange={(value) =>
+                    onCategoryTypeChange(value)
+                  }
+                  onSkinColorChange={(value) =>
+                    void onClickChangeSkinColor(
+                      value
+                    )
+                  }
+                  exportModel={() => exportModel()}
+                  isCustomCampaignHud
+                  onClickBackButton={() =>
+                    setIsEditModeSelected(false)
+                  }
+                  isLoading={isLoading}
+                />
+              }
+            </div>
+            {/* CANVAS */}
+            <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
               {currentCollection.baseCombination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View && <AvatarEditor
 
                 avatarBasePath={
@@ -414,20 +549,21 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                 }
               />}
             </div>
-            <CitizensUI
-              currentSection={currentSection}
-              loadedTokens={loadedTokens}
-              currentCollection={currentCollection}
-              updateCollection={updateCollection}
-              features={singleInitData?.features} exportModel={() => exportModel()} address={walletAddress ?? ""} />
+            {/* CITIZENS HUD */}
+            {!isEditModeSelected &&
+              <CitizensUI
+                currentSection={currentSection}
+                loadedTokens={loadedTokens}
+                currentCollection={currentCollection}
+                updateCollection={updateCollection}
+                features={singleInitData?.features} exportModel={() => exportModel()} address={walletAddress ?? ""} />
+            }
           </>
-
-
         }
-         {/* LOADER */}
-         {
+        {/* LOADER */}
+        {
           isLoading &&
-          <div className="fixed inset-0 w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]">
+          <div className={`fixed ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
             <p className=" text-white text-xl font-light">Loading Citizen</p>
             <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
           </div>
@@ -444,12 +580,22 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             />
           </div>
           {/* NAVBAR */}
-          {isSigned &&
+          {isSigned && !isEditModeSelected &&
             <div className="flex gap-4">
-              <Button label="homebase" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { 
-                setIsLoading(true)
-                setCurrentSection(CitizensSections.View) }} />
-              <Button label="backpack" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
+              <Button label="homebase" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
+                if (currentSection !== CitizensSections.View) {
+                  setIsLoading(true);
+                  setCurrentSection(CitizensSections.View);
+                }
+                
+              }} />
+              <Button label="backpack" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
+                if (currentSection !== CitizensSections.View) {
+                  setIsLoading(true);
+                  setCurrentSection(CitizensSections.View);
+                }
+                setIsEditModeSelected(true);
+              }} />
               <Button label="collection" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
                 setIsLoading(false)
                 setCurrentSection(CitizensSections.Collection)
@@ -485,6 +631,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
           </div>
         }
       </div>
-    </MobileLayout>
+    </MobileLayout >
   )
 }
