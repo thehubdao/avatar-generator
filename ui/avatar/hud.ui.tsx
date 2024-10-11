@@ -162,7 +162,7 @@ export default function HudUI({
         handleSwitchShowColorSelector={() => setShouldShowColorSelectorModal(false)}
       />}
       {/* DESKTOP UI */}
-      <div className={`fixed inset-0 ${editModeSelected ? 'w-[58%]' : 'w-0'} overflow-hidden h-screen bg-bg hidden xl:block transition-all duration-300`}>
+      <div className={`fixed inset-0 ${editModeSelected ? 'w-[58%]' : 'w-0'} overflow-hidden h-screen bg-bg dark:bg-citizens-dark hidden xl:block transition-all duration-300`}>
 
         {/* CAMPAIGN HEADER SIGN */}
         {!isCustomCampaignHud && <div className="fixed flex right-0 top-0 justify-center items-center gap-1 py-3 px-8 max-w-lg">
@@ -201,7 +201,7 @@ export default function HudUI({
           <div className="flex flex-col justify-between w-full px-8">
 
             {/* TITLE SECTION */}
-            <div className="text-gray-normal pt-10 2xl:pt-0">
+            <div className="text-gray-normal dark:text-citizens-graylight pt-10 2xl:pt-0">
               <div className="flex justify-end">
                 <div className="fixed right-0 bottom-0  pb-6 pt-12 2xl:static">
                   <AGButton onClickEvent={() => onClickBackButton()} nm={isWindowGreaterThan1536}>
