@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Button from "../common/button.ui";
 import CampaignCard from "../common/campaignCard.ui";
 import PlusSVG from "../common/SVG/plusSVG.ui";
@@ -19,7 +19,7 @@ const CAMPAIGNS: string[] = [
 
 interface CollectionProps {
   loadedTokens?: TokenMetadata[];
-  currentCollection:CollectionType
+  currentCollection: CollectionType
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
 }
 
@@ -28,7 +28,10 @@ export default function Collection({
   updateCollection,
   currentCollection
 }: CollectionProps) {
-  const [tokenID, setTokenId] = useState<string>("");
+
+  const filteredList = useRef<TokenMetadata[] | undefined>([]);
+
+  const [searchValue, setSerchValue] = useState<string | undefined>();
   const [isCampaignSelectorOpen, setIsCampaignSelectorOpen] = useState<boolean>(false);
 
   const handleCardClick = (tokenId: string, tokenMetadata: TokenMetadata) => {
@@ -38,7 +41,19 @@ export default function Collection({
     }
   };
 
+  const filterByTokenID = (id: string) => {
+    filteredList.current = loadedTokens?.filter((token) => {
+      return token.tokenId.includes(id);
+    })
+    setSerchValue(id);
+  }
 
+  // const filterByCampaign = (id: string) => {
+  //   filteredList.current = loadedTokens?.filter((token) => {
+  //     return token.campaign.includes(id);
+  //   })
+  //   setSerchValue(id);
+  // }
 
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] py-32">
@@ -57,8 +72,8 @@ export default function Collection({
                   id=""
                   placeholder="SEARCH BY TOKEN ID"
                   className="w-80 bg-[#2D2D2D] text-lg text-white placeholder:text-white focus-visible:outline-none px-4 py-2 shadow-citizens-input rounded-r-full"
-                  value={tokenID}
-                  onChange={e => setTokenId(e.target.value)}
+                  value={searchValue}
+                  onChange={e => filterByTokenID(e.target.value)}
                 />
               </div>
             </label>
@@ -85,20 +100,46 @@ export default function Collection({
             </div>
           </div>
           <div className="flex flex-wrap justify-center gap-4 p-8">
-            {loadedTokens && loadedTokens.map((tokenMetadata) => (
-              <CampaignCard
-                key={tokenMetadata.campaign + tokenMetadata.tokenId}
-                title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
-                tokenID={tokenMetadata.tokenId}
-                imgSrc={tokenMetadata.imageUrl}
-                imgAlt={tokenMetadata.name}
-                small
-                light
-                overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
-                handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
-                selected={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId}
-              />
-            ))}
+            {searchValue ?
+              <>
+                {filteredList.current && filteredList.current.length > 0 ?
+                  filteredList.current.map((tokenMetadata) => (
+                    <CampaignCard
+                      key={tokenMetadata.campaign + tokenMetadata.tokenId}
+                      title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
+                      tokenID={tokenMetadata.tokenId}
+                      imgSrc={tokenMetadata.imageUrl}
+                      imgAlt={tokenMetadata.name}
+                      small
+                      light
+                      overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
+                      handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
+                      selected={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId}
+                    />
+                  ))
+                  :
+                  <p className="font-light text-white">no results found!</p>
+                }
+              </>
+              :
+              <>
+                {loadedTokens && loadedTokens.map((tokenMetadata) => (
+                  <CampaignCard
+                    key={tokenMetadata.campaign + tokenMetadata.tokenId}
+                    title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
+                    tokenID={tokenMetadata.tokenId}
+                    imgSrc={tokenMetadata.imageUrl}
+                    imgAlt={tokenMetadata.name}
+                    small
+                    light
+                    overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
+                    handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
+                    selected={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId}
+                  />
+                ))}
+              </>
+            }
+
           </div>
           <div className="w-full pb-8">
             <Button label="LOAD MORE" handleClick={() => { }} withIcon className="mx-auto">
