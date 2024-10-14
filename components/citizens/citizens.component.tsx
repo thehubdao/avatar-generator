@@ -485,6 +485,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     _tokenIdList[tokenIdIndex].metadataUri = 'LOADING'
 
     setTokenIdList(_tokenIdList.slice())
+    
     try {
       const burnDropArray: BodyPart[] = []
       //NOTE: female campaign has it's types different from the DB
