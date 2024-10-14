@@ -200,6 +200,7 @@ export default function LuksoComponent({
             setDropList(features)
         }
         featuresPromise()
+        
     }, [addressToShow])
 
     useEffect(() => {
@@ -544,7 +545,7 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
             const metadataUrl = `ipfs://${metadataObject.uri}`
              await setTokenMetadata(
                 currentCampaign,
-                selectedTokenId,
+                selectedTokenId.toString(),
                 newMetadata,
                 metadataUrl
             ) 

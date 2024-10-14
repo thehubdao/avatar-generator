@@ -285,7 +285,7 @@ export const getUserFeatures = async (address: string) => {
     return features
 }
 
-export const setTokenMetadata = async (campaign: Campaign, tokenId: number, tokenMetadata: TokenMetadata, metadataUrl: string) => {
+export const setTokenMetadata = async (campaign: Campaign, tokenId: string, tokenMetadata: TokenMetadata, metadataUrl: string) => {
     const targetContractAddress = campaignWeb3Data[campaign].contractAddress
     const avatarContract = new ethers.Contract(
         targetContractAddress,
@@ -303,7 +303,7 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: number, toke
             },
         },
     ])
-    const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [ToHex64(tokenId), metadataDataKey, metadataDataValue.values[0]])
+    const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [ToHex64(Number(tokenId)), metadataDataKey, metadataDataValue.values[0]])
     const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         targetContractAddress, // address zero
         0, // amount to the fund the contract with when deploying

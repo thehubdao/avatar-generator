@@ -6,7 +6,7 @@ import Image from "next/image";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import CitizensUI from "../../ui/citizens/citizens.ui";
 import { useConnectWallet } from "@web3-onboard/react";
-import { getCampaignsTokenIds } from "../../utils/web3/contract.util";
+import { burnDrop, getCampaignsTokenIds, getUserFeatures, setTokenMetadata } from "../../utils/web3/contract.util";
 import { CitizensCollection } from "../../interfaces/citizens.interface";
 import Button from "../../ui/citizens/common/button.ui";
 import ArrowLinkSVG from "../../ui/citizens/common/SVG/arrowLinkSVG.ui";
@@ -35,6 +35,7 @@ import { StorageLocation } from "../../enums/firebase.enum";
 import { useCallback, useEffect, useState } from "react";
 import HudUI from "../../ui/avatar/hud.ui";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
+import { uploadMetadata } from "../../utils/metadata.util";
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -62,7 +63,7 @@ let featureList: FeatureInterface[] | undefined
 
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
-  const [isSigned, setIsSigned] = useState<boolean>(true); // false: log out, true: logged in
+  const [isSigned, setIsSigned] = useState<boolean>(false); // false: log out, true: logged in
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.Collection);
@@ -75,17 +76,13 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   const [currentCollection, setCurrentCollection] = useState<CollectionType>({
     campaign: campaignParams?.campaign as Campaign,
-    baseCombination: '',
+    combination: '',
     tokenMetadata: {} as TokenMetadata
   });
 
   // Edit state
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false);
   const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>();
-  const [dropList,] = useState<CampaignDrops>({
-    vrm_male: [],
-    vrm_female: [],
-  });
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
     exportData.attributes
   );
@@ -94,14 +91,18 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   );
   const [selectedCategory, setSelectedCategory] = useState<string>('head');
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>();
+  const [userWearables, setUserWearables] = useState<CampaignDrops>({
+    vrm_male: [],
+    vrm_female: [],
+  });
   // const [selectedCombination, setSelectedCombination] = useState<string>();
-  // const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>();
+  // const [selectedcombination, setSelectedcombination] = useState<string>();
   // const [selectedTokenId, setSelectedTokenId] = useState<number>();
   // const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>();
 
   const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => {
     const newCollection: CollectionType = {
-      campaign: newCampaign, baseCombination: newCombination,
+      campaign: newCampaign, combination: newCombination,
       tokenMetadata
     };
     console.log('newCollection: ', newCollection);
@@ -111,9 +112,9 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   // Function to update avatar features based on the current base combination
   const updateAvatarFeatures = useCallback(async () => {
-    /* if (currentCollection.baseCombination && currentCollection.campaign) {
+    /* if (currentCollection.combination && currentCollection.campaign) {
       // Fetch the single data for the new combination
-      await getSingleData(currentCollection.campaign, currentCollection.baseCombination);
+      await getSingleData(currentCollection.campaign, currentCollection.combination);
       
       // Update the features data
       await SetFeaturesData(campaignParams?.features ?? []);
@@ -121,11 +122,11 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       // Load the new features onto the avatar
       await loadSingleData();
     } */
-  }, [currentCollection.baseCombination, currentCollection.campaign, campaignParams]);
+  }, [currentCollection.combination, currentCollection.campaign, campaignParams]);
 
-  // Use effect to listen for changes in currentCollection.baseCombination
+  // Use effect to listen for changes in currentCollection.combination
   useEffect(() => {
-    // Call the function to update avatar features when baseCombination changes
+    // Call the function to update avatar features when combination changes
     void updateAvatarFeatures();
   }, [updateAvatarFeatures]);
 
@@ -153,7 +154,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
           try {
             const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
             if (i == 0) {
-              updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.baseCombination, tokenMetadata)
+              updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
             }
             setLoadedTokens(prevTokens => [...prevTokens, tokenMetadata]);
             return tokenMetadata;
@@ -169,6 +170,16 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
     loadTokenMetadata();
   }, [tokenIdList]);
+
+  useEffect(() => {
+    if (!walletAddress) return
+    const featuresPromise = async () => {
+      const features = await getUserFeatures(walletAddress)
+
+      setUserWearables(features)
+    }
+    featuresPromise()
+  }, [walletAddress])
 
   async function getEnvironmentMapList() {
     if (!campaignParams?.campaign) return
@@ -203,7 +214,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     optionList = MixArrays(optionList, featureList)
     optionList = MixArrays(optionList, accessoryList)
 
-    const combinationIndexes = currentCollection.baseCombination?.split('-')
+    const combinationIndexes = currentCollection.combination?.split('-')
     let filteredOptionList: FeatureInterface[] = []
     //This algorithm can be done in a better way, change it in the future.
     // Get features from combination and make them visible on avatar edit mode.
@@ -228,10 +239,10 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       filteredOptionList = filteredOptionList.concat(filteredArray)
     })
 
-    const campaignDropList =
-      dropList[campaignParams?.campaign as keyof typeof dropList]
-    if (campaignDropList) {
-      const formattedDropList = campaignDropList
+    const campaignuserWearables =
+      userWearables[campaignParams?.campaign as keyof typeof userWearables]
+    if (campaignuserWearables) {
+      const formatteduserWearables = campaignuserWearables
         .map((val) => {
           return optionList?.find(
             (option) =>
@@ -252,7 +263,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             val.index.toString()
           )
         })
-      filteredOptionList = filteredOptionList.concat(formattedDropList)
+      filteredOptionList = filteredOptionList.concat(formatteduserWearables)
     }
 
     optionList = filteredOptionList
@@ -364,7 +375,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     exportData.attributesBase64 = window.btoa(
       JSON.stringify(exportData.attributes)
     )
-    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${currentCollection.baseCombination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`
+    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${currentCollection.combination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`
     const [
       picturePromise,
       modelGLBPromise,
@@ -454,6 +465,106 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     setSkinColor(newSkinColor)
   }
 
+  async function saveCombination() {
+    if (!walletAddress) return
+    const newCombination = singleInitData?.features
+      .map((feature) => feature.val.index)
+      .join('-') as string
+    const currentCampaign = campaignParams?.campaign as Campaign
+    const currentFeatures = singleInitData?.features
+
+
+
+
+    const newMetadata = currentCollection.tokenMetadata
+    newMetadata.combination = newCombination
+    newMetadata.attributes = []
+
+    const _tokenIdList = tokenIdList?.slice() as TokenId[]
+
+    const tokenIdIndex = _tokenIdList?.findIndex(
+      ({ tokenId }) => tokenId === currentCollection.tokenMetadata.tokenId
+    )
+
+    const originalMetadataUri = _tokenIdList[tokenIdIndex].metadataUri
+
+    _tokenIdList[tokenIdIndex].metadataUri = 'LOADING'
+
+    setTokenIdList(_tokenIdList.slice())
+    try {
+      const burnDropArray: BodyPart[] = []
+      //NOTE: female campaign has it's types different from the DB
+      const femaleCampaignBodyTypes = {
+        head: 'hair',
+        face: 'accesories',
+        legs: 'legs',
+        chest: 'chest',
+        shoes: 'feet',
+        accesories: 'face',
+        feet: 'shoes',
+        hair: 'head'
+      }
+
+      currentFeatures?.forEach((feature) => {
+        newMetadata.attributes?.push({
+          key:
+            currentCampaign == 'vrm_female'
+              ? femaleCampaignBodyTypes[
+              feature.val.type.toLowerCase() as keyof typeof femaleCampaignBodyTypes
+              ]
+              : feature.val.type.toLowerCase(),
+          value: feature.val.name,
+          type: 'string',
+        })
+        let bodyFeature
+
+        if (currentCampaign == 'vrm_female') bodyFeature = newMetadata.body[femaleCampaignBodyTypes[feature.val.type.toLowerCase() as keyof typeof femaleCampaignBodyTypes] as keyof typeof newMetadata.body]
+        else bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
+
+        if (bodyFeature && bodyFeature.name != feature.val.name) {
+          newMetadata.body[
+            feature.val.type.toLowerCase() as keyof typeof newMetadata.body
+          ] = feature.val as BodyPart
+
+          burnDropArray.push(feature.val as BodyPart)
+        }
+      })
+
+      const metadataObject = await uploadMetadata(
+        newMetadata,
+        undefined,
+        newCombination,
+        currentCampaign
+      )
+      console.log(metadataObject)
+return
+      _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
+
+      setTokenIdList(_tokenIdList.slice())
+      const metadataUrl = `ipfs://${metadataObject.uri}`
+      await setTokenMetadata(
+        currentCampaign,
+        currentCollection.tokenMetadata.tokenId,
+        newMetadata,
+        metadataUrl
+      )
+
+      for (let i = 0; i < burnDropArray.length; i++) {
+        const drop = burnDropArray[i]
+        await burnDrop(walletAddress, currentCampaign, drop)
+      }
+
+      setCurrentCollection({combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign})
+    } catch (err) {
+      console.log(err)
+      _tokenIdList[tokenIdIndex].metadataUri = originalMetadataUri
+      /*         onBackView() */
+      setTokenIdList(_tokenIdList?.slice())
+    }
+  }
+
+
+
   return (
     <MobileLayout>
       <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
@@ -463,7 +574,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
           <>
             {/* EDITOR HUD */}
             <div className="fixed z-10 dark">
-              {currentCollection.baseCombination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View &&
+              {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View &&
                 <HudUI
                   selectedOption={selectedOpc.find(
                     (e) => e.id === selectedCategory
@@ -521,7 +632,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             </div>
             {/* CANVAS */}
             <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-              {currentCollection.baseCombination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View && <AvatarEditor
+              {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View && <AvatarEditor
 
                 avatarBasePath={
                   campaignParams.armature
@@ -543,7 +654,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                 }
                 onReady={() =>
                   onAvatarBuilderReady(
-                    currentCollection.baseCombination,
+                    currentCollection.combination,
                     currentCollection.campaign
                   )
                 }
@@ -587,7 +698,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   setIsLoading(true);
                   setCurrentSection(CitizensSections.View);
                 }
-                
+
               }} />
               <Button label="backpack" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
                 if (currentSection !== CitizensSections.View) {
