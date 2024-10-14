@@ -15,5 +15,6 @@ export type Phase = keyof typeof phaseMap
 export interface CollectionType {
     campaign: Campaign;
     combination: string;
+    baseCombination:string;
     tokenMetadata: TokenMetadata
   }

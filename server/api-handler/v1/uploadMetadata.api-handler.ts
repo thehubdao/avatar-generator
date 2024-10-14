@@ -21,7 +21,7 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
     const { campaign, tokenMetadata } = req.body;
     const metadata = await pinManager.upload(
       `${campaign}_metadata_#${tokenMetadata.tokenId}`,
-      Buffer.from(JSON.stringify(tokenMetadata)),
+      Buffer.from(JSON.stringify({LSP4Metadata:tokenMetadata})),
       {},
       {}
     );

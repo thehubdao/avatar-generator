@@ -2,6 +2,7 @@ import { StorageLocation } from "../enums/firebase.enum";
 import { Campaign, TokenMetadata } from "../types/metadata.type";
 import { tempCampaignSwitch } from "./web3/contract.util";
 import { UploadFile } from "./firebase.util";
+import { ApiResponse } from "../interfaces/api.interface";
 
 export const uploadMetadata = async (tokenMetadata: TokenMetadata, metadataThumbnail: Blob | undefined, combination: string, campaign: Campaign) => {
     if (metadataThumbnail) {
@@ -31,6 +32,8 @@ export const uploadMetadata = async (tokenMetadata: TokenMetadata, metadataThumb
         throw new Error('Failed to upload metadata');
     }
 
-    const { cid } = await response.json();
+    const responseData = await response.json() as ApiResponse<{ cid: string }>;
+    const { cid } = responseData.data as { cid: string }
+
     return { uri: cid, imageUrl }
 }

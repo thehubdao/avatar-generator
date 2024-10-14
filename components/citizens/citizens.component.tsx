@@ -77,8 +77,9 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   const [currentCollection, setCurrentCollection] = useState<CollectionType>({
     campaign: campaignParams?.campaign as Campaign,
     combination: '',
+    baseCombination:'',
     tokenMetadata: {} as TokenMetadata
-  });
+  })
 
   // Edit state
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false);
@@ -103,7 +104,8 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => {
     const newCollection: CollectionType = {
       campaign: newCampaign, combination: newCombination,
-      tokenMetadata
+      tokenMetadata,
+      baseCombination: tokenMetadata.baseCombination
     };
     console.log('newCollection: ', newCollection);
     setCurrentCollection(newCollection);
@@ -214,7 +216,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     optionList = MixArrays(optionList, featureList)
     optionList = MixArrays(optionList, accessoryList)
 
-    const combinationIndexes = currentCollection.combination?.split('-')
+    const combinationIndexes = currentCollection.baseCombination?.split('-')
     let filteredOptionList: FeatureInterface[] = []
     //This algorithm can be done in a better way, change it in the future.
     // Get features from combination and make them visible on avatar edit mode.
@@ -326,11 +328,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     currentCombination: string,
     campaign?: string
   ) {
-    console.log('currentCombination: ', currentCombination);
-    console.log('campaign: ', campaign);
     if (!campaign) return
-
-    console.log('onAvatarBuilderReady');
 
     await Promise.all([
       getEnvironmentMapList(),
@@ -472,10 +470,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       .join('-') as string
     const currentCampaign = campaignParams?.campaign as Campaign
     const currentFeatures = singleInitData?.features
-
-
-
-
     const newMetadata = currentCollection.tokenMetadata
     newMetadata.combination = newCombination
     newMetadata.attributes = []
@@ -537,7 +531,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         currentCampaign
       )
       console.log(metadataObject)
-return
+       
       _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
 
       setTokenIdList(_tokenIdList.slice())
@@ -554,7 +548,7 @@ return
         await burnDrop(walletAddress, currentCampaign, drop)
       }
 
-      setCurrentCollection({combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign})
+      setCurrentCollection({baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign})
     } catch (err) {
       console.log(err)
       _tokenIdList[tokenIdIndex].metadataUri = originalMetadataUri
@@ -600,7 +594,7 @@ return
                   }
                   skinColor={skinColor}
                   changeView={() => {
-                    // saveCombination() @GabCh15 tiene la misma funcionalidad de lukso?
+                    saveCombination()
                     setIsEditModeSelected(!isEditModeSelected)
                     // void updateStage(!isEditModeSelected) @GabCh15 tiene la misma funcionalidad de lukso?
                   }}
