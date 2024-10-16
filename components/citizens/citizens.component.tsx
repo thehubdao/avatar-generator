@@ -213,6 +213,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   async function getFeatureList() {
     const result = await GetAssetsListByCampaign(campaignParams?.campaign)
     featureList = result.success ? result.value : undefined
+    optionList = []
     optionList = MixArrays(optionList, featureList)
     optionList = MixArrays(optionList, accessoryList)
 
