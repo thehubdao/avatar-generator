@@ -13,7 +13,8 @@ import HudFeatureTitleUI from "./common/hudTitle.ui";
 import { RemovedAcc } from "../../utils/common.util";
 import ExportButtonUI from "./common/exportButton.ui";
 import { ModelExtension } from "../../enums/export.enum";
-import SaveModalUI from "../lukso/common/saveModal";
+import Modal from "../citizens/common/modal.ui";
+import Button from "../citizens/common/button.ui";
 
 interface HudUIProps {
 
@@ -185,9 +186,21 @@ export default function HudUI({
         </div>}
         {/* WRAPPER */}
         <div className={`w-full h-full grid grid-cols-[148px_minmax(100px,_1fr)] ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 duration-200'} transition-all`}>
-          {isSaveModalOpen && <SaveModalUI setIsSaveModalOpen={(bol: boolean) => setIsSaveModalOpen(bol)} onSave={() => {
-            changeView()
-          }} />}
+          {/* SAVE MODAL */}
+          {isSaveModalOpen &&
+            <Modal handleClose={() => setIsSaveModalOpen(false)} modalStyles="!w-[492px]">
+              <div className="grid justify-items-center">
+                <div className="text-center text-white grid gap-4">
+                  <p className="font-bold text-2xl">Save This Combination</p>
+                  <p className="text-lg">Are you sure that you want to save this wearable combination? If you are using a custom wearable it will be burnt and you will not be able to use it again on a different Citizen.</p>
+                </div>
+                <div className="w-full grid grid-cols-2 gap-4 pt-8">
+                  <Button label="Go Back" light className="w-full" textStiles="w-full text-center" handleClick={() => setIsSaveModalOpen(false)} />
+                  <Button label="Save" light className="w-full" textStiles="w-full text-center" handleClick={() => changeView()} />
+                </div>
+              </div>
+            </Modal>
+          }
           {/* FEATURES SECTION */}
           <div className="h-screen">
             <FeatureSelector
@@ -202,13 +215,13 @@ export default function HudUI({
 
             {/* TITLE SECTION */}
             <div className="text-gray-normal dark:text-citizens-graylight pt-10 2xl:pt-0">
-              <div className="flex justify-end">
-                <div className="fixed right-0 bottom-0  pb-6 pt-12 2xl:static">
+              <div className="relative flex justify-end">
+                <div className="absolute z-10 right-0 2xl:pb-6 2xl:pt-12 2xl:relative">
                   <AGButton onClickEvent={() => onClickBackButton()} nm={isWindowGreaterThan1536}>
-                    <p className="font-poppins text-center w-[240px] py-2">GO BACK</p>
+                    <p className="font-poppins text-center 2xl:w-[240px] py-2">GO BACK</p>
                   </AGButton>
                 </div>
-                <div className="fixed right-0 bottom-0 pb-6 pt-12 2xl:static">
+                <div className="fixed right-0 bottom-0 pb-6 pt-12 2xl:relative">
                   <AGButton onClickEvent={() => setIsSaveModalOpen(true)} nm={isWindowGreaterThan1536}>
                     <p className="font-poppins text-center w-[300px] py-2">SAVE COMBINATION</p>
                   </AGButton>
