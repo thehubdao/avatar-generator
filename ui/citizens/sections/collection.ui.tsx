@@ -1,21 +1,13 @@
-import { useRef, useState } from "react";
-import Button from "../common/button.ui";
+import { useEffect, useRef, useState } from "react";
 import CampaignCard from "../common/campaignCard.ui";
-import PlusSVG from "../common/SVG/plusSVG.ui";
+// import PlusSVG from "../common/SVG/plusSVG.ui";
 import SearchSVG from "../common/SVG/searchSVG.ui";
-import ArrowSVG from "../common/SVG/arrowSVG.ui";
 import { TokenMetadata, Campaign } from "../../../types/metadata.type";
 import { campaignLabels } from "../../../constants/lukso/labels.constant";
 import { CollectionType } from "../../../types/avatar.type";
-
-const CAMPAIGNS: string[] = [
-  'Campaign 01',
-  'Campaign 02',
-  'Campaign 03',
-  'Campaign 04',
-  'Campaign 05',
-  'Campaign 06',
-];
+import { LogError } from "../../../utils/common.util";
+import { Module } from "../../../enums/common.enum";
+import SelectorUI from "../common/selector.ui";
 
 interface CollectionProps {
   loadedTokens?: TokenMetadata[];
@@ -30,9 +22,10 @@ export default function Collection({
 }: CollectionProps) {
 
   const filteredList = useRef<TokenMetadata[] | undefined>([]);
+  const campaignList = useRef<string[] | undefined>([]);
 
   const [searchValue, setSerchValue] = useState<string | undefined>();
-  const [isCampaignSelectorOpen, setIsCampaignSelectorOpen] = useState<boolean>(false);
+  const [chooseValue, setChooseValue] = useState<string | undefined>();
 
   const handleCardClick = (tokenId: string, tokenMetadata: TokenMetadata) => {
     if (tokenId !== currentCollection.tokenMetadata.tokenId) {
@@ -41,26 +34,40 @@ export default function Collection({
     }
   };
 
-  const filterByTokenID = (id: string) => {
-    filteredList.current = loadedTokens?.filter((token) => {
-      return token.tokenId.includes(id);
+  const filterList = (id?: string, campaign?: string) => {
+    if (!loadedTokens) return LogError(Module.Citizens, 'loadedTokens is undefined');
+
+    filteredList.current = loadedTokens.filter((token) => {
+      return (campaign && campaign !== 'All' ? token.campaign.includes(campaign) : true) && (id ? token.tokenId.includes(id) : true);
     })
-    setSerchValue(id);
+    if (searchValue !== id) setSerchValue(id);
+    if (chooseValue !== campaign) setChooseValue(campaign);
   }
 
-  // const filterByCampaign = (id: string) => {
-  //   filteredList.current = loadedTokens?.filter((token) => {
-  //     return token.campaign.includes(id);
-  //   })
-  //   setSerchValue(id);
-  // }
+  const generateCampaignList = () => {
+    if (!loadedTokens) return LogError(Module.Citizens, 'loadedTokens is undefined');
+
+    const campaignSet: Set<string> = new Set();
+
+    loadedTokens.forEach(item => { if (item.campaign) campaignSet.add(item.campaign) });
+    campaignList.current = [...Array.from(campaignSet), 'All'];
+
+  }
+
+  useEffect(() => {
+    generateCampaignList();
+  }, [loadedTokens]);
 
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] py-32">
+      {/* MY CITIZENS */}
       <div className="container mx-auto">
         <h1 className="font-monument text-white text-6xl text-center">MY CITIZENS</h1>
+        {/*  CITIZENS TABLE */}
         <div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
+          {/* TABLE HEADER */}
           <div className="w-full flex justify-between p-8 border-b border-white/20">
+            {/* SEARCH BY ID INPUT */}
             <label className="flex">
               <div className="flex justify-center items-center w-12 shadow-citizens-input rounded-l-full">
                 <SearchSVG />
@@ -73,34 +80,17 @@ export default function Collection({
                   placeholder="SEARCH BY TOKEN ID"
                   className="w-80 bg-[#2D2D2D] text-lg text-white placeholder:text-white focus-visible:outline-none px-4 py-2 shadow-citizens-input rounded-r-full"
                   value={searchValue}
-                  onChange={e => filterByTokenID(e.target.value)}
+                  onChange={e => filterList(e.target.value, chooseValue)}
                 />
               </div>
             </label>
-            <div className="relative">
-              <Button label="CHOOSE CAMPAIGN" handleClick={() => { setIsCampaignSelectorOpen(!isCampaignSelectorOpen) }} withIcon textStiles="px-4">
-                <div className={`${isCampaignSelectorOpen ? 'rotate-180' : ''}`}>
-                  <ArrowSVG className="fill-white" />
-                </div>
-              </Button>
-              <p className="absolute top-full right-0 px-2 mt-1 text-xs text-white/20">{currentCollection.campaign}</p>
-              {isCampaignSelectorOpen &&
-                <div className="absolute top-full w-full max-h-96 overflow-y-auto rounded-2xl mt-2 p-4 bg-citizens-dark shadow-citizens-btn z-10">
-                  {
-                    CAMPAIGNS.map((campaign, index) => (
-                      <div key={index} className="py-2 cursor-pointer border-b border-white/10 last:border-none" onClick={() => {
-                        setIsCampaignSelectorOpen(false);
-                      }}>
-                        <p className="text-white truncate">{campaign}</p>
-                      </div>
-                    ))
-                  }
-                </div>
-              }
-            </div>
+            {/* CHOOSE CAMPAIGN SELECTOR */}
+            <SelectorUI list={campaignList.current} selection={chooseValue} label="CHOOSE CAMPAIGN" selectionHandler={(value) => {
+              filterList(searchValue, value);
+            }}/>
           </div>
-          <div className="flex flex-wrap justify-center gap-4 p-8">
-            {searchValue ?
+          <div className="flex flex-wrap justify-center gap-4 p-8 min-h-[336px]">
+            {searchValue || chooseValue ?
               <>
                 {filteredList.current && filteredList.current.length > 0 ?
                   filteredList.current.map((tokenMetadata) => (
@@ -141,11 +131,90 @@ export default function Collection({
             }
 
           </div>
-          <div className="w-full pb-8">
+          {/* <div className="w-full pb-8">
             <Button label="LOAD MORE" handleClick={() => { }} withIcon className="mx-auto">
               <PlusSVG />
             </Button>
+          </div> */}
+        </div>
+      </div>
+      {/* MY SWAG */}
+      <div className="container mx-auto pt-8">
+        <h1 className="font-monument text-white text-6xl text-center">MY SWAG</h1>
+        {/*  CITIZENS TABLE */}
+        <div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
+          {/* TABLE HEADER */}
+          <div className="w-full flex justify-between p-8 border-b border-white/20">
+            {/* SEARCH BY ID INPUT */}
+            <label className="flex">
+              <div className="flex justify-center items-center w-12 shadow-citizens-input rounded-l-full">
+                <SearchSVG />
+              </div>
+              <div>
+                <input
+                  type="number"
+                  name=""
+                  id=""
+                  placeholder="SEARCH BY TOKEN ID"
+                  className="w-80 bg-[#2D2D2D] text-lg text-white placeholder:text-white focus-visible:outline-none px-4 py-2 shadow-citizens-input rounded-r-full"
+                />
+              </div>
+            </label>
+            {/* SELECTORS */}
+            <div className="flex gap-4">
+              <SelectorUI label="OWNED" list={['Owned','Not Owned','All']} selectionHandler={() => { }} />
+              <SelectorUI label="PRICE" list={['High to low','Low to High']} selectionHandler={() => { }} />
+              <SelectorUI label="LEVEL" list={['LVL 01-10','LVL 01-10','LVL 10-20','LVL 20-30','LVL 30-40','LVL 40-50','LVL 50-60','LVL 60-70','LVL 70-80','LVL 80-90','LVL 90-100']} selectionHandler={() => { }} />
+              <SelectorUI label="CHOOSE DROPS" list={['Chillwhales Head','Metaheads Hat','Platties Tee']} selectionHandler={() => { }} />
+            </div>
           </div>
+          <div className="flex flex-wrap justify-center gap-4 p-8">
+            {searchValue || chooseValue ?
+              <>
+                {filteredList.current && filteredList.current.length > 0 ?
+                  filteredList.current.map((tokenMetadata) => (
+                    <CampaignCard
+                      key={tokenMetadata.campaign + tokenMetadata.tokenId}
+                      title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
+                      tokenID={tokenMetadata.tokenId}
+                      imgSrc={tokenMetadata.imageUrl}
+                      imgAlt={tokenMetadata.name}
+                      small
+                      light
+                      overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
+                      handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
+                      selected={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId}
+                    />
+                  ))
+                  :
+                  <p className="font-light text-white">no results found!</p>
+                }
+              </>
+              :
+              <>
+                {loadedTokens && loadedTokens.map((tokenMetadata) => (
+                  <CampaignCard
+                    key={tokenMetadata.campaign + tokenMetadata.tokenId}
+                    title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
+                    tokenID={tokenMetadata.tokenId}
+                    imgSrc={tokenMetadata.imageUrl}
+                    imgAlt={tokenMetadata.name}
+                    small
+                    light
+                    overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
+                    handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
+                    selected={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId}
+                  />
+                ))}
+              </>
+            }
+
+          </div>
+          {/* <div className="w-full pb-8">
+            <Button label="LOAD MORE" handleClick={() => { }} withIcon className="mx-auto">
+              <PlusSVG />
+            </Button>
+          </div> */}
         </div>
       </div>
     </div>
