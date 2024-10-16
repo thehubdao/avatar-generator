@@ -18,7 +18,7 @@ export default function OptionSelectorUI({ list, activeOption, handleClick }: Op
   }
 
   return (
-    <div className="flex flex-wrap flex-col gap-3 content-start overflow-x-auto h-[190px] min-[1440px]:h-[390px]">
+    <div className="flex flex-wrap flex-col gap-3 content-start overflow-x-auto h-[190px] dark:h-[220px] min-[1440px]:h-[390px]">
       {list ?
         list.map(opt => {
           return (
