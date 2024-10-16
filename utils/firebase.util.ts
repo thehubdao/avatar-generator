@@ -51,6 +51,16 @@ export const AVATAR_DOWNLOADED_STATUS = {
   NotDownloaded: "n",
 } as const;
 
+enum XPReward {
+  DailyLogin = 50,
+  WeeklyLoginStreak = 100,
+  NewFollower = 20,
+  NewFollowing = 10,
+  PostCreation = 30,
+  CommentCreation = 15,
+  LikeReceived = 5,
+  ProfileCompletion = 200,
+}
 
 class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -929,6 +939,56 @@ export async function GetRandomCombination() {
   }
 }
 
+async function handleFollowerChange(address: string, newCount: number, oldCount: number) {
+  const newFollowers = newCount - oldCount;
+  if (newFollowers <= 0) return;
+
+  const xpGained = newFollowers * XPReward.NewFollower;
+  const xpResult = await UpdateUserXP(address, xpGained);
+  if (!xpResult.success) return;
+
+  await CreateNotification(address, {
+    title: 'New Followers',
+    message: generateFollowerMessage(newFollowers, xpGained, xpResult.value),
+    points: xpGained,
+    time: new Date().toISOString(),
+    id: ''
+  });
+}
+
+async function handleFollowingChange(address: string, newCount: number, oldCount: number) {
+  const newFollowing = newCount - oldCount;
+  if (newFollowing <= 0) return;
+
+  const xpGained = newFollowing * XPReward.NewFollowing;
+  const xpResult = await UpdateUserXP(address, xpGained);
+  if (!xpResult.success) return;
+
+  await CreateNotification(address, {
+    title: 'New Following',
+    message: generateFollowingMessage(newFollowing, xpGained, xpResult.value),
+    points: xpGained,
+    time: new Date().toISOString(),
+    id: ''
+  });
+}
+
+function generateFollowerMessage(count: number, xp: number, levelInfo: { leveledUp: boolean, newLevel: number }) {
+  let message = `You've gained ${count} new follower${count > 1 ? 's' : ''}! You've earned ${xp} XP.`;
+  if (levelInfo.leveledUp) {
+    message += ` Congratulations! You've reached level ${levelInfo.newLevel}!`;
+  }
+  return message;
+}
+
+function generateFollowingMessage(count: number, xp: number, levelInfo: { leveledUp: boolean, newLevel: number }) {
+  let message = `You're now following ${count} new account${count > 1 ? 's' : ''}! You've earned ${xp} XP.`;
+  if (levelInfo.leveledUp) {
+    message += ` Congratulations! You've reached level ${levelInfo.newLevel}!`;
+  }
+  return message;
+}
+
 export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> {
   if (address == undefined) Raise("Missing address to update last login date!");
 
@@ -947,16 +1007,29 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         lastLogin.getFullYear() !== now.getFullYear();
 
       if (isFirstLoginOfDay) {
-        const xpResult = await UpdateUserXP(address, 100);
+        let xpGained = XPReward.DailyLogin;
+
+        // Increment login streak
+        userData.loginStreak = (userData.loginStreak || 0) + 1;
+
+        // Check if the streak is a multiple of 7 for the bonus
+        if (userData.loginStreak % 7 === 0) {
+          xpGained += XPReward.WeeklyLoginStreak;
+        }
+
+        const xpResult = await UpdateUserXP(address, xpGained);
         if (xpResult.success) {
           await CreateNotification(address, {
             title: 'Daily Login Reward',
-            message: `You've earned 100 XP for logging in today!${xpResult.value.leveledUp ? ` Congratulations! You've reached level ${xpResult.value.newLevel}!` : ''}`,
-            points: 100,
+            message: generateLoginMessage(xpGained, XPReward.WeeklyLoginStreak, xpResult.value),
+            points: xpGained,
             time: new Date().toISOString(),
-            id:''
+            id: ''
           });
         }
+      } else {
+        // Reset streak if not consecutive
+        userData.loginStreak = 1;
       }
 
       // Get current follower and following counts
@@ -964,39 +1037,18 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
 
       // Check if follower/following counts have increased
       if (followerCount > (userData.followerCount || 0)) {
-        const newFollowers = followerCount - (userData.followerCount || 0);
-        const xpGained = newFollowers * 40;
-        const xpResult = await UpdateUserXP(address, xpGained);
-        if (xpResult.success) {
-          await CreateNotification(address, {
-            title: 'New Followers',
-            message: `You've gained ${newFollowers} new follower${newFollowers > 1 ? 's' : ''}! You've earned ${xpGained} XP.${xpResult.value.leveledUp ? ` Congratulations! You've reached level ${xpResult.value.newLevel}!` : ''}`,
-            points: xpGained,
-            time: new Date().toISOString(),
-            id:''
-          });
-        }
+        await handleFollowerChange(address, followerCount, userData.followerCount || 0);
       }
 
       if (followingCount > (userData.followingCount || 0)) {
-        const newFollowing = followingCount - (userData.followingCount || 0);
-        const xpGained = newFollowing * 10;
-        const xpResult = await UpdateUserXP(address, xpGained);
-        if (xpResult.success) {
-          await CreateNotification(address, {
-            title: 'New Following',
-            message: `You're now following ${newFollowing} new account${newFollowing > 1 ? 's' : ''}! You've earned ${xpGained} XP.${xpResult.value.leveledUp ? ` Congratulations! You've reached level ${xpResult.value.newLevel}!` : ''}`,
-            points: xpGained,
-            time: new Date().toISOString(),
-            id:''
-          });
-        }
+        await handleFollowingChange(address, followingCount, userData.followingCount || 0);
       }
 
       await setDoc(userDocRef, { 
         lastLogin: Timestamp.now(),
         followerCount,
-        followingCount
+        followingCount,
+        loginStreak: userData.loginStreak
       }, { merge: true });
     } else {
       // If the user doesn't exist, create a new document with all fields
@@ -1012,7 +1064,8 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         level: 1,
         xpForNextLevel: 100,
         followerCount: 0,
-        followingCount: 0
+        followingCount: 0,
+        loginStreak: 1
       });
     }
 
@@ -1024,18 +1077,12 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
   }
 }
 
-const BASE_XP_PER_LEVEL = 100; // XP required for the first level
-
 function CalculateLevel(xp: number): number {
-  if (xp < BASE_XP_PER_LEVEL) return 1;
-  
-  const level = Math.floor(Math.log2(xp / BASE_XP_PER_LEVEL) + 2);
-  
-  return level;
+  return Math.floor((-1 + Math.sqrt(1 + 8 * xp / 1000)) / 2) + 1;
 }
 
 function GetXpForNextLevel(currentLevel: number): number {
-  return BASE_XP_PER_LEVEL * Math.pow(2, currentLevel - 1);
+  return 1000 * currentLevel * (currentLevel + 1) / 2;
 }
 
 export async function UpdateUserXP(userId: string, xpToAdd: number): Promise<Result<{ newXP: number, newLevel: number, leveledUp: boolean }>> {
@@ -1163,3 +1210,13 @@ export async function GetUserXPAndLevel(address: string) {
   }
 }
 
+function generateLoginMessage(xpGained: number, streakBonusXP: number, levelInfo: { leveledUp: boolean, newLevel: number }) {
+  let message = `You've earned ${xpGained} XP for logging in today!`;
+  if (streakBonusXP > 0) {
+    message += ` This includes a ${streakBonusXP} XP bonus for your 7-day login streak!`;
+  }
+  if (levelInfo.leveledUp) {
+    message += ` Congratulations! You've reached level ${levelInfo.newLevel}!`;
+  }
+  return message;
+}

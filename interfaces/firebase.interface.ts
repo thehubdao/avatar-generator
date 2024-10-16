@@ -15,6 +15,7 @@ export interface LogInInterface {
 export interface UserInterface {
   followerCount?: number;
   followingCount?: number;
+  loginStreak?: number;
   lastLogin?: Timestamp;
   role: UserRoleValues;
   name: string;
