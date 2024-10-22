@@ -5,6 +5,8 @@ import { TokenMetadata, Campaign } from "../../types/metadata.type";
 import DetailsUI from "./common/details.ui";
 import Notifications from "./common/notifications.ui";
 import Collection from "./sections/collection.ui";
+import LeaderBoard from "./sections/leaderBoard.ui";
+import Play from "./sections/play.ui";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -30,7 +32,7 @@ export default function CitizensUI({ currentSection,  currentCollection, updateC
           <Notifications address={address} />
         </>
       )}
-      {currentSection === CitizensSections.Collection && loadedTokens  && loadedTokens.length > 0 && (
+      {currentSection === CitizensSections.Collection && loadedTokens && loadedTokens.length > 0 && (
         <>
           <Collection
             loadedTokens={loadedTokens}
@@ -39,6 +41,12 @@ export default function CitizensUI({ currentSection,  currentCollection, updateC
           />
         </>
       )}
+      {currentSection === CitizensSections.LeaderBoard && 
+        <LeaderBoard />
+      }
+      {currentSection === CitizensSections.Play && 
+        <Play />
+      }
     </>
   );
 }
