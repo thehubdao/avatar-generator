@@ -8,6 +8,7 @@ import { CollectionType } from "../../../types/avatar.type";
 import { LogError } from "../../../utils/common.util";
 import { Module } from "../../../enums/common.enum";
 import SelectorUI from "../common/selector.ui";
+import { CardSize } from "../../../enums/citizens/common.enum";
 
 interface CollectionProps {
   loadedTokens?: TokenMetadata[];
@@ -100,7 +101,7 @@ export default function Collection({
                       tokenID={tokenMetadata.tokenId}
                       imgSrc={tokenMetadata.imageUrl}
                       imgAlt={tokenMetadata.name}
-                      small
+                      size={CardSize.Small}
                       light
                       overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
                       handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
@@ -120,7 +121,7 @@ export default function Collection({
                     tokenID={tokenMetadata.tokenId}
                     imgSrc={tokenMetadata.imageUrl}
                     imgAlt={tokenMetadata.name}
-                    small
+                    size={CardSize.Small}
                     light
                     overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
                     handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
@@ -179,7 +180,7 @@ export default function Collection({
                       tokenID={tokenMetadata.tokenId}
                       imgSrc={tokenMetadata.imageUrl}
                       imgAlt={tokenMetadata.name}
-                      small
+                      size={CardSize.Small}
                       light
                       overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
                       handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
@@ -199,7 +200,7 @@ export default function Collection({
                     tokenID={tokenMetadata.tokenId}
                     imgSrc={tokenMetadata.imageUrl}
                     imgAlt={tokenMetadata.name}
-                    small
+                    size={CardSize.Small}
                     light
                     overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
                     handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
