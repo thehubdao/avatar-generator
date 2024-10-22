@@ -11,6 +11,7 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
+import { Drop } from "../types/drop.type";
 
 //#region Generic
 type QueryParams = { [p: string]: string | number | undefined | null };
@@ -166,4 +167,23 @@ export async function FetchBlob(url: string) {
   const blobPromise = await fetch(url)
   const blob = await blobPromise.blob()
   return blob
+}
+
+export async function ApproveClaimForUser(address: string, dropId: string): Promise<boolean> {
+  const response = await fetch('/api/v1/drops', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address, dropId }),
+  });
+  if (!response.ok) throw new Error('Failed to approve claim');
+  const data = await response.json();
+  return data.data.approved;
+}
+
+export async function FetchClaimableDrops(dropId?: string): Promise<Drop[]> {
+  const url = dropId ? `/api/v1/drops?id=${dropId}` : '/api/v1/drops';
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Failed to fetch claimable drops');
+  const data = await response.json();
+  return data.data;
 }

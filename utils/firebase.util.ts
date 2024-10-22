@@ -35,6 +35,7 @@ import jwt from 'jsonwebtoken';
 import UniversalProfileContract from '../constants/abi/UniversalProfileABI.json';
 import { GetFollowerCounts } from "./web3/lukso.util";
 import { XPReward } from "../constants/lukso/xp.constant";
+import { Drop } from "../types/drop.type";
 
 export type LogInStructure = {
   user: string;
@@ -1209,4 +1210,25 @@ function GenerateLoginMessage(xpGained: number, streakBonusXP: number, levelInfo
     message += ` Congratulations! You've reached level ${levelInfo.newLevel}!`;
   }
   return message;
+}
+
+export async function GetClaimableDrops(dropId?: string): Promise<Drop[]> {
+  try {
+    const db = await FirebaseUtil.Instance().DB();
+    const dropsCollection = collection(db, 'claimableDrops');
+    
+    let query;
+    if (dropId) {
+      query = doc(dropsCollection, dropId);
+      const dropDoc = await getDoc(query);
+      return dropDoc.exists() ? [dropDoc.data() as Drop] : [];
+    } else {
+      query = dropsCollection;
+      const querySnapshot = await getDocs(query);
+      return querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Drop));
+    }
+  } catch (error) {
+    console.error('Error fetching claimable drops:', error);
+    return [];
+  }
 }
