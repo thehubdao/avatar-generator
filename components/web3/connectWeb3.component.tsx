@@ -101,7 +101,7 @@ export default function ConnectWeb3Button({ children, classStyles, setIsSigned,s
             }}
             disabled={isConnecting || isSigning || isVerifying}
         >
-            <div className="flex items-center gap-3 mx-4">
+            <div className="flex items-center gap-3">
                 {children}
             </div>
         </button>
