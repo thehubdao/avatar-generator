@@ -145,11 +145,11 @@ select {
 }
 
 /* Styles for the scrollbar in non-WebKit browsers */
-html {
+* {
   scrollbar-width: thin;
   scrollbar-color: #bbb #f1f1f1;
 }
 
-html:hover {
+*:hover {
   scrollbar-color: #999 #ddd;
 }
