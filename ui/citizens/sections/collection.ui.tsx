@@ -139,9 +139,9 @@ export default function Collection({
           </div> */}
         </div>
       </div>
-      {/* MY SWAG */}
+      {/* WEARABLE DROPS */}
       <div className="container mx-auto pt-8">
-        <h1 className="font-monument text-white text-6xl text-center">MY SWAG</h1>
+        <h1 className="font-monument text-white text-6xl text-center">WEARABLE DROPS</h1>
         {/*  CITIZENS TABLE */}
         <div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
           {/* TABLE HEADER */}
