@@ -704,11 +704,17 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                 setIsEditModeSelected(true);
               }} />
               <Button label="collection" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
-                setIsLoading(false)
-                setCurrentSection(CitizensSections.Collection)
+                setIsLoading(false);
+                setCurrentSection(CitizensSections.Collection);
               }} />
-              <Button label="leaderboard" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
-              <Button label="play" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => { }} />
+              <Button label="leaderboard" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
+                setIsLoading(false);
+                setCurrentSection(CitizensSections.LeaderBoard);
+              }} />
+              <Button label="play" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
+                setIsLoading(false);
+                setCurrentSection(CitizensSections.Play);
+              }} />
             </div>
           }
           {/* CONNECT BUTTON */}
