@@ -15,6 +15,7 @@ interface DropItemProps {
 export default function DropItem({ drop, userXP, userAddress, provider, onClaim }: DropItemProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isClaimed, setIsClaimed] = useState(false);
+  const [claimAttempted, setClaimAttempted] = useState(0);
 
   useEffect(() => {
     const checkClaimStatus = async () => {
@@ -29,18 +30,22 @@ export default function DropItem({ drop, userXP, userAddress, provider, onClaim 
     };
 
     checkClaimStatus();
-  }, [drop.contractAddress, userAddress, provider]);
+  }, [drop.contractAddress, userAddress, provider, claimAttempted]);
 
   const getDropStatus = () => {
     if (isClaimed) return 'Claimed';
     if (userXP < drop.requiredXP) return `UNLOCK: ${drop.requiredXP} XP`;
     if (drop.paymentType === 'LYX') return `PRICE: ${drop.price} LYX`;
-    if (drop.paymentType === 'TOKEN') return `HOLD
-    : ${drop.price}`;
+    if (drop.paymentType === 'TOKEN') return `HOLD: ${drop.price}`;
     return '';
   };
 
   const isClaimable = userXP >= drop.requiredXP && !isClaimed;
+
+  const handleClaim = () => {
+    onClaim();
+    setClaimAttempted(prev => prev + 1);
+  };
 
   return (
     <div 
@@ -57,7 +62,7 @@ export default function DropItem({ drop, userXP, userAddress, provider, onClaim 
       {isClaimable && isHovered && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <button
-            onClick={onClaim}
+            onClick={handleClaim}
             className="bg-citizens-primary text-white px-4 py-2 rounded-md"
           >
             Click to Claim

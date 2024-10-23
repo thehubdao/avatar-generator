@@ -108,12 +108,10 @@ export default function Collection({
       const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer);
       const claimTx = await dropContract.claim({
         gasLimit: 500000,
-        value: typeof drop.price === 'number' ? ethers.parseEther(drop.price.toString()) : undefined
+        value: drop.price ? ethers.parseEther(drop.price.toString()) : undefined
       });
       await claimTx.wait();
 
-      // 3. Update UI
-      setClaimableDrops(prevDrops => prevDrops.filter(d => d.id !== drop.id));
 
     } catch (error) {
       console.error('Error claiming drop:', error);
