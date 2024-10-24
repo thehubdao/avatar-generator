@@ -41,11 +41,13 @@ import { LeaderboardEntry } from '../../types/leaderboard.type';
 const COLLECTIONS: CitizensCollection[] = [
   {
     name: 'Lukso Citizens',
-    image: '/resources/images/campaings/citizens_collection_image.png'
+    image: '/resources/images/campaings/citizens_collection_image.png',
+    campaign: 'vrm_female'
   },
   {
     name: 'Lukso Creators',
-    image: '/resources/images/campaings/creators_collection_image.png'
+    image: '/resources/images/campaings/creators_collection_image.png',
+    campaign: 'vrm_male'
   },
 ]
 
@@ -66,8 +68,8 @@ let featureList: FeatureInterface[] | undefined
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
   const [isSigned, setIsSigned] = useState<boolean>(false); // false: log out, true: logged in
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.Collection);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
 
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
 
@@ -78,7 +80,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   const [currentCollection, setCurrentCollection] = useState<CollectionType>({
     campaign: campaignParams?.campaign as Campaign,
     combination: '',
-    baseCombination:'',
+    baseCombination: '',
     tokenMetadata: {} as TokenMetadata
   })
 
@@ -91,6 +93,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   const [skinColor, setSkinColor] = useState<string>(
     campaignParams?.config.skin?.defColor ?? 'FFFFFF'
   );
+  const [selectedLoginCampaign, setSelectedLoginCampaign] = useState<Campaign>();
   const [selectedCategory, setSelectedCategory] = useState<string>('head');
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>();
   const [userWearables, setUserWearables] = useState<CampaignDrops>({
@@ -169,12 +172,16 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   useEffect(() => {
     const loadTokenMetadata = async () => {
+      console.log('tokenIdList', tokenIdList, selectedLoginCampaign);
       if (tokenIdList) {
+        let firstToken = false;
         const promises = tokenIdList.map(async (tokenIdMetadata, i) => {
           try {
             const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
-            if (i == 0) {
+            if (!firstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
+              console.log('tokenMetadata', tokenMetadata, selectedLoginCampaign);
               updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
+              firstToken = true;
             }
             setLoadedTokens(prevTokens => [...prevTokens, tokenMetadata]);
             return tokenMetadata;
@@ -504,7 +511,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     _tokenIdList[tokenIdIndex].metadataUri = 'LOADING'
 
     setTokenIdList(_tokenIdList.slice())
-    
+
     try {
       const burnDropArray: BodyPart[] = []
       //NOTE: female campaign has it's types different from the DB
@@ -550,7 +557,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         newCombination,
         currentCampaign
       )
-       
+
       _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
 
       setTokenIdList(_tokenIdList.slice())
@@ -567,22 +574,31 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         await burnDrop(walletAddress, currentCampaign, drop)
       }
 
-      setCurrentCollection({baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign})
+      setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
     } catch (err) {
       console.log(err)
       _tokenIdList[tokenIdIndex].metadataUri = originalMetadataUri
-      /*         onBackView() */
+
       setTokenIdList(_tokenIdList?.slice())
     }
   }
 
+  const handleLogin = (isSigned: boolean, selectedLoginCampaign: Campaign) => {
+    setSelectedLoginCampaign(selectedLoginCampaign);
+    setIsSigned(isSigned);
+    
+  };
 
+useEffect(()=>{console.log('isLoading', isLoading)},[isLoading])
 
   return (
     <MobileLayout>
       <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
         {!isSigned ?
-          <LoginUI collections={collectionList} setIsSigned={(isSigned) => { setIsSigned(isSigned) }} />
+          <LoginUI
+            collections={collectionList}
+            setIsSigned={(isSigned: boolean, selectedCampaign: Campaign) => handleLogin(isSigned, selectedCampaign)}
+          />
           :
           <>
             {/* EDITOR HUD */}
@@ -765,6 +781,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
           </div>
         }
       </div>
-    </MobileLayout >
+    </MobileLayout>
   )
 }

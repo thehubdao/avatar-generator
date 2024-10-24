@@ -1,9 +1,10 @@
 import { CitizensCollection } from "../../../interfaces/citizens.interface";
+import { Campaign } from "../../../types/metadata.type";
 import CampaignList from "../common/campaignList.ui";
 
 interface LoginUIProps {
   collections?: CitizensCollection[] | null;
-  setIsSigned: (isSigned: boolean) => void;
+  setIsSigned: (isSigned: boolean, selectedCampaign: Campaign) => void;
 }
 
 export default function LoginUI({ collections, setIsSigned }: LoginUIProps) {

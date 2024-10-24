@@ -6,10 +6,11 @@ import CampaignCard from "./campaignCard.ui";
 // Import Swiper styles
 import 'swiper/css';
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
+import { Campaign } from '../../../types/metadata.type';
 
 interface CampaignListProps {
   collections: CitizensCollection[];
-  setIsSigned: (isSigned: boolean) => void;
+  setIsSigned: (isSigned: boolean, selectedCampaign: Campaign) => void;
 }
 
 export default function CampaignList({ collections, setIsSigned }: CampaignListProps) {
@@ -33,7 +34,7 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
             <SwiperSlide key={i} className="w-96">
               <ConnectWeb3Button
                 classStyles="w-full h-full"
-                setIsSigned={setIsSigned}
+                setIsSigned={(isSigned: boolean) => setIsSigned(isSigned, el.campaign)}
                 setIsConnecting={setIsConnecting}
                 setIsSigning={setIsSigning}
                 setIsVerifying={setIsVerifying}
