@@ -174,14 +174,14 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     const loadTokenMetadata = async () => {
       console.log('tokenIdList', tokenIdList, selectedLoginCampaign);
       if (tokenIdList) {
-        let firstToken = false;
-        const promises = tokenIdList.map(async (tokenIdMetadata, i) => {
+        let isFirstToken = false;
+        const promises = tokenIdList.map(async (tokenIdMetadata) => {
           try {
             const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
-            if (!firstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
+            if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
               console.log('tokenMetadata', tokenMetadata, selectedLoginCampaign);
               updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
-              firstToken = true;
+              isFirstToken = true;
             }
             setLoadedTokens(prevTokens => [...prevTokens, tokenMetadata]);
             return tokenMetadata;
@@ -364,9 +364,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
     await SetFeaturesData(campaignParams?.features ?? [])
 
-    const bgMap = envMapList?.find(
-      (em) => em.name === campaignParams?.config.envMap?.defBgMap
-    )
+
     const lightMap = envMapList?.find(
       (em) => em.name === campaignParams?.config.envMap?.defLightMap
     )
