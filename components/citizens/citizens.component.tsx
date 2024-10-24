@@ -36,6 +36,7 @@ import { useCallback, useEffect, useState } from "react";
 import HudUI from "../../ui/avatar/hud.ui";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
 import { uploadMetadata } from "../../utils/metadata.util";
+import { LeaderboardEntry } from '../../types/leaderboard.type';
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -101,13 +102,30 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   // const [selectedTokenId, setSelectedTokenId] = useState<number>();
   // const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>();
 
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+
+  useEffect(() => {
+    async function fetchLeaderboardData() {
+      try {
+        const response = await fetch('/api/v1/leaderboard');
+        if (!response.ok) throw new Error('Failed to fetch leaderboard data');
+        const data = await response.json();
+        setLeaderboardData(data);
+      } catch (error) {
+        console.error('Error fetching leaderboard data:', error);
+      }
+    }
+
+    fetchLeaderboardData();
+  }, []);
+
   const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => {
     const newCollection: CollectionType = {
       campaign: newCampaign, combination: newCombination,
       tokenMetadata,
       baseCombination: tokenMetadata.baseCombination
     };
-    console.log('newCollection: ', newCollection);
+
     setCurrentCollection(newCollection);
     setCampaign(newCollection.campaign); // This updates the parent state
   }, [setCampaign]);
@@ -532,7 +550,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         newCombination,
         currentCampaign
       )
-      console.log(metadataObject)
        
       _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
 
@@ -663,7 +680,11 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                 loadedTokens={loadedTokens}
                 currentCollection={currentCollection}
                 updateCollection={updateCollection}
-                features={singleInitData?.features} exportModel={() => exportModel()} address={walletAddress ?? ""} />
+                features={singleInitData?.features}
+                exportModel={() => exportModel()}
+                address={walletAddress ?? ""}
+                leaderboardData={leaderboardData}
+              />
             }
           </>
         }

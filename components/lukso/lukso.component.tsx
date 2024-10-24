@@ -522,7 +522,6 @@ export default function LuksoComponent({
 if(currentCampaign=='vrm_female')bodyFeature =  newMetadata.body[femaleCampaignBodyTypes[feature.val.type.toLowerCase() as keyof typeof femaleCampaignBodyTypes] as keyof typeof newMetadata.body]
 else bodyFeature =  newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body]
 
-console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && bodyFeature.name, feature.val.name)
                 if (bodyFeature && bodyFeature.name != feature.val.name) {
                     newMetadata.body[
                         feature.val.type.toLowerCase() as keyof typeof newMetadata.body
@@ -550,7 +549,7 @@ console.log(newMetadata.body, feature.val.type, bodyFeature, bodyFeature && body
                 metadataUrl
             ) 
             setCombinationPictureUrl(metadataObject.imageUrl)
-            console.log(burnDropArray)
+            
             for (let i = 0; i < burnDropArray.length; i++) {
                 const drop = burnDropArray[i]
                 await burnDrop(addressToShow, currentCampaign, drop)

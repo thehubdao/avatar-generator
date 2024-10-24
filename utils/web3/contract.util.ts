@@ -5,7 +5,7 @@ import WerableContractAbi from '../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { Campaign, CampaignData, CampaignDrops, Drop, TokenId, TokenMetadata } from '../../types/metadata.type';
 import { getIPFSData, getImageUrl } from './lukso.util';
-import { GetCollectionDocs } from '../firebase.util';
+import { GetCollectionDocs, GetDropsContractAddresses } from '../firebase.util';
 import noMetadataTokens from '../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
 import { BodyPart } from '../../types/avatar.type';
@@ -329,4 +329,27 @@ console.log(dropPair,drop.name, dropsData,"DROP PAIR")
         burnEncondedFunction
     )
     tx.wait()
+}
+
+export async function GetCitizensHoldings(address: string): Promise<number> {
+  let total = 0;
+  for (const campaign of Object.keys(campaignWeb3Data)) {
+    const { contractAddress } = campaignWeb3Data[campaign as keyof typeof campaignWeb3Data];
+    const contract = new Contract(contractAddress, AvatarContractAbi, provider);
+    const balance = await contract.balanceOf(address);
+    total += Number(balance);
+  }
+  return total;
+}
+
+export async function GetWearablesHoldings(address: string): Promise<number> {
+  const contractAddresses = await GetDropsContractAddresses();
+  
+  let total = 0;
+  for (const contractAddress of contractAddresses) {
+    const contract = new Contract(contractAddress, WerableContractAbi, provider);
+    const balance = await contract.balanceOf(address);
+    total += Number(balance);
+  }
+  return total;
 }

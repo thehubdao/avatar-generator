@@ -7,6 +7,7 @@ import Notifications from "./common/notifications.ui";
 import Collection from "./sections/collection.ui";
 import LeaderBoard from "./sections/leaderBoard.ui";
 import Play from "./sections/play.ui";
+import { LeaderboardEntry } from '../../types/leaderboard.type';
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -16,10 +17,11 @@ interface CitizensUIProps {
   features?: IndexFeatureInterface[];
   exportModel: () => Promise<void>;
   address: string;
+  leaderboardData: LeaderboardEntry[];
 }
 
 
-export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address }: CitizensUIProps) {
+export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address, leaderboardData }: CitizensUIProps) {
   return (
     <>
       {currentSection === CitizensSections.View && (
@@ -41,9 +43,9 @@ export default function CitizensUI({ currentSection,  currentCollection, updateC
           />
         </>
       )}
-      {currentSection === CitizensSections.LeaderBoard && 
-        <LeaderBoard />
-      }
+      {currentSection === CitizensSections.LeaderBoard && (
+        <LeaderBoard leaderboardData={leaderboardData} />
+      )}
       {currentSection === CitizensSections.Play && 
         <Play />
       }

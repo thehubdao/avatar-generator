@@ -19,7 +19,6 @@ export default function CitizensView() {
   }
 
   useEffect(() => {
-    console.log('campaign', campaign);
     if (!campaign) return setCampaignParams(undefined)
     void getCampaignParams()
   }, [campaign])

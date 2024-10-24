@@ -36,6 +36,7 @@ import UniversalProfileContract from '../constants/abi/UniversalProfileABI.json'
 import { GetFollowerCounts } from "./web3/lukso.util";
 import { XPReward } from "../constants/lukso/xp.constant";
 import { Drop } from "../types/drop.type";
+import { LeaderboardEntry } from "../types/leaderboard.type";
 
 export type LogInStructure = {
   user: string;
@@ -1229,6 +1230,32 @@ export async function GetClaimableDrops(dropId?: string): Promise<Drop[]> {
     }
   } catch (error) {
     console.error('Error fetching claimable drops:', error);
+    return [];
+  }
+}
+
+export async function GetLeaderboardData(): Promise<LeaderboardEntry[]> {
+  const db = await FirebaseUtil.Instance().DB();
+  const usersRef = collection(db, 'user');
+  const q = query(usersRef, orderBy('xp', 'desc'), limit(20));
+  const querySnapshot = await getDocs(q);
+  console.log(querySnapshot.docs);
+  return querySnapshot.docs.map(doc => ({
+    id: doc.id,
+    username: doc.id,
+    xp: doc.data().xp,
+    level: doc.data().level,
+    citizensHoldings: 0,
+    wearablesHoldings: 0
+  }));
+}
+
+export async function GetDropsContractAddresses(): Promise<string[]> {
+  try {
+    const dropsData = await GetCollectionDocs('drops');
+    return dropsData.map(drop => drop.contract_address);
+  } catch (error) {
+    console.error('Error fetching drops contract addresses:', error);
     return [];
   }
 }
