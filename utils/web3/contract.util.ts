@@ -317,11 +317,9 @@ export const burnDrop = async (from: string, campaign: string, drop: BodyPart) =
     if (!dropsData) return
 
     const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name })
-console.log(dropPair,drop.name, dropsData,"DROP PAIR")
     if (!dropPair) return
 
     const dropContract = new Contract(dropPair.contract_address, WerableContractAbi, provider)
-    console.log(dropPair.contract_address)
     const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1])
     const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         dropPair.contract_address,

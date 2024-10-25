@@ -172,14 +172,12 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   useEffect(() => {
     const loadTokenMetadata = async () => {
-      console.log('tokenIdList', tokenIdList, selectedLoginCampaign);
       if (tokenIdList) {
         let isFirstToken = false;
         const promises = tokenIdList.map(async (tokenIdMetadata) => {
           try {
             const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
             if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
-              console.log('tokenMetadata', tokenMetadata, selectedLoginCampaign);
               updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
               isFirstToken = true;
             }

@@ -1168,7 +1168,6 @@ export async function DeleteUserNotification(userAddress: string, notificationId
       collection(await FirebaseUtil.Instance().DB(), `${FirestoreGlobalLocation.User}/${userAddress}/notifications`),
       notificationId
     );
-    console.log("Notification Ref:", notificationRef.path);
     await deleteDoc(notificationRef);
     return { success: true, value: true };
   } catch (e) {
@@ -1239,7 +1238,6 @@ export async function GetLeaderboardData(): Promise<LeaderboardEntry[]> {
   const usersRef = collection(db, 'user');
   const q = query(usersRef, orderBy('xp', 'desc'), limit(20));
   const querySnapshot = await getDocs(q);
-  console.log(querySnapshot.docs);
   return querySnapshot.docs.map(doc => ({
     id: doc.id,
     username: doc.id,

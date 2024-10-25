@@ -76,7 +76,6 @@ export default function Collection({
     if (wallet) {
       const xpData = async () => {
         const xpData = await GetUserXPAndLevel(wallet.accounts[0].address);
-        console.log(xpData, 'xpData');  
         setUserXP(xpData.xp);
       };
       xpData();
