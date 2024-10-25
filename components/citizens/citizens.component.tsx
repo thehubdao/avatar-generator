@@ -177,7 +177,8 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         const promises = tokenIdList.map(async (tokenIdMetadata) => {
           try {
             const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
-            if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
+            
+            if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign ) {
               updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
               isFirstToken = true;
             }
