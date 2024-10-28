@@ -11,7 +11,7 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
-import { Drop } from "../types/drop.type";
+import { Drop } from "../interfaces/citizens.interface";
 
 //#region Generic
 type QueryParams = { [p: string]: string | number | undefined | null };

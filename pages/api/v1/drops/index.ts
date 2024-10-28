@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { ApproveClaimForUser } from '../../../../utils/web3/drops.util';
 import { ApiResponse } from '../../../../interfaces/api.interface';
 import { RequestResponse } from '../../../../server/api-handler/request.api-handler';
-import { Drop } from '../../../../types/drop.type';
+import { Drop } from '../../../../interfaces/citizens.interface';
 import { GetClaimableDrops } from '../../../../utils/firebase.util';
 
 export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<Drop[] | { approved: boolean }>>) {

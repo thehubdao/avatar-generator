@@ -2,6 +2,7 @@ import { Contract, ethers } from 'ethers';
 import ClaimableDropABI from '../../constants/abi/ClaimableDropABI.json';
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json';
 import { GetClaimableDrops } from '../../utils/firebase.util';
+import { PaymentType } from '../../enums/citizens/common.enum';
 
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
 const PK = process.env.NEXT_PUBLIC_PK!;
@@ -20,7 +21,7 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
     }
     const drop = drops[0];
 
-    if (drop.paymentType === 'TOKEN' && drop.requiredToken) {
+    if (drop.paymentType === PaymentType.TOKEN && drop.requiredToken) {
       const tokenContract = new ethers.Contract(drop.requiredToken, ClaimableDropABI, provider);
       const tokenBalance = await tokenContract.balanceOf(address);
       if (tokenBalance.isZero()) {

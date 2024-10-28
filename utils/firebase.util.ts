@@ -35,7 +35,7 @@ import jwt from 'jsonwebtoken';
 import UniversalProfileContract from '../constants/abi/UniversalProfileABI.json';
 import { GetFollowerCounts } from "./web3/lukso.util";
 import { XPReward } from "../constants/lukso/xp.constant";
-import { Drop } from "../types/drop.type";
+import { Drop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
 
 export type LogInStructure = {

@@ -21,7 +21,7 @@ export default function NotificationCard({ title, points, time, image, deleteSel
         <p className="opacity-50">+{points} XP</p>
         <div className="flex items-center gap-2">
           <ClockSVG />
-          <p className="opacity-50">{time} ago</p>
+          <p className="opacity-50">{time} ago</p> {/* Remove time ago from just now statement */}
         </div>
       </div>
       <button className={`w-10 h-[27px] border border-white rounded-full flex justify-center items-center`} onClick={() => deleteSelf()}>

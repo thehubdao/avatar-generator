@@ -131,6 +131,11 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
     setCurrentCollection(newCollection);
     setCampaign(newCollection.campaign); // This updates the parent state
+    setTimeout(() => {
+      setIsLoading(true);
+      setCurrentSection(CitizensSections.View);
+    }, 2000)
+
   }, [setCampaign]);
 
   // Function to update avatar features based on the current base combination
@@ -177,8 +182,8 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         const promises = tokenIdList.map(async (tokenIdMetadata) => {
           try {
             const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
-            
-            if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign ) {
+
+            if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
               updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
               isFirstToken = true;
             }
@@ -206,6 +211,8 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     }
     featuresPromise()
   }, [walletAddress])
+
+  useEffect(() => { }, [currentCollection.baseCombination])
 
   async function getEnvironmentMapList() {
     if (!campaignParams?.campaign) return
@@ -583,10 +590,10 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   const handleLogin = (isSigned: boolean, selectedLoginCampaign: Campaign) => {
     setSelectedLoginCampaign(selectedLoginCampaign);
     setIsSigned(isSigned);
-    
+
   };
 
-useEffect(()=>{console.log('isLoading', isLoading)},[isLoading])
+  useEffect(() => { console.log('isLoading', isLoading) }, [isLoading])
 
   return (
     <MobileLayout>
