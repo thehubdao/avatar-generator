@@ -370,12 +370,14 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
     await SetFeaturesData(campaignParams?.features ?? [])
 
-
+    const bgMap = envMapList?.find(
+      (em) => em.name === 'gray-01'
+    )
     const lightMap = envMapList?.find(
       (em) => em.name === campaignParams?.config.envMap?.defLightMap
     )
     await SetEnvironment(
-      undefined,
+      bgMap?.path,
       lightMap?.path,
       campaignParams?.config.envMap?.skyboxConfig
     )
