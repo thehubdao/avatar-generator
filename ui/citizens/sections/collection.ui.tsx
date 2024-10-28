@@ -232,7 +232,7 @@ export default function Collection({
             {claimableDrops.map((drop) => (
               <DropItemCard
                 key={drop.id} drop={drop}
-                userXP={userXP + 300}
+                userXP={userXP}
                 userAddress={wallet?.accounts[0].address || ''}
                 provider={wallet?.provider as EIP1193Provider}
                 onClaim={() => handleClaim(drop)}
