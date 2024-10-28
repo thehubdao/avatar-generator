@@ -11,13 +11,13 @@ import SelectorUI from "../common/selector.ui";
 import { CardSize } from "../../../enums/citizens/common.enum";
 import { useConnectWallet } from '@web3-onboard/react';
 import { BrowserProvider, ethers } from 'ethers';
-import { Drop } from '../../../types/drop.type';
 import { ApproveClaimForUser } from '../../../utils/api.util';
-import DropItem from '../components/DropItem';
 import ClaimableDropABI from '../../../constants/abi/ClaimableDropABI.json';
 import { GetUserXPAndLevel } from '../../../utils/firebase.util';
 import { EIP1193Provider } from "@web3-onboard/core";
 import { FetchClaimableDrops } from '../../../utils/api.util';
+import { Drop } from "../../../interfaces/citizens.interface";
+import DropItemCard from "../common/dropItemCard.ui";
 
 interface CollectionProps {
   loadedTokens?: TokenMetadata[];
@@ -146,7 +146,7 @@ export default function Collection({
             {/* CHOOSE CAMPAIGN SELECTOR */}
             <SelectorUI list={campaignList.current} selection={chooseValue} label="CHOOSE CAMPAIGN" selectionHandler={(value) => {
               filterList(searchValue, value);
-            }}/>
+            }} />
           </div>
           <div className="flex flex-wrap justify-center gap-4 p-8 min-h-[336px]">
             {searchValue || chooseValue ?
@@ -156,7 +156,7 @@ export default function Collection({
                     <CampaignCard
                       key={tokenMetadata.campaign + tokenMetadata.tokenId}
                       title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
-                      tokenID={tokenMetadata.tokenId}
+                      tokenID={'#' + tokenMetadata.tokenId}
                       imgSrc={tokenMetadata.imageUrl}
                       imgAlt={tokenMetadata.name}
                       size={CardSize.Small}
@@ -176,7 +176,7 @@ export default function Collection({
                   <CampaignCard
                     key={tokenMetadata.campaign + tokenMetadata.tokenId}
                     title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
-                    tokenID={tokenMetadata.tokenId}
+                    tokenID={'#' + tokenMetadata.tokenId}
                     imgSrc={tokenMetadata.imageUrl}
                     imgAlt={tokenMetadata.name}
                     size={CardSize.Small}
@@ -221,19 +221,18 @@ export default function Collection({
             </label>
             {/* SELECTORS */}
             <div className="flex gap-4">
-              <SelectorUI label="OWNED" list={['Owned','Not Owned','All']} selectionHandler={() => { }} />
-              <SelectorUI label="PRICE" list={['High to low','Low to High']} selectionHandler={() => { }} />
-              <SelectorUI label="LEVEL" list={['LVL 01-10','LVL 01-10','LVL 10-20','LVL 20-30','LVL 30-40','LVL 40-50','LVL 50-60','LVL 60-70','LVL 70-80','LVL 80-90','LVL 90-100']} selectionHandler={() => { }} />
-              <SelectorUI label="CHOOSE DROPS" list={['Chillwhales Head','Metaheads Hat','Platties Tee']} selectionHandler={() => { }} />
+              <SelectorUI label="OWNED" list={['Owned', 'Not Owned', 'All']} selectionHandler={() => { }} />
+              <SelectorUI label="PRICE" list={['High to low', 'Low to High']} selectionHandler={() => { }} />
+              <SelectorUI label="LEVEL" list={['LVL 01-10', 'LVL 01-10', 'LVL 10-20', 'LVL 20-30', 'LVL 30-40', 'LVL 40-50', 'LVL 50-60', 'LVL 60-70', 'LVL 70-80', 'LVL 80-90', 'LVL 90-100']} selectionHandler={() => { }} />
+              <SelectorUI label="CHOOSE DROPS" list={['Chillwhales Head', 'Metaheads Hat', 'Platties Tee']} selectionHandler={() => { }} />
             </div>
           </div>
           {/* DROPS LIST */}
           <div className="grid grid-cols-4 gap-4 p-8">
             {claimableDrops.map((drop) => (
-              <DropItem
-                key={drop.id}
-                drop={drop}
-                userXP={userXP}
+              <DropItemCard
+                key={drop.id} drop={drop}
+                userXP={userXP + 300}
                 userAddress={wallet?.accounts[0].address || ''}
                 provider={wallet?.provider as EIP1193Provider}
                 onClaim={() => handleClaim(drop)}
