@@ -16,3 +16,8 @@ export enum CardSize {
   Medium,
   Large
 }
+
+export enum PaymentType {
+  LYX,
+  TOKEN
+}
