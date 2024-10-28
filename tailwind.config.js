@@ -41,7 +41,9 @@
             gray: '#E6E6E6',
             graylight: '#C6C6C7',
             blue: '#19B5F3',
-            bluedark: '#1E293B' 
+            bluedark: '#1E293B',
+            yellow: '#FDC322',
+            red: '#FD228C'
           }
         },
         boxShadow: {
