@@ -76,6 +76,9 @@ export default function DropItemCard({ drop, userXP, userAddress, provider, onCl
               <Button label="Claim" textStiles="w-full text-center" light handleClick={() => {
                 setIsClaiming(true);
                 onClaim();
+                setIsOpenClaimModal(false)
+                setIsClaiming(false);
+
               }} />
               <Button label="Cancel" textStiles="w-full text-center" light handleClick={() => setIsOpenClaimModal(false)} />
             </div>
