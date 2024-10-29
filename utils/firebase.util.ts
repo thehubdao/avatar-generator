@@ -1240,11 +1240,13 @@ export async function GetLeaderboardData(): Promise<LeaderboardEntry[]> {
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({
     id: doc.id,
-    username: doc.id,
+    address: doc.id,
     xp: doc.data().xp,
     level: doc.data().level,
     citizensHoldings: 0,
-    wearablesHoldings: 0
+    wearablesHoldings: 0,
+    name: '',
+    profileImage: ''
   }));
 }
 

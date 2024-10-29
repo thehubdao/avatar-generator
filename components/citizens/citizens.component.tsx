@@ -37,6 +37,7 @@ import HudUI from "../../ui/avatar/hud.ui";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
 import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
+import { GetUniversalProfileData } from "../../utils/web3/lukso.util";
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -113,7 +114,17 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         const response = await fetch('/api/v1/leaderboard');
         if (!response.ok) throw new Error('Failed to fetch leaderboard data');
         const data = await response.json();
-        setLeaderboardData(data);
+
+        const leaderboardWithProfileData = await Promise.all(data.map(async (entry: LeaderboardEntry) => {
+          const profileData = await GetUniversalProfileData(entry.address);
+          return {
+            ...entry,
+            name: profileData.name,
+            profileImage: profileData.profileImage
+          };
+        }));
+
+        setLeaderboardData(leaderboardWithProfileData);
       } catch (error) {
         console.error('Error fetching leaderboard data:', error);
       }

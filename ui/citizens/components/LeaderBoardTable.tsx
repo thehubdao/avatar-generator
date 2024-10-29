@@ -22,7 +22,7 @@ export default function LeaderboardTable({ entries }: LeaderboardTableProps) {
         {entries.map((entry, index) => (
           <tr key={entry.id}>
             <td>{index + 1}</td>
-            <td>{entry.username}</td>
+            <td>{entry.address}</td>
             <td>{entry.level}</td>
             <td>{entry.xp}</td>
             <td>{entry.citizensHoldings}</td>
