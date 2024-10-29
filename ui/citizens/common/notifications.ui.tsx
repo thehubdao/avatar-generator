@@ -76,7 +76,7 @@ export default function Notifications({address}: {address: string}) {
   }
 
   return (
-    <div className="fixed bottom-8 right-4">
+    <div className="fixed bottom-4 right-4">
       <Button label={`/// ${notifications.length > 0 ? `${notifications.length} ` : 'no '}notifications`} handleClick={() => {setIsOpen(!isOpen)}} withIcon className="w-[376px]" textStiles="text-start pl-2">
         {isOpen ? <div className="w-[14px] h-[2px] bg-white" />:<PlusSVG />}
       </Button>
