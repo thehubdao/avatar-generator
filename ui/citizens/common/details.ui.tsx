@@ -1,10 +1,11 @@
 import Image from "next/image";
 import Button from "./button.ui";
 import PlusSVG from "./SVG/plusSVG.ui";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DownloadSVG from "./SVG/downloadSVG.ui";
 import Modal from "./modal.ui";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
+import Snackbar from "./snackbar.ui";
 
 interface DetailsUIProps {
   data: IndexFeatureInterface[];
@@ -15,8 +16,16 @@ export default function DetailsUI({ data, handleDownload }: DetailsUIProps) {
 
   const [isOpen, setIsOpen] = useState<boolean>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  return (
-    <div className="fixed bottom-8 left-4 w-[419px]">
+  const [isDownloading, setIsDownloading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isDownloading) setTimeout(() => {
+      setIsDownloading(false);
+    }, 3000);
+  }, [isDownloading])
+  
+  return <>
+    <div className="fixed bottom-4 left-4 w-[419px]">
       {
         isOpen ?
           <>
@@ -62,7 +71,10 @@ export default function DetailsUI({ data, handleDownload }: DetailsUIProps) {
               <p className="text-lg">and experience the 3D Web</p>
             </div>
             <div className="grid gap-4 pt-8">
-              <Button label="Download VRM" light handleClick={() => { handleDownload() }} />
+              <Button label="Download VRM" light handleClick={() => { 
+                handleDownload();
+                setIsDownloading(true);
+              }} />
               <Button label="Download GLB" light handleClick={() => { }} />
               <Button label="Download PNG" light handleClick={() => { }} />
             </div>
@@ -70,5 +82,10 @@ export default function DetailsUI({ data, handleDownload }: DetailsUIProps) {
         </Modal>
       }
     </div>
-  )
+    { isDownloading &&
+      <Snackbar>
+        <p>Your Citizen is being downloaded, please wait...</p>
+      </Snackbar>
+    }
+  </>
 }
