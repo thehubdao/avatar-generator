@@ -38,6 +38,7 @@ import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.co
 import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { GetUniversalProfileData } from "../../utils/web3/lukso.util";
+import Snackbar from "../../ui/citizens/common/snackbar.ui";
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -86,6 +87,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   })
 
   // Edit state
+  const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false);
   const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>();
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
@@ -508,6 +510,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   async function saveCombination() {
     if (!walletAddress) return
+    setIsSavingCombination(true);
     const newCombination = singleInitData?.features
       .map((feature) => feature.val.index)
       .join('-') as string
@@ -608,6 +611,12 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   useEffect(() => { console.log('isLoading', isLoading) }, [isLoading])
 
+  useEffect(() => {
+    if (isSavingCombination) setTimeout(() => {
+      setIsSavingCombination(false);
+    }, 5000);
+  }, [isSavingCombination])
+
   return (
     <MobileLayout>
       <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
@@ -674,6 +683,11 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   }
                   isLoading={isLoading}
                 />
+              }
+              {isSavingCombination &&
+                <Snackbar>
+                  <p>The changes are being saved onchain, it might take up to 4 minutes for them to be effective. Do not leave the app.</p>
+                </Snackbar>
               }
             </div>
             {/* CANVAS */}
