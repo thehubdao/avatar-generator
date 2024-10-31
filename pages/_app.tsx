@@ -49,6 +49,7 @@ const chains = [luksoMainnetNetwork]
 const connectionOptions: ConnectModalOptions = {
     iDontHaveAWalletLink: UP_BROWSER_EXTENSION_URL,
     removeWhereIsMyWalletWarning: true,
+    autoConnectLastWallet: true,
 }
 
 const i18n: I18nOptions = {

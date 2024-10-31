@@ -1128,7 +1128,7 @@ export async function GenerateSessionToken(address: string, message: string, sig
   const token = jwt.sign(
     {
       address: address,
-      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24) // 24 hours expiration
+      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 6) // 6 hours expiration
     },
     process.env.JWT_SECRET as string
   );
@@ -1257,5 +1257,20 @@ export async function GetDropsContractAddresses(): Promise<string[]> {
   } catch (error) {
     console.error('Error fetching drops contract addresses:', error);
     return [];
+  }
+}
+
+export async function HasValidToken(): Promise<boolean> {
+  try {
+    const response = await fetch('/api/v1/auth/verify', {
+      method: 'GET',
+      credentials: 'include'
+    });
+    
+    const data = await response.json();
+    return data.success;
+  } catch (error) {
+    console.error('Error verifying token:', error);
+    return false;
   }
 }

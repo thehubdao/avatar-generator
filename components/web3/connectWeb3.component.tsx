@@ -1,6 +1,7 @@
 import { ConnectedChain, EIP1193Provider, WalletState } from "@web3-onboard/core"
 import { useConnectWallet } from "@web3-onboard/react"
 import { ethers } from "ethers"
+import { useEffect } from "react";
 import { SiweMessage } from "siwe"
 
 interface ConnectWeb3ButtonProps {
@@ -10,14 +11,23 @@ interface ConnectWeb3ButtonProps {
     children: React.ReactNode;
     setIsConnecting: (connecting: boolean) => void;
     setIsSigning: (signing: boolean) => void;
-    setIsVerifying: (verifying: boolean) => void;   
+    setIsVerifying: (verifying: boolean) => void;
     isConnecting: boolean;
     isSigning: boolean;
-    isVerifying: boolean;   
+    isVerifying: boolean;
 }
 
-export default function ConnectWeb3Button({ children, classStyles, setIsSigned,setIsConnecting,setIsSigning,setIsVerifying, isConnecting,isSigning,isVerifying  }: ConnectWeb3ButtonProps) {
+export default function ConnectWeb3Button({ children, classStyles, setIsSigned, setIsConnecting, setIsSigning, setIsVerifying, isConnecting, isSigning, isVerifying }: ConnectWeb3ButtonProps) {
     const [{ wallet }, connect] = useConnectWallet()
+
+    useEffect(() => {
+        const checkToken = async () => {
+            if (wallet?.provider && wallet.accounts[0] && await HasValidToken()) {
+                setIsSigned(true)
+            }
+        }
+        checkToken()
+    }, [wallet?.provider, wallet?.accounts])
 
     const handleSign = async (wallet: WalletState) => {
         if (!wallet) return
@@ -52,7 +62,7 @@ export default function ConnectWeb3Button({ children, classStyles, setIsSigned,s
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        address: wallet.accounts[0].address.toLocaleLowerCase(),
+                        address: wallet.accounts[0].address.toLowerCase(),
                         message,
                         signature
                     }),
@@ -70,11 +80,7 @@ export default function ConnectWeb3Button({ children, classStyles, setIsSigned,s
                     console.error('Failed to verify authentication')
                 }
 
-
                 setIsVerifying(false)
-            } else {
-                console.error("No signer available")
-                setIsSigning(false)
             }
         } catch (error) {
             console.error("Error signing or verifying:", error)
@@ -83,22 +89,28 @@ export default function ConnectWeb3Button({ children, classStyles, setIsSigned,s
         }
     }
 
+
+
     const handleConnect = async () => {
         if (!wallet) {
             setIsConnecting(true)
-            const wallet = await connect()
-            await handleSign(wallet[0])
+            const walletResponse = await connect()
 
+            // Check for valid token first
+            const hasToken = await HasValidToken();
+
+            if (!hasToken)
+                await handleSign(walletResponse[0])
+
+            setIsSigned(true);
+            setIsConnecting(false);
         }
     }
 
     return (
         <button
             className={classStyles}
-            onClick={async () => {
-                await handleConnect()
-
-            }}
+            onClick={handleConnect}
             disabled={isConnecting || isSigning || isVerifying}
         >
             <div className="flex items-center gap-3">
@@ -110,4 +122,20 @@ export default function ConnectWeb3Button({ children, classStyles, setIsSigned,s
 
 async function CreateNonce(): Promise<string> {
     return Math.random().toString(36).substring(2, 15)
+}
+
+async function HasValidToken(): Promise<boolean> {
+    try {
+        const response = await fetch('/api/v1/auth/verify', {
+            method: 'GET',
+            credentials: 'include' // Important to include cookies
+        });
+
+        const data = await response.json();
+        console.log('Token verification response:', data);
+        return data.success;
+    } catch (error) {
+        console.error('Error verifying token:', error);
+        return false;
+    }
 }

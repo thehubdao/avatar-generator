@@ -609,8 +609,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   };
 
-  useEffect(() => { console.log('isLoading', isLoading) }, [isLoading])
-
   useEffect(() => {
     if (isSavingCombination) setTimeout(() => {
       setIsSavingCombination(false);
