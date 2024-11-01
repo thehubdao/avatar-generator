@@ -63,7 +63,7 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
         }
         <SwiperSlide className="w-96"><CampaignCard
           title={'Based Citizens'}
-          imgSrc={'/resources/images/campaings/coming_soon.jpg'}
+          imgSrc={'/resources/images/campaings/based_citizens.png'}
           imgAlt={'Based Citizens'}
           overlayText={
             'Coming Soon'
