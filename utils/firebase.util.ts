@@ -37,6 +37,7 @@ import { GetFollowerCounts } from "./web3/lukso.util";
 import { XPReward } from "../constants/lukso/xp.constant";
 import { Drop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
+import { GetWearablesHoldings } from "./web3/contract.util";
 
 export type LogInStructure = {
   user: string;
@@ -1026,8 +1027,9 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
 
       // Get current follower and following counts
       const { followerCount, followingCount } = await GetFollowerCounts(address);
+      const wearablesCount = await GetWearablesHoldings(address);
 
-      // Check if follower/following counts have increased
+      // Check if follower/following/wearables counts have increased
       if (followerCount > (userData.followerCount || 0)) {
         await HandleFollowerChange(address, followerCount, userData.followerCount || 0);
       }
@@ -1036,14 +1038,22 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         await HandleFollowingChange(address, followingCount, userData.followingCount || 0);
       }
 
+      if (wearablesCount > (userData.wearablesCount || 0)) {
+        await HandleWearableHoldings(address, wearablesCount, userData.wearablesCount || 0);
+      }
+
       await setDoc(userDocRef, { 
         lastLogin: Timestamp.now(),
         followerCount,
         followingCount,
+        wearablesCount,
         loginStreak: userData.loginStreak
       }, { merge: true });
     } else {
       // If the user doesn't exist, create a new document with all fields
+      const wearablesCount = await GetWearablesHoldings(address);
+      const initialXP = wearablesCount * XPReward.WearableHolding + 50; // Base XP + wearables bonus
+
       await setDoc(userDocRef, {
         account: '',
         campaign: [],
@@ -1052,13 +1062,24 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         role: 1,
         address: address.toLowerCase(),
         lastLogin: Timestamp.now(),
-        xp: 50,
+        xp: initialXP,
         level: 1,
         xpForNextLevel: 100,
         followerCount: 0,
         followingCount: 0,
+        wearablesCount,
         loginStreak: 1
       });
+
+      if (wearablesCount > 0) {
+        await CreateNotification(address, {
+          title: 'Welcome Bonus',
+          message: `Welcome! You've earned ${wearablesCount * XPReward.WearableHolding} XP for your ${wearablesCount} existing wearable${wearablesCount > 1 ? 's' : ''}!`,
+          points: wearablesCount * XPReward.WearableHolding,
+          time: new Date().toISOString(),
+          id: ''
+        });
+      }
     }
 
     return { success: true, value: true };
@@ -1273,4 +1294,29 @@ export async function HasValidToken(): Promise<boolean> {
     console.error('Error verifying token:', error);
     return false;
   }
+}
+
+async function HandleWearableHoldings(address: string, newCount: number, oldCount: number) {
+  const newWearables = newCount - oldCount;
+  if (newWearables <= 0) return;
+
+  const xpGained = newWearables * XPReward.WearableHolding;
+  const xpResult = await UpdateUserXP(address, xpGained);
+  if (!xpResult.success) return;
+
+  await CreateNotification(address, {
+    title: 'New Wearables',
+    message: GenerateWearablesMessage(newWearables, xpGained, xpResult.value),
+    points: xpGained,
+    time: new Date().toISOString(),
+    id: ''
+  });
+}
+
+function GenerateWearablesMessage(count: number, xp: number, levelInfo: { leveledUp: boolean, newLevel: number }) {
+  let message = `You've gained XP for ${count} new wearable${count > 1 ? 's' : ''}! You've earned ${xp} XP.`;
+  if (levelInfo.leveledUp) {
+    message += ` Congratulations! You've reached level ${levelInfo.newLevel}!`;
+  }
+  return message;
 }
