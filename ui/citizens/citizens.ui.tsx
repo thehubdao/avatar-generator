@@ -28,7 +28,7 @@ export default function CitizensUI({ currentSection,  currentCollection, updateC
         <>
           {/* details */}
           {features &&
-            <DetailsUI data={features} handleDownload={() => exportModel()}/>
+            <DetailsUI data={features} handleDownload={() => exportModel()} imgUrl={currentCollection.tokenMetadata.imageUrl}/>
           }
           {/* notifications */}
           <Notifications address={address} />
