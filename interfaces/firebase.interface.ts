@@ -13,7 +13,7 @@ export interface LogInInterface {
 }
 
 export interface UserInterface {
-  wearablesCount: number;
+  wearablesCount?: number;
   followerCount?: number;
   followingCount?: number;
   loginStreak?: number;
