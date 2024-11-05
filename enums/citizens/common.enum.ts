@@ -5,6 +5,11 @@ export enum CitizensSections {
   Play
 }
 
+export enum CollectionSections {
+  CITIZENS,
+  WEARABLES
+}
+
 export enum TheHubSocialLinks {
   SocialX = 'https://x.com/thehub_dao',
   SocialInstagram = 'https://www.instagram.com/thehub_dao/',
