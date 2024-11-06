@@ -1,4 +1,4 @@
-import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { usePrivy } from '@privy-io/react-auth'
 import { BrowserProvider, ethers } from 'ethers'
 import { useEffect, useState } from 'react'
 import { Drop } from '../../../interfaces/citizens.interface'
@@ -10,28 +10,25 @@ import DropItemCard from './dropItemCard.ui'
 import SearchSVG from './SVG/searchSVG.ui'
 import { FetchClaimableDrops } from '../../../utils/api.util'
 
-export default function WearablesCollection() {
-  const { user } = usePrivy()
-  const { wallets } = useWallets();
+export default function WearablesCollection({ provider }: { provider: BrowserProvider | null }) {
+    const { user } = usePrivy()
+  
   const [claimableDrops, setClaimableDrops] = useState<Drop[]>([])
   const [userXP, setUserXP] = useState<number>(0)
-  const [provider, setProvider] = useState<BrowserProvider | null>(null)
+
 
 
   const handleClaim = async (drop: Drop) => {
-    if (!user?.wallet) return
+    if (!user?.wallet || !provider) return
 
     try {
-      // 1. Off-chain verification
+      console.log(user.wallet.address, drop.id)
       const isApproved = await ApproveClaimForUser(user.wallet.address, drop.id)
+      console.log(isApproved)
       if (!isApproved) {
         console.error('Claim not approved')
         return
       }
-
-      // 2. On-chain claim
-      const provider = new ethers.BrowserProvider(await wallets[0].getEthereumProvider())
-      setProvider(provider)
       const signer = await provider.getSigner()
       const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer)
       
@@ -40,6 +37,9 @@ export default function WearablesCollection() {
         value: drop.price ? ethers.parseEther(drop.price.toString()) : undefined
       })
       await claimTx.wait()
+
+      const drops = await FetchClaimableDrops();
+      setClaimableDrops(drops);
 
     } catch (error) {
       console.error('Error claiming drop:', error)
@@ -95,15 +95,16 @@ export default function WearablesCollection() {
         </div>
         {/* DROPS LIST */}
         <div className="grid grid-cols-4 gap-4 p-8">
-          {claimableDrops.map((drop) => (
-            <DropItemCard
+          {claimableDrops.map((drop) => 
+            {
+            return <DropItemCard
               key={drop.id} drop={drop}
               userXP={userXP}
               userAddress={user?.wallet?.address || ''}
               provider={provider as BrowserProvider}
               onClaim={() => handleClaim(drop)}
-            />
-          ))}
+            />}
+          )}
         </div>
       </div>
     </div>

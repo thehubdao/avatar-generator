@@ -1,8 +1,6 @@
 import { PrivyProvider } from '@privy-io/react-auth';
-import { useRouter } from 'next/router';
 
 export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
 
   return (
     <PrivyProvider
@@ -17,7 +15,6 @@ export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
           createOnLogin: 'users-without-wallets',
         },
       }}
-      onSuccess={() => router.push('/')}
     >
       {children}
     </PrivyProvider>

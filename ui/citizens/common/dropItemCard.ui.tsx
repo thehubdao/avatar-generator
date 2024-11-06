@@ -13,7 +13,7 @@ interface DropItemCardProps {
   userXP: number;
   userAddress: string;
   provider: BrowserProvider;
-  onClaim: () => void;
+  onClaim: () => Promise<void>;
 }
 
 export default function DropItemCard({ drop, userXP, userAddress, provider, onClaim }: DropItemCardProps) {
@@ -34,7 +34,7 @@ export default function DropItemCard({ drop, userXP, userAddress, provider, onCl
     };
 
     checkClaimStatus();
-  }, [drop.contractAddress, userAddress, provider]);
+  });
 
   return <>
     <CampaignCard
@@ -72,9 +72,9 @@ export default function DropItemCard({ drop, userXP, userAddress, provider, onCl
           </div>
           {!isClaiming ?
             <div className="grid gap-4 pt-8">
-              <Button label="Claim" textStiles="w-full text-center" light handleClick={() => {
+              <Button label="Claim" textStiles="w-full text-center" light handleClick={async () => {
                 setIsClaiming(true);
-                onClaim();
+                await onClaim();
                 setIsOpenClaimModal(false)
                 setIsClaiming(false);
 

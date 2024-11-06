@@ -8,6 +8,7 @@ import Collection from "./sections/collection.ui";
 import LeaderBoard from "./sections/leaderBoard.ui";
 import Play from "./sections/play.ui";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
+import { BrowserProvider } from "ethers";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -18,10 +19,11 @@ interface CitizensUIProps {
   exportModel: () => Promise<void>;
   address: string;
   leaderboardData: LeaderboardEntry[];
+  provider: BrowserProvider | null;
 }
 
 
-export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address, leaderboardData }: CitizensUIProps) {
+export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, provider }: CitizensUIProps) {
   return (
     <>
       {currentSection === CitizensSections.View && (
@@ -40,6 +42,7 @@ export default function CitizensUI({ currentSection,  currentCollection, updateC
             loadedTokens={loadedTokens}
             currentCollection={currentCollection}
             updateCollection={updateCollection}
+            provider={provider}
           />
         </>
       )}

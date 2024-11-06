@@ -1,6 +1,6 @@
 'use client'
 
-import { usePrivy } from '@privy-io/react-auth'
+import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import MobileLayout from "../../layouts/mobile.layout";
 import { Campaign, CampaignDrops, TokenId, TokenMetadata } from "../../types/metadata.type";
@@ -41,6 +41,7 @@ import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { GetUniversalProfileData } from "../../utils/web3/lukso.util";
 import Snackbar from "../../ui/citizens/common/snackbar.ui";
+import { BrowserProvider } from 'ethers';
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -71,6 +72,8 @@ let featureList: FeatureInterface[] | undefined
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
   const { authenticated: isAuthenticated, user } = usePrivy()
+  const { wallets } = useWallets();
+  const [provider, setProvider] = useState<BrowserProvider | null>(null);
   const [isSigned, setIsSigned] = useState(false)
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -106,6 +109,20 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   });
 
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+
+  useEffect(() => {
+    const setupProvider = async () => {
+      if (wallets && wallets.length > 0) {
+        const ethProvider = await wallets[0].getEthereumProvider();
+        const browserProvider = new BrowserProvider(ethProvider);
+        setProvider(browserProvider);
+      }
+    };
+
+    if (isAuthenticated && wallets?.length > 0) {
+      setupProvider();
+    }
+  }, [isAuthenticated, wallets]);
 
   useEffect(() => {
     async function fetchLeaderboardData() {
@@ -732,6 +749,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                 exportModel={() => exportModel()}
                 address={walletAddress ?? ""}
                 leaderboardData={leaderboardData}
+                provider={provider}
               />
             }
           </>
