@@ -12,7 +12,7 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
   }
 
   try {
-    const token = await GenerateSessionToken(address, message, signature);
+    const token = await GenerateSessionToken(address);
 
     // Set the token as an HTTP-only cookie
     res.setHeader('Set-Cookie', `session=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`);

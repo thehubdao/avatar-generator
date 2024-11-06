@@ -1,7 +1,7 @@
 import Image from "next/image";
 import TransparentBoxUI from "./transparentBox.ui";
 import { useState } from "react";
-import { useConnectWallet } from "@web3-onboard/react";
+import { useWallets } from "@privy-io/react-auth";
 
 interface AccountModalUIProps {
   addressAccount: string;
@@ -14,7 +14,8 @@ interface AccountModalUIProps {
 export default function AccountModalUI({ addressAccount, formatAddress, setIsAccountModalOpen, onDisconnect, followerCount }: AccountModalUIProps) {
   const [isCopyAddress, setIsCopyAddress] = useState<boolean>(false);
   const [copyAddressMessage, setCopyAddressMessage] = useState<string>("");
-  const [{ wallet }, , disconnect,] = useConnectWallet()
+  const { wallets } = useWallets()
+  const wallet = wallets[0]
   async function copyToClipboard(text: string): Promise<void> {
     setIsCopyAddress(true);
 
@@ -64,7 +65,6 @@ export default function AccountModalUI({ addressAccount, formatAddress, setIsAcc
             <button className="w-72 h-fit" onClick={() => {
               void (async () => {
                 if (!wallet) return
-                await disconnect({ label: wallet.label })
                 onDisconnect()
               })()
               setIsAccountModalOpen(false)

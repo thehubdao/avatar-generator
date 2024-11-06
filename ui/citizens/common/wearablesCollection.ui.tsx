@@ -1,57 +1,60 @@
-import { useEffect, useState } from "react";
-import DropItemCard from "./dropItemCard.ui";
-import SelectorUI from "./selector.ui";
-import SearchSVG from "./SVG/searchSVG.ui";
-import { Drop } from "../../../interfaces/citizens.interface";
-import { useConnectWallet } from "@web3-onboard/react";
-import { EIP1193Provider } from "@web3-onboard/core";
-import { ApproveClaimForUser, FetchClaimableDrops } from "../../../utils/api.util";
-import { BrowserProvider, ethers } from "ethers";
-import ClaimableDropABI from '../../../constants/abi/ClaimableDropABI.json';
-import { GetUserXPAndLevel } from "../../../utils/firebase.util";
+import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { BrowserProvider, ethers } from 'ethers'
+import { useEffect, useState } from 'react'
+import { Drop } from '../../../interfaces/citizens.interface'
+import { GetUserXPAndLevel } from '../../../utils/firebase.util'
+import { ApproveClaimForUser } from '../../../utils/web3/drops.util'
+import ClaimableDropABI from '../../../constants/abi/ClaimableDropABI.json'
+import SelectorUI from './selector.ui'
+import DropItemCard from './dropItemCard.ui'
+import SearchSVG from './SVG/searchSVG.ui'
+import { FetchClaimableDrops } from '../../../utils/api.util'
 
 export default function WearablesCollection() {
-  
-  const [{ wallet }] = useConnectWallet();
-  const [claimableDrops, setClaimableDrops] = useState<Drop[]>([]);
-  const [userXP, setUserXP] = useState<number>(0);
+  const { user } = usePrivy()
+  const { wallets } = useWallets();
+  const [claimableDrops, setClaimableDrops] = useState<Drop[]>([])
+  const [userXP, setUserXP] = useState<number>(0)
+  const [provider, setProvider] = useState<BrowserProvider | null>(null)
+
 
   const handleClaim = async (drop: Drop) => {
-    if (!wallet) return;
+    if (!user?.wallet) return
 
     try {
       // 1. Off-chain verification
-      const isApproved = await ApproveClaimForUser(wallet.accounts[0].address, drop.id);
+      const isApproved = await ApproveClaimForUser(user.wallet.address, drop.id)
       if (!isApproved) {
-        console.error('Claim not approved');
-        return;
+        console.error('Claim not approved')
+        return
       }
 
       // 2. On-chain claim
-      const provider = new BrowserProvider(wallet.provider);
-      const signer = await provider.getSigner();
-      const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer);
+      const provider = new ethers.BrowserProvider(await wallets[0].getEthereumProvider())
+      setProvider(provider)
+      const signer = await provider.getSigner()
+      const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer)
+      
       const claimTx = await dropContract.claim({
         gasLimit: 500000,
         value: drop.price ? ethers.parseEther(drop.price.toString()) : undefined
-      });
-      await claimTx.wait();
-
+      })
+      await claimTx.wait()
 
     } catch (error) {
-      console.error('Error claiming drop:', error);
+      console.error('Error claiming drop:', error)
     }
-  };
+  }
 
   useEffect(() => {
-    if (wallet) {
-      const xpData = async () => {
-        const xpData = await GetUserXPAndLevel(wallet.accounts[0].address);
-        setUserXP(xpData.xp);
-      };
-      xpData();
+    if (user?.wallet?.address) {
+      const fetchXPData = async () => {
+        const xpData = await GetUserXPAndLevel(user?.wallet?.address || '')
+        setUserXP(xpData.xp)
+      }
+      fetchXPData()
     }
-  }, [wallet]);
+  }, [user?.wallet?.address])
 
   useEffect(() => {
     async function fetchDrops() {
@@ -60,7 +63,7 @@ export default function WearablesCollection() {
     }
     fetchDrops();
   }, []);
-  
+
   return (
     <div className="container mx-auto pt-8">
       {/*  CITIZENS TABLE */}
@@ -96,8 +99,8 @@ export default function WearablesCollection() {
             <DropItemCard
               key={drop.id} drop={drop}
               userXP={userXP}
-              userAddress={wallet?.accounts[0].address || ''}
-              provider={wallet?.provider as EIP1193Provider}
+              userAddress={user?.wallet?.address || ''}
+              provider={provider as BrowserProvider}
               onClaim={() => handleClaim(drop)}
             />
           ))}

@@ -113,7 +113,7 @@ export default function LoginUI({setIsSigned}: LoginUIProps) {
               alt="Lukso icon"
             />
           </div>
-          <ConnectWeb3Button classStyles="h-fit" setIsSigned={setIsSigned} setIsConnecting={() => { } } setIsSigning={() => { } } setIsVerifying={() => { } } isConnecting={false} isSigning={false} isVerifying={false} >
+          <ConnectWeb3Button classStyles="h-fit" setIsSigned={setIsSigned} >
               <TransparentBoxUI fullWidth border backgroundColorClass="bg-white" heightClass="h-12" >
                 <div className="flex items-center gap-3">
                   <p className="text-black">Login to manage your citizens</p>

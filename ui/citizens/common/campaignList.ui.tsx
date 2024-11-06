@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { CitizensCollection } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
@@ -14,9 +14,6 @@ interface CampaignListProps {
 }
 
 export default function CampaignList({ collections, setIsSigned }: CampaignListProps) {
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isSigning, setIsSigning] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
 
   return (
     <div className="w-full mx-auto">
@@ -35,25 +32,13 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
               <ConnectWeb3Button
                 classStyles="w-full h-full"
                 setIsSigned={(isSigned: boolean) => setIsSigned(isSigned, el.campaign)}
-                setIsConnecting={setIsConnecting}
-                setIsSigning={setIsSigning}
-                setIsVerifying={setIsVerifying}
-                isConnecting={isConnecting}
-                isSigning={isSigning}
-                isVerifying={isVerifying}
               >
                 <CampaignCard
                   title={el.name}
                   imgSrc={el.image}
                   imgAlt={el.name}
                   overlayText={
-                    isConnecting
-                      ? "Connecting..."
-                      : isSigning
-                        ? "Signing..."
-                        : isVerifying
-                          ? "Verifying..."
-                          : "LOG IN"
+               "LOG IN"
                   }
                 />
               </ConnectWeb3Button>

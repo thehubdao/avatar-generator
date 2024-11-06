@@ -7,6 +7,7 @@ import StarSVG from "./SVG/starSVG.ui";
 import { useFollowCount } from "../../../hooks/useFollowCount";
 import { FormatWalletAddress } from "../../../utils/common.util";
 import { useUniversalProfile } from '../../../hooks/useUniversalProfile';
+import { usePrivy } from '@privy-io/react-auth';
 
 interface ConnectButtonProps {
   isSigned?: boolean;
@@ -20,10 +21,8 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
   const [userXP, setUserXP] = useState(0);
   const [userLevel, setUserLevel] = useState(0);
   const [nextLevelXP, setNextLevelXP] = useState(0);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isSigning, setIsSigning] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const { name, profileImage } = useUniversalProfile(address);
+  const {authenticated:isAuthenthicated, user, ready:isReady } = usePrivy();
 
   useEffect(() => {
     if (address) {
@@ -34,6 +33,12 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
       });
     }
   }, [address]);
+
+  useEffect(() => {
+    if (isAuthenthicated && user) {
+      setIsSigned(true);
+    }
+  }, [isAuthenthicated, user, setIsSigned]);
 
   return (
     <div className="relative w-fit 2xl:w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">
@@ -125,17 +130,10 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
         <ConnectWeb3Button 
           classStyles="w-full h-full" 
           setIsSigned={setIsSigned}
-          setIsConnecting={setIsConnecting}
-          setIsSigning={setIsSigning}
-          setIsVerifying={setIsVerifying}
-          isConnecting={isConnecting}
-          isSigning={isSigning}
-          isVerifying={isVerifying}
         >
           <div className="w-full h-full font-light text-lg">
-            {isConnecting ? "Connecting..." :
-             isSigning ? "Signing..." :
-             isVerifying ? "Verifying..." :
+            {!isReady ? "Loading..." : 
+             isAuthenthicated ? "Connected" : 
              "Log in"}
           </div>
         </ConnectWeb3Button>

@@ -1,4 +1,4 @@
-import { EIP1193Provider } from "@web3-onboard/core";
+import { BrowserProvider } from "ethers";
 import { Drop } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
@@ -12,7 +12,7 @@ interface DropItemCardProps {
   drop: Drop;
   userXP: number;
   userAddress: string;
-  provider: EIP1193Provider;
+  provider: BrowserProvider;
   onClaim: () => void;
 }
 
@@ -25,8 +25,7 @@ export default function DropItemCard({ drop, userXP, userAddress, provider, onCl
   useEffect(() => {
     const checkClaimStatus = async () => {
       try {
-        const ethersProvider = new ethers.BrowserProvider(provider);
-        const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, ethersProvider);
+        const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, provider);
         const balance = await contract.balanceOf(userAddress);
         setIsClaimed(balance > 0);
       } catch (error) {

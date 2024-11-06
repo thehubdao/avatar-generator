@@ -1,3 +1,6 @@
+'use client'
+
+import { usePrivy } from '@privy-io/react-auth'
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import MobileLayout from "../../layouts/mobile.layout";
 import { Campaign, CampaignDrops, TokenId, TokenMetadata } from "../../types/metadata.type";
@@ -5,7 +8,6 @@ import LoginUI from "../../ui/citizens/sections/login.ui";
 import Image from "next/image";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import CitizensUI from "../../ui/citizens/citizens.ui";
-import { useConnectWallet } from "@web3-onboard/react";
 import { burnDrop, getCampaignsTokenIds, getUserFeatures, setTokenMetadata } from "../../utils/web3/contract.util";
 import { CitizensCollection } from "../../interfaces/citizens.interface";
 import Button from "../../ui/citizens/common/button.ui";
@@ -68,14 +70,13 @@ let featureList: FeatureInterface[] | undefined
 
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
-  const [isSigned, setIsSigned] = useState<boolean>(false); // false: log out, true: logged in
+  const { authenticated: isAuthenticated, user } = usePrivy()
+  const [isSigned, setIsSigned] = useState(false)
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
 
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
-
-  const [{ wallet }] = useConnectWallet()
 
   const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>([]);
 
@@ -103,10 +104,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     vrm_male: [],
     vrm_female: [],
   });
-  // const [selectedCombination, setSelectedCombination] = useState<string>();
-  // const [selectedcombination, setSelectedcombination] = useState<string>();
-  // const [selectedTokenId, setSelectedTokenId] = useState<number>();
-  // const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>();
 
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
 
@@ -172,12 +169,10 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   }, [updateAvatarFeatures]);
 
   useEffect(() => {
-    if (!isSigned || !wallet) return
+    if (!user?.wallet?.address) return
 
-    const address = wallet.accounts[0].address
-
-    setWalletAddress(address.toLowerCase())
-  }, [isSigned])
+    setWalletAddress(user.wallet.address.toLowerCase())
+  }, [user?.wallet?.address])
 
   useEffect(() => {
     if (!walletAddress) return
@@ -616,6 +611,12 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       setIsSavingCombination(false);
     }, 5000);
   }, [isSavingCombination])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      setIsSigned(true)
+    }
+  }, [isAuthenticated])
 
   return (
     <MobileLayout>

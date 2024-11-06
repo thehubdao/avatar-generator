@@ -65,7 +65,6 @@ import {
 import { BodyPart } from '../../types/avatar.type'
 import AccountModalUI from '../../ui/lukso/common/accountModal'
 import Loader from '../../ui/lukso/common/loader.ui'
-import { useConnectWallet } from '@web3-onboard/react'
 import {
     burnDrop,
     getCampaignsTokenIds,
@@ -81,6 +80,7 @@ import { SelectableCampaign } from '../../types/common.type'
 import { fileCampaignNameLabel } from '../../constants/lukso/labels.constant'
 import { StorageLocation } from '../../enums/firebase.enum'
 import { useFollowCount } from '../../hooks/useFollowCount'
+import { useWallets } from '@privy-io/react-auth'
 
 const exportData: ExportInterface = { attributes: [] }
 let optionList: FeatureInterface[] | undefined
@@ -159,7 +159,8 @@ export default function LuksoComponent({
         ''
     )
     const [isAccountModalOpen, setIsAccountModalOpen] = useState<boolean>(false)
-    const [{ wallet }] = useConnectWallet()
+    const { wallets } = useWallets()
+    const wallet = wallets[0]
     const [isSigned, setIsSigned] = useState(false)
 
 
@@ -206,7 +207,7 @@ export default function LuksoComponent({
     useEffect(() => {
         if (!isSigned || !wallet) return
 
-        const address = wallet.accounts[0].address
+        const address = wallet.address
 
         setAddressToShow(address)
     }, [isSigned])
@@ -735,7 +736,7 @@ else bodyFeature =  newMetadata.body[feature.val.type.toLowerCase() as keyof typ
                                         </button>
                                     ) : (
                                         <ConnectWeb3Button
-                                                classStyles={'w-48 border-l-2 border-white font-bold text-white'} setIsSigned={() => { } } setIsConnecting={() => { } } setIsSigning={() => { } } setIsVerifying={() => { } } isConnecting={false} isSigning={false} isVerifying={false}                                        >
+                                                classStyles={'w-48 border-l-2 border-white font-bold text-white'} setIsSigned={() => { } }                                          >
                                             <> Login with your UP!</>
                                         </ConnectWeb3Button>
                                     )}

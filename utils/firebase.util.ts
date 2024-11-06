@@ -30,9 +30,7 @@ import { ParameterNameType } from "../types/firebase.type";
 import { Client } from '../enums/client.enum'
 import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
 import { deleteDoc, doc, getDoc, orderBy, Timestamp } from 'firebase/firestore';
-import { ethers } from 'ethers';
 import jwt from 'jsonwebtoken';
-import UniversalProfileContract from '../constants/abi/UniversalProfileABI.json';
 import { GetFollowerCounts } from "./web3/lukso.util";
 import { XPReward } from "../constants/lukso/xp.constant";
 import { Drop } from "../interfaces/citizens.interface";
@@ -1107,33 +1105,23 @@ export async function UpdateUserXP(userId: string, xpToAdd: number): Promise<Res
   }
 }
 
-export async function GenerateSessionToken(address: string, message: string, signature: string): Promise<string> {
-  const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  const universalProfileContract = new ethers.Contract(
-    address,
-    UniversalProfileContract,
-    provider
-  );
+export async function GenerateSessionToken(address: string): Promise<string> {
+  try {
+    await UpdateLastLoginDate(address);
 
-  const hashedMessage = ethers.hashMessage(message);
-  const isValidSignature = await universalProfileContract.isValidSignature(hashedMessage, signature);
+    const token = jwt.sign(
+      {
+        address: address.toLowerCase(),
+        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24) // 24 hours expiration
+      },
+      process.env.JWT_SECRET as string
+    );
 
-  if (isValidSignature !== '0x1626ba7e') {
-    throw new Error('Invalid signature');
+    return token;
+  } catch (error) {
+    console.error('Error generating session token:', error);
+    throw error;
   }
-
-  await UpdateLastLoginDate(address);
-
-  // Generar JWT token
-  const token = jwt.sign(
-    {
-      address: address,
-      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24) // 24 hours expiration
-    },
-    process.env.JWT_SECRET as string
-  );
-
-  return token;
 }
 
 export async function CreateNotification(userId: string, notification: { title: string, message: string, points: number, time: string, id: string }): Promise<Result<boolean>> {
