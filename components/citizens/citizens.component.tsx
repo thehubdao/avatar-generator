@@ -783,14 +783,14 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                 }
 
               }} />
-              <Button label="backpack" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
+              <Button label="Wardrobe" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
                 if (currentSection !== CitizensSections.View) {
                   setIsLoading(true);
                   setCurrentSection(CitizensSections.View);
                 }
                 setIsEditModeSelected(true);
               }} />
-              <Button label="collection" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
+              <Button label="Backpack" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
                 setIsLoading(false);
                 setCurrentSection(CitizensSections.Collection);
               }} />
