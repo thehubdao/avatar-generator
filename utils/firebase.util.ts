@@ -1240,8 +1240,17 @@ export async function GetLeaderboardData(): Promise<LeaderboardEntry[]> {
 
 export async function GetDropsContractAddresses(): Promise<string[]> {
   try {
-    const dropsData = await GetCollectionDocs('drops');
-    return dropsData.map(drop => drop.contract_address);
+    const vrmTypes = ['vrm_female', 'vrm_male'];
+    const contractAddresses: string[] = [];
+
+    for (const vrmType of vrmTypes) {
+      const dropsData = await GetCollectionDocs(`campaign/${vrmType}/drops`);
+      const filteredAddresses = dropsData
+        .filter(drop => drop.contract_address)
+        .map(drop => drop.contract_address);
+      contractAddresses.push(...filteredAddresses);
+    }
+    return contractAddresses;
   } catch (error) {
     console.error('Error fetching drops contract addresses:', error);
     return [];

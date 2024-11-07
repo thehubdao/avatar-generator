@@ -8,12 +8,13 @@ interface OptionCardUIProps {
 }
 
 export default function OptionCardUI({ option, isActive }: OptionCardUIProps) {
+  console.log(option);
   return (
     <div className={`w-[132px] dark:w-[164px] h-[170px] dark:h-[206px] rounded-lg overflow-hidden cursor-pointer`}>
       <div className="relative bg-[#3d3d3d] w-full h-[132px] dark:h-[164px] flex justify-center items-center">
         <GetImage url={option.thumb} alt={option.path} />
         <div className="absolute inset-2 bg-citizens-bluedark w-fit h-fit text-xs text-white px-2 py-1 rounded-full">
-          {55} units
+          {option.balance} units
         </div>
         <div className="absolute right-2 top-2">
           <MedalSVG withCircle={isActive} />

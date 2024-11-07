@@ -102,10 +102,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   const [selectedLoginCampaign, setSelectedLoginCampaign] = useState<Campaign>();
   const [selectedCategory, setSelectedCategory] = useState<string>('head');
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>();
-  const [userWearables, setUserWearables] = useState<CampaignDrops>({
-    vrm_male: [],
-    vrm_female: [],
-  });
+  const [userWearables, setUserWearables] = useState<CampaignDrops | undefined>(undefined);
 
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
 
@@ -127,26 +124,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     }, 2000)
 
   }, [setCampaign]);
-
-  // Function to update avatar features based on the current base combination
-  const updateAvatarFeatures = useCallback(async () => {
-    /* if (currentCollection.combination && currentCollection.campaign) {
-      // Fetch the single data for the new combination
-      await getSingleData(currentCollection.campaign, currentCollection.combination);
-      
-      // Update the features data
-      await SetFeaturesData(campaignParams?.features ?? []);
-
-      // Load the new features onto the avatar
-      await loadSingleData();
-    } */
-  }, [currentCollection.combination, currentCollection.campaign, campaignParams]);
-
-  // Use effect to listen for changes in currentCollection.combination
-  useEffect(() => {
-    // Call the function to update avatar features when combination changes
-    void updateAvatarFeatures();
-  }, [updateAvatarFeatures]);
 
   useEffect(() => {
     if (!user?.wallet?.address) return
@@ -228,6 +205,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   }
 
   async function getFeatureList() {
+    if(!userWearables) return
     const result = await GetAssetsListByCampaign(campaignParams?.campaign)
     featureList = result.success ? result.value : undefined
     optionList = []
@@ -262,6 +240,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     const campaignuserWearables =
       userWearables[campaignParams?.campaign as keyof typeof userWearables]
     if (campaignuserWearables) {
+      console.log(campaignuserWearables, userWearables);
       const formatteduserWearables = campaignuserWearables
         .map((val) => {
           return optionList?.find(
@@ -734,7 +713,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             </div>
             {/* CANVAS */}
             <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-              {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View && <AvatarEditor
+              {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View && userWearables && <AvatarEditor
 
                 avatarBasePath={
                   campaignParams.armature

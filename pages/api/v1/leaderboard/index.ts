@@ -1,15 +1,15 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { GetLeaderboardData } from '../../../../utils/firebase.util';
+import { GetDropsContractAddresses, GetLeaderboardData } from '../../../../utils/firebase.util';
 import { GetCitizensHoldings, GetWearablesHoldings } from '../../../../utils/web3/contract.util';
 
 export default async function Handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
       const leaderboardData = await GetLeaderboardData();
-
+      const contractAddresses = await GetDropsContractAddresses();
       for (const entry of leaderboardData) {
         entry.citizensHoldings = await GetCitizensHoldings(entry.address);
-        entry.wearablesHoldings = await GetWearablesHoldings(entry.address);
+        entry.wearablesHoldings = await GetWearablesHoldings(entry.address, contractAddresses);
       }
       
       res.status(200).json(leaderboardData);

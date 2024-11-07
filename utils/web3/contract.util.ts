@@ -5,7 +5,7 @@ import WerableContractAbi from '../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { Campaign, CampaignData, CampaignDrops, Drop, TokenId, TokenMetadata } from '../../types/metadata.type';
 import { getIPFSData, getImageUrl } from './lukso.util';
-import { GetCollectionDocs, GetDropsContractAddresses } from '../firebase.util';
+import { GetCollectionDocs } from '../firebase.util';
 import noMetadataTokens from '../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
 import { BodyPart } from '../../types/avatar.type';
@@ -258,6 +258,7 @@ export const getTokensOf = async (contractAddress: string, address: string) => {
     return tokenIds
 }
 
+
 export const getCampaignUserFeatures = async (address: string, campaign: string) => {
     const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
     const features: Drop[] = []
@@ -267,7 +268,10 @@ export const getCampaignUserFeatures = async (address: string, campaign: string)
 
         const contract = new Contract(contract_address, WerableContractAbi, provider)
         const tokenBalance = await contract.balanceOf(address)
-        if (Number(tokenBalance) > 0) features.push(drop)
+        if (Number(tokenBalance) > 0) {
+            drop.balance = Number(tokenBalance) // Asigna el balance al campo opcional
+            features.push(drop)
+        }
     }
     return features
 }
@@ -329,25 +333,24 @@ export const burnDrop = async (from: string, campaign: string, drop: BodyPart) =
     tx.wait()
 }
 
-export async function GetCitizensHoldings(address: string): Promise<number> {
-  let total = 0;
-  for (const campaign of Object.keys(campaignWeb3Data)) {
-    const { contractAddress } = campaignWeb3Data[campaign as keyof typeof campaignWeb3Data];
-    const contract = new Contract(contractAddress, AvatarContractAbi, provider);
-    const balance = await contract.balanceOf(address);
-    total += Number(balance);
-  }
-  return total;
+
+async function GetBalancesBatch(contractAddresses: string[], address: string) {
+    const promises = contractAddresses.map(async (contractAddress) => {
+        const contract = new Contract(contractAddress, AvatarContractAbi, provider);
+        return contract.balanceOf(address);
+    });
+
+    const balances = await Promise.all(promises);
+    return balances.map(balance => Number(balance));
 }
 
-export async function GetWearablesHoldings(address: string): Promise<number> {
-  const contractAddresses = await GetDropsContractAddresses();
-  console.log(contractAddresses);
-  let total = 0;
-  for (const contractAddress of contractAddresses) {
-    const contract = new Contract(contractAddress, WerableContractAbi, provider);
-    const balance = await contract.balanceOf(address);
-    total += Number(balance);
-  }
-  return total;
+export async function GetCitizensHoldings(address: string): Promise<number> {
+    const contractAddresses = Object.values(campaignWeb3Data).map(data => data.contractAddress);
+    const balances = await GetBalancesBatch(contractAddresses, address);
+    return balances.reduce((total, balance) => total + balance, 0);
+}
+
+export async function GetWearablesHoldings(address: string, contractAddresses: string[]): Promise<number> {
+    const balances = await GetBalancesBatch(contractAddresses, address);
+    return balances.reduce((total, balance) => total + balance, 0);
 }
