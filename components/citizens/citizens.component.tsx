@@ -262,7 +262,11 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             val.index.toString()
           )
         })
-      filteredOptionList = filteredOptionList.concat(formatteduserWearables)
+        const wearablesWithBalance = formatteduserWearables.map(wearable => {
+          wearable.balance = userWearables[campaignParams?.campaign as keyof typeof userWearables].find(w => w.type === wearable.type && w.index === wearable.index)?.balance
+          return wearable
+        })  
+      filteredOptionList = filteredOptionList.concat(wearablesWithBalance)
     }
 
     optionList = filteredOptionList
