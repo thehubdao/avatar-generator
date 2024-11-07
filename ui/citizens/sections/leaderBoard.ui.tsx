@@ -2,13 +2,12 @@ import Image from 'next/image';
 import { LeaderboardEntry } from '../../../types/leaderboard.type';
 import AddUserSVG from '../common/SVG/addUserSVG.ui';
 
-
 interface LeaderBoardProps {
   leaderboardData: LeaderboardEntry[];
+  onFollowUser: (address: string) => Promise<void>;
 }
 
-export default function LeaderBoard({ leaderboardData }: LeaderBoardProps) {
-
+export default function LeaderBoard({ leaderboardData, onFollowUser }: LeaderBoardProps) {
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] py-32">
       <table className="relative w-full font-light text-lg shadow-citizens-btn bg-citizens-dark text-white container mx-auto rounded-2xl">
@@ -46,7 +45,12 @@ export default function LeaderBoard({ leaderboardData }: LeaderBoardProps) {
                     </p>
                   </div>
                   <div className='grow flex justify-end'>
-                    <div className='h-11 w-16 flex justify-center items-center bg-white rounded-[20px] cursor-pointer mr-8'>
+                    <div
+                      className={`h-11 w-16 flex justify-center items-center rounded-[20px] cursor-pointer mr-8 ${
+                        user.isFollowing ? 'bg-gray-400' : 'bg-white'
+                      }`}
+                      onClick={() => !user.isFollowing && onFollowUser(user.address)}
+                    >
                       <AddUserSVG />
                     </div>
                   </div>

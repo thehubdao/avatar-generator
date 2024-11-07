@@ -22,8 +22,8 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
         slidesPerView={'auto'}
         centeredSlides={true}
         initialSlide={1}
-        onSlideChange={() => console.log('slide change')}
-        onSwiper={(swiper) => console.log(swiper)}
+        onSlideChange={() => {}}
+        onSwiper={() => {}}
         className="collection_swiper"
       >
         {

@@ -1,4 +1,4 @@
-import { BrowserProvider } from "ethers";
+import {JsonRpcSigner } from "ethers";
 import { Drop } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
@@ -12,11 +12,11 @@ interface DropItemCardProps {
   drop: Drop;
   userXP: number;
   userAddress: string;
-  provider: BrowserProvider;
+  signer: JsonRpcSigner;
   onClaim: () => Promise<void>;
 }
 
-export default function DropItemCard({ drop, userXP, userAddress, provider, onClaim }: DropItemCardProps) {
+export default function DropItemCard({ drop, userXP, userAddress, signer, onClaim }: DropItemCardProps) {
   const [isClaimed, setIsClaimed] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
   const [isLock] = useState(userXP < drop.requiredXP);
@@ -25,7 +25,7 @@ export default function DropItemCard({ drop, userXP, userAddress, provider, onCl
   useEffect(() => {
     const checkClaimStatus = async () => {
       try {
-        const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, provider);
+        const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer);
         const balance = await contract.balanceOf(userAddress);
         setIsClaimed(balance > 0);
       } catch (error) {

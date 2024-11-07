@@ -8,8 +8,8 @@ export default async function Handler(req: NextApiRequest, res: NextApiResponse)
       const leaderboardData = await GetLeaderboardData();
 
       for (const entry of leaderboardData) {
-        entry.citizensHoldings = await GetCitizensHoldings(entry.id);
-        entry.wearablesHoldings = await GetWearablesHoldings(entry.id);
+        entry.citizensHoldings = await GetCitizensHoldings(entry.address);
+        entry.wearablesHoldings = await GetWearablesHoldings(entry.address);
       }
       
       res.status(200).json(leaderboardData);

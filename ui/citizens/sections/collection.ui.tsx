@@ -4,20 +4,19 @@ import CitizensCollection from "../common/citizensCollection.ui";
 import WearablesCollection from "../common/wearablesCollection.ui";
 import { useState } from "react";
 import { CollectionSections } from "../../../enums/citizens/common.enum";
-import { BrowserProvider } from "ethers";
-
+import { JsonRpcSigner } from "ethers";
 interface CollectionProps {
   loadedTokens?: TokenMetadata[];
   currentCollection: CollectionType
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
-  provider: BrowserProvider | null;
+  signer: JsonRpcSigner | null;
 }
 
 export default function Collection({
   loadedTokens,
   updateCollection,
   currentCollection,
-  provider
+  signer
 }: CollectionProps) {
 
   const [selectedList, setSelectedList] = useState<CollectionSections>(CollectionSections.CITIZENS)
@@ -45,7 +44,7 @@ export default function Collection({
       }
       {/* WEARABLE DROPS */}
       {selectedList === CollectionSections.WEARABLES &&
-        <WearablesCollection provider={provider} />}
+        <WearablesCollection signer={signer} />}
     </div>
   );
 }

@@ -19,7 +19,7 @@
     "@reduxjs/toolkit": "^1.9.7",
     "@types/react-redux": "^7.1.27",
     "axios": "^1.6.7",
-    "ethers": "^6.13.2",
+    "ethers": "^6.13.4",
     "file-saver": "^2.0.5",
     "firebase": "^10.13.2",
     "firebase-functions": "^6.1.0",

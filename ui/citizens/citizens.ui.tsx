@@ -8,7 +8,7 @@ import Collection from "./sections/collection.ui";
 import LeaderBoard from "./sections/leaderBoard.ui";
 import Play from "./sections/play.ui";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
-import { BrowserProvider } from "ethers";
+import { JsonRpcSigner } from "ethers";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -19,11 +19,12 @@ interface CitizensUIProps {
   exportModel: () => Promise<void>;
   address: string;
   leaderboardData: LeaderboardEntry[];
-  provider: BrowserProvider | null;
+  signer: JsonRpcSigner | null;
+  handleFollowUser: (address: string) => Promise<void>;
 }
 
 
-export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, provider }: CitizensUIProps) {
+export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser }: CitizensUIProps) {
   return (
     <>
       {currentSection === CitizensSections.View && (
@@ -42,12 +43,15 @@ export default function CitizensUI({ currentSection,  currentCollection, updateC
             loadedTokens={loadedTokens}
             currentCollection={currentCollection}
             updateCollection={updateCollection}
-            provider={provider}
+            signer={signer}
           />
         </>
       )}
       {currentSection === CitizensSections.LeaderBoard && (
-        <LeaderBoard leaderboardData={leaderboardData} />
+        <LeaderBoard 
+          leaderboardData={leaderboardData} 
+          onFollowUser={handleFollowUser}
+        />
       )}
       {currentSection === CitizensSections.Play && 
         <Play />

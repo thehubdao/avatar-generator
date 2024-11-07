@@ -1,11 +1,11 @@
 export interface LeaderboardEntry {
-  id: string;
   address: string;
-  xp: number;
+  name?: string;
+  profileImage?: string;
   level: number;
+  xp: number;
   citizensHoldings: number;
   wearablesHoldings: number;
-  name: string;
-  profileImage: string;
+  isFollowing?: boolean;
 }
 

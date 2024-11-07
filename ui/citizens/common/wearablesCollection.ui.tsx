@@ -1,5 +1,5 @@
 import { usePrivy } from '@privy-io/react-auth'
-import { BrowserProvider, ethers } from 'ethers'
+import { ethers, JsonRpcSigner } from 'ethers'
 import { useEffect, useState } from 'react'
 import { Drop } from '../../../interfaces/citizens.interface'
 import { GetUserXPAndLevel } from '../../../utils/firebase.util'
@@ -10,7 +10,7 @@ import DropItemCard from './dropItemCard.ui'
 import SearchSVG from './SVG/searchSVG.ui'
 import { FetchClaimableDrops } from '../../../utils/api.util'
 
-export default function WearablesCollection({ provider }: { provider: BrowserProvider | null }) {
+export default function WearablesCollection({ signer }: { signer: JsonRpcSigner | null }) {
     const { user } = usePrivy()
   
   const [claimableDrops, setClaimableDrops] = useState<Drop[]>([])
@@ -19,17 +19,13 @@ export default function WearablesCollection({ provider }: { provider: BrowserPro
 
 
   const handleClaim = async (drop: Drop) => {
-    if (!user?.wallet || !provider) return
+    if (!user?.wallet || !signer) return
 
     try {
-      console.log(user.wallet.address, drop.id)
       const isApproved = await ApproveClaimForUser(user.wallet.address, drop.id)
-      console.log(isApproved)
       if (!isApproved) {
-        console.error('Claim not approved')
         return
       }
-      const signer = await provider.getSigner()
       const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer)
       
       const claimTx = await dropContract.claim({
@@ -101,7 +97,7 @@ export default function WearablesCollection({ provider }: { provider: BrowserPro
               key={drop.id} drop={drop}
               userXP={userXP}
               userAddress={user?.wallet?.address || ''}
-              provider={provider as BrowserProvider}
+              signer={signer as JsonRpcSigner}
               onClaim={() => handleClaim(drop)}
             />}
           )}

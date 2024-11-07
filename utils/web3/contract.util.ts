@@ -342,7 +342,7 @@ export async function GetCitizensHoldings(address: string): Promise<number> {
 
 export async function GetWearablesHoldings(address: string): Promise<number> {
   const contractAddresses = await GetDropsContractAddresses();
-  
+  console.log(contractAddresses);
   let total = 0;
   for (const contractAddress of contractAddresses) {
     const contract = new Contract(contractAddress, WerableContractAbi, provider);

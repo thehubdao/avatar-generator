@@ -39,9 +39,9 @@ import HudUI from "../../ui/avatar/hud.ui";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
 import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
-import { GetUniversalProfileData } from "../../utils/web3/lukso.util";
+import { FollowUser, GetFollowStatuses, GetUniversalProfileData } from "../../utils/web3/lukso.util";
 import Snackbar from "../../ui/citizens/common/snackbar.ui";
-import { BrowserProvider } from 'ethers';
+import { BrowserProvider , JsonRpcSigner } from 'ethers';
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -71,9 +71,8 @@ let featureList: FeatureInterface[] | undefined
 
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
-  const { authenticated: isAuthenticated, user } = usePrivy()
+  const {user, ready:isReady } = usePrivy()
   const { wallets } = useWallets();
-  const [provider, setProvider] = useState<BrowserProvider | null>(null);
   const [isSigned, setIsSigned] = useState(false)
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -110,44 +109,8 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
 
-  useEffect(() => {
-    const setupProvider = async () => {
-      if (wallets && wallets.length > 0) {
-        const ethProvider = await wallets[0].getEthereumProvider();
-        const browserProvider = new BrowserProvider(ethProvider);
-        setProvider(browserProvider);
-      }
-    };
+  const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
 
-    if (isAuthenticated && wallets?.length > 0) {
-      setupProvider();
-    }
-  }, [isAuthenticated, wallets]);
-
-  useEffect(() => {
-    async function fetchLeaderboardData() {
-      try {
-        const response = await fetch('/api/v1/leaderboard');
-        if (!response.ok) throw new Error('Failed to fetch leaderboard data');
-        const data = await response.json();
-
-        const leaderboardWithProfileData = await Promise.all(data.map(async (entry: LeaderboardEntry) => {
-          const profileData = await GetUniversalProfileData(entry.address);
-          return {
-            ...entry,
-            name: profileData.name,
-            profileImage: profileData.profileImage
-          };
-        }));
-
-        setLeaderboardData(leaderboardWithProfileData);
-      } catch (error) {
-        console.error('Error fetching leaderboard data:', error);
-      }
-    }
-
-    fetchLeaderboardData();
-  }, []);
 
   const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => {
     const newCollection: CollectionType = {
@@ -236,8 +199,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     }
     featuresPromise()
   }, [walletAddress])
-
-  useEffect(() => { }, [currentCollection.baseCombination])
 
   async function getEnvironmentMapList() {
     if (!campaignParams?.campaign) return
@@ -608,7 +569,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
       setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
     } catch (err) {
-      console.log(err)
       _tokenIdList[tokenIdIndex].metadataUri = originalMetadataUri
 
       setTokenIdList(_tokenIdList?.slice())
@@ -619,9 +579,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     setSelectedLoginCampaign(selectedLoginCampaign);
     setIsSigned(isSigned);
 
-  };
-
-  useEffect(() => { console.log('isLoading', isLoading) }, [isLoading])
+  }
 
   useEffect(() => {
     if (isSavingCombination) setTimeout(() => {
@@ -629,11 +587,77 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     }, 5000);
   }, [isSavingCombination])
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      setIsSigned(true)
+  const handleFollowUser = async (addressToFollow: string) => {
+    if (!signer) return;
+    try {
+      const isSuccess = await FollowUser(addressToFollow, signer);
+      if (isSuccess) {
+        setLeaderboardData(prevData => 
+          prevData.map(entry => 
+            entry.address === addressToFollow 
+              ? { ...entry, isFollowing: true }
+              : entry
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error following user:', error);
     }
-  }, [isAuthenticated])
+  };
+
+  useEffect(() => {
+    if (!isReady || !wallets[0] || signer) return;
+    
+    const setupSigner = async () => {
+      try {
+        const ethProvider = await wallets[0].getEthereumProvider();
+        const browserProvider = new BrowserProvider(ethProvider);
+
+        const newSigner = await browserProvider.getSigner();
+        setSigner(newSigner);
+
+      } catch (error) {
+        console.error('Error setting up signer:', error);
+      }
+    };
+
+    setupSigner();
+
+  }, [isReady, wallets]);
+
+
+  useEffect(() => {
+    async function fetchLeaderboardData() {
+      if(!signer) return
+      console.log("FETCHING LEADERBOARD DATA")
+      try {
+        const response = await fetch('/api/v1/leaderboard');
+        if (!response.ok) throw new Error('Failed to fetch leaderboard data');
+        const data = await response.json();
+        const leaderboardWithProfileData = await Promise.all(data.map(async (entry: LeaderboardEntry) => {
+          const profileData = await GetUniversalProfileData(entry.address);
+          return {
+            ...entry,
+            name: profileData.name,
+            profileImage: profileData.profileImage,
+            isFollowing: false // Initialize isFollowing
+          };
+        }));
+
+        // If we have a signer, get follow statuses
+        const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, signer);
+        leaderboardWithProfileData.forEach(entry => {
+          entry.isFollowing = followStatuses[entry.address] || false;
+        });
+
+        setLeaderboardData(leaderboardWithProfileData);
+      } catch (error) {
+        console.error('Error fetching leaderboard data:', error);
+      }
+    }
+
+    fetchLeaderboardData();
+  }, [signer]);
 
   return (
     <MobileLayout>
@@ -741,16 +765,16 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             {/* CITIZENS HUD */}
             {!isEditModeSelected &&
               <CitizensUI
-                currentSection={currentSection}
-                loadedTokens={loadedTokens}
-                currentCollection={currentCollection}
-                updateCollection={updateCollection}
-                features={singleInitData?.features}
-                exportModel={() => exportModel()}
-                address={walletAddress ?? ""}
-                leaderboardData={leaderboardData}
-                provider={provider}
-              />
+              currentSection={currentSection}
+              loadedTokens={loadedTokens}
+              currentCollection={currentCollection}
+              updateCollection={updateCollection}
+              features={singleInitData?.features}
+              exportModel={() => exportModel()}
+              address={walletAddress ?? ""}
+              leaderboardData={leaderboardData}
+              signer={signer} 
+              handleFollowUser={handleFollowUser}              />
             }
           </>
         }
