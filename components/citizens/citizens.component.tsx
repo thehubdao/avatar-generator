@@ -195,7 +195,12 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     if (!walletAddress) return
     const getTokensMetadataPromise = async () => {
       const tokenIds = await getCampaignsTokenIds(walletAddress)
-      setTokenIdList(tokenIds)
+      if(tokenIds.length <= 0) {
+        setCurrentSection(CitizensSections.Collection);
+        setIsLoading(false);
+      } else {
+        setTokenIdList(tokenIds)
+      }
     }
     void getTokensMetadataPromise()
   }, [walletAddress])
@@ -774,7 +779,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             />
           </div>
           {/* NAVBAR */}
-          {isSigned && !isEditModeSelected &&
+          {isSigned && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
             <div className="flex gap-4">
               <Button label="homebase" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
                 if (currentSection !== CitizensSections.View) {
