@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { GetUserXPAndLevel } from "../../../utils/firebase.util";
 import ArrowSVG from "./SVG/arrowSVG.ui";
 import Image from "next/image";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
@@ -8,6 +7,7 @@ import { useFollowCount } from "../../../hooks/useFollowCount";
 import { FormatWalletAddress } from "../../../utils/common.util";
 import { useUniversalProfile } from '../../../hooks/useUniversalProfile';
 import { usePrivy } from '@privy-io/react-auth';
+import { useXPVerification } from '../../../hooks/useXPVerification';
 
 interface ConnectButtonProps {
   isSigned?: boolean;
@@ -18,27 +18,20 @@ interface ConnectButtonProps {
 export default function ConnectButton({ isSigned = false, setIsSigned, address }: ConnectButtonProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { followerCount, followingCount } = useFollowCount(address);
-  const [userXP, setUserXP] = useState(0);
-  const [userLevel, setUserLevel] = useState(0);
-  const [nextLevelXP, setNextLevelXP] = useState(0);
-  const { name, profileImage } = useUniversalProfile(address);
-  const {authenticated:isAuthenthicated, user, ready:isReady } = usePrivy();
+  const { xpData } = useXPVerification();
+  const { authenticated: isAuthenticated, user, ready: isReady } = usePrivy();
 
   useEffect(() => {
-    if (address) {
-      GetUserXPAndLevel(address).then(({ xp, level, nextLevelXP }) => {
-        setUserXP(xp);
-        setUserLevel(level);
-        setNextLevelXP(nextLevelXP);
-      });
-    }
-  }, [address]);
-
-  useEffect(() => {
-    if (isAuthenthicated && user) {
+    if (isAuthenticated && user) {
       setIsSigned(true);
     }
-  }, [isAuthenthicated, user, setIsSigned]);
+  }, [isAuthenticated, user, setIsSigned]);
+
+  const userXP = xpData?.xp ?? 0;
+  const userLevel = xpData?.level ?? 0;
+  const nextLevelXP = xpData?.nextLevelXP ?? 0;
+
+  const { name, profileImage } = useUniversalProfile(address);
 
   return (
     <div className="relative w-fit 2xl:w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">
@@ -133,7 +126,7 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
         >
           <div className="w-full h-full font-light text-lg">
             {!isReady ? "Loading..." : 
-             isAuthenthicated ? "Connected" : 
+             isAuthenticated ? "Connected" : 
              "Log in"}
           </div>
         </ConnectWeb3Button>

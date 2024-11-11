@@ -35,6 +35,7 @@ import { GetFollowerCounts } from "./web3/lukso.util";
 import { XPReward } from "../constants/lukso/xp.constant";
 import { Drop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
+import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/contract.util";
 
 export type LogInStructure = {
   user: string;
@@ -995,8 +996,9 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
       const isFirstLoginOfDay = lastLogin.getDate() !== now.getDate() ||
         lastLogin.getMonth() !== now.getMonth() ||
         lastLogin.getFullYear() !== now.getFullYear();
-
+      console.log('IS FIRST LOGIN OF DAY', isFirstLoginOfDay);
       if (isFirstLoginOfDay) {
+        console.log('FIRST LOGIN OF DAY');
         let xpGained = XPReward.DailyLogin;
 
         // Increment login streak
@@ -1017,10 +1019,14 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
             id: ''
           });
         }
+
+
       } else {
         // Reset streak if not consecutive
         userData.loginStreak = 1;
       }
+      // Add holdings XP check after login rewards
+      await HandleHoldingsXPReward(address);
 
       // Get current follower and following counts
       const { followerCount, followingCount } = await GetFollowerCounts(address);
@@ -1255,4 +1261,65 @@ export async function GetDropsContractAddresses(): Promise<string[]> {
     console.error('Error fetching drops contract addresses:', error);
     return [];
   }
+}
+
+async function CalculateCitizensXP(citizensCount: number): Promise<number> {
+  let totalXP = 0;
+  
+  // Aplicar la fórmula para cada citizen
+  for (let k = 1; k <= citizensCount; k++) {
+    const xpForThisCitizen = 100 * (1 + 0.20 * (k - 1));
+    totalXP += xpForThisCitizen;
+  }
+  
+  return Math.floor(totalXP);
+}
+
+export async function HandleHoldingsXPReward(address: string): Promise<void> {
+  try {
+    // Obtener los contratos de wearables
+    const contractAddresses = await GetDropsContractAddresses();
+    
+    // Obtener el conteo de holdings actual
+    const citizensHoldings = await GetCitizensHoldings(address);
+    const wearablesHoldings = await GetWearablesHoldings(address, contractAddresses);
+    
+    // Calcular XP usando la nueva fórmula para citizens
+    const citizensXP = await CalculateCitizensXP(citizensHoldings);
+    const wearablesXP = wearablesHoldings * XPReward.WearableHolding;
+    const totalXP = citizensXP + wearablesXP;
+    
+    if (totalXP > 0) {
+      await UpdateUserXP(address, totalXP);
+      
+      await CreateNotification(address, {
+        title: 'Holdings Reward',
+        message: GenerateHoldingsMessage(citizensXP, wearablesXP, totalXP),
+        points: totalXP,
+        time: new Date().toISOString(),
+        id: ''
+      });
+    }
+  } catch (error) {
+    console.error('Error processing holdings XP:', error);
+  }
+}
+
+function GenerateHoldingsMessage(
+  citizensXP: number,
+  wearablesXP: number,
+  totalXP: number,
+): string {
+  let message = `You've earned ${totalXP} XP for your holdings! `;
+  
+  if (citizensXP > 0) {
+    message += `(Citizens: ${citizensXP} XP) `;
+  }
+  
+  if (wearablesXP > 0) {
+    message += `(Wearables: ${wearablesXP} XP)`;
+  }
+
+  
+  return message;
 }
