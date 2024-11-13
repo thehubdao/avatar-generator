@@ -10,10 +10,10 @@ import Snackbar from "./snackbar.ui";
 interface DetailsUIProps {
   data: IndexFeatureInterface[];
   handleDownload: () => Promise<void>;
-  imageUrl: string;
+  imgUrl: string;
 }
 
-export default function DetailsUI({ data, handleDownload, imageUrl }: DetailsUIProps) {
+export default function DetailsUI({ data, handleDownload, imgUrl }: DetailsUIProps) {
 
   const [isOpen, setIsOpen] = useState<boolean>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -39,7 +39,7 @@ export default function DetailsUI({ data, handleDownload, imageUrl }: DetailsUIP
               </div>
               <div className="w-full px-7 py-9">
                 <div className="relative w-full h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
-                  <Image src={imageUrl} alt={'Avatar detail'} fill className="object-cover" />
+                  <Image src={imgUrl} alt={'Avatar detail'} fill className="object-cover" />
                 </div>
               </div>
               <div className="grid grid-cols-2 justify-items-center gap-4 px-8 pb-8">
