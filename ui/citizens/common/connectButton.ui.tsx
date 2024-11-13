@@ -124,7 +124,7 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
           classStyles="w-full h-full" 
           setIsSigned={setIsSigned}
         >
-          <div className="w-full h-full font-light text-lg">
+          <div className="w-full h-full font-light text-lg px-4">
             {!isReady ? "Loading..." : 
              isAuthenticated ? "Connected" : 
              "Log in"}

@@ -18,3 +18,10 @@ export interface Drop {
   requiredToken?: string;
   contractAddress: string;
 }
+
+export interface Game {
+  name: string;
+  link: string;
+  bgSrc: string;
+  iconSrc: string;
+}

@@ -9,6 +9,8 @@ import LeaderBoard from "./sections/leaderBoard.ui";
 import Play from "./sections/play.ui";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { JsonRpcSigner } from "ethers";
+import Modal from "./common/modal.ui";
+import Button from "./common/button.ui";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -47,13 +49,26 @@ export default function CitizensUI({ currentSection,  currentCollection, updateC
           />
         </>
       )}
+      {loadedTokens && loadedTokens?.length <= 0 &&
+        <Modal modalStyles="!min-h-fit" handleClose={() => { }}>
+          <div className="grid justify-center">
+            <div className="grow text-center text-white grid gap-4">
+              <p className="font-bold text-2xl">Backpack Empty</p>
+              <p className="text-lg">You do not own any<br />Lukso Citizens.</p>
+            </div>
+            <div className="grid gap-4 pt-8">
+              <Button label="Get one here" textStiles="w-full text-center" light handleClick={() => { }} />
+            </div>
+          </div>
+        </Modal>
+      }
       {currentSection === CitizensSections.LeaderBoard && (
         <LeaderBoard 
           leaderboardData={leaderboardData} 
           onFollowUser={handleFollowUser}
         />
       )}
-      {currentSection === CitizensSections.Play && 
+      {currentSection === CitizensSections.Play &&
         <Play />
       }
     </>
