@@ -10,13 +10,14 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
   nextLevelXP: number;
 }>>) {
   const { address } = req.body;
-
+console.log('ADDRESS', address);
   if (!address) {
     return RequestResponse(res, "BadRequest", false, DefaultApiResponse.MissingInfo);
   }
 
   try {
     // Handle login rewards first
+    console.log('VERIFY XP', address);
     await HandleXPReward(address);
     
     // Get updated XP data after rewards
@@ -29,6 +30,7 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
     });
   } catch (error) {
     console.error('XP verification error:', error);
+    console.log('ERROR', error);
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
   }
 }

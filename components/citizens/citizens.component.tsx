@@ -637,7 +637,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         leaderboardWithProfileData.forEach(entry => {
           entry.isFollowing = followStatuses[entry.address] || false;
         });
-
+        console.log(leaderboardWithProfileData)
         setLeaderboardData(leaderboardWithProfileData);
       } catch (error) {
         console.error('Error fetching leaderboard data:', error);

@@ -1047,6 +1047,7 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         loginStreak: userData.loginStreak
       }, { merge: true });
     } else {
+      console.log('USER DOES NOT EXIST, CREATING NEW USER');
       // If the user doesn't exist, create a new document with all fields
       await setDoc(userDocRef, {
         account: '',
@@ -1277,28 +1278,43 @@ async function CalculateCitizensXP(citizensCount: number): Promise<number> {
 
 export async function HandleHoldingsXPReward(address: string): Promise<void> {
   try {
-    // Obtener los contratos de wearables
+    const db = await FirebaseUtil.Instance().DB();
+    const userRef = doc(db, `${FirestoreGlobalLocation.User}/${address.toLowerCase()}`);
+    const userDoc = await getDoc(userRef);
+    const userData = userDoc.data() as UserInterface;
+    // Get current holdings
     const contractAddresses = await GetDropsContractAddresses();
-    
-    // Obtener el conteo de holdings actual
-    const citizensHoldings = await GetCitizensHoldings(address);
-    const wearablesHoldings = await GetWearablesHoldings(address, contractAddresses);
-    
-    // Calcular XP usando la nueva fórmula para citizens
-    const citizensXP = await CalculateCitizensXP(citizensHoldings);
-    const wearablesXP = wearablesHoldings * XPReward.WearableHolding;
-    const totalXP = citizensXP + wearablesXP;
-    
-    if (totalXP > 0) {
-      await UpdateUserXP(address, totalXP);
-      
-      await CreateNotification(address, {
-        title: 'Holdings Reward',
-        message: GenerateHoldingsMessage(citizensXP, wearablesXP, totalXP),
-        points: totalXP,
-        time: new Date().toISOString(),
-        id: ''
-      });
+    const currentCitizensHoldings = await GetCitizensHoldings(address);
+    const currentWearablesHoldings = await GetWearablesHoldings(address, contractAddresses);
+    // Get previous holdings from DB
+    const previousCitizensHoldings = userData.citizensHoldings || 0;
+    const previousWearablesHoldings = userData.wearablesHoldings || 0;
+    // Only calculate XP if holdings have increased
+    const newCitizens = currentCitizensHoldings - previousCitizensHoldings;
+    const newWearables = currentWearablesHoldings - previousWearablesHoldings;
+    if (newCitizens > 0 || newWearables > 0) {
+      // Calculate XP only for new holdings
+      const citizensXP = await CalculateCitizensXP(newCitizens);
+      const wearablesXP = newWearables * XPReward.WearableHolding;
+      const totalXP = citizensXP + wearablesXP;
+      if (totalXP > 0) {
+        // Update user XP
+        await UpdateUserXP(address, totalXP);
+        // Update holdings record in DB
+        await setDoc(userRef, {
+          citizensHoldings: currentCitizensHoldings,
+          wearablesHoldings: currentWearablesHoldings,
+          lastHoldingsUpdate: Timestamp.now()
+        }, { merge: true });
+        // Create notification
+        await CreateNotification(address, {
+          title: 'New Holdings Reward',
+          message: GenerateHoldingsMessage(citizensXP, wearablesXP, totalXP),
+          points: totalXP,
+          time: new Date().toISOString(),
+          id: ''
+        });
+      }
     }
   } catch (error) {
     console.error('Error processing holdings XP:', error);

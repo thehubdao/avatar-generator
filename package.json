@@ -11,6 +11,7 @@
   "dependencies": {
     "@erc725/erc725.js": "^0.22.0",
     "@filebase/sdk": "^1.0.6",
+    "@helia/car": "^4.0.0",
     "@lukso/lsp-smart-contracts": "^0.12.1",
     "@next/font": "^13.5.5",
     "@pinata/sdk": "^2.1.0",
