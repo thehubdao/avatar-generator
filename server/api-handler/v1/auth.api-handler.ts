@@ -17,7 +17,6 @@ console.log('ADDRESS', address);
 
   try {
     // Handle login rewards first
-    console.log('VERIFY XP', address);
     await HandleXPReward(address);
     
     // Get updated XP data after rewards
@@ -30,7 +29,6 @@ console.log('ADDRESS', address);
     });
   } catch (error) {
     console.error('XP verification error:', error);
-    console.log('ERROR', error);
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
   }
 }
