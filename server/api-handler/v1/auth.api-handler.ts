@@ -9,8 +9,7 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
   level: number;
   nextLevelXP: number;
 }>>) {
-  const { address } = req.body;
-console.log('ADDRESS', address);
+  const { address } = req.body; 
   if (!address) {
     return RequestResponse(res, "BadRequest", false, DefaultApiResponse.MissingInfo);
   }

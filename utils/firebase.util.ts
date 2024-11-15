@@ -996,9 +996,7 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
       const isFirstLoginOfDay = lastLogin.getDate() !== now.getDate() ||
         lastLogin.getMonth() !== now.getMonth() ||
         lastLogin.getFullYear() !== now.getFullYear();
-      console.log('IS FIRST LOGIN OF DAY', isFirstLoginOfDay);
       if (isFirstLoginOfDay) {
-        console.log('FIRST LOGIN OF DAY');
         let xpGained = XPReward.DailyLogin;
 
         // Increment login streak
@@ -1047,7 +1045,6 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         loginStreak: userData.loginStreak
       }, { merge: true });
     } else {
-      console.log('USER DOES NOT EXIST, CREATING NEW USER');
       // If the user doesn't exist, create a new document with all fields
       await setDoc(userDocRef, {
         account: '',

@@ -16,7 +16,6 @@ export function useXPVerification() {
 
   useEffect(() => {
     async function verifyXP() {
-      console.log('VERIFY XP', user?.wallet?.address);
       if (!user?.wallet?.address) return;
 
       setIsLoading(true);
@@ -34,7 +33,6 @@ export function useXPVerification() {
         });
 
         const data = await response.json();
-        console.log('DATA', data);
         if (!data.success) {
           throw new Error(data.message);
         }

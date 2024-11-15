@@ -41,7 +41,7 @@ import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { FollowUser, GetFollowStatuses, GetUniversalProfileData } from "../../utils/web3/lukso.util";
 import Snackbar from "../../ui/citizens/common/snackbar.ui";
-import { BrowserProvider , JsonRpcSigner } from 'ethers';
+import { BrowserProvider, JsonRpcSigner } from 'ethers';
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -71,7 +71,7 @@ let featureList: FeatureInterface[] | undefined
 
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
-  const {user, ready:isReady } = usePrivy()
+  const { user, ready: isReady } = usePrivy()
   const { wallets } = useWallets();
   const [isSigned, setIsSigned] = useState(false)
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
@@ -135,7 +135,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     if (!walletAddress) return
     const getTokensMetadataPromise = async () => {
       const tokenIds = await getCampaignsTokenIds(walletAddress)
-      if(tokenIds.length <= 0) {
+      if (tokenIds.length <= 0) {
         setCurrentSection(CitizensSections.Collection);
         setIsLoading(false);
       } else {
@@ -148,24 +148,34 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   useEffect(() => {
     const loadTokenMetadata = async () => {
       if (tokenIdList) {
+        setLoadedTokens([])
         let isFirstToken = false;
-        const promises = tokenIdList.map(async (tokenIdMetadata) => {
-          try {
-            const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
+        
+        try {
+          const tokenMetadatas = await Promise.all(
+            tokenIdList.map(async (tokenIdMetadata) => {
+              try {
+                const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
+                
+                if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
+                  updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
+                  isFirstToken = true;
+                }
+                
+                return tokenMetadata;
+              } catch (error) {
+                console.error(`Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
+                return null;
+              }
+            })
+          );
 
-            if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
-              updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
-              isFirstToken = true;
-            }
-            setLoadedTokens(prevTokens => [...prevTokens, tokenMetadata]);
-            return tokenMetadata;
-          } catch (error) {
-            console.error(`Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
-            return null;
-          }
-        });
-
-        await Promise.all(promises);
+          const validTokens = tokenMetadatas.filter((token): token is TokenMetadata => token !== null);
+          setLoadedTokens(validTokens);
+          
+        } catch (error) {
+          console.error('Error loading token metadata:', error);
+        }
       }
     };
 
@@ -210,7 +220,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   }
 
   async function getFeatureList() {
-    if(!userWearables) return
+    if (!userWearables) return
     const result = await GetAssetsListByCampaign(campaignParams?.campaign)
     featureList = result.success ? result.value : undefined
     optionList = []
@@ -245,7 +255,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     const campaignuserWearables =
       userWearables[campaignParams?.campaign as keyof typeof userWearables]
     if (campaignuserWearables) {
-      console.log(campaignuserWearables, userWearables);
       const formatteduserWearables = campaignuserWearables
         .map((val) => {
           return optionList?.find(
@@ -267,10 +276,10 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             val.index.toString()
           )
         })
-        const wearablesWithBalance = formatteduserWearables.map(wearable => {
-          wearable.balance = userWearables[campaignParams?.campaign as keyof typeof userWearables].find(w => w.type === wearable.type && w.index === wearable.index)?.balance
-          return wearable
-        })  
+      const wearablesWithBalance = formatteduserWearables.map(wearable => {
+        wearable.balance = userWearables[campaignParams?.campaign as keyof typeof userWearables].find(w => w.type === wearable.type && w.index === wearable.index)?.balance
+        return wearable
+      })
       filteredOptionList = filteredOptionList.concat(wearablesWithBalance)
     }
 
@@ -481,17 +490,13 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     newMetadata.combination = newCombination
     newMetadata.attributes = []
 
-    const _tokenIdList = tokenIdList?.slice() as TokenId[]
+    const _tokenIdList = [...tokenIdList as TokenId[]];
 
-    const tokenIdIndex = _tokenIdList?.findIndex(
+    const tokenIdIndex = _tokenIdList.findIndex(
       ({ tokenId }) => tokenId === currentCollection.tokenMetadata.tokenId
     )
 
     const originalMetadataUri = _tokenIdList[tokenIdIndex].metadataUri
-
-    _tokenIdList[tokenIdIndex].metadataUri = 'LOADING'
-
-    setTokenIdList(_tokenIdList.slice())
 
     try {
       const burnDropArray: BodyPart[] = []
@@ -539,9 +544,13 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         currentCampaign
       )
 
-      _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
+      _tokenIdList[tokenIdIndex] = {
+        ..._tokenIdList[tokenIdIndex],
+        metadataUri: metadataObject.uri
+      };
+      
+      setTokenIdList(_tokenIdList);
 
-      setTokenIdList(_tokenIdList.slice())
       const metadataUrl = `ipfs://${metadataObject.uri}`
       await setTokenMetadata(
         currentCampaign,
@@ -549,19 +558,31 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         newMetadata,
         metadataUrl
       )
+      console.log("BURNING DROPS")
 
       for (let i = 0; i < burnDropArray.length; i++) {
         const drop = burnDropArray[i]
         await burnDrop(walletAddress, currentCampaign, drop)
       }
-
+      console.log("SETTING CURRENT COLLECTION", currentCollection)
       setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
     } catch (err) {
-      _tokenIdList[tokenIdIndex].metadataUri = originalMetadataUri
-
-      setTokenIdList(_tokenIdList?.slice())
+      console.log(err, "ERROR SAVING COMBINATION");
+      
+      // Restore original metadata URI on error
+      _tokenIdList[tokenIdIndex] = {
+        ..._tokenIdList[tokenIdIndex],
+        metadataUri: originalMetadataUri
+      };
+      
+      setTokenIdList(_tokenIdList);
     }
+    console.log("SETTING IS SAVING COMBINATION TO FALSE")
+    setIsSavingCombination(false);
+    setIsLoading(false);
+
   }
+
 
   const handleLogin = (isSigned: boolean, selectedLoginCampaign: Campaign) => {
     setSelectedLoginCampaign(selectedLoginCampaign);
@@ -569,20 +590,18 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   }
 
-  useEffect(() => {
-    if (isSavingCombination) setTimeout(() => {
-      setIsSavingCombination(false);
-    }, 5000);
-  }, [isSavingCombination])
+  useEffect(() => { 
+    if(currentCollection) console.log("Current Collection",currentCollection)
+  }, [currentCollection])
 
   const handleFollowUser = async (addressToFollow: string) => {
     if (!signer) return;
     try {
       const isSuccess = await FollowUser(addressToFollow, signer);
       if (isSuccess) {
-        setLeaderboardData(prevData => 
-          prevData.map(entry => 
-            entry.address === addressToFollow 
+        setLeaderboardData(prevData =>
+          prevData.map(entry =>
+            entry.address === addressToFollow
               ? { ...entry, isFollowing: true }
               : entry
           )
@@ -595,7 +614,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   useEffect(() => {
     if (!isReady || !wallets[0] || signer) return;
-    
+
     const setupSigner = async () => {
       try {
         const ethProvider = await wallets[0].getEthereumProvider();
@@ -616,7 +635,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   useEffect(() => {
     async function fetchLeaderboardData() {
-      if(!signer) return
+      if (!signer) return
       console.log("FETCHING LEADERBOARD DATA")
       try {
         const response = await fetch('/api/v1/leaderboard');
@@ -637,7 +656,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         leaderboardWithProfileData.forEach(entry => {
           entry.isFollowing = followStatuses[entry.address] || false;
         });
-        console.log(leaderboardWithProfileData)
         setLeaderboardData(leaderboardWithProfileData);
       } catch (error) {
         console.error('Error fetching leaderboard data:', error);
@@ -753,22 +771,22 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             {/* CITIZENS HUD */}
             {!isEditModeSelected &&
               <CitizensUI
-              currentSection={currentSection}
-              loadedTokens={loadedTokens}
-              currentCollection={currentCollection}
-              updateCollection={updateCollection}
-              features={singleInitData?.features}
-              exportModel={() => exportModel()}
-              address={walletAddress ?? ""}
-              leaderboardData={leaderboardData}
-              signer={signer} 
-              handleFollowUser={handleFollowUser}              />
+                currentSection={currentSection}
+                loadedTokens={loadedTokens}
+                currentCollection={currentCollection}
+                updateCollection={updateCollection}
+                features={singleInitData?.features}
+                exportModel={() => exportModel()}
+                address={walletAddress ?? ""}
+                leaderboardData={leaderboardData}
+                signer={signer}
+                handleFollowUser={handleFollowUser} />
             }
           </>
         }
         {/* LOADER */}
         {
-          isLoading &&
+          false &&
           <div className={`fixed ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
             <p className=" text-white text-xl font-light">Loading Citizen</p>
             <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
