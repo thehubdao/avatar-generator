@@ -5,6 +5,7 @@ import { GetParameter } from "../../utils/firebase.util";
 import { CampaignParameterName, Module } from "../../enums/common.enum";
 import { LogError, RemoveUndefinedProperties } from "../../utils/common.util";
 import CitizensComponent from "../../components/citizens/citizens.component";
+import SnackbarProvider from "../../ui/citizens/snackbar/snackbar.provider";
 
 export default function CitizensView() {
   const [campaign, setCampaign] = useState<Campaign>()
@@ -23,7 +24,9 @@ export default function CitizensView() {
     void getCampaignParams()
   }, [campaign])
 
-  return <CitizensComponent campaignParams={campaignParams} setCampaign={(_campaign?: Campaign) => {
-    setCampaign(_campaign)
-  }} />
+  return <SnackbarProvider>
+    <CitizensComponent campaignParams={campaignParams} setCampaign={(_campaign?: Campaign) => {
+      setCampaign(_campaign)
+    }} />
+  </SnackbarProvider>
 }
