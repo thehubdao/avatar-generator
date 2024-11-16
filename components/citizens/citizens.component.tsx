@@ -118,10 +118,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
     setCurrentCollection(newCollection);
     setCampaign(newCollection.campaign); // This updates the parent state
-    setTimeout(() => {
-      setIsLoading(true);
-      setCurrentSection(CitizensSections.View);
-    }, 2000)
 
   }, [setCampaign]);
 
@@ -148,20 +144,19 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   useEffect(() => {
     const loadTokenMetadata = async () => {
       if (tokenIdList) {
-        setLoadedTokens([])
         let isFirstToken = false;
-        
+
         try {
           const tokenMetadatas = await Promise.all(
             tokenIdList.map(async (tokenIdMetadata) => {
               try {
                 const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
-                
+
                 if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
                   updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
                   isFirstToken = true;
                 }
-                
+
                 return tokenMetadata;
               } catch (error) {
                 console.error(`Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
@@ -172,7 +167,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
           const validTokens = tokenMetadatas.filter((token): token is TokenMetadata => token !== null);
           setLoadedTokens(validTokens);
-          
+
         } catch (error) {
           console.error('Error loading token metadata:', error);
         }
@@ -344,7 +339,8 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     campaign?: string
   ) {
     if (!campaign) return
-
+    setIsLoading(true);
+    
     await Promise.all([
       getEnvironmentMapList(),
       getSingleInfo(),
@@ -548,7 +544,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         ..._tokenIdList[tokenIdIndex],
         metadataUri: metadataObject.uri
       };
-      
+
       setTokenIdList(_tokenIdList);
 
       const metadataUrl = `ipfs://${metadataObject.uri}`
@@ -568,21 +564,16 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
     } catch (err) {
       console.log(err, "ERROR SAVING COMBINATION");
-      
+
       // Restore original metadata URI on error
       _tokenIdList[tokenIdIndex] = {
         ..._tokenIdList[tokenIdIndex],
         metadataUri: originalMetadataUri
       };
-      
+
       setTokenIdList(_tokenIdList);
     }
-    console.log("SETTING IS SAVING COMBINATION TO FALSE")
-    setIsSavingCombination(false);
-    setIsLoading(false);
-
   }
-
 
   const handleLogin = (isSigned: boolean, selectedLoginCampaign: Campaign) => {
     setSelectedLoginCampaign(selectedLoginCampaign);
@@ -590,9 +581,18 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   }
 
-  useEffect(() => { 
-    if(currentCollection) console.log("Current Collection",currentCollection)
-  }, [currentCollection])
+  useEffect(() => {
+    if (campaignParams) {
+      setIsLoading(true);
+      setCurrentSection(CitizensSections.View);
+    }
+  }, [campaignParams])
+
+  useEffect(() => {
+    if (isSavingCombination) setTimeout(() => {
+      setIsSavingCombination(false);
+    }, 5000);
+  }, [isSavingCombination])
 
   const handleFollowUser = async (addressToFollow: string) => {
     if (!signer) return;
@@ -786,7 +786,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         }
         {/* LOADER */}
         {
-          false &&
+          isLoading &&
           <div className={`fixed ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
             <p className=" text-white text-xl font-light">Loading Citizen</p>
             <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
