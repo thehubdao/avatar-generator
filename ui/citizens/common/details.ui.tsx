@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Button from "./button.ui";
 import PlusSVG from "./SVG/plusSVG.ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import DownloadSVG from "./SVG/downloadSVG.ui";
 import Modal from "./modal.ui";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
-import Snackbar from "./snackbar.ui";
+import { useSnackbar } from "../snackbar/snackbar.provider";
 
 interface DetailsUIProps {
   data: IndexFeatureInterface[];
@@ -14,16 +14,16 @@ interface DetailsUIProps {
 }
 
 export default function DetailsUI({ data, handleDownload, imgUrl }: DetailsUIProps) {
+  const { showSnackbar } = useSnackbar();
 
   const [isOpen, setIsOpen] = useState<boolean>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [isDownloading, setIsDownloading] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (isDownloading) setTimeout(() => {
-      setIsDownloading(false);
-    }, 3000);
-  }, [isDownloading])
+  const handleDownloadingSnackbar = () => {
+    showSnackbar(
+      <p>Your Citizen is being downloaded, please wait...</p>
+    );
+  }
   
   return <>
     <div className="fixed bottom-4 left-4 w-[419px]">
@@ -74,7 +74,7 @@ export default function DetailsUI({ data, handleDownload, imgUrl }: DetailsUIPro
             <div className="grid gap-4 pt-8">
               <Button label="Download VRM" light handleClick={() => { 
                 handleDownload();
-                setIsDownloading(true);
+                handleDownloadingSnackbar();
               }} />
               <Button label="Download GLB" light handleClick={() => { }} />
               <Button label="Download PNG" light handleClick={() => { }} />
@@ -83,10 +83,5 @@ export default function DetailsUI({ data, handleDownload, imgUrl }: DetailsUIPro
         </Modal>
       }
     </div>
-    { isDownloading &&
-      <Snackbar>
-        <p>Your Citizen is being downloaded, please wait...</p>
-      </Snackbar>
-    }
   </>
 }
