@@ -40,8 +40,8 @@ import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.co
 import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { FollowUser, GetFollowStatuses, GetUniversalProfileData } from "../../utils/web3/lukso.util";
-import Snackbar from "../../ui/citizens/common/snackbar.ui";
 import { BrowserProvider, JsonRpcSigner } from 'ethers';
+import { useSnackbar } from '../../ui/citizens/snackbar/snackbar.provider';
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -71,6 +71,7 @@ let featureList: FeatureInterface[] | undefined
 
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
+  const { showSnackbar } = useSnackbar();
   const { user, ready: isReady } = usePrivy()
   const { wallets } = useWallets();
   const [isSigned, setIsSigned] = useState(false)
@@ -90,7 +91,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   })
 
   // Edit state
-  const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false);
   const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>();
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
@@ -340,7 +340,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   ) {
     if (!campaign) return
     setIsLoading(true);
-    
+
     await Promise.all([
       getEnvironmentMapList(),
       getSingleInfo(),
@@ -474,9 +474,27 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     setSkinColor(newSkinColor)
   }
 
+  const onSavingCombinationSnackbar = () => {
+    showSnackbar(
+      <p>The changes are being saved onchain, it might take up to 4 minutes for them to be effective. Do not leave the app.</p>
+    );
+  };
+
+  const onSavedCombinationSnackbar = () => {
+    showSnackbar(
+      <p>The change was successfully saved.</p>
+    );
+  };
+
+  const onFailedCombinationSnackbar = () => {
+    showSnackbar(
+      <p>Saving Failed, try again later.</p>
+    );
+  };
+
   async function saveCombination() {
     if (!walletAddress) return
-    setIsSavingCombination(true);
+    
     const newCombination = singleInitData?.features
       .map((feature) => feature.val.index)
       .join('-') as string
@@ -495,6 +513,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     const originalMetadataUri = _tokenIdList[tokenIdIndex].metadataUri
 
     try {
+      onSavingCombinationSnackbar();
       const burnDropArray: BodyPart[] = []
       //NOTE: female campaign has it's types different from the DB
       const femaleCampaignBodyTypes = {
@@ -562,6 +581,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       }
       console.log("SETTING CURRENT COLLECTION", currentCollection)
       setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
+      onSavedCombinationSnackbar();
     } catch (err) {
       console.log(err, "ERROR SAVING COMBINATION");
 
@@ -572,6 +592,8 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       };
 
       setTokenIdList(_tokenIdList);
+
+      onFailedCombinationSnackbar();
     }
   }
 
@@ -587,12 +609,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       setCurrentSection(CitizensSections.View);
     }
   }, [campaignParams])
-
-  useEffect(() => {
-    if (isSavingCombination) setTimeout(() => {
-      setIsSavingCombination(false);
-    }, 5000);
-  }, [isSavingCombination])
 
   const handleFollowUser = async (addressToFollow: string) => {
     if (!signer) return;
@@ -731,11 +747,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   }
                   isLoading={isLoading}
                 />
-              }
-              {isSavingCombination &&
-                <Snackbar>
-                  <p>The changes are being saved onchain, it might take up to 4 minutes for them to be effective. Do not leave the app.</p>
-                </Snackbar>
               }
             </div>
             {/* CANVAS */}
