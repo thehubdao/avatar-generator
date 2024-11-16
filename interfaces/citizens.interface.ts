@@ -24,4 +24,6 @@ export interface Game {
   link: string;
   bgSrc: string;
   iconSrc: string;
+  instructions: string[];
+  guide?: string;
 }
