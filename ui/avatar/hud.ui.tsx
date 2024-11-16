@@ -185,7 +185,7 @@ export default function HudUI({
           />
         </div>}
         {/* WRAPPER */}
-        <div className={`w-full h-full grid grid-cols-[148px_minmax(100px,_1fr)] ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 duration-200'} transition-all`}>
+        <div className={`w-full h-full grid grid-cols-[148px_minmax(100px,_1fr)] ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 hidden duration-200'} transition-all`}>
           {/* SAVE MODAL */}
           {isSaveModalOpen &&
             <Modal handleClose={() => setIsSaveModalOpen(false)} modalStyles="!w-[492px]">
@@ -196,7 +196,7 @@ export default function HudUI({
                 </div>
                 <div className="w-full grid grid-cols-2 gap-4 pt-8">
                   <Button label="Go Back" light className="w-full" textStiles="w-full text-center" handleClick={() => setIsSaveModalOpen(false)} />
-                  <Button label="Save" light className="w-full" textStiles="w-full text-center" handleClick={() => changeView()} />
+                  <Button label="Save" light className="w-full" textStiles="w-full text-center" handleClick={() => {changeView(); setIsSaveModalOpen(false);}} />
                 </div>
               </div>
             </Modal>
