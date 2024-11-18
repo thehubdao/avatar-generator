@@ -164,7 +164,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
               }
             })
           );
-
           const validTokens = tokenMetadatas.filter((token): token is TokenMetadata => token !== null);
           setLoadedTokens(validTokens);
 
