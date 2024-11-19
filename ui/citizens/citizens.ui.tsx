@@ -22,7 +22,7 @@ interface CitizensUIProps {
   address: string;
   leaderboardData: LeaderboardEntry[];
   signer: JsonRpcSigner | null;
-  handleFollowUser: (address: string) => Promise<void>;
+  handleFollowUser: (address: string) => Promise<boolean>;
 }
 
 
