@@ -487,7 +487,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   const onFailedCombinationSnackbar = () => {
     showSnackbar(
-      <p>Saving Failed, try again later.</p>
+      <p>Saving failed, try again later.</p>
     );
   };
 
@@ -610,8 +610,9 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   }, [campaignParams])
 
   const handleFollowUser = async (addressToFollow: string) => {
-    if (!signer) return;
+    if (!signer) return false;
     try {
+      
       const isSuccess = await FollowUser(addressToFollow, signer);
       if (isSuccess) {
         setLeaderboardData(prevData =>
@@ -621,9 +622,14 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
               : entry
           )
         );
+        showSnackbar(
+          <p>You are following to {addressToFollow}</p>
+        )
       }
+      return isSuccess;
     } catch (error) {
-      console.error('Error following user:', error);
+      LogError(Module.Citizens, 'Error following user:', error);
+      return false;
     }
   };
 
