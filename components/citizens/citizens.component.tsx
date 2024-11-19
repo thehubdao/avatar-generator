@@ -72,7 +72,7 @@ let featureList: FeatureInterface[] | undefined
 
 export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
   const { showSnackbar } = useSnackbar();
-  const { user, ready: isReady } = usePrivy()
+  const { user, ready: isReady, logout } = usePrivy()
   const { wallets } = useWallets();
   const [isSigned, setIsSigned] = useState(false)
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
@@ -106,7 +106,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
 
-  const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
+  const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
 
 
   const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => {
@@ -686,6 +686,12 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     fetchLeaderboardData();
   }, [signer]);
 
+  const handleLogout = useCallback(async () => {
+    await logout();
+    setSigner(undefined);
+    setIsSigned(false);
+  }, [logout]);
+
   return (
     <MobileLayout>
       <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
@@ -785,7 +791,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
               />}
             </div>
             {/* CITIZENS HUD */}
-            {!isEditModeSelected &&
+            {!isEditModeSelected && signer &&
               <CitizensUI
                 currentSection={currentSection}
                 loadedTokens={loadedTokens}
@@ -858,7 +864,12 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   <ArrowLinkSVG />
                 </Button>
               }
-              <ConnectButton isSigned={isSigned} setIsSigned={(isSigned) => { setIsSigned(isSigned) }} address={walletAddress} />
+              <ConnectButton 
+                isSigned={isSigned}
+                setIsSigned={setIsSigned}
+                address={walletAddress}
+                onLogout={handleLogout}
+              />
             </div>
           }
         </div>

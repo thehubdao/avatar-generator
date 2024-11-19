@@ -14,10 +14,11 @@ import SwitchSVG from "./SVG/switchSVG.ui";
 interface ConnectButtonProps {
   isSigned?: boolean;
   setIsSigned: (signed: boolean) => void;
-  address: string | undefined;
+  address?: string;
+  onLogout?: () => void;
 }
 
-export default function ConnectButton({ isSigned = false, setIsSigned, address }: ConnectButtonProps) {
+export default function ConnectButton({ isSigned = false, setIsSigned, address, onLogout }: ConnectButtonProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { followerCount, followingCount } = useFollowCount(address);
   const { xpData } = useXPVerification();
@@ -121,7 +122,12 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address }
                 </div>
               </div>
               <div className="pt-3 w-full flex gap-3">
-                <button className="w-full bg-white text-lg font-light px-4 py-2 rounded-2xl flex justify-center items-center gap-2">
+                <button className="w-full bg-white text-lg font-light px-4 py-2 rounded-2xl flex justify-center items-center gap-2" 
+                  onClick={() => {
+                    if (onLogout) {
+                      onLogout();
+                    }
+                  }}>
                   <LogoutSVG />
                   <p>Log out</p>
                 </button>
