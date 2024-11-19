@@ -1,10 +1,10 @@
 import Image from 'next/image';
 import { LeaderboardEntry } from '../../../types/leaderboard.type';
-import AddUserSVG from '../common/SVG/addUserSVG.ui';
+import FollowButton from '../common/followButton.ui';
 
 interface LeaderBoardProps {
   leaderboardData: LeaderboardEntry[];
-  onFollowUser: (address: string) => Promise<void>;
+  onFollowUser: (address: string) => Promise<boolean>;
 }
 
 export default function LeaderBoard({ leaderboardData, onFollowUser }: LeaderBoardProps) {
@@ -45,14 +45,9 @@ export default function LeaderBoard({ leaderboardData, onFollowUser }: LeaderBoa
                     </p>
                   </div>
                   <div className='grow flex justify-end'>
-                    <div
-                      className={`h-11 w-16 flex justify-center items-center rounded-[20px] cursor-pointer mr-8 ${
-                        user.isFollowing ? 'bg-gray-400' : 'bg-white'
-                      }`}
-                      onClick={() => !user.isFollowing && onFollowUser(user.address)}
-                    >
-                      <AddUserSVG />
-                    </div>
+                    {!user.isFollowing &&
+                      <FollowButton user={user} onFollowUser={(address) => onFollowUser(address)} />
+                    }
                   </div>
                 </td>
                 <td className="text-center">{user.level}</td>
