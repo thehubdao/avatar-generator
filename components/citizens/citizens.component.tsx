@@ -563,7 +563,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         metadataUri: metadataObject.uri
       };
       newMetadata.imageUrl = metadataObject.imageUrl
-      setTokenIdList(_tokenIdList);
 
       const metadataUrl = `ipfs://${metadataObject.uri}`
       await setTokenMetadata(
