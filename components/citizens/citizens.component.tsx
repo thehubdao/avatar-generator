@@ -689,6 +689,13 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     await logout();
     setSigner(undefined);
     setIsSigned(false);
+    setCurrentCollection({
+      campaign: campaignParams?.campaign as Campaign,
+      combination: '',
+      baseCombination: '',
+      tokenMetadata: {} as TokenMetadata
+    })
+    setLoadedTokens([])
   }, [logout]);
 
   return (
