@@ -23,10 +23,11 @@ interface CitizensUIProps {
   leaderboardData: LeaderboardEntry[];
   signer: JsonRpcSigner | null;
   handleFollowUser: (address: string) => Promise<boolean>;
+  handleUserFeatures: ()=>Promise<void>
 }
 
 
-export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser }: CitizensUIProps) {
+export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleUserFeatures }: CitizensUIProps) {
   return (
     <>
       {currentSection === CitizensSections.View && (
@@ -45,8 +46,7 @@ export default function CitizensUI({ currentSection,  currentCollection, updateC
             loadedTokens={loadedTokens}
             currentCollection={currentCollection}
             updateCollection={updateCollection}
-            signer={signer}
-          />
+            signer={signer} handleUserFeatures={handleUserFeatures}          />
         </>
       )}
       {loadedTokens && loadedTokens?.length <= 0 &&

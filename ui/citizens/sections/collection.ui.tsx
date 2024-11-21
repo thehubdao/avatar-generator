@@ -10,13 +10,17 @@ interface CollectionProps {
   currentCollection: CollectionType
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
   signer: JsonRpcSigner | null;
+  handleUserFeatures: ()=>Promise<void>
 }
+
+
 
 export default function Collection({
   loadedTokens,
   updateCollection,
   currentCollection,
-  signer
+  signer,
+  handleUserFeatures
 }: CollectionProps) {
 
   const [selectedList, setSelectedList] = useState<CollectionSections>(CollectionSections.CITIZENS)
@@ -44,7 +48,7 @@ export default function Collection({
       }
       {/* WEARABLE DROPS */}
       {selectedList === CollectionSections.WEARABLES &&
-        <WearablesCollection signer={signer} />}
+        <WearablesCollection signer={signer} handleUserFeatures={handleUserFeatures}/>}
     </div>
   );
 }

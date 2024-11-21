@@ -176,14 +176,15 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     loadTokenMetadata();
   }, [tokenIdList]);
 
-  useEffect(() => {
+  const handleUserFeatures = async () => {
     if (!walletAddress) return
-    const featuresPromise = async () => {
-      const features = await getUserFeatures(walletAddress)
+    const features = await getUserFeatures(walletAddress)
 
-      setUserWearables(features)
-    }
-    featuresPromise()
+    setUserWearables(features)
+  }
+
+  useEffect(() => {
+    handleUserFeatures()
   }, [walletAddress])
 
   async function getEnvironmentMapList() {
@@ -493,7 +494,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   async function saveCombination() {
     if (!walletAddress) return
-    
+
     const newCombination = singleInitData?.features
       .map((feature) => feature.val.index)
       .join('-') as string
@@ -577,6 +578,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         const drop = burnDropArray[i]
         await burnDrop(walletAddress, currentCampaign, drop)
       }
+/*       await handleUserFeatures() */
       console.log("SETTING CURRENT COLLECTION", currentCollection)
       setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
       onSavedCombinationSnackbar();
@@ -611,7 +613,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   const handleFollowUser = async (addressToFollow: string) => {
     if (!signer) return false;
     try {
-      
+
       const isSuccess = await FollowUser(addressToFollow, signer);
       if (isSuccess) {
         setLeaderboardData(prevData =>
@@ -799,6 +801,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             {/* CITIZENS HUD */}
             {!isEditModeSelected && signer &&
               <CitizensUI
+                handleUserFeatures={handleUserFeatures}
                 currentSection={currentSection}
                 loadedTokens={loadedTokens}
                 currentCollection={currentCollection}
@@ -870,7 +873,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
                   <ArrowLinkSVG />
                 </Button>
               }
-              <ConnectButton 
+              <ConnectButton
                 isSigned={isSigned}
                 setIsSigned={setIsSigned}
                 address={walletAddress}

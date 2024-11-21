@@ -10,9 +10,14 @@ import DropItemCard from './dropItemCard.ui'
 import SearchSVG from './SVG/searchSVG.ui'
 import { FetchClaimableDrops } from '../../../utils/api.util'
 
-export default function WearablesCollection({ signer }: { signer: JsonRpcSigner | null }) {
-    const { user } = usePrivy()
-  
+interface WearablesCollectionProps {
+  signer: JsonRpcSigner | null
+  handleUserFeatures: () => Promise<void>
+}
+
+export default function WearablesCollection({ signer, handleUserFeatures }: WearablesCollectionProps) {
+  const { user } = usePrivy()
+
   const [claimableDrops, setClaimableDrops] = useState<Drop[]>([])
   const [userXP, setUserXP] = useState<number>(0)
 
@@ -27,7 +32,7 @@ export default function WearablesCollection({ signer }: { signer: JsonRpcSigner 
         return
       }
       const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer)
-      
+
       const claimTx = await dropContract.claim({
         gasLimit: 500000,
         value: drop.price ? ethers.parseEther(drop.price.toString()) : undefined
@@ -36,7 +41,7 @@ export default function WearablesCollection({ signer }: { signer: JsonRpcSigner 
 
       const drops = await FetchClaimableDrops();
       setClaimableDrops(drops);
-
+      await handleUserFeatures()
     } catch (error) {
       console.error('Error claiming drop:', error)
     }
@@ -91,15 +96,15 @@ export default function WearablesCollection({ signer }: { signer: JsonRpcSigner 
         </div>
         {/* DROPS LIST */}
         <div className="grid grid-cols-4 gap-4 p-8">
-          {claimableDrops.map((drop) => 
-            {
+          {claimableDrops.map((drop) => {
             return <DropItemCard
               key={drop.id} drop={drop}
               userXP={userXP}
               userAddress={user?.wallet?.address || ''}
               signer={signer as JsonRpcSigner}
               onClaim={() => handleClaim(drop)}
-            />}
+            />
+          }
           )}
         </div>
       </div>
