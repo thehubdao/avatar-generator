@@ -159,7 +159,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
                 return tokenMetadata;
               } catch (error) {
-                console.error(`Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
+                LogError(Module.Citizens, `Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
                 return null;
               }
             })
@@ -168,7 +168,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
           setLoadedTokens(validTokens);
 
         } catch (error) {
-          console.error('Error loading token metadata:', error);
+          LogError(Module.Citizens, 'Error loading token metadata:', error);
         }
       }
     };
