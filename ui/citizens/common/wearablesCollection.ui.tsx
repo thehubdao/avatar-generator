@@ -9,6 +9,8 @@ import SelectorUI from './selector.ui'
 import DropItemCard from './dropItemCard.ui'
 import SearchSVG from './SVG/searchSVG.ui'
 import { FetchClaimableDrops } from '../../../utils/api.util'
+import { LogError } from '../../../utils/common.util'
+import { Module } from '../../../enums/common.enum'
 
 interface WearablesCollectionProps {
   signer: JsonRpcSigner | null
@@ -21,15 +23,19 @@ export default function WearablesCollection({ signer, handleUserFeatures }: Wear
   const [claimableDrops, setClaimableDrops] = useState<Drop[]>([])
   const [userXP, setUserXP] = useState<number>(0)
 
+  const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
+
 
 
   const handleClaim = async (drop: Drop) => {
-    if (!user?.wallet || !signer) return
-
+    if (!user?.wallet || !signer) return false;
+    
     try {
       const isApproved = await ApproveClaimForUser(user.wallet.address, drop.id)
+      setIsPopupOpen(true);
       if (!isApproved) {
-        return
+        LogError(Module.Citizens, 'Error claiming drop: is not approved');
+        return false;
       }
       const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer)
 
@@ -41,9 +47,13 @@ export default function WearablesCollection({ signer, handleUserFeatures }: Wear
 
       const drops = await FetchClaimableDrops();
       setClaimableDrops(drops);
-      await handleUserFeatures()
+      await handleUserFeatures();
+      setIsPopupOpen(false);
+      return true;
     } catch (error) {
-      console.error('Error claiming drop:', error)
+      LogError(Module.Citizens, 'Error claiming drop:', error);
+      setIsPopupOpen(false);
+      return false;
     }
   }
 
@@ -100,6 +110,7 @@ export default function WearablesCollection({ signer, handleUserFeatures }: Wear
             return <DropItemCard
               key={drop.id} drop={drop}
               userXP={userXP}
+              popupOpen={isPopupOpen}
               userAddress={user?.wallet?.address || ''}
               signer={signer as JsonRpcSigner}
               onClaim={() => handleClaim(drop)}
