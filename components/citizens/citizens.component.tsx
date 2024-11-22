@@ -81,7 +81,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
 
-  const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>([]);
+  const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>();
 
   const [currentCollection, setCurrentCollection] = useState<CollectionType>({
     campaign: campaignParams?.campaign as Campaign,
@@ -697,7 +697,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       baseCombination: '',
       tokenMetadata: {} as TokenMetadata
     })
-    setLoadedTokens([])
+    setLoadedTokens(undefined)
   }, [logout]);
 
   return (
