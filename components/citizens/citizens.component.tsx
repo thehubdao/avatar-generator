@@ -558,6 +558,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         newCombination,
         currentCampaign
       )
+      
 
       _tokenIdList[tokenIdIndex] = {
         ..._tokenIdList[tokenIdIndex],
