@@ -124,6 +124,7 @@ export const getCampaignTokenIds = async (campaignAddress: string, address: stri
 }
 
 export const getCampaignsTokenIds = async (address: string) => {
+    console.log(new Date().toISOString(), 'getCampaignsTokenIds')
     let campaignsTokenIds = [] as TokenId[]
     for (const campaign of Object.keys(campaignWeb3Data)) {
         const typpedCampaign = campaign as keyof typeof campaignWeb3Data
@@ -142,7 +143,7 @@ export const getCampaignsTokenIds = async (address: string) => {
         campaignsTokenIds = campaignsTokenIds.concat(formattedTokenIds)
     }
     return campaignsTokenIds
-    
+
     /* [
         {
             "tokenId": "2614",
@@ -289,20 +290,23 @@ export const getUserFeatures = async (address: string) => {
     return features
 }
 
-export const setTokenMetadata = async (campaign: Campaign, tokenId: string, tokenMetadata: TokenMetadata, metadataUrl: string) => {
+export const setTokenMetadata = async (campaign: Campaign, tokenId: string, metadataUri: string) => {
     const targetContractAddress = campaignWeb3Data[campaign].contractAddress
+
     const avatarContract = new ethers.Contract(
         targetContractAddress,
         AvatarContractAbi,
         provider,
     );
-
+    const metadataUrl = `ipfs://${metadataUri}`
+    console.log(metadataUrl)
+    const metadataIpfsData = await getIPFSData(metadataUrl.split('//')[1])
     const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
     const metadataDataValue = avatarERC725Contract.encodeData([
         {
             keyName: 'LSP4Metadata',
             value: {
-                json: { "LSP4Metadata": tokenMetadata },
+                json: { "LSP4Metadata": metadataIpfsData },
                 url: metadataUrl,
             },
         },

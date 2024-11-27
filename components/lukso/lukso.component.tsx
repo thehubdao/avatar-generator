@@ -542,12 +542,11 @@ else bodyFeature =  newMetadata.body[feature.val.type.toLowerCase() as keyof typ
             _tokenIdList[tokenIdIndex].metadataUri = metadataObject.uri
 
             setTokenIdList(_tokenIdList.slice())
-            const metadataUrl = `ipfs://${metadataObject.uri}`
+     
              await setTokenMetadata(
                 currentCampaign,
                 selectedTokenId.toString(),
-                newMetadata,
-                metadataUrl
+                metadataObject.uri
             ) 
             setCombinationPictureUrl(metadataObject.imageUrl)
             

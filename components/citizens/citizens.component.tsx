@@ -131,6 +131,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     if (!walletAddress) return
     const getTokensMetadataPromise = async () => {
       const tokenIds = await getCampaignsTokenIds(walletAddress)
+      console.log(new Date().toISOString(), 'getTokensMetadataPromise')
       if (tokenIds.length <= 0) {
         setCurrentSection(CitizensSections.Collection);
         setIsLoading(false);
@@ -566,12 +567,11 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
       };
       newMetadata.imageUrl = metadataObject.imageUrl
 
-      const metadataUrl = `ipfs://${metadataObject.uri}`
+
       await setTokenMetadata(
         currentCampaign,
         currentCollection.tokenMetadata.tokenId,
-        newMetadata,
-        metadataUrl
+        metadataObject.uri
       )
       console.log("BURNING DROPS")
 
