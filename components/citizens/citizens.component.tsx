@@ -60,6 +60,8 @@ const COLLECTIONS: CitizensCollection[] = [
 interface CitizensComponentProps {
   campaignParams?: CampaignParameters;
   setCampaign: (campaign?: Campaign) => void;
+  isLoggedIn?: boolean;
+  closeConnection: () => void;
 }
 
 const exportData: ExportInterface = { attributes: [] }
@@ -70,11 +72,11 @@ let optionList: FeatureInterface[] | undefined
 let featureList: FeatureInterface[] | undefined
 
 
-export default function CitizensComponent({ campaignParams, setCampaign }: CitizensComponentProps) {
+export default function CitizensComponent({ campaignParams, setCampaign, isLoggedIn, closeConnection }: CitizensComponentProps) {
   const { showSnackbar } = useSnackbar();
   const { user, ready: isReady, logout } = usePrivy()
   const { wallets } = useWallets();
-  const [isSigned, setIsSigned] = useState(false)
+  const [isSigned, setIsSigned] = useState(isLoggedIn)
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
@@ -579,7 +581,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
         const drop = burnDropArray[i]
         await burnDrop(walletAddress, currentCampaign, drop)
       }
-/*       await handleUserFeatures() */
+      /*       await handleUserFeatures() */
       console.log("SETTING CURRENT COLLECTION", currentCollection)
       setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
       onSavedCombinationSnackbar();
@@ -692,6 +694,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     await logout();
     setSigner(undefined);
     setIsSigned(false);
+    closeConnection();
     setCurrentCollection({
       campaign: campaignParams?.campaign as Campaign,
       combination: '',
@@ -705,10 +708,18 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
     <MobileLayout>
       <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
         {!isSigned ?
-          <LoginUI
-            collections={collectionList}
-            setIsSigned={(isSigned: boolean, selectedCampaign: Campaign) => handleLogin(isSigned, selectedCampaign)}
-          />
+          <>
+            {isLoggedIn &&
+              <div className={`fixed z-50 ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
+                <p className=" text-white text-xl font-light">Loading session</p>
+                <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
+              </div>
+            }
+            <LoginUI
+                collections={collectionList}
+                setIsSigned={(isSigned: boolean, selectedCampaign: Campaign) => handleLogin(isSigned, selectedCampaign)}
+              />
+          </>
           :
           <>
             {/* EDITOR HUD */}
@@ -895,6 +906,13 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             <Link href={TheHubSocialLinks.Discord}>
               <SocialDiscordSVG />
             </Link>
+          </div>
+        }
+        {
+          isLoggedIn === undefined &&
+          <div className={`fixed z-50 ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
+            <p className=" text-white text-xl font-light">Verifing session</p>
+            <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
           </div>
         }
       </div>
