@@ -290,23 +290,73 @@ export const getUserFeatures = async (address: string) => {
     return features
 }
 
-export const setTokenMetadata = async (campaign: Campaign, tokenId: string, metadataUri: string) => {
-    const targetContractAddress = campaignWeb3Data[campaign].contractAddress
+export const verifyMetadataContent = async (metadataUrl: string, metadataIpfsData: { "LSP4Metadata": TokenMetadata }) => {
+    try {
+        // 1. Get the raw content from IPFS
+        const rawContent = await getIPFSData(metadataUrl.split('//')[1]);
+        
+        // 2. Generate hash of the raw content
+        const contentHash = ethers.keccak256(
+            ethers.toUtf8Bytes(JSON.stringify(rawContent))
+        );
 
+        // 3. Generate hash of the provided metadata
+        const providedHash = ethers.keccak256(
+            ethers.toUtf8Bytes(JSON.stringify(metadataIpfsData))
+        );
+
+        // 4. Compare hashes
+        if (contentHash !== providedHash) {
+            throw new Error('Content verification failed - hashes do not match');
+        }
+
+/*         // 5. Verify any nested image/asset hashes if they exist
+        if (metadataIpfsData.LSP4Metadata?.images) {
+            for (const imageSet of metadataIpfsData.LSP4Metadata.images) {
+                for (const image of imageSet) {
+                    if (image.verification) {
+                        const imageContent = await getIPFSData(image.url.split('//')[1]);
+                        const imageHash = ethers.keccak256(
+                            ethers.toUtf8Bytes(JSON.stringify(imageContent))
+                        );
+                        if (imageHash !== image.verification.data) {
+                            throw new Error(`Image verification failed for ${image.url}`);
+                        }
+                    }
+                }
+            }
+        } */
+
+        return true;
+    } catch (error) {
+        console.error('Metadata verification failed:', error);
+        return false;
+    }
+}
+
+export const setTokenMetadata = async (campaign: Campaign, tokenId: string, metadataUri: string) => {
+    const targetContractAddress = campaignWeb3Data[campaign].contractAddress;
     const avatarContract = new ethers.Contract(
         targetContractAddress,
         AvatarContractAbi,
         provider,
     );
-    const metadataUrl = `ipfs://${metadataUri}`
-    console.log(metadataUrl)
-    const metadataIpfsData = await getIPFSData(metadataUrl.split('//')[1])
-    const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
+    
+    const metadataUrl = `ipfs://${metadataUri}`;
+    const metadataIpfsData = await getIPFSData(metadataUrl.split('//')[1]);
+
+/*     // Verify content before proceeding
+    const isValid = await verifyMetadataContent(metadataUrl, metadataIpfsData);
+
+    if (!isValid) {
+        throw new Error('Metadata content verification failed');
+    } */
+    const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata');
     const metadataDataValue = avatarERC725Contract.encodeData([
         {
             keyName: 'LSP4Metadata',
             value: {
-                json: { "LSP4Metadata": metadataIpfsData },
+                json: metadataIpfsData ,
                 url: metadataUrl,
             },
         },

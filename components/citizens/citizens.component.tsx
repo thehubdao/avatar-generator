@@ -133,7 +133,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     if (!walletAddress) return
     const getTokensMetadataPromise = async () => {
       const tokenIds = await getCampaignsTokenIds(walletAddress)
-      console.log(new Date().toISOString(), 'getTokensMetadataPromise')
       if (tokenIds.length <= 0) {
         setCurrentSection(CitizensSections.Collection);
         setIsLoading(false);
@@ -145,6 +144,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }, [walletAddress])
 
   useEffect(() => {
+    
     const loadTokenMetadata = async () => {
       if (tokenIdList) {
         let isFirstToken = false;
@@ -568,7 +568,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
         metadataUri: metadataObject.uri
       };
       newMetadata.imageUrl = metadataObject.imageUrl
-
+      console.log(metadataObject.uri, "METADATA URI")
 
       await setTokenMetadata(
         currentCampaign,

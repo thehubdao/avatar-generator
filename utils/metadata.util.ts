@@ -13,6 +13,7 @@ export const uploadMetadata = async (tokenMetadata: TokenMetadata, metadataThumb
 
         await UploadFile(imageFile, StorageLocation.AvatarImages, undefined, tempCampaignSwitch[campaign])
     }
+    
     const imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[campaign]}%2Favatar_images%2F${combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
 
     if (!imageUrl) throw new Error("Error uploading image")
@@ -24,6 +25,6 @@ export const uploadMetadata = async (tokenMetadata: TokenMetadata, metadataThumb
         verification: {}
     },]]
 
-    const metadata = await pinata.pinJSONToIPFS({ 'LSP4Metadata': tokenMetadata })
+    const metadata = await pinata.pinJSONToIPFS({ 'LSP4Metadata': tokenMetadata }, {pinataMetadata:{name: `z-${campaign}-${tokenMetadata.tokenId}-metadata`}})
     return { uri: metadata.IpfsHash, imageUrl }
 }
