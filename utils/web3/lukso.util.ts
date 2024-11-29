@@ -48,6 +48,7 @@ export const getIPFSData = async (cid: string) => {
   
   return ipfsData
 }
+
 export const getImageUrl = (metadata: TokenMetadata) => {
     const ipfsUrl = metadata.images[0][0].url
     const cid = ipfsUrl.split('//')[1]
