@@ -11,24 +11,27 @@ interface DetailsUIProps {
   data: IndexFeatureInterface[];
   handleDownload: () => Promise<void>;
   imgUrl: string;
+  loading?: boolean;
 }
 
-export default function DetailsUI({ data, handleDownload, imgUrl }: DetailsUIProps) {
+export default function DetailsUI({ data, handleDownload, imgUrl, loading = false }: DetailsUIProps) {
   const { showSnackbar } = useSnackbar();
 
   const [isOpen, setIsOpen] = useState<boolean>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+  const [isLoadedImage, setIsLoadedImage] = useState<boolean>();
 
   const handleDownloadingSnackbar = () => {
     showSnackbar(
       <p>Your Citizen is being downloaded, please wait...</p>
     );
   }
-  
+
   return <>
     <div className="fixed bottom-4 left-4 w-[419px]">
       {
-        isOpen ?
+        isOpen && !loading ?
           <>
             <div className="max-h-[70vh] 2xl:max-h-[90vh] bg-citizens-dark shadow-citizens-btn w-full rounded-[20px] mb-4 p-2 pl-4 text-white overflow-auto">
               <div className="flex">
@@ -39,7 +42,15 @@ export default function DetailsUI({ data, handleDownload, imgUrl }: DetailsUIPro
               </div>
               <div className="w-full px-7 py-9">
                 <div className="relative w-full h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
-                  <Image src={imgUrl} alt={'Avatar detail'} fill className="object-cover" />
+                  <Image src={imgUrl} alt={'Avatar detail'} fill className={`object-cover ${isLoadedImage ? 'opacity-100' : 'opacity-0'} transition-opacity`} onLoadingComplete={(img) => {
+                    if (img) setIsLoadedImage(true);
+                  }} />
+                  {
+                    !isLoadedImage &&
+                    <div className="absolute w-8 h-8 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                      <div className="w-full h-full rounded-full border-t-2 border-white animate-spin" />
+                    </div>
+                  }
                 </div>
               </div>
               <div className="grid grid-cols-2 justify-items-center gap-4 px-8 pb-8">
@@ -61,7 +72,11 @@ export default function DetailsUI({ data, handleDownload, imgUrl }: DetailsUIPro
           </>
           :
           <Button label="/// details" withIcon handleClick={() => { setIsOpen(true) }} className="w-full" textStiles="text-start pl-2">
-            <PlusSVG />
+            {loading ?
+              <div className="w-3 h-3 rounded-full border-t-[1px] border-white animate-spin" />
+              :
+              <PlusSVG />
+            }
           </Button>
       }
       {isModalOpen &&
@@ -72,7 +87,7 @@ export default function DetailsUI({ data, handleDownload, imgUrl }: DetailsUIPro
               <p className="text-lg">and experience the 3D Web</p>
             </div>
             <div className="grid gap-4 pt-8">
-              <Button label="Download VRM" light handleClick={() => { 
+              <Button label="Download VRM" light handleClick={() => {
                 handleDownload();
                 handleDownloadingSnackbar();
               }} />
