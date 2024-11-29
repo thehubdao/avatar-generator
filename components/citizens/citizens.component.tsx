@@ -79,6 +79,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const [isSigned, setIsSigned] = useState(isLoggedIn)
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
 
   const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
@@ -144,7 +145,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }, [walletAddress])
 
   useEffect(() => {
-    
+
     const loadTokenMetadata = async () => {
       if (tokenIdList) {
         let isFirstToken = false;
@@ -478,18 +479,21 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }
 
   const onSavingCombinationSnackbar = () => {
+    setIsSavingCombination(true);
     showSnackbar(
       <p>The changes are being saved onchain, it might take up to 4 minutes for them to be effective. Do not leave the app.</p>
     );
   };
 
   const onSavedCombinationSnackbar = () => {
+    setIsSavingCombination(false);
     showSnackbar(
       <p>The change was successfully saved.</p>
     );
   };
 
   const onFailedCombinationSnackbar = () => {
+    setIsSavingCombination(false);
     showSnackbar(
       <p>Saving failed, try again later.</p>
     );
@@ -561,7 +565,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
         newCombination,
         currentCampaign
       )
-      
+
 
       _tokenIdList[tokenIdIndex] = {
         ..._tokenIdList[tokenIdIndex],
@@ -716,9 +720,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
               </div>
             }
             <LoginUI
-                collections={collectionList}
-                setIsSigned={(isSigned: boolean, selectedCampaign: Campaign) => handleLogin(isSigned, selectedCampaign)}
-              />
+              collections={collectionList}
+              setIsSigned={(isSigned: boolean, selectedCampaign: Campaign) => handleLogin(isSigned, selectedCampaign)}
+            />
           </>
           :
           <>
@@ -813,6 +817,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
             {/* CITIZENS HUD */}
             {!isEditModeSelected && signer &&
               <CitizensUI
+                isSavingCombination={isSavingCombination}
                 handleUserFeatures={handleUserFeatures}
                 currentSection={currentSection}
                 loadedTokens={loadedTokens}
@@ -861,8 +866,14 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
                   setIsLoading(true);
                   setCurrentSection(CitizensSections.View);
                 }
-                setIsEditModeSelected(true);
-              }} />
+                if (!isSavingCombination) setIsEditModeSelected(true);
+              }}>
+                {isSavingCombination ?
+                  <div className="w-3 h-3 rounded-full border-t-[1px] border-white animate-spin" />
+                  :
+                  <ArrowLinkSVG />
+                }
+              </Button>
               <Button label="Backpack" withIcon className="min-w-min h-fit pl-4" textStiles="!text-base 2xl:!text-lg" handleClick={() => {
                 setIsLoading(false);
                 setCurrentSection(CitizensSections.Collection);
