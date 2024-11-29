@@ -16,6 +16,7 @@ interface CitizensUIProps {
   currentSection: CitizensSections;
   loadedTokens?: TokenMetadata[];
   currentCollection: CollectionType;
+  isSavingCombination?: boolean;
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
   features?: IndexFeatureInterface[];
   exportModel: () => Promise<void>;
@@ -27,14 +28,14 @@ interface CitizensUIProps {
 }
 
 
-export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleUserFeatures }: CitizensUIProps) {
+export default function CitizensUI({ currentSection,  currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleUserFeatures }: CitizensUIProps) {
   return (
     <>
       {currentSection === CitizensSections.View && (
         <>
           {/* details */}
           {features &&
-            <DetailsUI data={features} handleDownload={() => exportModel()} imgUrl={currentCollection.tokenMetadata.imageUrl}/>
+            <DetailsUI data={features} handleDownload={() => exportModel()} imgUrl={currentCollection.tokenMetadata.imageUrl} loading={isSavingCombination}/>
           }
           {/* notifications */}
           <Notifications address={address} />
