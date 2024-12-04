@@ -980,7 +980,7 @@ function GenerateFollowingMessage(count: number, xp: number, levelInfo: { levele
   return message;
 }
 
-export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> {
+export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> { 
   if (address == undefined) Raise("Missing address to update last login date!");
 
   try {
@@ -1072,11 +1072,11 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
 }
 
 function CalculateLevel(xp: number): number {
-  return Math.floor((-1 + Math.sqrt(1 + 8 * xp / 1000)) / 2) + 1;
+  return Math.floor((-20 + Math.sqrt(400 + 40 * xp)) / 20) + 1;
 }
 
 function GetXpForNextLevel(currentLevel: number): number {
-  return 1000 * currentLevel * (currentLevel + 1) / 2;
+  return 10 * (Math.pow(currentLevel, 2) + 2 * currentLevel);
 }
 
 export async function UpdateUserXP(userId: string, xpToAdd: number): Promise<Result<{ newXP: number, newLevel: number, leveledUp: boolean }>> {
@@ -1266,7 +1266,7 @@ async function CalculateCitizensXP(citizensCount: number): Promise<number> {
   
   // Aplicar la fórmula para cada citizen
   for (let k = 1; k <= citizensCount; k++) {
-    const xpForThisCitizen = 100 * (1 + 0.20 * (k - 1));
+    const xpForThisCitizen = 10 * (1 + 0.10 * (k - 1));
     totalXP += xpForThisCitizen;
   }
   

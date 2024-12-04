@@ -9,7 +9,6 @@ import { useUniversalProfile } from '../../../hooks/useUniversalProfile';
 import { usePrivy } from '@privy-io/react-auth';
 import { useXPVerification } from '../../../hooks/useXPVerification';
 import LogoutSVG from "./SVG/logoutSVG.ui";
-import SwitchSVG from "./SVG/switchSVG.ui";
 
 interface ConnectButtonProps {
   isSigned?: boolean;
