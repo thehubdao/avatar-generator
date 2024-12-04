@@ -5,14 +5,21 @@ import { GetCitizensHoldings, GetWearablesHoldings } from '../../../../utils/web
 export default async function Handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
-      const leaderboardData = await GetLeaderboardData();
-      const contractAddresses = await GetDropsContractAddresses();
-      for (const entry of leaderboardData) {
-        entry.citizensHoldings = await GetCitizensHoldings(entry.address);
-        entry.wearablesHoldings = await GetWearablesHoldings(entry.address, contractAddresses);
-      }
-      
-      res.status(200).json(leaderboardData);
+
+      const [leaderboardData, contractAddresses] = await Promise.all([
+        GetLeaderboardData(),
+        GetDropsContractAddresses()
+      ]);
+
+      const updatedLeaderboardData = await Promise.all(
+        leaderboardData.map(async (entry) => ({
+          ...entry,
+          citizensHoldings: await GetCitizensHoldings(entry.address),
+          wearablesHoldings: await GetWearablesHoldings(entry.address, contractAddresses)
+        }))
+      );
+
+      res.status(200).json(updatedLeaderboardData);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch leaderboard data' });
     }
