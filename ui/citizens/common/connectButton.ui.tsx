@@ -131,10 +131,10 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address, 
                   <LogoutSVG />
                   <p>Log out</p>
                 </button>
-                <button className="w-full bg-white text-lg font-light px-4 py-2 rounded-2xl flex justify-center items-center gap-2">
+                {/* <button className="w-full bg-white text-lg font-light px-4 py-2 rounded-2xl flex justify-center items-center gap-2">
                   <SwitchSVG />
                   <p>Switch profile</p>
-                </button>
+                </button> */}
               </div>
             </div>
           )}
