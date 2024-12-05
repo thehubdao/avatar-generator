@@ -23,7 +23,7 @@ export default function Collection({
   handleUserFeatures
 }: CollectionProps) {
 
-  const [selectedList, setSelectedList] = useState<CollectionSections>(CollectionSections.CITIZENS)
+  const [selectedList, setSelectedList] = useState<CollectionSections>(CollectionSections.WEARABLES)
 
 
   return (
@@ -34,8 +34,9 @@ export default function Collection({
           { selectedList === CollectionSections.WEARABLES && 'WEARABLE DROPS' }
         </h1>
         <div className="absolute flex text-white bottom-0 right-0 bg-[#2D2D2D] rounded-full px-px">
+        <div className={`px-4 py-2 rounded-full ${selectedList === CollectionSections.WEARABLES ? ' select-none' : ' text-white/60 hover:text-white shadow-citizens-btn bg-citizens-dark cursor-pointer '}`} onClick={() => setSelectedList(CollectionSections.WEARABLES)}>WEARABLES</div>
           <div className={`px-4 py-2 rounded-full ${selectedList === CollectionSections.CITIZENS ? ' select-none' : ' text-white/60 hover:text-white shadow-citizens-btn bg-citizens-dark cursor-pointer '}`} onClick={() => setSelectedList(CollectionSections.CITIZENS)}>CITIZENS</div>
-          <div className={`px-4 py-2 rounded-full ${selectedList === CollectionSections.WEARABLES ? ' select-none' : ' text-white/60 hover:text-white shadow-citizens-btn bg-citizens-dark cursor-pointer '}`} onClick={() => setSelectedList(CollectionSections.WEARABLES)}>WEARABLES</div>
+
         </div>
       </div>
       {/* MY CITIZENS */}
