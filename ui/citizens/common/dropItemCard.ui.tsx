@@ -92,7 +92,7 @@ export default function DropItemCard({ drop, userXP, userAddress, signer, popupO
                 {
                   popupOpen ?
                     <>
-                      <p className="text-lg">Confirm the transaction in the opended pop-up, wait a while and the wearable will yours.</p>
+                      <p className="text-lg">Confirm the transaction on the extension.</p>
                       <p className="text-xs">The pop-up does not open yet?<br /><span className="underline cursor-pointer" onClick={() => cancelClaiming()}>click here.</span></p>
                     </>
                     :
