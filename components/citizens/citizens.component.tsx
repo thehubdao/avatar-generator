@@ -187,16 +187,21 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 loadTokenMetadata();
   }, [tokenIdList]);
 
-const handleUserFeatures = async () => {
-  if (!walletAddress) return
-  const features = await getUserFeatures(walletAddress)
+  const handleUserFeatures = async () => {
+    if (!walletAddress) return
+    const features = await getUserFeatures(walletAddress)
 
-  setUserWearables(features)
-}
+    setUserWearables(features)
+  } 
 
-useEffect(() => {
+  useEffect(() => {
   handleUserFeatures()
 }, [walletAddress])
+
+
+useEffect(() => {
+  void getFeatureList()
+}, [userWearables])
 
 async function getEnvironmentMapList() {
   if (!campaignParams?.campaign) return
@@ -291,6 +296,7 @@ async function getFeatureList() {
 
   optionList = filteredOptionList
   const filteredList = FilterList(optionList, 'type', selectedCategory)
+  console.log(filteredList, "FILTERED LIST");
   return setOptionListShow(filteredList)
 }
 
@@ -595,7 +601,8 @@ async function saveCombination() {
       const drop = burnDropArray[i]
       await burnDrop(walletAddress, currentCampaign, drop)
     }
-    /*       await handleUserFeatures() */
+    await handleUserFeatures()
+
     console.log("SETTING CURRENT COLLECTION", currentCollection)
     setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
     onSavedCombinationSnackbar();

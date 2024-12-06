@@ -367,7 +367,7 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: string, meta
         0, // amount to the fund the contract with when deploying
         setMetadataDataEncodedFunction
     )
-    tx.wait()
+    await tx.wait()
 }
 
 export const burnDrop = async (from: string, campaign: string, drop: BodyPart) => {
@@ -384,7 +384,7 @@ export const burnDrop = async (from: string, campaign: string, drop: BodyPart) =
         0, // amount to the fund the contract with when deploying
         burnEncondedFunction
     )
-    tx.wait()
+    await tx.wait()
 }
 
 
