@@ -17,6 +17,7 @@ export interface Drop {
   price?: number;
   requiredToken?: string;
   contractAddress: string;
+  owned: boolean;
 }
 
 export interface Game {

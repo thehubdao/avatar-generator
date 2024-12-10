@@ -73,7 +73,6 @@ export default function Play() {
   function openExternal(game: Game) {
     setIsOpenInstructions(true);
     setSelectedGame(game);
-    console.log(game);
 
     // window.open(link, "_blank");
   }

@@ -2,9 +2,7 @@ import { JsonRpcSigner } from "ethers";
 import { Drop } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
-import { useEffect, useState } from "react";
-import { ethers } from "ethers";
-import ClaimableDropABI from '../../../constants/abi/ClaimableDropABI.json';
+import { useState } from "react";
 import Modal from "./modal.ui";
 import Button from "./button.ui";
 import { useSnackbar } from "../snackbar/snackbar.provider";
@@ -16,33 +14,22 @@ interface DropItemCardProps {
   signer: JsonRpcSigner;
   popupOpen?: boolean;
   onClaim: () => Promise<boolean>;
+  isLock?: boolean;
 }
 
-export default function DropItemCard({ drop, userXP, userAddress, signer, popupOpen = false, onClaim }: DropItemCardProps) {
+export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock = true }: DropItemCardProps) {
   const { showSnackbar } = useSnackbar();
-
-  const [isClaimed, setIsClaimed] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
-  const [isLock] = useState(userXP < drop.requiredXP);
   const [isOpenClaimModal, setIsOpenClaimModal] = useState<boolean>(false);
 
-  const checkClaimStatus = async () => {
-    try {
-      const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer);
-      const balance = await contract.balanceOf(userAddress);
-      setIsClaimed(balance > 0);
-    } catch (error) {
-      console.error("Error checking claim status:", error);
-    }
-  };
+
 
   const claimHandler = async () => {
     setIsClaiming(true);
     const isSuccess = await onClaim();
     if (isSuccess) {
-      await checkClaimStatus();
       showSnackbar(
-        <p>The item &quot;{drop.name}&quot; has been successfully reclaimed!.</p>
+        <p>The item &quot;{drop.name}&quot; has been successfully claimed!.</p>
       )
     } else {
       showSnackbar(
@@ -61,25 +48,22 @@ export default function DropItemCard({ drop, userXP, userAddress, signer, popupO
     )
   }
 
-  useEffect(() => {
-    checkClaimStatus();
-  }, []);
 
   return <>
     <CampaignCard
       key={drop.id}
       title={drop.name}
-      tokenID={isClaimed ? 'Claimed' : undefined}
-      price={isClaimed ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : `PRICE: ${drop.price} ${drop.paymentType}`}
-      chipColor={isClaimed ? undefined : isLock ? 'bg-citizens-yellow' : drop.paymentType === PaymentType.LYX ? 'bg-citizens-red' : 'bg-citizens-blue'}
+      tokenID={drop.owned ? 'Claimed' : undefined}
+      price={drop.owned ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : `PRICE: ${drop.price} ${drop.paymentType}`}
+      chipColor={drop.owned ? undefined : isLock ? 'bg-citizens-yellow' : drop.paymentType === PaymentType.LYX ? 'bg-citizens-red' : 'bg-citizens-blue'}
       blocked={isLock}
       imgSrc={drop.imageUrl}
       imgAlt={drop.name}
       size={CardSize.Small}
       light
-      overlayText={isClaimed || isLock ? undefined : "CLICK TO CLAIM"}
+      overlayText={drop.owned || isLock ? undefined : "CLICK TO CLAIM"}
       handleClick={() => {
-        if (!isLock && !isClaimed) setIsOpenClaimModal(true);
+        if (!isLock && !drop.owned) setIsOpenClaimModal(true);
       }}
     />
     {isOpenClaimModal &&

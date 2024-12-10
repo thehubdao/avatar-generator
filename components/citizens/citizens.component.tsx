@@ -296,7 +296,7 @@ async function getFeatureList() {
 
   optionList = filteredOptionList
   const filteredList = FilterList(optionList, 'type', selectedCategory)
-  console.log(filteredList, "FILTERED LIST");
+
   return setOptionListShow(filteredList)
 }
 
@@ -588,7 +588,6 @@ async function saveCombination() {
       metadataUri: metadataObject.uri
     };
     newMetadata.imageUrl = metadataObject.imageUrl
-    console.log(metadataObject.uri, "METADATA URI")
 
     await setTokenMetadata(
       currentCampaign,
@@ -603,7 +602,6 @@ async function saveCombination() {
     }
     await handleUserFeatures()
 
-    console.log("SETTING CURRENT COLLECTION", currentCollection)
     setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
     onSavedCombinationSnackbar();
   } catch (err) {

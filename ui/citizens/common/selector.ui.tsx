@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Button from "./button.ui";
 import ArrowSVG from "./SVG/arrowSVG.ui";
 import { useOnClickOutside } from "usehooks-ts";
@@ -15,10 +15,6 @@ export default function SelectorUI({ list, selection, label = 'CHOOSE', selectio
   
   const [isButtonHovered, setIsButtonHovered] = useState<boolean>(false);
   const [isSelectorOpen, setIsSelectorOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    console.log(list, "list");
-  }, [list])
 
   function handleClickOutside() {
     if (!isButtonHovered) setIsSelectorOpen(false);
