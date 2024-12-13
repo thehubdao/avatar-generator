@@ -33,7 +33,6 @@ export default function SelectorUI({ list, selection, label = 'CHOOSE', selectio
           </div>
         </Button>
       </div>
-
       <p className="absolute top-full right-0 px-2 mt-1 text-xs text-white/20">{campaignLabels[selection?.toLowerCase() as keyof typeof campaignLabels]?.dropdownName}</p>
       {isSelectorOpen &&
         <div className="absolute top-full w-full max-h-96 overflow-y-auto rounded-2xl bg-white mt-2 z-10">

@@ -1,5 +1,5 @@
 ﻿export const GLOBAL_VALUES = {
-  BaseCampaign: "lukso",
+  BaseCampaign: "citizens",
   Acc: "Accessories",
   Config: "Config",
   AccEnd: "Acc",
