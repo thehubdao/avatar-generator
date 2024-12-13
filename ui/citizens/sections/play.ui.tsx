@@ -10,7 +10,7 @@ import Link from "next/link";
 const GAMES: Game[] = [
   {
     name: 'NIFTY ISLAND',
-    link: 'https://www.niftyisland.com/',
+    link: 'https://www.niftyisland.com/play/patabrava/0',
     bgSrc: '/resources/images/play/nifty.png',
     iconSrc: '/resources/images/play/logos/nifty.png',
     instructions: [
@@ -25,7 +25,7 @@ const GAMES: Game[] = [
   },
   {
     name: 'HYPERFY',
-    link: 'https://hyperfy.io/',
+    link: 'https://hyperfy.io/thehub',
     bgSrc: '/resources/images/play/hyperfy.png',
     iconSrc: '/resources/images/play/logos/hyperfy.png',
     instructions: [

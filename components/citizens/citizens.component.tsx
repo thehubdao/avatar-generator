@@ -57,8 +57,7 @@ const COLLECTIONS: CitizensCollection[] = [
 ]
 
 const isValidIPFSHash = (hash: string): boolean => {
-  const ipfsPattern = /^(Qm[1-9A-HJ-NP-Za-km-z]{44}|baf[1-9A-HJ-NP-Za-km-z]{56}(\/\d+)?)$/;
-  return ipfsPattern.test(hash);
+  return hash.startsWith('baf') || hash.startsWith('Qm');
 };
 
 interface CitizensComponentProps {
@@ -578,7 +577,7 @@ async function saveCombination() {
       newCombination,
       currentCampaign
     )
-
+    console.log(metadataObject.uri)
     if (!isValidIPFSHash(metadataObject.uri)) {
       throw new Error('Invalid IPFS hash format');
     }

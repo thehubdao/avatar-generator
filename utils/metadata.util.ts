@@ -1,10 +1,11 @@
 import { StorageLocation } from "../enums/firebase.enum";
 import { Campaign, TokenMetadata } from "../types/metadata.type";
-import pinataSDK from '@pinata/sdk'
+import { PinataSDK } from "pinata-web3";
 import { tempCampaignSwitch } from "./web3/contract.util";
 import { UploadFile } from "./firebase.util";
 
-const pinata = new pinataSDK({ pinataApiKey: process.env.NEXT_PUBLIC_PINATA_API_KEY, pinataSecretApiKey: process.env.NEXT_PUBLIC_PINATA_API_SECRET })
+
+const pinata = new PinataSDK({ pinataGateway: 'lukso.mypinata.cloud', pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT })
 
 
 export const uploadMetadata = async (tokenMetadata: TokenMetadata, metadataThumbnail: Blob | undefined, combination: string, campaign: Campaign) => {
@@ -15,16 +16,18 @@ export const uploadMetadata = async (tokenMetadata: TokenMetadata, metadataThumb
     }
     
     const imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[campaign]}%2Favatar_images%2F${combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
-
-    if (!imageUrl) throw new Error("Error uploading image")
-
+    const imageResponse = await fetch(imageUrl)
+    const imageBlob = await imageResponse.blob()
+    const file = new File([imageBlob], `${combination}.png`, { type: "image/png" });
+    console.log(file, imageBlob)
+    const upload = await pinata.upload.file(file, {cidVersion: 0, metadata:{name: `${campaign}-${tokenMetadata.tokenId}-thumbnail`}});
     tokenMetadata.images = [[{
         width: 1024,
         height: 974,
-        url: imageUrl,
+        url: `ipfs://${upload.IpfsHash}`,
         verification: {}
     },]]
 
-    const metadata = await pinata.pinJSONToIPFS({ 'LSP4Metadata': tokenMetadata }, {pinataMetadata:{name: `z-${campaign}-${tokenMetadata.tokenId}-metadata`}})
+    const metadata = await pinata.upload.json({ 'LSP4Metadata': tokenMetadata }, {cidVersion: 1, metadata:{name: `z-${campaign}-${tokenMetadata.tokenId}-metadata`}})
     return { uri: metadata.IpfsHash, imageUrl }
 }
