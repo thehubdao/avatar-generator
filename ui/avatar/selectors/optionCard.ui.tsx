@@ -13,7 +13,7 @@ export default function OptionCardUI({ option, isActive }: OptionCardUIProps) {
       <div className="relative bg-[#3d3d3d] w-full h-[132px] dark:h-[164px] flex justify-center items-center">
         <GetImage url={option.thumb} alt={option.path} />
         <div className="absolute inset-2 bg-citizens-bluedark w-fit h-fit text-xs text-white px-2 py-1 rounded-full">
-          {option.balance ? `${option.balance} units` : 'BASE'}
+          {option.balance ? `${option.balance} ${option.balance === 1 ? 'unit' : 'units'}` : 'BASE'}
         </div>
         <div className="absolute right-2 top-2">
           <MedalSVG withCircle={isActive} />
