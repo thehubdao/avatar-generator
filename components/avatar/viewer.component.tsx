@@ -26,6 +26,7 @@ import { GetToneTexture } from "../../utils/threejs/texture.util";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
 import { CreateEffectComposer } from "../../utils/threejs/postProcessing.util";
 import { ConfigPostProcessing } from "../../interfaces/postProcessing.interface";
+import SceneUtil from "../../utils/scene.utils";
 
 //#region Logic
 let _scene: Scene | undefined;
@@ -244,6 +245,10 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
 
     window.addEventListener('resize', onWindowResize, false);
     Animate();
+
+    // let's save renderer
+    const sceneUtil = SceneUtil.Instance()
+    sceneUtil.storeRenderer(_renderer)
   }
 
   function stopCamMovement() {
