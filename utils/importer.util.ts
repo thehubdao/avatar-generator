@@ -1,6 +1,6 @@
 import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader"
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js"
-import { KTX2Loader } from "three//examples/jsm/loaders/KTX2Loader.js"
+import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader.js"
 import {GetFile} from "./firebase.util";
 import {IsWebUrl, LogError} from "./common.util";
 import SceneUtil from "./scene.utils";
