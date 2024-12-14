@@ -609,103 +609,6 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
 
   };
 
-  useEffect(() => {
-      updateCollection('vrm_male', '3-5-2-3-6', {
-        "attributes": [
-            {
-                "key": "head",
-                "value": "Classic Pink",
-                "type": "string"
-            },
-            {
-                "key": "face",
-                "value": "Heart Glasses",
-                "type": "string"
-            },
-            {
-                "key": "chest",
-                "value": "Good Vibes",
-                "type": "string"
-            },
-            {
-                "key": "legs",
-                "value": "Jeans",
-                "type": "string"
-            },
-            {
-                "key": "shoes",
-                "value": "Silver High Tops",
-                "type": "string"
-            }
-        ],
-        "body": {
-            "head": {
-                "name": "Classic Pink",
-                "path": "vrm_male/feature/head/588097c4-61cd-468b-a316-2196a6d47b36",
-                "thumb": "vrm_male/thumb/hair/2c560639-5e18-4015-b583-1754ffeb4c52",
-                "tier": "common",
-                "type": "head",
-                "id": "tm1r9uUPtRJGot7pwXJw",
-                "index": 3
-            },
-            "face": {
-                "type": "face",
-                "index": 5,
-                "tier": "common",
-                "name": "Heart Glasses",
-                "id": "gOC3rLB5Fw4U1LYkdqDF",
-                "thumb": "vrm_male/thumb/aceesories/09a7fde2-77e0-4f34-936c-779262d0e3ef",
-                "path": "vrm_male/feature/aceesories/95874124-e986-4c16-826f-078431e3fde7"
-            },
-            "chest": {
-                "path": "vrm_male/feature/chest/7a6ed384-a81b-48f2-a42f-53ef2cc331fa",
-                "id": "uL83UHp5MiCvATfzAjSe",
-                "tier": "rare",
-                "thumb": "vrm_male/thumb/chest/69115c2f-bb3d-4df3-8011-1de8593a9f49",
-                "index": 2,
-                "type": "Chest",
-                "name": "Good Vibes"
-            },
-            "legs": {
-                "thumb": "vrm_male/thumb/legs/b3ce8d05-b336-4dce-90cf-f47f84926df6",
-                "index": 3,
-                "type": "Legs",
-                "name": "Jeans",
-                "id": "Ks5owWGRJtoW1ECxIURM",
-                "tier": "common",
-                "path": "vrm_male/feature/legs/cdd27659-7777-4b45-8233-34c6dabce4ef"
-            },
-            "shoes": {
-                "id": "azIzLP1cDJK3ioaim1qe",
-                "type": "shoes",
-                "name": "Silver High Tops",
-                "tier": "legendary",
-                "index": 6,
-                "path": "vrm_male/feature/shoes/81f85333-c2bb-4e5b-906c-a14ff63cf5fa",
-                "thumb": "vrm_male/thumb/shoes/b53e65b7-b3ba-47b3-8bd3-884f39eba000"
-            }
-        },
-        "name": "",
-        "description": "",
-        "images": [
-            [
-                {
-                    "width": 1024,
-                    "height": 974,
-                    "url": "https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/lukso2%2Favatar_images%2F3-5-2-3-6.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb",
-                    "verification": {}
-                }
-            ]
-        ],
-        "combination": "3-5-2-3-6",
-        "tokenId": "1590",
-        "campaign": "vrm_male",
-        "baseCombination": "3-5-2-3-6",
-        "imageUrl": "https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/lukso2%2Favatar_images%2F3-5-2-3-6.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb",
-        "fallbackImageUrl": "https://portal.myfilebase.com/ipfs/firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/lukso2%2Favatar_images%2F3-5-2-3-6.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb?filebaseGatewayToken=4gnf45tj05cp95oe2t1n"
-    })
-  }, [])
-
   useEffect(() => { console.log('isLoading', isLoading) }, [isLoading])
 
   useEffect(() => {
@@ -717,7 +620,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
   return (
     <MobileLayout>
       <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
-        {false ?
+        {!isSigned ?
           <LoginUI
             collections={collectionList}
             setIsSigned={(isSigned: boolean, selectedCampaign: Campaign) => handleLogin(isSigned, selectedCampaign)}
@@ -789,7 +692,7 @@ export default function CitizensComponent({ campaignParams, setCampaign }: Citiz
             </div>
             {/* CANVAS */}
             <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-              {campaignParams && <AvatarEditor
+              {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View && <AvatarEditor
 
                 avatarBasePath={
                   campaignParams.armature

@@ -1,6 +1,6 @@
-import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
-import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js"
-import { KTX2Loader } from "three/addons/loaders/KTX2Loader.js"
+import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader"
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js"
+import { KTX2Loader } from "three//examples/jsm/loaders/KTX2Loader.js"
 import {GetFile} from "./firebase.util";
 import {IsWebUrl, LogError} from "./common.util";
 import SceneUtil from "./scene.utils";
@@ -57,7 +57,7 @@ class ImporterUtil {
   }
 }
 
-function ParseAsync(array: ArrayBuffer, renderer?: WebGLRenderer): Promise<GLTF> {
+function ParseAsync(array: ArrayBuffer): Promise<GLTF> {
   const loader = ImporterUtil.Instance().GetGltfLoaderInstance();
   return new Promise<GLTF>((resolve, reject) => {
     loader.parse(array, '',
@@ -88,10 +88,10 @@ export async function LoadGltfModel(url: string): Promise<GLTF> {
   return loader.loadAsync(url);
 }
 
-export async function FetchGltfModel(url: string,  renderer?: WebGLRenderer): Promise<Result<GLTF>> {
+export async function FetchGltfModel(url: string): Promise<Result<GLTF>> {
   try {
     const arrayBuffer = await FetchArrayBuffer(url);
-    const parsed = await ParseAsync(arrayBuffer, renderer);
+    const parsed = await ParseAsync(arrayBuffer);
     return {success: true, value: parsed};
   }
   catch(err) {
@@ -116,9 +116,9 @@ export async function FirebaseGltfModel(path: string, campaign?: string): Promis
   return fileResult;
 }
 
-export async function GetGltfModel(path: string, renderer?: WebGLRenderer): Promise<Result<GLTF>> {
+export async function GetGltfModel(path: string): Promise<Result<GLTF>> {
   if (IsWebUrl(path))
-    return FetchGltfModel(path, renderer);
+    return FetchGltfModel(path);
   else
     return FirebaseGltfModel(path);
 }
