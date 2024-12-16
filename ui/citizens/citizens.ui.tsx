@@ -11,6 +11,7 @@ import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { JsonRpcSigner } from "ethers";
 import Modal from "./common/modal.ui";
 import Button from "./common/button.ui";
+import { DataBaseDrop } from "../../interfaces/citizens.interface";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -24,11 +25,12 @@ interface CitizensUIProps {
   leaderboardData: LeaderboardEntry[];
   signer: JsonRpcSigner | null;
   handleFollowUser: (address: string) => Promise<boolean>;
-  handleUserFeatures: ()=>Promise<void>
+  handleClaim: (drop: DataBaseDrop) => Promise<boolean>
+  claimableDrops: DataBaseDrop[]
 }
 
 
-export default function CitizensUI({ currentSection,  currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleUserFeatures }: CitizensUIProps) {
+export default function CitizensUI({claimableDrops, currentSection,  currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleClaim   }: CitizensUIProps) {
   return (
     <>
       {currentSection === CitizensSections.View && (
@@ -47,7 +49,9 @@ export default function CitizensUI({ currentSection,  currentCollection, isSavin
             loadedTokens={loadedTokens}
             currentCollection={currentCollection}
             updateCollection={updateCollection}
-            signer={signer} handleUserFeatures={handleUserFeatures}          />
+            signer={signer} 
+            claimableDrops={claimableDrops}
+            handleClaim={handleClaim}/>
         </>
       )}
       {loadedTokens && loadedTokens?.length <= 0 &&

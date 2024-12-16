@@ -7,7 +7,7 @@ export interface CitizensCollection {
   campaign: Campaign;
 }
 
-export interface Drop {
+export interface DataBaseDrop {
   id: string;
   name: string;
   description: string;
@@ -19,6 +19,7 @@ export interface Drop {
   contractAddress: string;
   owned: boolean;
 }
+
 
 export interface Game {
   name: string;

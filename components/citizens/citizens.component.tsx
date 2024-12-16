@@ -8,8 +8,8 @@ import LoginUI from "../../ui/citizens/sections/login.ui";
 import Image from "next/image";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import CitizensUI from "../../ui/citizens/citizens.ui";
-import { burnDrop, getCampaignsTokenIds, getUserFeatures, setTokenMetadata } from "../../utils/web3/contract.util";
-import { CitizensCollection } from "../../interfaces/citizens.interface";
+import { burnDrop, checkClaimStatus, getCampaignsTokenIds, getUserFeatures, setTokenMetadata } from "../../utils/web3/contract.util";
+import { CitizensCollection, DataBaseDrop } from "../../interfaces/citizens.interface";
 import Button from "../../ui/citizens/common/button.ui";
 import ArrowLinkSVG from "../../ui/citizens/common/SVG/arrowLinkSVG.ui";
 import SocialDiscordSVG from "../../ui/citizens/common/SVG/socialDiscordSVG.ui";
@@ -27,7 +27,7 @@ import AvatarEditor, {
   SetEnvironment,
   SetFeaturesData,
 } from '../avatar/editor.component'
-import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetAvatarSingleByCampaignCombinationString, GetAvatarSingleByCampaignCombination, GetAssetsListByCampaign, GetAnimationByCampaignAndName, FetchBlob } from "../../utils/api.util";
+import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetAvatarSingleByCampaignCombinationString, GetAvatarSingleByCampaignCombination, GetAssetsListByCampaign, GetAnimationByCampaignAndName, FetchBlob, FetchClaimableDrops, ApproveClaimForUser } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
@@ -40,8 +40,9 @@ import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.co
 import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { FollowUser, GetFollowStatuses, GetUniversalProfileData } from "../../utils/web3/lukso.util";
-import { BrowserProvider, JsonRpcSigner } from 'ethers';
+import { BrowserProvider, ethers, JsonRpcSigner } from 'ethers';
 import { useSnackbar } from '../../ui/citizens/snackbar/snackbar.provider';
+import { claimDrop } from '../../utils/web3/contract.util';
 
 const COLLECTIONS: CitizensCollection[] = [
   {
@@ -109,6 +110,8 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const [selectedCategory, setSelectedCategory] = useState<string>('head');
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>();
   const [userWearables, setUserWearables] = useState<CampaignDrops | undefined>(undefined);
+
+  const [claimableDrops, setClaimableDrops] = useState<DataBaseDrop[]>([])
 
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
 
@@ -201,6 +204,48 @@ loadTokenMetadata();
 useEffect(() => {
   void getFeatureList()
 }, [userWearables])
+
+useEffect(() => {
+  async function fetchDrops() {
+    if(!signer) return
+    const drops = await FetchClaimableDrops();
+    console.log('DROPS', drops)
+    Promise.all(drops.map(async (drop) => {
+      drop.owned = await checkClaimStatus(drop, signer, user?.wallet?.address || '');
+    }))
+    setClaimableDrops(drops);
+  }
+  fetchDrops();
+}, [signer]);
+
+const handleClaim = async (drop: DataBaseDrop) => {
+  if (!user?.wallet || !signer) return false;
+  
+  try {
+    const isApproved = await ApproveClaimForUser(user.wallet.address, drop.id)
+    if (!isApproved) {
+      LogError(Module.Citizens, 'Error claiming drop: is not approved');
+      return false;
+    }
+
+    const isOwned = await claimDrop(drop, signer, user.wallet.address);
+    
+    setClaimableDrops(prevDrops => 
+      prevDrops.map(d => 
+        d.id === drop.id 
+          ? { ...d, owned: isOwned }
+          : d
+      )
+    );
+
+    await handleUserFeatures();
+    return true;
+  } catch (error) {
+    LogError(Module.Citizens, 'Error claiming drop:', error);
+    return false;
+  }
+}
+
 
 async function getEnvironmentMapList() {
   if (!campaignParams?.campaign) return
@@ -493,7 +538,7 @@ async function onClickChangeSkinColor(newSkinColor = skinColor) {
 const onSavingCombinationSnackbar = () => {
   setIsSavingCombination(true);
   showSnackbar(
-    <p>The changes are being saved onchain, it might take up to 4 minutes for them to be effective. Do not leave the app.</p>
+    <p>The changes are being saved onchain, it might take up to 30 seconds for them to be effective. Do not leave the app.</p>
   );
 };
 
@@ -832,7 +877,6 @@ return (
           {!isEditModeSelected && signer &&
             <CitizensUI
               isSavingCombination={isSavingCombination}
-              handleUserFeatures={handleUserFeatures}
               currentSection={currentSection}
               loadedTokens={loadedTokens}
               currentCollection={currentCollection}
@@ -842,7 +886,9 @@ return (
               address={walletAddress ?? ""}
               leaderboardData={leaderboardData}
               signer={signer}
-              handleFollowUser={handleFollowUser} />
+              handleFollowUser={handleFollowUser} 
+              claimableDrops={claimableDrops}
+              handleClaim={handleClaim}/>
           }
         </>
       }

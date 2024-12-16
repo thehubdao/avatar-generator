@@ -1,4 +1,4 @@
-import { Contract, ethers, JsonRpcProvider, Signer, TransactionResponse } from 'ethers'
+import { Contract, ethers, JsonRpcProvider, JsonRpcSigner, Signer, TransactionResponse } from 'ethers'
 import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import WerableContractAbi from '../../constants/abi/WearableContractABI.json'
@@ -9,7 +9,10 @@ import { GetCollectionDocs } from '../firebase.util';
 import noMetadataTokens from '../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
 import { BodyPart } from '../../types/avatar.type';
-
+import { DataBaseDrop } from '../../interfaces/citizens.interface';
+import ClaimableDropABI from '../../constants/abi/ClaimableDropABI.json'
+import { LogError } from '../common.util';
+import { Module } from '../../enums/common.enum';
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
@@ -407,3 +410,37 @@ export async function GetWearablesHoldings(address: string, contractAddresses: s
     const balances = await GetBalancesBatch(contractAddresses, address);
     return balances.reduce((total, balance) => total + balance, 0);
 }
+
+
+export const checkClaimStatus = async (drop: DataBaseDrop, signer: Signer, address: string) => {
+    try {
+      const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer);
+      const balance = await contract.balanceOf(address);
+      return balance > 0;
+    } catch (error) {
+      console.error("Error checking claim status:", error);
+      return false;
+    }
+    
+  };
+
+export const claimDrop = async (
+    drop: DataBaseDrop, 
+    signer: JsonRpcSigner, 
+    userAddress: string
+  ): Promise<boolean> => {
+    try {
+      const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer)
+  
+      const claimTx = await dropContract.claim({
+        gasLimit: 500000,
+        value: drop.price ? ethers.parseEther(drop.price.toString()) : undefined
+      })
+      await claimTx.wait()
+  
+      return await checkClaimStatus(drop, signer, userAddress);
+    } catch (error) {
+      LogError(Module.Citizens, 'Error in claimDrop:', error);
+      throw error;
+    }
+  }

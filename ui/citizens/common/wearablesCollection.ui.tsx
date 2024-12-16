@@ -1,26 +1,24 @@
 import { usePrivy } from '@privy-io/react-auth'
-import { ethers, JsonRpcSigner } from 'ethers'
+import { JsonRpcSigner } from 'ethers'
 import { useEffect, useState } from 'react'
-import { Drop } from '../../../interfaces/citizens.interface'
 import { GetUserXPAndLevel } from '../../../utils/firebase.util'
-import { ApproveClaimForUser } from '../../../utils/web3/drops.util'
-import ClaimableDropABI from '../../../constants/abi/ClaimableDropABI.json'
 import SelectorUI from './selector.ui'
 import DropItemCard from './dropItemCard.ui'
 import SearchSVG from './SVG/searchSVG.ui'
-import { FetchClaimableDrops } from '../../../utils/api.util'
-import { LogError } from '../../../utils/common.util'
-import { Module } from '../../../enums/common.enum'
+import { DataBaseDrop } from '../../../interfaces/citizens.interface'
 
 interface WearablesCollectionProps {
   signer: JsonRpcSigner | null
-  handleUserFeatures: () => Promise<void>
+  claimableDrops: DataBaseDrop[]
+  handleClaim: (drop: DataBaseDrop) => Promise<boolean>
 }
 
-export default function WearablesCollection({ signer, handleUserFeatures }: WearablesCollectionProps) {
+export default function WearablesCollection({ 
+  signer, 
+  claimableDrops,
+  handleClaim 
+}: WearablesCollectionProps) {
   const { user } = usePrivy()
-
-  const [claimableDrops, setClaimableDrops] = useState<Drop[]>([])
   const [userXP, setUserXP] = useState<number>(0)
 
   const [isPopupOpen, setIsPopupOpen] = useState<boolean>(false);
@@ -31,45 +29,12 @@ export default function WearablesCollection({ signer, handleUserFeatures }: Wear
 
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const handleClaim = async (drop: Drop) => {
-    if (!user?.wallet || !signer) return false;
-    
-    try {
-      const isApproved = await ApproveClaimForUser(user.wallet.address, drop.id)
-      setIsPopupOpen(true);
-      if (!isApproved) {
-        LogError(Module.Citizens, 'Error claiming drop: is not approved');
-        return false;
-      }
-      const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer)
-
-      const claimTx = await dropContract.claim({
-        gasLimit: 500000,
-        value: drop.price ? ethers.parseEther(drop.price.toString()) : undefined
-      })
-      await claimTx.wait()
-
-    // Verificar el nuevo estado del drop específico
-    const isOwned = await checkClaimStatus(drop);
-    
-    // Actualizar solo el drop específico en el estado
-    setClaimableDrops(prevDrops => 
-      prevDrops.map(d => 
-        d.id === drop.id 
-          ? { ...d, owned: isOwned }
-          : d
-      )
-    );
-
-      await handleUserFeatures();
-      setIsPopupOpen(false);
-      return true;
-    } catch (error) {
-      LogError(Module.Citizens, 'Error claiming drop:', error);
-      setIsPopupOpen(false);
-      return false;
-    }
-  }
+  const handleClaimWithPopup = async (drop: DataBaseDrop) => {
+    setIsPopupOpen(true);
+    const result = await handleClaim(drop);
+    setIsPopupOpen(false);
+    return result;
+  };
 
   useEffect(() => {
     if (user?.wallet?.address) {
@@ -81,16 +46,6 @@ export default function WearablesCollection({ signer, handleUserFeatures }: Wear
     }
   }, [user?.wallet?.address])
 
-  useEffect(() => {
-    async function fetchDrops() {
-      const drops = await FetchClaimableDrops();
-      Promise.all(drops.map(async (drop) => {
-        drop.owned = await checkClaimStatus(drop);
-      }))
-      setClaimableDrops(drops);
-    }
-    fetchDrops();
-  }, []);
 
   const getFilteredDrops = () => {
     return claimableDrops.filter(drop => {
@@ -128,19 +83,6 @@ export default function WearablesCollection({ signer, handleUserFeatures }: Wear
     const level = Math.floor(xp / 100);
     return level >= start && level <= end;
   };
-
-  const checkClaimStatus = async (drop: Drop) => {
-    try {
-      const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer);
-      const balance = await contract.balanceOf(user?.wallet?.address || '');
-      return balance > 0;
-    } catch (error) {
-      console.error("Error checking claim status:", error);
-      return false;
-    }
-    
-  };
-
 
   return (
     <div className="container mx-auto pt-8">
@@ -181,7 +123,7 @@ export default function WearablesCollection({ signer, handleUserFeatures }: Wear
               popupOpen={isPopupOpen}
               userAddress={user?.wallet?.address || ''}
               signer={signer as JsonRpcSigner}
-              onClaim={() => handleClaim(drop)}
+              onClaim={() => handleClaimWithPopup(drop)}
               isLock={isLock}
             />
           })}
