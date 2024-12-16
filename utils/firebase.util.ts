@@ -33,7 +33,7 @@ import { deleteDoc, doc, getDoc, orderBy, Timestamp } from 'firebase/firestore';
 import jwt from 'jsonwebtoken';
 import { GetFollowerCounts } from "./web3/lukso.util";
 import { XPReward } from "../constants/lukso/xp.constant";
-import { Drop } from "../interfaces/citizens.interface";
+import { DataBaseDrop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
 import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/contract.util";
 
@@ -1204,7 +1204,7 @@ function GenerateLoginMessage(xpGained: number, streakBonusXP: number, levelInfo
   return message;
 }
 
-export async function GetClaimableDrops(dropId?: string): Promise<Drop[]> {
+export async function GetClaimableDrops(dropId?: string): Promise<DataBaseDrop[]> {
   try {
     const db = await FirebaseUtil.Instance().DB();
     const dropsCollection = collection(db, 'claimableDrops');
@@ -1213,11 +1213,11 @@ export async function GetClaimableDrops(dropId?: string): Promise<Drop[]> {
     if (dropId) {
       query = doc(dropsCollection, dropId);
       const dropDoc = await getDoc(query);
-      return dropDoc.exists() ? [dropDoc.data() as Drop] : [];
+      return dropDoc.exists() ? [dropDoc.data() as DataBaseDrop] : [];
     } else {
       query = dropsCollection;
       const querySnapshot = await getDocs(query);
-      return querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Drop));
+      return querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as DataBaseDrop));
     }
   } catch (error) {
     console.error('Error fetching claimable drops:', error);

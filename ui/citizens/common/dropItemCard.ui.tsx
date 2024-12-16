@@ -1,5 +1,5 @@
 import { JsonRpcSigner } from "ethers";
-import { Drop } from "../../../interfaces/citizens.interface";
+import { DataBaseDrop } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
 import { useState } from "react";
@@ -8,7 +8,7 @@ import Button from "./button.ui";
 import { useSnackbar } from "../snackbar/snackbar.provider";
 
 interface DropItemCardProps {
-  drop: Drop;
+  drop: DataBaseDrop;
   userXP: number;
   userAddress: string;
   signer: JsonRpcSigner;

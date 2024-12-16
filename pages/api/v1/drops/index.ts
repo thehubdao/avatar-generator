@@ -2,10 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import { ApproveClaimForUser } from '../../../../utils/web3/drops.util';
 import { ApiResponse } from '../../../../interfaces/api.interface';
 import { RequestResponse } from '../../../../server/api-handler/request.api-handler';
-import { Drop } from '../../../../interfaces/citizens.interface';
+import { DataBaseDrop } from '../../../../interfaces/citizens.interface';
 import { GetClaimableDrops } from '../../../../utils/firebase.util';
 
-export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<Drop[] | { approved: boolean }>>) {
+export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<DataBaseDrop[] | { approved: boolean }>>) {
   const { method, query, body } = req;
 
   switch (method) {
@@ -18,7 +18,7 @@ export default async function Handler(req: NextApiRequest, res: NextApiResponse<
   }
 }
 
-async function HandleGetDrops(dropId: string | undefined, res: NextApiResponse<ApiResponse<Drop[]>>) {
+async function HandleGetDrops(dropId: string | undefined, res: NextApiResponse<ApiResponse<DataBaseDrop[]>>) {
   try {
     const drops = await GetClaimableDrops(dropId);
     return RequestResponse(res, "Successful", true, "", drops);

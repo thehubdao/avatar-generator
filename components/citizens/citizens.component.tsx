@@ -40,7 +40,7 @@ import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.co
 import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { FollowUser, GetFollowStatuses, GetUniversalProfileData } from "../../utils/web3/lukso.util";
-import { BrowserProvider, ethers, JsonRpcSigner } from 'ethers';
+import { BrowserProvider, JsonRpcSigner } from 'ethers';
 import { useSnackbar } from '../../ui/citizens/snackbar/snackbar.provider';
 import { claimDrop } from '../../utils/web3/contract.util';
 

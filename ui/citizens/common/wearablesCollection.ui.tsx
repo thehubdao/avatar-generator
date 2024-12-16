@@ -31,9 +31,9 @@ export default function WearablesCollection({
 
   const handleClaimWithPopup = async (drop: DataBaseDrop) => {
     setIsPopupOpen(true);
-    const result = await handleClaim(drop);
+     await handleClaim(drop);
     setIsPopupOpen(false);
-    return result;
+    return true;
   };
 
   useEffect(() => {
