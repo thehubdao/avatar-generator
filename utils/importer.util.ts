@@ -1,6 +1,9 @@
-import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader";
+import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader"
+import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js"
+import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader.js"
 import {GetFile} from "./firebase.util";
 import {IsWebUrl, LogError} from "./common.util";
+import SceneUtil from "./scene.utils";
 import {Result} from "../types/common.type";
 import {CommonErrorCode, Module} from "../enums/common.enum";
 
@@ -16,10 +19,29 @@ class ImporterUtil {
     return ImporterUtil._instance;
   }
 
-  public GetGltfLoaderInstance(): GLTFLoader {
-    if (this._gltfLoader == undefined)
-      this._gltfLoader = new GLTFLoader();
+  // This setup allows Compressed GLTF/GLB files
+  public addCompressionToGLTF(loader: GLTFLoader) {
+    const dracoLoader = new DRACOLoader()
+    const ktx2Loader = new KTX2Loader()
+    const scene = SceneUtil.Instance()
+    dracoLoader.setDecoderPath("libs/draco/")
+    ktx2Loader.setTranscoderPath("/libs/basis/")
+    if(scene.renderer){
+      ktx2Loader.detectSupport(scene.renderer)
+    }
 
+    loader.setCrossOrigin('anonymous')
+    loader.setDRACOLoader(dracoLoader)
+    loader.setKTX2Loader(ktx2Loader)
+  }
+
+
+  public GetGltfLoaderInstance(): GLTFLoader {
+    if (this._gltfLoader == undefined) {
+      this._gltfLoader = new GLTFLoader();
+      this.addCompressionToGLTF(this._gltfLoader)
+    }
+    
     return this._gltfLoader;
   }
   
