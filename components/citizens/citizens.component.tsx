@@ -39,7 +39,7 @@ import HudUI from "../../ui/avatar/hud.ui";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
 import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
-import { FollowUser, GetFollowStatuses, GetUniversalProfileData } from "../../utils/web3/lukso.util";
+import { FollowUser, GetFollowStatuses, GetUniversalProfileData, UnfollowUser } from "../../utils/web3/lukso.util";
 import { BrowserProvider, JsonRpcSigner } from 'ethers';
 import { useSnackbar } from '../../ui/citizens/snackbar/snackbar.provider';
 import { claimDrop } from '../../utils/web3/contract.util';
@@ -700,6 +700,29 @@ const handleFollowUser = async (addressToFollow: string) => {
   }
 };
 
+const handleUnfollowUser = async (addressToUnfollow: string) => {
+  if (!signer) return false;
+  try {
+    const isSuccess = await UnfollowUser(addressToUnfollow, signer);
+    if (isSuccess) {
+      setLeaderboardData(prevData =>
+        prevData.map(entry =>
+          entry.address === addressToUnfollow
+            ? { ...entry, isFollowing: false }
+            : entry
+        )
+      );
+      showSnackbar(
+        <p>You unfollowed {addressToUnfollow}</p>
+      );
+    }
+    return isSuccess;
+  } catch (error) {
+    LogError(Module.Citizens, 'Error unfollowing user:', error);
+    return false;
+  }
+};
+
 useEffect(() => {
   if (!isReady || !wallets[0] || signer) return;
 
@@ -887,6 +910,7 @@ return (
               leaderboardData={leaderboardData}
               signer={signer}
               handleFollowUser={handleFollowUser} 
+              handleUnfollowUser={handleUnfollowUser}
               claimableDrops={claimableDrops}
               handleClaim={handleClaim}/>
           }

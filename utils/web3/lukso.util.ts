@@ -32,6 +32,13 @@ const LSP26_ABI = [
     type: 'function',
   },
   {
+    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
+    name: 'unfollow',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     inputs: [{ internalType: 'address', name: 'addr', type: 'address' }, { internalType: 'address', name: 'addr', type: 'address' }],
     name: 'isFollowing',
     outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
@@ -128,6 +135,21 @@ export async function FollowUser(addressToFollow: string, signer: JsonRpcSigner)
     return true;
   } catch (error) {
     console.error('Error following user:', error);
+    return false;
+  }
+}
+
+export async function UnfollowUser(addressToUnfollow: string, signer: JsonRpcSigner) {
+  try {
+
+    const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
+
+    const tx = await lsp26Contract.unfollow(addressToUnfollow);
+    await tx.wait();
+
+    return true;
+  } catch (error) {
+    console.error('Error unfollowing user:', error);
     return false;
   }
 }

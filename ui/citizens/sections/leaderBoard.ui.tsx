@@ -5,9 +5,10 @@ import FollowButton from '../common/followButton.ui';
 interface LeaderBoardProps {
   leaderboardData: LeaderboardEntry[];
   onFollowUser: (address: string) => Promise<boolean>;
+  onUnfollowUser: (address: string) => Promise<boolean>;
 }
 
-export default function LeaderBoard({ leaderboardData, onFollowUser }: LeaderBoardProps) {
+export default function LeaderBoard({ leaderboardData, onFollowUser, onUnfollowUser }: LeaderBoardProps) {
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] py-32">
       <table className="relative w-full font-light text-lg shadow-citizens-btn bg-citizens-dark text-white container mx-auto rounded-2xl">
@@ -45,9 +46,7 @@ export default function LeaderBoard({ leaderboardData, onFollowUser }: LeaderBoa
                     </p>
                   </div>
                   <div className='grow flex justify-end'>
-                    {!user.isFollowing &&
-                      <FollowButton user={user} onFollowUser={(address) => onFollowUser(address)} />
-                    }
+                      <FollowButton user={user} onFollowUser={(address) => onFollowUser(address)} onUnfollowUser={(address) => onUnfollowUser(address)} />
                   </div>
                 </td>
                 <td className="text-center">{user.level}</td>

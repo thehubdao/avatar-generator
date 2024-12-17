@@ -6,39 +6,66 @@ import { useSnackbar } from "../snackbar/snackbar.provider";
 interface FollowButtonProps {
   user: LeaderboardEntry;
   onFollowUser: (address: string) => Promise<boolean>;
+  onUnfollowUser: (address: string) => Promise<boolean>;
 }
 
-export default function FollowButton({ user, onFollowUser }: FollowButtonProps) {
+export default function FollowButton({ user, onFollowUser, onUnfollowUser }: FollowButtonProps) {
 
   const { showSnackbar } = useSnackbar();
 
   const followUserHandler = async () => {
     setIsLoading(true);
     const isSuccess = await onFollowUser(user.address);
+    
     if (!isSuccess) {
-      setIsLoading(false);
       showSnackbar(
         <p>Follow failed, try again later.</p>
       )
     }
+    setIsLoading(false);
+  }
+
+  const unfollowUserHandler = async () => {
+    setIsLoading(true);
+    const isSuccess = await onUnfollowUser(user.address);
+    console.log('isSuccess', isSuccess);
+    if (!isSuccess) {
+
+      showSnackbar(
+        <p>Unfollow failed, try again later.</p>
+      )
+    }
+    setIsLoading(false);
   }
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  return (
-    <div
-      className={`h-11 w-16 flex justify-center items-center rounded-[20px] cursor-pointer mr-8 bg-white`}
-      onClick={() => {
-        if (!user.isFollowing) {
-          setIsLoading(true);
-          followUserHandler();
-        }
-      }}
-    >
-      {isLoading ?
-        <div className="w-4 h-4 border-t border-citizens-dark rounded-full animate-spin" />
-        :
-        <AddUserSVG />
+  return !user.isFollowing ? <div
+    className={`h-11 w-16 flex justify-center items-center rounded-[20px] cursor-pointer mr-8 bg-white`}
+    onClick={() => {
+      if (!user.isFollowing) {
+        setIsLoading(true);
+        followUserHandler();
       }
-    </div>
-  )
+    }}
+  >
+    {isLoading ?
+      <div className="w-4 h-4 border-t border-citizens-dark rounded-full animate-spin" />
+      :
+      <AddUserSVG />
+    }
+  </div> : <div
+    className={`h-11 w-16 flex justify-center items-center rounded-[20px] cursor-pointer mr-8 bg-white`}
+    onClick={() => {
+      if (user.isFollowing) {
+        setIsLoading(true);
+        unfollowUserHandler();
+      }
+    }}
+  >
+    {isLoading ?
+      <div className="w-4 h-4 border-t border-citizens-dark rounded-full animate-spin" />
+      : // TODO: Add SVG
+      <div className="text-citizens-dark">X</div>
+    }
+  </div>
 }

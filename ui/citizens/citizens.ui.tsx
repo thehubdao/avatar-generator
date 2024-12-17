@@ -25,12 +25,13 @@ interface CitizensUIProps {
   leaderboardData: LeaderboardEntry[];
   signer: JsonRpcSigner | null;
   handleFollowUser: (address: string) => Promise<boolean>;
+  handleUnfollowUser: (address: string) => Promise<boolean>;
   handleClaim: (drop: DataBaseDrop) => Promise<boolean>
   claimableDrops: DataBaseDrop[]
 }
 
 
-export default function CitizensUI({claimableDrops, currentSection,  currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleClaim   }: CitizensUIProps) {
+export default function CitizensUI({claimableDrops, currentSection,  currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleClaim, handleUnfollowUser  }: CitizensUIProps) {
   return (
     <>
       {currentSection === CitizensSections.View && (
@@ -71,6 +72,7 @@ export default function CitizensUI({claimableDrops, currentSection,  currentColl
         <LeaderBoard 
           leaderboardData={leaderboardData} 
           onFollowUser={handleFollowUser}
+          onUnfollowUser={handleUnfollowUser}
         />
       )}
       {currentSection === CitizensSections.Play &&
