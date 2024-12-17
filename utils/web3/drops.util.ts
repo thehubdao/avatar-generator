@@ -41,8 +41,7 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
     );
 
     await tx.wait();
-
-    console.log(`Claim approved for address ${address} on drop ${dropId}`);
+    
     return true;
   } catch (error) {
     console.error('Error in approveClaimForUser:', error);

@@ -30,13 +30,12 @@ import { ParameterNameType } from "../types/firebase.type";
 import { Client } from '../enums/client.enum'
 import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
 import { deleteDoc, doc, getDoc, orderBy, Timestamp } from 'firebase/firestore';
-import { ethers } from 'ethers';
 import jwt from 'jsonwebtoken';
-import UniversalProfileContract from '../constants/abi/UniversalProfileABI.json';
 import { GetFollowerCounts } from "./web3/lukso.util";
 import { XPReward } from "../constants/lukso/xp.constant";
-import { Drop } from "../interfaces/citizens.interface";
+import { DataBaseDrop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
+import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/contract.util";
 
 export type LogInStructure = {
   user: string;
@@ -981,7 +980,7 @@ function GenerateFollowingMessage(count: number, xp: number, levelInfo: { levele
   return message;
 }
 
-export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> {
+export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> { 
   if (address == undefined) Raise("Missing address to update last login date!");
 
   try {
@@ -997,7 +996,6 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
       const isFirstLoginOfDay = lastLogin.getDate() !== now.getDate() ||
         lastLogin.getMonth() !== now.getMonth() ||
         lastLogin.getFullYear() !== now.getFullYear();
-
       if (isFirstLoginOfDay) {
         let xpGained = XPReward.DailyLogin;
 
@@ -1019,10 +1017,14 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
             id: ''
           });
         }
+
+
       } else {
         // Reset streak if not consecutive
         userData.loginStreak = 1;
       }
+      // Add holdings XP check after login rewards
+      await HandleHoldingsXPReward(address);
 
       // Get current follower and following counts
       const { followerCount, followingCount } = await GetFollowerCounts(address);
@@ -1070,11 +1072,11 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
 }
 
 function CalculateLevel(xp: number): number {
-  return Math.floor((-1 + Math.sqrt(1 + 8 * xp / 1000)) / 2) + 1;
+  return Math.floor((-20 + Math.sqrt(400 + 40 * xp)) / 20) + 1;
 }
 
 function GetXpForNextLevel(currentLevel: number): number {
-  return 1000 * currentLevel * (currentLevel + 1) / 2;
+  return 10 * (Math.pow(currentLevel, 2) + 2 * currentLevel);
 }
 
 export async function UpdateUserXP(userId: string, xpToAdd: number): Promise<Result<{ newXP: number, newLevel: number, leveledUp: boolean }>> {
@@ -1107,33 +1109,23 @@ export async function UpdateUserXP(userId: string, xpToAdd: number): Promise<Res
   }
 }
 
-export async function GenerateSessionToken(address: string, message: string, signature: string): Promise<string> {
-  const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  const universalProfileContract = new ethers.Contract(
-    address,
-    UniversalProfileContract,
-    provider
-  );
+export async function GenerateSessionToken(address: string): Promise<string> {
+  try {
+    await UpdateLastLoginDate(address);
 
-  const hashedMessage = ethers.hashMessage(message);
-  const isValidSignature = await universalProfileContract.isValidSignature(hashedMessage, signature);
+    const token = jwt.sign(
+      {
+        address: address.toLowerCase(),
+        exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24) // 24 hours expiration
+      },
+      process.env.JWT_SECRET as string
+    );
 
-  if (isValidSignature !== '0x1626ba7e') {
-    throw new Error('Invalid signature');
+    return token;
+  } catch (error) {
+    console.error('Error generating session token:', error);
+    throw error;
   }
-
-  await UpdateLastLoginDate(address);
-
-  // Generar JWT token
-  const token = jwt.sign(
-    {
-      address: address,
-      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24) // 24 hours expiration
-    },
-    process.env.JWT_SECRET as string
-  );
-
-  return token;
 }
 
 export async function CreateNotification(userId: string, notification: { title: string, message: string, points: number, time: string, id: string }): Promise<Result<boolean>> {
@@ -1212,7 +1204,7 @@ function GenerateLoginMessage(xpGained: number, streakBonusXP: number, levelInfo
   return message;
 }
 
-export async function GetClaimableDrops(dropId?: string): Promise<Drop[]> {
+export async function GetClaimableDrops(dropId?: string): Promise<DataBaseDrop[]> {
   try {
     const db = await FirebaseUtil.Instance().DB();
     const dropsCollection = collection(db, 'claimableDrops');
@@ -1221,11 +1213,11 @@ export async function GetClaimableDrops(dropId?: string): Promise<Drop[]> {
     if (dropId) {
       query = doc(dropsCollection, dropId);
       const dropDoc = await getDoc(query);
-      return dropDoc.exists() ? [dropDoc.data() as Drop] : [];
+      return dropDoc.exists() ? [dropDoc.data() as DataBaseDrop] : [];
     } else {
       query = dropsCollection;
       const querySnapshot = await getDocs(query);
-      return querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Drop));
+      return querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as DataBaseDrop));
     }
   } catch (error) {
     console.error('Error fetching claimable drops:', error);
@@ -1252,10 +1244,95 @@ export async function GetLeaderboardData(): Promise<LeaderboardEntry[]> {
 
 export async function GetDropsContractAddresses(): Promise<string[]> {
   try {
-    const dropsData = await GetCollectionDocs('drops');
-    return dropsData.map(drop => drop.contract_address);
+    const vrmTypes = ['vrm_female', 'vrm_male'];
+    const contractAddresses: string[] = [];
+
+    for (const vrmType of vrmTypes) {
+      const dropsData = await GetCollectionDocs(`campaign/${vrmType}/drops`);
+      const filteredAddresses = dropsData
+        .filter(drop => drop.contract_address)
+        .map(drop => drop.contract_address);
+      contractAddresses.push(...filteredAddresses);
+    }
+    return contractAddresses;
   } catch (error) {
     console.error('Error fetching drops contract addresses:', error);
     return [];
   }
+}
+
+async function CalculateCitizensXP(citizensCount: number): Promise<number> {
+  let totalXP = 0;
+  
+  // Aplicar la fórmula para cada citizen
+  for (let k = 1; k <= citizensCount; k++) {
+    const xpForThisCitizen = 10 * (1 + 0.10 * (k - 1));
+    totalXP += xpForThisCitizen;
+  }
+  
+  return Math.floor(totalXP);
+}
+
+export async function HandleHoldingsXPReward(address: string): Promise<void> {
+  try {
+    const db = await FirebaseUtil.Instance().DB();
+    const userRef = doc(db, `${FirestoreGlobalLocation.User}/${address.toLowerCase()}`);
+    const userDoc = await getDoc(userRef);
+    const userData = userDoc.data() as UserInterface;
+    // Get current holdings
+    const contractAddresses = await GetDropsContractAddresses();
+    const currentCitizensHoldings = await GetCitizensHoldings(address);
+    const currentWearablesHoldings = await GetWearablesHoldings(address, contractAddresses);
+    // Get previous holdings from DB
+    const previousCitizensHoldings = userData.citizensHoldings || 0;
+    const previousWearablesHoldings = userData.wearablesHoldings || 0;
+    // Only calculate XP if holdings have increased
+    const newCitizens = currentCitizensHoldings - previousCitizensHoldings;
+    const newWearables = currentWearablesHoldings - previousWearablesHoldings;
+    if (newCitizens > 0 || newWearables > 0) {
+      // Calculate XP only for new holdings
+      const citizensXP = await CalculateCitizensXP(newCitizens);
+      const wearablesXP = newWearables * XPReward.WearableHolding;
+      const totalXP = citizensXP + wearablesXP;
+      if (totalXP > 0) {
+        // Update user XP
+        await UpdateUserXP(address, totalXP);
+        // Update holdings record in DB
+        await setDoc(userRef, {
+          citizensHoldings: currentCitizensHoldings,
+          wearablesHoldings: currentWearablesHoldings,
+          lastHoldingsUpdate: Timestamp.now()
+        }, { merge: true });
+        // Create notification
+        await CreateNotification(address, {
+          title: 'New Holdings Reward',
+          message: GenerateHoldingsMessage(citizensXP, wearablesXP, totalXP),
+          points: totalXP,
+          time: new Date().toISOString(),
+          id: ''
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error processing holdings XP:', error);
+  }
+}
+
+function GenerateHoldingsMessage(
+  citizensXP: number,
+  wearablesXP: number,
+  totalXP: number,
+): string {
+  let message = `You've earned ${totalXP} XP for your holdings! `;
+  
+  if (citizensXP > 0) {
+    message += `(Citizens: ${citizensXP} XP) `;
+  }
+  
+  if (wearablesXP > 0) {
+    message += `(Wearables: ${wearablesXP} XP)`;
+  }
+
+  
+  return message;
 }

@@ -1,18 +1,25 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { GetLeaderboardData } from '../../../../utils/firebase.util';
+import { GetDropsContractAddresses, GetLeaderboardData } from '../../../../utils/firebase.util';
 import { GetCitizensHoldings, GetWearablesHoldings } from '../../../../utils/web3/contract.util';
 
 export default async function Handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     try {
-      const leaderboardData = await GetLeaderboardData();
 
-      for (const entry of leaderboardData) {
-        entry.citizensHoldings = await GetCitizensHoldings(entry.id);
-        entry.wearablesHoldings = await GetWearablesHoldings(entry.id);
-      }
-      
-      res.status(200).json(leaderboardData);
+      const [leaderboardData, contractAddresses] = await Promise.all([
+        GetLeaderboardData(),
+        GetDropsContractAddresses()
+      ]);
+
+      const updatedLeaderboardData = await Promise.all(
+        leaderboardData.map(async (entry) => ({
+          ...entry,
+          citizensHoldings: await GetCitizensHoldings(entry.address),
+          wearablesHoldings: await GetWearablesHoldings(entry.address, contractAddresses)
+        }))
+      );
+
+      res.status(200).json(updatedLeaderboardData);
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch leaderboard data' });
     }

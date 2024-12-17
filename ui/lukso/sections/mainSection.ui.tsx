@@ -11,9 +11,9 @@ import { AiOutlineLoading } from "react-icons/ai";
 import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
 import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
-import { useConnectWallet } from "@web3-onboard/react";
 import { canMint } from "../../../utils/phase.util";
 import LoadingUI from "./loadingSection.ui";
+import { useWallets } from "@privy-io/react-auth";
 
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
@@ -32,7 +32,8 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
-  const [{ wallet }] = useConnectWallet()
+  const { wallets } = useWallets()
+  const wallet = wallets[0]
 
   const [canUserMint, setCanUserMint] = useState<boolean | undefined>()
 

@@ -18,7 +18,7 @@ interface CitizensCollectionProps {
 export default function CitizensCollection({tokenList, currentCollection, updateCollection}: CitizensCollectionProps) {
 
   const filteredList = useRef<TokenMetadata[] | undefined>([]);
-  const campaignList = useRef<string[] | undefined>([]);
+  const [campaignList, setCampaignList] = useState<string[] | undefined>([]);
 
   const [searchValue, setSerchValue] = useState<string | undefined>();
   const [chooseValue, setChooseValue] = useState<string | undefined>();
@@ -46,8 +46,7 @@ export default function CitizensCollection({tokenList, currentCollection, update
     const campaignSet: Set<string> = new Set();
 
     tokenList.forEach(item => { if (item.campaign) campaignSet.add(item.campaign) });
-    campaignList.current = [...Array.from(campaignSet), 'All'];
-
+    setCampaignList([...Array.from(campaignSet), 'All']);
   }
 
   useEffect(() => {
@@ -78,7 +77,7 @@ export default function CitizensCollection({tokenList, currentCollection, update
             </div>
           </label>
           {/* CHOOSE CAMPAIGN SELECTOR */}
-          <SelectorUI list={campaignList.current} selection={chooseValue} label="CHOOSE CAMPAIGN" selectionHandler={(value) => {
+          <SelectorUI list={campaignList} selection={chooseValue} label="CHOOSE CAMPAIGN" selectionHandler={(value) => {
             filterList(searchValue, value);
           }} />
         </div>

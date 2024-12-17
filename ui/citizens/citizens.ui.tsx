@@ -8,27 +8,37 @@ import Collection from "./sections/collection.ui";
 import LeaderBoard from "./sections/leaderBoard.ui";
 import Play from "./sections/play.ui";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
+import { JsonRpcSigner } from "ethers";
+import Modal from "./common/modal.ui";
+import Button from "./common/button.ui";
+import { DataBaseDrop } from "../../interfaces/citizens.interface";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
   loadedTokens?: TokenMetadata[];
   currentCollection: CollectionType;
+  isSavingCombination?: boolean;
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
   features?: IndexFeatureInterface[];
   exportModel: () => Promise<void>;
   address: string;
   leaderboardData: LeaderboardEntry[];
+  signer: JsonRpcSigner | null;
+  handleFollowUser: (address: string) => Promise<boolean>;
+  handleUnfollowUser: (address: string) => Promise<boolean>;
+  handleClaim: (drop: DataBaseDrop) => Promise<boolean>
+  claimableDrops: DataBaseDrop[]
 }
 
 
-export default function CitizensUI({ currentSection,  currentCollection, updateCollection, loadedTokens, features, exportModel, address, leaderboardData }: CitizensUIProps) {
+export default function CitizensUI({claimableDrops, currentSection,  currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleClaim, handleUnfollowUser  }: CitizensUIProps) {
   return (
     <>
       {currentSection === CitizensSections.View && (
         <>
           {/* details */}
           {features &&
-            <DetailsUI data={features} handleDownload={() => exportModel()}/>
+            <DetailsUI data={features} handleDownload={() => exportModel()} imgUrl={currentCollection.tokenMetadata.imageUrl} loading={isSavingCombination}/>
           }
           {/* notifications */}
           <Notifications address={address} />
@@ -40,13 +50,32 @@ export default function CitizensUI({ currentSection,  currentCollection, updateC
             loadedTokens={loadedTokens}
             currentCollection={currentCollection}
             updateCollection={updateCollection}
-          />
+            signer={signer} 
+            claimableDrops={claimableDrops}
+            handleClaim={handleClaim}/>
         </>
       )}
+      {loadedTokens && loadedTokens?.length <= 0 &&
+        <Modal modalStyles="!min-h-fit" handleClose={() => { }}>
+          <div className="grid justify-center">
+            <div className="grow text-center text-white grid gap-4">
+              <p className="font-bold text-2xl">Backpack Empty</p>
+              <p className="text-lg">You do not own any<br />Lukso Citizens.</p>
+            </div>
+            <div className="grid gap-4 pt-8">
+              <Button label="Get one here" textStiles="w-full text-center" light handleClick={() => { }} />
+            </div>
+          </div>
+        </Modal>
+      }
       {currentSection === CitizensSections.LeaderBoard && (
-        <LeaderBoard leaderboardData={leaderboardData} />
+        <LeaderBoard 
+          leaderboardData={leaderboardData} 
+          onFollowUser={handleFollowUser}
+          onUnfollowUser={handleUnfollowUser}
+        />
       )}
-      {currentSection === CitizensSections.Play && 
+      {currentSection === CitizensSections.Play &&
         <Play />
       }
     </>

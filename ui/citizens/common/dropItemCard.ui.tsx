@@ -1,68 +1,90 @@
-import { EIP1193Provider } from "@web3-onboard/core";
-import { Drop } from "../../../interfaces/citizens.interface";
+import { JsonRpcSigner } from "ethers";
+import { DataBaseDrop } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
-import { useEffect, useState } from "react";
-import { ethers } from "ethers";
-import ClaimableDropABI from '../../../constants/abi/ClaimableDropABI.json';
+import { useState } from "react";
 import Modal from "./modal.ui";
 import Button from "./button.ui";
+import { useSnackbar } from "../snackbar/snackbar.provider";
 
 interface DropItemCardProps {
-  drop: Drop;
+  drop: DataBaseDrop;
   userXP: number;
   userAddress: string;
-  provider: EIP1193Provider;
-  onClaim: () => void;
+  signer: JsonRpcSigner;
+  popupOpen?: boolean;
+  onClaim: () => Promise<boolean>;
+  isLock?: boolean;
 }
 
-export default function DropItemCard({ drop, userXP, userAddress, provider, onClaim }: DropItemCardProps) {
-  const [isClaimed, setIsClaimed] = useState(false);
+export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock = true }: DropItemCardProps) {
+  const { showSnackbar } = useSnackbar();
   const [isClaiming, setIsClaiming] = useState(false);
-  const [isLock] = useState(userXP < drop.requiredXP);
   const [isOpenClaimModal, setIsOpenClaimModal] = useState<boolean>(false);
 
-  useEffect(() => {
-    const checkClaimStatus = async () => {
-      try {
-        const ethersProvider = new ethers.BrowserProvider(provider);
-        const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, ethersProvider);
-        const balance = await contract.balanceOf(userAddress);
-        setIsClaimed(balance > 0);
-      } catch (error) {
-        console.error("Error checking claim status:", error);
-      }
-    };
 
-    checkClaimStatus();
-  }, [drop.contractAddress, userAddress, provider]);
+
+  const claimHandler = async () => {
+    setIsClaiming(true);
+    const isSuccess = await onClaim();
+    if (isSuccess) {
+      showSnackbar(
+        <p>The item &quot;{drop.name}&quot; has been successfully claimed!.</p>
+      )
+    } else {
+      showSnackbar(
+        <p>Something went wrong, the item was not claimed. Try again later.</p>
+      )
+    }
+    setIsOpenClaimModal(false);
+    setIsClaiming(false);
+  }
+
+  const cancelClaiming = () => {
+    setIsOpenClaimModal(false);
+    setIsClaiming(false);
+    showSnackbar(
+      <p>If the pop-up does not open, the process will soon be cancelled</p>
+    )
+  }
+
 
   return <>
     <CampaignCard
       key={drop.id}
       title={drop.name}
-      tokenID={isClaimed ? 'Claimed' : undefined}
-      price={isClaimed ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : `PRICE: ${drop.price} ${drop.paymentType}`}
-      chipColor={isClaimed ? undefined : isLock ? 'bg-citizens-yellow' : drop.paymentType === PaymentType.LYX ? 'bg-citizens-red' : 'bg-citizens-blue'}
+      tokenID={drop.owned ? 'Claimed' : undefined}
+      price={drop.owned ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : `PRICE: ${drop.price} ${drop.paymentType}`}
+      chipColor={drop.owned ? undefined : isLock ? 'bg-citizens-yellow' : drop.paymentType === PaymentType.LYX ? 'bg-citizens-red' : 'bg-citizens-blue'}
       blocked={isLock}
       imgSrc={drop.imageUrl}
       imgAlt={drop.name}
       size={CardSize.Small}
       light
-      overlayText={isClaimed || isLock ? undefined : "CLICK TO CLAIM"}
+      overlayText={drop.owned || isLock ? undefined : "CLICK TO CLAIM"}
       handleClick={() => {
-        if (!isLock) setIsOpenClaimModal(true);
+        if (!isLock && !drop.owned) setIsOpenClaimModal(true);
       }}
     />
     {isOpenClaimModal &&
-      <Modal handleClose={() => setIsOpenClaimModal(false)}>
+      <Modal modalStyles="h-fit" handleClose={() => { !isClaiming && setIsOpenClaimModal(false) }}>
         <div className="grid justify-items-center">
           <div className="text-center text-white grid gap-4">
             {isClaiming ?
               <>
                 <p className="font-bold text-2xl">Claiming<br />{drop.name}</p>
-                <p className="text-lg">Check the pop-up from your wallet to continue with the claim process.</p>
-                <p className="text-xs">Pop-up will open soon...</p>
+                {
+                  popupOpen ?
+                    <>
+                      <p className="text-lg">Confirm the transaction on the extension.</p>
+                      <p className="text-xs">The pop-up does not open yet?<br /><span className="underline cursor-pointer" onClick={() => cancelClaiming()}>click here.</span></p>
+                    </>
+                    :
+                    <>
+                      <p className="text-lg">Check the pop-up from your wallet to continue with the claim process.</p>
+                      <p className="text-xs">Pop-up will open soon...</p>
+                    </>
+                }
               </>
               :
               <>
@@ -73,13 +95,7 @@ export default function DropItemCard({ drop, userXP, userAddress, provider, onCl
           </div>
           {!isClaiming ?
             <div className="grid gap-4 pt-8">
-              <Button label="Claim" textStiles="w-full text-center" light handleClick={() => {
-                setIsClaiming(true);
-                onClaim();
-                setIsOpenClaimModal(false)
-                setIsClaiming(false);
-
-              }} />
+              <Button label="Claim" textStiles="w-full text-center" light handleClick={() => claimHandler()} />
               <Button label="Cancel" textStiles="w-full text-center" light handleClick={() => setIsOpenClaimModal(false)} />
             </div>
             :

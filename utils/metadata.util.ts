@@ -1,39 +1,33 @@
 import { StorageLocation } from "../enums/firebase.enum";
 import { Campaign, TokenMetadata } from "../types/metadata.type";
+import { PinataSDK } from "pinata-web3";
 import { tempCampaignSwitch } from "./web3/contract.util";
 import { UploadFile } from "./firebase.util";
-import { ApiResponse } from "../interfaces/api.interface";
+
+
+const pinata = new PinataSDK({ pinataGateway: 'lukso.mypinata.cloud', pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT })
+
 
 export const uploadMetadata = async (tokenMetadata: TokenMetadata, metadataThumbnail: Blob | undefined, combination: string, campaign: Campaign) => {
     if (metadataThumbnail) {
         const imageFile = new File([metadataThumbnail], `${combination}.png`)
+
         await UploadFile(imageFile, StorageLocation.AvatarImages, undefined, tempCampaignSwitch[campaign])
     }
+    
     const imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[campaign]}%2Favatar_images%2F${combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
-
-    if (!imageUrl) throw new Error("Error uploading image")
-
+    const imageResponse = await fetch(imageUrl)
+    const imageBlob = await imageResponse.blob()
+    const file = new File([imageBlob], `${combination}.png`, { type: "image/png" });
+    console.log(file, imageBlob)
+    const upload = await pinata.upload.file(file, {cidVersion: 0, metadata:{name: `${campaign}-${tokenMetadata.tokenId}-thumbnail`}});
     tokenMetadata.images = [[{
         width: 1024,
         height: 974,
-        url: imageUrl,
+        url: `ipfs://${upload.IpfsHash}`,
         verification: {}
     },]]
 
-    const response = await fetch('/api/v1/uploadMetadata', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ campaign, tokenMetadata }),
-    });
-
-    if (!response.ok) {
-        throw new Error('Failed to upload metadata');
-    }
-
-    const responseData = await response.json() as ApiResponse<{ cid: string }>;
-    const { cid } = responseData.data as { cid: string }
-
-    return { uri: cid, imageUrl }
+    const metadata = await pinata.upload.json({ 'LSP4Metadata': tokenMetadata }, {cidVersion: 1, metadata:{name: `z-${campaign}-${tokenMetadata.tokenId}-metadata`}})
+    return { uri: metadata.IpfsHash, imageUrl }
 }

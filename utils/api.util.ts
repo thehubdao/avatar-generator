@@ -11,7 +11,7 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
-import { Drop } from "../interfaces/citizens.interface";
+import { DataBaseDrop } from "../interfaces/citizens.interface";
 
 //#region Generic
 type QueryParams = { [p: string]: string | number | undefined | null };
@@ -180,7 +180,7 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
   return data.data.approved;
 }
 
-export async function FetchClaimableDrops(dropId?: string): Promise<Drop[]> {
+export async function FetchClaimableDrops(dropId?: string): Promise<DataBaseDrop[]> {
   const url = dropId ? `/api/v1/drops?id=${dropId}` : '/api/v1/drops';
   const response = await fetch(url);
   if (!response.ok) throw new Error('Failed to fetch claimable drops');

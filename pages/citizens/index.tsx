@@ -5,8 +5,12 @@ import { GetParameter } from "../../utils/firebase.util";
 import { CampaignParameterName, Module } from "../../enums/common.enum";
 import { LogError, RemoveUndefinedProperties } from "../../utils/common.util";
 import CitizensComponent from "../../components/citizens/citizens.component";
+import SnackbarProvider from "../../ui/citizens/snackbar/snackbar.provider";
+import { useReadLocalStorage } from "usehooks-ts";
 
 export default function CitizensView() {
+  const sessionToken:string | null = useReadLocalStorage('privy:token');
+  const [isConnected, setIsConnected] = useState<boolean>();
   const [campaign, setCampaign] = useState<Campaign>()
   const [campaignParams, setCampaignParams] = useState<CampaignParameters>()
 
@@ -19,11 +23,19 @@ export default function CitizensView() {
   }
 
   useEffect(() => {
+    if (sessionToken !== null) {
+      setIsConnected(sessionToken.length > 0);
+    } else {
+      setIsConnected(false);
+    }
+  }, [sessionToken])
+
+  useEffect(() => {
     if (!campaign) return setCampaignParams(undefined)
     void getCampaignParams()
   }, [campaign])
 
-  return <CitizensComponent campaignParams={campaignParams} setCampaign={(_campaign?: Campaign) => {
-    setCampaign(_campaign)
-  }} />
+  return <SnackbarProvider>
+    <CitizensComponent isLoggedIn={isConnected} campaignParams={campaignParams} setCampaign={(_campaign?: Campaign) => setCampaign(_campaign)} closeConnection={() => setIsConnected(false)} />
+  </SnackbarProvider>
 }

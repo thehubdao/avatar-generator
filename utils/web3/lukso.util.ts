@@ -1,8 +1,9 @@
-import { ethers } from "ethers"
+import { ethers, JsonRpcSigner } from "ethers"
 import { TokenMetadata } from "../../types/metadata.type"
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
 import { FetchDataOutput } from "@erc725/erc725.js/build/main/src/types/decodeData";
+import { LeaderboardEntry } from "../../types/leaderboard.type";
 
 const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY
 const IPFS_GATEWAY_API_KEY = process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY
@@ -23,21 +24,43 @@ const LSP26_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
+  {
+    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
+    name: 'follow',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
+    name: 'unfollow',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }, { internalType: 'address', name: 'addr', type: 'address' }],
+    name: 'isFollowing',
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+    stateMutability: 'view',
+    type: 'function',
+  }
 ];
 
-export const getIPFSData = async (cid: string) => {
-    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?filebaseGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
-    const ipfsRequest = await fetch(ipfsHTTPUrl)
-    const ipfsData = await ipfsRequest.json() as { LSP4Metadata: TokenMetadata }
 
-    return ipfsData
+export const getIPFSData = async (cid: string) => {
+  const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+  const ipfsRequest = await fetch(ipfsHTTPUrl)
+  const ipfsData = await ipfsRequest.json() as { 'LSP4Metadata': TokenMetadata }
+  
+  return ipfsData
 }
 
 export const getImageUrl = (metadata: TokenMetadata) => {
     const ipfsUrl = metadata.images[0][0].url
     const cid = ipfsUrl.split('//')[1]
 
-    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?filebaseGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
     return imageUrl
 }
 
@@ -98,5 +121,62 @@ export async function GetUniversalProfileData(address: string) {
       name: '',
       profileImage: ''
     };
+  }
+}
+
+export async function FollowUser(addressToFollow: string, signer: JsonRpcSigner) {
+  try {
+
+    const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
+
+    const tx = await lsp26Contract.follow(addressToFollow);
+    await tx.wait();
+
+    return true;
+  } catch (error) {
+    console.error('Error following user:', error);
+    return false;
+  }
+}
+
+export async function UnfollowUser(addressToUnfollow: string, signer: JsonRpcSigner) {
+  try {
+
+    const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
+
+    const tx = await lsp26Contract.unfollow(addressToUnfollow);
+    await tx.wait();
+
+    return true;
+  } catch (error) {
+    console.error('Error unfollowing user:', error);
+    return false;
+  }
+}
+
+export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], signer: JsonRpcSigner) {
+  try {
+    const signerAddress = await signer.getAddress();
+    const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
+
+    // Check follow status for each user in parallel
+    const statuses = await Promise.all(
+      leaderboardData.map(async (user) => {
+        try {
+          const isFollowing = await lsp26Contract.isFollowing(signerAddress, user.address);
+          return [user.address, isFollowing];
+        } catch (error) {
+          console.error(`Error checking follow status for ${user.address}:`, error);
+          return [user.address, false];
+        }
+      })
+    )
+
+    // Convert array of results to object
+    const statusObject = Object.fromEntries(statuses); 
+    return statusObject;
+  } catch (error) {
+    console.error('Error getting signer or checking follow statuses:', error);
+    return {};
   }
 }

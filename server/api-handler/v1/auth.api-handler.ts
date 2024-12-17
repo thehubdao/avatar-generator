@@ -2,24 +2,45 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { ApiResponse } from "../../../interfaces/api.interface";
 import { RequestResponse } from "../request.api-handler";
 import { DefaultApiResponse } from "../../enums/api.enum";
-import { GenerateSessionToken } from "../../../utils/firebase.util";
+import { GetUserXPAndLevel, UpdateLastLoginDate } from "../../../utils/firebase.util";
 
-export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<string>>) {
-  const { address, message, signature } = req.body;
-
-  if (!address || !message || !signature) {
+export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<{
+  xp: number;
+  level: number;
+  nextLevelXP: number;
+}>>) {
+  const { address } = req.body; 
+  if (!address) {
     return RequestResponse(res, "BadRequest", false, DefaultApiResponse.MissingInfo);
   }
 
   try {
-    const token = await GenerateSessionToken(address, message, signature);
+    // Handle login rewards first
+    await HandleXPReward(address);
+    
+    // Get updated XP data after rewards
+    const xpData = await GetUserXPAndLevel(address);
 
-    // Set the token as an HTTP-only cookie
-    res.setHeader('Set-Cookie', `session=${token}; HttpOnly; Path=/; Max-Age=86400; SameSite=Strict`);
-
-    return RequestResponse(res, "Successful", true, DefaultApiResponse.PostSuccess, "Authentication successful");
+    return RequestResponse(res, "Successful", true, DefaultApiResponse.PostSuccess, {
+      xp: xpData.xp,
+      level: xpData.level,
+      nextLevelXP: xpData.nextLevelXP
+    });
   } catch (error) {
-    console.error('Verification error:', error);
+    console.error('XP verification error:', error);
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
+  }
+}
+
+async function HandleXPReward(address: string): Promise<void> {
+  try {
+    // Update last login and get login rewards
+    const loginResult = await UpdateLastLoginDate(address);
+    
+    if (!loginResult.success) {
+      console.error('Error updating last login:', loginResult);
+    }
+  } catch (error) {
+    console.error('Error handling XP reward:', error);
   }
 }

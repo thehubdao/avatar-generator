@@ -13,6 +13,7 @@ export interface AssetInterface {
   type: string;
   path: string;
   thumb?: string;
+  balance?: number;
 }
 
 export interface FeatureInterface extends AssetInterface {
