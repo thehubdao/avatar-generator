@@ -33,7 +33,7 @@ export default function SelectorUI({ list, selection, label = 'CHOOSE', selectio
           </div>
         </Button>
       </div>
-      <p className="absolute top-full right-0 px-2 mt-1 text-xs text-white/20">{campaignLabels[selection?.toLowerCase() as keyof typeof campaignLabels]?.dropdownName}</p>
+      <p className="absolute top-full right-0 px-2 mt-1 text-xs text-white/20">{label === 'CHOOSE CAMPAIGN' ? campaignLabels[selection?.toLowerCase() as keyof typeof campaignLabels]?.dropdownName : selection}</p>
       {isSelectorOpen &&
         <div className="absolute top-full w-full max-h-96 overflow-y-auto rounded-2xl bg-white mt-2 z-10">
           {
@@ -42,7 +42,7 @@ export default function SelectorUI({ list, selection, label = 'CHOOSE', selectio
                 selectionHandler(el);
                 setIsSelectorOpen(false);
               }}>
-                <p className="text-center text-sm truncate">{campaignLabels[el.toLowerCase() as keyof typeof campaignLabels]?.dropdownName}</p>
+                <p className="text-center text-sm truncate">{label === 'CHOOSE CAMPAIGN' ? campaignLabels[el.toLowerCase() as keyof typeof campaignLabels]?.dropdownName : el}</p>
               </div>
             ))
           }
