@@ -10,7 +10,7 @@ export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
           "accentColor": "#A7C080",
           "theme": "#222224",
           "walletList": [
-            "detected_ethereum_wallets"
+            "metamask", "universal_profile"
           ]
         },
         "loginMethods": [
