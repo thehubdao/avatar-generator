@@ -15,7 +15,7 @@ interface CitizensCollectionProps {
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
 }
 
-export default function CitizensCollection({tokenList, currentCollection, updateCollection}: CitizensCollectionProps) {
+export default function CitizensCollection({ tokenList, currentCollection, updateCollection }: CitizensCollectionProps) {
 
   const filteredList = useRef<TokenMetadata[] | undefined>([]);
   const [campaignList, setCampaignList] = useState<string[] | undefined>([]);
@@ -54,33 +54,36 @@ export default function CitizensCollection({tokenList, currentCollection, update
   }, [tokenList]);
 
   return (
-    <div className="container mx-auto pt-8">
-      {/*  CITIZENS TABLE */}
+    <div className="container mx-auto xl:pt-8 px-6 2xl:px-0">
+      {/* TABLE */}
       <div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
         {/* TABLE HEADER */}
-        <div className="w-full flex justify-between p-8 border-b border-white/20">
+        <div className="w-full flex flex-col xl:flex-row justify-between p-4 sm:p-8 border-b border-white/20">
           {/* SEARCH BY ID INPUT */}
-          <label className="flex">
+          <label className="flex w-full xl:w-auto">
             <div className="flex justify-center items-center w-12 shadow-citizens-input rounded-l-full">
               <SearchSVG />
             </div>
-            <div>
+            <div className='w-full xl:w-auto'>
               <input
                 type="number"
                 name=""
                 id=""
                 placeholder="SEARCH BY TOKEN ID"
-                className="w-80 bg-[#2D2D2D] text-lg text-white placeholder:text-white focus-visible:outline-none px-4 py-2 shadow-citizens-input rounded-r-full"
+                className="w-full xl:w-80 bg-[#2D2D2D] text-lg text-white placeholder:text-white focus-visible:outline-none px-4 py-2 shadow-citizens-input rounded-r-full"
                 value={searchValue}
                 onChange={e => filterList(e.target.value, chooseValue)}
               />
             </div>
           </label>
-          {/* CHOOSE CAMPAIGN SELECTOR */}
-          <SelectorUI list={campaignList} selection={chooseValue} label="CHOOSE CAMPAIGN" selectionHandler={(value) => {
-            filterList(searchValue, value);
-          }} />
+          {/* SELECTORS */}
+          <div className="flex lg:gap-4 justify-between lg:justify-center pt-6 xl:pt-0">
+            <SelectorUI list={campaignList} selection={chooseValue} label="CHOOSE CAMPAIGN" selectionHandler={(value) => {
+              filterList(searchValue, value);
+            }} />
+          </div>
         </div>
+        {/* DROPS LIST */}
         <div className="flex flex-wrap justify-center gap-4 p-8 min-h-[336px]">
           {searchValue || chooseValue ?
             <>
