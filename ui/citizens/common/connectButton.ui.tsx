@@ -65,9 +65,9 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address, 
             </div>
           </button>
           {isOpen && (
-            <div className="absolute top-full right-0 w-[376px] mt-3">
-              <div className="grid grid-cols-[144px_1fr] bg-white rounded-[20px] overflow-hidden">
-                <div className="relative h-full w-36">
+            <div className="absolute top-full xl:right-0 w-[320px] sm:w-[376px] mt-3">
+              <div className="grid grid-cols-[112px_1fr] sm:grid-cols-[144px_1fr] bg-white rounded-[20px] overflow-hidden">
+                <div className="relative h-full w-28 sm:w-36">
                   {profileImage ? (
                     <Image
                       src={profileImage}
@@ -87,7 +87,7 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address, 
                     <div className="w-4 h-4 bg-black rounded-full flex justify-center items-center">
                       <StarSVG />
                     </div>
-                    <p className="grow text-xs pr-2">
+                    <p className="grow text-xs pr-2 whitespace-nowrap">
                       lvl {userLevel}
                     </p>
                   </div>
@@ -97,11 +97,11 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address, 
                     {name || (address ? FormatWalletAddress(address, 6) : 'No name')}
                   </p>
                   <div className="w-full flex justify-between">
-                    <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-4">
+                    <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-3 sm:px-4">
                       <p>{followerCount}</p>
                       <p>Followers</p>
                     </div>
-                    <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-4">
+                    <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-3 sm:px-4">
                       <p>{followingCount}</p>
                       <p>Following</p>
                     </div>
