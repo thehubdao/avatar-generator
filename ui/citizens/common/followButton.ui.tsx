@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LeaderboardEntry } from "../../../types/leaderboard.type";
 import AddUserSVG from "./SVG/addUserSVG.ui";
 import { useSnackbar } from "../snackbar/snackbar.provider";
+import RemoveUserSVG from "./SVG/removeUserSVG.ui";
 
 interface FollowButtonProps {
   user: LeaderboardEntry;
@@ -65,7 +66,7 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
     {isLoading ?
       <div className="w-4 h-4 border-t border-citizens-dark rounded-full animate-spin" />
       : // TODO: Add SVG
-      <div className="text-citizens-dark">X</div>
+      <RemoveUserSVG />
     }
   </div>
 }
