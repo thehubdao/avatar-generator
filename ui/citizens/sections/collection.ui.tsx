@@ -32,14 +32,13 @@ export default function Collection({
   return (
     <div className="relative w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] py-32">
       <div className="relative container mx-auto">
-        <h1 className="font-monument text-white text-6xl text-center">
-          { selectedList === CollectionSections.CITIZENS && 'MY CITIZENS' }
-          { selectedList === CollectionSections.WEARABLES && 'WEARABLE DROPS' }
+        <h1 className="font-monument text-white text-4xl sm:text-6xl text-center px-6">
+          {selectedList === CollectionSections.CITIZENS && 'MY CITIZENS'}
+          {selectedList === CollectionSections.WEARABLES && 'WEARABLE DROPS'}
         </h1>
-        <div className="absolute flex text-white bottom-0 right-0 bg-[#2D2D2D] rounded-full px-px">
-        <div className={`px-4 py-2 rounded-full ${selectedList === CollectionSections.WEARABLES ? ' select-none' : ' text-white/60 hover:text-white shadow-citizens-btn bg-citizens-dark cursor-pointer '}`} onClick={() => setSelectedList(CollectionSections.WEARABLES)}>WEARABLES</div>
+        <div className="xl:absolute xl:bottom-0 xl:right-6 2xl:right-0 w-fit flex text-white bg-[#2D2D2D] rounded-full px-px mx-auto mt-6">
+          <div className={`px-4 py-2 rounded-full ${selectedList === CollectionSections.WEARABLES ? ' select-none' : ' text-white/60 hover:text-white shadow-citizens-btn bg-citizens-dark cursor-pointer '}`} onClick={() => setSelectedList(CollectionSections.WEARABLES)}>WEARABLES</div>
           <div className={`px-4 py-2 rounded-full ${selectedList === CollectionSections.CITIZENS ? ' select-none' : ' text-white/60 hover:text-white shadow-citizens-btn bg-citizens-dark cursor-pointer '}`} onClick={() => setSelectedList(CollectionSections.CITIZENS)}>CITIZENS</div>
-
         </div>
       </div>
       {/* MY CITIZENS */}
@@ -52,7 +51,7 @@ export default function Collection({
       }
       {/* WEARABLE DROPS */}
       {selectedList === CollectionSections.WEARABLES &&
-        <WearablesCollection signer={signer} claimableDrops={claimableDrops} handleClaim={handleClaim}/>}
+        <WearablesCollection signer={signer} claimableDrops={claimableDrops} handleClaim={handleClaim} />}
     </div>
   );
 }
