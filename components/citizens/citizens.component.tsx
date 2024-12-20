@@ -945,14 +945,14 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
                   </div>
                 </div>
                 <div className='xl:flex gap-4 pb-8 xl:pb-0'>
-                  <Button label="homebase" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStiles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                  <Button label="homebase" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                     if (currentSection !== CitizensSections.View) {
                       setIsLoading(true);
                       setCurrentSection(CitizensSections.View);
                     }
                     setIsBurguerOpen(false);
                   }} />
-                  <Button label="Wardrobe" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStiles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                  <Button label="Wardrobe" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                     if (currentSection !== CitizensSections.View) {
                       setIsLoading(true);
                       setCurrentSection(CitizensSections.View);
@@ -966,17 +966,17 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
                       <ArrowLinkSVG />
                     }
                   </Button>
-                  <Button label="Backpack" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStiles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                  <Button label="Backpack" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                     setIsLoading(false);
                     setIsBurguerOpen(false);
                     setCurrentSection(CitizensSections.Collection);
                   }} />
-                  <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStiles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                  <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                     setIsLoading(false);
                     setIsBurguerOpen(false);
                     setCurrentSection(CitizensSections.LeaderBoard);
                   }} />
-                  <Button label="play" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStiles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                  <Button label="play" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                     setIsLoading(false);
                     setIsBurguerOpen(false);
                     setCurrentSection(CitizensSections.Play);
@@ -998,7 +998,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           {(collectionList || collectionList === null || isSigned) &&
             <div className="flex gap-4">
               {!isSigned &&
-                <Button label="About" handleClick={() => { }} withIcon textStiles="text-start pl-2">
+                <Button label="About" handleClick={() => { }} withIcon textStyles="text-start pl-2">
                   <ArrowLinkSVG />
                 </Button>
               }
