@@ -119,7 +119,7 @@ export default function Play() {
               }
             </div>
             <div className="grid gap-4 pt-8 xl:pt-20">
-              <Button label={'Go to ' + selectedGame.name} textStiles="w-full text-center" light handleClick={() => {
+              <Button label={'Go to ' + selectedGame.name} textStyles="w-full text-center" light handleClick={() => {
                 window.open(selectedGame.link, "_blank");
                 setIsOpenInstructions(false);
               }} />

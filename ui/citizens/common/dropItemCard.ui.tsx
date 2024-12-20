@@ -95,8 +95,8 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
           </div>
           {!isClaiming ?
             <div className="grid gap-4 pt-8">
-              <Button label="Claim" textStiles="w-full text-center" light handleClick={() => claimHandler()} />
-              <Button label="Cancel" textStiles="w-full text-center" light handleClick={() => setIsOpenClaimModal(false)} />
+              <Button label="Claim" textStyles="w-full text-center" light handleClick={() => claimHandler()} />
+              <Button label="Cancel" textStyles="w-full text-center" light handleClick={() => setIsOpenClaimModal(false)} />
             </div>
             :
             <div className="w-4 h-4 border-t rounded-full animate-spin mt-4"></div>

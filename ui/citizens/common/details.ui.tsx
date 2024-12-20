@@ -71,7 +71,7 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
       </div>
     }
     {!isOpen &&
-      <Button label="/// details" withIcon handleClick={() => { setIsOpen(true) }} className="fixed bottom-4 left-4 min-w-fit lg:w-[419px]" textStiles="text-start text-sm lg:text-lg lg:pl-2">
+      <Button label="/// details" withIcon handleClick={() => { setIsOpen(true) }} className="fixed bottom-4 left-4 min-w-fit lg:w-[419px]" textStyles="text-start text-sm lg:text-lg lg:pl-2">
         {loading ?
           <div className="w-3 h-3 rounded-full border-t-[1px] border-white animate-spin" />
           :

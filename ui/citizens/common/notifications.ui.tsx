@@ -79,7 +79,7 @@ export default function Notifications({ address }: { address: string }) {
     <>
       {isOpen ?
         <div className="fixed top-24 md:top-auto md:bottom-4 md:right-4 w-full md:w-auto px-6 md:px-0">
-          <Button label={`/// ${notifications.length > 0 ? `${notifications.length} ` : 'no '}notifications`} handleClick={() => { setIsOpen(!isOpen) }} withIcon className="w-full lg:w-[376px]" textStiles="text-start text-sm lg:text-lg lg:pl-2">
+          <Button label={`/// ${notifications.length > 0 ? `${notifications.length} ` : 'no '}notifications`} handleClick={() => { setIsOpen(!isOpen) }} withIcon className="w-full lg:w-[376px]" textStyles="text-start text-sm lg:text-lg lg:pl-2">
             <div className="w-[14px] h-[2px] bg-white" />
           </Button>
           <div className="grid gap-3 pt-3 max-h-[276px] overflow-hidden">
@@ -91,7 +91,7 @@ export default function Notifications({ address }: { address: string }) {
           </div>
         </div>
         :
-        <Button label={`/// ${notifications.length > 0 ? `${notifications.length} ` : 'no '}notifications`} handleClick={() => { setIsOpen(!isOpen) }} withIcon className="fixed bottom-4 right-4 min-w-fit lg:w-[376px]" textStiles="text-start text-sm lg:text-lg lg:pl-2">
+        <Button label={`/// ${notifications.length > 0 ? `${notifications.length} ` : 'no '}notifications`} handleClick={() => { setIsOpen(!isOpen) }} withIcon className="fixed bottom-4 right-4 min-w-fit lg:w-[376px]" textStyles="text-start text-sm lg:text-lg lg:pl-2">
           {isOpen ? <div className="w-[14px] h-[2px] bg-white" /> : <PlusSVG />}
         </Button>
       }

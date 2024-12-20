@@ -195,8 +195,8 @@ export default function HudUI({
                   <p className="text-lg">Are you sure that you want to save this wearable combination? If you are using a custom wearable it will be burnt and you will not be able to use it again on a different Citizen.</p>
                 </div>
                 <div className="w-full grid grid-cols-2 gap-4 pt-8">
-                  <Button label="Go Back" light className="w-full" textStiles="w-full text-center" handleClick={() => setIsSaveModalOpen(false)} />
-                  <Button label="Save" light className="w-full" textStiles="w-full text-center" handleClick={() => {changeView(); setIsSaveModalOpen(false);}} />
+                  <Button label="Go Back" light className="w-full" textStyles="w-full text-center" handleClick={() => setIsSaveModalOpen(false)} />
+                  <Button label="Save" light className="w-full" textStyles="w-full text-center" handleClick={() => {changeView(); setIsSaveModalOpen(false);}} />
                 </div>
               </div>
             </Modal>
