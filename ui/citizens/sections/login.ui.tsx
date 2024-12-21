@@ -12,11 +12,11 @@ export default function LoginUI({ collections, setIsSigned }: LoginUIProps) {
     <>
       {
         collections ?
-          <div className="pt-[15vh] 2xl:pt-[25vh]">
+          <div className="pt-[15vh] 2xl:pt-[25vh] min-h-screen">
             <CampaignList collections={collections} setIsSigned={setIsSigned} />
             <div className="grid justify-items-center pt-4 2xl:pt-10">
-              <h1 className="font-monument text-7xl text-white text-center">CITIZENS PORTAL</h1>
-              <p className="text-2xl text-white">The home of creators in the 3D Web</p>
+              <h1 className="font-monument text-6xl lg:text-7xl text-white text-center"><span className="text-[52px] lg:text-7xl">CITIZENS</span><br className="lg:hidden"/> PORTAL</h1>
+              <p className="lg:text-2xl text-white">The home of creators in the 3D Web</p>
             </div>
           </div>
           :
