@@ -790,239 +790,236 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }, [logout]);
 
   return (
-    <MobileLayout>
-      <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
-        {!isSigned ?
-          <>
-            {isLoggedIn &&
-              <div className={`fixed z-50 ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
-                <p className=" text-white text-xl font-light">Loading session</p>
-                <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
-              </div>
-            }
-            <LoginUI
-              collections={collectionList}
-              setIsSigned={(isSigned: boolean, selectedCampaign: Campaign) => handleLogin(isSigned, selectedCampaign)}
-            />
-          </>
-          :
-          <>
-            {/* EDITOR HUD */}
-            <div className="fixed w-full z-10 dark">
-              {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View &&
-                <HudUI
-                  selectedOption={selectedOpc.find(
-                    (e) => e.id === selectedCategory
-                  )}
-                  editModeSelected={
-                    isEditModeSelected
-                  }
-                  selectListCategory={
-                    (campaignParams.features &&
-                      campaignParams.accessories && [
-                        ...campaignParams.features,
-                        ...campaignParams.accessories,
-                      ]) ||
-                    []
-                  }
-                  // optionList
-                  optionList={optionListShow}
-                  // selectedCategory
-                  selectedCategory={selectedCategory}
-                  campaignSkinColorConfig={
-                    campaignParams?.config.skin ||
-                    {}
-                  }
-                  skinColor={skinColor}
-                  changeView={() => {
-                    saveCombination()
-                    setIsEditModeSelected(!isEditModeSelected)
-                    // void updateStage(!isEditModeSelected) @GabCh15 tiene la misma funcionalidad de lukso?
-                  }}
-                  // changeCategory
-                  onOptionChange={(id, path, name) =>
-                    void onOptionChange(
-                      id,
-                      path,
-                      name
-                    )
-                  }
-                  // onCategoryChange
-                  onCategoryTypeChange={(value) =>
-                    onCategoryTypeChange(value)
-                  }
-                  onSkinColorChange={(value) =>
-                    void onClickChangeSkinColor(
-                      value
-                    )
-                  }
-                  exportModel={() => exportModel()}
-                  isCustomCampaignHud
-                  onClickBackButton={() =>
-                    setIsEditModeSelected(false)
-                  }
-                  isLoading={isLoading}
-                />
-              }
-            </div>
-            {/* CANVAS */}
-            <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-              {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View && userWearables && <AvatarEditor
-
-                avatarBasePath={
-                  campaignParams.armature
+    <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
+      {isSigned ?
+        <>
+          {/* EDITOR HUD */}
+          <div className="fixed w-full z-10 dark">
+            {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View &&
+              <HudUI
+                selectedOption={selectedOpc.find(
+                  (e) => e.id === selectedCategory
+                )}
+                editModeSelected={
+                  isEditModeSelected
                 }
-                editMode={isEditModeSelected}
-                lights={
-                  campaignParams.config.lights
+                selectListCategory={
+                  (campaignParams.features &&
+                    campaignParams.accessories && [
+                      ...campaignParams.features,
+                      ...campaignParams.accessories,
+                    ]) ||
+                  []
                 }
-                defaultShadow={
-                  campaignParams.config
-                    .defShadow
+                // optionList
+                optionList={optionListShow}
+                // selectedCategory
+                selectedCategory={selectedCategory}
+                campaignSkinColorConfig={
+                  campaignParams?.config.skin ||
+                  {}
                 }
-                defaultCamera={
-                  campaignParams.config.defCam
-                }
-                postProcessing={
-                  campaignParams.config
-                    .postProcessing
-                }
-                onReady={() =>
-                  onAvatarBuilderReady(
-                    currentCollection.combination,
-                    currentCollection.campaign
+                skinColor={skinColor}
+                changeView={() => {
+                  saveCombination()
+                  setIsEditModeSelected(!isEditModeSelected)
+                  // void updateStage(!isEditModeSelected) @GabCh15 tiene la misma funcionalidad de lukso?
+                }}
+                // changeCategory
+                onOptionChange={(id, path, name) =>
+                  void onOptionChange(
+                    id,
+                    path,
+                    name
                   )
                 }
-              />}
-            </div>
-            {/* CITIZENS HUD */}
-            {!isEditModeSelected && signer &&
-              <CitizensUI
-                isSavingCombination={isSavingCombination}
-                currentSection={currentSection}
-                loadedTokens={loadedTokens}
-                currentCollection={currentCollection}
-                updateCollection={updateCollection}
-                features={singleInitData?.features}
+                // onCategoryChange
+                onCategoryTypeChange={(value) =>
+                  onCategoryTypeChange(value)
+                }
+                onSkinColorChange={(value) =>
+                  void onClickChangeSkinColor(
+                    value
+                  )
+                }
                 exportModel={() => exportModel()}
-                address={walletAddress ?? ""}
-                leaderboardData={leaderboardData}
-                signer={signer}
-                handleFollowUser={handleFollowUser}
-                handleUnfollowUser={handleUnfollowUser}
-                claimableDrops={claimableDrops}
-                handleClaim={handleClaim} />
+                isCustomCampaignHud
+                onClickBackButton={() =>
+                  setIsEditModeSelected(false)
+                }
+                isLoading={isLoading}
+              />
             }
+          </div>
+          {/* CANVAS */}
+          <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
+            {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View && userWearables && <AvatarEditor
+
+              avatarBasePath={
+                campaignParams.armature
+              }
+              editMode={isEditModeSelected}
+              lights={
+                campaignParams.config.lights
+              }
+              defaultShadow={
+                campaignParams.config
+                  .defShadow
+              }
+              defaultCamera={
+                campaignParams.config.defCam
+              }
+              postProcessing={
+                campaignParams.config
+                  .postProcessing
+              }
+              onReady={() =>
+                onAvatarBuilderReady(
+                  currentCollection.combination,
+                  currentCollection.campaign
+                )
+              }
+            />}
+          </div>
+          {/* CITIZENS HUD */}
+          {!isEditModeSelected && signer &&
+            <CitizensUI
+              isSavingCombination={isSavingCombination}
+              currentSection={currentSection}
+              loadedTokens={loadedTokens}
+              currentCollection={currentCollection}
+              updateCollection={updateCollection}
+              features={singleInitData?.features}
+              exportModel={() => exportModel()}
+              address={walletAddress ?? ""}
+              leaderboardData={leaderboardData}
+              signer={signer}
+              handleFollowUser={handleFollowUser}
+              handleUnfollowUser={handleUnfollowUser}
+              claimableDrops={claimableDrops}
+              handleClaim={handleClaim} />
+          }
+          {/* LOADER */}
+          {isLoading &&
+            <div className={`fixed ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
+              <p className=" text-white text-xl font-light">Loading Citizen</p>
+              <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
+            </div>
+          }
+        </>
+        :
+        <>
+          {isLoggedIn &&
+            <div className={`fixed z-50 ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
+              <p className=" text-white text-xl font-light">Loading session</p>
+              <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
+            </div>
+          }
+          <LoginUI
+            collections={collectionList}
+            setIsSigned={(isSigned: boolean, selectedCampaign: Campaign) => handleLogin(isSigned, selectedCampaign)}
+          />
+        </>
+      }
+      {/* HEADER */}
+      <div className="fixed inset-0 w-full h-fit flex justify-between items-center pt-8 px-6">
+        {/* LOGO THE HUB */}
+        <div className="w-fit h-fit">
+          <LogoTheHub />
+        </div>
+        {/* NAVBAR */}
+        {isSigned && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
+          <>
+            <div className={`fixed z-50 xl:relative inset-6 xl:inset-0 bg-citizens-dark xl:bg-inherit h-fit ${isBurguerOpen ? 'block' : 'hidden xl:block'}`}>
+              <div className='w-full px-4 pt-4 pb-24 flex justify-between xl:hidden'>
+                <Image
+                  src='/resources/images/the-hub-logo-white.svg'
+                  alt="the hub icon"
+                  width={182}
+                  height={32}
+                />
+                <div className={`w-10 h-[27px] border border-white rounded-full flex justify-center items-center`} onClick={() => setIsBurguerOpen(false)}>
+                  <div className='w-1/3 h-px bg-white'></div>
+                </div>
+              </div>
+              <div className='xl:flex gap-4 pb-8 xl:pb-0'>
+                <Button label="homebase" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                  if (currentSection !== CitizensSections.View) {
+                    setIsLoading(true);
+                    setCurrentSection(CitizensSections.View);
+                  }
+                  setIsBurguerOpen(false);
+                }} />
+                <Button label="Wardrobe" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                  if (currentSection !== CitizensSections.View) {
+                    setIsLoading(true);
+                    setCurrentSection(CitizensSections.View);
+                  }
+                  setIsBurguerOpen(false);
+                  if (!isSavingCombination) setIsEditModeSelected(true);
+                }}>
+                  {isSavingCombination ?
+                    <div className="w-3 h-3 rounded-full border-t-[1px] border-white animate-spin" />
+                    :
+                    <ArrowLinkSVG />
+                  }
+                </Button>
+                <Button label="Backpack" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                  setIsLoading(false);
+                  setIsBurguerOpen(false);
+                  setCurrentSection(CitizensSections.Collection);
+                }} />
+                <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                  setIsLoading(false);
+                  setIsBurguerOpen(false);
+                  setCurrentSection(CitizensSections.LeaderBoard);
+                }} />
+                <Button label="play" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                  setIsLoading(false);
+                  setIsBurguerOpen(false);
+                  setCurrentSection(CitizensSections.Play);
+                }} />
+              </div>
+              <div className='border-t-[1px] mx-4 xl:hidden'>
+                <p className='text-center text-xs text-white font-light pt-8'>Follow us</p>
+                <SocialButtons className='flex gap-4 w-full justify-center pt-4 pb-8' />
+              </div>
+            </div>
+            <div className='grid w-[18px] gap-[6px] xl:hidden order-3' onClick={() => setIsBurguerOpen(true)}>
+              <div className='w-full h-[2px] bg-white'></div>
+              <div className='w-full h-[2px] bg-white'></div>
+              <div className='w-full h-[2px] bg-white'></div>
+            </div>
           </>
         }
-        {/* LOADER */}
-        {
-          isLoading &&
-          <div className={`fixed ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
-            <p className=" text-white text-xl font-light">Loading Citizen</p>
-            <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
-          </div>
-        }
-        {/* HEADER */}
-        <div className="fixed inset-0 w-full h-fit flex justify-between items-center pt-8 px-6">
-          {/* LOGO THE HUB */}
-          <div className="w-fit h-fit">
-            <LogoTheHub />
-          </div>
-          {/* NAVBAR */}
-          {isSigned && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
-            <>
-              <div className={`fixed z-50 xl:relative inset-6 xl:inset-0 bg-citizens-dark xl:bg-inherit h-fit ${isBurguerOpen ? 'block':'hidden xl:block'}`}>
-                <div className='w-full px-4 pt-4 pb-24 flex justify-between xl:hidden'>
-                  <Image
-                    src='/resources/images/the-hub-logo-white.svg'
-                    alt="the hub icon"
-                    width={182}
-                    height={32}
-                  />
-                  <div className={`w-10 h-[27px] border border-white rounded-full flex justify-center items-center`} onClick={() => setIsBurguerOpen(false)}>
-                    <div className='w-1/3 h-px bg-white'></div>
-                  </div>
-                </div>
-                <div className='xl:flex gap-4 pb-8 xl:pb-0'>
-                  <Button label="homebase" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                    if (currentSection !== CitizensSections.View) {
-                      setIsLoading(true);
-                      setCurrentSection(CitizensSections.View);
-                    }
-                    setIsBurguerOpen(false);
-                  }} />
-                  <Button label="Wardrobe" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                    if (currentSection !== CitizensSections.View) {
-                      setIsLoading(true);
-                      setCurrentSection(CitizensSections.View);
-                    }
-                    setIsBurguerOpen(false);
-                    if (!isSavingCombination) setIsEditModeSelected(true);
-                  }}>
-                    {isSavingCombination ?
-                      <div className="w-3 h-3 rounded-full border-t-[1px] border-white animate-spin" />
-                      :
-                      <ArrowLinkSVG />
-                    }
-                  </Button>
-                  <Button label="Backpack" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                    setIsLoading(false);
-                    setIsBurguerOpen(false);
-                    setCurrentSection(CitizensSections.Collection);
-                  }} />
-                  <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                    setIsLoading(false);
-                    setIsBurguerOpen(false);
-                    setCurrentSection(CitizensSections.LeaderBoard);
-                  }} />
-                  <Button label="play" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                    setIsLoading(false);
-                    setIsBurguerOpen(false);
-                    setCurrentSection(CitizensSections.Play);
-                  }} />
-                </div>
-                <div className='border-t-[1px] mx-4 xl:hidden'>
-                  <p className='text-center text-xs text-white font-light pt-8'>Follow us</p>
-                  <SocialButtons className='flex gap-4 w-full justify-center pt-4 pb-8'/>
-                </div>
-              </div>
-              <div className='grid w-[18px] gap-[6px] xl:hidden order-3' onClick={() => setIsBurguerOpen(true)}>
-                <div className='w-full h-[2px] bg-white'></div>
-                <div className='w-full h-[2px] bg-white'></div>
-                <div className='w-full h-[2px] bg-white'></div>
-              </div>
-            </>
-          }
-          {/* CONNECT BUTTON */}
-          {(collectionList || collectionList === null || isSigned) &&
-            <div className="flex gap-4">
-              {!isSigned &&
+        {/* CONNECT BUTTON */}
+        {(collectionList || collectionList === null || isSigned) &&
+          <div className="flex gap-4">
+            {/* {!isSigned &&
                 <Button label="About" handleClick={() => { }} withIcon textStyles="text-start pl-2">
                   <ArrowLinkSVG />
                 </Button>
-              }
-              <ConnectButton
-                isSigned={isSigned}
-                setIsSigned={setIsSigned}
-                address={walletAddress}
-                onLogout={handleLogout}
-              />
-            </div>
-          }
-        </div>
-        {/* SOCIAL */}
-        {!isSigned &&
-          <SocialButtons className='fixed bottom-8 right-6 flex gap-4'/>
-        }
-        {
-          isLoggedIn === undefined &&
-          <div className={`fixed z-50 ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
-            <p className=" text-white text-xl font-light">Verifing session</p>
-            <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
+              } */}
+            <ConnectButton
+              isSigned={isSigned}
+              setIsSigned={setIsSigned}
+              address={walletAddress}
+              onLogout={handleLogout}
+            />
           </div>
         }
       </div>
-    </MobileLayout>
+      {/* SOCIAL */}
+      {!isSigned &&
+        <SocialButtons className='hidden lg:flex fixed bottom-8 right-6 gap-4' />
+      }
+      {
+        isLoggedIn === undefined &&
+        <div className={`fixed z-50 ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
+          <p className=" text-white text-xl font-light">Verifing session</p>
+          <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
+        </div>
+      }
+    </div>
   )
 }
