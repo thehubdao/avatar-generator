@@ -22,7 +22,7 @@ interface CitizensUIProps {
   features?: IndexFeatureInterface[];
   exportModel: () => Promise<void>;
   address: string;
-  leaderboardData: LeaderboardEntry[];
+  leaderboardData?: LeaderboardEntry[];
   signer: JsonRpcSigner | null;
   handleFollowUser: (address: string) => Promise<boolean>;
   handleUnfollowUser: (address: string) => Promise<boolean>;
