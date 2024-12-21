@@ -48,7 +48,7 @@ export default function FeatureSelectorUI({ activeOpc, handleClick, list }: Feat
         ))}
       </Swiper>
       <div className='absolute w-full px-3' >
-        <div className='w-full border-b-[1px] border-slate-300' />
+        <div className='w-full border-b-[1px] border-slate-300 dark:border-gray-normal' />
       </div>
     </div >
   )

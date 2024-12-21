@@ -808,7 +808,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           :
           <>
             {/* EDITOR HUD */}
-            <div className="fixed z-10 dark">
+            <div className="fixed w-full z-10 dark">
               {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View &&
                 <HudUI
                   selectedOption={selectedOpc.find(
