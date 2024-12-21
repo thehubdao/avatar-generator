@@ -78,7 +78,7 @@ export default function CitizensCollection({ tokenList, currentCollection, updat
           </label>
           {/* SELECTORS */}
           <div className="flex lg:gap-4 justify-between lg:justify-center pt-6 xl:pt-0">
-            <SelectorUI list={campaignList} selection={chooseValue} label="CHOOSE CAMPAIGN" selectionHandler={(value) => {
+            <SelectorUI list={campaignList} selection={chooseValue} label="CHOOSE CAMPAIGN" areCampaigns selectionHandler={(value) => {
               filterList(searchValue, value);
             }} />
           </div>
