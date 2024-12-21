@@ -2,6 +2,7 @@ import { useState } from "react";
 import { LeaderboardEntry } from "../../../types/leaderboard.type";
 import AddUserSVG from "./SVG/addUserSVG.ui";
 import { useSnackbar } from "../snackbar/snackbar.provider";
+import PlusSVG from "./SVG/plusSVG.ui";
 
 interface FollowButtonProps {
   user: LeaderboardEntry;
@@ -16,7 +17,7 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
   const followUserHandler = async () => {
     setIsLoading(true);
     const isSuccess = await onFollowUser(user.address);
-    
+
     if (!isSuccess) {
       showSnackbar(
         <p>Follow failed, try again later.</p>
@@ -66,8 +67,10 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
   >
     {isLoading ?
       <div className="w-2 sm:w-4 h-2 sm:h-4 border-t border-citizens-dark rounded-full animate-spin" />
-      : // TODO: Add SVG
-      <div className="text-citizens-dark">X</div>
+      :
+      <div className="rotate-45">
+        <PlusSVG className="fill-citizens-dark" />
+      </div>
     }
   </div>
 }
