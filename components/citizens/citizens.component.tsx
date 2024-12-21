@@ -639,13 +639,34 @@ async function saveCombination() {
       metadataObject.uri
     )
     console.log("BURNING DROPS")
+    let successfulBurns = 0;
 
     for (let i = 0; i < burnDropArray.length; i++) {
       const drop = burnDropArray[i]
       await burnDrop(walletAddress, currentCampaign, drop)
+     successfulBurns++
     }
-    await handleUserFeatures()
 
+    // Si hubo burns exitosos, notificar al servidor
+    if (successfulBurns > 0) {
+      try {
+        await fetch('/api/v1/burns', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            address: walletAddress,
+            burns: successfulBurns
+          }),
+        });
+      } catch (error) {
+        console.error('Error notifying burns to server:', error);
+      }
+    }
+
+    await handleUserFeatures()
+    
     setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
     onSavedCombinationSnackbar();
   } catch (err) {

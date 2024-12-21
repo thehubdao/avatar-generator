@@ -4,5 +4,6 @@ export enum XPReward {
   NewFollower = 20,
   NewFollowing = 10,
   HeldCitizen = 10,
-  WearableHolding = 10
+  WearableHolding = 10,
+  BurnDrop = 420
 }
