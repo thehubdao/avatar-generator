@@ -6,13 +6,14 @@ import { campaignLabels } from "../../../constants/lukso/labels.constant";
 
 interface SelectorUIProps {
   list?: string[];
+  areCampaigns?: boolean;
   label?: string;
   selection?: string;
   dropDownPosition?: string;
   selectionHandler: (value?: string) => void;
 }
 
-export default function SelectorUI({ list, selection, label = 'CHOOSE', dropDownPosition,  selectionHandler }: SelectorUIProps) {
+export default function SelectorUI({ list, areCampaigns, selection, label = 'CHOOSE', dropDownPosition,  selectionHandler }: SelectorUIProps) {
   const menuDOM = useRef<HTMLDivElement>(null);
   
   const [isButtonHovered, setIsButtonHovered] = useState<boolean>(false);
@@ -34,7 +35,7 @@ export default function SelectorUI({ list, selection, label = 'CHOOSE', dropDown
           </div>
         </Button>
       </div>
-      <p className="absolute top-full left-0 sm:left-auto sm:right-0 px-2 sm:mt-1 text-xs text-white/20">{campaignLabels[selection?.toLowerCase() as keyof typeof campaignLabels]?.dropdownName}</p>
+      <p className="absolute top-full left-0 sm:left-auto sm:right-0 px-2 sm:mt-1 text-xs text-white/20">{areCampaigns ? campaignLabels[selection?.toLowerCase() as keyof typeof campaignLabels]?.dropdownName : selection}</p>
       {isSelectorOpen &&
         <div className={`absolute top-full ${dropDownPosition} w-48 md:w-full max-h-96 overflow-y-auto rounded-2xl bg-white mt-2 z-10`}>
           {
@@ -43,7 +44,7 @@ export default function SelectorUI({ list, selection, label = 'CHOOSE', dropDown
                 selectionHandler(el);
                 setIsSelectorOpen(false);
               }}>
-                <p className="text-center text-sm truncate">{campaignLabels[el.toLowerCase() as keyof typeof campaignLabels]?.dropdownName}</p>
+                <p className="text-center text-sm truncate">{areCampaigns ? campaignLabels[el.toLowerCase() as keyof typeof campaignLabels]?.dropdownName : el}</p>
               </div>
             ))
           }
