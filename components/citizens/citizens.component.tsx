@@ -2,7 +2,6 @@
 
 import { usePrivy, useWallets } from '@privy-io/react-auth'
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
-import MobileLayout from "../../layouts/mobile.layout";
 import { Campaign, CampaignDrops, TokenId, TokenMetadata } from "../../types/metadata.type";
 import LoginUI from "../../ui/citizens/sections/login.ui";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
@@ -112,7 +111,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   const [claimableDrops, setClaimableDrops] = useState<DataBaseDrop[]>([])
 
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[]>([]);
+  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[] | undefined>([]);
 
   const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
 
@@ -682,7 +681,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       const isSuccess = await FollowUser(addressToFollow, signer);
       if (isSuccess) {
         setLeaderboardData(prevData =>
-          prevData.map(entry =>
+          prevData && prevData.map(entry =>
             entry.address === addressToFollow
               ? { ...entry, isFollowing: true }
               : entry
@@ -705,7 +704,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       const isSuccess = await UnfollowUser(addressToUnfollow, signer);
       if (isSuccess) {
         setLeaderboardData(prevData =>
-          prevData.map(entry =>
+          prevData && prevData.map(entry =>
             entry.address === addressToUnfollow
               ? { ...entry, isFollowing: false }
               : entry
@@ -768,7 +767,8 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
         });
         setLeaderboardData(leaderboardWithProfileData);
       } catch (error) {
-        console.error('Error fetching leaderboard data:', error);
+        setLeaderboardData(undefined);
+        LogError(Module.Citizens, 'Error fetching leaderboard data:', error);
       }
     }
 
