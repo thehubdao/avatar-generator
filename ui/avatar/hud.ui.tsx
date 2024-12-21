@@ -118,9 +118,21 @@ export default function HudUI({
           }
         </>}
         {
-          <div className={`fixed bottom-0 left-0 w-screen bg-slate-100 ${editModeSelected ? 'h-64' : ' h-0'} transition-all duration-300`}>
+          <div className={`fixed bottom-0 left-0 w-full bg-slate-100  dark:bg-citizens-dark ${editModeSelected ? 'h-64' : ' h-0'} transition-all duration-300`}>
 
-            <div className="w-full">
+            <div className="relative w-full">
+
+              {
+                editModeSelected &&
+                <div className="absolute bottom-full w-full flex justify-between gap-6 px-6">
+                  <AGButton full onClickEvent={() => onClickBackButton()}>
+                    <p>GO BACK</p>
+                  </AGButton>
+                  <AGButton full onClickEvent={() => setIsSaveModalOpen(true)}>
+                    <p>SAVE</p>
+                  </AGButton>
+                </div>
+              }
 
               {/* FEATURES SELECTOR */}
               <div className="w-full">
@@ -129,12 +141,12 @@ export default function HudUI({
                   activeOpc={selectedCategory}
                   handleClick={(value: string) => onCategoryTypeChange(value)}
                 />
-                <div className="flex text-gray-normal mx-4 items-center">
+                <div className="flex text-gray-normal dark:text-gray-light mx-4 items-center">
                   <HudFeatureTitleUI selectedFeature={RemovedAcc(selectedCategory)} size="small" />
                   <AGButton nm fit onClickEvent={() => setShouldShowColorSelectorModal(true)}>
                     <div className="w-full flex justify-center items-center gap-3 text-xs font-semibold">
                       <p>SKIN</p>
-                      <div className="shadow-flat-soft h-7 w-7 rounded-sm p-1">
+                      <div className="shadow-flat-soft dark:shadow-citizens-input h-7 w-7 rounded-sm p-1">
                         <div className="w-full h-full rounded-sm" style={{ backgroundColor: ('#' + skinColor) }} />
                       </div>
                     </div>
@@ -186,21 +198,6 @@ export default function HudUI({
         </div>}
         {/* WRAPPER */}
         <div className={`w-full h-full grid grid-cols-[148px_minmax(100px,_1fr)] ${editModeSelected ? 'opacity-100 delay-500 duration-500' : 'opacity-0 hidden duration-200'} transition-all`}>
-          {/* SAVE MODAL */}
-          {isSaveModalOpen &&
-            <Modal handleClose={() => setIsSaveModalOpen(false)} modalStyles="!w-[492px]">
-              <div className="grid justify-items-center">
-                <div className="text-center text-white grid gap-4">
-                  <p className="font-bold text-2xl">Save This Combination</p>
-                  <p className="text-lg">Are you sure that you want to save this wearable combination? If you are using a custom wearable it will be burnt and you will not be able to use it again on a different Citizen.</p>
-                </div>
-                <div className="w-full grid grid-cols-2 gap-4 pt-8">
-                  <Button label="Go Back" light className="w-full" textStyles="w-full text-center" handleClick={() => setIsSaveModalOpen(false)} />
-                  <Button label="Save" light className="w-full" textStyles="w-full text-center" handleClick={() => {changeView(); setIsSaveModalOpen(false);}} />
-                </div>
-              </div>
-            </Modal>
-          }
           {/* FEATURES SECTION */}
           <div className="h-screen">
             <FeatureSelector
@@ -275,6 +272,22 @@ export default function HudUI({
             </div>
           </ExportButtonUI>
         </div>
+      }
+      {/* MODALS */}
+      {/* SAVE MODAL */}
+      {isSaveModalOpen &&
+        <Modal handleClose={() => setIsSaveModalOpen(false)} modalStyles="w-[90vw] sm:!w-[492px]">
+          <div className="grid justify-items-center">
+            <div className="text-center text-white grid gap-4">
+              <p className="font-bold text-2xl">Save This Combination</p>
+              <p className="text-lg">Are you sure that you want to save this wearable combination? If you are using a custom wearable it will be burnt and you will not be able to use it again on a different Citizen.</p>
+            </div>
+            <div className="w-full grid grid-cols-2 gap-4 pt-8">
+              <Button label="Go Back" light className="w-full" textStyles="w-full text-center" handleClick={() => setIsSaveModalOpen(false)} />
+              <Button label="Save" light className="w-full" textStyles="w-full text-center" handleClick={() => { changeView(); setIsSaveModalOpen(false); }} />
+            </div>
+          </div>
+        </Modal>
       }
     </>
   )
