@@ -2,7 +2,7 @@ import { JsonRpcSigner } from "ethers";
 import { DataBaseDrop } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
-import { useState } from "react";
+import {  useState } from "react";
 import Modal from "./modal.ui";
 import Button from "./button.ui";
 import { useSnackbar } from "../snackbar/snackbar.provider";
@@ -48,13 +48,12 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
     )
   }
 
-
   return <>
     <CampaignCard
       key={drop.id}
       title={drop.name}
       tokenID={drop.owned ? 'Claimed' : undefined}
-      price={drop.owned ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : `PRICE: ${drop.price} ${drop.paymentType}`}
+      price={drop.owned ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : drop.paymentType === PaymentType.TOKEN ? `HOLDING` : `PRICE: ${drop.price} ${drop.paymentType}`}
       chipColor={drop.owned ? undefined : isLock ? 'bg-citizens-yellow' : drop.paymentType === PaymentType.LYX ? 'bg-citizens-red' : 'bg-citizens-blue'}
       blocked={isLock}
       imgSrc={drop.imageUrl}
@@ -89,7 +88,7 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
               :
               <>
                 <p className="font-bold text-2xl">Claim Item:<br />{drop.name}</p>
-                <p className="text-lg">This item will be claimed for the following Price:<br />{drop.price} {drop.paymentType}</p>
+                <p className="text-lg">To claim this item you need to be holding one of these tokens:<br />{drop.holdingAddresses.map(addr => addr.tokenName).join(' or ')}</p>
               </>
             }
           </div>

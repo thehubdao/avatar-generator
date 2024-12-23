@@ -9,7 +9,10 @@ export interface CitizensCollection {
 
 export interface DataBaseDrop {
   holdingCondition: string;
-  holdingAddresses: string[];
+  holdingAddresses: {
+    contractAddress: string;
+    tokenName: string;
+  }[];
   id: string;
   name: string;
   description: string;

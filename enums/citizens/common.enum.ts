@@ -23,6 +23,6 @@ export enum CardSize {
 }
 
 export enum PaymentType {
-  LYX,
-  TOKEN
+  LYX = "LYX",
+  TOKEN = "TOKEN"
 }

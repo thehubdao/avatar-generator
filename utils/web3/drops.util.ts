@@ -25,14 +25,13 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
       const holdingCondition = drop.holdingCondition || '|'; 
       
       const balanceChecks = await Promise.all(
-        drop.holdingAddresses.map(async (tokenAddress) => {
-          const tokenContract = new ethers.Contract(tokenAddress, ClaimableDropABI, provider);
+        drop.holdingAddresses.map(async ({contractAddress}) => {
+          const tokenContract = new ethers.Contract(contractAddress, ClaimableDropABI, provider);
           const tokenBalance = await tokenContract.balanceOf(address);
           return !tokenBalance.isZero();
         })
       );
 
-      // Verificar según la condición
       const hasRequiredTokens = holdingCondition === '&'
         ? balanceChecks.every(Boolean)  
         : balanceChecks.some(Boolean); 
