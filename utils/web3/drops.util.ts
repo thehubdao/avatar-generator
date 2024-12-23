@@ -21,11 +21,24 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
     }
     const drop = drops[0];
 
-    if (drop.paymentType === PaymentType.TOKEN && drop.requiredToken) {
-      const tokenContract = new ethers.Contract(drop.requiredToken, ClaimableDropABI, provider);
-      const tokenBalance = await tokenContract.balanceOf(address);
-      if (tokenBalance.isZero()) {
-        console.error('User does not hold the required token');
+    if (drop.paymentType === PaymentType.TOKEN && drop.holdingAddresses?.length > 0) {
+      const holdingCondition = drop.holdingCondition || '|'; 
+      
+      const balanceChecks = await Promise.all(
+        drop.holdingAddresses.map(async (tokenAddress) => {
+          const tokenContract = new ethers.Contract(tokenAddress, ClaimableDropABI, provider);
+          const tokenBalance = await tokenContract.balanceOf(address);
+          return !tokenBalance.isZero();
+        })
+      );
+
+      // Verificar según la condición
+      const hasRequiredTokens = holdingCondition === '&'
+        ? balanceChecks.every(Boolean)  
+        : balanceChecks.some(Boolean); 
+
+      if (!hasRequiredTokens) {
+        console.error('User does not meet token holding requirements');
         return false;
       }
     }
@@ -34,9 +47,9 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
     const approveClaimFunction = dropContract.interface.encodeFunctionData('approveClaim', [[address]]);
 
     const tx = await (universalProfile.connect(EOA) as Contract).execute(
-      0, // OPERATION_CALL
+      0,
       drop.contractAddress,
-      0, // value
+      0,
       approveClaimFunction
     );
 

@@ -8,6 +8,8 @@ export interface CitizensCollection {
 }
 
 export interface DataBaseDrop {
+  holdingCondition: string;
+  holdingAddresses: string[];
   id: string;
   name: string;
   description: string;
