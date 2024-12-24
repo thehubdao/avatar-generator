@@ -28,7 +28,7 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
         drop.holdingAddresses.map(async ({contractAddress}) => {
           const tokenContract = new ethers.Contract(contractAddress, ClaimableDropABI, provider);
           const tokenBalance = await tokenContract.balanceOf(address);
-          return !tokenBalance.isZero();
+          return tokenBalance !== BigInt(0);
         })
       );
 

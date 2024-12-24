@@ -88,7 +88,12 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
               :
               <>
                 <p className="font-bold text-2xl">Claim Item:<br />{drop.name}</p>
-                <p className="text-lg">To claim this item you need to be holding one of these tokens:<br />{drop.holdingAddresses.map(addr => addr.tokenName).join(' or ')}</p>
+                <p className="text-lg">
+                  {drop.paymentType === PaymentType.LYX 
+                    ? `To claim this item you need to pay ${drop.price} ${drop.paymentType}`
+                    : `To claim this item you need to be holding one of these tokens:\n${drop.holdingAddresses.map(addr => addr.tokenName).join(' or ')}`
+                  }
+                </p>
               </>
             }
           </div>
