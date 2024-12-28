@@ -647,7 +647,6 @@ async function saveCombination() {
      successfulBurns++
     }
 
-    // Si hubo burns exitosos, notificar al servidor
     if (successfulBurns > 0) {
       try {
         await fetch('/api/v1/burns', {

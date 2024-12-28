@@ -27,13 +27,14 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
   const claimHandler = async () => {
     setIsClaiming(true);
     const isSuccess = await onClaim();
+    console.log('isSuccess', isSuccess);
     if (isSuccess) {
       showSnackbar(
         <p>The item &quot;{drop.name}&quot; has been successfully claimed!.</p>
       )
     } else {
       showSnackbar(
-        <p>Something went wrong, the item was not claimed. Try again later.</p>
+        <p>You are not holding the required tokens to claim this item. Or don't have enough LYX to pay for it.</p>
       )
     }
     setIsOpenClaimModal(false);
