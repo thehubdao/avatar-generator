@@ -13,7 +13,9 @@ export enum CollectionSections {
 export enum TheHubSocialLinks {
   SocialX = 'https://x.com/thehub_dao',
   SocialInstagram = 'https://www.instagram.com/thehub_dao/',
-  Discord = 'https://discord.gg/3KvUpQayxp'
+  Discord = 'https://discord.gg/3KvUpQayxp',
+  Telegram = 'https://t.me/+nwDvGtb1iT4zNjY6',
+  CommonGround = 'https://app.cg/c/thehub/'
 }
 
 export enum CardSize {

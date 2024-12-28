@@ -14,7 +14,7 @@ export default function ColorItemUI({ color, isActive, handleChangeColor }: Colo
 
   return (
     <div
-      className={'cursor-pointer rounded-md transition duration-200 ease-in-out w-[50px] h-[50px] flex items-center justify-center mx-3 ' + (isActive ? 'shadow-inset-medium' : 'shadow-flat-medium')}
+      className={'cursor-pointer rounded-md transition duration-200 ease-in-out w-[50px] h-[50px] flex items-center justify-center mx-3 ' + (isActive ? 'shadow-inset-medium dark:shadow-flat-hard-dark' : 'shadow-flat-medium dark:shadow-flat-soft-dark')}
       onClick={(event) => selectColor(event)}
       key={color}
     >

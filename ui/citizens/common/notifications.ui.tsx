@@ -36,7 +36,7 @@ function FormatRelativeTime(timestamp: string): string {
   return `${years} ${years === 1 ? 'year' : 'years'}`;
 }
 
-export default function Notifications({address}: {address: string}) {
+export default function Notifications({ address }: { address: string }) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -44,7 +44,7 @@ export default function Notifications({address}: {address: string}) {
     async function fetchNotifications() {
       if (address) {
         const fetchedNotifications = await GetUserNotifications(address);
-        
+
         // Aplicar el formato de tiempo relativo a cada notificación
         const formattedNotifications = fetchedNotifications.map(notification => ({
           ...notification,
@@ -60,7 +60,7 @@ export default function Notifications({address}: {address: string}) {
 
   async function deleteNotification(index: number) {
     const notificationToDelete = notifications[index];
-    
+
     if (notificationToDelete.id) {
       try {
         await DeleteUserNotification(address, notificationToDelete.id);
@@ -76,19 +76,25 @@ export default function Notifications({address}: {address: string}) {
   }
 
   return (
-    <div className="fixed bottom-4 right-4">
-      <Button label={`/// ${notifications.length > 0 ? `${notifications.length} ` : 'no '}notifications`} handleClick={() => {setIsOpen(!isOpen)}} withIcon className="w-[376px]" textStiles="text-start pl-2">
-        {isOpen ? <div className="w-[14px] h-[2px] bg-white" />:<PlusSVG />}
-      </Button>
-      {isOpen &&
-        <div className="grid gap-3 pt-3 max-h-[276px] overflow-hidden">
-          {
-            notifications.map((el, i) => (
-              <NotificationCard key={i} title={el.title} points={el.points} time={el.time} deleteSelf={() => deleteNotification(i)} />
-            ))
-          }
+    <>
+      {isOpen ?
+        <div className="fixed top-24 md:top-auto md:bottom-4 md:right-4 w-full md:w-auto px-6 md:px-0">
+          <Button label={`/// ${notifications.length > 0 ? `${notifications.length} ` : 'no '}notifications`} handleClick={() => { setIsOpen(!isOpen) }} withIcon className="w-full lg:w-[376px]" textStyles="text-start text-sm lg:text-lg lg:pl-2">
+            <div className="w-[14px] h-[2px] bg-white" />
+          </Button>
+          <div className="grid gap-3 pt-3 max-h-[276px] overflow-hidden">
+            {
+              notifications.map((el, i) => (
+                <NotificationCard key={i} title={el.title} points={el.points} time={el.time} deleteSelf={() => deleteNotification(i)} />
+              ))
+            }
+          </div>
         </div>
+        :
+        <Button label={`/// ${notifications.length > 0 ? `${notifications.length} ` : 'no '}notifications`} handleClick={() => { setIsOpen(!isOpen) }} withIcon className="fixed bottom-4 right-4 min-w-fit lg:w-[376px]" textStyles="text-start text-sm lg:text-lg lg:pl-2">
+          {isOpen ? <div className="w-[14px] h-[2px] bg-white" /> : <PlusSVG />}
+        </Button>
       }
-    </div>
+    </>
   )
 }

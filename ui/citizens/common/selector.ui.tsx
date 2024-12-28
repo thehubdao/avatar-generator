@@ -6,12 +6,14 @@ import { campaignLabels } from "../../../constants/lukso/labels.constant";
 
 interface SelectorUIProps {
   list?: string[];
+  areCampaigns?: boolean;
   label?: string;
   selection?: string;
+  dropDownPosition?: string;
   selectionHandler: (value?: string) => void;
 }
 
-export default function SelectorUI({ list, selection, label = 'CHOOSE', selectionHandler }: SelectorUIProps) {
+export default function SelectorUI({ list, areCampaigns, selection, label = 'CHOOSE', dropDownPosition,  selectionHandler }: SelectorUIProps) {
   const menuDOM = useRef<HTMLDivElement>(null);
   
   const [isButtonHovered, setIsButtonHovered] = useState<boolean>(false);
@@ -27,22 +29,22 @@ export default function SelectorUI({ list, selection, label = 'CHOOSE', selectio
     <div ref={menuDOM} className="relative">
       <div onMouseEnter={() => setIsButtonHovered(true)}
         onMouseLeave={() => setIsButtonHovered(false)}>
-        <Button label={label} handleClick={() => setIsSelectorOpen(!isSelectorOpen)} withIcon textStiles="px-4">
-          <div className={`${isSelectorOpen ? 'rotate-180' : ''}`}>
+        <Button label={label} className="min-w-fit md:min-w-[214px]" handleClick={() => setIsSelectorOpen(!isSelectorOpen)} withIcon textStyles="sm:px-4 text-xs sm:text-lg" iconStyles={'w-[23px] sm:w-10 h-[16px] sm:h-[27px]'} >
+          <div className={`scale-75 sm:scale-100 ${isSelectorOpen ? 'rotate-180' : ''}`}>
             <ArrowSVG className="fill-white" />
           </div>
         </Button>
       </div>
-      <p className="absolute top-full right-0 px-2 mt-1 text-xs text-white/20">{label === 'CHOOSE CAMPAIGN' ? campaignLabels[selection?.toLowerCase() as keyof typeof campaignLabels]?.dropdownName : selection}</p>
+      <p className="absolute top-full left-0 sm:left-auto sm:right-0 px-2 sm:mt-1 text-xs text-white/20">{areCampaigns ? campaignLabels[selection?.toLowerCase() as keyof typeof campaignLabels]?.dropdownName : selection}</p>
       {isSelectorOpen &&
-        <div className="absolute top-full w-full max-h-96 overflow-y-auto rounded-2xl bg-white mt-2 z-10">
+        <div className={`absolute top-full ${dropDownPosition} w-48 md:w-full max-h-96 overflow-y-auto rounded-2xl bg-white mt-2 z-10`}>
           {
             list?.map((el, index) => (
               <div key={index} className="py-2 px-4 cursor-pointer hover:bg-citizens-gray" onClick={() => {
                 selectionHandler(el);
                 setIsSelectorOpen(false);
               }}>
-                <p className="text-center text-sm truncate">{label === 'CHOOSE CAMPAIGN' ? campaignLabels[el.toLowerCase() as keyof typeof campaignLabels]?.dropdownName : el}</p>
+                <p className="text-center text-sm truncate">{areCampaigns ? campaignLabels[el.toLowerCase() as keyof typeof campaignLabels]?.dropdownName : el}</p>
               </div>
             ))
           }

@@ -17,7 +17,7 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
   const followUserHandler = async () => {
     setIsLoading(true);
     const isSuccess = await onFollowUser(user.address);
-    
+
     if (!isSuccess) {
       showSnackbar(
         <p>Follow failed, try again later.</p>
@@ -41,7 +41,7 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   return !user.isFollowing ? <div
-    className={`h-11 w-16 flex justify-center items-center rounded-[20px] cursor-pointer mr-8 bg-white`}
+    className={`h-7 sm:h-11 w-8 sm:w-16 flex justify-center items-center rounded-[20px] cursor-pointer mr-2 lg:mr-8 bg-white`}
     onClick={() => {
       if (!user.isFollowing) {
         setIsLoading(true);
@@ -50,12 +50,14 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
     }}
   >
     {isLoading ?
-      <div className="w-4 h-4 border-t border-citizens-dark rounded-full animate-spin" />
+      <div className="w-2 sm:w-2 h-2 sm:h-4 border-t border-citizens-dark rounded-full animate-spin" />
       :
-      <AddUserSVG />
+      <div className="scale-75">
+        <AddUserSVG />
+      </div>
     }
   </div> : <div
-    className={`h-11 w-16 flex justify-center items-center rounded-[20px] cursor-pointer mr-8 bg-white`}
+    className={`h-7 sm:h-11 w-8 sm:w-16 flex justify-center items-center rounded-[20px] cursor-pointer mr-2 lg:mr-8 bg-white`}
     onClick={() => {
       if (user.isFollowing) {
         setIsLoading(true);
@@ -64,9 +66,11 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
     }}
   >
     {isLoading ?
-      <div className="w-4 h-4 border-t border-citizens-dark rounded-full animate-spin" />
-      : // TODO: Add SVG
-      <RemoveUserSVG />
+      <div className="w-2 sm:w-4 h-2 sm:h-4 border-t border-citizens-dark rounded-full animate-spin" />
+      :
+      <div className="scale-75">
+        <RemoveUserSVG  />
+      </div>
     }
   </div>
 }

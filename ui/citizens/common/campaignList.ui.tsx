@@ -21,9 +21,12 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
         spaceBetween={40}
         slidesPerView={'auto'}
         centeredSlides={true}
-        initialSlide={1}
-        onSlideChange={() => {}}
-        onSwiper={() => {}}
+        initialSlide={0}
+        breakpoints={{
+          1024: {
+            initialSlide: 1
+          },
+        }}
         className="collection_swiper"
       >
         {
@@ -38,11 +41,10 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
                   imgSrc={el.image}
                   imgAlt={el.name}
                   overlayText={
-               "LOG IN"
+                    "LOG IN"
                   }
                 />
               </ConnectWeb3Button>
-              {/* <CampaignCard title={el.name} imgSrc={el.image} imgAlt={el.name} overlayText="LOG IN" handleClick={() => {if(handleCardSelection) handleCardSelection()}}/> */}
             </SwiperSlide>
           ))
         }

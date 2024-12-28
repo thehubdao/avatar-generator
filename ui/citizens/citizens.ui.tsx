@@ -22,7 +22,7 @@ interface CitizensUIProps {
   features?: IndexFeatureInterface[];
   exportModel: () => Promise<void>;
   address: string;
-  leaderboardData: LeaderboardEntry[];
+  leaderboardData?: LeaderboardEntry[];
   signer: JsonRpcSigner | null;
   handleFollowUser: (address: string) => Promise<boolean>;
   handleUnfollowUser: (address: string) => Promise<boolean>;
@@ -63,7 +63,7 @@ export default function CitizensUI({claimableDrops, currentSection,  currentColl
               <p className="text-lg">You do not own any<br />Lukso Citizens.</p>
             </div>
             <div className="grid gap-4 pt-8">
-              <Button label="Get one here" textStiles="w-full text-center" light handleClick={() => { }} />
+              <Button label="Get one here" textStyles="w-full text-center" light handleClick={() => { }} />
             </div>
           </div>
         </Modal>
