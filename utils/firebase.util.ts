@@ -29,7 +29,7 @@ import { CampaignParameters } from "../interfaces/common.interface";
 import { ParameterNameType } from "../types/firebase.type";
 import { Client } from '../enums/client.enum'
 import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
-import { deleteDoc, doc, getDoc, orderBy, Timestamp } from 'firebase/firestore';
+import { deleteDoc, doc, getDoc, increment, orderBy, Timestamp } from 'firebase/firestore';
 import jwt from 'jsonwebtoken';
 import { GetFollowerCounts } from "./web3/lukso.util";
 import { XPReward } from "../constants/lukso/xp.constant";
@@ -53,7 +53,7 @@ export const AVATAR_DOWNLOADED_STATUS = {
   NotDownloaded: "n",
 } as const;
 
-class FirebaseUtil {
+export class FirebaseUtil {
   private static _instance: FirebaseUtil;
   private _app: FirebaseApp | null;
   private _db: Firestore | null;
@@ -1335,4 +1335,55 @@ function GenerateHoldingsMessage(
 
   
   return message;
+}
+
+export async function TrackUserLogin(address: string): Promise<Result<boolean>> {
+  try {
+    const db = await FirebaseUtil.Instance().DB();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dateString = today.toISOString().split('T')[0];
+
+    // Registro único diario por usuario (para usuarios activos)
+    const userLoginRef = doc(db, 'statistics', 'dailyLogins', 'users', address, 'dates', dateString);
+    const userLoginDoc = await getDoc(userLoginRef);
+
+    if (!userLoginDoc.exists()) {
+      // Primera vez en el día - crear registro
+      await setDoc(userLoginRef, {
+        date: dateString,
+        firstLogin: Timestamp.now(),
+        loginCount: 1,
+        lastLogin: Timestamp.now()
+      });
+
+      // Actualizar contador global de usuarios únicos diarios
+      const globalLoginRef = doc(db, 'statistics', 'dailyLogins', 'dates', dateString);
+      await setDoc(globalLoginRef, {
+        uniqueUsers: increment(1),
+        totalLogins: increment(1),
+        date: dateString,
+        lastUpdated: Timestamp.now()
+      }, { merge: true });
+    } else {
+      // Usuario ya registrado hoy - actualizar contador de logins
+      await setDoc(userLoginRef, {
+        loginCount: increment(1),
+        lastLogin: Timestamp.now()
+      }, { merge: true });
+
+      // Actualizar solo el contador total de logins global
+      const globalLoginRef = doc(db, 'statistics', 'dailyLogins', 'dates', dateString);
+      await setDoc(globalLoginRef, {
+        totalLogins: increment(1),
+        lastUpdated: Timestamp.now()
+      }, { merge: true });
+    }
+
+    return { success: true, value: true };
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error tracking user login: ${err.message}`);
+    return { success: false, errMessage: err.message, errCode: err.code };
+  }
 }
