@@ -54,7 +54,7 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
       key={drop.id}
       title={drop.name}
       tokenID={drop.owned ? 'Claimed' : undefined}
-      price={drop.owned ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : drop.paymentType === PaymentType.TOKEN ? `ELEGIBLE` : `PRICE: ${drop.price} ${drop.paymentType}`}
+      price={drop.owned ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : drop.paymentType === PaymentType.TOKEN ? `TOKEN-GATED` : `PRICE: ${drop.price} ${drop.paymentType}`}
       chipColor={drop.owned ? undefined : isLock ? 'bg-citizens-yellow' : drop.paymentType === PaymentType.LYX ? 'bg-citizens-red' : 'bg-citizens-blue'}
       blocked={isLock}
       imgSrc={drop.imageUrl}
