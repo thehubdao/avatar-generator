@@ -12,6 +12,7 @@ import { JsonRpcSigner } from "ethers";
 import Modal from "./common/modal.ui";
 import Button from "./common/button.ui";
 import { DataBaseDrop } from "../../interfaces/citizens.interface";
+import { useEffect, useState } from "react";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -32,6 +33,12 @@ interface CitizensUIProps {
 
 
 export default function CitizensUI({ claimableDrops, currentSection, currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleClaim, handleUnfollowUser }: CitizensUIProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  useEffect(() => {
+    if (!loadedTokens)
+      setIsModalOpen(true)
+  }, [loadedTokens])
 
   return (
     <>
@@ -56,8 +63,8 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
             handleClaim={handleClaim} />
         </>
       )}
-      {!loadedTokens &&
-        <Modal modalStyles="!min-h-fit" handleClose={() => { }}>
+      {isModalOpen &&
+        <Modal modalStyles="!min-h-fit" handleClose={() => { setIsModalOpen(false) }}>
           <div className="grid justify-center">
             <div className="grow text-center text-white grid gap-4">
               <p className="font-bold text-2xl">Backpack Empty</p>
