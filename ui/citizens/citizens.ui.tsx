@@ -31,14 +31,15 @@ interface CitizensUIProps {
 }
 
 
-export default function CitizensUI({claimableDrops, currentSection,  currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleClaim, handleUnfollowUser  }: CitizensUIProps) {
+export default function CitizensUI({ claimableDrops, currentSection, currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleClaim, handleUnfollowUser }: CitizensUIProps) {
+
   return (
     <>
       {currentSection === CitizensSections.View && (
         <>
           {/* details */}
           {features &&
-            <DetailsUI data={features} handleDownload={() => exportModel()} imgUrl={currentCollection.tokenMetadata.imageUrl} loading={isSavingCombination}/>
+            <DetailsUI data={features} handleDownload={() => exportModel()} imgUrl={currentCollection.tokenMetadata.imageUrl} loading={isSavingCombination} />
           }
           {/* notifications */}
           <Notifications address={address} />
@@ -50,12 +51,12 @@ export default function CitizensUI({claimableDrops, currentSection,  currentColl
             loadedTokens={loadedTokens}
             currentCollection={currentCollection}
             updateCollection={updateCollection}
-            signer={signer} 
+            signer={signer}
             claimableDrops={claimableDrops}
-            handleClaim={handleClaim}/>
+            handleClaim={handleClaim} />
         </>
       )}
-      {loadedTokens && loadedTokens?.length <= 0 &&
+      {!loadedTokens &&
         <Modal modalStyles="!min-h-fit" handleClose={() => { }}>
           <div className="grid justify-center">
             <div className="grow text-center text-white grid gap-4">
@@ -63,14 +64,20 @@ export default function CitizensUI({claimableDrops, currentSection,  currentColl
               <p className="text-lg">You do not own any<br />Lukso Citizens.</p>
             </div>
             <div className="grid gap-4 pt-8">
-              <Button label="Get one here" textStyles="w-full text-center" light handleClick={() => { }} />
+              <Button label="Get one here" textStyles="w-full text-center" light handleClick={() => {
+
+                const a = document.createElement('a');
+                a.target = "_blank";
+                a.href = 'https://universal.page/collections/lukso/0x74654920356257981f6b63a65ad72d4d9bc21929';
+                a.click()
+              }} />
             </div>
           </div>
         </Modal>
       }
       {currentSection === CitizensSections.LeaderBoard && (
-        <LeaderBoard 
-          leaderboardData={leaderboardData} 
+        <LeaderBoard
+          leaderboardData={leaderboardData}
           onFollowUser={handleFollowUser}
           onUnfollowUser={handleUnfollowUser}
         />
