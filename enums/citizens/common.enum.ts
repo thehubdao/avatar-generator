@@ -2,7 +2,8 @@ export enum CitizensSections {
   View,
   Collection,
   LeaderBoard,
-  Play
+  Play,
+  Mint
 }
 
 export enum CollectionSections {
