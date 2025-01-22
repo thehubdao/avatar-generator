@@ -1,0 +1,137 @@
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import SocialButtons from "../common/socialButtons.ui";
+import Button from "../common/button.ui";
+import ArrowMintSVG from "../common/SVG/arrowMintSVG.ui";
+import Modal from "../common/modal.ui";
+import Loader from "../../lukso/common/loader.ui";
+import CheckedSVG from "../common/SVG/checkedSVG.ui";
+
+interface MintUIProps {
+  imgUrl?: string;
+  avatarDescription?: string;
+  campaignName?: string;
+  campaignDescription?: string;
+  price?: number;
+  supply?: number;
+}
+
+export default function MintUI({ 
+  imgUrl = 'https://lipsum.app/random/500x500',
+  avatarDescription = '"Kum Kum" inspired the nickname of the football legend Kun Agüero. Today, we honor his nickname and celebrate his career by presenting "KUMAI," a FREE-to-claim, 3D interoperable avatar that showcases the future of Web3 gaming and the internet',
+  campaignName = 'KUMAI CITIZENS',
+  campaignDescription = 'Minting a KUMI unlocks the gateway to the Fitchin Universe. It’s your chance to own a unique visual identity that’s truly yours. Dive in, create epic content, flex your avatar, climb the leaderboard, and snag exclusive wearables to stand out in style.',
+  price,
+  supply }: MintUIProps) {
+  const [isLoadedImage, setIsLoadedImage] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isMinting, setIsMinting] = useState<boolean>(false);
+  const [isMinted, setIsMinted] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isMinting) {
+      setTimeout(() => {
+        setIsMinted(true);
+      }, 3000);
+    }
+  }, [isMinting])
+  return (
+    <>
+      {!isModalOpen &&
+        <>
+          {/* AVATAR DESCRIPTION */}
+          <div className="hidden xl:block fixed top-24 left-6 md:w-[462px] h-[75vh] 2xl:h-[85vh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto">
+            <div className="w-full pb-8">
+              <div className="relative w-full h-[30vh] md:h-[250px] 2xl:h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
+                <Image src={imgUrl} alt={'Avatar detail'} fill className={`object-cover ${isLoadedImage ? 'opacity-100' : 'opacity-0'} transition-opacity`} onLoadingComplete={(img) => {
+                  if (img) setIsLoadedImage(true);
+                }} />
+                {
+                  !isLoadedImage &&
+                  <div className="absolute w-8 h-8 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <div className="w-full h-full rounded-full border-t-2 border-white animate-spin" />
+                  </div>
+                }
+              </div>
+            </div>
+            <div>
+              <p className="text-center 2xl:text-xl">{avatarDescription}</p>
+            </div>
+          </div >
+          {/* CAMPAIGN DESCRIPTION */}
+          <div className="fixed bottom-6 xl:bottom-auto top-auto xl:top-24 right-6 xl:right-6 md:w-[462px] h-fit xl:h-[75vh] 2xl:h-[85vh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto" >
+            <div className="relative h-full flex flex-col justify-between gap-4 xl:gap-0 2xl:py-16">
+              <h1 className="text-center text-2xl font-semibold">
+                {campaignName}
+              </h1>
+              <p className="hidden lg:block text-center text-xs xl:text-base">
+                {campaignDescription}
+              </p>
+              <SocialButtons className='w-full flex justify-center gap-4 scale-75 order-4 xl:order-none' />
+              <div className="text-center font-semibold">
+                <p className="xl:text-lg">PUBLIC MINT</p>
+                <p>{price} ETH</p>
+              </div>
+              <div className="xl:hidden w-full flex flex-col items-center" >
+                <Button label="Mint" withIcon light handleClick={() => { setIsModalOpen(true) }} textStyles="text-start text-xl px-8">
+                  <div className="pr-8">
+                    <ArrowMintSVG />
+                  </div>
+                </Button>
+                <p className="font-medium text-center pt-4 text-white">Current Supply: {supply}</p>
+              </div >
+            </div>
+          </div >
+          {/* MINT BUTTON */}
+          < div className="hidden xl:block fixed bottom-6 left-1/2 -translate-x-1/2" >
+            <Button label="Mint" withIcon light handleClick={() => { setIsModalOpen(true) }} textStyles="text-start text-xl px-8">
+              <div className="pr-8">
+                <ArrowMintSVG />
+              </div>
+            </Button>
+            <p className="font-medium text-center pt-4 text-white">Current Supply: {supply}</p>
+          </div >
+        </>
+      }
+      {
+        isModalOpen && !isMinting &&
+        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => setIsModalOpen(false)}>
+          <div className="grid justify-items-center">
+            <div className="text-center text-white grid gap-4">
+              <p className="font-bold text-2xl">Claim your citizen</p>
+              <p className="text-lg">Are you sure that you want to claim this citizen?</p>
+            </div>
+            <div className="flex gap-4 pt-8">
+              <Button label="Go Back" light handleClick={() => { setIsModalOpen(false) }} />
+              <Button label="Claim" light handleClick={() => { setIsMinting(true) }} />
+            </div>
+          </div>
+        </Modal>
+      }
+      {
+        isMinting && !isMinted &&
+        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => { }}>
+          <div className="grid justify-items-center">
+            <Loader size={69} />
+            <div className="text-center text-white grid gap-4 pt-4">
+              <p className="text-lg">Synthesizing your unique digital genome...<br />Your custom avatar is being created!</p>
+            </div>
+          </div>
+        </Modal>
+      }
+      {
+        isMinted &&
+        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => { }}>
+          <div className="grid justify-items-center">
+            <div className="text-center text-white grid gap-4 pb-4">
+              <p className="font-bold text-2xl">Congratulations!</p>
+              <p className="text-lg">Your citizen has been claimed!</p>
+            </div>
+            <CheckedSVG />
+          </div>
+        </Modal>
+      }
+    </>
+  )
+}
+
