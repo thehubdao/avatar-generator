@@ -853,7 +853,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           </div>
           {/* CANVAS */}
           <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-            {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View && userWearables && <AvatarEditor
+            {currentCollection.combination && campaignParams && campaignParams.campaign && (currentSection === CitizensSections.View || currentSection === CitizensSections.Mint) && userWearables && <AvatarEditor
 
               avatarBasePath={
                 campaignParams.armature
@@ -924,7 +924,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       {/* HEADER */}
       <div className="fixed inset-0 w-full h-fit flex justify-between items-center pt-8 px-6">
         {/* LOGO THE HUB */}
-        <div className="w-fit h-fit">
+        <div className="w-fit h-fit" onClick={() => setCurrentSection(CitizensSections.Mint)}>
           <LogoTheHub />
         </div>
         {/* NAVBAR */}
@@ -942,7 +942,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
                   <div className='w-1/3 h-px bg-white'></div>
                 </div>
               </div>
-              <div className='xl:flex gap-4 pb-8 xl:pb-0'>
+              <div className='xl:flex gap-4 pb-8 xl:pb-0 px-4'>
                 <Button label="homebase" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                   if (currentSection !== CitizensSections.View) {
                     setIsLoading(true);
