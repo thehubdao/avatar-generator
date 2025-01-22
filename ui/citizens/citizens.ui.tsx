@@ -13,6 +13,7 @@ import Modal from "./common/modal.ui";
 import Button from "./common/button.ui";
 import { DataBaseDrop } from "../../interfaces/citizens.interface";
 import { useEffect, useState } from "react";
+import MintUI from "./sections/mint.ui";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -91,6 +92,9 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
       )}
       {currentSection === CitizensSections.Play &&
         <Play />
+      }
+      {currentSection === CitizensSections.Mint &&
+        <MintUI />
       }
     </>
   );
