@@ -37,8 +37,10 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
+    console.log('loadedTokens', loadedTokens)
     if (loadedTokens && loadedTokens.length === 0)
-      setIsModalOpen(true)
+        setIsModalOpen(true)
+      
   }, [loadedTokens])
 
   return (

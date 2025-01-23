@@ -141,6 +141,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       if (tokenIds.length <= 0) {
         setCurrentSection(CitizensSections.Collection);
         setIsLoading(false);
+        setLoadedTokens([])
       } else {
         setTokenIdList(tokenIds)
       }
@@ -149,40 +150,39 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }, [walletAddress])
 
   useEffect(() => {
+    if (!tokenIdList) return
 
     const loadTokenMetadata = async () => {
-      if (!tokenIdList) return setLoadedTokens([]) 
-      if (tokenIdList) {
-        let isFirstToken = false;
-
-        try {
-          tokenIdList.forEach(async (tokenIdMetadata) => {
-            try {
-              if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
-                throw new Error('Invalid IPFS hash format');
-              }
-              const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
-
-              if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
-                updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
-                isFirstToken = true;
-              }
-
-              setLoadedTokens(prevTokens => {
-                if (!prevTokens) return [tokenMetadata];
-                return [...prevTokens, tokenMetadata];
-              });
-            } catch (error) {
-              LogError(Module.Citizens, `Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
+      let isFirstToken = false;
+      try {
+        if (tokenIdList.length === 0) return setLoadedTokens([])
+        tokenIdList.forEach(async (tokenIdMetadata) => {
+          try {
+            if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
+              throw new Error('Invalid IPFS hash format');
             }
-          })
+            const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
+
+            if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
+              updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
+              isFirstToken = true;
+            }
+
+            setLoadedTokens(prevTokens => {
+              if (!prevTokens) return [tokenMetadata];
+              return [...prevTokens, tokenMetadata];
+            });
+          } catch (error) {
+            LogError(Module.Citizens, `Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
+          }
+        })
 
 
 
-        } catch (error) {
-          LogError(Module.Citizens, 'Error loading token metadata:', error);
-        }
+      } catch (error) {
+        LogError(Module.Citizens, 'Error loading token metadata:', error);
       }
+
     };
 
     loadTokenMetadata();
