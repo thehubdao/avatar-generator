@@ -12,11 +12,13 @@ export default async function Handler(req: NextApiRequest, res: NextApiResponse)
       ]);
 
       const updatedLeaderboardData = await Promise.all(
-        leaderboardData.map(async (entry) => ({
-          ...entry,
-          citizensHoldings: await GetCitizensHoldings(entry.address),
-          wearablesHoldings: await GetWearablesHoldings(entry.address, contractAddresses)
-        }))
+        leaderboardData
+          .filter(entry => entry.address.toLowerCase().startsWith('0x'))
+          .map(async (entry) => ({
+            ...entry,
+            citizensHoldings: await GetCitizensHoldings(entry.address),
+            wearablesHoldings: await GetWearablesHoldings(entry.address, contractAddresses)
+          }))
       );
 
       res.status(200).json(updatedLeaderboardData);
