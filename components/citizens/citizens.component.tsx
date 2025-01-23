@@ -151,6 +151,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   useEffect(() => {
 
     const loadTokenMetadata = async () => {
+      if (!tokenIdList) return setLoadedTokens([]) 
       if (tokenIdList) {
         let isFirstToken = false;
 
