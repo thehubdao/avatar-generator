@@ -13,6 +13,7 @@ import Modal from "./common/modal.ui";
 import Button from "./common/button.ui";
 import { DataBaseDrop } from "../../interfaces/citizens.interface";
 import { useEffect, useState } from "react";
+import { CandyMachineMint } from "../../components/web3/Solana/CandyMachineMint";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -71,13 +72,14 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
               <p className="text-lg">You do not own any<br />Lukso Citizens.</p>
             </div>
             <div className="grid gap-4 pt-8">
-              <Button label="Get one here" textStyles="w-full text-center" light handleClick={() => {
+{/*               <Button label="Get one here" textStyles="w-full text-center" light handleClick={() => {
 
                 const a = document.createElement('a');
                 a.target = "_blank";
                 a.href = 'https://universal.page/collections/lukso/0x74654920356257981f6b63a65ad72d4d9bc21929';
                 a.click()
-              }} />
+              }} /> */}
+              <CandyMachineMint></CandyMachineMint>
             </div>
           </div>
         </Modal>
