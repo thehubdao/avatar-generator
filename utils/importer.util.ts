@@ -26,7 +26,6 @@ class ImporterUtil {
     const scene = SceneUtil.Instance()
     dracoLoader.setDecoderPath("/libs/draco/")
     ktx2Loader.setTranscoderPath("/libs/basis/")
-    console.log("renderer: ", scene.renderer)
     if(scene.renderer){
       ktx2Loader.detectSupport(scene.renderer)
     }
@@ -118,7 +117,6 @@ export async function FirebaseGltfModel(path: string, campaign?: string): Promis
 }
 
 export async function GetGltfModel(path: string): Promise<Result<GLTF>> {
-  console.log("AVATER RENDERING: ", IsWebUrl(path))
   if (IsWebUrl(path))
     return FetchGltfModel(path);
   else
