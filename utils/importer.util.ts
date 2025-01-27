@@ -1,6 +1,7 @@
 import {GLTF, GLTFLoader} from "three/examples/jsm/loaders/GLTFLoader"
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js"
 import { KTX2Loader } from "three/examples/jsm/loaders/KTX2Loader.js"
+import { MeshoptDecoder } from "three/examples/jsm/libs/meshopt_decoder.module"
 import {GetFile} from "./firebase.util";
 import {IsWebUrl, LogError} from "./common.util";
 import SceneUtil from "./scene.utils";
@@ -24,6 +25,7 @@ class ImporterUtil {
     const dracoLoader = new DRACOLoader()
     const ktx2Loader = new KTX2Loader()
     const scene = SceneUtil.Instance()
+    loader.setMeshoptDecoder(MeshoptDecoder)
     dracoLoader.setDecoderPath("/libs/draco/")
     ktx2Loader.setTranscoderPath("/libs/basis/")
     if(scene.renderer){
