@@ -22,11 +22,6 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
         slidesPerView={'auto'}
         centeredSlides={true}
         initialSlide={Math.floor(collections.length/2)}
-        breakpoints={{
-          1024: {
-            initialSlide: 1
-          },
-        }}
         className="collection_swiper"
       >
         {
