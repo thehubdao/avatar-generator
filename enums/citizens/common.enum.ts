@@ -19,6 +19,15 @@ export enum TheHubSocialLinks {
   CommonGround = 'https://app.cg/c/thehub/'
 }
 
+export enum BackedByLinks {
+  Polygon = 'https://polygonscan.com/',
+  Sandbox = 'https://www.sandbox.game/en/',
+  Decentraland = 'https://decentraland.org/',
+  Chainlink = 'https://chain.link/',
+  Brinc = 'https://www.brinc.io/',
+  Ocean = 'https://app.oceanportocol.xyz/en/?utm_source=bing_original_site=successfully&utm_source=bing&utm_medium=cpc&utm_term=trading_platforms#'
+}
+
 export enum CardSize {
   Small,
   Medium,

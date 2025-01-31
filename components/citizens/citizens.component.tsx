@@ -662,10 +662,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     }
   }
 
-  const handleLogin = (isSigned: boolean, selectedLoginCampaign: Campaign) => {
-    setSelectedLoginCampaign(selectedLoginCampaign);
+  const handleLogin = (isSigned: boolean, selectedLoginCampaign?: Campaign) => {
+    if (selectedLoginCampaign) setSelectedLoginCampaign(selectedLoginCampaign);
     setIsSigned(isSigned);
-
   }
 
   useEffect(() => {
@@ -918,12 +917,12 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           }
           <LoginUI
             collections={collectionList}
-            setIsSigned={(isSigned: boolean, selectedCampaign: Campaign) => handleLogin(isSigned, selectedCampaign)}
+            setIsSigned={(isSigned: boolean, selectedCampaign?: Campaign) => handleLogin(isSigned, selectedCampaign ?? undefined)}
           />
         </>
       }
       {/* HEADER */}
-      <div className="fixed inset-0 w-full h-fit flex justify-between items-center pt-8 px-6">
+      <div className="fixed inset-0 w-full h-fit flex justify-between items-center pt-8 px-6 z-50">
         {/* LOGO THE HUB */}
         <div className="w-fit h-fit" onClick={() => setCurrentSection(CitizensSections.Mint)}>
           <LogoTheHub />
@@ -1010,10 +1009,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           </div>
         }
       </div>
-      {/* SOCIAL */}
-      {!isSigned &&
-        <SocialButtons className='hidden lg:flex fixed bottom-8 right-6 gap-4' />
-      }
       {
         isLoggedIn === undefined &&
         <div className={`fixed z-50 ${isEditModeSelected ? 'xl:w-[42%] right-0 top-0' : 'inset-0'} w-full h-screen flex flex-col justify-center items-center gap-4 bg-gradient-to-b from-[#151515] to-[#0C0C0C]`}>
