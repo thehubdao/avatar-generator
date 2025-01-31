@@ -3,10 +3,16 @@ import { CitizensCollection } from "../../../interfaces/citizens.interface";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 import CampaignList from "../common/campaignList.ui";
 import Link from "next/link";
-import { BackedByLinks } from "../../../enums/citizens/common.enum";
+import { BackedByLinks, CardSize } from "../../../enums/citizens/common.enum";
 import SocialButtons from "../common/socialButtons.ui";
 import PrivacyPolicySVG from "../common/SVG/privacyPolicySVG.ui";
 import TermsOfServicesSVG from "../common/SVG/termsOfServicesSVG.ui";
+import { Swiper, SwiperSlide } from "swiper/react";
+
+// Import Swiper styles
+import 'swiper/css';
+import { Autoplay } from "swiper/modules";
+import CampaignCard from "../common/campaignCard.ui";
 
 const BACKEDBY = [
   {
@@ -33,6 +39,40 @@ const BACKEDBY = [
     img: 'chainlink',
     link: BackedByLinks.Chainlink
   }
+]
+
+const NEWS = [
+  {
+    img: 'news-01',
+    link: ''
+  },
+  {
+    img: 'news-02',
+    link: ''
+  },
+  {
+    img: 'news-03',
+    link: ''
+  }
+]
+
+const COMMUNITY = [
+  {
+    img: 'content-01',
+    link: ''
+  },
+  {
+    img: 'content-02',
+    link: ''
+  },
+  {
+    img: 'content-03',
+    link: ''
+  },
+  {
+    img: 'content-04',
+    link: ''
+  },
 ]
 
 interface LoginUIProps {
@@ -74,18 +114,152 @@ export default function LoginUI({ collections, setIsSigned }: LoginUIProps) {
             </div>
             {/* CAMPAIGNS */}
             <div>
-              <h2 className="font-monument text-3xl sm:text-[64px] text-white text-center pb-12 pt-20">CAMPAIGNS</h2>
+              <h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-12 pt-20">CAMPAIGNS</h2>
               <CampaignList collections={collections} setIsSigned={setIsSigned} />
+            </div>
+            {/* WHATS NEW */}
+            <div className="xl:pt-12 px-6">
+              {/* TABLE */}
+              <div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
+                {/* TABLE TITLE */}
+                <h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-8 pt-10 border-b-[1px] border-white/10">WHATS NEW?</h2>
+                {/* NEWS LIST */}
+                <div className="pt-8 z-0">
+                  <Swiper
+                    spaceBetween={40}
+                    slidesPerView={1}
+                    initialSlide={0}
+                    centeredSlides={true}
+                    autoplay={{
+                      delay: 2500,
+                      disableOnInteraction: true,
+                    }}
+                    breakpoints={{
+                      1280: {
+                        slidesPerView: 2
+                      },
+                      1536: {
+                        slidesPerView: 3
+                      },
+                    }}
+                    modules={[Autoplay]}
+                  >
+                    {
+                      NEWS.map((item, index) => (
+                        <SwiperSlide key={index} className="w-96">
+                          <Link href={item.link} target="_blank" className="flex justify-center">
+                            <div className="relative w-[320px] sm:w-[550px] h-[169px] sm:h-[290px]">
+                              <Image src={`/resources/images/citizens/news/${item.img}.png`} fill alt={item.img} />
+                            </div>
+                          </Link>
+                        </SwiperSlide>
+                      ))
+                    }
+                  </Swiper>
+                </div>
+              </div>
+            </div>
+            {/* FRESH DROPS */}
+            <div className="xl:pt-12 px-6">
+              {/* TABLE */}
+              <div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
+                {/* TABLE TITLE */}
+                <h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-8 pt-10 border-b-[1px] border-white/10">FRESH DROPS</h2>
+                {/* NEWS LIST */}
+                <div className="py-12 px-6">
+                  <Swiper
+                    spaceBetween={40}
+                    slidesPerView={1}
+                    initialSlide={0}
+                    autoplay={{
+                      delay: 2500,
+                      disableOnInteraction: true,
+                    }}
+                    breakpoints={{
+                      768: {
+                        slidesPerView: 2,
+                      },
+                      1024: {
+                        slidesPerView: 3,
+                      },
+                      1280: {
+                        slidesPerView: 4,
+                        loop: true,
+                      },
+                      1536: {
+                        slidesPerView: 5,
+                        loop: true,
+                      },
+                    }}
+                    modules={[Autoplay]}
+                  >
+                    {
+                      BACKEDBY.map((drop, index) => (
+                        <SwiperSlide key={index} className="!flex justify-center">
+                          <CampaignCard
+                            key={index}
+                            title={drop.img}
+                            imgSrc={'https://lipsum.app/random/640x640/'}
+                            imgAlt={'alt'}
+                            size={CardSize.Small}
+                            light
+                            overlayText={"LOG IN TO CLAIM"}
+                          />
+                        </SwiperSlide>
+                      ))
+                    }
+                  </Swiper>
+                </div>
+              </div>
+            </div>
+            {/* COMMUNITY CONTENT */}
+            <div>
+              <h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-12 pt-20 leading-none">COMMUNITY CONTENT</h2>
+              <div>
+                <Swiper
+                  spaceBetween={10}
+                  slidesPerView={1}
+                  initialSlide={0}
+                  loop={true}
+                  autoplay={{
+                    delay: 2500,
+                    disableOnInteraction: true,
+                  }}
+                  breakpoints={{
+                    768: {
+                      slidesPerView: 2,
+                    },
+                    1280: {
+                      slidesPerView: 3,
+                    },
+                    1536: {
+                      slidesPerView: 4,
+                      loop: true,
+                    },
+                  }}
+                  modules={[Autoplay]}
+                >
+                  {
+                    COMMUNITY.map((item, index) => (
+                      <SwiperSlide key={index} className="!flex justify-center px-6">
+                        <div className="relative w-[478px] h-[374px] rounded-[30px] overflow-hidden">
+                          <Image src={`/resources/images/citizens/community/${item.img}.jpg`} alt={item.img} fill className="object-cover"/>
+                        </div>
+                      </SwiperSlide>
+                    ))
+                  }
+                </Swiper>
+              </div>
             </div>
             {/* BACKED BY */}
             <div className="pb-[15vh]">
-              <h2 className="font-monument text-3xl sm:text-[64px] text-white text-center pb-12 pt-48">BACKED BY</h2>
+              <h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-12 pt-48">BACKED BY</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-0 gap-y-6 mx-6 md:mx-12 xl:mx-32 2xl:mx-80 place-items-center">
                 {
                   BACKEDBY.map((item, index) => (
-                    <Link key={index} href={item.link} className="bg-[#2B2B2B] rounded-2xl">
+                    <Link key={index} href={item.link} target="_blank" className="bg-[#2B2B2B] rounded-2xl">
                       <div className="relative w-[260px] h-[100px]">
-                        <Image src={`/resources/images/citizens/backedby/${item.img}.png`} fill alt="" className="grayscale" />
+                        <Image src={`/resources/images/citizens/backedby/${item.img}.png`} fill alt={item.img} />
                       </div>
                     </Link>
                   ))
@@ -93,15 +267,15 @@ export default function LoginUI({ collections, setIsSigned }: LoginUIProps) {
               </div>
             </div>
             {/* FOOTER */}
-            <footer className="w-full border-t-[1px] border-white/10 flex justify-between items-center p-6">
+            <footer className="w-full border-t-[1px] border-white/10 flex flex-col md:flex-row justify-between items-center gap-8 md:gap-0 p-6">
               <div className="flex gap-4 items-center">
-                <Link href={''} className="flex flex-col items-center gap-2">
+                <Link href={''} target="_blank" className="flex flex-col items-center gap-2">
                   <PrivacyPolicySVG />
                   <p className="font-light text-sm text-white text-center">
                     Privacy<br />Policy
                   </p>
                 </Link>
-                <Link href={''} className="flex flex-col items-center gap-2">
+                <Link href={''} target="_blank" className="flex flex-col items-center gap-2">
                   <TermsOfServicesSVG />
                   <p className="font-light text-sm text-white text-center">
                     Terms of<br />Service
