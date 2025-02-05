@@ -1,4 +1,10 @@
 import { PrivyProvider } from '@privy-io/react-auth';
+import {toSolanaWalletConnectors} from '@privy-io/react-auth/solana';
+
+const solanaConnectors = toSolanaWalletConnectors({
+  // By default, shouldAutoConnect is enabled
+  shouldAutoConnect: true,
+});
 
 export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
 
@@ -10,12 +16,34 @@ export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
           "accentColor": "#A7C080",
           "theme": "#222224",
           "walletList": [
-            "metamask", "universal_profile", "wallet_connect"
-          ]
+            "metamask", "universal_profile", "wallet_connect", "phantom"
+          ], 
+          walletChainType:'ethereum-and-solana'
         },
+        externalWallets: {
+          solana: {
+            connectors: solanaConnectors,
+          },},
         "loginMethods": [
           "wallet"
         ],
+        "supportedChains": [
+          {
+            "name": "Solana",
+            "id": 901,
+            "nativeCurrency": {
+              "name": "Solana",
+              "symbol": "SOL",
+              "decimals": 9
+            },
+            rpcUrls: {
+              default: {
+                http: ["https://api.devnet.solana.com"],
+                webSocket: undefined
+              }
+            }
+          }
+        ]
       }}
     >
       {children}

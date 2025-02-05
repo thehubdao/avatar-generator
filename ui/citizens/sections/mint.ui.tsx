@@ -6,6 +6,8 @@ import ArrowMintSVG from "../common/SVG/arrowMintSVG.ui";
 import Modal from "../common/modal.ui";
 import Loader from "../../lukso/common/loader.ui";
 import CheckedSVG from "../common/SVG/checkedSVG.ui";
+import { createAsset } from "../../../utils/web3/solana/contract.utl";
+import { useSolanaWallets } from "@privy-io/react-auth";
 
 interface MintUIProps {
   imgUrl?: string;
@@ -27,6 +29,8 @@ export default function MintUI({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isMinting, setIsMinting] = useState<boolean>(false);
   const [isMinted, setIsMinted] = useState<boolean>(false);
+  const { wallets } = useSolanaWallets();
+
 
   useEffect(() => {
     if (isMinting) {
@@ -70,7 +74,7 @@ export default function MintUI({
               <SocialButtons className='w-full flex justify-center gap-4 scale-75 order-4 xl:order-none' />
               <div className="text-center font-semibold">
                 <p className="xl:text-lg">PUBLIC MINT</p>
-                <p>{price} ETH</p>
+                <p>{price} SOL</p>
               </div>
               <div className="xl:hidden w-full flex flex-col items-center" >
                 <Button label="Mint" withIcon light handleClick={() => { setIsModalOpen(true) }} textStyles="text-start text-xl px-8">
@@ -83,7 +87,7 @@ export default function MintUI({
             </div>
           </div >
           {/* MINT BUTTON */}
-          < div className="hidden xl:block fixed bottom-6 left-1/2 -translate-x-1/2" >
+          < div className="hidden xl:block fixed bottom-6 left-1/2 -translate-x-1/2"  >
             <Button label="Mint" withIcon light handleClick={() => { setIsModalOpen(true) }} textStyles="text-start text-xl px-8">
               <div className="pr-8">
                 <ArrowMintSVG />
@@ -103,7 +107,13 @@ export default function MintUI({
             </div>
             <div className="flex gap-4 pt-8">
               <Button label="Go Back" light handleClick={() => { setIsModalOpen(false) }} />
-              <Button label="Claim" light handleClick={() => { setIsMinting(true) }} />
+              <Button label="Claim" light handleClick={async () => { setIsMinting(true)
+                
+            await createAsset(wallets[0], {
+              name: "KUMI",
+              uri: "https://lukso.mypinata.cloud/ipfs/bafkreigq5qxnabsyja7ccitr5igyzkqcov76jrapucwxvdlsxucmxqgx2y?pinataGatewayToken=VFS9STK6cE1_B6uNQUciXrcRBAR7ALuzCgJaopOc5qkPiiYfJfkFjPifzfU6l4Di"
+            })
+               }} />
             </div>
           </div>
         </Modal>
