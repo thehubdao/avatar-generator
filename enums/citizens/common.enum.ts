@@ -31,7 +31,8 @@ export enum BackedByLinks {
 export enum CardSize {
   Small,
   Medium,
-  Large
+  Large,
+  Big
 }
 
 export enum PaymentType {
