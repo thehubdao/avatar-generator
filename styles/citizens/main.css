@@ -2,6 +2,10 @@
   width: 280px;
 }
 
+.login_swiper .swiper-slide {
+  width: 488px;
+}
+
 @keyframes slide-in {
   from {
     transform: translateY(100%);

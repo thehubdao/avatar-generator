@@ -7,6 +7,7 @@ import CampaignCard from "./campaignCard.ui";
 import 'swiper/css';
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 import { Campaign } from '../../../types/metadata.type';
+import { CardSize } from '../../../enums/citizens/common.enum';
 
 interface CampaignListProps {
   collections: CitizensCollection[];
@@ -18,17 +19,17 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
   return (
     <div className="w-full mx-auto">
       <Swiper
-        spaceBetween={40}
+        spaceBetween={60}
         slidesPerView={'auto'}
         centeredSlides={true}
-        initialSlide={Math.floor(collections.length/2)}
-        className="collection_swiper"
+        initialSlide={Math.floor(collections.length / 2)}
+        className='login_swiper'
       >
         {
           collections.map((el, i) => (
-            <SwiperSlide key={i} className="w-96">
+            <SwiperSlide key={i} >
               <ConnectWeb3Button
-                classStyles="w-full h-full"
+                classStyles=""
                 setIsSigned={(isSigned: boolean) => setIsSigned(isSigned, el.campaign)}
               >
                 <CampaignCard
@@ -38,20 +39,34 @@ export default function CampaignList({ collections, setIsSigned }: CampaignListP
                   overlayText={
                     "LOG IN"
                   }
+                  size={CardSize.Big}
                 />
               </ConnectWeb3Button>
             </SwiperSlide>
           ))
         }
-        <SwiperSlide className="w-96"><CampaignCard
-          title={'Based Citizens'}
-          imgSrc={'/resources/images/campaings/based_citizens.png'}
-          imgAlt={'Based Citizens'}
-          overlayText={
-            'Coming Soon'
-          }
-        /></SwiperSlide>
-
+        <SwiperSlide>
+          <CampaignCard
+            title={'Based Citizens'}
+            imgSrc={'/resources/images/campaings/based_citizens.jpg'}
+            imgAlt={'Based Citizens'}
+            overlayText={
+              'Coming Soon'
+            }
+            size={CardSize.Big}
+          />
+        </SwiperSlide>
+        <SwiperSlide>
+          <CampaignCard
+            title={'KUMI Citizens'}
+            imgSrc={'/resources/images/campaings/kumi_collection.jpg'}
+            imgAlt={'Kumi Citizens'}
+            overlayText={
+              'Coming Soon'
+            }
+            size={CardSize.Big}
+          />
+        </SwiperSlide>
       </Swiper>
 
     </div>
