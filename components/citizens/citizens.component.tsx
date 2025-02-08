@@ -44,12 +44,12 @@ import SocialButtons from '../../ui/citizens/common/socialButtons.ui';
 const COLLECTIONS: CitizensCollection[] = [
   {
     name: 'Lukso Citizens',
-    image: '/resources/images/campaings/citizens_collection_image.png',
+    image: '/resources/images/campaings/citizens_collection.jpg',
     campaign: 'vrm_female'
   },
   {
     name: 'Lukso Creators',
-    image: '/resources/images/campaings/creators_collection_image.png',
+    image: '/resources/images/campaings/creators_collection.jpg',
     campaign: 'vrm_male'
   },
 ]
