@@ -6,7 +6,7 @@ import ArrowMintSVG from "../common/SVG/arrowMintSVG.ui";
 import Modal from "../common/modal.ui";
 import Loader from "../../lukso/common/loader.ui";
 import CheckedSVG from "../common/SVG/checkedSVG.ui";
-import { createAsset } from "../../../utils/web3/solana/contract.utl";
+import { createAsset } from "../../../utils/web3/solana/contract.util";
 import { useSolanaWallets } from "@privy-io/react-auth";
 
 interface MintUIProps {
@@ -19,9 +19,9 @@ interface MintUIProps {
 }
 
 export default function MintUI({ 
-  imgUrl = 'https://lipsum.app/random/500x500',
-  avatarDescription = '"Kum Kum" inspired the nickname of the football legend Kun Agüero. Today, we honor his nickname and celebrate his career by presenting "KUMAI," a FREE-to-claim, 3D interoperable avatar that showcases the future of Web3 gaming and the internet',
-  campaignName = 'KUMAI CITIZENS',
+  imgUrl = '/resources/images/campaings/kumi_collection_image.png',
+  avatarDescription = '"Kum Kum" inspired the nickname of the football legend Kun Agüero. Today, we honor his nickname and celebrate his career by presenting "KUMI," a FREE-to-claim, 3D interoperable avatar that showcases the future of Web3 gaming and the internet',
+  campaignName = 'KUMI CITIZENS',
   campaignDescription = 'Minting a KUMI unlocks the gateway to the Fitchin Universe. It’s your chance to own a unique visual identity that’s truly yours. Dive in, create epic content, flex your avatar, climb the leaderboard, and snag exclusive wearables to stand out in style.',
   price,
   supply }: MintUIProps) {
@@ -29,6 +29,7 @@ export default function MintUI({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isMinting, setIsMinting] = useState<boolean>(false);
   const [isMinted, setIsMinted] = useState<boolean>(false);
+  
   const { wallets } = useSolanaWallets();
 
 
@@ -111,7 +112,8 @@ export default function MintUI({
                 
             await createAsset(wallets[0], {
               name: "KUMI",
-              uri: "https://lukso.mypinata.cloud/ipfs/bafkreigq5qxnabsyja7ccitr5igyzkqcov76jrapucwxvdlsxucmxqgx2y?pinataGatewayToken=VFS9STK6cE1_B6uNQUciXrcRBAR7ALuzCgJaopOc5qkPiiYfJfkFjPifzfU6l4Di"
+              uri: "https://lukso.mypinata.cloud/ipfs/bafkreigq5qxnabsyja7ccitr5igyzkqcov76jrapucwxvdlsxucmxqgx2y?pinataGatewayToken=VFS9STK6cE1_B6uNQUciXrcRBAR7ALuzCgJaopOc5qkPiiYfJfkFjPifzfU6l4Di",
+              plugins: []
             })
                }} />
             </div>

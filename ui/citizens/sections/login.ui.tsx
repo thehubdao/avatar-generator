@@ -13,6 +13,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import { Autoplay } from "swiper/modules";
 import CampaignCard from "../common/campaignCard.ui";
+import { Campaign } from "../../../types/metadata.type";
 
 const BACKEDBY = [
   {
@@ -77,10 +78,10 @@ const COMMUNITY = [
 
 interface LoginUIProps {
   collections?: CitizensCollection[] | null;
-  setIsSigned: (isSigned: boolean) => void;
+  setSelectedCampaign: (electedCampaign: Campaign) => void;
 }
 
-export default function LoginUI({ collections, setIsSigned }: LoginUIProps) {
+export default function LoginUI({ collections, setSelectedCampaign }: LoginUIProps) {
   return (
     <>
       {
@@ -99,7 +100,7 @@ export default function LoginUI({ collections, setIsSigned }: LoginUIProps) {
                 <div className="w-full flex justify-center pt-6">
                   <ConnectWeb3Button
                     classStyles="w-fit h-11 bg-white rounded-[20px]"
-                    setIsSigned={(isSigned: boolean) => setIsSigned(isSigned)}
+                    onClick={() => setSelectedCampaign(collections[0].campaign)}
                   >
                     <div className="w-full h-full font-light text-lg px-10 md:px-24">
                       FIND OUT MORE
@@ -115,7 +116,7 @@ export default function LoginUI({ collections, setIsSigned }: LoginUIProps) {
             {/* CAMPAIGNS */}
             <div>
               <h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-12 pt-20">CAMPAIGNS</h2>
-              <CampaignList collections={collections} setIsSigned={setIsSigned} />
+              <CampaignList collections={collections} setSelectedCampaign={setSelectedCampaign} />
             </div>
             {/* WHATS NEW */}
             <div className="xl:pt-12 px-6">

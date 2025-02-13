@@ -14,6 +14,8 @@ import Button from "./common/button.ui";
 import { DataBaseDrop } from "../../interfaces/citizens.interface";
 import { useEffect, useState } from "react";
 import MintUI from "./sections/mint.ui";
+import { getCollectionSupply } from "../../utils/web3/solana/contract.util";
+import { useBlockchainWallet } from "../../hooks/useBlockchainWallet";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -35,6 +37,16 @@ interface CitizensUIProps {
 
 export default function CitizensUI({ claimableDrops, currentSection, currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleClaim, handleUnfollowUser }: CitizensUIProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [collectionSupply, setCollectionSupply] = useState<number | undefined>(undefined)
+  const { solanaWallets } = useBlockchainWallet();
+
+  useEffect(() => {
+    const fetchCollectionSupply = async () => {
+      const supply = await getCollectionSupply(solanaWallets[0])
+      setCollectionSupply(supply)
+    }
+    fetchCollectionSupply()
+  }, [address])
 
   useEffect(() => {
     console.log('loadedTokens', loadedTokens)
@@ -96,7 +108,7 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
         <Play />
       }
       {currentSection === CitizensSections.Mint &&
-        <MintUI />
+        <MintUI supply={collectionSupply} />
       }
     </>
   );

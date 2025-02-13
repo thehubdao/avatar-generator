@@ -17,6 +17,7 @@ import { Result } from "../types/common.type";
 export async function FindAndReadjustFeatureIndexes(campaign: string) {
   // Get FeatureList (same from page)
   const featuresResult = await GetParameter<FeatureBasic[]>(campaign, CampaignParameterName.Features);
+
   if (!featuresResult.success)
     return void LogError(Module.CollectionUtil, `Couldn't find featureList for campaign: ${campaign}`);
 
@@ -34,7 +35,6 @@ export async function FindAndReadjustFeatureIndexes(campaign: string) {
       void LogError(Module.CollectionUtil, `Missing index on ${feature.displayName} feature type!`);
       continue;
     }
-
     // Filter features and leave only the available ones
     featureOptionListData.set(
       feature.index,
@@ -176,12 +176,10 @@ export function IsValidIndexValues(indexValues: Map<number, number>, maxValues: 
     void LogError(Module.CommonUtil, "Empty index values, not valid!");
     return false;
   }
-
   if (indexValues.size !== maxValues.size) {
     void LogError(Module.CommonUtil, "Misshaped index values, not valid!");
     return false;
   }
-
   for (const [key, value] of indexValues) {
     const maxVal = maxValues.get(key);
     if (maxVal !== undefined && value >= 0 && value < maxVal) continue;

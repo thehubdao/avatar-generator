@@ -126,7 +126,7 @@ export const getCampaignTokenIds = async (campaignAddress: string, address: stri
     return campaignTokenIds
 }
 
-export const getCampaignsTokenIds = async (address: string) => {
+export const getEthereumCampaignsTokenIds = async (address: string) => {
     let campaignsTokenIds = [] as TokenId[]
     for (const campaign of Object.keys(campaignWeb3Data)) {
         const typpedCampaign = campaign as keyof typeof campaignWeb3Data

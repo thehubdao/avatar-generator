@@ -1,8 +1,12 @@
-import { Connection, Keypair, PublicKey, Signer, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import solanaIdl from '../../../constants/idl/solanaIdl.json';
 import { ConnectedSolanaWallet } from '@privy-io/react-auth';
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
+import { publicKey } from '@metaplex-foundation/umi'
+import { fetchAssetsByOwner, fetchCollection, PluginAuthorityPair } from '@metaplex-foundation/mpl-core'
+import { keypairIdentity } from '@metaplex-foundation/umi';
+import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 
 const PROGRAM_ID = new PublicKey('Bit5BcAGufekdsZoVVGyt81dFXURadnZBGB5PU5U5Ru4');
 const MPL_CORE_ID = new PublicKey('CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d');
@@ -19,12 +23,14 @@ interface CreateCollectionArgs {
   uri: string;
   plugins?: PluginAuthorityPair[];
 }
-
+  
 interface CreateAssetArgs {
   name: string;
   uri: string;
   plugins: any[];
 }
+
+const umi = createUmi(process.env.NEXT_PUBLIC_SOLANA_RPC_URL || '');
 
 export const createAsset = async (
   wallet: ConnectedSolanaWallet,
@@ -113,11 +119,6 @@ export const transferAsset = async (
 
   return new Transaction().add(transferIx);
 };
-// Tipos
-interface PluginAuthorityPair {
-  plugin: Plugin;
-  authority?: PluginAuthority;
-}
 
 enum PluginAuthority {
   None,
@@ -127,3 +128,41 @@ enum PluginAuthority {
 }
 
 const NOOP_PROGRAM_ID = new PublicKey('noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV');
+
+export const getAssetsByOwner = async (wallet: ConnectedSolanaWallet) => {
+  try {
+    const ownerPublicKey = publicKey(wallet.address);
+    
+    const assets = await fetchAssetsByOwner(umi, ownerPublicKey);
+    console.log(assets);
+    return assets;
+  } catch (error) {
+    console.error('Error fetching assets:', error);
+    throw error;
+  }
+};
+
+export const getCollectionAssetByOwner= async (wallet: ConnectedSolanaWallet, collectionId: PublicKey = COLLECTION_ID) => {
+  const assets = await getAssetsByOwner(wallet);
+  const collectionAsset = assets.find(asset => asset.updateAuthority.address === collectionId.toString());
+  return collectionAsset;
+}
+
+export const getCollectionAssets = async (wallet: ConnectedSolanaWallet, collectionId: PublicKey = COLLECTION_ID) => {
+  const assets = await fetchCollection(umi, collectionId.toString());
+  return assets;
+}
+
+export const getCollectionSupply = async (wallet: ConnectedSolanaWallet, collectionId: PublicKey = COLLECTION_ID) => {
+  const assets = await getCollectionAssets(wallet, collectionId);
+  return assets.numMinted;
+}
+/* export const saveCombination = async (
+  connection: Connection,
+  program: Program,
+  walletAddress: PublicKey,
+  combination: string
+) => {
+  // TODO: Implementar lógica de guardado usando Umi
+  const umiWallet = keypairIdentity(umi,  keypair );
+}; */

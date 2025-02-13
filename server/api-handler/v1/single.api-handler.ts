@@ -66,7 +66,6 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   const combinationIndexValues = typeof combinationNum === 'number' ? NumberToIndexValues(combinationNum, maxCombination, maxIndexValues) : combinationNum;
   if (combinationIndexValues == undefined)
     return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
-
   // get values combination
   const featureCombination = GetCombinationValues(combinationIndexValues, featureValues.featureOptionListData);
   const result: SingleInterface = {

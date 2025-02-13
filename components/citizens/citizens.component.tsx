@@ -6,7 +6,7 @@ import { Campaign, CampaignDrops, TokenId, TokenMetadata } from "../../types/met
 import LoginUI from "../../ui/citizens/sections/login.ui";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import CitizensUI from "../../ui/citizens/citizens.ui";
-import { burnDrop, checkClaimStatus, getCampaignsTokenIds, getUserFeatures, setTokenMetadata } from "../../utils/web3/contract.util";
+import { burnDrop, checkClaimStatus, getEthereumCampaignsTokenIds, getUserFeatures, setTokenMetadata } from "../../utils/web3/contract.util";
 import { CitizensCollection, DataBaseDrop } from "../../interfaces/citizens.interface";
 import Button from "../../ui/citizens/common/button.ui";
 import ArrowLinkSVG from "../../ui/citizens/common/SVG/arrowLinkSVG.ui";
@@ -40,19 +40,31 @@ import { claimDrop } from '../../utils/web3/contract.util';
 import LogoTheHub from '../../ui/citizens/common/SVG/logoTheHubSVG.ui';
 import Image from 'next/image';
 import SocialButtons from '../../ui/citizens/common/socialButtons.ui';
+import { BlockchainType, useBlockchainWallet } from '../../hooks/useBlockchainWallet';
+import { getAssetsByOwner, getCollectionAssetByOwner } from '../../utils/web3/solana/contract.util';
 
 const COLLECTIONS: CitizensCollection[] = [
   {
     name: 'Lukso Citizens',
     image: '/resources/images/campaings/citizens_collection_image.png',
-    campaign: 'vrm_female'
+    campaign: 'vrm_female',
+    blockChain: BlockchainType.ETHEREUM
   },
   {
     name: 'Lukso Creators',
     image: '/resources/images/campaings/creators_collection_image.png',
-    campaign: 'vrm_male'
+    campaign: 'vrm_male',
+    blockChain: BlockchainType.ETHEREUM
   },
+  {
+    name: 'Kumi',
+    image: '/resources/images/campaings/kumi_collection_image.png',
+    campaign: 'kumi',
+    blockChain: BlockchainType.SOLANA
+  }
+
 ]
+
 
 const isValidIPFSHash = (hash: string): boolean => {
   return hash.startsWith('baf') || hash.startsWith('Qm');
@@ -77,6 +89,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const { showSnackbar } = useSnackbar();
   const { user, ready: isReady, logout } = usePrivy()
   const { wallets } = useWallets();
+  const { isSolana, blockchainType, solanaWallets } = useBlockchainWallet();
   const [isSigned, setIsSigned] = useState(isLoggedIn)
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -122,7 +135,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       tokenMetadata,
       baseCombination: tokenMetadata.baseCombination
     };
-
     setCurrentCollection(newCollection);
     setCampaign(newCollection.campaign); // This updates the parent state
 
@@ -130,63 +142,92 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   useEffect(() => {
     if (!user?.wallet?.address) return
-
     setWalletAddress(user.wallet.address.toLowerCase())
+    setIsSigned(true);
   }, [user?.wallet?.address])
 
-  useEffect(() => {
+  const getEthereumTokensMetadataPromise = async () => {
     if (!walletAddress) return
-    const getTokensMetadataPromise = async () => {
-      const tokenIds = await getCampaignsTokenIds(walletAddress)
-      if (tokenIds.length <= 0) {
-        setCurrentSection(CitizensSections.Collection);
-        setIsLoading(false);
-        setLoadedTokens([])
-      } else {
-        setTokenIdList(tokenIds)
-      }
+    const tokenIds = await getEthereumCampaignsTokenIds(walletAddress)
+    if (tokenIds.length <= 0) {
+      setCurrentSection(CitizensSections.Collection);
+      setIsLoading(false);
+      setLoadedTokens([])
+    } else {
+      setTokenIdList(tokenIds)
     }
-    void getTokensMetadataPromise()
+  }
+
+  const getSolanaTokensMetadataPromise = async () => {
+    if (!walletAddress) return
+    const asset = await getCollectionAssetByOwner(solanaWallets[0])
+    console.log('asset', asset)
+   
+      setCurrentSection(CitizensSections.Mint);
+      setIsLoading(false);
+      setLoadedTokens([])
+     /* else {
+      setTokenIdList([{
+        tokenId: asset.publicKey,
+        campaign: 'kumi',
+        metadataUri: asset.uri
+      }])
+    } */
+  }
+useEffect(() => {
+  console.log('currentSection', currentSection)
+}, [currentSection])
+  useEffect(() => {
+    if (isSolana) {
+      void getSolanaTokensMetadataPromise() 
+    } else {
+      void getEthereumTokensMetadataPromise()
+    }
   }, [walletAddress])
 
-  useEffect(() => {
-    if (!tokenIdList) return
-
-    const loadTokenMetadata = async () => {
-      let isFirstToken = false;
-      try {
-        if (tokenIdList.length === 0) return setLoadedTokens([])
-        tokenIdList.forEach(async (tokenIdMetadata) => {
-          try {
-            if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
-              throw new Error('Invalid IPFS hash format');
-            }
-            const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
-
-            if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
-              updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
-              isFirstToken = true;
-            }
-
-            setLoadedTokens(prevTokens => {
-              if (!prevTokens) return [tokenMetadata];
-              return [...prevTokens, tokenMetadata];
-            });
-          } catch (error) {
-            LogError(Module.Citizens, `Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
+  const loadEthereumTokensMetadata = async () => {
+    let isFirstToken = false;
+    try {
+      if (!tokenIdList || tokenIdList.length === 0) return setLoadedTokens([])
+      tokenIdList.forEach(async (tokenIdMetadata) => {
+        try {
+          if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
+            throw new Error('Invalid IPFS hash format');
           }
-        })
+          const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
+          if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
+            updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
+            isFirstToken = true;
+          }
+
+          setLoadedTokens(prevTokens => {
+            if (!prevTokens) return [tokenMetadata];
+            return [...prevTokens, tokenMetadata];
+          });
+        } catch (error) {
+          LogError(Module.Citizens, `Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
+        }
+      })
 
 
 
-      } catch (error) {
-        LogError(Module.Citizens, 'Error loading token metadata:', error);
-      }
+    } catch (error) {
+      LogError(Module.Citizens, 'Error loading token metadata:', error);
+    }
 
-    };
+  };
 
-    loadTokenMetadata();
-  }, [tokenIdList]);
+  useEffect(() => {
+    if (!tokenIdList && !isSolana) return
+
+
+    if (isSolana) {
+      updateCollection('kumi', '0-0-0-0-0-0-0-0-0-0', {} as TokenMetadata)
+    } else {
+      loadEthereumTokensMetadata();
+    }
+  }, [tokenIdList, isSolana]);
+
 
   const handleUserFeatures = async () => {
     if (!walletAddress) return
@@ -196,26 +237,39 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }
 
   useEffect(() => {
-    handleUserFeatures()
+    if (isSolana) {
+      /* handleSolanaUserFeatures() */
+    } else {
+      handleUserFeatures()
+    }
   }, [walletAddress])
 
 
   useEffect(() => {
-    void getFeatureList()
+    if (isSolana) {
+      /* void getSolanaFeatureList() */
+    } else {
+      void getFeatureList()
+    }
   }, [userWearables])
+
 
   useEffect(() => {
     async function fetchDrops() {
       if (!signer) return
       const drops = await FetchClaimableDrops();
-      console.log('DROPS', drops)
       Promise.all(drops.map(async (drop) => {
         drop.owned = await checkClaimStatus(drop, signer, user?.wallet?.address || '');
       }))
       setClaimableDrops(drops);
     }
-    fetchDrops();
+    if (isSolana) {
+      /* fetchSolanaDrops(); */
+    } else {
+      fetchDrops();
+    }
   }, [signer]);
+
 
   const handleClaim = async (drop: DataBaseDrop) => {
     if (!user?.wallet || !signer) return false;
@@ -377,13 +431,15 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       LogError(Module.Lukso, 'Missing single data!');
       return;
     }
-
     for (const { val } of singleInitData.features) {
       const { id, path, type, name } = val;
       const { tokenMetadata } = currentCollection;
       const bodyIndex = val.type.toLowerCase() as keyof typeof tokenMetadata.body;
-      tokenMetadata.body[bodyIndex] = val as BodyPart;
-
+      try{
+        tokenMetadata.body[bodyIndex] = val as BodyPart; // Adjust logic to Solana
+      } catch (error) {
+        console.log("ERROR", error)
+      }
       await ChangeFeature(
         id,
         path,
@@ -399,13 +455,13 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     campaign?: string
   ) {
     if (!campaign) return
-    setIsLoading(true);
-
-    await Promise.all([
-      getEnvironmentMapList(),
-      getSingleInfo(),
-      getSingleData(campaign, currentCombination),
-    ])
+    try {
+      setIsLoading(true);
+      await Promise.all([
+        getEnvironmentMapList(),
+        getSingleInfo(),
+        getSingleData(campaign, currentCombination),
+      ])
 
     await SetFeaturesData(campaignParams?.features ?? [])
 
@@ -435,9 +491,13 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
     if (result.success) {
       await ChangeStartAnimation(result.value.at(0)?.path)
-    }
+      }
 
-    setIsLoading(false)
+      setIsLoading(false)
+    } catch (error) {
+      console.error('Error onAvatarBuilderReady:', error);
+      setIsLoading(false)
+    }
   }
 
   async function exportModel() {
@@ -460,7 +520,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       ? modelGLBPromise.value
       : undefined
     const filesName =
-      fileCampaignNameLabel[campaignParams?.campaign as Campaign] +
+      fileCampaignNameLabel[campaignParams?.campaign as keyof typeof fileCampaignNameLabel] +
       currentCollection.tokenMetadata.tokenId
     if (modelVRM && modelGLBPromise.success) {
       await SaveFile(modelVRM, `${filesName}.vrm`)
@@ -621,7 +681,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
         newCombination,
         currentCampaign
       )
-      console.log(metadataObject.uri)
       if (!isValidIPFSHash(metadataObject.uri)) {
         throw new Error('Invalid IPFS hash format');
       }
@@ -637,7 +696,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
         currentCollection.tokenMetadata.tokenId,
         metadataObject.uri
       )
-      console.log("BURNING DROPS")
 
       for (let i = 0; i < burnDropArray.length; i++) {
         const drop = burnDropArray[i]
@@ -660,11 +718,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
       onFailedCombinationSnackbar();
     }
-  }
-
-  const handleLogin = (isSigned: boolean, selectedLoginCampaign?: Campaign) => {
-    if (selectedLoginCampaign) setSelectedLoginCampaign(selectedLoginCampaign);
-    setIsSigned(isSigned);
   }
 
   useEffect(() => {
@@ -726,54 +779,143 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
     const setupSigner = async () => {
       try {
-        const ethProvider = await wallets[0].getEthereumProvider();
-        const browserProvider = new BrowserProvider(ethProvider);
-
-        const newSigner = await browserProvider.getSigner();
-        setSigner(newSigner);
-
+        if (isSolana) {
+          // TODO: Solana setup
+          console.log('Solana signer setup pending');
+        } else {
+          const ethProvider = await wallets[0].getEthereumProvider();
+          const browserProvider = new BrowserProvider(ethProvider);
+          const newSigner = await browserProvider.getSigner();
+          setSigner(newSigner);
+        }
       } catch (error) {
         console.error('Error setting up signer:', error);
       }
     };
 
-    setupSigner();
+    if (isSolana) {
+      /* setupSolanaSigner(); */
+    } else {
+      setupSigner();
+    }
+  }, [isReady, wallets, signer, isSolana]);
 
-  }, [isReady, wallets]);
+
+  const getEthereumUserFeaturesPromise = async () => {
+    if (!signer) return;
+    try {
+      if (isSolana) {
+        // TODO: Solana user features
+        console.log('Solana getUserFeatures pending');
+      } else {
+        const features = await getUserFeatures(await signer.getAddress());
+        setUserWearables(features);
+      }
+    } catch (error) {
+      console.error('Error getting user features:', error);
+    }
+  };
+
+  const getSolanaUserFeaturesPromise = async () => {
+    /*     const features = await getUserFeatures(await signer.getAddress()); */
+    setUserWearables({} as CampaignDrops);
+
+
+  };
+
+  useEffect(() => {
+    if (isSolana) {
+      void getSolanaUserFeaturesPromise();
+    } else {
+      void getEthereumUserFeaturesPromise();
+    }
+  }, [signer, isSolana]);
 
 
   useEffect(() => {
-    async function fetchLeaderboardData() {
-      if (!signer) return
-      console.log("FETCHING LEADERBOARD DATA")
+    if (!walletAddress) return;
+    const getTokensMetadataPromise = async () => {
       try {
-        const response = await fetch('/api/v1/leaderboard');
-        if (!response.ok) throw new Error('Failed to fetch leaderboard data');
-        const data = await response.json();
-        const leaderboardWithProfileData = await Promise.all(data.map(async (entry: LeaderboardEntry) => {
-          const profileData = await GetUniversalProfileData(entry.address);
-          return {
-            ...entry,
-            name: profileData.name,
-            profileImage: profileData.profileImage,
-            isFollowing: false // Initialize isFollowing
-          };
-        }));
+        if (isSolana) {
+          // TODO: Solana tokens
+          console.log('Solana getTokensMetadata pending');
+        } else {
+          const tokenIds = await getEthereumCampaignsTokenIds(walletAddress);
+          if (tokenIds.length <= 0) {
+            setCurrentSection(CitizensSections.Collection);
+            setLoadedTokens([]);
+          } else {
+            setTokenIdList(tokenIds);
+          }
+        }
+      } catch (error) {
+        console.error('Error getting tokens:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    void getTokensMetadataPromise();
+  }, [walletAddress, isSolana]);
 
-        // If we have a signer, get follow statuses
-        const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, signer);
-        leaderboardWithProfileData.forEach(entry => {
-          entry.isFollowing = followStatuses[entry.address] || false;
-        });
-        setLeaderboardData(leaderboardWithProfileData);
+  useEffect(() => {
+    if (!signer) return;
+    const getClaimableDropsPromise = async () => {
+      try {
+        if (isSolana) {
+          // TODO: Solana drops
+          console.log('Solana getClaimableDrops pending');
+        } else {
+          const drops = await FetchClaimableDrops(await signer.getAddress());
+          Promise.all(drops.map(async (drop) => {
+            drop.owned = await checkClaimStatus(drop, signer, user?.wallet?.address || '');
+          }))
+          setClaimableDrops(drops);
+        }
+      } catch (error) {
+        console.error('Error getting claimable drops:', error);
+      }
+    };
+    void getClaimableDropsPromise();
+  }, [signer, isSolana]);
+
+  useEffect(() => {
+    async function fetchEthereumLeaderboardData() {
+      if (!signer) return;
+      try {
+        if (isSolana) {
+          // TODO: Solana leaderboard
+          console.log('Solana leaderboard pending');
+        } else {
+          const response = await fetch('/api/v1/leaderboard');
+          if (!response.ok) throw new Error('Failed to fetch leaderboard data');
+          const data = await response.json();
+          const leaderboardWithProfileData = await Promise.all(data.map(async (entry: LeaderboardEntry) => {
+            const profileData = await GetUniversalProfileData(entry.address);
+            return {
+              ...entry,
+              name: profileData.name,
+              profileImage: profileData.profileImage,
+              isFollowing: false
+            };
+          }));
+          const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, signer);
+          leaderboardWithProfileData.forEach(entry => {
+            entry.isFollowing = followStatuses[entry.address] || false;
+          });
+          setLeaderboardData(leaderboardWithProfileData);
+        }
       } catch (error) {
         setLeaderboardData(undefined);
         LogError(Module.Citizens, 'Error fetching leaderboard data:', error);
       }
     }
+    if (isSolana) {
+      /* fetchSolanaLeaderboardData(); */
+    } else {
+      fetchEthereumLeaderboardData();
+    }
+  }, [signer, isSolana]);
 
-    fetchLeaderboardData();
-  }, [signer]);
 
   const handleLogout = useCallback(async () => {
     await logout();
@@ -792,6 +934,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
       {isSigned ?
+
         <>
           {/* EDITOR HUD */}
           <div className="fixed w-full z-10 dark">
@@ -853,7 +996,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           </div>
           {/* CANVAS */}
           <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-            {currentCollection.combination && campaignParams && campaignParams.campaign && (currentSection === CitizensSections.View || currentSection === CitizensSections.Mint) && userWearables && <AvatarEditor
+            {function () {
+              if (!currentCollection.combination || !campaignParams || !campaignParams.campaign || (currentSection !== CitizensSections.View && currentSection !== CitizensSections.Mint)) return <></>;
+              return <AvatarEditor // TODO: Add userWearables
 
               avatarBasePath={
                 campaignParams.armature
@@ -873,13 +1018,15 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
                 campaignParams.config
                   .postProcessing
               }
-              onReady={() =>
-                onAvatarBuilderReady(
+              onReady={() => {
+                console.log("CAMPAIGN ON AVATAR BUILDER READY 1", currentCollection.campaign)
+                return onAvatarBuilderReady(
                   currentCollection.combination,
                   currentCollection.campaign
                 )
               }
-            />}
+              }
+            />}()}
           </div>
           {/* CITIZENS HUD */}
           {!isEditModeSelected && signer &&
@@ -917,9 +1064,10 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           }
           <LoginUI
             collections={collectionList}
-            setIsSigned={(isSigned: boolean, selectedCampaign?: Campaign) => handleLogin(isSigned, selectedCampaign ?? undefined)}
+            setSelectedCampaign={(selectedCampaign?: Campaign) => setSelectedLoginCampaign(selectedCampaign)}
           />
         </>
+
       }
       {/* HEADER */}
       <div className="fixed inset-0 w-full h-fit flex justify-between items-center pt-8 px-6 z-50">
