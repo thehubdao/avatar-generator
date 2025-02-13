@@ -31,7 +31,6 @@ export default function MintUI({
   const [isMinted, setIsMinted] = useState<boolean>(false);
   const { wallets } = useSolanaWallets();
 
-
   useEffect(() => {
     if (isMinting) {
       setTimeout(() => {
@@ -111,7 +110,8 @@ export default function MintUI({
                 
             await createAsset(wallets[0], {
               name: "KUMI",
-              uri: "https://lukso.mypinata.cloud/ipfs/bafkreigq5qxnabsyja7ccitr5igyzkqcov76jrapucwxvdlsxucmxqgx2y?pinataGatewayToken=VFS9STK6cE1_B6uNQUciXrcRBAR7ALuzCgJaopOc5qkPiiYfJfkFjPifzfU6l4Di"
+              uri: "https://lukso.mypinata.cloud/ipfs/bafkreigq5qxnabsyja7ccitr5igyzkqcov76jrapucwxvdlsxucmxqgx2y?pinataGatewayToken=VFS9STK6cE1_B6uNQUciXrcRBAR7ALuzCgJaopOc5qkPiiYfJfkFjPifzfU6l4Di",
+              plugins: []
             })
                }} />
             </div>

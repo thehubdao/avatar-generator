@@ -1,5 +1,5 @@
-﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils";
+﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
+import * as SkeletonUtils from "three/examples/jsm/utils/SkeletonUtils.js";
 import {
   Bone,
   Group,

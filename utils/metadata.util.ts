@@ -12,10 +12,12 @@ export const uploadMetadata = async (tokenMetadata: TokenMetadata, metadataThumb
     if (metadataThumbnail) {
         const imageFile = new File([metadataThumbnail], `${combination}.png`)
 
-        await UploadFile(imageFile, StorageLocation.AvatarImages, undefined, tempCampaignSwitch[campaign])
+        // Add type check to handle 'kumi' campaign case
+        const campaignPath = campaign === 'kumi' ? 'kumi' : tempCampaignSwitch[campaign]
+        await UploadFile(imageFile, StorageLocation.AvatarImages, undefined, campaignPath)
     }
     
-    const imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[campaign]}%2Favatar_images%2F${combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
+    const imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign === 'kumi' ? 'kumi' : tempCampaignSwitch[campaign]}%2Favatar_images%2F${combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
     const imageResponse = await fetch(imageUrl)
     const imageBlob = await imageResponse.blob()
     const file = new File([imageBlob], `${combination}.png`, { type: "image/png" });

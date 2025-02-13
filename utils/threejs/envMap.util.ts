@@ -1,6 +1,6 @@
 import { EquirectangularReflectionMapping, Object3D, SRGBColorSpace, Texture } from "three";
 import { GetTextureFromFile } from "./texture.util";
-import { GroundProjectedSkybox } from "three/examples/jsm/objects/GroundProjectedSkybox";
+import { GroundProjectedSkybox } from "three/examples/jsm/objects/GroundProjectedSkybox.js";
 import { Result } from "../../types/common.type";
 import { ConfigSkybox } from "../../interfaces/envMap.interface";
 

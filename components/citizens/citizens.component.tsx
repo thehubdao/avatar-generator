@@ -460,7 +460,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       ? modelGLBPromise.value
       : undefined
     const filesName =
-      fileCampaignNameLabel[campaignParams?.campaign as Campaign] +
+      fileCampaignNameLabel[campaignParams?.campaign as keyof typeof fileCampaignNameLabel] +
       currentCollection.tokenMetadata.tokenId
     if (modelVRM && modelGLBPromise.success) {
       await SaveFile(modelVRM, `${filesName}.vrm`)

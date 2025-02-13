@@ -27,7 +27,7 @@ import {
   SkinnedMesh,
 } from "three";
 import {IsBone, IsSkinnedMesh} from "../model.util";
-import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils";
+import {mergeGeometries} from "three/examples/jsm/utils/BufferGeometryUtils.js";
 
 class VrmUtil {
   private static _instance: VrmUtil;

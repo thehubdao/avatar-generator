@@ -20,7 +20,7 @@ export default function AssetList({ activedOption, updateDefaultAsset }: AssetLi
   //* Fetching campaign assets and features using custom hooks
   const campaignAssets = useAppSelector(state => state.currentCampaign.assets);
   const campaignTags = useAppSelector(state => {
-    if (activedOption === ('features' || 'accessories'))
+    if (activedOption === 'features' || activedOption === 'accessories')
       return state.currentCampaign.parameters[activedOption]
     return []
   });

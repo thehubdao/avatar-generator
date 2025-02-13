@@ -125,6 +125,7 @@ export default function LuksoComponent({
     const [dropList, setDropList] = useState<CampaignDrops>({
         vrm_male: [],
         vrm_female: [],
+        kumi: [],
     })
     const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false)
     const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
@@ -639,7 +640,7 @@ else bodyFeature =  newMetadata.body[feature.val.type.toLowerCase() as keyof typ
             ? modelGLBPromise.value
             : undefined
         const filesName =
-            fileCampaignNameLabel[campaignParams?.campaign as Campaign] +
+            fileCampaignNameLabel[campaignParams?.campaign as keyof typeof fileCampaignNameLabel] +
             selectedTokenId
         if (modelVRM && modelGLBPromise.success) {
             await SaveFile(modelVRM, `${filesName}.vrm`)

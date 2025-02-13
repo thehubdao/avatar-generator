@@ -1,8 +1,8 @@
-import { Connection, Keypair, PublicKey, Signer, SystemProgram, Transaction, TransactionInstruction } from '@solana/web3.js';
+import { Connection, Keypair, PublicKey, SystemProgram, Transaction } from '@solana/web3.js';
 import solanaIdl from '../../../constants/idl/solanaIdl.json';
 import { ConnectedSolanaWallet } from '@privy-io/react-auth';
-import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
+import * as anchor from '@coral-xyz/anchor';
+import { Program } from '@coral-xyz/anchor';
 
 const PROGRAM_ID = new PublicKey('Bit5BcAGufekdsZoVVGyt81dFXURadnZBGB5PU5U5Ru4');
 const MPL_CORE_ID = new PublicKey('CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d');
@@ -13,12 +13,6 @@ const connection = new Connection(
     process.env.NEXT_PUBLIC_SOLANA_RPC_URL || '', 
   'confirmed'
 );
-
-interface CreateCollectionArgs {
-  name: string;
-  uri: string;
-  plugins?: PluginAuthorityPair[];
-}
 
 interface CreateAssetArgs {
   name: string;
@@ -31,7 +25,7 @@ export const createAsset = async (
   args: CreateAssetArgs
 ) => {
     console.log(process.env.NEXT_PUBLIC_SOLANA_PK)
-  const asset = Keypair.generate();
+  const asset = Keypair.generate() as Keypair;
   const decodedKey = new Uint8Array([252,200,135,134,209,2,78,248,180,140,150,138,5,93,86,86,187,20,28,210,7,52,183,111,70,204,137,232,37,255,148,61,87,219,2,72,4,206,150,168,51,246,5,243,138,213,78,109,235,232,106,70,69,153,218,130,167,54,98,178,66,203,153,242]);
   const payer = Keypair.fromSecretKey(decodedKey);
 
@@ -113,17 +107,5 @@ export const transferAsset = async (
 
   return new Transaction().add(transferIx);
 };
-// Tipos
-interface PluginAuthorityPair {
-  plugin: Plugin;
-  authority?: PluginAuthority;
-}
-
-enum PluginAuthority {
-  None,
-  Owner,
-  UpdateAuthority,
-  Address
-}
 
 const NOOP_PROGRAM_ID = new PublicKey('noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV');

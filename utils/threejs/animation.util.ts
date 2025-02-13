@@ -1,5 +1,5 @@
 import {AnimationMixer, Object3D} from "three";
-import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
+import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
 import {FirebaseGltfModel} from "../importer.util";
 import {LogError} from "../common.util";
 import {Module} from "../../enums/common.enum";
