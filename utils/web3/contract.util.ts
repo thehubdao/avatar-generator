@@ -218,7 +218,7 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
     const decodedRawData = avatarERC725Contract.decodeData(metadataFormattedArray)
     const decodedDataArray = JSON.parse(JSON.stringify(decodedRawData))
 
-    const metadatasArray = []
+    const metadatasArray = [] as TokenMetadata[]
     for (let i = 0; i < tokenIds.length; i++) {
         try {
             const tokenId = Number(tokenIds[i]).toString()
