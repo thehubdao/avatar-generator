@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ArrowSVG from "./SVG/arrowSVG.ui";
 import Image from "next/image";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
@@ -9,6 +9,7 @@ import { useUniversalProfile } from '../../../hooks/useUniversalProfile';
 import { usePrivy } from '@privy-io/react-auth';
 import { useXPVerification } from '../../../hooks/useXPVerification';
 import LogoutSVG from "./SVG/logoutSVG.ui";
+import { useOnClickOutside } from "usehooks-ts";
 
 interface ConnectButtonProps {
   isSigned?: boolean;
@@ -18,6 +19,8 @@ interface ConnectButtonProps {
 }
 
 export default function ConnectButton({ isSigned = false, setIsSigned, address, onLogout }: ConnectButtonProps) {
+  const parentDOM = useRef(null);
+  
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { followerCount, followingCount } = useFollowCount(address);
   const { xpData } = useXPVerification();
@@ -35,8 +38,10 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address, 
 
   const { name, profileImage } = useUniversalProfile(address);
 
+  useOnClickOutside(parentDOM, () => setIsOpen(false));
+
   return (
-    <div className="relative w-fit 2xl:w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">
+    <div ref={parentDOM} className="relative w-fit 2xl:w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">
       {isSigned ? (
         <>
           <button className="w-full flex justify-between items-center p-1" onClick={() => setIsOpen(!isOpen)}>

@@ -1,4 +1,4 @@
-﻿import {GLTFExporterPlugin, GLTFWriter} from "three/examples/jsm/exporters/GLTFExporter";
+﻿import {GLTFExporterPlugin, GLTFWriter} from "three/examples/jsm/exporters/GLTFExporter.js";
 import {VrmStructure} from "../../interfaces/export.interface";
 import {GenerateVrmBoneData, GenerateVrmMaterialData, GetVrmData} from "./vrm.util";
 

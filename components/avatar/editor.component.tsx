@@ -1,7 +1,7 @@
 import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { AnimationMixer } from "three";
-import { GLTF } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { GetGltfModel } from "../../utils/importer.util";
 import { CreateAnimationMixer, SetAnimation } from "../../utils/threejs/animation.util";
 import {
@@ -196,7 +196,7 @@ export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, 
     if (postProcessing)
       AddComposer(postProcessing);
 
-    _avatar = getAvatarBaseResult.value;
+    _avatar = getAvatarBaseResult.value as GLTF;
     BonesFirst(_avatar);
     _startPose = GetPose(_avatar.scene);
 

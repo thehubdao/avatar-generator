@@ -24,7 +24,7 @@ export default function CampaignCard({ title, tokenID, imgSrc, imgAlt, light = f
   }
 
   return (
-    <div className={`group relative ${size === CardSize.Small ? 'w-[228px] h-[272px]' : size === CardSize.Medium ? 'w-[280px] h-[388px]' : 'w-[275px] h-[568px]'} rounded-2xl overflow-hidden ${blocked ? 'cursor-not-allowed':'cursor-pointer'} ${selected ? 'border-4 border-white' : ''}`} onClick={() => onCardClicked()}>
+    <div className={`group relative ${size === CardSize.Small ? 'w-[228px] h-[272px]' : size === CardSize.Medium ? 'w-[280px] h-[388px]' : size === CardSize.Large ? 'w-[275px] h-[568px]':'w-[488px] h-[573px]'} rounded-2xl overflow-hidden ${blocked ? 'cursor-not-allowed':'cursor-pointer'} ${selected ? 'border-4 border-white' : ''}`} onClick={() => onCardClicked()}>
       <div className={`relative w-full ${size === CardSize.Small ? 'h-[228px]' : size === CardSize.Medium ? 'h-[300px]' : 'h-[515px]'}`}>
         <Image src={imgSrc} alt={imgAlt} fill className="object-cover" />
         {overlayText && !selected &&

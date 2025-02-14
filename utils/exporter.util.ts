@@ -1,8 +1,8 @@
-﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader";
-import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter";
+﻿import {GLTF} from "three/examples/jsm/loaders/GLTFLoader.js";
+import {GLTFExporter} from "three/examples/jsm/exporters/GLTFExporter.js";
 import {Delay, LogError, Raise} from "./common.util";
 import {CommonErrorCode, Module} from "../enums/common.enum";
-import {clone} from "three/examples/jsm/utils/SkeletonUtils";
+import {clone} from "three/examples/jsm/utils/SkeletonUtils.js";
 import {SetPose} from "./model.util";
 import {BoneMatrix} from "../types/model.type";
 import {Result} from "../types/common.type";

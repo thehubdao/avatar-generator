@@ -1217,7 +1217,10 @@ export async function GetClaimableDrops(dropId?: string): Promise<DataBaseDrop[]
     } else {
       query = dropsCollection;
       const querySnapshot = await getDocs(query);
-      return querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as DataBaseDrop));
+      return querySnapshot.docs.map(doc => {
+        const data = doc.data() as Record<string, unknown>;
+        return { ...data, id: doc.id } as DataBaseDrop;
+      });
     }
   } catch (error) {
     console.error('Error fetching claimable drops:', error);

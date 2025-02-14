@@ -1,5 +1,5 @@
 ﻿import {Object3D, PCFSoftShadowMap, PerspectiveCamera, Scene, WebGLRenderer} from "three";
-import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls.js";
 import {SceneInterface} from "../../interfaces/scene.interface";
 import {AGVector3} from "../../interfaces/common.interface";
 

@@ -32,7 +32,6 @@ export default function MintUI({
   
   const { wallets } = useSolanaWallets();
 
-
   useEffect(() => {
     if (isMinting) {
       setTimeout(() => {

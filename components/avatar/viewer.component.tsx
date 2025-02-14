@@ -11,7 +11,7 @@ import {
   Vector3,
   WebGLRenderer
 } from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Delay, LogError, LogWarning } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import {
@@ -23,7 +23,7 @@ import {
 } from "../../utils/threejs/scene.util";
 import { AGVector3 } from "../../interfaces/common.interface";
 import { GetToneTexture } from "../../utils/threejs/texture.util";
-import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { CreateEffectComposer } from "../../utils/threejs/postProcessing.util";
 import { ConfigPostProcessing } from "../../interfaces/postProcessing.interface";
 import SceneUtil from "../../utils/scene.utils";
@@ -229,7 +229,7 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
     _scene = GetBaseScene();
     _camera = GetBaseCamera(defaultCamPos);
     _renderer = GetBaseRenderer();
-    _controls = GetBaseCameraControls(_camera, _renderer.domElement, defaultCamLookAt, enablePan);
+    _controls = GetBaseCameraControls(_camera, _renderer.domElement, defaultCamLookAt, enablePan) as OrbitControls;
 
     // mount scene
     threeCanvas.current.appendChild(_renderer.domElement);
