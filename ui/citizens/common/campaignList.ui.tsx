@@ -52,7 +52,6 @@ export default function CampaignList({ collections, setSelectedCampaign }: Campa
                   await handleCollectionClick(el)
                   setSelectedCampaign(el.campaign)
                 }}
-                classStyles=""
               >
                 <CampaignCard
                   title={el.name}
