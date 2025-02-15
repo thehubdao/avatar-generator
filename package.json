@@ -2,6 +2,9 @@
   "name": "avatar-generator",
   "version": "0.4.0",
   "private": true,
+  "engines": {
+    "node": "~18"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -19,7 +22,7 @@
     "@metaplex-foundation/umi-bundle-defaults": "^1.0.0",
     "@metaplex-foundation/umi-web3js-adapters": "^1.0.0",
     "@next/font": "^13.5.5",
-    "@pixiv/three-vrm": "^2.0.6",
+    "@pixiv/three-vrm": "2.0.6",
     "@privy-io/react-auth": "^2.3.0",
     "@reduxjs/toolkit": "^1.9.7",
     "@solana/wallet-adapter-react": "^0.15.35",
@@ -46,7 +49,7 @@
     "siwe": "^2.3.2",
     "swiper": "^11.0.3",
     "tailwindcss-neumorphism": "^0.1.0",
-    "three": "^0.152.2",
+    "three": "^0.154.0",
     "toastify-js": "^1.12.0",
     "usehooks-ts": "^3.1.0"
   },
@@ -57,7 +60,7 @@
     "@types/node": "20.8.6",
     "@types/react": "18.2.28",
     "@types/react-dom": "18.2.13",
-    "@types/three": "^0.152.1",
+    "@types/three": "^0.154.0",
     "@types/toastify-js": "^1.12.3",
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
