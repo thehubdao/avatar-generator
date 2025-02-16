@@ -38,7 +38,7 @@ interface CitizensUIProps {
 export default function CitizensUI({ claimableDrops, currentSection, currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleClaim, handleUnfollowUser }: CitizensUIProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [collectionSupply, setCollectionSupply] = useState<number | undefined>(undefined)
-  const { solanaWallets } = useBlockchainWallet();
+  const { solanaWallets, isSolana } = useBlockchainWallet();
 
   useEffect(() => {
     const fetchCollectionSupply = async () => {
@@ -50,10 +50,14 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
 
   useEffect(() => {
     console.log('loadedTokens', loadedTokens)
-    if (loadedTokens && loadedTokens.length === 0)
+    if (loadedTokens && loadedTokens.length === 0 && !isSolana)
         setIsModalOpen(true)
-      
+          
   }, [loadedTokens])
+
+  useEffect(() => {
+    console.log("CURRENT SECTION", currentSection)
+  }, [currentSection])
 
   return (
     <>

@@ -66,7 +66,7 @@ export default function CampaignList({ collections, setSelectedCampaign }: Campa
             </SwiperSlide>
           ))
         }
-        <SwiperSlide>
+{/*         <SwiperSlide>
           <CampaignCard
             title={'Based Citizens'}
             imgSrc={'/resources/images/campaings/based_citizens.jpg'}
@@ -87,7 +87,7 @@ export default function CampaignList({ collections, setSelectedCampaign }: Campa
             }
             size={CardSize.Big}
           />
-        </SwiperSlide>
+        </SwiperSlide> */}
       </Swiper>
 
     </div>

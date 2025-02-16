@@ -41,24 +41,24 @@ import LogoTheHub from '../../ui/citizens/common/SVG/logoTheHubSVG.ui';
 import Image from 'next/image';
 import SocialButtons from '../../ui/citizens/common/socialButtons.ui';
 import { BlockchainType, useBlockchainWallet } from '../../hooks/useBlockchainWallet';
-import { getAssetsByOwner, getCollectionAssetByOwner } from '../../utils/web3/solana/contract.util';
+import { getCollectionAssetByOwner } from '../../utils/web3/solana/contract.util';
 
 const COLLECTIONS: CitizensCollection[] = [
   {
     name: 'Lukso Citizens',
-    image: '/resources/images/campaings/citizens_collection_image.png',
+    image: '/resources/images/campaings/citizens_collection.jpg',
     campaign: 'vrm_female',
     blockChain: BlockchainType.ETHEREUM
   },
   {
     name: 'Lukso Creators',
-    image: '/resources/images/campaings/creators_collection_image.png',
+    image: '/resources/images/campaings/creators_collection.jpg',
     campaign: 'vrm_male',
     blockChain: BlockchainType.ETHEREUM
   },
   {
     name: 'Kumi',
-    image: '/resources/images/campaings/kumi_collection_image.png',
+    image: '/resources/images/campaings/kumi_collection.jpg',
     campaign: 'kumi',
     blockChain: BlockchainType.SOLANA
   }
@@ -89,7 +89,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const { showSnackbar } = useSnackbar();
   const { user, ready: isReady, logout } = usePrivy()
   const { wallets } = useWallets();
-  const { isSolana, blockchainType, solanaWallets } = useBlockchainWallet();
+  const { isSolana, isEthereum, solanaWallets } = useBlockchainWallet();
   const [isSigned, setIsSigned] = useState(isLoggedIn)
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -162,24 +162,39 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     if (!walletAddress) return
     const asset = await getCollectionAssetByOwner(solanaWallets[0])
     console.log('asset', asset)
-   
-      setCurrentSection(CitizensSections.Mint);
+    if (asset) {
+      setCurrentSection(CitizensSections.View);
       setIsLoading(false);
       setLoadedTokens([])
-     /* else {
       setTokenIdList([{
         tokenId: asset.publicKey,
         campaign: 'kumi',
         metadataUri: asset.uri
       }])
-    } */
+    }
+    else {
+      setCurrentSection(CitizensSections.Mint);
+      setIsLoading(false);
+      setLoadedTokens([])
+    }
+
+
+    /* else {
+    setTokenIdList([{
+      tokenId: asset.publicKey,
+      campaign: 'kumi',
+      metadataUri: asset.uri
+    }])
+  } */
   }
-useEffect(() => {
-  console.log('currentSection', currentSection)
-}, [currentSection])
+  useEffect(() => {
+    console.log('CURRENT SECTION', currentSection)
+  }, [currentSection])
+
   useEffect(() => {
     if (isSolana) {
-      void getSolanaTokensMetadataPromise() 
+      console.log("IS SOLANA GETTING TOKENS METADATA")
+      void getSolanaTokensMetadataPromise()
     } else {
       void getEthereumTokensMetadataPromise()
     }
@@ -435,7 +450,7 @@ useEffect(() => {
       const { id, path, type, name } = val;
       const { tokenMetadata } = currentCollection;
       const bodyIndex = val.type.toLowerCase() as keyof typeof tokenMetadata.body;
-      try{
+      try {
         tokenMetadata.body[bodyIndex] = val as BodyPart; // Adjust logic to Solana
       } catch (error) {
         console.log("ERROR", error)
@@ -463,34 +478,34 @@ useEffect(() => {
         getSingleData(campaign, currentCombination),
       ])
 
-    await SetFeaturesData(campaignParams?.features ?? [])
+      await SetFeaturesData(campaignParams?.features ?? [])
 
-    const bgMap = envMapList?.find(
-      (em) => em.name === 'gray-01'
-    )
-    const lightMap = envMapList?.find(
-      (em) => em.name === campaignParams?.config.envMap?.defLightMap
-    )
-    await SetEnvironment(
-      bgMap?.path,
-      lightMap?.path,
-      campaignParams?.config.envMap?.skyboxConfig
-    )
+      const bgMap = envMapList?.find(
+        (em) => em.name === 'gray-01'
+      )
+      const lightMap = envMapList?.find(
+        (em) => em.name === campaignParams?.config.envMap?.defLightMap
+      )
+      await SetEnvironment(
+        bgMap?.path,
+        lightMap?.path,
+        campaignParams?.config.envMap?.skyboxConfig
+      )
 
-    // Set features from single
-    await loadSingleData()
+      // Set features from single
+      await loadSingleData()
 
-    // Set skin tone
-    await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'ffffff')
+      // Set skin tone
+      await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'ffffff')
 
-    // Set animation
-    const result = await GetAnimationByCampaignAndName(
-      campaignParams?.campaign,
-      campaignParams?.config.defAnimation
-    )
+      // Set animation
+      const result = await GetAnimationByCampaignAndName(
+        campaignParams?.campaign,
+        campaignParams?.config.defAnimation
+      )
 
-    if (result.success) {
-      await ChangeStartAnimation(result.value.at(0)?.path)
+      if (result.success) {
+        await ChangeStartAnimation(result.value.at(0)?.path)
       }
 
       setIsLoading(false)
@@ -838,7 +853,7 @@ useEffect(() => {
       try {
         if (isSolana) {
           // TODO: Solana tokens
-          console.log('Solana getTokensMetadata pending');
+          console.log('Solana getTokensMetadata');
         } else {
           const tokenIds = await getEthereumCampaignsTokenIds(walletAddress);
           if (tokenIds.length <= 0) {
@@ -1000,36 +1015,37 @@ useEffect(() => {
               if (!currentCollection.combination || !campaignParams || !campaignParams.campaign || (currentSection !== CitizensSections.View && currentSection !== CitizensSections.Mint)) return <></>;
               return <AvatarEditor // TODO: Add userWearables
 
-              avatarBasePath={
-                campaignParams.armature
-              }
-              editMode={isEditModeSelected}
-              lights={
-                campaignParams.config.lights
-              }
-              defaultShadow={
-                campaignParams.config
-                  .defShadow
-              }
-              defaultCamera={
-                campaignParams.config.defCam
-              }
-              postProcessing={
-                campaignParams.config
-                  .postProcessing
-              }
-              onReady={() => {
-                console.log("CAMPAIGN ON AVATAR BUILDER READY 1", currentCollection.campaign)
-                return onAvatarBuilderReady(
-                  currentCollection.combination,
-                  currentCollection.campaign
-                )
-              }
-              }
-            />}()}
+                avatarBasePath={
+                  campaignParams.armature
+                }
+                editMode={isEditModeSelected}
+                lights={
+                  campaignParams.config.lights
+                }
+                defaultShadow={
+                  campaignParams.config
+                    .defShadow
+                }
+                defaultCamera={
+                  campaignParams.config.defCam
+                }
+                postProcessing={
+                  campaignParams.config
+                    .postProcessing
+                }
+                onReady={() => {
+                  console.log("CAMPAIGN ON AVATAR BUILDER READY 1", currentCollection.campaign)
+                  return onAvatarBuilderReady(
+                    currentCollection.combination,
+                    currentCollection.campaign
+                  )
+                }
+                }
+              />
+            }()}
           </div>
           {/* CITIZENS HUD */}
-          {!isEditModeSelected && signer &&
+          {!isEditModeSelected && ((isEthereum && signer) || isSolana) &&
             <CitizensUI
               isSavingCombination={isSavingCombination}
               currentSection={currentSection}
@@ -1040,7 +1056,7 @@ useEffect(() => {
               exportModel={() => exportModel()}
               address={walletAddress ?? ""}
               leaderboardData={leaderboardData}
-              signer={signer}
+              signer={signer as any}
               handleFollowUser={handleFollowUser}
               handleUnfollowUser={handleUnfollowUser}
               claimableDrops={claimableDrops}
