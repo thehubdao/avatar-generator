@@ -54,11 +54,7 @@ const campaignWeb3Data: CampaignData = {
         contractAddress: '0x74654920356257981f6b63a65ad72d4d9bc21929',
         baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
     }, 'vrm_female': { contractAddress: '0x754a5d007d5f1188ef0db892ee115a7c01b38fa3', baseCid: '' },
-    kumi: {
-        contractAddress: '',
-        baseCid: ''
-    }
-}
+} as CampaignData
 
 const schemas = [
     {
@@ -132,11 +128,10 @@ export const getCampaignTokenIds = async (campaignAddress: string, address: stri
 
 export const getEthereumCampaignsTokenIds = async (address: string) => {
     let campaignsTokenIds = [] as TokenId[]
-    for (const campaign of Object.keys(campaignWeb3Data)) {
+    for (const campaign of Object.keys(campaignWeb3Data).filter((campaign) => campaign)) {
         const typpedCampaign = campaign as keyof typeof campaignWeb3Data
         const { contractAddress } = campaignWeb3Data[typpedCampaign]
         let tokenIds: string[] = await getCampaignTokenIds(contractAddress, address)
-
         if (campaign === 'vrm_female') tokenIds = tokenIds.filter((tokenId) => !noMetadataTokens.includes(Number(tokenId)))
 
         if (!tokenIds || tokenIds.length == 0) continue

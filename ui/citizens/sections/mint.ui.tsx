@@ -114,7 +114,7 @@ export default function MintUI({
                 
             await createAsset(wallets[0], {
               name: "KUMI",
-              uri: "https://lukso.mypinata.cloud/ipfs/bafkreigq5qxnabsyja7ccitr5igyzkqcov76jrapucwxvdlsxucmxqgx2y?pinataGatewayToken=VFS9STK6cE1_B6uNQUciXrcRBAR7ALuzCgJaopOc5qkPiiYfJfkFjPifzfU6l4Di",
+              uri: "ipfs://"+process.env.NEXT_PUBLIC_KUMI_IPFS_HASH,
               plugins: []
             })
                }} />

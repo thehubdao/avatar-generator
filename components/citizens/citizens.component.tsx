@@ -159,6 +159,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }
 
   const getSolanaTokensMetadataPromise = async () => {
+    console.log('getSolanaTokensMetadataPromise', walletAddress)
     if (!walletAddress) return
     const asset = await getCollectionAssetByOwner(solanaWallets[0])
     console.log('asset', asset)
@@ -192,13 +193,14 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }, [currentSection])
 
   useEffect(() => {
+    console.log("GETTING TOKENS METADATA")
     if (isSolana) {
       console.log("IS SOLANA GETTING TOKENS METADATA")
       void getSolanaTokensMetadataPromise()
     } else {
       void getEthereumTokensMetadataPromise()
     }
-  }, [walletAddress])
+  }, [walletAddress, isSolana])
 
   const loadEthereumTokensMetadata = async () => {
     let isFirstToken = false;
@@ -232,11 +234,45 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   };
 
+  const loadSolanaTokensMetadata = async () => {
+    let isFirstToken = false;
+    try {
+      if (!tokenIdList || tokenIdList.length === 0) return setLoadedTokens([])
+      tokenIdList.forEach(async (tokenIdMetadata) => {
+        try {
+          if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
+            throw new Error('Invalid IPFS hash format');
+          }
+          const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
+          if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
+            updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
+            isFirstToken = true;
+          }
+
+          setLoadedTokens(prevTokens => {
+            if (!prevTokens) return [tokenMetadata];
+            return [...prevTokens, tokenMetadata];
+          });
+        } catch (error) {
+          LogError(Module.Citizens, `Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
+        }
+      })
+
+
+
+    } catch (error) {
+      LogError(Module.Citizens, 'Error loading token metadata:', error);
+    }
+
+  };
+
+
   useEffect(() => {
     if (!tokenIdList && !isSolana) return
 
 
     if (isSolana) {
+      loadSolanaTokensMetadata();
       updateCollection('kumi', '0-0-0-0-0-0-0-0-0-0', {} as TokenMetadata)
     } else {
       loadEthereumTokensMetadata();
@@ -1012,7 +1048,8 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           {/* CANVAS */}
           <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
             {function () {
-              if (!currentCollection.combination || !campaignParams || !campaignParams.campaign || (currentSection !== CitizensSections.View && currentSection !== CitizensSections.Mint)) return <></>;
+              console.log("CURRENT COLLECTION", currentCollection )
+              if (!currentCollection.combination || !campaignParams || !campaignParams.campaign ) return <></>;
               return <AvatarEditor // TODO: Add userWearables
 
                 avatarBasePath={
