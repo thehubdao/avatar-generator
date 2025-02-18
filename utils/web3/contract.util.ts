@@ -4,7 +4,7 @@ import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import WerableContractAbi from '../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { Campaign, CampaignData, CampaignDrops, Drop, TokenId, TokenMetadata } from '../../types/metadata.type';
-import { getIPFSData, getImageUrl } from './lukso.util';
+import { getEthereumIPFSData, getEthereumImageUrl, getSolanaIPFSData, getSolanaImageUrl } from './lukso.util';
 import { GetCollectionDocs } from '../firebase.util';
 import noMetadataTokens from '../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
@@ -36,7 +36,7 @@ const EOA = new ethers.Wallet(PK).connect(provider);
 
 const OPERATION_CALL = 0;
 
-export const tempCampaignSwitch = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b' }
+export const tempCampaignSwitch = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b', 'kumi':'kumi' }
 
 //TESTNET
 
@@ -185,15 +185,28 @@ export const getCampaignTokenMetadataUris = async (campaign: Campaign, tokenIds:
 
 
 
-export const getTokenMetadata = async (tokenId: TokenId) => {
-    const { LSP4Metadata: metadata } = await getIPFSData(tokenId.metadataUri)
+export const getEthereumTokenMetadata = async (tokenId: TokenId) => {
+    const { LSP4Metadata: metadata } = await getEthereumIPFSData(tokenId.metadataUri)
     metadata.tokenId = tokenId.tokenId
     metadata.campaign = tokenId.campaign
 
     if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
     if (!metadata.baseCombination) metadata.baseCombination = metadata.combination
     metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch]}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
-    metadata.fallbackImageUrl = getImageUrl(metadata)
+    metadata.fallbackImageUrl = getEthereumImageUrl(metadata)
+
+    return metadata
+}
+
+export const getSolanaTokenMetadata = async (tokenId: TokenId) => {
+    const metadata = await getSolanaIPFSData(tokenId.metadataUri)
+    metadata.tokenId = tokenId.tokenId
+    metadata.campaign = tokenId.campaign
+
+    if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
+    if (!metadata.baseCombination) metadata.baseCombination = metadata.combination
+    metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch]}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
+    metadata.fallbackImageUrl = getSolanaImageUrl(metadata)
 
     return metadata
 }
@@ -220,7 +233,7 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
             const decodedData = decodedDataArray[i]
             const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenId}`
             if (!baseCid && !decodedData.value) continue
-            const tokenMetadata = await getTokenMetadata({ metadataUri, campaign, tokenId })
+            const tokenMetadata = await getEthereumTokenMetadata({ metadataUri, campaign, tokenId })
             metadatasArray.push(tokenMetadata)
         } catch (err) { console.log(err) }
     }
@@ -295,7 +308,7 @@ export const getUserFeatures = async (address: string) => {
 export const verifyMetadataContent = async (metadataUrl: string, metadataIpfsData: { "LSP4Metadata": TokenMetadata }) => {
     try {
         // 1. Get the raw content from IPFS
-        const rawContent = await getIPFSData(metadataUrl.split('//')[1]);
+        const rawContent = await getEthereumIPFSData(metadataUrl.split('//')[1]);
         
         // 2. Generate hash of the raw content
         const contentHash = ethers.keccak256(
@@ -345,7 +358,7 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: string, meta
     );
     
     const metadataUrl = `ipfs://${metadataUri}`;
-    const metadataIpfsData = await getIPFSData(metadataUrl.split('//')[1]);
+    const metadataIpfsData = await getEthereumIPFSData(metadataUrl.split('//')[1]);
 
 /*     // Verify content before proceeding
     const isValid = await verifyMetadataContent(metadataUrl, metadataIpfsData);

@@ -1,4 +1,4 @@
-import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers"
+import { BrowserProvider, ethers, JsonRpcProvider, JsonRpcSigner } from "ethers"
 import { TokenMetadata } from "../../types/metadata.type"
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
@@ -48,7 +48,7 @@ const LSP26_ABI = [
 ];
 
 
-export const getIPFSData = async (cid: string) => {
+export const getEthereumIPFSData = async (cid: string) => {
   const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
   const ipfsRequest = await fetch(ipfsHTTPUrl)
   const ipfsData = await ipfsRequest.json() as { 'LSP4Metadata': TokenMetadata }
@@ -56,7 +56,15 @@ export const getIPFSData = async (cid: string) => {
   return ipfsData
 }
 
-export const getImageUrl = (metadata: TokenMetadata) => {
+export const getSolanaIPFSData = async (cid: string) => {
+  const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+  const ipfsRequest = await fetch(ipfsHTTPUrl)
+  const ipfsData = await ipfsRequest.json() as TokenMetadata 
+  
+  return ipfsData
+}
+
+export const getEthereumImageUrl = (metadata: TokenMetadata) => {
     const ipfsUrl = metadata.images[0][0].url
     const cid = ipfsUrl.split('//')[1]
 
@@ -64,6 +72,13 @@ export const getImageUrl = (metadata: TokenMetadata) => {
     return imageUrl
 }
 
+export const getSolanaImageUrl = (metadata: TokenMetadata) => {
+    const ipfsUrl = metadata.imageUrl
+    const cid = ipfsUrl.split('//')[1]
+
+    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+    return imageUrl
+}
 export async function GetFollowerCounts(address: string): Promise<{ followerCount: number, followingCount: number }> {
     const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
@@ -124,7 +139,7 @@ export async function GetUniversalProfileData(address: string) {
   }
 }
 
-export async function FollowUser(addressToFollow: string, provider: JsonRpcProvider) {
+export async function FollowUser(addressToFollow: string, provider: BrowserProvider) {
   try {
     const signer = await provider.getSigner();
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
@@ -139,7 +154,7 @@ export async function FollowUser(addressToFollow: string, provider: JsonRpcProvi
   }
 }
 
-export async function UnfollowUser(addressToUnfollow: string, provider: JsonRpcProvider) {
+export async function UnfollowUser(addressToUnfollow: string, provider: BrowserProvider) {
   try {
     const signer = await provider.getSigner();
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
@@ -154,17 +169,16 @@ export async function UnfollowUser(addressToUnfollow: string, provider: JsonRpcP
   }
 }
 
-export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], provider: JsonRpcProvider) {
+export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], provider: BrowserProvider, walletAddress: string) {
   try {
     const signer = await provider.getSigner();
-    const signerAddress = await signer.getAddress();
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
 
     // Check follow status for each user in parallel
     const statuses = await Promise.all(
       leaderboardData.map(async (user) => {
         try {
-          const isFollowing = await lsp26Contract.isFollowing(signerAddress, user.address);
+          const isFollowing = await lsp26Contract.isFollowing(walletAddress, user.address);
           return [user.address, isFollowing];
         } catch (error) {
           console.error(`Error checking follow status for ${user.address}:`, error);

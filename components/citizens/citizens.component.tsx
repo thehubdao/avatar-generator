@@ -6,12 +6,11 @@ import { Campaign, CampaignDrops, TokenId, TokenMetadata } from "../../types/met
 import LoginUI from "../../ui/citizens/sections/login.ui";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import CitizensUI from "../../ui/citizens/citizens.ui";
-import { burnDrop, checkClaimStatus, getEthereumCampaignsTokenIds, getUserFeatures, setTokenMetadata } from "../../utils/web3/contract.util";
+import { burnDrop, checkClaimStatus, getEthereumCampaignsTokenIds, getEthereumTokenMetadata, getSolanaTokenMetadata, getUserFeatures, setTokenMetadata } from "../../utils/web3/contract.util";
 import { CitizensCollection, DataBaseDrop } from "../../interfaces/citizens.interface";
 import Button from "../../ui/citizens/common/button.ui";
 import ArrowLinkSVG from "../../ui/citizens/common/SVG/arrowLinkSVG.ui";
 import { CitizensSections } from "../../enums/citizens/common.enum";
-import { getTokenMetadata } from "../../utils/web3/contract.util"; // Add this import
 import { BodyPart, CollectionType } from "../../types/avatar.type";
 import AvatarEditor, {
   ChangeFeature,
@@ -88,7 +87,7 @@ let featureList: FeatureInterface[] | undefined
 export default function CitizensComponent({ campaignParams, setCampaign, isLoggedIn, closeConnection }: CitizensComponentProps) {
   const { showSnackbar } = useSnackbar();
   const { user } = usePrivy()
-  const { isSolana, isEthereum, solanaWallets,ethWallets, walletAddress, provider, logout, authenticated } = useBlockchainWallet();
+  const { isSolana, isEthereum, solanaWallets, ethWallets, walletAddress, provider, logout, authenticated } = useBlockchainWallet();
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
@@ -149,15 +148,14 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const getSolanaTokensMetadataPromise = async () => {
     if (!walletAddress) return
     const asset = await getCollectionAssetByOwner(solanaWallets[0])
-    console.log('asset', asset)
+    console.log('ASSET', asset)
     if (asset) {
       setCurrentSection(CitizensSections.View);
       setIsLoading(false);
-      setLoadedTokens([])
       setTokenIdList([{
         tokenId: asset.publicKey,
         campaign: 'kumi',
-        metadataUri: asset.uri
+        metadataUri: asset.uri.split('//')[1]
       }])
     }
     else {
@@ -178,6 +176,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   useEffect(() => {
     if (isSolana) {
+      console.log("SOLANA GET TOKENS METADATA")
       void getSolanaTokensMetadataPromise()
     } else if (isEthereum) {
       void getEthereumTokensMetadataPromise()
@@ -195,7 +194,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
             throw new Error('Invalid IPFS hash format');
           }
-          const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
+          const tokenMetadata = await getEthereumTokenMetadata(tokenIdMetadata);
           const selectedCampaign = selectedLoginCampaign || 'vrm_male'
           if (!isFirstToken && tokenIdMetadata.campaign === selectedCampaign) {
             updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
@@ -221,14 +220,17 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   const loadSolanaTokensMetadata = async () => {
     let isFirstToken = false;
-/*     try {
+    try {
+      console.log("LOAD SOLANA TOKENS METADATA", tokenIdList)
       if (!tokenIdList || tokenIdList.length === 0) return setLoadedTokens([])
+      console.log(tokenIdList, 'tokenIdList')
       tokenIdList.forEach(async (tokenIdMetadata) => {
         try {
           if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
             throw new Error('Invalid IPFS hash format');
           }
-          const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
+          const tokenMetadata = await getSolanaTokenMetadata(tokenIdMetadata);
+          console.log("TOKEN METADATA", tokenMetadata)
           if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
             updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
             isFirstToken = true;
@@ -247,7 +249,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
     } catch (error) {
       LogError(Module.Citizens, 'Error loading token metadata:', error);
-    } */
+    }
 
   };
 
@@ -760,6 +762,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   useEffect(() => {
     if (campaignParams) {
       setIsLoading(true);
+      console.log("CAMPAIGN PARAMS TO VIEW", campaignParams)
       setCurrentSection(CitizensSections.View);
     }
   }, [campaignParams])
@@ -890,24 +893,24 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     if (!provider) return;
 
     try {
-        const response = await fetch('/api/v1/leaderboard');
-        if (!response.ok) throw new Error('Failed to fetch leaderboard data');
-        const data = await response.json();
-        const leaderboardWithProfileData = await Promise.all(data.map(async (entry: LeaderboardEntry) => {
-          const profileData = await GetUniversalProfileData(entry.address);
-          return {
-            ...entry,
-            name: profileData.name,
-            profileImage: profileData.profileImage,
-            isFollowing: false
-          };
-        }));
-        const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, provider);
-        leaderboardWithProfileData.forEach(entry => {
-          entry.isFollowing = followStatuses[entry.address] || false;
-        });
-        setLeaderboardData(leaderboardWithProfileData);
-      
+      const response = await fetch('/api/v1/leaderboard');
+      if (!response.ok) throw new Error('Failed to fetch leaderboard data');
+      const data = await response.json();
+      const leaderboardWithProfileData = await Promise.all(data.map(async (entry: LeaderboardEntry) => {
+        const profileData = await GetUniversalProfileData(entry.address);
+        return {
+          ...entry,
+          name: profileData.name,
+          profileImage: profileData.profileImage,
+          isFollowing: false
+        };
+      }));
+      const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, provider, walletAddress);
+      leaderboardWithProfileData.forEach(entry => {
+        entry.isFollowing = followStatuses[entry.address] || false;
+      });
+      setLeaderboardData(leaderboardWithProfileData);
+
     } catch (error) {
       setLeaderboardData(undefined);
       LogError(Module.Citizens, 'Error fetching leaderboard data:', error);
@@ -1001,7 +1004,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           </div>
           {/* CANVAS */}
           <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-            {currentCollection.combination && campaignParams && campaignParams.campaign&& (currentSection === CitizensSections.View || currentSection === CitizensSections.Mint) && <AvatarEditor
+            {currentCollection.combination && campaignParams && campaignParams.campaign && (currentSection === CitizensSections.View || currentSection === CitizensSections.Mint) && <AvatarEditor
               avatarBasePath={
                 campaignParams.armature
               }
@@ -1067,7 +1070,8 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           <LoginUI
             collections={collectionList}
             setSelectedCampaign={(selectedCampaign?: Campaign) => {
-              setSelectedLoginCampaign(selectedCampaign)}}
+              setSelectedLoginCampaign(selectedCampaign)
+            }}
           />
         </>
 

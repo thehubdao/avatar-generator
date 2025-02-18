@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { GetFollowerCounts } from '../utils/web3/lukso.util';
+import { useBlockchainWallet } from './useBlockchainWallet';
 
 
 
@@ -8,10 +9,11 @@ export function useFollowCount(address: string | undefined) {
     const [followingCount, setfollowingCount] = useState<number>(-1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
+    const { isSolana } = useBlockchainWallet();
 
   useEffect(() => {
     async function fetchFollowCount() {
-      if (!address) {
+      if (!address || isSolana) {
         setIsLoading(false);
         return;
       }

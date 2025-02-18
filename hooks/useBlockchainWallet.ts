@@ -1,6 +1,7 @@
 import { usePrivy } from '@privy-io/react-auth';
 import { useWallets } from '@privy-io/react-auth';
 import { useSolanaWallets } from '@privy-io/react-auth/solana';
+import { BrowserProvider } from 'ethers';
 import { useEffect, useState } from 'react';
 
 export enum BlockchainType {
@@ -17,13 +18,19 @@ export function useBlockchainWallet() {
   const [provider, setProvider] = useState<any>(undefined);
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || provider) return;
     if (user?.wallet?.chainType == BlockchainType.SOLANA) {
+      console.log(user, 'user')
       setBlockchainType(BlockchainType.SOLANA);
       setProvider({})
     } else if (user?.wallet?.chainType == BlockchainType.ETHEREUM) {
+      console.log(user, 'user')
       setBlockchainType(BlockchainType.ETHEREUM);
-      ethWallets[0]?.getEthereumProvider().then(setProvider);
+
+      ethWallets[0]?.getEthereumProvider().then(ethProvider => {
+        const browserProvider = new BrowserProvider(ethProvider);
+        setProvider(browserProvider);
+      });
     }
 
   }, [ready, solanaWallets, ethWallets]);
@@ -39,6 +46,7 @@ export function useBlockchainWallet() {
     privyLogout();
     setProvider(undefined);
   }
+
 
   return {
     blockchainType,

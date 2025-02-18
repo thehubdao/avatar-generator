@@ -10,6 +10,7 @@ import { usePrivy } from '@privy-io/react-auth';
 import { useXPVerification } from '../../../hooks/useXPVerification';
 import LogoutSVG from "./SVG/logoutSVG.ui";
 import { useOnClickOutside } from "usehooks-ts";
+import { useBlockchainWallet } from "../../../hooks/useBlockchainWallet";
 
 interface ConnectButtonProps {
   isSigned?: boolean;
@@ -19,7 +20,7 @@ interface ConnectButtonProps {
 
 export default function ConnectButton({ isSigned, address, onLogout }: ConnectButtonProps) {
   const parentDOM = useRef(null);
-  
+  const { isSolana } = useBlockchainWallet();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { followerCount, followingCount } = useFollowCount(address);
   const { xpData } = useXPVerification();
@@ -98,7 +99,7 @@ export default function ConnectButton({ isSigned, address, onLogout }: ConnectBu
                   <p className="w-full font-light text-center text-2xl pt-4 pb-1 truncate">
                     {name || (address ? FormatWalletAddress(address, 6) : 'No name')}
                   </p>
-                  <div className="w-full flex justify-between">
+                  {!isSolana && <div className="w-full flex justify-between">
                     <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-3 sm:px-4">
                       <p>{followerCount}</p>
                       <p>Followers</p>
@@ -107,7 +108,7 @@ export default function ConnectButton({ isSigned, address, onLogout }: ConnectBu
                       <p>{followingCount}</p>
                       <p>Following</p>
                     </div>
-                  </div>
+                  </div>}
                   <div className="w-full pb-3">
                     <p className="text-center py-1 opacity-50">XP: {userXP}/{nextLevelXP}</p>
                     <div className="h-1 w-full bg-citizens-gray rounded-full overflow-hidden">

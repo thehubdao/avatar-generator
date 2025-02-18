@@ -32,16 +32,6 @@ export default function MintUI({
   
   const { wallets } = useSolanaWallets();
 
-  useEffect(() => {
-    if (isMinting) {
-      setTimeout(() => {
-        setIsMinted(true);
-      }, 3000);
-    }
-  }, [isMinting])
-  useEffect(() => {
-    console.log("MINT UI RENDERED", isModalOpen)
-  }, [isModalOpen])
   return (
     <>
       {!isModalOpen &&
@@ -117,6 +107,7 @@ export default function MintUI({
               uri: "ipfs://"+process.env.NEXT_PUBLIC_KUMI_IPFS_HASH,
               plugins: []
             })
+            setIsMinted(true)
                }} />
             </div>
           </div>
