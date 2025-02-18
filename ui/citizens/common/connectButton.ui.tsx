@@ -13,24 +13,17 @@ import { useOnClickOutside } from "usehooks-ts";
 
 interface ConnectButtonProps {
   isSigned?: boolean;
-  setIsSigned: (signed: boolean) => void;
   address?: string;
   onLogout?: () => void;
 }
 
-export default function ConnectButton({ isSigned = false, setIsSigned, address, onLogout }: ConnectButtonProps) {
+export default function ConnectButton({ isSigned, address, onLogout }: ConnectButtonProps) {
   const parentDOM = useRef(null);
   
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { followerCount, followingCount } = useFollowCount(address);
   const { xpData } = useXPVerification();
-  const { authenticated: isAuthenticated, user, ready: isReady } = usePrivy();
-
-  useEffect(() => {
-    if (isAuthenticated && user) {
-      setIsSigned(true);
-    }
-  }, [isAuthenticated, user, setIsSigned]);
+  const { authenticated: isAuthenticated, ready: isReady, login } = usePrivy();
 
   const userXP = xpData?.xp ?? 0;
   const userLevel = xpData?.level ?? 0;
@@ -39,6 +32,10 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address, 
   const { name, profileImage } = useUniversalProfile(address);
 
   useOnClickOutside(parentDOM, () => setIsOpen(false));
+
+  useEffect(() => {
+    console.log(isSigned)
+  }, [isSigned])
 
   return (
     <div ref={parentDOM} className="relative w-fit 2xl:w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">
@@ -146,7 +143,9 @@ export default function ConnectButton({ isSigned = false, setIsSigned, address, 
       ) : (
         <ConnectWeb3Button
           classStyles="w-full h-full"
-          setIsSigned={setIsSigned}
+          onClick={() => {
+            login({ walletChainType: 'ethereum-and-solana' })
+          }}
         >
           <div className="w-full h-full font-light text-lg px-4">
             {!isReady ? "Loading..." :

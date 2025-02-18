@@ -8,7 +8,7 @@ import Collection from "./sections/collection.ui";
 import LeaderBoard from "./sections/leaderBoard.ui";
 import Play from "./sections/play.ui";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
-import { JsonRpcSigner } from "ethers";
+import { JsonRpcProvider } from "ethers";
 import Modal from "./common/modal.ui";
 import Button from "./common/button.ui";
 import { DataBaseDrop } from "../../interfaces/citizens.interface";
@@ -27,7 +27,7 @@ interface CitizensUIProps {
   exportModel: () => Promise<void>;
   address: string;
   leaderboardData?: LeaderboardEntry[];
-  signer: JsonRpcSigner | null;
+  provider: JsonRpcProvider | null;
   handleFollowUser: (address: string) => Promise<boolean>;
   handleUnfollowUser: (address: string) => Promise<boolean>;
   handleClaim: (drop: DataBaseDrop) => Promise<boolean>
@@ -35,7 +35,7 @@ interface CitizensUIProps {
 }
 
 
-export default function CitizensUI({ claimableDrops, currentSection, currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, signer, handleFollowUser, handleClaim, handleUnfollowUser }: CitizensUIProps) {
+export default function CitizensUI({ claimableDrops, currentSection, currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, provider, handleFollowUser, handleClaim, handleUnfollowUser }: CitizensUIProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [collectionSupply, setCollectionSupply] = useState<number | undefined>(undefined)
   const { solanaWallets, isSolana } = useBlockchainWallet();
@@ -77,7 +77,7 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
             loadedTokens={loadedTokens}
             currentCollection={currentCollection}
             updateCollection={updateCollection}
-            signer={signer}
+            provider={provider}
             claimableDrops={claimableDrops}
             handleClaim={handleClaim} />
         </>

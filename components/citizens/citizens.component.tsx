@@ -87,17 +87,13 @@ let featureList: FeatureInterface[] | undefined
 
 export default function CitizensComponent({ campaignParams, setCampaign, isLoggedIn, closeConnection }: CitizensComponentProps) {
   const { showSnackbar } = useSnackbar();
-  const { user, ready: isReady, logout } = usePrivy()
-  const { wallets } = useWallets();
-  const { isSolana, isEthereum, solanaWallets } = useBlockchainWallet();
-  const [isSigned, setIsSigned] = useState(isLoggedIn)
+  const { user } = usePrivy()
+  const { isSolana, isEthereum, solanaWallets,ethWallets, walletAddress, provider, logout, authenticated } = useBlockchainWallet();
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
   const [isBurguerOpen, setIsBurguerOpen] = useState<boolean>(false);
-
-  const [walletAddress, setWalletAddress] = useState<string | undefined>(undefined)
 
   const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>();
 
@@ -126,8 +122,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[] | undefined>([]);
 
-  const [signer, setSigner] = useState<JsonRpcSigner | undefined>();
-
 
   const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => {
     const newCollection: CollectionType = {
@@ -139,12 +133,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     setCampaign(newCollection.campaign); // This updates the parent state
 
   }, [setCampaign]);
-
-  useEffect(() => {
-    if (!user?.wallet?.address) return
-    setWalletAddress(user.wallet.address.toLowerCase())
-    setIsSigned(true);
-  }, [user?.wallet?.address])
 
   const getEthereumTokensMetadataPromise = async () => {
     if (!walletAddress) return
@@ -159,7 +147,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }
 
   const getSolanaTokensMetadataPromise = async () => {
-    console.log('getSolanaTokensMetadataPromise', walletAddress)
     if (!walletAddress) return
     const asset = await getCollectionAssetByOwner(solanaWallets[0])
     console.log('asset', asset)
@@ -188,21 +175,18 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     }])
   } */
   }
-  useEffect(() => {
-    console.log('CURRENT SECTION', currentSection)
-  }, [currentSection])
 
   useEffect(() => {
-    console.log("GETTING TOKENS METADATA")
     if (isSolana) {
-      console.log("IS SOLANA GETTING TOKENS METADATA")
       void getSolanaTokensMetadataPromise()
-    } else {
+    } else if (isEthereum) {
       void getEthereumTokensMetadataPromise()
     }
-  }, [walletAddress, isSolana])
+  }, [walletAddress, isSolana, isEthereum])
 
   const loadEthereumTokensMetadata = async () => {
+    if (!tokenIdList) return
+
     let isFirstToken = false;
     try {
       if (!tokenIdList || tokenIdList.length === 0) return setLoadedTokens([])
@@ -212,7 +196,8 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
             throw new Error('Invalid IPFS hash format');
           }
           const tokenMetadata = await getTokenMetadata(tokenIdMetadata);
-          if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
+          const selectedCampaign = selectedLoginCampaign || 'vrm_male'
+          if (!isFirstToken && tokenIdMetadata.campaign === selectedCampaign) {
             updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
             isFirstToken = true;
           }
@@ -236,7 +221,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   const loadSolanaTokensMetadata = async () => {
     let isFirstToken = false;
-    try {
+/*     try {
       if (!tokenIdList || tokenIdList.length === 0) return setLoadedTokens([])
       tokenIdList.forEach(async (tokenIdMetadata) => {
         try {
@@ -262,25 +247,23 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
     } catch (error) {
       LogError(Module.Citizens, 'Error loading token metadata:', error);
-    }
+    } */
 
   };
 
 
   useEffect(() => {
-    if (!tokenIdList && !isSolana) return
-
-
+    console.log("IS SOLANA", isSolana, "IS ETHEREUM", isEthereum)
     if (isSolana) {
       loadSolanaTokensMetadata();
       updateCollection('kumi', '0-0-0-0-0-0-0-0-0-0', {} as TokenMetadata)
-    } else {
+    } else if (isEthereum) {
       loadEthereumTokensMetadata();
     }
-  }, [tokenIdList, isSolana]);
+  }, [tokenIdList, isSolana, isEthereum]);
 
 
-  const handleUserFeatures = async () => {
+  const handleEthereumUserFeatures = async () => {
     if (!walletAddress) return
     const features = await getUserFeatures(walletAddress)
 
@@ -290,40 +273,42 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   useEffect(() => {
     if (isSolana) {
       /* handleSolanaUserFeatures() */
-    } else {
-      handleUserFeatures()
+    } else if (isEthereum) {
+      handleEthereumUserFeatures()
     }
-  }, [walletAddress])
+  }, [walletAddress, isEthereum, isSolana])
 
 
   useEffect(() => {
     if (isSolana) {
       /* void getSolanaFeatureList() */
-    } else {
-      void getFeatureList()
+    } else if (isEthereum) {
+      void getEthereumFeatureList()
     }
-  }, [userWearables])
+  }, [userWearables, isEthereum, isSolana])
 
+
+  async function fetchEthereumDrops() {
+    if (!provider) return
+    const drops = await FetchClaimableDrops();
+    Promise.all(drops.map(async (drop) => {
+      drop.owned = await checkClaimStatus(drop, provider, user?.wallet?.address || '');
+    }))
+    setClaimableDrops(drops);
+  }
 
   useEffect(() => {
-    async function fetchDrops() {
-      if (!signer) return
-      const drops = await FetchClaimableDrops();
-      Promise.all(drops.map(async (drop) => {
-        drop.owned = await checkClaimStatus(drop, signer, user?.wallet?.address || '');
-      }))
-      setClaimableDrops(drops);
-    }
+
     if (isSolana) {
       /* fetchSolanaDrops(); */
-    } else {
-      fetchDrops();
+    } else if (isEthereum) {
+      fetchEthereumDrops();
     }
-  }, [signer]);
+  }, [provider, isEthereum, isSolana]);
 
 
-  const handleClaim = async (drop: DataBaseDrop) => {
-    if (!user?.wallet || !signer) return false;
+  const handleEthereumClaim = async (drop: DataBaseDrop) => {
+    if (!user?.wallet || !provider) return false;
 
     try {
       const isApproved = await ApproveClaimForUser(user.wallet.address, drop.id)
@@ -332,7 +317,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
         return false;
       }
 
-      const isOwned = await claimDrop(drop, signer, user.wallet.address);
+      const isOwned = await claimDrop(drop, provider, user.wallet.address);
 
       setClaimableDrops(prevDrops =>
         prevDrops.map(d =>
@@ -342,7 +327,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
         )
       );
 
-      await handleUserFeatures();
+      await handleEthereumUserFeatures();
       return true;
     } catch (error) {
       LogError(Module.Citizens, 'Error claiming drop:', error);
@@ -378,7 +363,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     accessoryList = result.success ? result.value : undefined
   }
 
-  async function getFeatureList() {
+  async function getEthereumFeatureList() {
     if (!userWearables) return
     const result = await GetAssetsListByCampaign(campaignParams?.campaign)
     featureList = result.success ? result.value : undefined
@@ -470,7 +455,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     )
     singleInitData = numResult.success ? numResult.value : undefined;
     await getAccessoryList();
-    await getFeatureList();
+    await getEthereumFeatureList();
 
     singleInitData?.features.forEach((feature) => {
       addReplaceAttribute(feature.val.type, feature.val.name);
@@ -505,6 +490,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     currentCombination: string,
     campaign?: string
   ) {
+    console.log("ON AVATAR BUILDER READY", currentCombination, campaign)
     if (!campaign) return
     try {
       setIsLoading(true);
@@ -752,7 +738,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
         const drop = burnDropArray[i]
         await burnDrop(walletAddress, currentCampaign, drop)
       }
-      await handleUserFeatures()
+      await handleEthereumUserFeatures()
 
       setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
       onSavedCombinationSnackbar();
@@ -779,10 +765,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }, [campaignParams])
 
   const handleFollowUser = async (addressToFollow: string) => {
-    if (!signer) return false;
+    if (!provider) return false;
     try {
-
-      const isSuccess = await FollowUser(addressToFollow, signer);
+      const isSuccess = await FollowUser(addressToFollow, provider);
       if (isSuccess) {
         setLeaderboardData(prevData =>
           prevData && prevData.map(entry =>
@@ -803,9 +788,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   };
 
   const handleUnfollowUser = async (addressToUnfollow: string) => {
-    if (!signer) return false;
+    if (!provider) return false;
     try {
-      const isSuccess = await UnfollowUser(addressToUnfollow, signer);
+      const isSuccess = await UnfollowUser(addressToUnfollow, provider);
       if (isSuccess) {
         setLeaderboardData(prevData =>
           prevData && prevData.map(entry =>
@@ -825,41 +810,13 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     }
   };
 
-  useEffect(() => {
-    if (!isReady || !wallets[0] || signer) return;
-
-    const setupSigner = async () => {
-      try {
-        if (isSolana) {
-          // TODO: Solana setup
-          console.log('Solana signer setup pending');
-        } else {
-          const ethProvider = await wallets[0].getEthereumProvider();
-          const browserProvider = new BrowserProvider(ethProvider);
-          const newSigner = await browserProvider.getSigner();
-          setSigner(newSigner);
-        }
-      } catch (error) {
-        console.error('Error setting up signer:', error);
-      }
-    };
-
-    if (isSolana) {
-      /* setupSolanaSigner(); */
-    } else {
-      setupSigner();
-    }
-  }, [isReady, wallets, signer, isSolana]);
-
-
   const getEthereumUserFeaturesPromise = async () => {
-    if (!signer) return;
+    if (!provider) return;
     try {
       if (isSolana) {
         // TODO: Solana user features
-        console.log('Solana getUserFeatures pending');
       } else {
-        const features = await getUserFeatures(await signer.getAddress());
+        const features = await getUserFeatures(walletAddress);
         setUserWearables(features);
       }
     } catch (error) {
@@ -880,7 +837,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     } else {
       void getEthereumUserFeaturesPromise();
     }
-  }, [signer, isSolana]);
+  }, [provider, isSolana]);
 
 
   useEffect(() => {
@@ -889,7 +846,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       try {
         if (isSolana) {
           // TODO: Solana tokens
-          console.log('Solana getTokensMetadata');
         } else {
           const tokenIds = await getEthereumCampaignsTokenIds(walletAddress);
           if (tokenIds.length <= 0) {
@@ -908,70 +864,68 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     void getTokensMetadataPromise();
   }, [walletAddress, isSolana]);
 
-  useEffect(() => {
-    if (!signer) return;
-    const getClaimableDropsPromise = async () => {
-      try {
-        if (isSolana) {
-          // TODO: Solana drops
-          console.log('Solana getClaimableDrops pending');
-        } else {
-          const drops = await FetchClaimableDrops(await signer.getAddress());
-          Promise.all(drops.map(async (drop) => {
-            drop.owned = await checkClaimStatus(drop, signer, user?.wallet?.address || '');
-          }))
-          setClaimableDrops(drops);
-        }
-      } catch (error) {
-        console.error('Error getting claimable drops:', error);
-      }
-    };
-    void getClaimableDropsPromise();
-  }, [signer, isSolana]);
+
+  const getEthereumClaimableDropsPromise = async () => {
+    try {
+      if (!provider) return;
+      const drops = await FetchClaimableDrops(walletAddress);
+      Promise.all(drops.map(async (drop) => {
+        drop.owned = await checkClaimStatus(drop, provider, walletAddress);
+      }))
+      setClaimableDrops(drops);
+    } catch (error) {
+      console.error('Error getting claimable drops:', error);
+    }
+  };
 
   useEffect(() => {
-    async function fetchEthereumLeaderboardData() {
-      if (!signer) return;
-      try {
-        if (isSolana) {
-          // TODO: Solana leaderboard
-          console.log('Solana leaderboard pending');
-        } else {
-          const response = await fetch('/api/v1/leaderboard');
-          if (!response.ok) throw new Error('Failed to fetch leaderboard data');
-          const data = await response.json();
-          const leaderboardWithProfileData = await Promise.all(data.map(async (entry: LeaderboardEntry) => {
-            const profileData = await GetUniversalProfileData(entry.address);
-            return {
-              ...entry,
-              name: profileData.name,
-              profileImage: profileData.profileImage,
-              isFollowing: false
-            };
-          }));
-          const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, signer);
-          leaderboardWithProfileData.forEach(entry => {
-            entry.isFollowing = followStatuses[entry.address] || false;
-          });
-          setLeaderboardData(leaderboardWithProfileData);
-        }
-      } catch (error) {
-        setLeaderboardData(undefined);
-        LogError(Module.Citizens, 'Error fetching leaderboard data:', error);
-      }
+    if (isSolana) {
+      /*       void getSolanaClaimableDropsPromise(); */
+    } else if (isEthereum) {
+      void getEthereumClaimableDropsPromise();
     }
+  }, [provider, isSolana, isEthereum]);
+
+  const fetchEthereumLeaderboardData = async () => {
+    if (!provider) return;
+
+    try {
+        const response = await fetch('/api/v1/leaderboard');
+        if (!response.ok) throw new Error('Failed to fetch leaderboard data');
+        const data = await response.json();
+        const leaderboardWithProfileData = await Promise.all(data.map(async (entry: LeaderboardEntry) => {
+          const profileData = await GetUniversalProfileData(entry.address);
+          return {
+            ...entry,
+            name: profileData.name,
+            profileImage: profileData.profileImage,
+            isFollowing: false
+          };
+        }));
+        const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, provider);
+        leaderboardWithProfileData.forEach(entry => {
+          entry.isFollowing = followStatuses[entry.address] || false;
+        });
+        setLeaderboardData(leaderboardWithProfileData);
+      
+    } catch (error) {
+      setLeaderboardData(undefined);
+      LogError(Module.Citizens, 'Error fetching leaderboard data:', error);
+    }
+  }
+
+  useEffect(() => {
+
     if (isSolana) {
       /* fetchSolanaLeaderboardData(); */
-    } else {
+    } else if (isEthereum) {
       fetchEthereumLeaderboardData();
     }
-  }, [signer, isSolana]);
+  }, [provider, isSolana]);
 
 
   const handleLogout = useCallback(async () => {
-    await logout();
-    setSigner(undefined);
-    setIsSigned(false);
+    logout();
     closeConnection();
     setCurrentCollection({
       campaign: campaignParams?.campaign as Campaign,
@@ -984,7 +938,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
-      {isSigned ?
+      {authenticated ?
 
         <>
           {/* EDITOR HUD */}
@@ -1047,42 +1001,37 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           </div>
           {/* CANVAS */}
           <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-            {function () {
-              console.log("CURRENT COLLECTION", currentCollection )
-              if (!currentCollection.combination || !campaignParams || !campaignParams.campaign ) return <></>;
-              return <AvatarEditor // TODO: Add userWearables
+            {currentCollection.combination && campaignParams && campaignParams.campaign&& (currentSection === CitizensSections.View || currentSection === CitizensSections.Mint) && <AvatarEditor
+              avatarBasePath={
+                campaignParams.armature
+              }
+              editMode={isEditModeSelected}
+              lights={
+                campaignParams.config.lights
+              }
+              defaultShadow={
+                campaignParams.config
+                  .defShadow
+              }
+              defaultCamera={
+                campaignParams.config.defCam
+              }
+              postProcessing={
+                campaignParams.config
+                  .postProcessing
+              }
+              onReady={() => {
+                return onAvatarBuilderReady(
+                  currentCollection.combination,
+                  currentCollection.campaign
+                )
+              }
+              }
+            />}
 
-                avatarBasePath={
-                  campaignParams.armature
-                }
-                editMode={isEditModeSelected}
-                lights={
-                  campaignParams.config.lights
-                }
-                defaultShadow={
-                  campaignParams.config
-                    .defShadow
-                }
-                defaultCamera={
-                  campaignParams.config.defCam
-                }
-                postProcessing={
-                  campaignParams.config
-                    .postProcessing
-                }
-                onReady={() => {
-                  console.log("CAMPAIGN ON AVATAR BUILDER READY 1", currentCollection.campaign)
-                  return onAvatarBuilderReady(
-                    currentCollection.combination,
-                    currentCollection.campaign
-                  )
-                }
-                }
-              />
-            }()}
           </div>
           {/* CITIZENS HUD */}
-          {!isEditModeSelected && ((isEthereum && signer) || isSolana) &&
+          {!isEditModeSelected && authenticated &&
             <CitizensUI
               isSavingCombination={isSavingCombination}
               currentSection={currentSection}
@@ -1091,13 +1040,13 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
               updateCollection={updateCollection}
               features={singleInitData?.features}
               exportModel={() => exportModel()}
-              address={walletAddress ?? ""}
+              address={walletAddress}
               leaderboardData={leaderboardData}
-              signer={signer as any}
+              provider={provider}
               handleFollowUser={handleFollowUser}
               handleUnfollowUser={handleUnfollowUser}
               claimableDrops={claimableDrops}
-              handleClaim={handleClaim} />
+              handleClaim={handleEthereumClaim} />
           }
           {/* LOADER */}
           {isLoading &&
@@ -1117,7 +1066,8 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           }
           <LoginUI
             collections={collectionList}
-            setSelectedCampaign={(selectedCampaign?: Campaign) => setSelectedLoginCampaign(selectedCampaign)}
+            setSelectedCampaign={(selectedCampaign?: Campaign) => {
+              setSelectedLoginCampaign(selectedCampaign)}}
           />
         </>
 
@@ -1129,7 +1079,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           <LogoTheHub />
         </div>
         {/* NAVBAR */}
-        {isSigned && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
+        {authenticated && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
           <>
             <div className={`fixed z-50 xl:relative inset-6 xl:inset-0 bg-citizens-dark xl:bg-inherit h-fit ${isBurguerOpen ? 'block' : 'hidden xl:block'}`}>
               <div className='w-full px-4 pt-4 pb-24 flex justify-between xl:hidden'>
@@ -1194,7 +1144,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           </>
         }
         {/* CONNECT BUTTON */}
-        {(collectionList || collectionList === null || isSigned) &&
+        {(collectionList || collectionList === null || authenticated) &&
           <div className="flex gap-4">
             {/* {!isSigned &&
                 <Button label="About" handleClick={() => { }} withIcon textStyles="text-start pl-2">
@@ -1202,8 +1152,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
                 </Button>
               } */}
             <ConnectButton
-              isSigned={isSigned}
-              setIsSigned={setIsSigned}
+              isSigned={authenticated}
               address={walletAddress}
               onLogout={handleLogout}
             />

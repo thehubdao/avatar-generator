@@ -4,13 +4,13 @@ import CitizensCollection from "../common/citizensCollection.ui";
 import WearablesCollection from "../common/wearablesCollection.ui";
 import { useState } from "react";
 import { CollectionSections } from "../../../enums/citizens/common.enum";
-import { JsonRpcSigner } from "ethers";
+import { JsonRpcProvider } from "ethers";
 import { DataBaseDrop } from "../../../interfaces/citizens.interface";
 interface CollectionProps {
   loadedTokens?: TokenMetadata[];
   currentCollection: CollectionType
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
-  signer: JsonRpcSigner | null;
+  provider: JsonRpcProvider | null;
   claimableDrops: DataBaseDrop[]
   handleClaim: (drop: DataBaseDrop) => Promise<boolean>
 }
@@ -21,7 +21,7 @@ export default function Collection({
   loadedTokens,
   updateCollection,
   currentCollection,
-  signer,
+  provider,
   claimableDrops,
   handleClaim
 }: CollectionProps) {
@@ -51,7 +51,7 @@ export default function Collection({
       }
       {/* WEARABLE DROPS */}
       {selectedList === CollectionSections.WEARABLES &&
-        <WearablesCollection signer={signer} claimableDrops={claimableDrops} handleClaim={handleClaim} />}
+        <WearablesCollection provider={provider} claimableDrops={claimableDrops} handleClaim={handleClaim} />}
     </div>
   );
 }

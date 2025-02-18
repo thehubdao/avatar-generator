@@ -1,5 +1,5 @@
 import { usePrivy } from '@privy-io/react-auth'
-import { JsonRpcSigner } from 'ethers'
+import { JsonRpcProvider } from 'ethers'
 import { useEffect, useState } from 'react'
 import { GetUserXPAndLevel } from '../../../utils/firebase.util'
 import SelectorUI from './selector.ui'
@@ -8,13 +8,13 @@ import SearchSVG from './SVG/searchSVG.ui'
 import { DataBaseDrop } from '../../../interfaces/citizens.interface'
 
 interface WearablesCollectionProps {
-  signer: JsonRpcSigner | null
+  provider: JsonRpcProvider | null
   claimableDrops: DataBaseDrop[]
   handleClaim: (drop: DataBaseDrop) => Promise<boolean>
 }
 
 export default function WearablesCollection({ 
-  signer, 
+  provider, 
   claimableDrops,
   handleClaim 
 }: WearablesCollectionProps) {
@@ -122,7 +122,7 @@ export default function WearablesCollection({
               userXP={userXP}
               popupOpen={isPopupOpen}
               userAddress={user?.wallet?.address || ''}
-              signer={signer as JsonRpcSigner}
+              provider={provider as JsonRpcProvider}
               onClaim={() => handleClaimWithPopup(drop)}
               isLock={isLock}
             />

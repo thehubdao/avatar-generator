@@ -1,4 +1,4 @@
-import { ethers, JsonRpcSigner } from "ethers"
+import { ethers, JsonRpcProvider, JsonRpcSigner } from "ethers"
 import { TokenMetadata } from "../../types/metadata.type"
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
@@ -124,9 +124,9 @@ export async function GetUniversalProfileData(address: string) {
   }
 }
 
-export async function FollowUser(addressToFollow: string, signer: JsonRpcSigner) {
+export async function FollowUser(addressToFollow: string, provider: JsonRpcProvider) {
   try {
-
+    const signer = await provider.getSigner();
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
 
     const tx = await lsp26Contract.follow(addressToFollow);
@@ -139,9 +139,9 @@ export async function FollowUser(addressToFollow: string, signer: JsonRpcSigner)
   }
 }
 
-export async function UnfollowUser(addressToUnfollow: string, signer: JsonRpcSigner) {
+export async function UnfollowUser(addressToUnfollow: string, provider: JsonRpcProvider) {
   try {
-
+    const signer = await provider.getSigner();
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
 
     const tx = await lsp26Contract.unfollow(addressToUnfollow);
@@ -154,8 +154,9 @@ export async function UnfollowUser(addressToUnfollow: string, signer: JsonRpcSig
   }
 }
 
-export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], signer: JsonRpcSigner) {
+export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], provider: JsonRpcProvider) {
   try {
+    const signer = await provider.getSigner();
     const signerAddress = await signer.getAddress();
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
 

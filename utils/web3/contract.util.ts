@@ -412,8 +412,9 @@ export async function GetWearablesHoldings(address: string, contractAddresses: s
 }
 
 
-export const checkClaimStatus = async (drop: DataBaseDrop, signer: Signer, address: string) => {
+export const checkClaimStatus = async (drop: DataBaseDrop, provider: JsonRpcProvider, address: string) => {
     try {
+      const signer = await provider.getSigner();
       const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer);
       const balance = await contract.balanceOf(address);
       return balance > 0;
@@ -426,10 +427,11 @@ export const checkClaimStatus = async (drop: DataBaseDrop, signer: Signer, addre
 
 export const claimDrop = async (
     drop: DataBaseDrop, 
-    signer: JsonRpcSigner, 
+    provider: JsonRpcProvider, 
     userAddress: string
   ): Promise<boolean> => {
     try {
+        const signer = await provider.getSigner();
       const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer)
   
       const claimTx = await dropContract.claim({
@@ -438,7 +440,7 @@ export const claimDrop = async (
       })
       await claimTx.wait()
   
-      return await checkClaimStatus(drop, signer, userAddress);
+      return await checkClaimStatus(drop, provider, userAddress);
     } catch (error) {
       LogError(Module.Citizens, 'Error in claimDrop:', error);
       throw error;

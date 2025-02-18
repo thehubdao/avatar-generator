@@ -49,8 +49,9 @@ export default function CampaignList({ collections, setSelectedCampaign }: Campa
                 classStyles="w-full h-full"
                 onClick={async () => {
                   console.log("COLLECTION", el)
-                  await handleCollectionClick(el)
                   setSelectedCampaign(el.campaign)
+                  await handleCollectionClick(el)
+                  
                 }}
               >
                 <CampaignCard

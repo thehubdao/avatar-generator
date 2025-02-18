@@ -1,4 +1,4 @@
-import { JsonRpcSigner } from "ethers";
+import { JsonRpcProvider } from "ethers";
 import { DataBaseDrop } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
@@ -11,7 +11,7 @@ interface DropItemCardProps {
   drop: DataBaseDrop;
   userXP: number;
   userAddress: string;
-  signer: JsonRpcSigner;
+  provider: JsonRpcProvider;
   popupOpen?: boolean;
   onClaim: () => Promise<boolean>;
   isLock?: boolean;
