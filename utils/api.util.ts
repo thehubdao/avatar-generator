@@ -94,8 +94,9 @@ export async function PostRequestVRMProcessFile(VRMFile: Blob): Promise<Blob> {
 
   } catch (fail) {
     console.error(fail)
-
-    throw fail
+    return new Blob()
+/* 
+    throw fail */
   }
 }
 
