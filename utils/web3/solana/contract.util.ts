@@ -4,8 +4,7 @@ import { ConnectedSolanaWallet } from '@privy-io/react-auth';
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { publicKey } from '@metaplex-foundation/umi'
-import { fetchAssetsByOwner, fetchCollection, PluginAuthorityPair } from '@metaplex-foundation/mpl-core'
-import { keypairIdentity } from '@metaplex-foundation/umi';
+import { fetchAssetsByOwner, fetchCollection } from '@metaplex-foundation/mpl-core'
 import { createUmi } from '@metaplex-foundation/umi-bundle-defaults'
 
 const PROGRAM_ID = new PublicKey('Bit5BcAGufekdsZoVVGyt81dFXURadnZBGB5PU5U5Ru4');
@@ -113,13 +112,6 @@ export const transferAsset = async (
 
   return new Transaction().add(transferIx);
 };
-
-enum PluginAuthority {
-  None,
-  Owner,
-  UpdateAuthority,
-  Address
-}
 
 const NOOP_PROGRAM_ID = new PublicKey('noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV');
 

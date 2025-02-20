@@ -1,4 +1,4 @@
-import { BrowserProvider, ethers, JsonRpcProvider, JsonRpcSigner } from "ethers"
+import { BrowserProvider, ethers } from "ethers"
 import { TokenMetadata } from "../../types/metadata.type"
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";

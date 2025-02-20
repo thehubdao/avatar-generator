@@ -1,6 +1,6 @@
 'use client'
 
-import { usePrivy, useWallets } from '@privy-io/react-auth'
+import { usePrivy} from '@privy-io/react-auth'
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import { Campaign, CampaignDrops, TokenId, TokenMetadata } from "../../types/metadata.type";
 import LoginUI from "../../ui/citizens/sections/login.ui";
@@ -33,7 +33,6 @@ import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.co
 import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { FollowUser, GetFollowStatuses, GetUniversalProfileData, UnfollowUser } from "../../utils/web3/lukso.util";
-import { BrowserProvider, JsonRpcSigner } from 'ethers';
 import { useSnackbar } from '../../ui/citizens/snackbar/snackbar.provider';
 import { claimDrop } from '../../utils/web3/contract.util';
 import LogoTheHub from '../../ui/citizens/common/SVG/logoTheHubSVG.ui';
@@ -87,7 +86,7 @@ let featureList: FeatureInterface[] | undefined
 export default function CitizensComponent({ campaignParams, setCampaign, isLoggedIn, closeConnection }: CitizensComponentProps) {
   const { showSnackbar } = useSnackbar();
   const { user } = usePrivy()
-  const { isSolana, isEthereum, solanaWallets, ethWallets, walletAddress, provider, logout, authenticated } = useBlockchainWallet();
+  const { isSolana, isEthereum, solanaWallets, walletAddress, provider, logout, authenticated: isAuthenticated } = useBlockchainWallet();
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
@@ -128,6 +127,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       tokenMetadata,
       baseCombination: tokenMetadata.baseCombination
     };
+    console.log(newCollection, 'newCollection')
     setCurrentCollection(newCollection);
     setCampaign(newCollection.campaign); // This updates the parent state
 
@@ -188,6 +188,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
     let isFirstToken = false;
     try {
+      console.log("LOAD ETHEREUM TOKENS METADATA", tokenIdList)
       if (!tokenIdList || tokenIdList.length === 0) return setLoadedTokens([])
       tokenIdList.forEach(async (tokenIdMetadata) => {
         try {
@@ -230,8 +231,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
             throw new Error('Invalid IPFS hash format');
           }
           const tokenMetadata = await getSolanaTokenMetadata(tokenIdMetadata);
-          console.log("TOKEN METADATA", tokenMetadata)
-          if (!isFirstToken && tokenIdMetadata.campaign === selectedLoginCampaign) {
+          console.log("TOKEN METADATA", tokenMetadata, isFirstToken, tokenIdMetadata.campaign, selectedLoginCampaign)
+          const selectedCampaign = selectedLoginCampaign || 'kumi'
+          if (!isFirstToken && tokenIdMetadata.campaign === selectedCampaign) {
             updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
             isFirstToken = true;
           }
@@ -258,11 +260,11 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     console.log("IS SOLANA", isSolana, "IS ETHEREUM", isEthereum)
     if (isSolana) {
       loadSolanaTokensMetadata();
-      updateCollection('kumi', '0-0-0-0-0-0-0-0-0-0', {} as TokenMetadata)
+      /*       updateCollection('kumi', '0-0-0-0-0-0-0-0-0-0', {} as TokenMetadata) */
     } else if (isEthereum) {
       loadEthereumTokensMetadata();
     }
-  }, [tokenIdList, isSolana, isEthereum]);
+  }, [tokenIdList, isSolana || isEthereum]);
 
 
   const handleEthereumUserFeatures = async () => {
@@ -473,6 +475,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       const { id, path, type, name } = val;
       const { tokenMetadata } = currentCollection;
       const bodyIndex = val.type.toLowerCase() as keyof typeof tokenMetadata.body;
+      console.log(tokenMetadata, 'tokenMetadata')
       try {
         tokenMetadata.body[bodyIndex] = val as BodyPart; // Adjust logic to Solana
       } catch (error) {
@@ -941,7 +944,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
-      {authenticated ?
+      {isAuthenticated ?
 
         <>
           {/* EDITOR HUD */}
@@ -1034,7 +1037,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
           </div>
           {/* CITIZENS HUD */}
-          {!isEditModeSelected && authenticated &&
+          {!isEditModeSelected && isAuthenticated &&
             <CitizensUI
               isSavingCombination={isSavingCombination}
               currentSection={currentSection}
@@ -1083,7 +1086,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           <LogoTheHub />
         </div>
         {/* NAVBAR */}
-        {authenticated && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
+        {isAuthenticated && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
           <>
             <div className={`fixed z-50 xl:relative inset-6 xl:inset-0 bg-citizens-dark xl:bg-inherit h-fit ${isBurguerOpen ? 'block' : 'hidden xl:block'}`}>
               <div className='w-full px-4 pt-4 pb-24 flex justify-between xl:hidden'>
@@ -1148,7 +1151,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           </>
         }
         {/* CONNECT BUTTON */}
-        {(collectionList || collectionList === null || authenticated) &&
+        {(collectionList || collectionList === null || isAuthenticated) &&
           <div className="flex gap-4">
             {/* {!isSigned &&
                 <Button label="About" handleClick={() => { }} withIcon textStyles="text-start pl-2">
@@ -1156,7 +1159,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
                 </Button>
               } */}
             <ConnectButton
-              isSigned={authenticated}
+              isSigned={isAuthenticated}
               address={walletAddress}
               onLogout={handleLogout}
             />

@@ -1,4 +1,4 @@
-import { Contract, ethers, JsonRpcProvider, JsonRpcSigner, Signer, TransactionResponse } from 'ethers'
+import { Contract, ethers, JsonRpcProvider, Signer, TransactionResponse } from 'ethers'
 import AvatarContractAbi from '../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../constants/abi/AvatarProxyContractABI.json'
 import WerableContractAbi from '../../constants/abi/WearableContractABI.json'

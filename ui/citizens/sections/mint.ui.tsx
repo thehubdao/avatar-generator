@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import SocialButtons from "../common/socialButtons.ui";
 import Button from "../common/button.ui";
 import ArrowMintSVG from "../common/SVG/arrowMintSVG.ui";

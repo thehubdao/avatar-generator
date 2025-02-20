@@ -13,6 +13,7 @@ export const campaignLabels = {
       campaignName: 'vrm_female',
       nftName: 'Lukso Citizen',
       dropdownName: 'Lukso Citizens'
-    }, 'vrm_male': { campaignName: 'vrm_male', nftName: 'Lukso Creator', dropdownName: 'Lukso Creators' }
+    }, 'vrm_male': { campaignName: 'vrm_male', nftName: 'Lukso Creator', dropdownName: 'Lukso Creators' },
+    'kumi': { campaignName: 'kumi', nftName: 'Kumi Citizen', dropdownName: 'Kumi Citizens' }
   }
   

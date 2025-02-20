@@ -27,9 +27,9 @@ export default function CampaignList({ collections, setSelectedCampaign }: Campa
 
       login({ walletChainType });
 
-      ;
+      
     } catch (error) {
-      console.error('Error during login:', error);
+      console.error('Error during login:', error)
     }
   };
 
