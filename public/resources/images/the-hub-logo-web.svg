@@ -7,8 +7,8 @@
 	.st1{fill:#1AB3F4;}
 </style>
 <linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="20.5509" y1="42" x2="20.5509" y2="2.6852" gradientTransform="matrix(1 0 0 -1 0 42)">
-	<stop  offset="0" style="stopColor:#19D8F3"/>
-	<stop  offset="1" style="stopColor:#197FF3"/>
+	<stop  offset="0" style="stop-color:#19D8F3"/>
+	<stop  offset="1" style="stop-color:#197FF3"/>
 </linearGradient>
 <path class="st0" d="M39.3,18.9c0,0-4.6-3.3-5.5-4.9c-0.9-1.6-1.5-7.2-1.5-7.2C27.1-2.3,14-2.3,8.8,6.8c0,0-0.5,5.6-1.5,7.2
 	c-0.9,1.6-5.5,4.9-5.5,4.9C-3.4,28,3.1,39.3,13.6,39.3c0,0,5.1-2.3,7-2.3c1.8,0,7,2.3,7,2.3C38,39.3,44.5,28,39.3,18.9L39.3,18.9z
