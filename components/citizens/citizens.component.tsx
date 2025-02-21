@@ -136,6 +136,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const getEthereumTokensMetadataPromise = async () => {
     if (!walletAddress) return
     const tokenIds = await getEthereumCampaignsTokenIds(walletAddress)
+    console.log('TOKEN IDS ethereum', tokenIds)
     if (tokenIds.length <= 0) {
       setCurrentSection(CitizensSections.Collection);
       setIsLoading(false);
@@ -179,6 +180,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       console.log("SOLANA GET TOKENS METADATA")
       void getSolanaTokensMetadataPromise()
     } else if (isEthereum) {
+      console.log("ETHEREUM GET TOKENS METADATA")
       void getEthereumTokensMetadataPromise()
     }
   }, [walletAddress, isSolana, isEthereum])
@@ -190,6 +192,8 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     try {
       console.log("LOAD ETHEREUM TOKENS METADATA", tokenIdList)
       if (!tokenIdList || tokenIdList.length === 0) return setLoadedTokens([])
+      console.log(tokenIdList, 'tokenIdList')
+      console.log(loadedTokens, 'loadedTokens')
       tokenIdList.forEach(async (tokenIdMetadata) => {
         try {
           if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
@@ -258,13 +262,14 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   useEffect(() => {
     console.log("IS SOLANA", isSolana, "IS ETHEREUM", isEthereum)
+    if (loadedTokens && loadedTokens.length > 0) return
     if (isSolana) {
       loadSolanaTokensMetadata();
-      /*       updateCollection('kumi', '0-0-0-0-0-0-0-0-0-0', {} as TokenMetadata) */
     } else if (isEthereum) {
+      console.log("LOAD ETHEREUM TOKENS METADATA")
       loadEthereumTokensMetadata();
     }
-  }, [tokenIdList, isSolana || isEthereum]);
+  }, [isSolana, isEthereum]);
 
 
   const handleEthereumUserFeatures = async () => {
@@ -475,7 +480,6 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       const { id, path, type, name } = val;
       const { tokenMetadata } = currentCollection;
       const bodyIndex = val.type.toLowerCase() as keyof typeof tokenMetadata.body;
-      console.log(tokenMetadata, 'tokenMetadata')
       try {
         tokenMetadata.body[bodyIndex] = val as BodyPart; // Adjust logic to Solana
       } catch (error) {
@@ -513,6 +517,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       const lightMap = envMapList?.find(
         (em) => em.name === campaignParams?.config.envMap?.defLightMap
       )
+
       await SetEnvironment(
         bgMap?.path,
         lightMap?.path,
@@ -930,7 +935,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }, [provider, isSolana]);
 
 
-  const handleLogout = useCallback(async () => {
+  const handleLogout = async () => {
     logout();
     closeConnection();
     setCurrentCollection({
@@ -940,7 +945,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       tokenMetadata: {} as TokenMetadata
     })
     setLoadedTokens(undefined)
-  }, [logout]);
+  }
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
@@ -1082,7 +1087,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       {/* HEADER */}
       <div className="fixed inset-0 w-full h-fit flex justify-between items-center pt-8 px-6 z-50">
         {/* LOGO THE HUB */}
-        <div className="w-fit h-fit" onClick={() => setCurrentSection(CitizensSections.Mint)}>
+        <div className="w-fit h-fit" onClick={() => setCurrentSection(CitizensSections.View)}>
           <LogoTheHub />
         </div>
         {/* NAVBAR */}
