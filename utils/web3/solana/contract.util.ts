@@ -129,7 +129,9 @@ export const getAssetsByOwner = async (wallet: ConnectedSolanaWallet) => {
 };
 
 export const getCollectionAssetByOwner= async (wallet: ConnectedSolanaWallet, collectionId: PublicKey = COLLECTION_ID) => {
+  console.log('Start getCollectionAssetByOwner', new Date().toISOString())
   const assets = await getAssetsByOwner(wallet);
+  console.log('End getCollectionAssetByOwner', new Date().toISOString())
   const collectionAsset = assets.find(asset => asset.updateAuthority.address === collectionId.toString());
   return collectionAsset;
 }

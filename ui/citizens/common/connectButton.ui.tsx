@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import ArrowSVG from "./SVG/arrowSVG.ui";
 import Image from "next/image";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
@@ -33,10 +33,6 @@ export default function ConnectButton({ isSigned, address, onLogout }: ConnectBu
   const { name, profileImage } = useUniversalProfile(address);
 
   useOnClickOutside(parentDOM, () => setIsOpen(false));
-
-  useEffect(() => {
-    console.log(isSigned)
-  }, [isSigned])
 
   return (
     <div ref={parentDOM} className="relative w-fit 2xl:w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">

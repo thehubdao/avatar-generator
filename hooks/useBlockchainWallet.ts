@@ -33,7 +33,11 @@ export function useBlockchainWallet() {
       });
     }
 
-  }, [ready, solanaWallets, ethWallets]);
+  }, [user]);
+
+  useEffect(() => {
+    console.log(blockchainType, 'blockchainType')
+  }, [ready])
 
   const getWalletAddress = () => {
     if (blockchainType === BlockchainType.SOLANA) {
@@ -45,6 +49,7 @@ export function useBlockchainWallet() {
   const logout = () => {
     privyLogout();
     setProvider(undefined);
+    setBlockchainType(BlockchainType.UNKNOWN);
   }
 
 

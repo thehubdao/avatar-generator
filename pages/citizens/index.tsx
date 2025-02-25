@@ -16,6 +16,7 @@ export default function CitizensView() {
 
   const getCampaignParams = async () => {
     const campaignParameters = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
+    console.log('CAMPAIGN PARAMETERS', campaignParameters)
     if (campaignParameters.success) {
       campaignParameters.value.campaign = campaign
       setCampaignParams(RemoveUndefinedProperties(campaignParameters.value))
@@ -31,11 +32,15 @@ export default function CitizensView() {
   }, [sessionToken])
 
   useEffect(() => {
+    console.log('CAMPAIGN', campaign)
     if (!campaign) return setCampaignParams(undefined)
     void getCampaignParams()
   }, [campaign])
 
   return <SnackbarProvider>
-    <CitizensComponent isLoggedIn={isConnected} campaignParams={campaignParams} setCampaign={(_campaign?: Campaign) => setCampaign(_campaign)} closeConnection={() => setIsConnected(false)} />
+    <CitizensComponent isLoggedIn={isConnected} campaignParams={campaignParams} setCampaign={(_campaign?: Campaign) => {
+      console.log('SET CAMPAIGN', _campaign)
+      setCampaign(_campaign)
+    }} closeConnection={() => setIsConnected(false)} />
   </SnackbarProvider>
 }

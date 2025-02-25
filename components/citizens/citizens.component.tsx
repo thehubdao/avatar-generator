@@ -127,11 +127,11 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       tokenMetadata,
       baseCombination: tokenMetadata.baseCombination
     };
-    console.log(newCollection, 'newCollection')
-    setCurrentCollection(newCollection);
-    setCampaign(newCollection.campaign); // This updates the parent state
-
+    console.log('UPDATE COLLECTION', newCollection)
+    setCurrentCollection(newCollection)
+    setCampaign(newCollection.campaign)
   }, [setCampaign]);
+
 
   const getEthereumTokensMetadataPromise = async () => {
     if (!walletAddress) return
@@ -148,7 +148,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   const getSolanaTokensMetadataPromise = async () => {
     if (!walletAddress) return
+
     const asset = await getCollectionAssetByOwner(solanaWallets[0])
+console.log(currentCollection.combination && campaignParams && campaignParams.campaign)
     console.log('ASSET', asset)
     if (asset) {
       setCurrentSection(CitizensSections.View);
@@ -160,9 +162,11 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       }])
     }
     else {
+      
+      updateCollection('kumi', '0-0-0-0-0-0-0-0-0-0', {} as TokenMetadata)
       setCurrentSection(CitizensSections.Mint);
       setIsLoading(false);
-      setLoadedTokens([])
+
     }
 
 
@@ -269,7 +273,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       console.log("LOAD ETHEREUM TOKENS METADATA")
       loadEthereumTokensMetadata();
     }
-  }, [isSolana, isEthereum]);
+  }, [tokenIdList,isSolana, isEthereum]);
 
 
   const handleEthereumUserFeatures = async () => {
@@ -499,7 +503,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     currentCombination: string,
     campaign?: string
   ) {
-    console.log("ON AVATAR BUILDER READY", currentCombination, campaign)
+    console.log("ON AVATAR BUILDER READY", currentCombination, campaign, campaignParams)
     if (!campaign) return
     try {
       setIsLoading(true);
@@ -767,14 +771,14 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     }
   }
 
-  useEffect(() => {
+/*   useEffect(() => {
     if (campaignParams) {
       setIsLoading(true);
       console.log("CAMPAIGN PARAMS TO VIEW", campaignParams)
       setCurrentSection(CitizensSections.View);
     }
   }, [campaignParams])
-
+ */
   const handleFollowUser = async (addressToFollow: string) => {
     if (!provider) return false;
     try {
@@ -945,6 +949,10 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       tokenMetadata: {} as TokenMetadata
     })
     setLoadedTokens(undefined)
+    setTokenIdList(undefined)
+    setClaimableDrops([])
+    setLeaderboardData(undefined)
+    setUserWearables({} as CampaignDrops)
   }
 
   return (
@@ -1012,7 +1020,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           </div>
           {/* CANVAS */}
           <div className="fixed left-[50%] translate-x-[-50%] flex justify-center xl:justify-end items-start !w-full !h-full overflow-hidden transition-width transition-height duration-300 ease-in-out">
-            {currentCollection.combination && campaignParams && campaignParams.campaign && (currentSection === CitizensSections.View || currentSection === CitizensSections.Mint) && <AvatarEditor
+            {campaignParams && campaignParams.campaign && (currentSection === CitizensSections.View || currentSection === CitizensSections.Mint) && <AvatarEditor
               avatarBasePath={
                 campaignParams.armature
               }
