@@ -148,9 +148,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   const getSolanaTokensMetadataPromise = async () => {
     if (!walletAddress) return
-
     const asset = await getCollectionAssetByOwner(solanaWallets[0])
-console.log(currentCollection.combination && campaignParams && campaignParams.campaign)
     console.log('ASSET', asset)
     if (asset) {
       setCurrentSection(CitizensSections.View);
@@ -162,9 +160,8 @@ console.log(currentCollection.combination && campaignParams && campaignParams.ca
       }])
     }
     else {
-      
       updateCollection('kumi', '0-0-0-0-0-0-0-0-0-0', {} as TokenMetadata)
-      setCurrentSection(CitizensSections.Mint);
+      if (currentSection !== CitizensSections.Mint) setCurrentSection(CitizensSections.Mint);
       setIsLoading(false);
 
     }
@@ -955,6 +952,13 @@ console.log(currentCollection.combination && campaignParams && campaignParams.ca
     setUserWearables({} as CampaignDrops)
   }
 
+  const mintRedirect = () => {
+    setTimeout(async () => {
+      await getSolanaTokensMetadataPromise()
+      setCurrentSection(CitizensSections.View)
+    }, 5000)
+  }
+
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
       {isAuthenticated ?
@@ -1052,20 +1056,20 @@ console.log(currentCollection.combination && campaignParams && campaignParams.ca
           {/* CITIZENS HUD */}
           {!isEditModeSelected && isAuthenticated &&
             <CitizensUI
-              isSavingCombination={isSavingCombination}
-              currentSection={currentSection}
-              loadedTokens={loadedTokens}
-              currentCollection={currentCollection}
-              updateCollection={updateCollection}
-              features={singleInitData?.features}
-              exportModel={() => exportModel()}
-              address={walletAddress}
-              leaderboardData={leaderboardData}
-              provider={provider}
-              handleFollowUser={handleFollowUser}
-              handleUnfollowUser={handleUnfollowUser}
-              claimableDrops={claimableDrops}
-              handleClaim={handleEthereumClaim} />
+            isSavingCombination={isSavingCombination}
+            currentSection={currentSection}
+            loadedTokens={loadedTokens}
+            currentCollection={currentCollection}
+            updateCollection={updateCollection}
+            features={singleInitData?.features}
+            exportModel={() => exportModel()}
+            address={walletAddress}
+            leaderboardData={leaderboardData}
+            provider={provider}
+            handleFollowUser={handleFollowUser}
+            handleUnfollowUser={handleUnfollowUser}
+            claimableDrops={claimableDrops}
+            handleClaim={handleEthereumClaim} mintRedirect={mintRedirect} />
           }
           {/* LOADER */}
           {isLoading &&

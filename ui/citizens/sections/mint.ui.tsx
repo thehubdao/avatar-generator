@@ -16,20 +16,22 @@ interface MintUIProps {
   campaignDescription?: string;
   price?: number;
   supply?: number;
+  mintRedirect: () => void;
 }
 
-export default function MintUI({ 
+export default function MintUI({
   imgUrl = '/resources/images/campaings/kumi_collection.jpg',
   avatarDescription = '"Kum Kum" inspired the nickname of the football legend Kun Agüero. Today, we honor his nickname and celebrate his career by presenting "KUMI," a FREE-to-claim, 3D interoperable avatar that showcases the future of Web3 gaming and the internet',
   campaignName = 'KUMI CITIZENS',
   campaignDescription = 'Minting a KUMI unlocks the gateway to the Fitchin Universe. It’s your chance to own a unique visual identity that’s truly yours. Dive in, create epic content, flex your avatar, climb the leaderboard, and snag exclusive wearables to stand out in style.',
   price,
-  supply }: MintUIProps) {
+  supply,
+  mintRedirect }: MintUIProps) {
   const [isLoadedImage, setIsLoadedImage] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isMinting, setIsMinting] = useState<boolean>(false);
   const [isMinted, setIsMinted] = useState<boolean>(false);
-  
+
   const { wallets } = useSolanaWallets();
 
   return (
@@ -100,15 +102,17 @@ export default function MintUI({
             </div>
             <div className="flex gap-4 pt-8">
               <Button label="Go Back" light handleClick={() => { setIsModalOpen(false) }} />
-              <Button label="Claim" light handleClick={async () => { setIsMinting(true)
-                
-            await createAsset(wallets[0], {
-              name: "KUMI",
-              uri: "ipfs://"+process.env.NEXT_PUBLIC_KUMI_IPFS_HASH,
-              plugins: []
-            })
-            setIsMinted(true)
-               }} />
+              <Button label="Claim" light handleClick={async () => {
+                setIsMinting(true)
+
+                await createAsset(wallets[0], {
+                  name: "KUMI",
+                  uri: "ipfs://" + process.env.NEXT_PUBLIC_KUMI_IPFS_HASH,
+                  plugins: []
+                })
+                setIsMinted(true)
+                mintRedirect()
+              }} />
             </div>
           </div>
         </Modal>

@@ -32,10 +32,11 @@ interface CitizensUIProps {
   handleUnfollowUser: (address: string) => Promise<boolean>;
   handleClaim: (drop: DataBaseDrop) => Promise<boolean>
   claimableDrops: DataBaseDrop[]
+  mintRedirect: () => void
 }
 
 
-export default function CitizensUI({ claimableDrops, currentSection, currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, provider, handleFollowUser, handleClaim, handleUnfollowUser }: CitizensUIProps) {
+export default function CitizensUI({ claimableDrops, currentSection, currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, provider, handleFollowUser, handleClaim, handleUnfollowUser, mintRedirect }: CitizensUIProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [collectionSupply, setCollectionSupply] = useState<number | undefined>(undefined)
   const { solanaWallets, isSolana, isEthereum } = useBlockchainWallet();
@@ -113,7 +114,7 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
         <Play />
       }
       {currentSection === CitizensSections.Mint &&
-        <MintUI supply={collectionSupply} />
+        <MintUI supply={collectionSupply} mintRedirect={mintRedirect} />
       }
     </>
   );
