@@ -18,6 +18,9 @@
     "@firebase/auth": "^1.9.1",
     "@helia/car": "^4.0.0",
     "@lukso/lsp-smart-contracts": "^0.12.1",
+    "@metaplex-foundation/mpl-core": "1.2.0",
+    "@metaplex-foundation/umi-bundle-defaults": "1.0.0",
+    "@metaplex-foundation/umi-web3js-adapters": "1.0.0",
     "@next/font": "^13.5.5",
     "@pixiv/three-vrm": "2.0.6",
     "@privy-io/react-auth": "^2.3.0",
@@ -70,5 +73,8 @@
     "sass": "^1.69.3",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.2.2"
+  },
+  "peerDependencies": {
+    "@metaplex-foundation/umi": "1.0.0"
   }
 }
