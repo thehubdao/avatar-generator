@@ -952,6 +952,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     setUserWearables({} as CampaignDrops)
   }
 
+  
   const mintRedirect = () => {
     setTimeout(async () => {
       await getSolanaTokensMetadataPromise()
