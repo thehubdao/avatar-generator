@@ -870,7 +870,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       } catch (error) {
         console.error('Error getting tokens:', error);
       } finally {
-        setIsLoading(false);
+        // setIsLoading(false);
       }
     };
     void getTokensMetadataPromise();
