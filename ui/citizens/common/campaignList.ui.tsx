@@ -3,13 +3,13 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { CitizensCollection } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 import { usePrivy } from '@privy-io/react-auth';
-
 // Import Swiper styles
 import 'swiper/css';
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 import { Campaign } from '../../../types/metadata.type';
 import { BlockchainType } from '../../../hooks/useBlockchainWallet';
 import { CardSize } from '../../../enums/citizens/common.enum';
+import { useAuthUi } from '@futureverse/auth-ui';
 
 interface CampaignListProps {
   collections: CitizensCollection[];
@@ -18,14 +18,15 @@ interface CampaignListProps {
 
 export default function CampaignList({ collections, setSelectedCampaign }: CampaignListProps) {
   const { login } = usePrivy();
+  const { openLogin, closeLogin, isLoginOpen } = useAuthUi();
 
   const handleCollectionClick = async (collection: CitizensCollection) => {
     try {
       const walletChainType = collection.blockChain?.toLowerCase() === BlockchainType.SOLANA
         ? 'solana-only'
         : 'ethereum-only';
-
-      login({ walletChainType });
+      openLogin();
+      /* login({ walletChainType }); */
 
       
     } catch (error) {
