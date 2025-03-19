@@ -25,16 +25,14 @@ const customThemeConfig: ThemeConfig = {
     },
   };
 
-const clientId = 'zjHdKav0hVGFETJBwiOv2';
+const clientId = 'iSacWyAeaQ6YnHnwc91mk';
 
 
 const authClient = new FutureverseAuthClient({
     clientId,
     environment: 'development',
-    redirectUri: 'http://localhost:3000/fp',
+    redirectUri: 'http://localhost:3000',
     signInFlow: 'popup',
-    /** Custom IDP url goes under authority */
-    authority: 'https://jen.passonline.cloud',
 });
 const queryClient = new QueryClient();
 
