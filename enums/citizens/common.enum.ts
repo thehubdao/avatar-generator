@@ -6,6 +6,11 @@ export enum CitizensSections {
   Mint
 }
 
+export enum CitizensPageLocation {
+  HOME = '/citizens',
+  LOGIN = '/citizens/login',
+}
+
 export enum CollectionSections {
   CITIZENS,
   WEARABLES
@@ -39,3 +44,4 @@ export enum PaymentType {
   LYX = "LYX",
   TOKEN = "TOKEN"
 }
+
