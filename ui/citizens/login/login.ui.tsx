@@ -7,7 +7,7 @@ interface CitizensLoginUIProps {
 }
 
 export default function CitizensLoginUI({ handleLogin, handleLogout }: CitizensLoginUIProps) {
-    const { ready, authenticated } = usePrivy();
+    const { ready, authenticated, user } = usePrivy();
 
     if (!ready) {
         return <div>Loading...</div>
@@ -16,7 +16,7 @@ export default function CitizensLoginUI({ handleLogin, handleLogout }: CitizensL
         return <div onClick={handleLogin}>Poner Login UI</div>
     }
     if (ready && authenticated) {
-        return <div onClick={handleLogout}>Poner Home UI</div>
+        return <div onClick={handleLogout}>{user?.wallet?.address}</div>
     }
 
 }
