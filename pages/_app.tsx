@@ -25,12 +25,12 @@ const customThemeConfig: ThemeConfig = {
     },
   };
 
-const clientId = 'iSacWyAeaQ6YnHnwc91mk';
+const clientId = '_I8ed6ePWVvtBg-Hu6yeW';
 
 
 const authClient = new FutureverseAuthClient({
     clientId,
-    environment: 'development',
+    environment: 'staging',
     redirectUri: 'http://localhost:3000',
     signInFlow: 'popup',
 });
