@@ -54,10 +54,12 @@ export enum Module {
   TextureUtil = 'TextureUtil',
   EditCampaign = 'EditCampaignComponent',
   OptionSelector = 'OptionSelector',
-  Importer = "ThreeJsImporterUtil",
+  Importer = 'ThreeJsImporterUtil',
   Lukso = 'LuksoComponent',
-  VrmUtil = "VrmUtil",
-  Citizens = "Citizens"
+  VrmUtil = 'VrmUtil',
+  Citizens = 'Citizens',
+  LuksoContractUtil = 'LuksoContractUtil',
+  SolanaContractUtil = 'SolanaContractUtil',
 }
 
 export enum EmailResult {
