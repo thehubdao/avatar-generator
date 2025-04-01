@@ -128,3 +128,5 @@ export interface SocialMediaDataProps {
   link: string;
   icon: ReactNode;
 }
+
+
