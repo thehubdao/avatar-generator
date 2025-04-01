@@ -35,7 +35,7 @@ import { GetFollowerCounts } from "./web3/lukso.util";
 import { XPReward } from "../constants/lukso/xp.constant";
 import { DataBaseDrop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
-import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/contract.util";
+import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/lukso/contract.util.ts[deprecated]";
 
 export type LogInStructure = {
   user: string;
