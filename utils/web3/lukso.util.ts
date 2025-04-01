@@ -4,6 +4,9 @@ import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.jso
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
 import { FetchDataOutput } from "@erc725/erc725.js/build/main/src/types/decodeData";
 import { LeaderboardEntry } from "../../types/leaderboard.type";
+import { CitizenMetadata } from "../../interfaces/citizens.interface";
+import { Result } from '../../types/common.type'
+import { CommonErrorCode } from "../../enums/common.enum";
 
 const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY
 const IPFS_GATEWAY_API_KEY = process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY
@@ -48,49 +51,59 @@ const LSP26_ABI = [
 ];
 
 
-export const getEthereumIPFSData = async (cid: string) => {
-  const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
-  const ipfsRequest = await fetch(ipfsHTTPUrl)
-  const ipfsData = await ipfsRequest.json() as { 'LSP4Metadata': TokenMetadata }
-  
-  return ipfsData
+export async function getEthereumIPFSData(cid: string): Promise<Result<CitizenMetadata>> {
+  try {
+    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+    const ipfsRequest = await fetch(ipfsHTTPUrl)
+    const ipfsData = await ipfsRequest.json() as { 'LSP4Metadata': CitizenMetadata }
+
+    return { success: true, value: ipfsData.LSP4Metadata }
+  } catch (error) {
+    const err = error as Error
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError }
+  }
 }
 
-export const getSolanaIPFSData = async (cid: string) => {
-  const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
-  const ipfsRequest = await fetch(ipfsHTTPUrl)
-  const ipfsData = await ipfsRequest.json() as TokenMetadata 
-  
-  return ipfsData
+export async function getSolanaIPFSData(cid: string): Promise<Result<CitizenMetadata>> {
+  try {
+    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+    const ipfsRequest = await fetch(ipfsHTTPUrl)
+    const ipfsData = await ipfsRequest.json() as CitizenMetadata
+
+    return { success: true, value: ipfsData }
+  } catch (error) {
+    const err = error as Error
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError }
+  }
 }
 
-export const getEthereumImageUrl = (metadata: TokenMetadata) => {
-    const ipfsUrl = metadata.images[0][0].url
-    const cid = ipfsUrl.split('//')[1]
+export const getEthereumImageUrl = (metadata: CitizenMetadata) => {
+  const ipfsUrl = metadata.images[0][0].url
+  const cid = ipfsUrl.split('//')[1]
 
-    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
-    return imageUrl
+  const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+  return imageUrl
 }
 
 export const getSolanaImageUrl = (metadata: TokenMetadata) => {
-    const ipfsUrl = metadata.imageUrl
-    const cid = ipfsUrl.split('//')[1]
+  const ipfsUrl = metadata.imageUrl
+  const cid = ipfsUrl.split('//')[1]
 
-    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
-    return imageUrl
+  const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+  return imageUrl
 }
 export async function GetFollowerCounts(address: string): Promise<{ followerCount: number, followingCount: number }> {
-    const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-    const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
-  
-    const followerCount = await lsp26Contract.followerCount(address);
-    const followingCount = await lsp26Contract.followingCount(address);
-  
-    return {
-      followerCount: Number(followerCount),
-      followingCount: Number(followingCount)
-    };
-  }
+  const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+  const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
+
+  const followerCount = await lsp26Contract.followerCount(address);
+  const followingCount = await lsp26Contract.followingCount(address);
+
+  return {
+    followerCount: Number(followerCount),
+    followingCount: Number(followingCount)
+  };
+}
 
 export async function GetUniversalProfileData(address: string) {
   try {
@@ -188,7 +201,7 @@ export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], pro
     )
 
     // Convert array of results to object
-    const statusObject = Object.fromEntries(statuses); 
+    const statusObject = Object.fromEntries(statuses);
     return statusObject;
   } catch (error) {
     console.error('Error getting signer or checking follow statuses:', error);
