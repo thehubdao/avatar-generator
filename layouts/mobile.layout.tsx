@@ -1,5 +1,5 @@
 import { Provider } from "react-redux";
-import store from "../store/store";
+import store from "../store/citizensStore";
 import MobileBuildAlert from "../ui/admin/common/mobileBuildAlert.ui";
 
 interface MobileLayoutProps {
