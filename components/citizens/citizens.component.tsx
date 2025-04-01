@@ -2,17 +2,17 @@ import { useEffect } from "react";
 import { CitizensPageLocation } from "../../enums/citizens/common.enum";
 import CitizensUI from "../../ui/citizens/citizens.ui"
 import { GoToPage } from "../../utils/router.util";
-import { usePrivy } from "@privy-io/react-auth";
+import { useBlockchainWallet } from "../../hooks/useBlockchainWallet";
 
 export default function CitizensComponent() {
-  const { ready, authenticated } = usePrivy();
+
+  const { isLoggedIn } = useBlockchainWallet();
 
   //User Auth Check
   useEffect(() => {
-    if (ready && !authenticated) {
+    if (isLoggedIn === false)
       GoToPage(CitizensPageLocation.LOGIN);
-    }
-  }, [ready, authenticated]);
+  }, [isLoggedIn]);
 
   return <CitizensUI />
 }
