@@ -1,5 +1,5 @@
 import { Provider } from "react-redux";
-import store from "../store/citizensStore";
+import store from "../store/store";
 import MobileBuildAlert from "../ui/admin/common/mobileBuildAlert.ui";
 import Header from "../components/admin/common/header.component";
 import { Suspense, useEffect } from "react";

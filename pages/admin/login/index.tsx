@@ -7,7 +7,7 @@ import { PageLocation } from "../../../enums/common.enum";
 import AGLoading from "../../../ui/common/ag-loading.component";
 import LoginUI from "../../../ui/admin/login/login.ui";
 import { Provider } from "react-redux";
-import store from "../../../store/citizensStore";
+import store from "../../../store/store";
 import { ShowModal } from "../../../utils/modal.util";
 
 export default function Login() {

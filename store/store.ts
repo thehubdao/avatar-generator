@@ -5,7 +5,7 @@ import currentCampaignSlice from './currentCampaignSlice';
 import addAssetSlice from './addAssetSlice';
 import citizensMetadataSlice from './citizensMetadataSlice';
 
-const citizensStore = configureStore({
+const store = configureStore({
   reducer: {
     auth: authSlice,
     addCampaign: addCampaignSlice,
@@ -13,9 +13,9 @@ const citizensStore = configureStore({
     addAsset: addAssetSlice,
     citizensMetadata: citizensMetadataSlice
   }
-})
+});
 
-export type RootState = ReturnType<typeof citizensStore.getState>
-export type AppDispatch = typeof citizensStore.dispatch
+export type RootState = ReturnType<typeof store.getState>;
+export type AppDispatch = typeof store.dispatch;
 
-export default citizensStore
+export default store;

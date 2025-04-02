@@ -7,7 +7,7 @@ import { AppProps } from 'next/app'
 import { PrivyAuthProvider } from '../components/providers/PrivyProvider'
 import "toastify-js/src/toastify.css"
 import { Provider } from 'react-redux'
-import citizensStore from '../store/citizensStore'
+import citizensStore from '../store/store'
 
 const workSans = Work_Sans({ subsets: ['latin'], display: 'block' })
 const poppins = Poppins({
