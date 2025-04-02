@@ -6,7 +6,7 @@ import ArrowMintSVG from "../common/SVG/arrowMintSVG.ui";
 import Modal from "../common/modal.ui";
 import Loader from "../../lukso/common/loader.ui";
 import CheckedSVG from "../common/SVG/checkedSVG.ui";
-import { createAsset } from "../../../utils/web3/solana/contract.util";
+import { createAsset } from "../../../utils/web3/solana/contract.util[deprecated]";
 import { useSolanaWallets } from "@privy-io/react-auth";
 
 interface MintUIProps {

@@ -3,7 +3,7 @@
   Subscribe = 'subscribe',
   Exported = 'exported',
   ChangeFeature = 'change',
-  ChangeSkinColor = 'change_color',
+  ChangeSkinColor = 'change_color'
 }
 
 export enum PageLocation {
@@ -23,7 +23,7 @@ export enum Breadcrumb {
   AssetCreate = 'createAsset',
   Account = 'account',
   Missing = 'missingPage',
-  UserControl = 'userControl',
+  UserControl = 'userControl'
 }
 
 export enum AdminComponents {
@@ -32,7 +32,7 @@ export enum AdminComponents {
   AssetModify,
   UserAdd,
   UserList,
-  CampaignAdd,
+  CampaignAdd
 }
 
 export enum Module {
@@ -59,13 +59,13 @@ export enum Module {
   VrmUtil = 'VrmUtil',
   Citizens = 'Citizens',
   LuksoContractUtil = 'LuksoContractUtil',
-  SolanaContractUtil = 'SolanaContractUtil',
+  SolanaContractUtil = 'SolanaContractUtil'
 }
 
 export enum EmailResult {
   NoEmail,
   BadEmail,
-  GoodEmail,
+  GoodEmail
 }
 
 export enum CampaignParameterName {
@@ -76,7 +76,7 @@ export enum CampaignParameterName {
   Random = 'r_val',
   Config = 'Config',
   All = '',
-  Missing = 'NaN',
+  Missing = 'NaN'
 }
 
 export enum RandomTier {

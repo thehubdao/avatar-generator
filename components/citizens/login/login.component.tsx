@@ -5,14 +5,14 @@ import { GoToPage } from "../../../utils/router.util";
 import { usePrivy } from "@privy-io/react-auth";
 
 export default function CitizensLoginComponent() {
-    const { ready, authenticated } = usePrivy();
+    const { ready:isPrivyProviderReady, authenticated:isUserAuthenticated } = usePrivy();
 
     //User Auth Check
     useEffect(() => {
-        if (ready && authenticated) {
+        if (isPrivyProviderReady && isUserAuthenticated) {
             GoToPage(CitizensPageLocation.HOME);
         }
-    }, [ready, authenticated]);
+    }, [isPrivyProviderReady, isUserAuthenticated]);
 
     return <LoginUI />
 }

@@ -1,5 +1,5 @@
-import { Campaign, TokenMetadata } from "./metadata.type"
-
+import { TokenMetadata } from "./metadata.type"
+import { Campaign } from "../enums/citizens/common.enum"
 export type BodyPart = {
     name: string
     path: string

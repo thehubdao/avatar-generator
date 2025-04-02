@@ -1,8 +1,6 @@
 import { BrowserProvider, ethers } from "ethers"
-import { TokenMetadata } from "../../types/metadata.type"
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
-import { FetchDataOutput } from "@erc725/erc725.js/build/main/src/types/decodeData";
 import { LeaderboardEntry } from "../../types/leaderboard.type";
 import { CitizenMetadata } from "../../interfaces/citizens.interface";
 import { Result } from '../../types/common.type'
@@ -51,7 +49,7 @@ const LSP26_ABI = [
 ];
 
 
-export async function getEthereumIPFSData(cid: string): Promise<Result<CitizenMetadata>> {
+export async function GetEthereumIPFSData(cid: string): Promise<Result<CitizenMetadata>> {
   try {
     const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
     const ipfsRequest = await fetch(ipfsHTTPUrl)
@@ -64,7 +62,7 @@ export async function getEthereumIPFSData(cid: string): Promise<Result<CitizenMe
   }
 }
 
-export async function getSolanaIPFSData(cid: string): Promise<Result<CitizenMetadata>> {
+export async function GetSolanaIPFSData(cid: string): Promise<Result<CitizenMetadata>> {
   try {
     const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
     const ipfsRequest = await fetch(ipfsHTTPUrl)
@@ -77,37 +75,44 @@ export async function getSolanaIPFSData(cid: string): Promise<Result<CitizenMeta
   }
 }
 
-export const getEthereumImageUrl = (metadata: CitizenMetadata) => {
+export function GetEthereumImageUrl(metadata: CitizenMetadata): Result<string> {
   const ipfsUrl = metadata.images[0][0].url
   const cid = ipfsUrl.split('//')[1]
 
   const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
-  return imageUrl
+  return { success: true, value: imageUrl };
 }
 
-export const getSolanaImageUrl = (metadata: TokenMetadata) => {
-  const ipfsUrl = metadata.imageUrl
-  const cid = ipfsUrl.split('//')[1]
-
-  const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
-  return imageUrl
-}
-export async function GetFollowerCounts(address: string): Promise<{ followerCount: number, followingCount: number }> {
-  const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
-  const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
-
-  const followerCount = await lsp26Contract.followerCount(address);
-  const followingCount = await lsp26Contract.followingCount(address);
-
-  return {
-    followerCount: Number(followerCount),
-    followingCount: Number(followingCount)
-  };
-}
-
-export async function GetUniversalProfileData(address: string) {
+export function GetSolanaImageUrl(metadata: CitizenMetadata): Result<string> {
   try {
-    // 1. Crear instancia de ERC725
+    const ipfsUrl = metadata.imageUrl;
+    const cid = ipfsUrl.split('//')[1];
+
+    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+    return { success: true, value: imageUrl };
+  } catch (error) {
+    const err = error as Error
+    return { success: false, errMessage: err.message, errCode: '' }
+  }
+}
+
+export async function GetFollowerCounts(address: string): Promise<Result<{ followerCount: number, followingCount: number }>> {
+  try {
+    const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
+    const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
+
+    const followerCount = await lsp26Contract.followerCount(address);
+    const followingCount = await lsp26Contract.followingCount(address);
+
+    return { success: true, value: { followerCount: Number(followerCount), followingCount: Number(followingCount) } };
+  } catch (error) {
+    const err = error as Error
+    return { success: false, errMessage: err.message, errCode: '' }
+  }
+}
+
+export async function GetUniversalProfileData(address: string): Promise<Result<{ name: string, profileImage: string }>> {
+  try {
     const erc725js = new ERC725(
       LSP3ProfileSchema as ERC725JSONSchema[],
       address,
@@ -116,18 +121,11 @@ export async function GetUniversalProfileData(address: string) {
         ipfsGateway: 'https://api.universalprofile.cloud/ipfs'
       }
     );
-
-    // 2. Obtener los metadatos del perfil LSP3
-    const profileData = await erc725js.fetchData('LSP3Profile') as FetchDataOutput;
-    // 3. Validar y extraer los datos
+    const profileData = await erc725js.fetchData('LSP3Profile');
     if (!profileData?.value || typeof profileData.value === 'string' || !('LSP3Profile' in profileData.value)) {
-      return {
-        name: '',
-        profileImage: ''
-      };
+      return { success: false, errMessage: 'Invalid profile data', errCode: '' };
     }
 
-    // 4. Procesar la imagen del perfil
     let imageUrl = '';
     if (profileData.value.LSP3Profile.profileImage?.[0]) {
       const url = profileData.value.LSP3Profile.profileImage[0].url;
@@ -138,21 +136,15 @@ export async function GetUniversalProfileData(address: string) {
         imageUrl = url;
       }
     }
-    return {
-      name: profileData.value.LSP3Profile.name || '',
-      profileImage: imageUrl
-    };
+    return { success: true, value: { name: profileData.value.LSP3Profile.name || '', profileImage: imageUrl } };
 
   } catch (error) {
-    console.error('Error fetching Universal Profile data:', error);
-    return {
-      name: '',
-      profileImage: ''
-    };
+    const err = error as Error
+    return { success: false, errMessage: err.message, errCode: '' };
   }
 }
 
-export async function FollowUser(addressToFollow: string, provider: BrowserProvider) {
+export async function FollowUser(addressToFollow: string, provider: BrowserProvider): Promise<Result<boolean>> {
   try {
     const signer = await provider.getSigner();
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
@@ -160,14 +152,14 @@ export async function FollowUser(addressToFollow: string, provider: BrowserProvi
     const tx = await lsp26Contract.follow(addressToFollow);
     await tx.wait();
 
-    return true;
+    return { success: true, value: true };
   } catch (error) {
-    console.error('Error following user:', error);
-    return false;
+    const err = error as Error
+    return { success: false, errMessage: err.message, errCode: '' };
   }
 }
 
-export async function UnfollowUser(addressToUnfollow: string, provider: BrowserProvider) {
+export async function UnfollowUser(addressToUnfollow: string, provider: BrowserProvider): Promise<Result<boolean>> {
   try {
     const signer = await provider.getSigner();
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
@@ -175,14 +167,14 @@ export async function UnfollowUser(addressToUnfollow: string, provider: BrowserP
     const tx = await lsp26Contract.unfollow(addressToUnfollow);
     await tx.wait();
 
-    return true;
+    return { success: true, value: true };
   } catch (error) {
-    console.error('Error unfollowing user:', error);
-    return false;
+    const err = error as Error
+    return { success: false, errMessage: err.message, errCode: '' };
   }
 }
 
-export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], provider: BrowserProvider, walletAddress: string) {
+export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], provider: BrowserProvider, walletAddress: string): Promise<Result<Record<string, boolean>>> {
   try {
     const signer = await provider.getSigner();
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
@@ -194,7 +186,6 @@ export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], pro
           const isFollowing = await lsp26Contract.isFollowing(walletAddress, user.address);
           return [user.address, isFollowing];
         } catch (error) {
-          console.error(`Error checking follow status for ${user.address}:`, error);
           return [user.address, false];
         }
       })
@@ -202,9 +193,9 @@ export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], pro
 
     // Convert array of results to object
     const statusObject = Object.fromEntries(statuses);
-    return statusObject;
+    return { success: true, value: statusObject };
   } catch (error) {
-    console.error('Error getting signer or checking follow statuses:', error);
-    return {};
+    const err = error as Error
+    return { success: false, errMessage: err.message, errCode: '' };
   }
 }

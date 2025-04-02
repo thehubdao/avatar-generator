@@ -1,0 +1,5 @@
+TODO:
+    ✔ Reset redux state on logout @done(25-03-31 11:18)
+    ✔ Add conversion util to convert from Blockchain interface to Privy login walletChainType enum @done(25-03-31 20:14)
+    ✔ Add selected campaign + combination to app state @done(25-03-31 14:08)
+    ✔ Add error handling to GetEthereumTokenMetadata and GetTokensMetadata at lukso/contract.util.ts @done(25-04-01 13:40)

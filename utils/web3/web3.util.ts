@@ -1,7 +1,7 @@
 import { PrivyClientConfig } from "@privy-io/react-auth";
 import { Blockchain } from "../../enums/blockchain/common.enum";
 
-export function blockchainToWalletChainType(blockchain?: Blockchain): NonNullable<PrivyClientConfig['appearance']>['walletChainType'] {
+export function BlockchainToWalletChainType(blockchain?: Blockchain): NonNullable<PrivyClientConfig['appearance']>['walletChainType'] {
     switch (blockchain) {
         case "ethereum":
             return "ethereum-only";

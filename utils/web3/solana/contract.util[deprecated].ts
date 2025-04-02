@@ -115,7 +115,7 @@ export const transferAsset = async (
 
 const NOOP_PROGRAM_ID = new PublicKey('noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV');
 
-export const getAssetsByOwner = async (walletAddress: string) => {
+export async function GetAssetsByOwner(walletAddress: string) {
   try {
     const ownerPublicKey = publicKey(walletAddress);
     
@@ -125,21 +125,21 @@ export const getAssetsByOwner = async (walletAddress: string) => {
     console.error('Error fetching assets:', error);
     throw error;
   }
-};
+}
 
-export const getCollectionAssetByOwner= async (walletAddress: string, collectionId: PublicKey = COLLECTION_ID) => {
-  const assets = await getAssetsByOwner(walletAddress);
+export async function GetCollectionAssetByOwner(walletAddress: string, collectionId: PublicKey = COLLECTION_ID) {
+  const assets = await GetAssetsByOwner(walletAddress);
   const collectionAsset = assets.find(asset => asset.updateAuthority.address === collectionId.toString());
   return collectionAsset;
 }
 
-export const getCollectionAssets = async (wallet: ConnectedSolanaWallet, collectionId: PublicKey = COLLECTION_ID) => {
+export async function GetCollectionAssets(wallet: ConnectedSolanaWallet, collectionId: PublicKey = COLLECTION_ID) {
   const assets = await fetchCollection(umi, collectionId.toString());
   return assets;
 }
 
-export const getCollectionSupply = async (wallet: ConnectedSolanaWallet, collectionId: PublicKey = COLLECTION_ID) => {
-  const assets = await getCollectionAssets(wallet, collectionId);
+export async function GetCollectionSupply(wallet: ConnectedSolanaWallet, collectionId: PublicKey = COLLECTION_ID) {
+  const assets = await GetCollectionAssets(wallet, collectionId);
   return assets.numMinted;
 }
 /* export const saveCombination = async (

@@ -1,5 +1,5 @@
 import { Phase } from '../types/avatar.type'
-import { isWhitelisted } from './web3/contract.util'
+import { isWhitelisted } from './web3/lukso/contract.util[deprecated]'
 
 export const currentPhase: Phase | undefined = process.env.NEXT_PUBLIC_MINTING_PHASE as Phase
 

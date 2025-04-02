@@ -4,16 +4,17 @@ import ProxyContractAbi from '../../../constants/abi/AvatarProxyContractABI.json
 import WerableContractAbi from '../../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { CampaignData, CampaignDrops, Drop, TokenId, TokenMetadata } from '../../../types/metadata.type';
-import { getEthereumIPFSData, getEthereumImageUrl, getSolanaIPFSData, getSolanaImageUrl } from '../lukso.util';
-import { GetCollectionDocs } from '../../../utils/firebase.util';
+import { GetEthereumIPFSData, GetEthereumImageUrl, GetSolanaIPFSData, GetSolanaImageUrl } from '../lukso.util';
+import { GetCollectionDocs } from '../../firebase.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../../constants/abi/UniversalProfileABI.json'
 import { BodyPart } from '../../../types/avatar.type';
 import { CitizenMetadata, DataBaseDrop } from '../../../interfaces/citizens.interface';
 import ClaimableDropABI from '../../../constants/abi/ClaimableDropABI.json'
-import { LogError } from '../../../utils/common.util';
-import { Module } from '../../../enums/common.enum';
+import { LogError } from '../../common.util';
+import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { Campaign } from '../../../enums/citizens/common.enum';
+import { Result } from '../../../types/common.type';
 
 
 
@@ -127,29 +128,32 @@ export const isWhitelisted = async (address: string) => {
     return isWhitelisted
 }
 
-export const getCampaignTokenIds = async (campaignAddress: string, address: string) => {
-    const campaignTokenIds = await getTokensOf(campaignAddress, address)
-    return campaignTokenIds
+export async function GetCampaignTokenIds(campaignAddress: string, address: string): Promise<Result<string[]>> {
+    const campaignTokenIds = await GetTokensOf(campaignAddress, address)
+    if (campaignTokenIds.success) return { success: true, value: campaignTokenIds.value }
+    return { success: false, errMessage: campaignTokenIds.errMessage, errCode: campaignTokenIds.errCode }
 }
 
-export const getEthereumCampaignsTokenIds = async (address: string) => {
+export async function GetEthereumCampaignsTokenIds(address: string): Promise<Result<TokenId[]>> {
     let campaignsTokenIds = [] as TokenId[]
     for (const campaign of Object.keys(campaignWeb3Data).filter((campaign) => campaign)) {
         const typpedCampaign = campaign as keyof typeof campaignWeb3Data
         const { contractAddress } = campaignWeb3Data[typpedCampaign]
-        let tokenIds: string[] = await getCampaignTokenIds(contractAddress, address)
+        const tokenIdsResult = await GetCampaignTokenIds(contractAddress, address)
+        if (!tokenIdsResult.success) continue
+        let tokenIds = tokenIdsResult.value
         if (campaign === 'vrm_female') tokenIds = tokenIds.filter((tokenId) => !noMetadataTokens.includes(Number(tokenId)))
 
         if (!tokenIds || tokenIds.length == 0) continue
 
-        const tokensMetadataUrls = await getCampaignTokenMetadataUris(campaign as Campaign, tokenIds)
+        const tokensMetadataUrls = await GetCampaignTokenMetadataUris(campaign as Campaign, tokenIds)
         const formattedTokenIds = tokenIds.map((tokenId, index) => {
             const metadataUri = tokensMetadataUrls[index]
             return { tokenId: Number(tokenId).toString(), campaign, metadataUri } as TokenId
         })
         campaignsTokenIds = campaignsTokenIds.concat(formattedTokenIds)
     }
-    return campaignsTokenIds
+    return { success: true, value: campaignsTokenIds }
 
     /* [
         {
@@ -166,7 +170,7 @@ export const getEthereumCampaignsTokenIds = async (address: string) => {
 
 
 
-export const getCampaignTokenMetadataUris = async (campaign: Campaign, tokenIds: string[]) => {
+export async function GetCampaignTokenMetadataUris(campaign: Campaign, tokenIds: string[]): Promise<Result<string[]>> {
     const { contractAddress } = campaignWeb3Data[campaign]
     const contract = new Contract(contractAddress, AvatarContractAbi, provider)
     const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
@@ -191,33 +195,39 @@ export const getCampaignTokenMetadataUris = async (campaign: Campaign, tokenIds:
 
 
 
-export const getEthereumTokenMetadata = async (tokenId: TokenId) => {
-    const { LSP4Metadata: metadata } = await getEthereumIPFSData(tokenId.metadataUri)
+export async function GetEthereumTokenMetadata(tokenId: TokenId): Promise<Result<CitizenMetadata>> {
+    const result = await GetEthereumIPFSData(tokenId.metadataUri)
+    if (!result.success) return result
+    const metadata = result.value
     metadata.tokenId = tokenId.tokenId
     metadata.campaign = tokenId.campaign as Campaign
 
     if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
     if (!metadata.baseCombination) metadata.baseCombination = metadata.combination
     metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch]}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
-    metadata.fallbackImageUrl = getEthereumImageUrl(metadata)
+    const imageUrlResult = GetEthereumImageUrl(metadata)
+    if (imageUrlResult.success) metadata.fallbackImageUrl = imageUrlResult.value
 
-    return metadata
+    return { success: true, value: metadata }
 }
 
-export const getSolanaTokenMetadata = async (tokenId: TokenId) => {
-    const metadata = await getSolanaIPFSData(tokenId.metadataUri)
+export async function GetSolanaTokenMetadata(tokenId: TokenId): Promise<Result<CitizenMetadata>> {
+    const result = await GetSolanaIPFSData(tokenId.metadataUri)
+    if (!result.success) return result
+    const metadata = result.value
     metadata.tokenId = tokenId.tokenId
     metadata.campaign = tokenId.campaign
 
     if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
     if (!metadata.baseCombination) metadata.baseCombination = metadata.combination
     metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch]}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
-    metadata.fallbackImageUrl = getSolanaImageUrl(metadata)
+    const imageUrlResult = GetSolanaImageUrl(metadata)
+    if (imageUrlResult.success) metadata.fallbackImageUrl = imageUrlResult.value
 
-    return metadata
+    return { success: true, value: metadata }
 }
 
-export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) => {
+export async function GetTokensMetadata(campaign: Campaign, tokenIds: string[]): Promise<Result<CitizenMetadata[]>> {
     const { contractAddress, baseCid } = campaignWeb3Data[campaign]
     const contract = new Contract(contractAddress, AvatarContractAbi, provider)
     const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
@@ -239,51 +249,56 @@ export const getTokensMetadata = async (campaign: Campaign, tokenIds: string[]) 
             const decodedData = decodedDataArray[i]
             const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenId}`
             if (!baseCid && !decodedData.value) continue
-            const tokenMetadata = await getEthereumTokenMetadata({ metadataUri, campaign, tokenId })
-            metadatasArray.push(tokenMetadata)
+            const tokenMetadataResult = await GetEthereumTokenMetadata({ metadataUri, campaign, tokenId })
+            if (tokenMetadataResult.success) metadatasArray.push(tokenMetadataResult.value)
         } catch (err) { console.log(err) }
     }
 
-    return metadatasArray
+    return { success: true, value: metadatasArray }
 }
 
-export const getCampaignsTokensMetadata = async (address: string) => { //TODO: Add error handling 
+export async function GetCampaignsTokensMetadata(address: string): Promise<Result<CitizenMetadata[]>> { //TODO: Add error handling 
     let campaignsMetadatas = [] as CitizenMetadata[]
     for (const campaign of Object.keys(campaignWeb3Data)) {
         const typpedCampaign = campaign as keyof typeof campaignWeb3Data
         const { contractAddress } = campaignWeb3Data[typpedCampaign]
-        const tokenIds: string[] = await getCampaignTokenIds(contractAddress, address)
-        if (!tokenIds) continue
-        const tokensMetadata = await getTokensMetadata(typpedCampaign as Campaign, tokenIds)
-        campaignsMetadatas = campaignsMetadatas.concat(tokensMetadata)
+        const tokenIdsResult = await GetCampaignTokenIds(contractAddress, address)
+        if (!tokenIdsResult.success) continue
+        const tokenIds = tokenIdsResult.value
+        const tokensMetadataResult = await GetTokensMetadata(typpedCampaign as Campaign, tokenIds)
+        if (!tokensMetadataResult.success) continue
+        campaignsMetadatas = campaignsMetadatas.concat(tokensMetadataResult.value)
     }
-    return campaignsMetadatas
+    return { success: true, value: campaignsMetadatas }
 }
 
-export const getSupply = async () => {
-    if (!AVATAR_CONTRACT_ADDRESS || !RPC_URL) return
-    const avatarContract = new Contract(AVATAR_CONTRACT_ADDRESS, AvatarContractAbi, provider)
-    const totalSupply = Number(await avatarContract.totalSupply())
-
-    return totalSupply
+export async function GetSupply(): Promise<Result<number>> {
+    try {
+        const avatarContract = new Contract(AVATAR_CONTRACT_ADDRESS, AvatarContractAbi, provider)
+        const totalSupply = Number(await avatarContract.totalSupply())
+        return { success: true, value: totalSupply }
+    } catch (error) {
+        return { success: false, errMessage: 'Error getting supply', errCode: CommonErrorCode.FetchError }
+    }
 }
 
-export const getTokensOf = async (contractAddress: string, address: string) => { //TODO: Add try catch statements
+export async function GetTokensOf(contractAddress: string, address: string): Promise<Result<string[]>> { //TODO: Add try catch statements
     const contract = new Contract(contractAddress, AvatarContractAbi, provider)
     const tokenIdsResult: string = await contract.tokenIdsOf(address)
 
     const tokenIds = tokenIdsResult.toString().split(',')
 
-    if (tokenIds[0] === "") return []
+    if (tokenIds[0] === "") return { success: true, value: [] }
 
-    return tokenIds
+    return { success: true, value: tokenIds }
 }
 
 
-export const getCampaignUserFeatures = async (address: string, campaign: string) => {
-    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
-    const features: Drop[] = []
-    for (let i = 0; i < dropsData.length; i++) {
+export async function GetCampaignUserFeatures(address: string, campaign: string): Promise<Result<Drop[]>> {
+    try {
+        const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
+        const features: Drop[] = []
+        for (let i = 0; i < dropsData.length; i++) {
         const drop = dropsData[i];
         const { contract_address } = drop
 
@@ -292,70 +307,30 @@ export const getCampaignUserFeatures = async (address: string, campaign: string)
         if (Number(tokenBalance) > 0) {
             drop.balance = Number(tokenBalance) // Asigna el balance al campo opcional
             features.push(drop)
+            }
         }
+        return { success: true, value: features }
+    } catch (error) {
+        return { success: false, errMessage: 'Error getting campaign user features', errCode: CommonErrorCode.FetchError }
     }
-    return features
 }
 
 
-export const getUserFeatures = async (address: string) => {
+export async function GetUserFeatures(address: string): Promise<Result<CampaignDrops>> {
     const features: CampaignDrops = {
         vrm_male: [],
         vrm_female: [],
         kumi: []
     }
     for (const campaign of Object.keys(campaignWeb3Data)) {
-        const campaignUserFeatures = await getCampaignUserFeatures(address, campaign)
-        features[campaign as keyof typeof campaignWeb3Data] = campaignUserFeatures
+        const campaignUserFeatures = await GetCampaignUserFeatures(address, campaign)
+        if (!campaignUserFeatures.success) continue
+        features[campaign as keyof typeof campaignWeb3Data] = campaignUserFeatures.value
     }
-    return features
+    return { success: true, value: features }
 }
 
-export const verifyMetadataContent = async (metadataUrl: string, metadataIpfsData: { "LSP4Metadata": TokenMetadata }) => {
-    try {
-        // 1. Get the raw content from IPFS
-        const rawContent = await getEthereumIPFSData(metadataUrl.split('//')[1]);
-
-        // 2. Generate hash of the raw content
-        const contentHash = ethers.keccak256(
-            ethers.toUtf8Bytes(JSON.stringify(rawContent))
-        );
-
-        // 3. Generate hash of the provided metadata
-        const providedHash = ethers.keccak256(
-            ethers.toUtf8Bytes(JSON.stringify(metadataIpfsData))
-        );
-
-        // 4. Compare hashes
-        if (contentHash !== providedHash) {
-            throw new Error('Content verification failed - hashes do not match');
-        }
-
-        /*         // 5. Verify any nested image/asset hashes if they exist
-                if (metadataIpfsData.LSP4Metadata?.images) {
-                    for (const imageSet of metadataIpfsData.LSP4Metadata.images) {
-                        for (const image of imageSet) {
-                            if (image.verification) {
-                                const imageContent = await getIPFSData(image.url.split('//')[1]);
-                                const imageHash = ethers.keccak256(
-                                    ethers.toUtf8Bytes(JSON.stringify(imageContent))
-                                );
-                                if (imageHash !== image.verification.data) {
-                                    throw new Error(`Image verification failed for ${image.url}`);
-                                }
-                            }
-                        }
-                    }
-                } */
-
-        return true;
-    } catch (error) {
-        console.error('Metadata verification failed:', error);
-        return false;
-    }
-}
-
-export const setTokenMetadata = async (campaign: Campaign, tokenId: string, metadataUri: string) => {
+export async function SetTokenMetadata(campaign: Campaign, tokenId: string, metadataUri: string): Promise<Result<void>> {
     const targetContractAddress = campaignWeb3Data[campaign].contractAddress;
     const avatarContract = new ethers.Contract(
         targetContractAddress,
@@ -364,14 +339,7 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: string, meta
     );
 
     const metadataUrl = `ipfs://${metadataUri}`;
-    const metadataIpfsData = await getEthereumIPFSData(metadataUrl.split('//')[1]);
-
-    /*     // Verify content before proceeding
-        const isValid = await verifyMetadataContent(metadataUrl, metadataIpfsData);
-    
-        if (!isValid) {
-            throw new Error('Metadata content verification failed');
-        } */
+    const metadataIpfsData = await GetEthereumIPFSData(metadataUrl.split('//')[1]);
     const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata');
     const metadataDataValue = avatarERC725Contract.encodeData([
         {
@@ -389,14 +357,15 @@ export const setTokenMetadata = async (campaign: Campaign, tokenId: string, meta
         setMetadataDataEncodedFunction
     )
     await tx.wait()
+    return { success: true, value: undefined }
 }
 
-export const burnDrop = async (from: string, campaign: string, drop: BodyPart) => {
+export async function BurnDrop(from: string, campaign: string, drop: BodyPart): Promise<Result<void>> {
     const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
-    if (!dropsData) return
+    if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError }
 
     const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name })
-    if (!dropPair) return
+    if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError }
 
     const dropContract = new Contract(dropPair.contract_address, WerableContractAbi, provider)
     const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1])
@@ -406,6 +375,7 @@ export const burnDrop = async (from: string, campaign: string, drop: BodyPart) =
         burnEncondedFunction
     )
     await tx.wait()
+    return { success: true, value: undefined }
 }
 
 
@@ -431,24 +401,24 @@ export async function GetWearablesHoldings(address: string, contractAddresses: s
 }
 
 
-export const checkClaimStatus = async (drop: DataBaseDrop, provider: JsonRpcProvider, address: string) => {
+export async function CheckClaimStatus(drop: DataBaseDrop, provider: JsonRpcProvider, address: string): Promise<Result<boolean>> {
     try {
         const signer = await provider.getSigner();
         const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer);
         const balance = await contract.balanceOf(address);
-        return balance > 0;
+        return { success: true, value: balance > 0 }
     } catch (error) {
         console.error("Error checking claim status:", error);
-        return false;
+        return { success: false, errMessage: 'Error checking claim status', errCode: CommonErrorCode.FetchError }
     }
 
-};
+}
 
-export const claimDrop = async (
+export async function ClaimDrop(
     drop: DataBaseDrop,
     provider: JsonRpcProvider,
     userAddress: string
-): Promise<boolean> => {
+): Promise<Result<boolean>> {
     try {
         const signer = await provider.getSigner();
         const dropContract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer)
@@ -459,9 +429,9 @@ export const claimDrop = async (
         })
         await claimTx.wait()
 
-        return await checkClaimStatus(drop, provider, userAddress);
+        return await CheckClaimStatus(drop, provider, userAddress);
     } catch (error) {
         LogError(Module.Citizens, 'Error in claimDrop:', error);
-        throw error;
+        return { success: false, errMessage: 'Error in claimDrop', errCode: CommonErrorCode.FetchError }
     }
 }

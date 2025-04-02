@@ -37,30 +37,31 @@ export interface Game {
 }
 
 export interface TokenMetadataImage {
-  width: number,
-  height: number,
-  url: string,
-  verification: object | undefined
+  width: number;
+  height: number;
+  url: string;
+  verification: object | undefined;
 }
 
 export interface CitizenMetadata {
-  fallbackImageUrl: string
-  imageUrl: string
-  combination: string
-  baseCombination: string
-  campaign: Campaign
-  tokenId: string
-  name: string,
-  description: string,
-  images: Array<Array<TokenMetadataImage>>
-  attributes?: Array<{ key: string, value: string, type: string }>
-  links?: [], assets?: [],
+  fallbackImageUrl: string;
+  imageUrl: string;
+  combination: string;
+  baseCombination: string;
+  campaign: Campaign;
+  tokenId: string;
+  name: string;
+  description: string;
+  images: Array<Array<TokenMetadataImage>>;
+  attributes?: Array<{ key: string, value: string, type: string }>;
+  links?: [];
+  assets?: [];
   body: {
-      head?: BodyPart
-      face?: BodyPart
-      chest?: BodyPart
-      legs?: BodyPart
-  }
+    head?: BodyPart;
+    face?: BodyPart;
+    chest?: BodyPart;
+    legs?: BodyPart;
+  };
 }
 
 export interface CitizenAttribute {

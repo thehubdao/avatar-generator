@@ -1,3 +1,4 @@
+import { Campaign } from "../enums/citizens/common.enum"
 import { BodyPart } from "./avatar.type"
 
 export type TokenMetadataImage = {
@@ -28,11 +29,7 @@ export type TokenMetadata = {
     }
 }
 
-export type TokenId = { tokenId: string, campaign: string, metadataUri:string}
-
-export const campaigns = { 'vrm_male': 'vrm_male', 'vrm_female': 'vrm_female', 'kumi': 'kumi' }
-
-export type Campaign = keyof typeof campaigns
+export type TokenId = { tokenId: string, campaign: Campaign, metadataUri:string}
 
 export type CampaignData = { [campaign in Campaign]: { contractAddress: string, baseCid: string } }
 

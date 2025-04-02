@@ -1,9 +1,9 @@
-import { TokenMetadata, Campaign } from "../../../types/metadata.type";
+import { TokenMetadata } from "../../../types/metadata.type";
 import { CollectionType } from "../../../types/avatar.type";
 import CitizensCollection from "../common/citizensCollection.ui";
 import WearablesCollection from "../common/wearablesCollection.ui";
 import { useState } from "react";
-import { CollectionSections } from "../../../enums/citizens/common.enum";
+import { Campaign, CollectionSections } from "../../../enums/citizens/common.enum";
 import { JsonRpcProvider } from "ethers";
 import { DataBaseDrop } from "../../../interfaces/citizens.interface";
 interface CollectionProps {

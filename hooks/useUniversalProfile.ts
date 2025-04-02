@@ -19,8 +19,10 @@ export function useUniversalProfile(address: string | undefined) {
       }
 
       try {
-        const data = await GetUniversalProfileData(address);
-        setProfileData(data);
+        const universalProfileData = await GetUniversalProfileData(address);
+        if (universalProfileData.success) {
+          setProfileData(universalProfileData.value);
+        } 
       } catch (error) {
         console.error('Error fetching profile data:', error);
       } finally {

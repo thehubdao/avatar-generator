@@ -1,7 +1,7 @@
-import { CitizensSections } from "../../enums/citizens/common.enum";
+import { Campaign, CitizensSections } from "../../enums/citizens/common.enum";
 import { IndexFeatureInterface } from "../../interfaces/api.interface";
 import { CollectionType } from "../../types/avatar.type";
-import { TokenMetadata, Campaign } from "../../types/metadata.type";
+import { TokenMetadata } from "../../types/metadata.type";
 import DetailsUI from "./common/details.ui";
 import Notifications from "./common/notifications.ui";
 import Collection from "./sections/collection.ui";
@@ -14,8 +14,6 @@ import Button from "./common/button.ui";
 import { DataBaseDrop } from "../../interfaces/citizens.interface";
 import { useEffect, useState } from "react";
 import MintUI from "./sections/mint.ui";
-import { getCollectionSupply } from "../../utils/web3/solana/contract.util";
-import { useBlockchainWallet } from "../../hooks/useBlockchainWallet";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -38,24 +36,23 @@ interface CitizensUIProps {
 
 export default function CitizensUI({ claimableDrops, currentSection, currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, provider, handleFollowUser, handleClaim, handleUnfollowUser, mintRedirect }: CitizensUIProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [collectionSupply, setCollectionSupply] = useState<number | undefined>(undefined)
-  const { solanaWallets, isSolana, isEthereum } = useBlockchainWallet();
+  const [collectionSupply] = useState<number | undefined>(undefined)
 
-  useEffect(() => {
+/*   useEffect(() => {
     const fetchCollectionSupply = async () => {
       if(!isSolana) return
       const supply = await getCollectionSupply(solanaWallets[0])
       setCollectionSupply(supply)
     }
     fetchCollectionSupply()
-  }, [address])
+  }, [address]) */
 
-  useEffect(() => {
+/*   useEffect(() => {
     console.log('loadedTokens', loadedTokens)
     if (loadedTokens && loadedTokens.length === 0 && isEthereum)
         setIsModalOpen(true)
           
-  }, [loadedTokens])
+  }, [loadedTokens]) */
 
   useEffect(() => {
     console.log("CURRENT SECTION", currentSection)

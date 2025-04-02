@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import { Campaign } from "../../types/metadata.type";
+import { Campaign } from "../../enums/citizens/common.enum";
 import { CampaignParameters } from "../../interfaces/common.interface";
 import { GetParameter } from "../../utils/firebase.util";
 import { CampaignParameterName, Module } from "../../enums/common.enum";
 import { LogError, RemoveUndefinedProperties } from "../../utils/common.util";
-import CitizensComponent from "../../components/citizens/citizens.component";
+import CitizensComponent from "../../components/citizens/citizens.component[deprecated]";
 import SnackbarProvider from "../../ui/citizens/snackbar/snackbar.provider";
 import { useReadLocalStorage } from "usehooks-ts";
 

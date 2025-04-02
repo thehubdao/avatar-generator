@@ -5,7 +5,6 @@ import { GoToPage } from "../../utils/router.util";
 import { useBlockchainWallet } from "../../hooks/useBlockchainWallet";
 
 export default function CitizensComponent() {
-
   const { isLoggedIn } = useBlockchainWallet();
 
   //User Auth Check

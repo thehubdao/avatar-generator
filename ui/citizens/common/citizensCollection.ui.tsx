@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from "react";
 import SearchSVG from "./SVG/searchSVG.ui";
-import { Campaign, TokenMetadata } from "../../../types/metadata.type";
+import {TokenMetadata } from "../../../types/metadata.type";
 import { LogError } from "../../../utils/common.util";
 import { Module } from "../../../enums/common.enum";
 import SelectorUI from "./selector.ui";
 import CampaignCard from "./campaignCard.ui";
 import { campaignLabels } from "../../../constants/lukso/labels.constant";
-import { CardSize } from "../../../enums/citizens/common.enum";
+import { Campaign, CardSize } from "../../../enums/citizens/common.enum";
 import { CollectionType } from "../../../types/avatar.type";
 
 interface CitizensCollectionProps {

@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { GetDropsContractAddresses, GetLeaderboardData } from '../../../../utils/firebase.util';
-import { GetCitizensHoldings, GetWearablesHoldings } from '../../../../utils/web3/contract.util';
+import { GetCitizensHoldings, GetWearablesHoldings } from '../../../../utils/web3/lukso/contract.util[deprecated]';
 
 export default async function Handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
