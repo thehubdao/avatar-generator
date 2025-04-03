@@ -3,13 +3,14 @@ import { AssetV1, fetchAssetsByOwner } from '@metaplex-foundation/mpl-core';
 import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
-import { umi, COLLECTION_ID } from '../../../constants/solana/contract.constant';
+import { UMI, COLLECTION_ID } from '../../../constants/solana/contract.constant';
 import { PublicKey } from '@solana/web3.js';
+import { CitizenMetadata } from '../../../interfaces/citizens.interface';
 
 export async function GetAssetsByOwner(walletAddress: string): Promise<Result<AssetV1[]>> {
     try {
         const ownerPublicKey = publicKey(walletAddress);
-        const assets = await fetchAssetsByOwner(umi, ownerPublicKey);
+        const assets = await fetchAssetsByOwner(UMI, ownerPublicKey);
 
         return {
             success: true,
@@ -29,26 +30,27 @@ export async function GetAssetsByOwner(walletAddress: string): Promise<Result<As
 export async function GetCollectionAssetByOwner(
     walletAddress: string,
     collectionId: PublicKey = COLLECTION_ID
-): Promise<Result<AssetV1>> {
+): Promise<Result<CitizenMetadata[]>> {
     const assetsResult = await GetAssetsByOwner(walletAddress);
     if (!assetsResult.success) return {
         success: false,
-        errMessage: "No assets found",
+        errMessage: "Couldn't get assets correctly",
         errCode: CommonErrorCode.GetNoData
     };
 
     const collectionAsset = assetsResult.value.find(
         asset => asset.updateAuthority.address === collectionId.toString()
     );
-
-    if (collectionAsset) {
-        return {
-            success: true,
-            value: collectionAsset
-        };
-    } else return {
-        success: false,
-        errMessage: "No collection asset found",
-        errCode: CommonErrorCode.GetNoData
+    if (!collectionAsset) return {
+        success: true,
+        value: [] //Return empty array because we don't have any collection asset. Means user has to mint
     };
+
+    const castedCitizenMetadata = collectionAsset as unknown as CitizenMetadata; //We have to make a cast because the type of the asset is not CitizenMetadata and AssetV1 is a very big object
+
+    return {
+        success: true,
+        value: [castedCitizenMetadata]//Temporarily return as array while we add more campaigns to Solana
+    };
+
 }

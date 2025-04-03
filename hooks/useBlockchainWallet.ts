@@ -8,8 +8,9 @@ import { GetCampaignsTokensMetadata } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
 import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
 import { LogError } from '../utils/common.util';
-import { Module } from '../enums/common.enum';
+import { CommonErrorCode, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
+import { Result } from '../types/common.type';
 
 export function useBlockchainWallet() {
   const blockchainType = useRef<Blockchain>();
@@ -33,31 +34,39 @@ export function useBlockchainWallet() {
     }
   };
 
-  const getSolanaTokensMetadataPromise = async (walletAddress: string) => {
+  async function getSolanaTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
     const asset = await GetCollectionAssetByOwner(walletAddress);
-    
-    if (asset.success) return [asset.value as unknown as CitizenMetadata];
 
-    return [];
+    if (asset.success) return { success: true, value: asset.value };
+
+    return { success: false, errMessage: asset.errMessage, errCode: asset.errCode };
   };
 
-  const getEthereumTokensMetadataPromise = async (walletAddress: string) => {
+  async function getEthereumTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
     const tokensMetadata = await GetCampaignsTokensMetadata(walletAddress);
 
-    if (tokensMetadata.success) return tokensMetadata.value;
+    if (tokensMetadata.success) return { success: true, value: tokensMetadata.value };
 
-    return [];
+    return { success: false, errMessage: tokensMetadata.errMessage, errCode: tokensMetadata.errCode };
   };
 
   const fetchCitizensMetadata = async (walletAddress: string) => {
     if (blockchainType.current === Blockchain.Ethereum) {
       const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress);
-      dispatch(setCitizensMetadata(ethereumCitizensMetadata));
-      dispatch(setSelectedCombination(ethereumCitizensMetadata[0]?.combination)); // null in case of error. This means user has no avatars
+      if (ethereumCitizensMetadata.success) {
+        dispatch(setCitizensMetadata(ethereumCitizensMetadata.value));
+        dispatch(setSelectedCombination(ethereumCitizensMetadata.value[0]?.combination));
+      } else {
+        LogError(Module.Citizens, ethereumCitizensMetadata.errMessage, ethereumCitizensMetadata.errCode);
+      }
     } else if (blockchainType.current === Blockchain.Solana) {
       const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress);
-      dispatch(setCitizensMetadata(solanaCitizensMetadata));
-      dispatch(setSelectedCombination(solanaCitizensMetadata[0]?.combination)); // null in case of error. This means user has no avatars
+      if (solanaCitizensMetadata.success) {
+        dispatch(setCitizensMetadata(solanaCitizensMetadata.value));
+        dispatch(setSelectedCombination(solanaCitizensMetadata.value[0]?.combination));
+      } else {
+        LogError(Module.Citizens, solanaCitizensMetadata.errMessage, solanaCitizensMetadata.errCode);
+      }
     }
   };
 
