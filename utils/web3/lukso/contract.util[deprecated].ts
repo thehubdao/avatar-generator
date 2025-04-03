@@ -3,13 +3,12 @@ import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../../constants/abi/AvatarProxyContractABI.json'
 import WerableContractAbi from '../../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
-import { CampaignData, CampaignDrops, Drop, TokenId, TokenMetadata } from '../../../types/metadata.type';
-import { GetEthereumIPFSData, GetEthereumImageUrl, GetSolanaIPFSData, GetSolanaImageUrl } from '../lukso.util';
+import { CampaignData, CampaignDrops, Drop, TokenId, CitizenMetadata, DataBaseDrop } from '../../../interfaces/citizens.interface';
+import { GetEthereumIPFSData, GetEthereumImageUrl, GetSolanaIPFSData, GetSolanaImageUrl } from '../citizens.util';
 import { GetCollectionDocs } from '../../firebase.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../../constants/abi/UniversalProfileABI.json'
-import { BodyPart } from '../../../types/avatar.type';
-import { CitizenMetadata, DataBaseDrop } from '../../../interfaces/citizens.interface';
+import { BodyPart } from '../../../interfaces/avatar.interface';
 import ClaimableDropABI from '../../../constants/abi/ClaimableDropABI.json'
 import { LogError } from '../../common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
@@ -94,7 +93,7 @@ function ToHex64(num: number) {
 }
 
 
-export const mint = async (metadataIpfsUrl: string, tokenMetadata: TokenMetadata, walletSigner: Signer) => {
+export const mint = async (metadataIpfsUrl: string, tokenMetadata: CitizenMetadata, walletSigner: Signer) => {
     const writableProxyContract = proxyContract.connect(walletSigner) as Contract
     const metadataDataKey = avatarERC725Contract.encodeKeyName('LSP4Metadata')
     const metadataDataValue = avatarERC725Contract.encodeData([
@@ -390,7 +389,7 @@ async function GetBalancesBatch(contractAddresses: string[], address: string) {
 }
 
 export async function GetCitizensHoldings(address: string): Promise<number> {
-    const contractAddresses = Object.values(campaignWeb3Data).map(data => data.contractAddress);
+    const contractAddresses = Object.values(campaignWeb3Data).map((data: any) => data.contractAddress); //TODO: Fix type on new contract util
     const balances = await GetBalancesBatch(contractAddresses, address);
     return balances.reduce((total, balance) => total + balance, 0);
 }
