@@ -1,14 +1,15 @@
 import { StorageLocation } from "../enums/firebase.enum";
-import { Campaign, TokenMetadata } from "../types/metadata.type";
+import { CitizenMetadata } from "../interfaces/citizens.interface";
 import { PinataSDK } from "pinata-web3";
-import { tempCampaignSwitch } from "./web3/contract.util";
+import { tempCampaignSwitch } from "./web3/lukso/contract.util[deprecated]";
 import { UploadFile } from "./firebase.util";
+import { Campaign } from "../enums/citizens/common.enum";
 
 
 const pinata = new PinataSDK({ pinataGateway: 'lukso.mypinata.cloud', pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT })
 
 
-export const uploadMetadata = async (tokenMetadata: TokenMetadata, metadataThumbnail: Blob | undefined, combination: string, campaign: Campaign) => {
+export const uploadMetadata = async (tokenMetadata: CitizenMetadata, metadataThumbnail: Blob | undefined, combination: string, campaign: Campaign) => {
     if (metadataThumbnail) {
         const imageFile = new File([metadataThumbnail], `${combination}.png`)
 

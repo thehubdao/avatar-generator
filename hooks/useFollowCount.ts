@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { GetFollowerCounts } from '../utils/web3/lukso.util';
+import { GetFollowerCounts } from '../utils/web3/citizens.util';
 import { useBlockchainWallet } from './useBlockchainWallet';
-
+import { Blockchain } from '../enums/blockchain/common.enum';
 
 
 export function useFollowCount(address: string | undefined) {
@@ -9,28 +9,26 @@ export function useFollowCount(address: string | undefined) {
     const [followingCount, setfollowingCount] = useState<number>(-1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
-    const { isSolana } = useBlockchainWallet();
+    const { blockchainType } = useBlockchainWallet();
 
   useEffect(() => {
     async function fetchFollowCount() {
-      if (!address || isSolana) {
+      if (!address || blockchainType.current === Blockchain.Solana) {
         setIsLoading(false);
         return;
       }
 
       setIsLoading(true);
-      try {
-        const { followerCount, followingCount } = await GetFollowerCounts(address);
-
-        setFollowerCount(followerCount);
-        setfollowingCount(followingCount);
-      } catch (err) {
-        console.error('Error fetching follower count:', err);
-        setError(err instanceof Error ? err : new Error('An error occurred while fetching follower count'));
-        setFollowerCount(-1);
-      } finally {
+        const followerCountResult = await GetFollowerCounts(address);
+        if (followerCountResult.success) {
+          setFollowerCount(followerCountResult.value.followerCount);
+          setfollowingCount(followerCountResult.value.followingCount);
+        } else {
+          setError(new Error(followerCountResult.errMessage));
+          setFollowerCount(-1);
+        }
         setIsLoading(false);
-      }
+      
     }
 
     fetchFollowCount();

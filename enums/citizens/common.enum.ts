@@ -45,3 +45,8 @@ export enum PaymentType {
   TOKEN = "TOKEN"
 }
 
+export enum Campaign {
+  Citizens = "vrm_female",
+  Creators = "vrm_male",
+  Kumi = "kumi",
+}

@@ -31,27 +31,17 @@ import { Client } from '../enums/client.enum'
 import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
 import { deleteDoc, doc, getDoc, increment, orderBy, Timestamp } from 'firebase/firestore';
 import jwt from 'jsonwebtoken';
-import { GetFollowerCounts } from "./web3/lukso.util";
+import { GetFollowerCounts } from "./web3/citizens.util";
 import { XPReward } from "../constants/lukso/xp.constant";
 import { DataBaseDrop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
-import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/contract.util";
+import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/lukso/contract.util[deprecated]";
+import { AVATAR_DOWNLOADED_STATUS, AVATAR_STATUS } from "../constants/firebase.constant";
 
 export type LogInStructure = {
   user: string;
   pass: string;
 };
-
-export const AVATAR_STATUS = {
-  Minted: "m",
-  NotMinted: "n",
-} as const;
-
-
-export const AVATAR_DOWNLOADED_STATUS = {
-  Downloaded: "d",
-  NotDownloaded: "n",
-} as const;
 
 export class FirebaseUtil {
   private static _instance: FirebaseUtil;
@@ -68,11 +58,9 @@ export class FirebaseUtil {
     this._auth = null;
   }
 
-
   public static Instance() {
     if (FirebaseUtil._instance === undefined)
       FirebaseUtil._instance = new FirebaseUtil();
-
     return FirebaseUtil._instance;
   }
 
@@ -91,10 +79,8 @@ export class FirebaseUtil {
       this._app = initializeApp(config);
     }
 
-
     return this._app;
   }
-
 
   public async Lukso() {
     if (this._luksoCampaign == undefined) {
@@ -139,7 +125,6 @@ export class FirebaseUtil {
   }
 }
 
-
 async function CheckServerSide() {
   await FirebaseUtil.Instance().Auth();
   if (!(process.env.NEXT_PUBLIC_FB_USER && process.env.NEXT_PUBLIC_FB_PASS)) {
@@ -154,7 +139,6 @@ async function CheckServerSide() {
     };
     await LogIn(logInfo);
   }
-
 }
 
 export async function GetInfoDB<T>(dbLocation: FirestoreLocation | FirestoreGlobalLocation | string, campaign?: string, constraintsValues?: AGQueryConstraints): Promise<Result<T[]>> {
@@ -195,7 +179,7 @@ async function GetDocuments<T>(dbLocation: string, constraintsValues?: AGQueryCo
     const querySnapshot = await getDocs(myQuery);
 
     const data = querySnapshot.docs.map(s => {
-      return { ...s.data() as T, id: s.id }
+      return { ...s.data() as T, id: s.id };
     });
 
     return { success: true, value: data };
@@ -448,8 +432,6 @@ export async function GetParameters<T>(campaign?: string, ...parameters: Paramet
   return result;
 }
 
-
-
 function CampaignLocation(campaign?: string) {
   return campaign ? `${FirestoreGlobalLocation.Campaign}/${campaign.toLowerCase()}/` : '';
 }
@@ -565,7 +547,6 @@ export async function LogIn(credentials: LogInInterface) {
 
   return signInWithEmailAndPassword(await FirebaseUtil.Instance().Auth(), actualUser, credentials.pass);
 }
-
 
 export async function IsLogIn(): Promise<boolean> {
   const authFirebase = await FirebaseUtil.Instance().Auth();
@@ -794,7 +775,6 @@ export async function UpdateCampaignParameter(update: Partial<CampaignParameters
   return await UpdateDocObject(FirestoreLocation.Parameters, update, campaign);
 }
 
-
 async function DeleteDocument(docLocation: string): Promise<Result<string>> {
   try {
     const { doc, deleteDoc } = await import('@firebase/firestore');
@@ -815,8 +795,6 @@ export async function DeleteCampaign(campaign: string): Promise<Result<string>> 
     const currentUser = await GetCurrentUser();
     if (currentUser == null)
       return { success: false, errMessage: "No user authenticated right now!", errCode: CommonErrorCode.NoAuth };
-
-
 
     const userLocation = `${FirestoreGlobalLocation.User}/${currentUser.uid}`;
     const userDocRef = doc(await FirebaseUtil.Instance().DB(), userLocation);
@@ -874,8 +852,6 @@ export async function GetAvatarStatus(combinationIndexes: string) {
   const status = await getDoc(resultDoc);
 
   return status.get('status') as string
-
-
 }
 
 export async function UpdateDownloadedAvatarStatus(combinationIndexes: string, downloadedStatus: keyof typeof AVATAR_DOWNLOADED_STATUS) {
@@ -903,7 +879,6 @@ export async function GetAvatarDownloadedStatus(combinationIndexes: string) {
 
 export async function GetAllCombinations(campaign: string, fromStatus: keyof typeof AVATAR_DOWNLOADED_STATUS) {
   const location = `collection/${campaign}/nft`;
-
 
   const combinationCollection1 = collection(await FirebaseUtil.Instance().DB(), location)
   const whereQuery = query(combinationCollection1, where("downloadedStatus", "==", AVATAR_DOWNLOADED_STATUS[fromStatus]))
@@ -980,7 +955,7 @@ function GenerateFollowingMessage(count: number, xp: number, levelInfo: { levele
   return message;
 }
 
-export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> { 
+export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> {
   if (address == undefined) Raise("Missing address to update last login date!");
 
   try {
@@ -1018,7 +993,6 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
           });
         }
 
-
       } else {
         // Reset streak if not consecutive
         userData.loginStreak = 1;
@@ -1027,7 +1001,9 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
       await HandleHoldingsXPReward(address);
 
       // Get current follower and following counts
-      const { followerCount, followingCount } = await GetFollowerCounts(address);
+      const followerCountsResult = await GetFollowerCounts(address);
+      if (!followerCountsResult.success) return { success: false, errMessage: followerCountsResult.errMessage, errCode: followerCountsResult.errCode }
+      const { followerCount, followingCount } = followerCountsResult.value
 
       // Check if follower/following counts have increased
       if (followerCount > (userData.followerCount || 0)) {
@@ -1038,7 +1014,7 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         await HandleFollowingChange(address, followingCount, userData.followingCount || 0);
       }
 
-      await setDoc(userDocRef, { 
+      await setDoc(userDocRef, {
         lastLogin: Timestamp.now(),
         followerCount,
         followingCount,
@@ -1208,7 +1184,7 @@ export async function GetClaimableDrops(dropId?: string): Promise<DataBaseDrop[]
   try {
     const db = await FirebaseUtil.Instance().DB();
     const dropsCollection = collection(db, 'claimableDrops');
-    
+
     let query;
     if (dropId) {
       query = doc(dropsCollection, dropId);
@@ -1266,13 +1242,13 @@ export async function GetDropsContractAddresses(): Promise<string[]> {
 
 async function CalculateCitizensXP(citizensCount: number): Promise<number> {
   let totalXP = 0;
-  
+
   // Aplicar la fórmula para cada citizen
   for (let k = 1; k <= citizensCount; k++) {
     const xpForThisCitizen = 10 * (1 + 0.10 * (k - 1));
     totalXP += xpForThisCitizen;
   }
-  
+
   return Math.floor(totalXP);
 }
 
@@ -1327,16 +1303,16 @@ function GenerateHoldingsMessage(
   totalXP: number,
 ): string {
   let message = `You've earned ${totalXP} XP for your holdings! `;
-  
+
   if (citizensXP > 0) {
     message += `(Citizens: ${citizensXP} XP) `;
   }
-  
+
   if (wearablesXP > 0) {
     message += `(Wearables: ${wearablesXP} XP)`;
   }
 
-  
+
   return message;
 }
 

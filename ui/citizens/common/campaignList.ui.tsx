@@ -7,8 +7,8 @@ import { usePrivy } from '@privy-io/react-auth';
 // Import Swiper styles
 import 'swiper/css';
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
-import { Campaign } from '../../../types/metadata.type';
-import { BlockchainType } from '../../../hooks/useBlockchainWallet';
+import { Campaign } from '../../../enums/citizens/common.enum';
+import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { CardSize } from '../../../enums/citizens/common.enum';
 
 interface CampaignListProps {
@@ -21,15 +21,13 @@ export default function CampaignList({ collections, setSelectedCampaign }: Campa
 
   const handleCollectionClick = async (collection: CitizensCollection) => {
     try {
-      const walletChainType = collection.blockChain?.toLowerCase() === BlockchainType.SOLANA
+      const walletChainType = collection.blockChain?.toLowerCase() === Blockchain.Solana
         ? 'solana-only'
         : 'ethereum-only';
 
       login({ walletChainType });
-
-      
     } catch (error) {
-      console.error('Error during login:', error)
+      console.error('Error during login:', error);
     }
   };
 

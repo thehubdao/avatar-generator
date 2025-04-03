@@ -13,7 +13,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import { Autoplay } from "swiper/modules";
 import CampaignCard from "../common/campaignCard.ui";
-import { Campaign } from "../../../types/metadata.type";
+import { Campaign } from "../../../enums/citizens/common.enum";
 
 const BACKEDBY = [
   {

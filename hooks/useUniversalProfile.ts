@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GetUniversalProfileData } from '../utils/web3/lukso.util';
+import { GetUniversalProfileData } from '../utils/web3/citizens.util';
 
 export function useUniversalProfile(address: string | undefined) {
   const [profileData, setProfileData] = useState<{
@@ -19,8 +19,10 @@ export function useUniversalProfile(address: string | undefined) {
       }
 
       try {
-        const data = await GetUniversalProfileData(address);
-        setProfileData(data);
+        const universalProfileData = await GetUniversalProfileData(address);
+        if (universalProfileData.success) {
+          setProfileData(universalProfileData.value);
+        } 
       } catch (error) {
         console.error('Error fetching profile data:', error);
       } finally {

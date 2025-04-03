@@ -10,7 +10,7 @@ import { ConfigShadow } from "./shadow.interface";
 import { ReactNode } from "react";
 import { ConfigPostProcessing } from "./postProcessing.interface";
 import {ModelExtension} from "../enums/export.enum";
-import { Campaign } from "../types/metadata.type";
+import { Campaign } from "../enums/citizens/common.enum";
 
 export interface BasicData {
   id: string;
@@ -75,8 +75,6 @@ export interface CampaignConfig {
   postProcessing?: ConfigPostProcessing[];
   extraExport?: ModelExtension[];
 }
-
-
 
 /***
  * Update CampaignParameterName enum as well, when changing names on this interface

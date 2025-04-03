@@ -1,17 +1,17 @@
 'use client'
 
-import { usePrivy} from '@privy-io/react-auth'
+import { usePrivy } from '@privy-io/react-auth'
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
-import { Campaign, CampaignDrops, TokenId, TokenMetadata } from "../../types/metadata.type";
+import { CampaignDrops, TokenId, CitizenMetadata } from "../../interfaces/citizens.interface";
 import LoginUI from "../../ui/citizens/sections/login.ui";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
-import CitizensUI from "../../ui/citizens/citizens.ui";
-import { burnDrop, checkClaimStatus, getEthereumCampaignsTokenIds, getEthereumTokenMetadata, getSolanaTokenMetadata, getUserFeatures, setTokenMetadata } from "../../utils/web3/contract.util";
+import CitizensUI from "../../ui/citizens/citizens.ui[deprecated]";
+import { BurnDrop, GetUserFeatures, SetTokenMetadata } from "../../utils/web3/lukso/contract.util[deprecated]";
 import { CitizensCollection, DataBaseDrop } from "../../interfaces/citizens.interface";
 import Button from "../../ui/citizens/common/button.ui";
 import ArrowLinkSVG from "../../ui/citizens/common/SVG/arrowLinkSVG.ui";
-import { CitizensSections } from "../../enums/citizens/common.enum";
-import { BodyPart, CollectionType } from "../../types/avatar.type";
+import { Campaign, CitizensSections } from "../../enums/citizens/common.enum";
+import { BodyPart, CollectionType } from "../../interfaces/avatar.interface";
 import AvatarEditor, {
   ChangeFeature,
   ChangeSkinColor,
@@ -20,45 +20,43 @@ import AvatarEditor, {
   SetEnvironment,
   SetFeaturesData,
 } from '../avatar/editor.component'
-import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetAvatarSingleByCampaignCombinationString, GetAvatarSingleByCampaignCombination, GetAssetsListByCampaign, GetAnimationByCampaignAndName, FetchBlob, FetchClaimableDrops, ApproveClaimForUser } from "../../utils/api.util";
+import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetAvatarSingleByCampaignCombinationString, GetAvatarSingleByCampaignCombination, GetAssetsListByCampaign, GetAnimationByCampaignAndName, FetchBlob } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { fileCampaignNameLabel } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { StorageLocation } from "../../enums/firebase.enum";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import HudUI from "../../ui/avatar/hud.ui";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
 import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
-import { FollowUser, GetFollowStatuses, GetUniversalProfileData, UnfollowUser } from "../../utils/web3/lukso.util";
 import { useSnackbar } from '../../ui/citizens/snackbar/snackbar.provider';
-import { claimDrop } from '../../utils/web3/contract.util';
 import LogoTheHub from '../../ui/citizens/common/SVG/logoTheHubSVG.ui';
 import Image from 'next/image';
 import SocialButtons from '../../ui/citizens/common/socialButtons.ui';
-import { BlockchainType, useBlockchainWallet } from '../../hooks/useBlockchainWallet';
-import { getCollectionAssetByOwner } from '../../utils/web3/solana/contract.util';
-
+import { useBlockchainWallet } from '../../hooks/useBlockchainWallet';
+import { Blockchain } from '../../enums/blockchain/common.enum';
+import { JsonRpcProvider } from 'ethers';
 const COLLECTIONS: CitizensCollection[] = [
   {
     name: 'Lukso Citizens',
     image: '/resources/images/campaings/citizens_collection.jpg',
-    campaign: 'vrm_female',
-    blockChain: BlockchainType.ETHEREUM
+    campaign: Campaign.Citizens,
+    blockChain: Blockchain.Ethereum
   },
   {
     name: 'Lukso Creators',
     image: '/resources/images/campaings/creators_collection.jpg',
-    campaign: 'vrm_male',
-    blockChain: BlockchainType.ETHEREUM
+    campaign: Campaign.Creators,
+    blockChain: Blockchain.Ethereum
   },
   {
     name: 'Kumi',
     image: '/resources/images/campaings/kumi_collection.jpg',
-    campaign: 'kumi',
-    blockChain: BlockchainType.SOLANA
+    campaign: Campaign.Kumi,
+    blockChain: Blockchain.Solana
   }
 
 ]
@@ -85,21 +83,21 @@ let featureList: FeatureInterface[] | undefined
 
 export default function CitizensComponent({ campaignParams, setCampaign, isLoggedIn, closeConnection }: CitizensComponentProps) {
   const { showSnackbar } = useSnackbar();
-  const { user } = usePrivy()
-  const { isSolana, isEthereum, solanaWallets, walletAddress, provider, logout, authenticated: isAuthenticated } = useBlockchainWallet();
+  const { logout, } = usePrivy()
+  const { walletAddress, provider, isLoggedIn: isAuthenticated } = useBlockchainWallet();
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
   const [isBurguerOpen, setIsBurguerOpen] = useState<boolean>(false);
 
-  const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>();
+  const [loadedTokens, setLoadedTokens] = useState<CitizenMetadata[]>();
 
   const [currentCollection, setCurrentCollection] = useState<CollectionType>({
     campaign: campaignParams?.campaign as Campaign,
     combination: '',
     baseCombination: '',
-    tokenMetadata: {} as TokenMetadata
+    citizenMetadata: {} as CitizenMetadata
   })
 
   // Edit state
@@ -111,7 +109,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const [skinColor, setSkinColor] = useState<string>(
     campaignParams?.config.skin?.defColor ?? 'FFFFFF'
   );
-  const [selectedLoginCampaign, setSelectedLoginCampaign] = useState<Campaign>();
+  const [, setSelectedLoginCampaign] = useState<Campaign>();
   const [selectedCategory, setSelectedCategory] = useState<string>('head');
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>();
   const [userWearables, setUserWearables] = useState<CampaignDrops | undefined>(undefined);
@@ -121,11 +119,11 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[] | undefined>([]);
 
 
-  const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => {
+  const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, citizenMetadata: CitizenMetadata) => {
     const newCollection: CollectionType = {
       campaign: newCampaign, combination: newCombination,
-      tokenMetadata,
-      baseCombination: tokenMetadata.baseCombination
+      citizenMetadata,
+      baseCombination: citizenMetadata.baseCombination
     };
     console.log('UPDATE COLLECTION', newCollection)
     setCurrentCollection(newCollection)
@@ -133,60 +131,61 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }, [setCampaign]);
 
 
-  const getEthereumTokensMetadataPromise = async () => {
+/*   const getEthereumTokensMetadataPromise = async () => {
     if (!walletAddress) return
-    const tokenIds = await getEthereumCampaignsTokenIds(walletAddress)
+    const tokenIds = await GetEthereumCampaignsTokenIds(walletAddress)
     console.log('TOKEN IDS ethereum', tokenIds)
-    if (tokenIds.length <= 0) {
+    if (!tokenIds.success) return
+    if (tokenIds.value.length <= 0) {
       setCurrentSection(CitizensSections.Collection);
       setIsLoading(false);
       setLoadedTokens([])
     } else {
-      setTokenIdList(tokenIds)
+      setTokenIdList(tokenIds.value)
     }
-  }
+  } */
 
-  const getSolanaTokensMetadataPromise = async () => {
+/*   const getSolanaTokensMetadataPromise = async () => {
     if (!walletAddress) return
-    const asset = await getCollectionAssetByOwner(solanaWallets[0])
+    const asset = await GetCollectionAssetByOwner(solanaWallets[0].address)
     console.log('ASSET', asset)
     if (asset) {
       setCurrentSection(CitizensSections.View);
       setIsLoading(false);
       setTokenIdList([{
         tokenId: asset.publicKey,
-        campaign: 'kumi',
+        campaign: Campaign.Kumi,
         metadataUri: asset.uri.split('//')[1]
       }])
     }
     else {
-      updateCollection('kumi', '0-0-0-0-0-0-0-0-0-0', {} as TokenMetadata)
+      updateCollection(Campaign.Kumi, '0-0-0-0-0-0-0-0-0-0', {} as citizenMetadata)
       if (currentSection !== CitizensSections.Mint) setCurrentSection(CitizensSections.Mint);
       setIsLoading(false);
 
     }
 
 
-    /* else {
+     else {
     setTokenIdList([{
       tokenId: asset.publicKey,
       campaign: 'kumi',
       metadataUri: asset.uri
     }])
+  } 
   } */
-  }
 
-  useEffect(() => {
-    if (isSolana) {
-      console.log("SOLANA GET TOKENS METADATA")
-      void getSolanaTokensMetadataPromise()
-    } else if (isEthereum) {
-      console.log("ETHEREUM GET TOKENS METADATA")
-      void getEthereumTokensMetadataPromise()
-    }
-  }, [walletAddress, isSolana, isEthereum])
+  /*   useEffect(() => {
+      if (isSolana) {
+        console.log("SOLANA GET TOKENS METADATA")
+        void getSolanaTokensMetadataPromise()
+      } else if (isEthereum) {
+        console.log("ETHEREUM GET TOKENS METADATA")
+        void getEthereumTokensMetadataPromise()
+      }
+    }, [walletAddress, isSolana, isEthereum]) */
 
-  const loadEthereumTokensMetadata = async () => {
+/*   const loadEthereumTokensMetadata = async () => {
     if (!tokenIdList) return
 
     let isFirstToken = false;
@@ -200,16 +199,17 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
             throw new Error('Invalid IPFS hash format');
           }
-          const tokenMetadata = await getEthereumTokenMetadata(tokenIdMetadata);
-          const selectedCampaign = selectedLoginCampaign || 'vrm_male'
+          const citizenMetadata = await GetEthereumcitizenMetadata(tokenIdMetadata);
+          const selectedCampaign = selectedLoginCampaign || Campaign.Citizens
+          if (!citizenMetadata.success) return
           if (!isFirstToken && tokenIdMetadata.campaign === selectedCampaign) {
-            updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
+            updateCollection(citizenMetadata.value.campaign as Campaign, citizenMetadata.value.combination, citizenMetadata.value as citizenMetadata)
             isFirstToken = true;
           }
 
           setLoadedTokens(prevTokens => {
-            if (!prevTokens) return [tokenMetadata];
-            return [...prevTokens, tokenMetadata];
+            if (!prevTokens) return [citizenMetadata.value as citizenMetadata];
+            return [...prevTokens, citizenMetadata.value as citizenMetadata];
           });
         } catch (error) {
           LogError(Module.Citizens, `Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
@@ -222,9 +222,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       LogError(Module.Citizens, 'Error loading token metadata:', error);
     }
 
-  };
+  }; */
 
-  const loadSolanaTokensMetadata = async () => {
+/*   const loadSolanaTokensMetadata = async () => {
     let isFirstToken = false;
     try {
       console.log("LOAD SOLANA TOKENS METADATA", tokenIdList)
@@ -235,17 +235,18 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
             throw new Error('Invalid IPFS hash format');
           }
-          const tokenMetadata = await getSolanaTokenMetadata(tokenIdMetadata);
-          console.log("TOKEN METADATA", tokenMetadata, isFirstToken, tokenIdMetadata.campaign, selectedLoginCampaign)
-          const selectedCampaign = selectedLoginCampaign || 'kumi'
+          const citizenMetadata = await GetSolanacitizenMetadata(tokenIdMetadata);
+          console.log("TOKEN METADATA", citizenMetadata, isFirstToken, tokenIdMetadata.campaign, selectedLoginCampaign)
+          const selectedCampaign = selectedLoginCampaign || Campaign.Kumi
+          if (!citizenMetadata.success) return
           if (!isFirstToken && tokenIdMetadata.campaign === selectedCampaign) {
-            updateCollection(tokenMetadata.campaign as Campaign, tokenMetadata.combination, tokenMetadata)
+            updateCollection(citizenMetadata.value.campaign as Campaign, citizenMetadata.value.combination, citizenMetadata.value as citizenMetadata)
             isFirstToken = true;
           }
 
           setLoadedTokens(prevTokens => {
-            if (!prevTokens) return [tokenMetadata];
-            return [...prevTokens, tokenMetadata];
+            if (!prevTokens) return [citizenMetadata.value as citizenMetadata];
+            return [...prevTokens, citizenMetadata.value as citizenMetadata];
           });
         } catch (error) {
           LogError(Module.Citizens, `Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
@@ -258,66 +259,68 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       LogError(Module.Citizens, 'Error loading token metadata:', error);
     }
 
-  };
+  }; */
 
-
-  useEffect(() => {
-    console.log("IS SOLANA", isSolana, "IS ETHEREUM", isEthereum)
-    if (loadedTokens && loadedTokens.length > 0) return
-    if (isSolana) {
-      loadSolanaTokensMetadata();
-    } else if (isEthereum) {
-      console.log("LOAD ETHEREUM TOKENS METADATA")
-      loadEthereumTokensMetadata();
-    }
-  }, [tokenIdList,isSolana, isEthereum]);
+  //COMMENTED WHILE DEPRECATED COMPONENT IS REMOVED
+  /*   useEffect(() => {
+      console.log("IS SOLANA", isSolana, "IS ETHEREUM", isEthereum)
+      if (loadedTokens && loadedTokens.length > 0) return
+      if (isSolana) {
+        loadSolanaTokensMetadata();
+      } else if (isEthereum) {
+        console.log("LOAD ETHEREUM TOKENS METADATA")
+        loadEthereumTokensMetadata();
+      }
+    }, [tokenIdList,isSolana, isEthereum]); */
 
 
   const handleEthereumUserFeatures = async () => {
     if (!walletAddress) return
-    const features = await getUserFeatures(walletAddress)
-
-    setUserWearables(features)
+    const features = await GetUserFeatures(walletAddress)
+    if (!features.success) return
+    setUserWearables(features.value)
   }
 
-  useEffect(() => {
-    if (isSolana) {
-      /* handleSolanaUserFeatures() */
-    } else if (isEthereum) {
-      handleEthereumUserFeatures()
-    }
-  }, [walletAddress, isEthereum, isSolana])
+  /*   useEffect(() => {
+      if (isSolana) {
+        // handleSolanaUserFeatures() 
+      } else if (isEthereum) {
+        handleEthereumUserFeatures()
+      }
+    }, [walletAddress, isEthereum, isSolana]) */
 
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (isSolana) {
-      /* void getSolanaFeatureList() */
+      /* void getSolanaFeatureList() 
     } else if (isEthereum) {
       void getEthereumFeatureList()
     }
-  }, [userWearables, isEthereum, isSolana])
+  }, [userWearables, isEthereum, isSolana]) */
 
 
-  async function fetchEthereumDrops() {
+/*   async function fetchEthereumDrops() {
     if (!provider) return
     const drops = await FetchClaimableDrops();
     Promise.all(drops.map(async (drop) => {
-      drop.owned = await checkClaimStatus(drop, provider, user?.wallet?.address || '');
+      const result = await CheckClaimStatus(drop, provider as unknown as JsonRpcProvider, user?.wallet?.address || '');
+      if (!result.success) return
+      drop.owned = result.value;
     }))
     setClaimableDrops(drops);
-  }
+  } */
 
-  useEffect(() => {
+  /*   useEffect(() => {
+  
+      if (isSolana) {
+         fetchSolanaDrops(); 
+      } else if (isEthereum) {
+        fetchEthereumDrops();
+      }
+    }, [provider, isEthereum, isSolana]); */
 
-    if (isSolana) {
-      /* fetchSolanaDrops(); */
-    } else if (isEthereum) {
-      fetchEthereumDrops();
-    }
-  }, [provider, isEthereum, isSolana]);
 
-
-  const handleEthereumClaim = async (drop: DataBaseDrop) => {
+/*   const handleEthereumClaim = async (drop: DataBaseDrop) => {
     if (!user?.wallet || !provider) return false;
 
     try {
@@ -327,12 +330,13 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
         return false;
       }
 
-      const isOwned = await claimDrop(drop, provider, user.wallet.address);
+      const isOwned = await ClaimDrop(drop, provider as unknown as JsonRpcProvider, user.wallet.address);
+      if (!isOwned.success) return
 
       setClaimableDrops(prevDrops =>
         prevDrops.map(d =>
           d.id === drop.id
-            ? { ...d, owned: isOwned }
+            ? { ...d, owned: isOwned.value }
             : d
         )
       );
@@ -343,7 +347,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       LogError(Module.Citizens, 'Error claiming drop:', error);
       return false;
     }
-  }
+  } */
 
 
   async function getEnvironmentMapList() {
@@ -479,10 +483,10 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     }
     for (const { val } of singleInitData.features) {
       const { id, path, type, name } = val;
-      const { tokenMetadata } = currentCollection;
-      const bodyIndex = val.type.toLowerCase() as keyof typeof tokenMetadata.body;
+      const { citizenMetadata } = currentCollection;
+      const bodyIndex = val.type.toLowerCase() as keyof typeof citizenMetadata.body;
       try {
-        tokenMetadata.body[bodyIndex] = val as BodyPart; // Adjust logic to Solana
+        citizenMetadata.body[bodyIndex] = val as BodyPart; // Adjust logic to Solana
       } catch (error) {
         console.log("ERROR", error)
       }
@@ -558,7 +562,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       modelGLBPromise,
       modelVRMPromise,
     ] = await Promise.all([
-      FetchBlob(currentCollection.tokenMetadata.imageUrl),
+      FetchBlob(currentCollection.citizenMetadata.imageUrl),
       GetAvatarGLB(),
       FetchBlob(vrmStorageUrl),
     ])
@@ -569,7 +573,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       : undefined
     const filesName =
       fileCampaignNameLabel[campaignParams?.campaign as keyof typeof fileCampaignNameLabel] +
-      currentCollection.tokenMetadata.tokenId
+      currentCollection.citizenMetadata.tokenId
     if (modelVRM && modelGLBPromise.success) {
       await SaveFile(modelVRM, `${filesName}.vrm`)
       await SaveFile(modelGLB, `${filesName}.glb`)
@@ -671,14 +675,14 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       .join('-') as string
     const currentCampaign = campaignParams?.campaign as Campaign
     const currentFeatures = singleInitData?.features
-    const newMetadata = currentCollection.tokenMetadata
+    const newMetadata = currentCollection.citizenMetadata
     newMetadata.combination = newCombination
     newMetadata.attributes = []
 
     const _tokenIdList = [...tokenIdList as TokenId[]];
 
     const tokenIdIndex = _tokenIdList.findIndex(
-      ({ tokenId }) => tokenId === currentCollection.tokenMetadata.tokenId
+      ({ tokenId }) => tokenId === currentCollection.citizenMetadata.tokenId
     )
 
     const originalMetadataUri = _tokenIdList[tokenIdIndex].metadataUri
@@ -739,19 +743,19 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       };
       newMetadata.imageUrl = metadataObject.imageUrl
 
-      await setTokenMetadata(
+      await SetTokenMetadata(
         currentCampaign,
-        currentCollection.tokenMetadata.tokenId,
+        currentCollection.citizenMetadata.tokenId,
         metadataObject.uri
       )
 
       for (let i = 0; i < burnDropArray.length; i++) {
         const drop = burnDropArray[i]
-        await burnDrop(walletAddress, currentCampaign, drop)
+        await BurnDrop(walletAddress, currentCampaign, drop)
       }
       await handleEthereumUserFeatures()
 
-      setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
+      setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, citizenMetadata: newMetadata, campaign: currentCampaign })
       onSavedCombinationSnackbar();
     } catch (err) {
       console.log(err, "ERROR SAVING COMBINATION");
@@ -768,15 +772,15 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     }
   }
 
-/*   useEffect(() => {
-    if (campaignParams) {
-      setIsLoading(true);
-      console.log("CAMPAIGN PARAMS TO VIEW", campaignParams)
-      setCurrentSection(CitizensSections.View);
-    }
-  }, [campaignParams])
- */
-  const handleFollowUser = async (addressToFollow: string) => {
+  /*   useEffect(() => {
+      if (campaignParams) {
+        setIsLoading(true);
+        console.log("CAMPAIGN PARAMS TO VIEW", campaignParams)
+        setCurrentSection(CitizensSections.View);
+      }
+    }, [campaignParams])
+   */
+/*   const handleFollowUser = async (addressToFollow: string) => {
     if (!provider) return false;
     try {
       const isSuccess = await FollowUser(addressToFollow, provider);
@@ -797,9 +801,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       LogError(Module.Citizens, 'Error following user:', error);
       return false;
     }
-  };
+  }; */
 
-  const handleUnfollowUser = async (addressToUnfollow: string) => {
+/*   const handleUnfollowUser = async (addressToUnfollow: string) => {
     if (!provider) return false;
     try {
       const isSuccess = await UnfollowUser(addressToUnfollow, provider);
@@ -820,86 +824,90 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       LogError(Module.Citizens, 'Error unfollowing user:', error);
       return false;
     }
-  };
+  }; */
 
-  const getEthereumUserFeaturesPromise = async () => {
-    if (!provider) return;
-    try {
-      if (isSolana) {
-        // TODO: Solana user features
-      } else {
-        const features = await getUserFeatures(walletAddress);
-        setUserWearables(features);
-      }
-    } catch (error) {
-      console.error('Error getting user features:', error);
-    }
-  };
-
-  const getSolanaUserFeaturesPromise = async () => {
-    /*     const features = await getUserFeatures(await signer.getAddress()); */
-    setUserWearables({} as CampaignDrops);
-
-
-  };
-
-  useEffect(() => {
-    if (isSolana) {
-      void getSolanaUserFeaturesPromise();
-    } else {
-      void getEthereumUserFeaturesPromise();
-    }
-  }, [provider, isSolana]);
-
-
-  useEffect(() => {
-    if (!walletAddress) return;
-    const getTokensMetadataPromise = async () => {
+  /*   const getEthereumUserFeaturesPromise = async () => {
+      if (!provider) return;
       try {
         if (isSolana) {
-          // TODO: Solana tokens
+          // TODO: Solana user features
         } else {
-          const tokenIds = await getEthereumCampaignsTokenIds(walletAddress);
-          if (tokenIds.length <= 0) {
-            setCurrentSection(CitizensSections.Collection);
-            setLoadedTokens([]);
-          } else {
-            setTokenIdList(tokenIds);
-          }
+          const features = await GetUserFeatures(walletAddress);
+          if (!features.success) return
+          setUserWearables(features.value);
         }
       } catch (error) {
-        console.error('Error getting tokens:', error);
-      } finally {
-        // setIsLoading(false);
+        console.error('Error getting user features:', error);
       }
-    };
-    void getTokensMetadataPromise();
-  }, [walletAddress, isSolana]);
+    }; */
+
+  /*   const getSolanaUserFeaturesPromise = async () => {
+      //     const features = await getUserFeatures(await signer.getAddress()); 
+      setUserWearables({} as CampaignDrops);
+  
+  
+    }; */
+
+  /*   useEffect(() => {
+      if (isSolana) {
+        void getSolanaUserFeaturesPromise();
+      } else {
+        void getEthereumUserFeaturesPromise();
+      }
+    }, [provider, isSolana]);
+   */
+  /* 
+    useEffect(() => {
+      if (!walletAddress) return;
+      const getTokensMetadataPromise = async () => {
+        try {
+          if (isSolana) {
+            // TODO: Solana tokens
+          } else {
+            const tokenIds = await GetEthereumCampaignsTokenIds(walletAddress);
+            if (!tokenIds.success) return
+            if (tokenIds.value.length <= 0) {
+              setCurrentSection(CitizensSections.Collection);
+              setLoadedTokens([]);
+            } else {
+              setTokenIdList(tokenIds.value);
+            }
+          }
+        } catch (error) {
+          console.error('Error getting tokens:', error);
+        } finally {
+          // setIsLoading(false);
+        }
+      };
+      void getTokensMetadataPromise();
+    }, [walletAddress]); */
 
 
-  const getEthereumClaimableDropsPromise = async () => {
+ /*  const getEthereumClaimableDropsPromise = async () => {
     try {
       if (!provider) return;
       const drops = await FetchClaimableDrops(walletAddress);
       Promise.all(drops.map(async (drop) => {
-        drop.owned = await checkClaimStatus(drop, provider, walletAddress);
+        const result = await CheckClaimStatus(drop, provider as unknown as JsonRpcProvider, walletAddress as string);
+        if (!result.success) return
+        drop.owned = result.value;
       }))
       setClaimableDrops(drops);
     } catch (error) {
       console.error('Error getting claimable drops:', error);
     }
-  };
+  }; */
 
-  useEffect(() => {
-    if (isSolana) {
-      /*       void getSolanaClaimableDropsPromise(); */
-    } else if (isEthereum) {
-      void getEthereumClaimableDropsPromise();
-    }
-  }, [provider, isSolana, isEthereum]);
+  /*   useEffect(() => {
+      if (isSolana) {
+               // void getSolanaClaimableDropsPromise(); 
+      } else if (isEthereum) {
+        void getEthereumClaimableDropsPromise();
+      }
+    }, [provider]); */
 
-  const fetchEthereumLeaderboardData = async () => {
-    if (!provider) return;
+  /*   const fetchEthereumLeaderboardData = async () => {
+      if (!provider) return;
 
     try {
       const response = await fetch('/api/v1/leaderboard');
@@ -907,14 +915,15 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       const data = await response.json();
       const leaderboardWithProfileData = await Promise.all(data.map(async (entry: LeaderboardEntry) => {
         const profileData = await GetUniversalProfileData(entry.address);
+        if (!profileData.success) return
         return {
           ...entry,
-          name: profileData.name,
-          profileImage: profileData.profileImage,
+          name: profileData.value.name,
+          profileImage: profileData.value.profileImage,
           isFollowing: false
         };
       }));
-      const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, provider, walletAddress);
+      const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, provider, walletAddress as string);
       leaderboardWithProfileData.forEach(entry => {
         entry.isFollowing = followStatuses[entry.address] || false;
       });
@@ -926,14 +935,14 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     }
   }
 
-  useEffect(() => {
+/*   useEffect(() => {
 
     if (isSolana) {
-      /* fetchSolanaLeaderboardData(); */
+     //  fetchSolanaLeaderboardData(); 
     } else if (isEthereum) {
       fetchEthereumLeaderboardData();
     }
-  }, [provider, isSolana]);
+  }, [provider, isSolana]); */
 
 
   const handleLogout = async () => {
@@ -943,7 +952,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       campaign: campaignParams?.campaign as Campaign,
       combination: '',
       baseCombination: '',
-      tokenMetadata: {} as TokenMetadata
+      citizenMetadata: {} as CitizenMetadata
     })
     setLoadedTokens(undefined)
     setTokenIdList(undefined)
@@ -952,13 +961,13 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     setUserWearables({} as CampaignDrops)
   }
 
-  
-  const mintRedirect = () => {
+
+/*   const mintRedirect = () => {
     setTimeout(async () => {
       await getSolanaTokensMetadataPromise()
       setCurrentSection(CitizensSections.View)
     }, 5000)
-  }
+  } */
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
@@ -1064,13 +1073,20 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
             updateCollection={updateCollection}
             features={singleInitData?.features}
             exportModel={() => exportModel()}
-            address={walletAddress}
+            address={walletAddress as string}
             leaderboardData={leaderboardData}
-            provider={provider}
-            handleFollowUser={handleFollowUser}
-            handleUnfollowUser={handleUnfollowUser}
-            claimableDrops={claimableDrops}
-            handleClaim={handleEthereumClaim} mintRedirect={mintRedirect} />
+            provider={provider as unknown as JsonRpcProvider | null}
+            /*               handleFollowUser={handleFollowUser}
+                          handleUnfollowUser={handleUnfollowUser} */
+            claimableDrops={claimableDrops} handleFollowUser={function (): Promise<boolean> {
+              throw new Error('Function not implemented.');
+            } } handleUnfollowUser={function (): Promise<boolean> {
+              throw new Error('Function not implemented.');
+            } } handleClaim={function (): Promise<boolean> {
+              throw new Error('Function not implemented.');
+            } } mintRedirect={function (): void {
+              throw new Error('Function not implemented.');
+            } }              /* handleClaim={handleEthereumClaim} mintRedirect={mintRedirect} */ />
           }
           {/* LOADER */}
           {isLoading &&
