@@ -3,7 +3,7 @@
 import { usePrivy } from '@privy-io/react-auth'
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import { CampaignDrops, TokenId, CitizenMetadata } from "../../interfaces/citizens.interface";
-import LoginUI from "../../ui/citizens/sections/login.ui";
+// import LoginUI from "../../ui/citizens/sections/login.ui";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import CitizensUI from "../../ui/citizens/citizens.ui[deprecated]";
 import { BurnDrop, GetUserFeatures, SetTokenMetadata } from "../../utils/web3/lukso/contract.util[deprecated]";
@@ -109,7 +109,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const [skinColor, setSkinColor] = useState<string>(
     campaignParams?.config.skin?.defColor ?? 'FFFFFF'
   );
-  const [, setSelectedLoginCampaign] = useState<Campaign>();
+  // const [, setSelectedLoginCampaign] = useState<Campaign>();
   const [selectedCategory, setSelectedCategory] = useState<string>('head');
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>();
   const [userWearables, setUserWearables] = useState<CampaignDrops | undefined>(undefined);
@@ -1104,12 +1104,12 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
               <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
             </div>
           }
-          <LoginUI
+          {/* <LoginUI
             collections={collectionList}
             setSelectedCampaign={(selectedCampaign?: Campaign) => {
               setSelectedLoginCampaign(selectedCampaign)
             }}
-          />
+          /> */}
         </>
 
       }
@@ -1192,11 +1192,11 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
                   <ArrowLinkSVG />
                 </Button>
               } */}
-            <ConnectButton
+            {/* <ConnectButton
               isSigned={isAuthenticated}
               address={walletAddress}
               onLogout={handleLogout}
-            />
+            /> */}
           </div>
         }
       </div>
