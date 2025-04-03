@@ -2,7 +2,7 @@
 
 import { usePrivy } from '@privy-io/react-auth'
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
-import { CampaignDrops, TokenId, TokenMetadata } from "../../types/metadata.type";
+import { CampaignDrops, TokenId, CitizenMetadata } from "../../interfaces/citizens.interface";
 import LoginUI from "../../ui/citizens/sections/login.ui";
 import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import CitizensUI from "../../ui/citizens/citizens.ui[deprecated]";
@@ -11,7 +11,7 @@ import { CitizensCollection, DataBaseDrop } from "../../interfaces/citizens.inte
 import Button from "../../ui/citizens/common/button.ui";
 import ArrowLinkSVG from "../../ui/citizens/common/SVG/arrowLinkSVG.ui";
 import { Campaign, CitizensSections } from "../../enums/citizens/common.enum";
-import { BodyPart, CollectionType } from "../../types/avatar.type";
+import { BodyPart, CollectionType } from "../../interfaces/avatar.interface";
 import AvatarEditor, {
   ChangeFeature,
   ChangeSkinColor,
@@ -91,13 +91,13 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
   const [isBurguerOpen, setIsBurguerOpen] = useState<boolean>(false);
 
-  const [loadedTokens, setLoadedTokens] = useState<TokenMetadata[]>();
+  const [loadedTokens, setLoadedTokens] = useState<CitizenMetadata[]>();
 
   const [currentCollection, setCurrentCollection] = useState<CollectionType>({
     campaign: campaignParams?.campaign as Campaign,
     combination: '',
     baseCombination: '',
-    tokenMetadata: {} as TokenMetadata
+    citizenMetadata: {} as CitizenMetadata
   })
 
   // Edit state
@@ -119,11 +119,11 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[] | undefined>([]);
 
 
-  const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => {
+  const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, citizenMetadata: CitizenMetadata) => {
     const newCollection: CollectionType = {
       campaign: newCampaign, combination: newCombination,
-      tokenMetadata,
-      baseCombination: tokenMetadata.baseCombination
+      citizenMetadata,
+      baseCombination: citizenMetadata.baseCombination
     };
     console.log('UPDATE COLLECTION', newCollection)
     setCurrentCollection(newCollection)
@@ -159,7 +159,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       }])
     }
     else {
-      updateCollection(Campaign.Kumi, '0-0-0-0-0-0-0-0-0-0', {} as TokenMetadata)
+      updateCollection(Campaign.Kumi, '0-0-0-0-0-0-0-0-0-0', {} as citizenMetadata)
       if (currentSection !== CitizensSections.Mint) setCurrentSection(CitizensSections.Mint);
       setIsLoading(false);
 
@@ -199,17 +199,17 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
             throw new Error('Invalid IPFS hash format');
           }
-          const tokenMetadata = await GetEthereumTokenMetadata(tokenIdMetadata);
+          const citizenMetadata = await GetEthereumcitizenMetadata(tokenIdMetadata);
           const selectedCampaign = selectedLoginCampaign || Campaign.Citizens
-          if (!tokenMetadata.success) return
+          if (!citizenMetadata.success) return
           if (!isFirstToken && tokenIdMetadata.campaign === selectedCampaign) {
-            updateCollection(tokenMetadata.value.campaign as Campaign, tokenMetadata.value.combination, tokenMetadata.value as TokenMetadata)
+            updateCollection(citizenMetadata.value.campaign as Campaign, citizenMetadata.value.combination, citizenMetadata.value as citizenMetadata)
             isFirstToken = true;
           }
 
           setLoadedTokens(prevTokens => {
-            if (!prevTokens) return [tokenMetadata.value as TokenMetadata];
-            return [...prevTokens, tokenMetadata.value as TokenMetadata];
+            if (!prevTokens) return [citizenMetadata.value as citizenMetadata];
+            return [...prevTokens, citizenMetadata.value as citizenMetadata];
           });
         } catch (error) {
           LogError(Module.Citizens, `Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
@@ -235,18 +235,18 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           if (!isValidIPFSHash(tokenIdMetadata.metadataUri)) {
             throw new Error('Invalid IPFS hash format');
           }
-          const tokenMetadata = await GetSolanaTokenMetadata(tokenIdMetadata);
-          console.log("TOKEN METADATA", tokenMetadata, isFirstToken, tokenIdMetadata.campaign, selectedLoginCampaign)
+          const citizenMetadata = await GetSolanacitizenMetadata(tokenIdMetadata);
+          console.log("TOKEN METADATA", citizenMetadata, isFirstToken, tokenIdMetadata.campaign, selectedLoginCampaign)
           const selectedCampaign = selectedLoginCampaign || Campaign.Kumi
-          if (!tokenMetadata.success) return
+          if (!citizenMetadata.success) return
           if (!isFirstToken && tokenIdMetadata.campaign === selectedCampaign) {
-            updateCollection(tokenMetadata.value.campaign as Campaign, tokenMetadata.value.combination, tokenMetadata.value as TokenMetadata)
+            updateCollection(citizenMetadata.value.campaign as Campaign, citizenMetadata.value.combination, citizenMetadata.value as citizenMetadata)
             isFirstToken = true;
           }
 
           setLoadedTokens(prevTokens => {
-            if (!prevTokens) return [tokenMetadata.value as TokenMetadata];
-            return [...prevTokens, tokenMetadata.value as TokenMetadata];
+            if (!prevTokens) return [citizenMetadata.value as citizenMetadata];
+            return [...prevTokens, citizenMetadata.value as citizenMetadata];
           });
         } catch (error) {
           LogError(Module.Citizens, `Error loading metadata for token ${tokenIdMetadata.tokenId}:`, error);
@@ -483,10 +483,10 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     }
     for (const { val } of singleInitData.features) {
       const { id, path, type, name } = val;
-      const { tokenMetadata } = currentCollection;
-      const bodyIndex = val.type.toLowerCase() as keyof typeof tokenMetadata.body;
+      const { citizenMetadata } = currentCollection;
+      const bodyIndex = val.type.toLowerCase() as keyof typeof citizenMetadata.body;
       try {
-        tokenMetadata.body[bodyIndex] = val as BodyPart; // Adjust logic to Solana
+        citizenMetadata.body[bodyIndex] = val as BodyPart; // Adjust logic to Solana
       } catch (error) {
         console.log("ERROR", error)
       }
@@ -562,7 +562,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       modelGLBPromise,
       modelVRMPromise,
     ] = await Promise.all([
-      FetchBlob(currentCollection.tokenMetadata.imageUrl),
+      FetchBlob(currentCollection.citizenMetadata.imageUrl),
       GetAvatarGLB(),
       FetchBlob(vrmStorageUrl),
     ])
@@ -573,7 +573,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       : undefined
     const filesName =
       fileCampaignNameLabel[campaignParams?.campaign as keyof typeof fileCampaignNameLabel] +
-      currentCollection.tokenMetadata.tokenId
+      currentCollection.citizenMetadata.tokenId
     if (modelVRM && modelGLBPromise.success) {
       await SaveFile(modelVRM, `${filesName}.vrm`)
       await SaveFile(modelGLB, `${filesName}.glb`)
@@ -675,14 +675,14 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       .join('-') as string
     const currentCampaign = campaignParams?.campaign as Campaign
     const currentFeatures = singleInitData?.features
-    const newMetadata = currentCollection.tokenMetadata
+    const newMetadata = currentCollection.citizenMetadata
     newMetadata.combination = newCombination
     newMetadata.attributes = []
 
     const _tokenIdList = [...tokenIdList as TokenId[]];
 
     const tokenIdIndex = _tokenIdList.findIndex(
-      ({ tokenId }) => tokenId === currentCollection.tokenMetadata.tokenId
+      ({ tokenId }) => tokenId === currentCollection.citizenMetadata.tokenId
     )
 
     const originalMetadataUri = _tokenIdList[tokenIdIndex].metadataUri
@@ -745,7 +745,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
       await SetTokenMetadata(
         currentCampaign,
-        currentCollection.tokenMetadata.tokenId,
+        currentCollection.citizenMetadata.tokenId,
         metadataObject.uri
       )
 
@@ -755,7 +755,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       }
       await handleEthereumUserFeatures()
 
-      setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, tokenMetadata: newMetadata, campaign: currentCampaign })
+      setCurrentCollection({ baseCombination: currentCollection.baseCombination, combination: newCombination, citizenMetadata: newMetadata, campaign: currentCampaign })
       onSavedCombinationSnackbar();
     } catch (err) {
       console.log(err, "ERROR SAVING COMBINATION");
@@ -952,7 +952,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       campaign: campaignParams?.campaign as Campaign,
       combination: '',
       baseCombination: '',
-      tokenMetadata: {} as TokenMetadata
+      citizenMetadata: {} as CitizenMetadata
     })
     setLoadedTokens(undefined)
     setTokenIdList(undefined)
