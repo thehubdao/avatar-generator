@@ -114,7 +114,6 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
 
     // On invalid number use random combination
     const maxIndexValues = GetMaxIndexValues(featureValues.featureList, featureValues.featureOptionListData);
-
     const indexValues = realAttributes
       .filter(a => a.id !== EXPORT_ATTRIBUTE.Campaign)
       .map(a => {
