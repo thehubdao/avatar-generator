@@ -21,6 +21,7 @@ import { IFrameExportData, IFrameReady, SetIFrameEvents } from "../../utils/ifra
 import { Module } from "../../enums/common.enum";
 import { FilterList, LogError, RandomArrayElement, MixArrays } from "../../utils/common.util";
 import {
+  FetchBlob,
   GetAccessoryListByCampaign,
   GetAnimationListByCampaign,
   GetAssetsListByCampaign, GetAvatarCombinationByAttributes,
@@ -37,7 +38,6 @@ import AvatarEditor, {
   ChangeFeature, ChangeSkinColor,
   ChangeStartAnimation,
   GetAvatarGLB,
-  GetAvatarVRM,
   GetWearableOption,
   RemoveStage,
   SetStage,
@@ -48,6 +48,7 @@ import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "
 import {Result} from "../../types/common.type";
 import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../constants/common.constant";
 import {GenerateVrmMetaData} from "../../utils/threejs/vrm.util";
+import { StorageLocation } from "../../enums/firebase.enum";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -109,7 +110,7 @@ export default function AvatarBuilder({
       getStageList(),
       getEnvironmentMapList(),
       getSingleInfo()
-    ]);
+    ])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -383,21 +384,29 @@ export default function AvatarBuilder({
     const attributesBase64 = window.btoa(JSON.stringify(exportData.attributes));
     
     exportData.attributesBase64 = attributesBase64;
+    const comboString = selectedOpc
+    .filter(({ id }) => id !== EXPORT_ATTRIBUTE.Campaign)
+    .map(({id, val}) => {
+      const asset = featureList?.find((option) => option.type === id && option.name === val)
+      return asset?.index
+    })
+    .join("-")
+    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign}%2F${StorageLocation.AvatarVrms}%2F${comboString}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`
     const [picturePromise, modelVRMPromise, modelGLBPromise, combinationPromise] = await Promise.all([
       TakeCanvasPicture(),
-      GetAvatarVRM(),
+      FetchBlob(vrmStorageUrl),
       GetAvatarGLB(),
       GetAvatarCombinationByAttributes(campaign, attributesBase64)
     ]);
     exportData.picture = picturePromise;
-    const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
+    const modelVRM = modelVRMPromise;
     const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
     exportData.combination = combinationPromise.success ? combinationPromise.value : undefined;
 
     if (isOnIFrame) {
       IFrameExportData(exportData);
     } else {
-      if (modelVRMPromise.success && modelGLBPromise.success) {
+      if (modelVRMPromise && modelGLBPromise.success) {
         const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
         await SaveFile(refinedModelVRM, `avatar.vrm`);
         await SaveFile(modelGLB, `model.glb`);
@@ -454,7 +463,6 @@ export default function AvatarBuilder({
             // selectListAccessories={selectListAccessories}
             // optionList
             optionList={optionListShow}
-            // featureList={featureListShow}
             // accessoryList={accessoryListShow}
             // selectedCategory
             selectedCategory={selectedCategory}
