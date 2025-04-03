@@ -1,10 +1,9 @@
 'use client'
 
-import { usePrivy } from '@privy-io/react-auth'
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import { CampaignDrops, TokenId, CitizenMetadata } from "../../interfaces/citizens.interface";
 // import LoginUI from "../../ui/citizens/sections/login.ui";
-import ConnectButton from "../../ui/citizens/common/connectButton.ui";
+// import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import CitizensUI from "../../ui/citizens/citizens.ui[deprecated]";
 import { BurnDrop, GetUserFeatures, SetTokenMetadata } from "../../utils/web3/lukso/contract.util[deprecated]";
 import { CitizensCollection, DataBaseDrop } from "../../interfaces/citizens.interface";
@@ -81,9 +80,8 @@ let optionList: FeatureInterface[] | undefined
 let featureList: FeatureInterface[] | undefined
 
 
-export default function CitizensComponent({ campaignParams, setCampaign, isLoggedIn, closeConnection }: CitizensComponentProps) {
+export default function CitizensComponent({ campaignParams, setCampaign, isLoggedIn }: CitizensComponentProps) {
   const { showSnackbar } = useSnackbar();
-  const { logout, } = usePrivy()
   const { walletAddress, provider, isLoggedIn: isAuthenticated } = useBlockchainWallet();
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -91,7 +89,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
   const [isBurguerOpen, setIsBurguerOpen] = useState<boolean>(false);
 
-  const [loadedTokens, setLoadedTokens] = useState<CitizenMetadata[]>();
+  const [loadedTokens, ] = useState<CitizenMetadata[]>();
 
   const [currentCollection, setCurrentCollection] = useState<CollectionType>({
     campaign: campaignParams?.campaign as Campaign,
@@ -114,9 +112,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>();
   const [userWearables, setUserWearables] = useState<CampaignDrops | undefined>(undefined);
 
-  const [claimableDrops, setClaimableDrops] = useState<DataBaseDrop[]>([])
+  const [claimableDrops, ] = useState<DataBaseDrop[]>([])
 
-  const [leaderboardData, setLeaderboardData] = useState<LeaderboardEntry[] | undefined>([]);
+  const [leaderboardData, ] = useState<LeaderboardEntry[] | undefined>([]);
 
 
   const updateCollection = useCallback((newCampaign: Campaign, newCombination: string, citizenMetadata: CitizenMetadata) => {
@@ -945,21 +943,21 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   }, [provider, isSolana]); */
 
 
-  const handleLogout = async () => {
-    logout();
-    closeConnection();
-    setCurrentCollection({
-      campaign: campaignParams?.campaign as Campaign,
-      combination: '',
-      baseCombination: '',
-      citizenMetadata: {} as CitizenMetadata
-    })
-    setLoadedTokens(undefined)
-    setTokenIdList(undefined)
-    setClaimableDrops([])
-    setLeaderboardData(undefined)
-    setUserWearables({} as CampaignDrops)
-  }
+  // const handleLogout = async () => {
+  //   logout();
+  //   closeConnection();
+  //   setCurrentCollection({
+  //     campaign: campaignParams?.campaign as Campaign,
+  //     combination: '',
+  //     baseCombination: '',
+  //     citizenMetadata: {} as CitizenMetadata
+  //   })
+  //   setLoadedTokens(undefined)
+  //   setTokenIdList(undefined)
+  //   setClaimableDrops([])
+  //   setLeaderboardData(undefined)
+  //   setUserWearables({} as CampaignDrops)
+  // }
 
 
 /*   const mintRedirect = () => {
