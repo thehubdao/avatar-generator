@@ -1,7 +1,7 @@
 import { Campaign, CitizensSections } from "../../enums/citizens/common.enum";
 import { IndexFeatureInterface } from "../../interfaces/api.interface";
-import { CollectionType } from "../../types/avatar.type";
-import { TokenMetadata } from "../../types/metadata.type";
+import { CollectionType } from "../../interfaces/avatar.interface";
+import { CitizenMetadata } from "../../interfaces/citizens.interface";
 import DetailsUI from "./common/details.ui";
 import Notifications from "./common/notifications.ui";
 import Collection from "./sections/collection.ui";
@@ -17,10 +17,10 @@ import MintUI from "./sections/mint.ui";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
-  loadedTokens?: TokenMetadata[];
+  loadedTokens?: CitizenMetadata[];
   currentCollection: CollectionType;
   isSavingCombination?: boolean;
-  updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
+  updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: CitizenMetadata) => void;
   features?: IndexFeatureInterface[];
   exportModel: () => Promise<void>;
   address: string;
@@ -64,7 +64,7 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
         <>
           {/* details */}
           {features &&
-            <DetailsUI data={features} handleDownload={() => exportModel()} imgUrl={currentCollection.tokenMetadata.imageUrl} loading={isSavingCombination} />
+            <DetailsUI data={features} handleDownload={() => exportModel()} imgUrl={currentCollection.citizenMetadata.imageUrl} loading={isSavingCombination} />
           }
           {/* notifications */}
           <Notifications address={address} />
