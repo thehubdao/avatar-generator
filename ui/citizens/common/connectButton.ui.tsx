@@ -1,12 +1,10 @@
 import { useState, useRef } from "react";
 import ArrowSVG from "./SVG/arrowSVG.ui";
 import Image from "next/image";
-import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 import StarSVG from "./SVG/starSVG.ui";
 import { useFollowCount } from "../../../hooks/useFollowCount";
 import { FormatWalletAddress } from "../../../utils/common.util";
 import { useUniversalProfile } from '../../../hooks/useUniversalProfile';
-import { usePrivy } from '@privy-io/react-auth';
 import { useXPVerification } from '../../../hooks/useXPVerification';
 import LogoutSVG from "./SVG/logoutSVG.ui";
 import { useOnClickOutside } from "usehooks-ts";
@@ -14,18 +12,20 @@ import { useBlockchainWallet } from "../../../hooks/useBlockchainWallet";
 import { Blockchain } from "../../../enums/blockchain/common.enum";
 
 interface ConnectButtonProps {
-  isSigned?: boolean;
   address?: string;
-  onLogout?: () => void;
+  onLogin: () => void;
+  onLogout: () => void;
 }
 
-export default function ConnectButton({ isSigned, address, onLogout }: ConnectButtonProps) {
+export default function ConnectButton({ address, onLogin, onLogout }: ConnectButtonProps) {
   const parentDOM = useRef(null);
+
+  const { isLoggedIn } = useBlockchainWallet();
+  
   const { blockchainType } = useBlockchainWallet();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { followerCount, followingCount } = useFollowCount(address);
   const { xpData } = useXPVerification();
-  const { authenticated: isAuthenticated, ready: isReady, login } = usePrivy();
 
   const userXP = xpData?.xp ?? 0;
   const userLevel = xpData?.level ?? 0;
@@ -37,7 +37,7 @@ export default function ConnectButton({ isSigned, address, onLogout }: ConnectBu
 
   return (
     <div ref={parentDOM} className="relative w-fit 2xl:w-[376px] h-11 bg-white rounded-[20px] flex justify-center items-center">
-      {isSigned ? (
+      {isLoggedIn ? (
         <>
           <button className="w-full flex justify-between items-center p-1" onClick={() => setIsOpen(!isOpen)}>
             <div>
@@ -121,7 +121,7 @@ export default function ConnectButton({ isSigned, address, onLogout }: ConnectBu
                 </div>
               </div>
               <div className="pt-3 w-full flex gap-3">
-                <button className="w-full bg-white text-lg font-light px-4 py-2 rounded-2xl flex justify-center items-center gap-2" 
+                <button className="w-full bg-white text-lg font-light px-4 py-2 rounded-2xl flex justify-center items-center gap-2"
                   onClick={() => {
                     if (onLogout) {
                       onLogout();
@@ -139,18 +139,9 @@ export default function ConnectButton({ isSigned, address, onLogout }: ConnectBu
           )}
         </>
       ) : (
-        <ConnectWeb3Button
-          classStyles="w-full h-full"
-          onClick={() => {
-            login({ walletChainType: 'ethereum-and-solana' })
-          }}
-        >
-          <div className="w-full h-full font-light text-lg px-4">
-            {!isReady ? "Loading..." :
-              isAuthenticated ? "Connected" :
-                "Log in"}
-          </div>
-        </ConnectWeb3Button>
+        <div className="w-full font-light text-lg text-center px-4 cursor-pointer" onClick={() => onLogin()} >
+          Log in
+        </div>
       )}
     </div>
   );
