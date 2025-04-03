@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { GetUniversalProfileData } from '../utils/web3/lukso.util';
+import { GetUniversalProfileData } from '../utils/web3/citizens.util';
 
 export function useUniversalProfile(address: string | undefined) {
   const [profileData, setProfileData] = useState<{

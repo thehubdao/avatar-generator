@@ -31,25 +31,16 @@ import { Client } from '../enums/client.enum'
 import { FeatureInterface, TierDistributionInterface } from "../interfaces/api.interface";
 import { deleteDoc, doc, getDoc, increment, orderBy, Timestamp } from 'firebase/firestore';
 import jwt from 'jsonwebtoken';
-import { GetFollowerCounts } from "./web3/lukso.util";
+import { GetFollowerCounts } from "./web3/citizens.util";
 import { XPReward } from "../constants/lukso/xp.constant";
 import { DataBaseDrop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
 import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/lukso/contract.util[deprecated]";
+import { AVATAR_DOWNLOADED_STATUS, AVATAR_STATUS } from "../constants/firebase.constant";
 
 export type LogInStructure = {
   user: string;
   pass: string;
-};
-
-export const AVATAR_STATUS = {
-  Minted: "m",
-  NotMinted: "n",
-};
-
-export const AVATAR_DOWNLOADED_STATUS = {
-  Downloaded: "d",
-  NotDownloaded: "n",
 };
 
 export class FirebaseUtil {
@@ -964,7 +955,7 @@ function GenerateFollowingMessage(count: number, xp: number, levelInfo: { levele
   return message;
 }
 
-export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> { 
+export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> {
   if (address == undefined) Raise("Missing address to update last login date!");
 
   try {
@@ -1023,7 +1014,7 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         await HandleFollowingChange(address, followingCount, userData.followingCount || 0);
       }
 
-      await setDoc(userDocRef, { 
+      await setDoc(userDocRef, {
         lastLogin: Timestamp.now(),
         followerCount,
         followingCount,
@@ -1193,7 +1184,7 @@ export async function GetClaimableDrops(dropId?: string): Promise<DataBaseDrop[]
   try {
     const db = await FirebaseUtil.Instance().DB();
     const dropsCollection = collection(db, 'claimableDrops');
-    
+
     let query;
     if (dropId) {
       query = doc(dropsCollection, dropId);
@@ -1251,13 +1242,13 @@ export async function GetDropsContractAddresses(): Promise<string[]> {
 
 async function CalculateCitizensXP(citizensCount: number): Promise<number> {
   let totalXP = 0;
-  
+
   // Aplicar la fórmula para cada citizen
   for (let k = 1; k <= citizensCount; k++) {
     const xpForThisCitizen = 10 * (1 + 0.10 * (k - 1));
     totalXP += xpForThisCitizen;
   }
-  
+
   return Math.floor(totalXP);
 }
 
@@ -1312,16 +1303,16 @@ function GenerateHoldingsMessage(
   totalXP: number,
 ): string {
   let message = `You've earned ${totalXP} XP for your holdings! `;
-  
+
   if (citizensXP > 0) {
     message += `(Citizens: ${citizensXP} XP) `;
   }
-  
+
   if (wearablesXP > 0) {
     message += `(Wearables: ${wearablesXP} XP)`;
   }
 
-  
+
   return message;
 }
 

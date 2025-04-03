@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import TransparentBox from "../common/transparentBox.ui";
 import { translationInOutBlock } from "../../../utils/gsap/block_in_out.util";
 import { FaDice } from "react-icons/fa6";
@@ -11,9 +11,7 @@ import { AiOutlineLoading } from "react-icons/ai";
 import { FaWallet } from "react-icons/fa";
 import Loader from "../common/loader.ui";
 import { AVATAR_MAX_SUPPLY } from "../../../constants/common.constant";
-import { canMint } from "../../../utils/phase.util";
 import LoadingUI from "./loadingSection.ui";
-import { useWallets } from "@privy-io/react-auth";
 
 interface MainSectionUIProps {
   setCurrentSection: (value: LuksoSections) => void;
@@ -23,27 +21,16 @@ interface MainSectionUIProps {
   picture: string;
   combination: string;
 }
-
-
-
+/* Attention! This component is not used in the project. It is a component from the previous version of the project. */
 export default function MainSectionUI({ setCurrentSection, hasMinted, provider, isGettingInfoAboutHasMinted, combination, picture }: MainSectionUIProps) {
   const luksoAvatarRef = useRef<HTMLDivElement>(null);
   const exclusiveCollectionRef = useRef<HTMLDivElement>(null);
 
   const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
-  const { wallets } = useWallets()
-  const wallet = wallets[0]
-
-  const [canUserMint, setCanUserMint] = useState<boolean | undefined>()
+  const [canUserMint] = useState<boolean | undefined>()
 
   const [isLoading, setIsLoading] = useState(false)
-
-  const gsapEnterBlocks = () => {
-    if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
-    translationInOutBlock(luksoAvatarRef.current, DURATION_ANIMATION_SECTION);
-    translationInOutBlock(exclusiveCollectionRef.current, DURATION_ANIMATION_SECTION);
-  }
 
   const gsapOutBlocks = () => {
     if (!luksoAvatarRef.current || !exclusiveCollectionRef.current) return
@@ -55,17 +42,6 @@ export default function MainSectionUI({ setCurrentSection, hasMinted, provider, 
         setCurrentSection(LuksoSections.Edit);
     });
   }
-  useEffect(() => {
-    if (!wallet) return
-    const canUserMintPromise = () => {
-      const canUserMint = canMint()
-      setCanUserMint(canUserMint)
-    }
-    void canUserMintPromise()
-  }, [wallet])
-  useLayoutEffect(() => {
-    void gsapEnterBlocks();
-  }, [])
 
   return (
     <>

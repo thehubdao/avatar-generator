@@ -1,6 +1,6 @@
 import { Blockchain } from "../enums/blockchain/common.enum";
 import { Campaign, PaymentType } from "../enums/citizens/common.enum";
-import { BodyPart } from "../types/avatar.type";
+import { BodyPart } from "./avatar.interface";
 
 export interface CitizensCollection {
   name: string;
@@ -36,7 +36,7 @@ export interface Game {
   guide?: string;
 }
 
-export interface TokenMetadataImage {
+export interface CitizenMetadataImage {
   width: number;
   height: number;
   url: string;
@@ -52,7 +52,7 @@ export interface CitizenMetadata {
   tokenId: string;
   name: string;
   description: string;
-  images: Array<Array<TokenMetadataImage>>;
+  images: Array<Array<CitizenMetadataImage>>;
   attributes?: Array<{ key: string, value: string, type: string }>;
   links?: [];
   assets?: [];
@@ -68,3 +68,29 @@ export interface CitizenAttribute {
   trait_type: string;
   value: string;
 }
+
+export interface TokenId {
+  tokenId: string;
+  campaign: Campaign;
+  metadataUri: string;
+}
+
+export interface CampaignWeb3Data {
+  contractAddress: string;
+  baseCid: string;
+}
+
+export interface CampaignData extends Record<Campaign, CampaignWeb3Data> {
+}
+
+export interface CampaignDrops extends Record<Campaign, Drop[]> { }
+
+export interface Drop {
+  balance?: number;
+  contract_address: string;
+  index: number;
+  type: string;
+  name: string;
+}
+
+export interface CampaignMetadata extends Record<Campaign, CitizenMetadata[]> { }

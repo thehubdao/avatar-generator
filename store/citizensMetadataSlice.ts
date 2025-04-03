@@ -3,16 +3,16 @@ import { CitizenMetadata } from '../interfaces/citizens.interface';
 import { Campaign } from '../enums/citizens/common.enum';
 
 interface CitizensMetadataState {
-  citizensMetadata: CitizenMetadata[];
+  citizensMetadata: CitizenMetadata[] | null;
   selectedCampaign: Campaign | null;
   selectedCombination: string | null;
 }
 
 const initialState: CitizensMetadataState = {
-  citizensMetadata: [],
+  citizensMetadata: null,
   selectedCampaign: null,
   selectedCombination: null, // Cannot be void string, only null or valid combination string
-};
+}
 
 export const citizensMetadataSlice = createSlice({
   name: 'citizensMetadata',
@@ -31,5 +31,5 @@ export const citizensMetadataSlice = createSlice({
   }
 });
 
-export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setSelectedCombination } = citizensMetadataSlice.actions
-export default citizensMetadataSlice.reducer
+export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setSelectedCombination } = citizensMetadataSlice.actions;
+export default citizensMetadataSlice.reducer;

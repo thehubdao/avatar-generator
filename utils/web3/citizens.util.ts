@@ -1,86 +1,53 @@
-import { BrowserProvider, ethers } from "ethers"
+import { BrowserProvider, ethers } from "ethers";
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
 import { LeaderboardEntry } from "../../types/leaderboard.type";
 import { CitizenMetadata } from "../../interfaces/citizens.interface";
-import { Result } from '../../types/common.type'
-import { CommonErrorCode } from "../../enums/common.enum";
-
-const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY
-const IPFS_GATEWAY_API_KEY = process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY
-const LSP26_ADDRESS = '0xf01103E5a9909Fc0DBe8166dA7085e0285daDDcA';
-
-const LSP26_ABI = [
-  {
-    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
-    name: 'followerCount',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
-    name: 'followingCount',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
-    name: 'follow',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }],
-    name: 'unfollow',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'address', name: 'addr', type: 'address' }, { internalType: 'address', name: 'addr', type: 'address' }],
-    name: 'isFollowing',
-    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-    stateMutability: 'view',
-    type: 'function',
-  }
-];
-
+import { Result } from '../../types/common.type';
+import { CommonErrorCode, Module } from "../../enums/common.enum";
+import { LogError } from "../common.util";
+import { IPFS_GATEWAY_API_KEY, IPFS_GATEWAY_URL, LSP26_ABI, LSP26_ADDRESS } from "../../constants/citizens.constant";
 
 export async function GetEthereumIPFSData(cid: string): Promise<Result<CitizenMetadata>> {
   try {
-    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
-    const ipfsRequest = await fetch(ipfsHTTPUrl)
-    const ipfsData = await ipfsRequest.json() as { 'LSP4Metadata': CitizenMetadata }
+    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
+    const ipfsRequest = await fetch(ipfsHTTPUrl);
+    const ipfsData = await ipfsRequest.json() as { 'LSP4Metadata': CitizenMetadata };
 
-    return { success: true, value: ipfsData.LSP4Metadata }
+    return { success: true, value: ipfsData.LSP4Metadata };
   } catch (error) {
-    const err = error as Error
-    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError }
+    const err = error as Error;
+    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
 
 export async function GetSolanaIPFSData(cid: string): Promise<Result<CitizenMetadata>> {
   try {
-    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
-    const ipfsRequest = await fetch(ipfsHTTPUrl)
-    const ipfsData = await ipfsRequest.json() as CitizenMetadata
+    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
+    const ipfsRequest = await fetch(ipfsHTTPUrl);
+    const ipfsData = await ipfsRequest.json() as CitizenMetadata;
 
-    return { success: true, value: ipfsData }
+    return { success: true, value: ipfsData };
   } catch (error) {
-    const err = error as Error
-    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError }
+    const err = error as Error;
+    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
 
 export function GetEthereumImageUrl(metadata: CitizenMetadata): Result<string> {
-  const ipfsUrl = metadata.images[0][0].url
-  const cid = ipfsUrl.split('//')[1]
+  try {
+    const ipfsUrl = metadata.images[0][0].url
+    const cid = ipfsUrl.split('//')[1]
 
-  const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
-  return { success: true, value: imageUrl };
+    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
+    return { success: true, value: imageUrl };
+  } catch (error) {
+    const err = error as Error;
+    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    return { success: false, errMessage: err.message, errCode: ''};
+  }
 }
 
 export function GetSolanaImageUrl(metadata: CitizenMetadata): Result<string> {
@@ -88,11 +55,12 @@ export function GetSolanaImageUrl(metadata: CitizenMetadata): Result<string> {
     const ipfsUrl = metadata.imageUrl;
     const cid = ipfsUrl.split('//')[1];
 
-    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`
+    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
     return { success: true, value: imageUrl };
   } catch (error) {
-    const err = error as Error
-    return { success: false, errMessage: err.message, errCode: '' }
+    const err = error as Error;
+    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    return { success: false, errMessage: err.message, errCode: '' };
   }
 }
 
@@ -106,8 +74,9 @@ export async function GetFollowerCounts(address: string): Promise<Result<{ follo
 
     return { success: true, value: { followerCount: Number(followerCount), followingCount: Number(followingCount) } };
   } catch (error) {
-    const err = error as Error
-    return { success: false, errMessage: err.message, errCode: '' }
+    const err = error as Error;
+    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
 
@@ -139,8 +108,9 @@ export async function GetUniversalProfileData(address: string): Promise<Result<{
     return { success: true, value: { name: profileData.value.LSP3Profile.name || '', profileImage: imageUrl } };
 
   } catch (error) {
-    const err = error as Error
-    return { success: false, errMessage: err.message, errCode: '' };
+    const err = error as Error;
+    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
 
@@ -154,8 +124,9 @@ export async function FollowUser(addressToFollow: string, provider: BrowserProvi
 
     return { success: true, value: true };
   } catch (error) {
-    const err = error as Error
-    return { success: false, errMessage: err.message, errCode: '' };
+    const err = error as Error;
+    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
 
@@ -169,8 +140,9 @@ export async function UnfollowUser(addressToUnfollow: string, provider: BrowserP
 
     return { success: true, value: true };
   } catch (error) {
-    const err = error as Error
-    return { success: false, errMessage: err.message, errCode: '' };
+    const err = error as Error;
+    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
 
@@ -189,13 +161,14 @@ export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], pro
           return [user.address, false];
         }
       })
-    )
+    );
 
     // Convert array of results to object
     const statusObject = Object.fromEntries(statuses);
     return { success: true, value: statusObject };
   } catch (error) {
-    const err = error as Error
-    return { success: false, errMessage: err.message, errCode: '' };
+    const err = error as Error;
+    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }

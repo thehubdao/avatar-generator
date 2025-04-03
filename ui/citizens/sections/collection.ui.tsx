@@ -1,5 +1,5 @@
-import { TokenMetadata } from "../../../types/metadata.type";
-import { CollectionType } from "../../../types/avatar.type";
+import { CitizenMetadata } from "../../../interfaces/citizens.interface";
+import { CollectionType } from "../../../interfaces/avatar.interface";
 import CitizensCollection from "../common/citizensCollection.ui";
 import WearablesCollection from "../common/wearablesCollection.ui";
 import { useState } from "react";
@@ -7,9 +7,9 @@ import { Campaign, CollectionSections } from "../../../enums/citizens/common.enu
 import { JsonRpcProvider } from "ethers";
 import { DataBaseDrop } from "../../../interfaces/citizens.interface";
 interface CollectionProps {
-  loadedTokens?: TokenMetadata[];
+  loadedTokens?: CitizenMetadata[];
   currentCollection: CollectionType
-  updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
+  updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: CitizenMetadata) => void;
   provider: JsonRpcProvider | null;
   claimableDrops: DataBaseDrop[]
   handleClaim: (drop: DataBaseDrop) => Promise<boolean>

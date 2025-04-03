@@ -1,23 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import SearchSVG from "./SVG/searchSVG.ui";
-import {TokenMetadata } from "../../../types/metadata.type";
+import { CitizenMetadata } from "../../../interfaces/citizens.interface";
 import { LogError } from "../../../utils/common.util";
 import { Module } from "../../../enums/common.enum";
 import SelectorUI from "./selector.ui";
 import CampaignCard from "./campaignCard.ui";
 import { campaignLabels } from "../../../constants/lukso/labels.constant";
 import { Campaign, CardSize } from "../../../enums/citizens/common.enum";
-import { CollectionType } from "../../../types/avatar.type";
+import { CollectionType } from "../../../interfaces/avatar.interface";
 
 interface CitizensCollectionProps {
-  tokenList?: TokenMetadata[];
+  tokenList?: CitizenMetadata[];
   currentCollection: CollectionType;
-  updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: TokenMetadata) => void;
+  updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: CitizenMetadata) => void;
 }
 
 export default function CitizensCollection({ tokenList, currentCollection, updateCollection }: CitizensCollectionProps) {
 
-  const filteredList = useRef<TokenMetadata[] | undefined>([]);
+  const filteredList = useRef<CitizenMetadata[] | undefined>([]);
   const [campaignList, setCampaignList] = useState<string[] | undefined>([]);
 
   const [searchValue, setSerchValue] = useState<string | undefined>();
@@ -33,8 +33,8 @@ export default function CitizensCollection({ tokenList, currentCollection, updat
     if (chooseValue !== campaign) setChooseValue(campaign);
   }
 
-  const handleCardClick = (tokenId: string, tokenMetadata: TokenMetadata) => {
-    if (tokenId !== currentCollection.tokenMetadata.tokenId) {
+  const handleCardClick = (tokenId: string, tokenMetadata: CitizenMetadata) => {
+    if (tokenId !== currentCollection.citizenMetadata.tokenId) {
       const { campaign: newCampaign, combination: newCombination } = tokenMetadata;
       updateCollection(newCampaign as Campaign, newCombination, tokenMetadata);
     }
@@ -97,9 +97,9 @@ export default function CitizensCollection({ tokenList, currentCollection, updat
                     imgAlt={tokenMetadata.name}
                     size={CardSize.Small}
                     light
-                    overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
+                    overlayText={currentCollection.citizenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
                     handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
-                    selected={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId}
+                    selected={currentCollection.citizenMetadata.tokenId === tokenMetadata.tokenId}
                   />
                 ))
                 :
@@ -117,9 +117,9 @@ export default function CitizensCollection({ tokenList, currentCollection, updat
                   imgAlt={tokenMetadata.name}
                   size={CardSize.Small}
                   light
-                  overlayText={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
+                  overlayText={currentCollection.citizenMetadata.tokenId === tokenMetadata.tokenId ? "SELECTED" : "USE CITIZEN"}
                   handleClick={() => handleCardClick(tokenMetadata.tokenId, tokenMetadata)}
-                  selected={currentCollection.tokenMetadata.tokenId === tokenMetadata.tokenId}
+                  selected={currentCollection.citizenMetadata.tokenId === tokenMetadata.tokenId}
                 />
               ))}
             </>
