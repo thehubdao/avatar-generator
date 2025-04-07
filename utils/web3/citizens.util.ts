@@ -2,7 +2,7 @@ import { BrowserProvider, ethers } from "ethers";
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
 import { LeaderboardEntry } from "../../types/leaderboard.type";
-import { CitizenMetadata } from "../../interfaces/citizens.interface";
+import { CitizenMetadata, FollowUserData } from "../../interfaces/citizens.interface";
 import { Result } from '../../types/common.type';
 import { CommonErrorCode, Module } from "../../enums/common.enum";
 import { LogError } from "../common.util";
@@ -64,7 +64,7 @@ export function GetSolanaImageUrl(metadata: CitizenMetadata): Result<string> {
   }
 }
 
-export async function GetFollowerCounts(address: string): Promise<Result<{ followerCount: number, followingCount: number }>> {
+export async function GetFollowerCounts(address: string): Promise<Result<FollowUserData>> {
   try {
     const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
