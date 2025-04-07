@@ -94,3 +94,9 @@ export interface Drop {
 }
 
 export interface CampaignMetadata extends Record<Campaign, CitizenMetadata[]> { }
+
+export interface FollowUserData {
+  followerCount: number;
+  followingCount: number;
+}
+
