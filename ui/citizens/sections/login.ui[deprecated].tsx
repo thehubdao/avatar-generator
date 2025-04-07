@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { CitizensCollection } from "../../../interfaces/citizens.interface";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
-import CampaignList from "../common/campaignList.ui";
+// import CampaignList from "../login/campaignList.ui";
 import Link from "next/link";
 import { BackedByLinks, CardSize } from "../../../enums/citizens/common.enum";
 import SocialButtons from "../common/socialButtons.ui";
@@ -78,7 +78,7 @@ const COMMUNITY = [
 
 interface LoginUIProps {
   collections?: CitizensCollection[] | null;
-  setSelectedCampaign: (electedCampaign: Campaign) => void;
+  setSelectedCampaign: (selectedCampaign: Campaign) => void;
 }
 
 export default function LoginUI({ collections, setSelectedCampaign }: LoginUIProps) {
@@ -116,7 +116,7 @@ export default function LoginUI({ collections, setSelectedCampaign }: LoginUIPro
             {/* CAMPAIGNS */}
             <div>
               <h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-12 pt-20">CAMPAIGNS</h2>
-              <CampaignList collections={collections} setSelectedCampaign={setSelectedCampaign} />
+              {/* <CampaignList collections={collections} setSelectedCampaign={setSelectedCampaign} /> */}
             </div>
             {/* WHATS NEW */}
             <div className="xl:pt-12 px-6">
