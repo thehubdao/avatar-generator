@@ -52,27 +52,27 @@ export function useBlockchainWallet() {
   };
 
   const fetchCitizensMetadata = async (walletAddress: string) => {
-    if (blockchainType.current === Blockchain.Ethereum) { // If the blockchain is Ethereum
-      const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereummetadata
+    if (blockchainType.current === Blockchain.Ethereum) {
+      const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
       const followerCountResult = await GetFollowerCounts(walletAddress); // Get the follower count
-      if (ethereumCitizensMetadata.success) { // If success, set the citizens metadata and selected combination
-        dispatch(setCitizensMetadata(ethereumCitizensMetadata.value)); // Set the citizens metadata
-        dispatch(setSelectedCombination(ethereumCitizensMetadata.value[0]?.combination)); // Set the selected combination
+      if (ethereumCitizensMetadata.success) { 
+        dispatch(setCitizensMetadata(ethereumCitizensMetadata.value)); 
+        dispatch(setSelectedCombination(ethereumCitizensMetadata.value[0]?.combination)); 
       } else { // If error, log the error, citizens metadata and selected combination will be null
         LogError(Module.Citizens, ethereumCitizensMetadata.errMessage, ethereumCitizensMetadata.errCode);
       }
 
-      if (followerCountResult.success) { // If success, set the follow user data
+      if (followerCountResult.success) {
         dispatch(setFollowUserData(followerCountResult.value));
       } else { // If error, log the error, follow user data will be null
         LogError(Module.Citizens, followerCountResult.errMessage, followerCountResult.errCode);
       }
 
-    } else if (blockchainType.current === Blockchain.Solana) { // If the blockchain is Solana
+    } else if (blockchainType.current === Blockchain.Solana) { 
       const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
-      if (solanaCitizensMetadata.success) { // If success, set the citizens metadata and selected combination
-        dispatch(setCitizensMetadata(solanaCitizensMetadata.value)); // Set the citizens metadata
-        dispatch(setSelectedCombination(solanaCitizensMetadata.value[0]?.combination)); // Set the selected combination
+      if (solanaCitizensMetadata.success) { 
+        dispatch(setCitizensMetadata(solanaCitizensMetadata.value)); 
+        dispatch(setSelectedCombination(solanaCitizensMetadata.value[0]?.combination)); 
       } else { // If error, log the error, citizens metadata and selected combination will be null
         LogError(Module.Citizens, solanaCitizensMetadata.errMessage, solanaCitizensMetadata.errCode);
       }
