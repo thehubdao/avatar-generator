@@ -3,7 +3,7 @@ import { useWallets } from '@privy-io/react-auth';
 import { BrowserProvider } from 'ethers';
 import { useEffect, useState, useRef } from 'react';
 import { Blockchain } from '../enums/blockchain/common.enum';
-import { setCitizensMetadata, setSelectedCombination } from '../store/citizensMetadataSlice';
+import { setCitizensMetadata, setFollowUserData, setSelectedCombination } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
 import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
@@ -11,6 +11,7 @@ import { LogError } from '../utils/common.util';
 import { CommonErrorCode, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
+import { GetFollowerCounts } from '../utils/web3/citizens.util';
 
 export function useBlockchainWallet() {
   const blockchainType = useRef<Blockchain>();
@@ -52,21 +53,30 @@ export function useBlockchainWallet() {
 
   const fetchCitizensMetadata = async (walletAddress: string) => {
     if (blockchainType.current === Blockchain.Ethereum) {
-      const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress);
-      if (ethereumCitizensMetadata.success) {
-        dispatch(setCitizensMetadata(ethereumCitizensMetadata.value));
-        dispatch(setSelectedCombination(ethereumCitizensMetadata.value[0]?.combination));
-      } else {
+      const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
+      const followerCountResult = await GetFollowerCounts(walletAddress); // Get the follower count
+      if (ethereumCitizensMetadata.success) { 
+        dispatch(setCitizensMetadata(ethereumCitizensMetadata.value)); 
+        dispatch(setSelectedCombination(ethereumCitizensMetadata.value[0]?.combination)); 
+      } else { // If error, log the error, citizens metadata and selected combination will be null
         LogError(Module.Citizens, ethereumCitizensMetadata.errMessage, ethereumCitizensMetadata.errCode);
       }
-    } else if (blockchainType.current === Blockchain.Solana) {
-      const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress);
-      if (solanaCitizensMetadata.success) {
-        dispatch(setCitizensMetadata(solanaCitizensMetadata.value));
-        dispatch(setSelectedCombination(solanaCitizensMetadata.value[0]?.combination));
-      } else {
+
+      if (followerCountResult.success) {
+        dispatch(setFollowUserData(followerCountResult.value));
+      } else { // If error, log the error, follow user data will be null
+        LogError(Module.Citizens, followerCountResult.errMessage, followerCountResult.errCode);
+      }
+
+    } else if (blockchainType.current === Blockchain.Solana) { 
+      const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
+      if (solanaCitizensMetadata.success) { 
+        dispatch(setCitizensMetadata(solanaCitizensMetadata.value)); 
+        dispatch(setSelectedCombination(solanaCitizensMetadata.value[0]?.combination)); 
+      } else { // If error, log the error, citizens metadata and selected combination will be null
         LogError(Module.Citizens, solanaCitizensMetadata.errMessage, solanaCitizensMetadata.errCode);
       }
+      dispatch(setFollowUserData({ followerCount: -1, followingCount: -1 })); // Set the follow user data to -1, meaning this blockchain does not support follow user data
     }
   };
 
