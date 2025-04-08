@@ -52,7 +52,6 @@ export function useBlockchainWallet() {
   };
 
   const fetchCitizensMetadata = async (walletAddress: string) => {
-    console.log("walletAddress", walletAddress, blockchainType.current);
     if (blockchainType.current === Blockchain.Ethereum) { // If the blockchain is Ethereum
       const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereummetadata
       const followerCountResult = await GetFollowerCounts(walletAddress); // Get the follower count
@@ -70,7 +69,6 @@ export function useBlockchainWallet() {
       }
 
     } else if (blockchainType.current === Blockchain.Solana) { // If the blockchain is Solana
-      console.log("walletAddress", walletAddress, blockchainType.current);
       const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
       if (solanaCitizensMetadata.success) { // If success, set the citizens metadata and selected combination
         dispatch(setCitizensMetadata(solanaCitizensMetadata.value)); // Set the citizens metadata

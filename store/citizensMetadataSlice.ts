@@ -31,7 +31,6 @@ export const citizensMetadataSlice = createSlice({
       state.selectedCombination = action.payload;
     },
     setFollowUserData: (state, action: PayloadAction<FollowUserData>) => {
-      console.log("action.payload", action.payload);
       state.followUserData = action.payload;
     }
   }
