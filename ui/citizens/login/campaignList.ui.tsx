@@ -1,7 +1,6 @@
 import React from 'react';
 import { CitizensCollection } from "../../../interfaces/citizens.interface";
 import CampaignCard from "../common/campaignCard.ui";
-import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 import { Campaign } from '../../../enums/citizens/common.enum';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { CardSize } from '../../../enums/citizens/common.enum';
@@ -27,22 +26,16 @@ export default function CampaignList({ collections, handleClick }: CampaignListP
         {
           collections.map((el, i) => (
             <SwiperSlide key={i} >
-              <ConnectWeb3Button
-                classStyles="w-full h-full"
-                onClick={async () => {
-                  handleClick(el.blockChain, el.campaign);
-                }}
-              >
-                <CampaignCard
-                  title={el.name}
-                  imgSrc={el.image}
-                  imgAlt={el.name}
-                  overlayText={
-                    "LOG IN"
-                  }
-                  size={CardSize.Big}
-                />
-              </ConnectWeb3Button>
+              <CampaignCard
+                title={el.name}
+                imgSrc={el.image}
+                imgAlt={el.name}
+                overlayText={
+                  "LOG IN"
+                }
+                size={CardSize.Big}
+                handleClick={() => handleClick(el.blockChain, el.campaign)}
+              />
             </SwiperSlide>
           ))
         }
