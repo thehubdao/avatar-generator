@@ -9,7 +9,7 @@ export default function BackedBy() {
         LOGIN_BACKEDBY.map((item, index) => (
           <Link key={index} href={item.link} target="_blank" className="bg-[#2B2B2B] rounded-2xl">
             <div className="relative w-[260px] h-[100px]">
-              <Image src={`/resources/images/citizens/backedby/${item.img}.png`} fill alt={item.img} />
+              <Image src={`/resources/images/citizens/backedby/${item.img}.png`} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" alt={item.img} />
             </div>
           </Link>
         ))
