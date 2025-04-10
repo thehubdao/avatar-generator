@@ -1,17 +1,15 @@
-import { useEffect } from "react";
-import { CitizensPageLocation } from "../../../enums/citizens/common.enum";
+import { Blockchain } from "../../../enums/blockchain/common.enum";
+import { Campaign } from "../../../enums/citizens/common.enum";
 import LoginUI from "../../../ui/citizens/login/login.ui";
-import { GoToPage } from "../../../utils/router.util";
-import { useBlockchainWallet } from "../../../hooks/useBlockchainWallet";
 
-export default function CitizensLoginComponent() {
-    const { isLoggedIn } = useBlockchainWallet();
-
-    //User Auth Check
-    useEffect(() => {
-        if (isLoggedIn) GoToPage(CitizensPageLocation.HOME);
-        
-    }, [isLoggedIn]);
-
-    return <LoginUI />
+interface CitizensLoginComponentProps {
+    handleLogin?: (blockChain: Blockchain | undefined, campaign: Campaign | undefined) => void;
+}
+export default function CitizensLoginComponent({handleLogin}: CitizensLoginComponentProps) {
+    const onLogin = (blockChain: Blockchain | undefined, campaign: Campaign | undefined) => {
+		if (handleLogin) {
+			handleLogin(blockChain, campaign);
+		}
+	}
+    return <LoginUI handleLogin={onLogin}/>
 }
