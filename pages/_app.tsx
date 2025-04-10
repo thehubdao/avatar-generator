@@ -7,7 +7,7 @@ import { AppProps } from 'next/app'
 import { PrivyAuthProvider } from '../components/providers/PrivyProvider'
 import "toastify-js/src/toastify.css"
 import { Provider } from 'react-redux'
-import citizensStore from '../store/store'
+import store from '../store/store'
 
 const workSans = Work_Sans({ subsets: ['latin'], display: 'block' })
 const poppins = Poppins({
@@ -40,7 +40,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     --features-icons-font: ${featuresIcons.style.fontFamily};
                 }
             `}</style>
-            <Provider store={citizensStore}>
+            <Provider store={store}>
                 <PrivyAuthProvider>
                     <Component {...pageProps} />
                 </PrivyAuthProvider>
