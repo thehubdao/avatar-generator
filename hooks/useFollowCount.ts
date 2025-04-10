@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react';
 import { GetFollowerCounts } from '../utils/web3/citizens.util';
-import { useBlockchainWallet } from './useBlockchainWallet';
 import { Blockchain } from '../enums/blockchain/common.enum';
+import { useAppSelector } from '../store/hooks';
 
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export function useFollowCount(address: string | undefined) {
     const [followerCount, setFollowerCount] = useState<number>(-1);
     const [followingCount, setfollowingCount] = useState<number>(-1);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
-    const { blockchainType } = useBlockchainWallet();
+    const blockchainType = useAppSelector(state => state.citizensAuth.blockchainType);
 
   useEffect(() => {
     async function fetchFollowCount() {
-      if (!address || blockchainType.current === Blockchain.Solana) {
+      if (!address || blockchainType === Blockchain.Solana) {
         setIsLoading(false);
         return;
       }
