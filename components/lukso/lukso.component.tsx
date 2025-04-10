@@ -108,13 +108,13 @@ export default function LuksoComponent({
 }) {
   // Loading flags
   const [currentSection, setCurrentSection] = useState<LuksoSections>(
-    LuksoSections.Loading
+    LuksoSections.Edit
   )
   const [isLoading, setIsLoading] = useState<boolean>(true)
 
   // Edit state
   const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>()
-  const [dropList, setDropList] = useState<CampaignDrops>({ vrm_male: [], vrm_female: [] })
+  const [dropList, setDropList] = useState<CampaignDrops>({ vrm_male: [], vrm_female: [], kumi: [] })
   const [isEditModeSelected, setIsEditModeSelected] = useState<boolean>(false)
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(
     exportData.attributes
@@ -126,8 +126,8 @@ export default function LuksoComponent({
     'head'
   )
   const [tokenIdList, setTokenIdList] = useState<TokenId[]>()
-  const [selectedCombination, setSelectedCombination] = useState<string>()
-  const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>()
+  const [selectedCombination, setSelectedCombination] = useState<string>('0-0-0-0-0-0-0-0-0-0')
+  const [selectedBaseCombination, setSelectedBaseCombination] = useState<string>('0-0-0-0-0-0-0-0-0-0')
   const [selectedTokenId, setSelectedTokenId] = useState<number>()
   const [selectedMetadata, setSelectedMetadata] = useState<TokenMetadata>()
   // Web3 state
@@ -166,48 +166,9 @@ export default function LuksoComponent({
   })
 
   useEffect(() => {
-    if (!addressToShow) return
-    const featuresPromise = async () => {
-      const features = await getUserFeatures(addressToShow)
-
-      setDropList(features)
-    }
-    featuresPromise()
-  }, [addressToShow])
-
-  useEffect(() => {
-    if (!wallet) return setProvider(undefined)
-    const setEtherProviderPromise = () => {
-      const _etherProvider = new ethers.BrowserProvider(wallet.provider, 'any')
-      setProvider(_etherProvider)
-    }
-    void setEtherProviderPromise()
-  }, [wallet])
-
-  useEffect(() => {
-    if (!provider || !wallet) return
-
-    const address = wallet.accounts[0].address
-
-    setAddressToShow(address)
-
-  }, [provider])
-
-  useEffect(() => {
-    if (!addressToShow) return
-    const getTokensMetadataPromise = async () => {
-      const tokenIds = await getCampaignsTokenIds(addressToShow)
-      setTokenIdList(tokenIds)
-    }
-    void getTokensMetadataPromise()
-  }, [addressToShow])
-
-  useEffect(() => {
     if (!campaignParams || !campaignParams?.features) return
     setSelectedCategory(campaignParams?.features[0].displayName)
   }, [campaignParams])
-
-  useEffect(() => { console.log(tokenIdList, "TOKEN ID LIST CHANGE") }, [tokenIdList])
 
   async function onAvatarBuilderReady(currentCombination: string, campaign?: string) {
     if (!campaign) return
@@ -565,7 +526,7 @@ console.log(combinationIndexes)
   }
 
   const onBackView = () => {
-    setSelectedCombination(undefined)
+    setSelectedCombination('0-0-0-0-0-0-0-0-0-0')
     setCampaign(undefined)
     setSelectedCategory('head')
     setOptionListShow([])
@@ -577,14 +538,14 @@ console.log(combinationIndexes)
     <MobileLayout>
       <>
         {/* LOGIN */}
-        {!provider &&
+        {/* {!provider &&
           <LoginUI />
-        }
+        } */}
         {/* MAIN VIEW */}
-        {provider &&
+         {
           <div className="w-full h-screen bg-client-primary flex flex-col">
             {/* ACCOUNT MODAL */}
-            {isAccountModalOpen &&
+{/*             {isAccountModalOpen &&
               (
                 <AccountModalUI
                   addressAccount={addressToShow}
@@ -594,15 +555,15 @@ console.log(combinationIndexes)
                   }
                   onDisconnect={() => {
                     setCurrentSection(LuksoSections.Main)
-                    setSelectedBaseCombination(undefined)
-                    setSelectedCombination(undefined)
+                    setSelectedBaseCombination('0-0-0-0-0-0-0-0-0-0')
+                    setSelectedCombination('0-0-0-0-0-0-0-0-0-0')
                     setTokenIdList(undefined)
                   }}
                 />
               )
-            }
+            } */}
             {/* HEADER TAB */}
-            <div className='z-10'>
+{/* {            <div className='z-10'>
               <TransparentBoxUI
                 fullWidth
                 border
@@ -615,14 +576,14 @@ console.log(combinationIndexes)
                 alignItemsClass="items-stretch"
               >
                 <div className="flex flex-row justify-between h-full">
-                  {/* LOGO UI */}
+                  { LOGO UI }
                   <Image
                     src="resources/icons/campaigns/portal.svg"
                     width={106}
                     height={24}
                     alt="Lukso icon"
                   />
-                  {/* WALLET/CONNECT BUTTON UI */}
+                  {/* WALLET/CONNECT BUTTON UI }
                   {provider ?
                     (
                       <button
@@ -643,12 +604,12 @@ console.log(combinationIndexes)
                         <> Login with your UP!</>
                       </ConnectWeb3Button>
                     )
-                  }
+                  } 
                 </div>
               </TransparentBoxUI>
-            </div>
+            </div> } */}
             {/* COLLECTION LIST */}
-            {!selectedCombination &&
+{/*             {!selectedCombination &&
               <ListUI
                 tokenIdList={tokenIdList}
                 provider={provider}
@@ -679,7 +640,7 @@ console.log(combinationIndexes)
                   }
                 }
               />
-            }
+            } */}
             {/* CAMPAIGN VIEWER */}
             {selectedCombination && campaignParams?.campaign && campaignParams &&
               <>

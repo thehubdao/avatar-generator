@@ -21,7 +21,7 @@ export async function getStaticProps() {
 }
 
 export default function LuksoAvatarView({ imagenes }: any) {
-  const [campaign, setCampaign] = useState<Campaign>()
+  const [campaign, setCampaign] = useState<Campaign>('kumi')
   const [campaignParams, setCampaignParams] = useState<CampaignParameters>()
 
   const getBlob = async () => {
@@ -55,6 +55,5 @@ export default function LuksoAvatarView({ imagenes }: any) {
   }, [campaign])
 
   return <LuksoComponent campaignParams={campaignParams} setCampaign={(_campaign: Campaign | undefined) => {
-    setCampaign(_campaign)
   }} />
 }
