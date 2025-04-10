@@ -1,5 +1,9 @@
-import CitizensComponent from "../../components/citizens/citizens.component"
+import CitizensComponent from "../../components/citizens/citizens.component";
+import CitizensLayout from "../../layouts/citizens.layout";
 
 export default function Citizens() {
-  return <CitizensComponent />
+  
+  return <CitizensLayout >
+    <CitizensComponent />
+  </CitizensLayout>
 }
