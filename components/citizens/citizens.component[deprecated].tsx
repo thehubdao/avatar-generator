@@ -80,9 +80,9 @@ let optionList: FeatureInterface[] | undefined
 let featureList: FeatureInterface[] | undefined
 
 
-export default function CitizensComponent({ campaignParams, setCampaign, isLoggedIn }: CitizensComponentProps) {
+export default function CitizensComponent({ campaignParams, isLoggedIn, setCampaign }: CitizensComponentProps) {
   const { showSnackbar } = useSnackbar();
-  const { walletAddress, provider, isLoggedIn: isAuthenticated } = useBlockchainWallet();
+  const { walletAddress, provider } = useBlockchainWallet();
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
@@ -969,7 +969,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
-      {isAuthenticated ?
+      {isLoggedIn ?
 
         <>
           {/* EDITOR HUD */}
@@ -1062,7 +1062,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
           </div>
           {/* CITIZENS HUD */}
-          {!isEditModeSelected && isAuthenticated &&
+          {!isEditModeSelected && isLoggedIn &&
             <CitizensUI
             isSavingCombination={isSavingCombination}
             currentSection={currentSection}
@@ -1118,7 +1118,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           <LogoTheHub />
         </div>
         {/* NAVBAR */}
-        {isAuthenticated && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
+        {isLoggedIn && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
           <>
             <div className={`fixed z-50 xl:relative inset-6 xl:inset-0 bg-citizens-dark xl:bg-inherit h-fit ${isBurguerOpen ? 'block' : 'hidden xl:block'}`}>
               <div className='w-full px-4 pt-4 pb-24 flex justify-between xl:hidden'>
@@ -1183,7 +1183,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           </>
         }
         {/* CONNECT BUTTON */}
-        {(collectionList || collectionList === null || isAuthenticated) &&
+        {(collectionList || collectionList === null || isLoggedIn) &&
           <div className="flex gap-4">
             {/* {!isSigned &&
                 <Button label="About" handleClick={() => { }} withIcon textStyles="text-start pl-2">
