@@ -8,8 +8,8 @@ import { useUniversalProfile } from '../../../hooks/useUniversalProfile';
 import { useXPVerification } from '../../../hooks/useXPVerification';
 import LogoutSVG from "./SVG/logoutSVG.ui";
 import { useOnClickOutside } from "usehooks-ts";
-import { useBlockchainWallet } from "../../../hooks/useBlockchainWallet";
 import { Blockchain } from "../../../enums/blockchain/common.enum";
+import { useAppSelector } from "../../../store/hooks";
 
 interface ConnectButtonProps {
   address?: string;
@@ -20,9 +20,9 @@ interface ConnectButtonProps {
 export default function ConnectButton({ address, onLogin, onLogout }: ConnectButtonProps) {
   const parentDOM = useRef(null);
 
-  const { isLoggedIn } = useBlockchainWallet();
-  
-  const { blockchainType } = useBlockchainWallet();
+  const isLoggedIn = useAppSelector(state => state.citizensAuth.connected);
+  const blockchainType = useAppSelector(state => state.citizensAuth.blockchainType);
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { followerCount, followingCount } = useFollowCount(address);
   const { xpData } = useXPVerification();
@@ -73,6 +73,7 @@ export default function ConnectButton({ address, onLogin, onLogout }: ConnectBut
                       src={profileImage}
                       alt="Profile"
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover"
                     />
                   ) : (
@@ -80,6 +81,7 @@ export default function ConnectButton({ address, onLogin, onLogout }: ConnectBut
                       src={'https://lipsum.app/random/280x300/'}
                       alt="Default"
                       fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover"
                     />
                   )}
@@ -96,7 +98,7 @@ export default function ConnectButton({ address, onLogin, onLogout }: ConnectBut
                   <p className="w-full font-light text-center text-2xl pt-4 pb-1 truncate">
                     {name || (address ? FormatWalletAddress(address, 6) : 'No name')}
                   </p>
-                  {blockchainType.current !== Blockchain.Solana && <div className="w-full flex justify-between">
+                  {blockchainType !== Blockchain.Solana && <div className="w-full flex justify-between">
                     <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-3 sm:px-4">
                       <p>{followerCount}</p>
                       <p>Followers</p>
