@@ -131,7 +131,6 @@ export default function CitizensComponent() {
   }
 
   async function onAvatarBuilderReady() {
-    console.log('Avatar Builder is ready');
     try {
       await Promise.all([
         getEnvironmentMapList(),
