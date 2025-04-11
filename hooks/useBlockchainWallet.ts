@@ -1,6 +1,5 @@
 import { useLogin, useLogout, usePrivy } from '@privy-io/react-auth';
-import { BrowserProvider } from 'ethers';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Blockchain } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setSelectedCampaign, setSelectedCitizen } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata } from '../utils/web3/lukso/contract.util';
@@ -21,7 +20,7 @@ import { CampaignParameters } from '../interfaces/common.interface';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
-  const isLoggedIn = useAppSelector(state => state.citizensAuth.connected);
+  const isConnected = useAppSelector(state => state.citizensAuth.connected);
   const userAddress = useAppSelector(state => state.citizensAuth.address);
   const blockchainType = useAppSelector(state => state.citizensAuth.blockchainType);
 
@@ -32,10 +31,9 @@ export function useBlockchainWallet() {
   const { ready, user, authenticated } = usePrivy();
   const { login } = useLogin();
   const { logout } = useLogout();
-  // const { wallets: ethWallets } = useWallets();
 
-  const [provider,] = useState<BrowserProvider | undefined>(undefined);
-  const [walletAddress,] = useState<string | undefined>(undefined);
+
+  // const { wallets: ethWallets } = useWallets();
 
   // const setBlockchain = () => {
   //   if (user?.wallet?.chainType == Blockchain.Solana) {
@@ -159,31 +157,28 @@ export function useBlockchainWallet() {
   }, [ready, authenticated]);
 
   useEffect(() => {
-    if (isLoggedIn === true) {
+    if (isConnected === true) {
       if (citizensMetadata === null) {
         if (userAddress === null) {
           LogError(Module.Citizens, "User address is null, can't fetch citizens metadata");
           return;
         }
-
         fetchCitizensMetadata(userAddress);
       }
     }
-    else if (isLoggedIn === false) {
+    else if (isConnected === false) {
+      // codigo necesario cuanedo el usuario se desconecta
       dispatch(resetCitizensMetadata());
     }
-  }, [isLoggedIn]);
+  }, [isConnected]);
 
   useEffect(() => {
-    if (selectedCampaign !== null && isLoggedIn === true) {
+    if (selectedCampaign !== null && isConnected === true) {
       getCampaignParams(selectedCampaign); // Get the campaign parameters
     }
-  }, [selectedCampaign, isLoggedIn]);
+  }, [selectedCampaign, isConnected]);
 
   return {
-    blockchainType,
-    walletAddress,
-    provider,
     HandleLogin,
     HandleLogout
   };

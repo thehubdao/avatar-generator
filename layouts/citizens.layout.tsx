@@ -11,13 +11,13 @@ export default function CitizensLayout({
 }) {
   const { HandleLogin, HandleLogout } = useBlockchainWallet();
 
-  const isLoggedIn = useAppSelector(state => state.citizensAuth.connected);
+  const isConnected = useAppSelector(state => state.citizensAuth.connected);
 
   return (
     <section className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
       {/* Loading while waiting for login state */}
       {
-        isLoggedIn === null ?
+        isConnected === null ?
           <div className="flex justify-center items-center h-screen">
             <h1 className="text-white text-2xl">Loading Citizens Portal...</h1>
           </div>
@@ -26,7 +26,7 @@ export default function CitizensLayout({
             <HeaderUI onLogin={() => HandleLogin(undefined, undefined)} onLogout={() => HandleLogout()} />
             <main className="w-full min-h-dvh">
               {
-                isLoggedIn === true ?
+                isConnected === true ?
                 children
                 :
                 <CitizensLoginComponent handleLogin={HandleLogin} />
