@@ -119,7 +119,7 @@ export async function GetCampaignTokenMetadataUris(campaign: Campaign, tokenIds:
 
 export async function GetEthereumTokenMetadata(tokenId: TokenId): Promise<Result<CitizenMetadata>> {
     const ipfsDataResult = await GetEthereumIPFSData(tokenId.metadataUri);
-    if (!ipfsDataResult.success) return { success: false, errMessage: ipfsDataResult.errMessage, errCode: ipfsDataResult.errCode };
+    if (!ipfsDataResult.success || !ipfsDataResult.value) return { success: false, errMessage: ipfsDataResult.errMessage, errCode: ipfsDataResult.errCode };
 
     const metadata = ipfsDataResult.value;
     metadata.tokenId = tokenId.tokenId;
