@@ -75,7 +75,7 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
                 handleNavbarClick();
               }} />
               <Button label="play" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                handleNavbarClick();
+                handleNavbarClick(CitizensPageLocation.PLAY);
               }} />
             </div>
             <div className='border-t-[1px] mx-4 xl:hidden'>
