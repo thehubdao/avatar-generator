@@ -9,6 +9,7 @@ export enum CitizensSections {
 export enum CitizensPageLocation {
   HOME = '/citizens',
   BACKPACK = '/citizens/backpack',
+  PLAY = '/citizens/play',
 }
 
 export enum CollectionSections {
