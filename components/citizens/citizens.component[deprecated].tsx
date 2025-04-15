@@ -2,10 +2,7 @@
 
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import { CampaignDrops, TokenId, CitizenMetadata } from "../../interfaces/citizens.interface";
-// import LoginUI from "../../ui/citizens/sections/login.ui";
-// import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import CitizensUI from "../../ui/citizens/citizens.ui[deprecated]";
-import { BurnDrop, GetUserFeatures, SetTokenMetadata } from "../../utils/web3/lukso/contract.util[deprecated]";
 import { CitizensCollection, DataBaseDrop } from "../../interfaces/citizens.interface";
 import Button from "../../ui/citizens/common/button.ui";
 import ArrowLinkSVG from "../../ui/citizens/common/SVG/arrowLinkSVG.ui";
@@ -29,15 +26,12 @@ import { StorageLocation } from "../../enums/firebase.enum";
 import { useCallback, useState } from "react";
 import HudUI from "../../ui/avatar/hud.ui";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
-import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
-import { useSnackbar } from '../../ui/citizens/snackbar/snackbar.provider';
 import LogoTheHub from '../../ui/citizens/common/SVG/logoTheHubSVG.ui';
 import Image from 'next/image';
 import SocialButtons from '../../ui/citizens/common/socialButtons.ui';
-import { useBlockchainWallet } from '../../hooks/useBlockchainWallet';
 import { Blockchain } from '../../enums/blockchain/common.enum';
-import { JsonRpcProvider } from 'ethers';
+
 const COLLECTIONS: CitizensCollection[] = [
   {
     name: 'Lukso Citizens',
@@ -61,9 +55,9 @@ const COLLECTIONS: CitizensCollection[] = [
 ]
 
 
-const isValidIPFSHash = (hash: string): boolean => {
+/* const isValidIPFSHash = (hash: string): boolean => {
   return hash.startsWith('baf') || hash.startsWith('Qm');
-};
+}; */
 
 interface CitizensComponentProps {
   campaignParams?: CampaignParameters;
@@ -81,11 +75,11 @@ let featureList: FeatureInterface[] | undefined
 
 
 export default function CitizensComponent({ campaignParams, isLoggedIn, setCampaign }: CitizensComponentProps) {
-  const { showSnackbar } = useSnackbar();
+/*   const { showSnackbar } = useSnackbar(); */
 /*   const { walletAddress, provider } = useBlockchainWallet(); */
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
+  const [isSavingCombination] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
   const [isBurguerOpen, setIsBurguerOpen] = useState<boolean>(false);
 
@@ -109,8 +103,8 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
   );
   // const [, setSelectedLoginCampaign] = useState<Campaign>();
   const [selectedCategory, setSelectedCategory] = useState<string>('head');
-  const [tokenIdList, setTokenIdList] = useState<TokenId[]>();
-  const [userWearables, setUserWearables] = useState<CampaignDrops | undefined>(undefined);
+  const [tokenIdList] = useState<TokenId[]>();
+  const [userWearables] = useState<CampaignDrops | undefined>(undefined);
 
   const [claimableDrops, ] = useState<DataBaseDrop[]>([])
 
@@ -272,12 +266,12 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
     }, [tokenIdList,isSolana, isEthereum]); */
 
 
-  const handleEthereumUserFeatures = async () => {
-/*     if (!walletAddress) return
+  /* const handleEthereumUserFeatures = async () => {
+    if (!walletAddress) return
     const features = await GetUserFeatures(walletAddress)
     if (!features.success) return
     setUserWearables(features.value) */
-  }
+  /* } */
 
   /*   useEffect(() => {
       if (isSolana) {
@@ -644,26 +638,26 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
     setSkinColor(newSkinColor)
   }
 
-  const onSavingCombinationSnackbar = () => {
+  /* const onSavingCombinationSnackbar = () => {
     setIsSavingCombination(true);
     showSnackbar(
       <p>The changes are being saved onchain, it might take up to 30 seconds for them to be effective. Do not leave the app.</p>
     );
-  };
+  }; */
 
-  const onSavedCombinationSnackbar = () => {
+  /* const onSavedCombinationSnackbar = () => {
     setIsSavingCombination(false);
     showSnackbar(
       <p>The change was successfully saved.</p>
     );
-  };
+  }; */
 
-  const onFailedCombinationSnackbar = () => {
+  /* const onFailedCombinationSnackbar = () => {
     setIsSavingCombination(false);
     showSnackbar(
       <p>Saving failed, try again later.</p>
     );
-  };
+  }; */
 
   async function saveCombination() {
 /*     if (!walletAddress) return
