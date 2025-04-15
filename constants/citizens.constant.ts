@@ -1,6 +1,6 @@
 import { Blockchain } from "../enums/blockchain/common.enum";
 import { BackedByLinks, Campaign } from "../enums/citizens/common.enum";
-import { CitizensCollection } from "../interfaces/citizens.interface";
+import { CitizensCollection, Game } from "../interfaces/citizens.interface";
 
 export const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY;
 export const IPFS_GATEWAY_API_KEY = process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY;
@@ -164,3 +164,61 @@ export const LOGIN_BACKEDBY = [
     link: BackedByLinks.Chainlink
   }
 ];
+
+export const GAMES: Game[] = [
+  {
+    name: 'NIFTY ISLAND',
+    link: 'https://www.niftyisland.com/play/patabrava/0',
+    bgSrc: '/resources/images/play/nifty.png',
+    iconSrc: '/resources/images/play/logos/nifty.png',
+    instructions: [
+      'Log into your Nifty Island account',
+      'Go to your profile, click on “create”',
+      'Click on the upload icon in assets to upload your downloaded Citizen.',
+      'Upload a cover image for your avatar and click on "Start Build"',
+      'Click "Next"',
+      'Click the "Creator Agreement" and click "Create"'
+    ],
+    guide: 'https://youtu.be/grE_znFG3-4?feature=shared'
+  },
+  {
+    name: 'HYPERFY',
+    link: 'https://hyperfy.io/thehub',
+    bgSrc: '/resources/images/play/hyperfy.png',
+    iconSrc: '/resources/images/play/logos/hyperfy.png',
+    instructions: [
+      'Log in to hyperfy_io with your preferred wallet',
+      'Choose your virtual world for interactions',
+      'Click on the “Avatar” icon and select the "Upload" option',
+      'Click “Equip” to import your Citizen',
+      'Click on “Settings” and set your avatar to “Heavy+”'
+    ]
+  },
+  {
+    name: 'DVERSO',
+    link: 'https://dverso.io/',
+    bgSrc: '/resources/images/play/dverso.png',
+    iconSrc: '/resources/images/play/logos/dverso.png',
+    instructions: [
+      'Log in to Dverso using your preferred wallet ',
+      'Visit your profile ',
+      'Go to "Settings"',
+      'Click on "Wardrobe"',
+      'Click on “Upload a VRM”',
+      'Upload your downloaded Citizen ',
+      'Once uploaded, select your Citizen from your avatar list, and it’s ready to use!'
+    ]
+  },
+  {
+    name: 'ONCYBER',
+    link: 'https://oncyber.io/',
+    bgSrc: '/resources/images/play/oncyber.png',
+    iconSrc: '/resources/images/play/logos/oncyber.png',
+    instructions: [
+      'Click on the pen (customize button), next to the profile picture',
+      'Click on "Uploaded"',
+      'Click on the "+" to upload your VRM',
+      'Click on "create" to develop your own worlds'
+    ]
+  }
+]
