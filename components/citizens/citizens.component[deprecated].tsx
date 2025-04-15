@@ -2,10 +2,7 @@
 
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import { CampaignDrops, TokenId, CitizenMetadata } from "../../interfaces/citizens.interface";
-// import LoginUI from "../../ui/citizens/sections/login.ui";
-// import ConnectButton from "../../ui/citizens/common/connectButton.ui";
 import CitizensUI from "../../ui/citizens/citizens.ui[deprecated]";
-import { BurnDrop, GetUserFeatures, SetTokenMetadata } from "../../utils/web3/lukso/contract.util[deprecated]";
 import { CitizensCollection, DataBaseDrop } from "../../interfaces/citizens.interface";
 import Button from "../../ui/citizens/common/button.ui";
 import ArrowLinkSVG from "../../ui/citizens/common/SVG/arrowLinkSVG.ui";
@@ -29,15 +26,12 @@ import { StorageLocation } from "../../enums/firebase.enum";
 import { useCallback, useState } from "react";
 import HudUI from "../../ui/avatar/hud.ui";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../avatar/viewer.component";
-import { uploadMetadata } from "../../utils/metadata.util";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
-import { useSnackbar } from '../../ui/citizens/snackbar/snackbar.provider';
 import LogoTheHub from '../../ui/citizens/common/SVG/logoTheHubSVG.ui';
 import Image from 'next/image';
 import SocialButtons from '../../ui/citizens/common/socialButtons.ui';
-import { useBlockchainWallet } from '../../hooks/useBlockchainWallet';
 import { Blockchain } from '../../enums/blockchain/common.enum';
-import { JsonRpcProvider } from 'ethers';
+
 const COLLECTIONS: CitizensCollection[] = [
   {
     name: 'Lukso Citizens',
@@ -61,9 +55,9 @@ const COLLECTIONS: CitizensCollection[] = [
 ]
 
 
-const isValidIPFSHash = (hash: string): boolean => {
+/* const isValidIPFSHash = (hash: string): boolean => {
   return hash.startsWith('baf') || hash.startsWith('Qm');
-};
+}; */
 
 interface CitizensComponentProps {
   campaignParams?: CampaignParameters;
@@ -80,12 +74,12 @@ let optionList: FeatureInterface[] | undefined
 let featureList: FeatureInterface[] | undefined
 
 
-export default function CitizensComponent({ campaignParams, setCampaign, isLoggedIn }: CitizensComponentProps) {
-  const { showSnackbar } = useSnackbar();
-  const { walletAddress, provider, isLoggedIn: isAuthenticated } = useBlockchainWallet();
+export default function CitizensComponent({ campaignParams, isLoggedIn, setCampaign }: CitizensComponentProps) {
+/*   const { showSnackbar } = useSnackbar(); */
+/*   const { walletAddress, provider } = useBlockchainWallet(); */
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
+  const [isSavingCombination] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<CitizensSections>(CitizensSections.View);
   const [isBurguerOpen, setIsBurguerOpen] = useState<boolean>(false);
 
@@ -109,8 +103,8 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
   );
   // const [, setSelectedLoginCampaign] = useState<Campaign>();
   const [selectedCategory, setSelectedCategory] = useState<string>('head');
-  const [tokenIdList, setTokenIdList] = useState<TokenId[]>();
-  const [userWearables, setUserWearables] = useState<CampaignDrops | undefined>(undefined);
+  const [tokenIdList] = useState<TokenId[]>();
+  const [userWearables] = useState<CampaignDrops | undefined>(undefined);
 
   const [claimableDrops, ] = useState<DataBaseDrop[]>([])
 
@@ -272,12 +266,12 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     }, [tokenIdList,isSolana, isEthereum]); */
 
 
-  const handleEthereumUserFeatures = async () => {
+  /* const handleEthereumUserFeatures = async () => {
     if (!walletAddress) return
     const features = await GetUserFeatures(walletAddress)
     if (!features.success) return
-    setUserWearables(features.value)
-  }
+    setUserWearables(features.value) */
+  /* } */
 
   /*   useEffect(() => {
       if (isSolana) {
@@ -644,29 +638,29 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
     setSkinColor(newSkinColor)
   }
 
-  const onSavingCombinationSnackbar = () => {
+  /* const onSavingCombinationSnackbar = () => {
     setIsSavingCombination(true);
     showSnackbar(
       <p>The changes are being saved onchain, it might take up to 30 seconds for them to be effective. Do not leave the app.</p>
     );
-  };
+  }; */
 
-  const onSavedCombinationSnackbar = () => {
+  /* const onSavedCombinationSnackbar = () => {
     setIsSavingCombination(false);
     showSnackbar(
       <p>The change was successfully saved.</p>
     );
-  };
+  }; */
 
-  const onFailedCombinationSnackbar = () => {
+  /* const onFailedCombinationSnackbar = () => {
     setIsSavingCombination(false);
     showSnackbar(
       <p>Saving failed, try again later.</p>
     );
-  };
+  }; */
 
   async function saveCombination() {
-    if (!walletAddress) return
+/*     if (!walletAddress) return
 
     const newCombination = singleInitData?.features
       .map((feature) => feature.val.index)
@@ -767,7 +761,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
       setTokenIdList(_tokenIdList);
 
       onFailedCombinationSnackbar();
-    }
+    } */
   }
 
   /*   useEffect(() => {
@@ -969,7 +963,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
-      {isAuthenticated ?
+      {isLoggedIn ?
 
         <>
           {/* EDITOR HUD */}
@@ -1062,7 +1056,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
 
           </div>
           {/* CITIZENS HUD */}
-          {!isEditModeSelected && isAuthenticated &&
+          {!isEditModeSelected && isLoggedIn &&
             <CitizensUI
             isSavingCombination={isSavingCombination}
             currentSection={currentSection}
@@ -1071,9 +1065,9 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
             updateCollection={updateCollection}
             features={singleInitData?.features}
             exportModel={() => exportModel()}
-            address={walletAddress as string}
+            address={''}
             leaderboardData={leaderboardData}
-            provider={provider as unknown as JsonRpcProvider | null}
+            provider={null}
             /*               handleFollowUser={handleFollowUser}
                           handleUnfollowUser={handleUnfollowUser} */
             claimableDrops={claimableDrops} handleFollowUser={function (): Promise<boolean> {
@@ -1118,7 +1112,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           <LogoTheHub />
         </div>
         {/* NAVBAR */}
-        {isAuthenticated && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
+        {isLoggedIn && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
           <>
             <div className={`fixed z-50 xl:relative inset-6 xl:inset-0 bg-citizens-dark xl:bg-inherit h-fit ${isBurguerOpen ? 'block' : 'hidden xl:block'}`}>
               <div className='w-full px-4 pt-4 pb-24 flex justify-between xl:hidden'>
@@ -1183,7 +1177,7 @@ export default function CitizensComponent({ campaignParams, setCampaign, isLogge
           </>
         }
         {/* CONNECT BUTTON */}
-        {(collectionList || collectionList === null || isAuthenticated) &&
+        {(collectionList || collectionList === null || isLoggedIn) &&
           <div className="flex gap-4">
             {/* {!isSigned &&
                 <Button label="About" handleClick={() => { }} withIcon textStyles="text-start pl-2">

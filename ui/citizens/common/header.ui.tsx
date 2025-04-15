@@ -1,5 +1,12 @@
+import { useState } from "react";
+import { useAppSelector } from "../../../store/hooks";
 import ConnectButton from "./connectButton.ui";
 import LogoTheHub from "./SVG/logoTheHubSVG.ui";
+import Image from "next/image";
+import Button from "./button.ui";
+import SocialButtons from "./socialButtons.ui";
+import { CitizensPageLocation } from "../../../enums/citizens/common.enum";
+import { GoToPage } from "../../../utils/router.util";
 
 interface HeaderUIProps {
   onLogin?: () => void;
@@ -7,6 +14,9 @@ interface HeaderUIProps {
 }
 
 export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
+  const isLoggedIn = useAppSelector(state => state.citizensAuth.connected);
+
+  const [isBurguerOpen, setIsBurguerOpen] = useState(false);
 
   const handleLogin = () => {
     if (onLogin) {
@@ -19,15 +29,19 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
       onLogout();
     }
   }
+
+  const handleNavbarClick = (location?: CitizensPageLocation) => {
+    setIsBurguerOpen(false);
+    if (location) GoToPage(location);
+  }
   return (
-    <div className="sticky inset-0 w-full h-fit flex justify-between items-center pt-8 px-6 z-50">
+    <header className="fixed w-dvw z-50 inset-0 h-fit flex justify-between items-center pt-8 px-6">
       {/* LOGO THE HUB */}
       <div className="w-fit h-fit" >
         <LogoTheHub />
       </div>
-      {/* TODO: @nan-ser0 Ajustar navBar */}
       {/* NAVBAR */}
-      {/* {isAuthenticated && !isEditModeSelected && tokenIdList && tokenIdList?.length > 0 &&
+      {isLoggedIn &&
         <>
           <div className={`fixed z-50 xl:relative inset-6 xl:inset-0 bg-citizens-dark xl:bg-inherit h-fit ${isBurguerOpen ? 'block' : 'hidden xl:block'}`}>
             <div className='w-full px-4 pt-4 pb-24 flex justify-between xl:hidden'>
@@ -43,40 +57,25 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
             </div>
             <div className='xl:flex gap-4 pb-8 xl:pb-0 px-4'>
               <Button label="homebase" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                if (currentSection !== CitizensSections.View) {
-                  setIsLoading(true);
-                  setCurrentSection(CitizensSections.View);
-                }
-                setIsBurguerOpen(false);
+                handleNavbarClick(CitizensPageLocation.HOME);
               }} />
               <Button label="Wardrobe" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                if (currentSection !== CitizensSections.View) {
-                  setIsLoading(true);
-                  setCurrentSection(CitizensSections.View);
-                }
-                setIsBurguerOpen(false);
-                if (!isSavingCombination) setIsEditModeSelected(true);
+                handleNavbarClick();
               }}>
-                {isSavingCombination ?
+                {/* {isSavingCombination ?
                   <div className="w-3 h-3 rounded-full border-t-[1px] border-white animate-spin" />
                   :
                   <ArrowLinkSVG />
-                }
+                } */}
               </Button>
               <Button label="Backpack" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                setIsLoading(false);
-                setIsBurguerOpen(false);
-                setCurrentSection(CitizensSections.Collection);
+                handleNavbarClick(CitizensPageLocation.BACKPACK);
               }} />
               <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                setIsLoading(false);
-                setIsBurguerOpen(false);
-                setCurrentSection(CitizensSections.LeaderBoard);
+                handleNavbarClick();
               }} />
               <Button label="play" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                setIsLoading(false);
-                setIsBurguerOpen(false);
-                setCurrentSection(CitizensSections.Play);
+                handleNavbarClick();
               }} />
             </div>
             <div className='border-t-[1px] mx-4 xl:hidden'>
@@ -90,11 +89,11 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
             <div className='w-full h-[2px] bg-white'></div>
           </div>
         </>
-      } */}
+      }
       {/* CONNECT BUTTON */}
       <div className="flex gap-4">
         <ConnectButton onLogin={() => handleLogin()} onLogout={() => handleLogout()} />
       </div>
-    </div>
+    </header>
   )
 }

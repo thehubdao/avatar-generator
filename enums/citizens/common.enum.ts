@@ -8,7 +8,7 @@ export enum CitizensSections {
 
 export enum CitizensPageLocation {
   HOME = '/citizens',
-  LOGIN = '/citizens/login',
+  BACKPACK = '/citizens/backpack',
 }
 
 export enum CollectionSections {

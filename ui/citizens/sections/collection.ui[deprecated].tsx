@@ -1,6 +1,6 @@
 import { CitizenMetadata } from "../../../interfaces/citizens.interface";
 import { CollectionType } from "../../../interfaces/avatar.interface";
-import CitizensCollection from "../common/citizensCollection.ui";
+import CitizensCollection from "../common/citizensCollection.ui[deprecated]";
 import WearablesCollection from "../common/wearablesCollection.ui";
 import { useState } from "react";
 import { Campaign, CollectionSections } from "../../../enums/citizens/common.enum";

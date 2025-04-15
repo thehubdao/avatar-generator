@@ -1,9 +1,3 @@
-import { useLogin } from "@privy-io/react-auth";
-import { Blockchain } from "../../../enums/blockchain/common.enum";
-import { BlockchainToWalletChainType } from "../../../utils/web3/web3.util";
-import { useDispatch } from "react-redux";
-import { Campaign } from "../../../enums/citizens/common.enum";
-import { setSelectedCampaign } from "../../../store/citizensMetadataSlice";
 import Image from "next/image";
 import Link from "next/link";
 import PrivacyPolicySVG from "../common/SVG/privacyPolicySVG.ui";
@@ -15,21 +9,17 @@ import NewsUI from "./news.ui";
 import FreshDropsUI from "./freshDrops.ui";
 import CommunityContent from "./communityContent.ui";
 import BackedBy from "./backedBy.ui";
-import HeaderUI from "../common/header.ui";
+import { Blockchain } from "../../../enums/blockchain/common.enum";
+import { Campaign } from "../../../enums/citizens/common.enum";
 
-export default function CitizensLoginUI() {
-	const dispatch = useDispatch();
-	const { login } = useLogin();
+interface CitizensLoginUIProps {
+	handleLogin: (blockChain: Blockchain | undefined, campaign: Campaign | undefined) => void;
+}
 
-	/* Tanto el blockchain como la campaña se seleccionan manualmente en cada boton que llama esta función */
-	const handleLogin = (blockchain: Blockchain | undefined, campaign: Campaign | undefined) => {
-		login({ walletChainType: BlockchainToWalletChainType(blockchain) });
-		dispatch(setSelectedCampaign(campaign ?? Campaign.Citizens));
-	}
+export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 
 	return (
-		<div className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
-			<HeaderUI onLogin={() => handleLogin(undefined, undefined)}/>
+		<div className="w-full min-h-screen pt-20">
 			<div className="pt-[8vh] 2xl:pt-[6vh] min-h-screen">
 				{/* LANDING CARD */}
 				<div className="relative w-full px-6">

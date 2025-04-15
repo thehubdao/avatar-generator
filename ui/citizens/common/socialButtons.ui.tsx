@@ -13,19 +13,19 @@ interface SocialButtonsProps {
 export default function SocialButtons({className}: SocialButtonsProps) {
   return (
     <div className={className}>
-      <Link href={TheHubSocialLinks.Telegram}>
+      <Link target="_blank" href={TheHubSocialLinks.Telegram}>
         <SocialTelegramSVG />
       </Link>
-      <Link href={TheHubSocialLinks.Discord}>
+      <Link target="_blank" href={TheHubSocialLinks.Discord}>
         <SocialDiscordSVG />
       </Link>
-      <Link href={TheHubSocialLinks.CommonGround}>
+      <Link target="_blank" href={TheHubSocialLinks.CommonGround}>
         <SocialCommonGroundSVG />
       </Link>
-      <Link href={TheHubSocialLinks.SocialX}>
+      <Link target="_blank" href={TheHubSocialLinks.SocialX}>
         <SocialXSVG />
       </Link>
-      <Link href={TheHubSocialLinks.SocialInstagram}>
+      <Link target="_blank" href={TheHubSocialLinks.SocialInstagram}>
         <SocialInstagramSVG />
       </Link>
       

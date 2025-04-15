@@ -28,7 +28,7 @@ export default function CampaignCard({ title, tokenID, imgSrc, imgAlt, light = f
       <div className={`relative w-full ${size === CardSize.Small ? 'h-[228px]' : size === CardSize.Medium ? 'h-[300px]' : 'h-[515px]'}`}>
         <Image src={imgSrc} alt={imgAlt} fill className="object-cover" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"/>
         {overlayText && !selected &&
-          <div onClick={handleClick} className="absolute w-full h-full flex justify-center items-center bg-citizens-dark/75 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute w-full h-full flex justify-center items-center bg-citizens-dark/75 opacity-0 group-hover:opacity-100 transition-opacity">
             <p className="font-light text-lg text-white">{overlayText}</p>
           </div>
         }
