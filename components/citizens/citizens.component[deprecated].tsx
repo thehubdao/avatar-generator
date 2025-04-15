@@ -82,7 +82,7 @@ let featureList: FeatureInterface[] | undefined
 
 export default function CitizensComponent({ campaignParams, isLoggedIn, setCampaign }: CitizensComponentProps) {
   const { showSnackbar } = useSnackbar();
-  const { walletAddress, provider } = useBlockchainWallet();
+/*   const { walletAddress, provider } = useBlockchainWallet(); */
   const [collectionList] = useState<CitizensCollection[] | null | undefined>(COLLECTIONS); // collections to show before login, it controls the view flow: undefined: loading state, null: error getting data, CitizensCollection[]: show collections
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSavingCombination, setIsSavingCombination] = useState<boolean>(false);
@@ -273,10 +273,10 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
 
 
   const handleEthereumUserFeatures = async () => {
-    if (!walletAddress) return
+/*     if (!walletAddress) return
     const features = await GetUserFeatures(walletAddress)
     if (!features.success) return
-    setUserWearables(features.value)
+    setUserWearables(features.value) */
   }
 
   /*   useEffect(() => {
@@ -666,7 +666,7 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
   };
 
   async function saveCombination() {
-    if (!walletAddress) return
+/*     if (!walletAddress) return
 
     const newCombination = singleInitData?.features
       .map((feature) => feature.val.index)
@@ -767,7 +767,7 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
       setTokenIdList(_tokenIdList);
 
       onFailedCombinationSnackbar();
-    }
+    } */
   }
 
   /*   useEffect(() => {
@@ -1071,9 +1071,9 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
             updateCollection={updateCollection}
             features={singleInitData?.features}
             exportModel={() => exportModel()}
-            address={walletAddress as string}
+            address={''}
             leaderboardData={leaderboardData}
-            provider={provider as unknown as JsonRpcProvider | null}
+            provider={null}
             /*               handleFollowUser={handleFollowUser}
                           handleUnfollowUser={handleUnfollowUser} */
             claimableDrops={claimableDrops} handleFollowUser={function (): Promise<boolean> {
