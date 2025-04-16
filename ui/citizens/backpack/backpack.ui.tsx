@@ -9,7 +9,7 @@ export default function CitizensBackpackUI() {
   const [selectedList, setSelectedList] = useState<CollectionSections>(CollectionSections.CITIZENS)
 
   return (
-    <div className="relative w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] py-32">
+    <div className="relative w-full min-h-screen py-32">
       <div className="relative container mx-auto">
         <h1 className="font-monument text-white text-4xl sm:text-6xl text-center px-6">
           {selectedList === CollectionSections.CITIZENS && 'MY CITIZENS'}
