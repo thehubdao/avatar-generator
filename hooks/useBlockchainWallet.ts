@@ -1,7 +1,7 @@
 import { useLogin, useLogout, usePrivy } from '@privy-io/react-auth';
 import { useEffect } from 'react';
 import { Blockchain } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setSelectedCampaign, setSelectedCitizen } from '../store/citizensMetadataSlice';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
 import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
@@ -32,22 +32,6 @@ export function useBlockchainWallet() {
   const { login } = useLogin();
   const { logout } = useLogout();
 
-
-  // const { wallets: ethWallets } = useWallets();
-
-  // const setBlockchain = () => {
-  //   if (user?.wallet?.chainType == Blockchain.Solana) {
-  //     blockchainType.current = Blockchain.Solana;
-  //     setProvider(undefined);
-  //   } else if (user?.wallet?.chainType == Blockchain.Ethereum) {
-  //     blockchainType.current = Blockchain.Ethereum;
-  //     ethWallets[0]?.getEthereumProvider().then(ethProvider => {
-  //       const browserProvider = new BrowserProvider(ethProvider);
-  //       setProvider(browserProvider);
-  //     });
-  //   }
-  // };
-
   const getCampaignParams = async (campaign: Campaign) => {
     const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
     if (campaignParams.success) {
@@ -71,12 +55,19 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: tokensMetadata.errMessage, errCode: tokensMetadata.errCode };
   }
 
+  const fetchEthereumLeaderboardData = async () => {
+    // TODO: Get the leaderboard data from utility and dispatch it to the store
+    dispatch(setLeaderboardData(undefined));
+  }
+
   const fetchCitizensMetadata = async (walletAddress: string) => {
     if (blockchainType === Blockchain.Ethereum) {
       const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
       const followerCountResult = await GetFollowerCounts(walletAddress); // Get the follower count
 
       if (ethereumCitizensMetadata.success) {
+        fetchEthereumLeaderboardData(); // Fetch the leaderboard data
+        
         const citizen = ethereumCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
 
         dispatch(setCitizensMetadata(ethereumCitizensMetadata.value));
