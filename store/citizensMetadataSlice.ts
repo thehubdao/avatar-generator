@@ -7,7 +7,7 @@ import { LeaderboardEntry } from '../types/leaderboard.type';
 interface CitizensMetadataState {
   citizensMetadata: CitizenMetadata[] | null;
   selectedCampaign: Campaign | null;
-  CampaignParameters: CampaignParameters | null;
+  campaignParameters: CampaignParameters | null;
   selectedCitizen: CitizenMetadata | null;
   followUserData: FollowUserData | null;
   leaderboardData: LeaderboardEntry[] | null | undefined;
@@ -16,7 +16,7 @@ interface CitizensMetadataState {
 const initialState: CitizensMetadataState = {
   citizensMetadata: null,
   selectedCampaign: null,
-  CampaignParameters: null,
+  campaignParameters: null,
   selectedCitizen: null, // Cannot be void string, only null or valid combination string
   followUserData: null,  // Both follower and following count are -1, meaning this blockchain does not support follow user data
   leaderboardData: null
@@ -33,8 +33,8 @@ export const citizensMetadataSlice = createSlice({
     setSelectedCampaign: (state, action: PayloadAction<Campaign | null>) => {
       state.selectedCampaign = action.payload;
     },
-    setCampaignParameters: (state, action: PayloadAction<CampaignParameters>) => {
-      state.CampaignParameters = action.payload;
+    setCampaignParameters: (state, action: PayloadAction<CampaignParameters | null>) => {
+      state.campaignParameters = action.payload;
     },
     setSelectedCitizen: (state, action: PayloadAction<CitizenMetadata>) => {
       state.selectedCitizen = action.payload;
