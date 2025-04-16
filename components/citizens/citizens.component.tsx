@@ -11,7 +11,7 @@ import { ExportInterface } from "../../interfaces/common.interface";
 export default function CitizensComponent() {
   // REDUX State
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
-  const campaignParams = useAppSelector(state => state.citizensMetadata.CampaignParameters);
+  const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
   const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
 
   // Local references
