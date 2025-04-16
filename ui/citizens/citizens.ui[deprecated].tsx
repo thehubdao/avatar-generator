@@ -5,7 +5,7 @@ import { CitizenMetadata } from "../../interfaces/citizens.interface";
 import DetailsUI from "./common/details.ui";
 import Notifications from "./common/notifications.ui";
 import Collection from "./sections/collection.ui[deprecated]";
-import LeaderBoard from "./sections/leaderBoard.ui";
+import LeaderBoard from "./sections/leaderBoard.ui[deprecated]";
 import Play from "./sections/play.ui";
 import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { JsonRpcProvider } from "ethers";
