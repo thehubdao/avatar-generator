@@ -7,7 +7,7 @@ interface CitizensUIProps {
 }
 
 export default function CitizensUI({ isReady, handleReady }: CitizensUIProps) {
-	const campaignParams = useAppSelector(state => state.citizensMetadata.CampaignParameters);
+	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
 
 	return (
