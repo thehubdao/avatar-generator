@@ -4,8 +4,7 @@ TODO:
     ✔ Add selected campaign + combination to app state @done(25-03-31 14:08)
     ✔ Add error handling to GetEthereumTokenMetadata and GetTokensMetadata at lukso/contract.util.ts @done(25-04-01 13:40)
     ☐ Check double setCampaignParameters in useBlockchainWallet hook when change pages or change selectedCampaign
-
-
+    ☐ Add ImageUrl and tokenId to Kumi minting metadata
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
