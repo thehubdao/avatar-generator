@@ -8,12 +8,13 @@ import SearchSVG from "../common/SVG/searchSVG.ui";
 import SelectorUI from "../common/selector.ui";
 import CampaignCard from "../common/campaignCard.ui";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { setSelectedCitizen } from "../../../store/citizensMetadataSlice";
+import { setCampaignParameters, setSelectedCampaign, setSelectedCitizen } from "../../../store/citizensMetadataSlice";
 import { GoToPage } from "../../../utils/router.util";
 
 export default function CitizensCollection() {
   const dispatch = useAppDispatch();
   const tokenList = useAppSelector(state => state.citizensMetadata.citizensMetadata);
+  const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
 
   const filteredList = useRef<CitizenMetadata[] | undefined>([]);
@@ -35,6 +36,10 @@ export default function CitizensCollection() {
 
   const handleCardClick = (tokenId: string, tokenMetadata: CitizenMetadata) => {
     if (selectedCitizen === null || tokenId !== selectedCitizen.tokenId) {
+      if (tokenMetadata.campaign !== selectedCampaign) {
+        dispatch(setCampaignParameters(null)); // Necesary to reset the campaign parameters
+        dispatch(setSelectedCampaign(tokenMetadata.campaign));
+      } 
       dispatch(setSelectedCitizen(tokenMetadata));
       GoToPage(CitizensPageLocation.HOME);
     }
