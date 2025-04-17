@@ -2,7 +2,6 @@ import { ERC725 } from "@erc725/erc725.js";
 
 import { ERC725JSONSchemaKeyType } from "@erc725/erc725.js";
 import { JsonRpcProvider } from "ethers";
-import { CampaignData } from "../../interfaces/citizens.interface";
 import { Campaign } from "../../enums/citizens/common.enum";
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!;
