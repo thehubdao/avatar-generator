@@ -26,12 +26,14 @@ export async function GetSolanaIPFSData(cid: string): Promise<Result<CitizenMeta
   try {
     const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
     const ipfsRequest = await fetch(ipfsHTTPUrl);
-    const ipfsData = await ipfsRequest.json() as CitizenMetadata;
+    const ipfsData = await ipfsRequest.json();
+    const ipfsDataResult = ipfsData as CitizenMetadata;
+    ipfsDataResult.imageUrl = ipfsData.image;
 
     return { success: true, value: ipfsData };
   } catch (error) {
     const err = error as Error;
-    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    LogError(Module.SolanaContractUtil, 'Error on getting token metadata', err.stack);
     return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
@@ -45,17 +47,16 @@ export function GetEthereumImageUrl(metadata: CitizenMetadata): Result<string> {
     return { success: true, value: imageUrl };
   } catch (error) {
     const err = error as Error;
-    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    LogError(Module.SolanaContractUtil, 'Error on getting image url', err.stack);
     return { success: false, errMessage: err.message, errCode: ''};
   }
 }
 
 export function GetSolanaImageUrl(metadata: CitizenMetadata): Result<string> {
   try {
-    const ipfsUrl = metadata.imageUrl;
-    const cid = ipfsUrl.split('//')[1];
-
+    const cid = metadata.imageUrl.split('//')[1];
     const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
+    
     return { success: true, value: imageUrl };
   } catch (error) {
     const err = error as Error;
