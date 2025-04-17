@@ -75,8 +75,6 @@ export default function CitizensComponent() {
     });
 
     featureList.current = filteredOptionList;
-    console.log('Filtered feature list', featureList.current);
-
   }
 
   async function getEnvironmentMapList() {
