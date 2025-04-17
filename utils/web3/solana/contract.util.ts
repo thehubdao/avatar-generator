@@ -6,6 +6,7 @@ import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { UMI, COLLECTION_ID } from '../../../constants/solana/contract.constant';
 import { PublicKey } from '@solana/web3.js';
 import { CitizenMetadata } from '../../../interfaces/citizens.interface';
+import { GetSolanaImageUrl, GetSolanaIPFSData } from '../citizens.util';
 
 export async function GetAssetsByOwner(walletAddress: string): Promise<Result<AssetV1[]>> {
     try {
@@ -46,11 +47,30 @@ export async function GetCollectionAssetByOwner(
         value: [] //Return empty array because we don't have any collection asset. Means user has to mint
     };
 
-    const castedCitizenMetadata = collectionAsset as unknown as CitizenMetadata; //We have to make a cast because the type of the asset is not CitizenMetadata and AssetV1 is a very big object
+    const cid = collectionAsset.uri.split('//')[1];
+    const ipfsDataResult = await GetSolanaIPFSData(cid); // Get the Solana token metadata from IPFS
+
+    if (!ipfsDataResult.success) return {
+        success: false,
+        errMessage: ipfsDataResult.errMessage,
+        errCode: CommonErrorCode.FetchError
+    };
+    const assetMetadata = ipfsDataResult.value;
+    const imageUrlResult = GetSolanaImageUrl(assetMetadata);
+
+    if (!imageUrlResult.success) return {
+        success: false,
+        errMessage: imageUrlResult.errMessage,
+        errCode: CommonErrorCode.FetchError
+    };
+
+    assetMetadata.imageUrl = imageUrlResult.value; // take the ipfs data and add the imageUrl and fallbackImageUrl
+    assetMetadata.fallbackImageUrl = imageUrlResult.value;
+    assetMetadata.tokenId = collectionAsset.key.toString(); //set the tokenId
 
     return {
         success: true,
-        value: [castedCitizenMetadata]//Temporarily return as array while we add more campaigns to Solana
+        value: [assetMetadata] //Temporarily return as array while we add more campaigns to Solana
     };
 
 }

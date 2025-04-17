@@ -2,7 +2,6 @@ import { ERC725 } from "@erc725/erc725.js";
 
 import { ERC725JSONSchemaKeyType } from "@erc725/erc725.js";
 import { JsonRpcProvider } from "ethers";
-import { CampaignData } from "../../interfaces/citizens.interface";
 import { Campaign } from "../../enums/citizens/common.enum";
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!;
@@ -17,12 +16,11 @@ export const PROVIDER = new JsonRpcProvider(RPC_URL);
 export const TEMP_CAMPAIGN_SWITCH = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b', 'kumi': 'kumi' };
 
 //MAINNET
-export const CAMPAIGN_WEB3_DATA: CampaignData = {
+export const LUKSO_CAMPAIGN_WEB3_DATA = {
     [Campaign.Creators]: {
         contractAddress: '0x74654920356257981f6b63a65ad72d4d9bc21929',
         baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
     }, [Campaign.Citizens]: { contractAddress: '0x754a5d007d5f1188ef0db892ee115a7c01b38fa3', baseCid: '' },
-    [Campaign.Kumi]: { contractAddress: '', baseCid: '' },
 };
 
 const SCHEMAS = [

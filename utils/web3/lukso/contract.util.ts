@@ -8,7 +8,7 @@ import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { Campaign } from '../../../enums/citizens/common.enum';
-import { CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH } from '../../../constants/lukso/contract.constant';
+import { LUKSO_CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH } from '../../../constants/lukso/contract.constant';
 
 export async function GetTokensOf(contractAddress: string, address: string): Promise<Result<string[]>> {
     try {
@@ -39,9 +39,9 @@ export async function GetEthereumCampaignsTokenIds(address: string): Promise<Res
     try {
         let campaignsTokenIds = [] as TokenId[];
 
-        for (const campaign of Object.keys(CAMPAIGN_WEB3_DATA).filter((campaign) => campaign)) {
-            const typpedCampaign = campaign as keyof typeof CAMPAIGN_WEB3_DATA;
-            const { contractAddress } = CAMPAIGN_WEB3_DATA[typpedCampaign];
+        for (const campaign of Object.keys(LUKSO_CAMPAIGN_WEB3_DATA).filter((campaign) => campaign)) {
+            const typpedCampaign = campaign as keyof typeof LUKSO_CAMPAIGN_WEB3_DATA;
+            const { contractAddress } = LUKSO_CAMPAIGN_WEB3_DATA[typpedCampaign];
 
             const tokenIdsResult = await GetCampaignTokenIds(contractAddress, address);
             if (!tokenIdsResult.success) continue;
@@ -82,7 +82,7 @@ export async function GetEthereumCampaignsTokenIds(address: string): Promise<Res
 
 export async function GetCampaignTokenMetadataUris(campaign: Campaign, tokenIds: string[]): Promise<Result<string[]>> {
     try {
-        const { contractAddress } = CAMPAIGN_WEB3_DATA[campaign];
+        const { contractAddress } = LUKSO_CAMPAIGN_WEB3_DATA[campaign];
         const contract = new Contract(contractAddress, AvatarContractAbi, PROVIDER);
         const metadataDataKey = AVATAR_ERC725_CONTRACT.encodeKeyName('LSP4Metadata');
         const metadataKeyArray = tokenIds.map(() => metadataDataKey);
@@ -99,7 +99,7 @@ export async function GetCampaignTokenMetadataUris(campaign: Campaign, tokenIds:
         const decodedRawData = AVATAR_ERC725_CONTRACT.decodeData(metadataFormattedArray);
         const decodedDataArray = JSON.parse(JSON.stringify(decodedRawData));
 
-        const { baseCid } = CAMPAIGN_WEB3_DATA[campaign];
+        const { baseCid } = LUKSO_CAMPAIGN_WEB3_DATA[campaign];
         const formattedDataArray = decodedDataArray.map((data: { value: { url: string }; }, index: number) => {
             const { value: metadataUri } = data;
             return metadataUri ? metadataUri.url.split('//')[1] : `${baseCid}/${Number(tokenIds[index])}`;
@@ -135,7 +135,7 @@ export async function GetEthereumTokenMetadata(tokenId: TokenId): Promise<Result
 }
 
 export async function GetTokensMetadata(campaign: Campaign, tokenIds: string[]): Promise<Result<CitizenMetadata[]>> {
-    const { contractAddress, baseCid } = CAMPAIGN_WEB3_DATA[campaign];
+    const { contractAddress, baseCid } = LUKSO_CAMPAIGN_WEB3_DATA[campaign];
     try {
         const contract = new Contract(contractAddress, AvatarContractAbi, PROVIDER);
         const metadataDataKey = AVATAR_ERC725_CONTRACT.encodeKeyName('LSP4Metadata');
@@ -169,8 +169,8 @@ export async function GetTokensMetadata(campaign: Campaign, tokenIds: string[]):
 }
 
 export async function GetCampaignTokensMetadata(campaign: Campaign, address: string): Promise<Result<CitizenMetadata[]>> {
-    const { contractAddress } = CAMPAIGN_WEB3_DATA[campaign];
-    const typpedCampaign = campaign as keyof typeof CAMPAIGN_WEB3_DATA;
+    const { contractAddress } = LUKSO_CAMPAIGN_WEB3_DATA[campaign];
+    const typpedCampaign = campaign as keyof typeof LUKSO_CAMPAIGN_WEB3_DATA;
     const tokenIds = await GetCampaignTokenIds(contractAddress, address);
     if (!tokenIds.success) return { success: false, errMessage: tokenIds.errMessage, errCode: tokenIds.errCode };
 
@@ -183,7 +183,7 @@ export async function GetCampaignTokensMetadata(campaign: Campaign, address: str
 export async function GetCampaignsTokensMetadata(address: string): Promise<Result<CitizenMetadata[]>> { //Fix error handling!!
     let campaignsMetadatas: CitizenMetadata[] = [];
     let hasErrors = false;
-    for (const campaign of Object.keys(CAMPAIGN_WEB3_DATA)) {
+    for (const campaign of Object.keys(LUKSO_CAMPAIGN_WEB3_DATA)) {
         const tokensMetadataResult = await GetCampaignTokensMetadata(campaign as Campaign, address);
         if (!tokensMetadataResult.success) {
             hasErrors = true;
