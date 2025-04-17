@@ -1,8 +1,8 @@
 import { useLogin, useLogout, usePrivy } from '@privy-io/react-auth';
 import { useEffect } from 'react';
 import { Blockchain } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen } from '../store/citizensMetadataSlice';
-import { GetCampaignsTokensMetadata } from '../utils/web3/lukso/contract.util';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
+import { GetCampaignsTokensMetadata , GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
 import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
@@ -11,11 +11,12 @@ import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
-import { Campaign } from '../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign, SolanaCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect } from '../store/CitizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
+import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -55,6 +56,18 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: tokensMetadata.errMessage, errCode: tokensMetadata.errCode };
   }
 
+  async function getEthereumUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
+    const features = await GetUserFeatures(walletAddress);
+
+    if (features.success) return { success: true, value: features.value };
+
+    return { success: false, errMessage: features.errMessage, errCode: features.errCode };
+  }
+
+  async function getSolanaUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<SolanaCampaign>>> {
+    return { success: true, value: { [SolanaCampaign.Kumi]: [] } }; //TODO: Implement this function when solana campaign is fully ready
+  }
+
   const fetchEthereumLeaderboardData = async () => {
     // TODO: Get the leaderboard data from utility and dispatch it to the store
     dispatch(setLeaderboardData(undefined));
@@ -64,10 +77,10 @@ export function useBlockchainWallet() {
     if (blockchainType === Blockchain.Ethereum) {
       const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
       const followerCountResult = await GetFollowerCounts(walletAddress); // Get the follower count
-
+      const ethereumUserFeatures = await getEthereumUserFeaturesPromise('0xD803011177474766A066244076daDDd9dDeDA2c6'); // Get the user features
       if (ethereumCitizensMetadata.success) {
         fetchEthereumLeaderboardData(); // Fetch the leaderboard data
-        
+
         const citizen = ethereumCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
 
         dispatch(setCitizensMetadata(ethereumCitizensMetadata.value));
@@ -96,6 +109,13 @@ export function useBlockchainWallet() {
         dispatch(setFollowUserData(followerCountResult.value));
       } else { // If error, log the error, follow user data will be null
         LogError(Module.Citizens, followerCountResult.errMessage, followerCountResult.errCode);
+      }
+
+      if(ethereumUserFeatures.success) {
+        const ethereumFeatures = ethereumUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the ethereum features to the AppCampaigns type, this depends on the wearables got for current campaign
+        dispatch(setUserFeatures(ethereumFeatures));
+      } else {
+        LogError(Module.Citizens, ethereumUserFeatures.errMessage, ethereumUserFeatures.errCode);
       }
 
     } else if (blockchainType === Blockchain.Solana) {
