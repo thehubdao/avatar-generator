@@ -3,7 +3,7 @@ import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../../constants/abi/AvatarProxyContractABI.json'
 import WerableContractAbi from '../../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
-import { CampaignData, CampaignDrops, Drop, TokenId, CitizenMetadata, DataBaseDrop } from '../../../interfaces/citizens.interface';
+import { CampaignData, Drop, TokenId, CitizenMetadata, DataBaseDrop } from '../../../interfaces/citizens.interface';
 import { GetEthereumIPFSData, GetEthereumImageUrl, GetSolanaIPFSData, GetSolanaImageUrl } from '../citizens.util';
 import { GetCollectionDocs } from '../../firebase.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json'
@@ -12,8 +12,9 @@ import { BodyPart } from '../../../interfaces/avatar.interface';
 import ClaimableDropABI from '../../../constants/abi/ClaimableDropABI.json'
 import { LogError } from '../../common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
-import { Campaign } from '../../../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign } from '../../../enums/citizens/common.enum';
 import { Result } from '../../../types/common.type';
+import { CampaignDrops } from '../../../types/citizens.type';
 
 
 
@@ -315,11 +316,10 @@ export async function GetCampaignUserFeatures(address: string, campaign: string)
 }
 
 
-export async function GetUserFeatures(address: string): Promise<Result<CampaignDrops>> {
-    const features: CampaignDrops = {
-        vrm_male: [],
-        vrm_female: [],
-        kumi: []
+export async function GetUserFeatures(address: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
+    const features: CampaignDrops<LuksoCampaign> = {
+        [LuksoCampaign.Creators]: [],
+        [LuksoCampaign.Citizens]: [],
     }
     for (const campaign of Object.keys(campaignWeb3Data)) {
         const campaignUserFeatures = await GetCampaignUserFeatures(address, campaign)
