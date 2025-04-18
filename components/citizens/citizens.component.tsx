@@ -1,22 +1,27 @@
 import { useRef, useState } from "react";
 import { useAppSelector } from "../../store/hooks";
 import CitizensUI from "../../ui/citizens/citizens.ui";
-import { GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign } from "../../utils/api.util";
+import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
-import { ChangeFeature, ChangeStartAnimation, SetEnvironment, SetFeaturesData } from "../avatar/editor.component";
+import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData } from "../avatar/editor.component";
 import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
+import { StorageLocation } from "../../enums/firebase.enum";
+import { fileCampaignNameLabel } from "../../constants/lukso/labels.constant";
+import { SaveFile } from "../../utils/exporter.util";
 
 export default function CitizensComponent() {
   // REDUX State
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
   const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
+  const userFeatures = useAppSelector(state => state.citizensMetadata.userFeatures);
 
   // Local references
   const exportData = useRef<ExportInterface>({ attributes: [] });
-  const featureList = useRef<FeatureInterface[]>();
+  const featureList = useRef<FeatureInterface[]>([]);
+  const optionList = useRef<FeatureInterface[]>([]);
   const envMapList = useRef<EnvMapInterface[]>();
   const singleInitData = useRef<SingleInterface>();
 
@@ -45,6 +50,7 @@ export default function CitizensComponent() {
     const result = await GetAssetsListByCampaign(selectedCampaign);
     if (result.success) {
       featureList.current = result.value;
+      optionList.current = result.value;
     } else {
       LogError(Module.Citizens, 'Failed to get feature list', result.errCode);
       return;
@@ -74,7 +80,41 @@ export default function CitizensComponent() {
       filteredOptionList = filteredOptionList.concat(filteredArray)
     });
 
-    featureList.current = filteredOptionList;
+    if (userFeatures !== null) {
+      const campaignuserFeatures = userFeatures[selectedCampaign as string];
+      if (campaignuserFeatures) {
+        const formatteduserWearables = campaignuserFeatures
+          .map((val) => {
+            return optionList.current?.find(
+              (option) =>
+                option.type === val.type &&
+                val.index === option.index
+            ) as FeatureInterface
+          })
+          .filter((val) => {
+            const categoryIndex = campaignParams?.features?.find(
+              (category) => {
+                return category.displayName === val.type
+              }
+            )?.index
+
+            if (!categoryIndex || !combinationIndexes) return true
+
+            return !combinationIndexes[categoryIndex - 1]?.includes(
+              val.index.toString()
+            )
+          })
+        const featuresWithBalance = formatteduserWearables.map(feature => {
+          feature.balance = userFeatures[selectedCampaign as string].find(w => w.type === feature.type && w.index === feature.index)?.balance
+          return feature
+        })
+        filteredOptionList = filteredOptionList.concat(featuresWithBalance)
+      }
+    } else {
+      LogError(Module.Citizens, 'Missing user features to add!');
+    }
+
+    optionList.current = filteredOptionList;
   }
 
   async function getEnvironmentMapList() {
@@ -172,5 +212,76 @@ export default function CitizensComponent() {
     }
   }
 
-  return <CitizensUI isReady={isAllReady} handleReady={() => onAvatarBuilderReady()} />
+  async function exportModel() {
+    exportData.current.attributesBase64 = window.btoa(
+      JSON.stringify(exportData.current.attributes)
+    )
+    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${selectedCitizen!.combination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`
+    const [
+      picturePromise,
+      modelGLBPromise,
+      modelVRMPromise,
+    ] = await Promise.all([
+      FetchBlob(selectedCitizen!.imageUrl),
+      GetAvatarGLB(),
+      FetchBlob(vrmStorageUrl),
+    ])
+    console.log('EXPORTING VRM, GLB and image...')
+    const modelVRM = modelVRMPromise
+    const modelGLB = modelGLBPromise.success
+      ? modelGLBPromise.value
+      : undefined
+    const filesName =
+      fileCampaignNameLabel[campaignParams?.campaign as keyof typeof fileCampaignNameLabel] +
+      selectedCitizen!.tokenId
+    if (modelVRM && modelGLBPromise.success) {
+      await SaveFile(modelVRM, `${filesName}.vrm`)
+      await SaveFile(modelGLB, `${filesName}.glb`)
+      await SaveFile(picturePromise, `${filesName}.png`)
+    }
+  }
+
+  async function changeFeaturefromHud(
+    id: string,
+    path: string,
+    name: string,
+    category: string
+  ) {
+    if (!singleInitData.current) return LogError(Module.Citizens, 'Singlke init data is undefined in changeFeaturefromHud');
+
+    const currentFeatures = singleInitData.current.features;
+    const changedFeature = optionList.current.find(
+      (feature) => feature.type === category && feature.id === id
+    )
+    const currentFeaturesTypeIndex = currentFeatures?.findIndex(
+      (feature) => feature.val.type === category
+    )
+
+    if ( currentFeaturesTypeIndex != undefined && changedFeature ) {
+      singleInitData.current.features[
+        currentFeaturesTypeIndex
+      ].val = changedFeature
+    }
+
+    await ChangeFeature(
+      id,
+      path,
+      name,
+      category,
+      campaignParams?.config.skin?.defColor ?? 'FFFFFF',
+      campaignParams?.config.skin?.materialName,
+      campaignParams?.config.changeMaterial
+    )
+
+    addReplaceAttribute(category, name)
+  }
+
+  return <CitizensUI 
+  exportData={exportData.current} 
+  featureList={optionList.current} 
+  isReady={isAllReady} 
+  handleReady={() => onAvatarBuilderReady()} 
+  handleExport={() => exportModel()} 
+  handleOptionChange={(id, path, name, category) => changeFeaturefromHud(id, path, name, category)}
+  />
 }
