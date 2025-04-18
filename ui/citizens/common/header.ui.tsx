@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAppSelector } from "../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import ConnectButton from "./connectButton.ui";
 import LogoTheHub from "./SVG/logoTheHubSVG.ui";
 import Image from "next/image";
@@ -7,6 +7,7 @@ import Button from "./button.ui";
 import SocialButtons from "./socialButtons.ui";
 import { CitizensPageLocation } from "../../../enums/citizens/common.enum";
 import { GoToPage } from "../../../utils/router.util";
+import { setEditMode } from "../../../store/citizensMetadataSlice";
 
 interface HeaderUIProps {
   onLogin?: () => void;
@@ -14,6 +15,7 @@ interface HeaderUIProps {
 }
 
 export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
+  const dispatch = useAppDispatch();
   const isLoggedIn = useAppSelector(state => state.citizensAuth.connected);
 
   const [isBurguerOpen, setIsBurguerOpen] = useState(false);
@@ -60,14 +62,9 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
                 handleNavbarClick(CitizensPageLocation.HOME);
               }} />
               <Button label="Wardrobe" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                handleNavbarClick();
-              }}>
-                {/* {isSavingCombination ?
-                  <div className="w-3 h-3 rounded-full border-t-[1px] border-white animate-spin" />
-                  :
-                  <ArrowLinkSVG />
-                } */}
-              </Button>
+                dispatch(setEditMode(true));
+                handleNavbarClick(CitizensPageLocation.HOME);
+              }} />
               <Button label="Backpack" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                 handleNavbarClick(CitizensPageLocation.BACKPACK);
               }} />
