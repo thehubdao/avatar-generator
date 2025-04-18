@@ -1,45 +1,140 @@
+import { useEffect, useState } from "react";
 import AvatarEditor from "../../components/avatar/editor.component";
 import { useAppSelector } from "../../store/hooks";
+import HudUI from "../avatar/hud.ui";
+import { BasicData, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
+import { FeatureInterface } from "../../interfaces/api.interface";
+import { AGChangeCamPosition, AGChangeLookAtPosition } from "../../components/avatar/viewer.component";
+import { FilterList } from "../../utils/common.util";
 
 interface CitizensUIProps {
+	exportData: ExportInterface;
+	featureList: FeatureInterface[];
 	isReady: boolean;
 	handleReady: () => Promise<void>;
+	handleExport: () => Promise<void>;
+	handleOptionChange: (id, path, name, category) => Promise<void>;
 }
 
-export default function CitizensUI({ isReady, handleReady }: CitizensUIProps) {
+export default function CitizensUI({ exportData, featureList, isReady, handleReady, handleExport, handleOptionChange }: CitizensUIProps) {
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
 
+	// Local State
+	const [optionList, setOptionList] = useState<FeatureInterface[]>();
+	const [selectedCategory, setSelectedCategory] = useState<string>('head');
+	const [selectedOption, setSelectedOption] = useState<BasicData>();
+	const [didEditMode, setDidEditMode] = useState<boolean>(true);
+
+	function updateFeatureCamPosition(
+		index: string,
+		posLocation?: Record<string, LookAtVectors>
+	) {
+		const confRef = posLocation ? posLocation[index] : undefined
+		if (confRef == undefined) return
+
+		AGChangeCamPosition(confRef.pos)
+		AGChangeLookAtPosition(confRef.lookAt)
+	}
+
+	function onSelectedOptionChange() {
+		const option = exportData?.attributes.find(
+			(e) => e.id === selectedCategory
+		)
+		console.log('option: ', option);
+		
+		setSelectedOption(option);
+	}
+
+	function onOptionChange(id: string, path: string, name: string) {
+		onSelectedOptionChange();
+		handleOptionChange(id, path, name, selectedCategory);
+	}
+
+	function onCategoryChange(value: string) {
+		setSelectedCategory(value);
+		const filteredList = FilterList(featureList, 'type', value);
+		if (filteredList) setOptionList(filteredList);
+		updateFeatureCamPosition(value, {
+			...campaignParams?.config.featuresCamPos,
+			...campaignParams?.config.accCamPos,
+		})
+	}
+
+	useEffect(() => {
+		const filteredList = FilterList(featureList, 'type', selectedCategory);
+		setOptionList(filteredList);
+	}, [featureList])
+
+	useEffect(() => {		
+		onSelectedOptionChange();
+	}, [isReady, selectedCategory])
+
 	return (
-		<div className="w-full min-h-[calc(100dvh_-_96px)] grid items-center text-white">
+		<div className="w-full h-dvh text-white">
 			{
 				campaignParams && campaignParams !== null && selectedCitizen !== null &&
-				<div className="fixed inset-0 w-full h-dvh flex justify-center items-center">
-					<AvatarEditor
-						avatarBasePath={
-							campaignParams.armature
-						}
-						editMode={false}
-						lights={
-							campaignParams.config.lights
-						}
-						defaultShadow={
-							campaignParams.config
-								.defShadow
-						}
-						defaultCamera={
-							campaignParams.config.defCam
-						}
-						postProcessing={
-							campaignParams.config
-								.postProcessing
-						}
-						onReady={() => {
-							return handleReady();
-						}
-						}
-					/>
-				</div>
+				<>
+					<div className="fixed top-0 right-0 h-dvh flex justify-end">
+						<AvatarEditor
+							avatarBasePath={
+								campaignParams.armature
+							}
+							editMode={didEditMode}
+							lights={
+								campaignParams.config.lights
+							}
+							defaultShadow={
+								campaignParams.config
+									.defShadow
+							}
+							defaultCamera={
+								campaignParams.config.defCam
+							}
+							postProcessing={
+								campaignParams.config
+									.postProcessing
+							}
+							onReady={() => {
+								return handleReady();
+							}
+							}
+						/>
+					</div>
+					{isReady &&
+						<div className="fixed w-full z-50 dark">
+							<HudUI
+								selectedOption={selectedOption}
+								editModeSelected={didEditMode}
+								selectListCategory={
+									(campaignParams.features &&
+										campaignParams.accessories && [
+											...campaignParams.features,
+											...campaignParams.accessories,
+										]) ||
+									[]
+								}
+								optionList={optionList}
+								selectedCategory={selectedCategory}
+								campaignSkinColorConfig={
+									campaignParams?.config.skin ||
+									{}
+								}
+								skinColor={'#FFFFFF'}
+								//TODO: Save combination
+								changeView={() => setDidEditMode(false)}
+								onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
+								onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
+								onSkinColorChange={() => { }}
+								exportModel={() => handleExport()}
+								isCustomCampaignHud
+								onClickBackButton={() => setDidEditMode(false)}
+								isLoading={false}
+							/>
+						</div>
+					}
+				</>
+
 			}
 			{
 				!isReady &&
