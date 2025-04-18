@@ -1,14 +1,17 @@
 import { Contract } from 'ethers';
 import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json';
-import { TokenId } from '../../../interfaces/citizens.interface';
+import { Drop, TokenId } from '../../../interfaces/citizens.interface';
 import { GetEthereumIPFSData, GetEthereumImageUrl } from '../citizens.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json';
 import { CitizenMetadata } from '../../../interfaces/citizens.interface';
 import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
-import { Campaign } from '../../../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign } from '../../../enums/citizens/common.enum';
 import { LUKSO_CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH } from '../../../constants/lukso/contract.constant';
+import { GetCollectionDocs } from '../../firebase.util';
+import WearableContractAbi from '../../../constants/abi/WearableContractABI.json'
+import { CampaignDrops } from '../../../types/citizens.type';
 
 export async function GetTokensOf(contractAddress: string, address: string): Promise<Result<string[]>> {
     try {
@@ -193,4 +196,38 @@ export async function GetCampaignsTokensMetadata(address: string): Promise<Resul
     }
     if (hasErrors && campaignsMetadatas.length === 0) return { success: false, errMessage: 'No tokens metadata were loaded correctly', errCode: CommonErrorCode.FetchError };
     return { success: true, value: campaignsMetadatas };
+}
+
+export async function GetCampaignUserFeatures(address: string, campaign: string): Promise<Result<Drop[]>> { //Get user features from a specific campaign
+    try {
+        const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
+        const features: Drop[] = []
+        for (let i = 0; i < dropsData.length; i++) {
+        const drop = dropsData[i];
+        const { contract_address } = drop
+
+        const contract = new Contract(contract_address, WearableContractAbi, PROVIDER)
+        const tokenBalance = await contract.balanceOf(address)
+        if (Number(tokenBalance) > 0) {
+            drop.balance = Number(tokenBalance) // Assign the balance to the optional field
+            features.push(drop)
+            }
+        }
+        return { success: true, value: features }
+    } catch (error) {
+        return { success: false, errMessage: 'Error getting campaign user features', errCode: CommonErrorCode.FetchError }
+    }
+}
+
+export async function GetUserFeatures(address: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
+    const features: CampaignDrops<LuksoCampaign> = {
+        [LuksoCampaign.Creators]: [],
+        [LuksoCampaign.Citizens]: [],
+    }
+    for (const campaign of Object.keys(LUKSO_CAMPAIGN_WEB3_DATA)) {
+        const campaignUserFeatures = await GetCampaignUserFeatures(address, campaign)
+        if (!campaignUserFeatures.success) continue
+        features[campaign as keyof typeof LUKSO_CAMPAIGN_WEB3_DATA] = campaignUserFeatures.value
+    }
+    return { success: true, value: features }
 }

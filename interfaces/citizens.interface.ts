@@ -83,10 +83,8 @@ export interface CampaignWeb3Data {
 export interface CampaignData extends Record<Campaign, CampaignWeb3Data> {
 }
 
-export interface CampaignDrops extends Record<Campaign, Drop[]> { }
-
 export interface Drop {
-  balance?: number;
+  balance: number;
   contract_address: string;
   index: number;
   type: string;

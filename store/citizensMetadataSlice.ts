@@ -3,6 +3,7 @@ import { CitizenMetadata, FollowUserData } from '../interfaces/citizens.interfac
 import { Campaign } from '../enums/citizens/common.enum';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { LeaderboardEntry } from '../types/leaderboard.type';
+import { AppCampaigns, CampaignDrops } from '../types/citizens.type';
 
 interface CitizensMetadataState {
   citizensMetadata: CitizenMetadata[] | null;
@@ -11,6 +12,7 @@ interface CitizensMetadataState {
   selectedCitizen: CitizenMetadata | null;
   followUserData: FollowUserData | null;
   leaderboardData: LeaderboardEntry[] | null | undefined;
+  userFeatures: CampaignDrops<AppCampaigns> | null;
 }
 
 const initialState: CitizensMetadataState = {
@@ -19,7 +21,8 @@ const initialState: CitizensMetadataState = {
   campaignParameters: null,
   selectedCitizen: null, // Cannot be void string, only null or valid combination string
   followUserData: null,  // Both follower and following count are -1, meaning this blockchain does not support follow user data
-  leaderboardData: null
+  leaderboardData: null,
+  userFeatures: null
 }
 
 export const citizensMetadataSlice = createSlice({
@@ -44,9 +47,12 @@ export const citizensMetadataSlice = createSlice({
     },
     setLeaderboardData: (state, action: PayloadAction<LeaderboardEntry[] | undefined>) => {
       state.leaderboardData = action.payload;
+    },
+    setUserFeatures: (state, action: PayloadAction<CampaignDrops<AppCampaigns>>) => {
+      state.userFeatures = action.payload;
     }
   }
 });
 
-export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setFollowUserData, setLeaderboardData } = citizensMetadataSlice.actions;
+export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setFollowUserData, setLeaderboardData, setUserFeatures } = citizensMetadataSlice.actions;
 export default citizensMetadataSlice.reducer;

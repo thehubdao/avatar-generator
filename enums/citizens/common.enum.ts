@@ -52,3 +52,12 @@ export enum Campaign {
   Creators = "vrm_male",
   Kumi = "kumi",
 }
+
+export enum LuksoCampaign{
+  Citizens = "vrm_female",
+  Creators = "vrm_male",
+}
+
+export enum SolanaCampaign{
+  Kumi = "kumi",
+}
