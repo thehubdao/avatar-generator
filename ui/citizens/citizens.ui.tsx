@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import AvatarEditor from "../../components/avatar/editor.component";
-import { useAppSelector } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import HudUI from "../avatar/hud.ui";
 import { BasicData, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import { FeatureInterface } from "../../interfaces/api.interface";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../../components/avatar/viewer.component";
 import { FilterList } from "../../utils/common.util";
+import { setEditMode } from "../../store/citizensMetadataSlice";
 
 interface CitizensUIProps {
 	exportData: ExportInterface;
@@ -17,14 +18,15 @@ interface CitizensUIProps {
 }
 
 export default function CitizensUI({ exportData, featureList, isReady, handleReady, handleExport, handleOptionChange }: CitizensUIProps) {
+	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
+	const didEditMode = useAppSelector(state => state.citizensMetadata.editMode);
 
 	// Local State
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
 	const [selectedCategory, setSelectedCategory] = useState<string>('head');
 	const [selectedOption, setSelectedOption] = useState<BasicData>();
-	const [didEditMode, setDidEditMode] = useState<boolean>(true);
 
 	function updateFeatureCamPosition(
 		index: string,
@@ -40,9 +42,7 @@ export default function CitizensUI({ exportData, featureList, isReady, handleRea
 	function onSelectedOptionChange() {
 		const option = exportData?.attributes.find(
 			(e) => e.id === selectedCategory
-		)
-		console.log('option: ', option);
-		
+		)		
 		setSelectedOption(option);
 	}
 
@@ -122,13 +122,13 @@ export default function CitizensUI({ exportData, featureList, isReady, handleRea
 								}
 								skinColor={'#FFFFFF'}
 								//TODO: Save combination
-								changeView={() => setDidEditMode(false)}
+								changeView={() => dispatch(setEditMode(false))}
 								onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
 								onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
 								onSkinColorChange={() => { }}
 								exportModel={() => handleExport()}
 								isCustomCampaignHud
-								onClickBackButton={() => setDidEditMode(false)}
+								onClickBackButton={() => dispatch(setEditMode(false))}
 								isLoading={false}
 							/>
 						</div>
