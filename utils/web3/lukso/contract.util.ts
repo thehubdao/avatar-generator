@@ -198,36 +198,62 @@ export async function GetCampaignsTokensMetadata(address: string): Promise<Resul
     return { success: true, value: campaignsMetadatas };
 }
 
-export async function GetCampaignUserFeatures(address: string, campaign: string): Promise<Result<Drop[]>> { //Get user features from a specific campaign
+export async function GetCampaignUserFeatures(address: string, campaign: string): Promise<Result<Drop[]>> {
     try {
-        const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
-        const features: Drop[] = []
-        for (let i = 0; i < dropsData.length; i++) {
-        const drop = dropsData[i];
-        const { contract_address } = drop
+        const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
+        
+        const balancePromises = dropsData.map(drop => {
+            const contract = new Contract(drop.contract_address, WearableContractAbi, PROVIDER);
+            return contract.balanceOf(address).then(balance => ({
+                drop,
+                balance: Number(balance)
+            }));
+        });
 
-        const contract = new Contract(contract_address, WearableContractAbi, PROVIDER)
-        const tokenBalance = await contract.balanceOf(address)
-        if (Number(tokenBalance) > 0) {
-            drop.balance = Number(tokenBalance) // Assign the balance to the optional field
-            features.push(drop)
-            }
-        }
-        return { success: true, value: features }
+        const results = await Promise.all(balancePromises);
+
+        const features = results
+            .filter(({ balance }) => balance > 0)
+            .map(({ drop, balance }) => ({
+                ...drop,
+                balance
+            }));
+
+        return { success: true, value: features };
     } catch (error) {
-        return { success: false, errMessage: 'Error getting campaign user features', errCode: CommonErrorCode.FetchError }
+        return { 
+            success: false, 
+            errMessage: 'Error getting campaign user features', 
+            errCode: CommonErrorCode.FetchError 
+        };
     }
 }
 
 export async function GetUserFeatures(address: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
-    const features: CampaignDrops<LuksoCampaign> = {
-        [LuksoCampaign.Creators]: [],
-        [LuksoCampaign.Citizens]: [],
+    try {
+        const campaigns = Object.keys(LUKSO_CAMPAIGN_WEB3_DATA);
+        const campaignPromises = campaigns.map(campaign => 
+            GetCampaignUserFeatures(address, campaign)
+        );
+
+        const results = await Promise.all(campaignPromises);
+        
+        const features = campaigns.reduce((acc, campaign, index) => {
+            const result = results[index];
+            if (result.success) {
+                acc[campaign as keyof typeof LUKSO_CAMPAIGN_WEB3_DATA] = result.value;
+            } else {
+                acc[campaign as keyof typeof LUKSO_CAMPAIGN_WEB3_DATA] = [];
+            }
+            return acc;
+        }, {} as CampaignDrops<LuksoCampaign>);
+
+        return { success: true, value: features };
+    } catch (error) {
+        return { 
+            success: false, 
+            errMessage: 'Error getting user features', 
+            errCode: CommonErrorCode.FetchError 
+        };
     }
-    for (const campaign of Object.keys(LUKSO_CAMPAIGN_WEB3_DATA)) {
-        const campaignUserFeatures = await GetCampaignUserFeatures(address, campaign)
-        if (!campaignUserFeatures.success) continue
-        features[campaign as keyof typeof LUKSO_CAMPAIGN_WEB3_DATA] = campaignUserFeatures.value
-    }
-    return { success: true, value: features }
 }
