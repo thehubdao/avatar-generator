@@ -7,6 +7,7 @@ TODO:
     ☐ Add ImageUrl and tokenId to Kumi minting metadata
     ☐ (vrm_male) Check bad skin color asignation in head
     ☐ Review and adjust z-index layout in whole citizens
+    ☐ Review exportModel function in citizens UI
     ✔ Back camera to initial position when edit mode is closed @done(25-04-22 11:45)
 
 COMPONENTS TO REVIEW:
