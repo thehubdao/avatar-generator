@@ -39,16 +39,23 @@ export default function CitizensUI({ exportData, featureList, isReady, handleRea
 		AGChangeLookAtPosition(confRef.lookAt)
 	}
 
-	function onSelectedOptionChange() {
-		const option = exportData?.attributes.find(
-			(e) => e.id === selectedCategory
-		)		
-		setSelectedOption(option);
+	function onSelectedOptionChange(opt?: BasicData) {
+		if (opt) {
+			setSelectedOption(opt);
+		} else {
+			const option = exportData?.attributes.find(
+				(e) => e.id === selectedCategory
+			)
+			setSelectedOption(option);
+		}
 	}
 
 	function onOptionChange(id: string, path: string, name: string) {
-		onSelectedOptionChange();
 		handleOptionChange(id, path, name, selectedCategory);
+		onSelectedOptionChange({
+			id: id,
+			val: name
+		});
 	}
 
 	function onCategoryChange(value: string) {
@@ -66,9 +73,21 @@ export default function CitizensUI({ exportData, featureList, isReady, handleRea
 		setOptionList(filteredList);
 	}, [featureList])
 
-	useEffect(() => {		
+	useEffect(() => {
 		onSelectedOptionChange();
 	}, [isReady, selectedCategory])
+
+	useEffect(() => {
+		if (!didEditMode) {
+			AGChangeCamPosition(campaignParams?.config.defCam?.pos)
+			AGChangeLookAtPosition(campaignParams?.config.defCam?.lookAt)
+		} else {
+			updateFeatureCamPosition(selectedCategory, {
+				...campaignParams?.config.featuresCamPos,
+				...campaignParams?.config.accCamPos,
+			})
+		}
+	}, [didEditMode])
 
 	return (
 		<div className="w-full h-dvh text-white">
