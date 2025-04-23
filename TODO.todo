@@ -5,6 +5,10 @@ TODO:
     ✔ Add error handling to GetEthereumTokenMetadata and GetTokensMetadata at lukso/contract.util.ts @done(25-04-01 13:40)
     ☐ Check double setCampaignParameters in useBlockchainWallet hook when change pages or change selectedCampaign
     ☐ Add ImageUrl and tokenId to Kumi minting metadata
+    ☐ (vrm_male) Check bad skin color asignation in head
+    ☐ Review and adjust z-index layout in whole citizens
+    ☐ Review exportModel function in citizens UI
+    ✔ Back camera to initial position when edit mode is closed @done(25-04-22 11:45)
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
