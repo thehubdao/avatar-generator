@@ -1,4 +1,4 @@
-import { BrowserProvider, ethers } from "ethers";
+import { BrowserProvider, ethers, JsonRpcProvider } from "ethers";
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
 import { LeaderboardEntry } from "../../types/leaderboard.type";
@@ -147,7 +147,7 @@ export async function UnfollowUser(addressToUnfollow: string, provider: BrowserP
   }
 }
 
-export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], provider: BrowserProvider, walletAddress: string): Promise<Result<Record<string, boolean>>> {
+export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], provider: JsonRpcProvider, walletAddress: string): Promise<Result<Record<string, boolean>>> {
   try {
     const signer = await provider.getSigner();
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);

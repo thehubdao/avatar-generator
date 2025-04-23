@@ -2,7 +2,7 @@ import { useLogin, useLogout, usePrivy } from '@privy-io/react-auth';
 import { useEffect } from 'react';
 import { Blockchain } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
-import { GetCampaignsTokensMetadata , GetUserFeatures } from '../utils/web3/lukso/contract.util';
+import { GetCampaignsTokensMetadata , GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
 import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
@@ -69,8 +69,12 @@ export function useBlockchainWallet() {
   }
 
   const fetchEthereumLeaderboardData = async () => {
-    // TODO: Get the leaderboard data from utility and dispatch it to the store
-    dispatch(setLeaderboardData(undefined));
+    const leaderboardData = await GetFullLeaderboardData(userAddress as string);
+    if (leaderboardData.success) {
+      dispatch(setLeaderboardData(leaderboardData.value));
+    } else {
+      LogError(Module.Citizens, leaderboardData.errMessage, leaderboardData.errCode);
+    }
   }
 
   const fetchCitizensMetadata = async (walletAddress: string) => {

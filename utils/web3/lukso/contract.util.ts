@@ -1,7 +1,7 @@
 import { Contract } from 'ethers';
 import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json';
 import { Drop, TokenId } from '../../../interfaces/citizens.interface';
-import { GetEthereumIPFSData, GetEthereumImageUrl } from '../citizens.util';
+import { GetEthereumIPFSData, GetEthereumImageUrl, GetFollowStatuses, GetUniversalProfileData } from '../citizens.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json';
 import { CitizenMetadata } from '../../../interfaces/citizens.interface';
 import { Result } from '../../../types/common.type';
@@ -9,9 +9,10 @@ import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { Campaign, LuksoCampaign } from '../../../enums/citizens/common.enum';
 import { LUKSO_CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH } from '../../../constants/lukso/contract.constant';
-import { GetCollectionDocs } from '../../firebase.util';
+import { GetCollectionDocs, GetLeaderboardData } from '../../firebase.util';
 import WearableContractAbi from '../../../constants/abi/WearableContractABI.json'
 import { CampaignDrops } from '../../../types/citizens.type';
+import { LeaderboardEntry } from '../../../types/leaderboard.type';
 
 export async function GetTokensOf(contractAddress: string, address: string): Promise<Result<string[]>> {
     try {
@@ -256,4 +257,26 @@ export async function GetUserFeatures(address: string): Promise<Result<CampaignD
             errCode: CommonErrorCode.FetchError 
         };
     }
+}
+
+export async function GetFullLeaderboardData(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
+    const leaderboardData = await GetLeaderboardData();
+    const leaderboardWithProfileData = await Promise.all(leaderboardData.map(async (entry: LeaderboardEntry) => {
+        const profileData = await GetUniversalProfileData(entry.address);
+        if (!profileData.success) return entry; // If the profile data is not found, return the original entry
+        return {
+          ...entry,
+          name: profileData.value.name,
+          profileImage: profileData.value.profileImage,
+          isFollowing: false
+        };
+      }));
+
+      if(!leaderboardWithProfileData) return { success: false, errMessage: 'Error getting leaderboard with profile data', errCode: CommonErrorCode.FetchError };
+
+      const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, PROVIDER, walletAddress as string);
+      leaderboardWithProfileData.forEach(entry => {
+        entry.isFollowing = followStatuses[entry.address] || false;
+      });
+    return { success: true, value: leaderboardWithProfileData };
 }
