@@ -1,8 +1,8 @@
-import { useLogin, useLogout, usePrivy } from '@privy-io/react-auth';
+import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
 import { useEffect } from 'react';
 import { Blockchain } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
-import { GetCampaignsTokensMetadata , GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
+import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
 import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
@@ -17,6 +17,7 @@ import { useAppSelector } from '../store/hooks';
 import { GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
+import { ethers } from 'ethers';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -30,6 +31,8 @@ export function useBlockchainWallet() {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { ready, user, authenticated } = usePrivy();
+  const { wallets: ethereumWallets } = useWallets();
+  const { wallets: solanaWallets } = useSolanaWallets();
   const { login } = useLogin();
   const { logout } = useLogout();
 
@@ -115,7 +118,7 @@ export function useBlockchainWallet() {
         LogError(Module.Citizens, followerCountResult.errMessage, followerCountResult.errCode);
       }
 
-      if(ethereumUserFeatures.success) {
+      if (ethereumUserFeatures.success) {
         const ethereumFeatures = ethereumUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the ethereum features to the AppCampaigns type, this depends on the wearables got for current campaign
         dispatch(setUserFeatures(ethereumFeatures));
       } else {
@@ -164,7 +167,17 @@ export function useBlockchainWallet() {
 
   useEffect(() => {
     if (ready && authenticated) {
-      if (user?.wallet) dispatch(connect({ address: user?.wallet?.address, blockchainType: user?.wallet?.chainType as Blockchain })); // Set the user as logged in
+      if (user?.wallet) {
+        const chainType = user?.wallet?.chainType as Blockchain;
+        if (chainType === Blockchain.Ethereum) {
+          ethereumWallets[0].getEthereumProvider().then((provider) => {
+            const ethersProvider = new ethers.BrowserProvider(provider);
+            dispatch(connect({ address: user?.wallet?.address as string, blockchainType: chainType, provider: ethersProvider }));
+          });
+        } else if (chainType === Blockchain.Solana) {
+          dispatch(connect({ address: user?.wallet?.address, blockchainType: chainType, provider: null }));
+        }
+      } // Set the user as logged in
     }
     if (ready && !authenticated) {
       dispatch(disconnect());
