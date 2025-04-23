@@ -47,7 +47,7 @@ export function GetEthereumImageUrl(metadata: CitizenMetadata): Result<string> {
     return { success: true, value: imageUrl };
   } catch (error) {
     const err = error as Error;
-    LogError(Module.SolanaContractUtil, 'Error on getting image url', err.stack);
+    LogError(Module.SolanaContractUtil, 'Error on getting Ethereum image url', err.stack);
     return { success: false, errMessage: err.message, errCode: ''};
   }
 }
@@ -60,7 +60,7 @@ export function GetSolanaImageUrl(metadata: CitizenMetadata): Result<string> {
     return { success: true, value: imageUrl };
   } catch (error) {
     const err = error as Error;
-    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    LogError(Module.SolanaContractUtil, 'Error on getting Solana image url', err.stack);
     return { success: false, errMessage: err.message, errCode: '' };
   }
 }
@@ -76,7 +76,7 @@ export async function GetFollowerCounts(address: string): Promise<Result<FollowU
     return { success: true, value: { followerCount: Number(followerCount), followingCount: Number(followingCount) } };
   } catch (error) {
     const err = error as Error;
-    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    LogError(Module.SolanaContractUtil, 'Error on getting follower counts', err.stack);
     return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
@@ -110,7 +110,7 @@ export async function GetUniversalProfileData(address: string): Promise<Result<{
 
   } catch (error) {
     const err = error as Error;
-    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    LogError(Module.SolanaContractUtil, 'Error on getting universal profile data', err.stack);
     return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
@@ -126,7 +126,7 @@ export async function FollowUser(addressToFollow: string, provider: BrowserProvi
     return { success: true, value: true };
   } catch (error) {
     const err = error as Error;
-    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    LogError(Module.SolanaContractUtil, 'Error on following user', err.stack);
     return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
@@ -142,7 +142,7 @@ export async function UnfollowUser(addressToUnfollow: string, provider: BrowserP
     return { success: true, value: true };
   } catch (error) {
     const err = error as Error;
-    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    LogError(Module.SolanaContractUtil, 'Error on unfollowing user', err.stack);
     return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
@@ -169,7 +169,7 @@ export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], pro
     return { success: true, value: statusObject };
   } catch (error) {
     const err = error as Error;
-    LogError(Module.SolanaContractUtil, err.message, err.stack);
+    LogError(Module.SolanaContractUtil, 'Error on getting follow statuses', err.stack);
     return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
