@@ -277,6 +277,7 @@ export default function CitizensComponent() {
   }
 
   return <CitizensUI 
+  singleInitData={singleInitData.current}
   exportData={exportData.current} 
   featureList={optionList.current} 
   isReady={isAllReady} 

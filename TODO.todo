@@ -3,12 +3,13 @@ TODO:
     ✔ Add conversion util to convert from Blockchain interface to Privy login walletChainType enum @done(25-03-31 20:14)
     ✔ Add selected campaign + combination to app state @done(25-03-31 14:08)
     ✔ Add error handling to GetEthereumTokenMetadata and GetTokensMetadata at lukso/contract.util.ts @done(25-04-01 13:40)
+    ✔ Back camera to initial position when edit mode is closed @done(25-04-22 11:45)
     ☐ Check double setCampaignParameters in useBlockchainWallet hook when change pages or change selectedCampaign
     ☐ Add ImageUrl and tokenId to Kumi minting metadata
     ☐ (vrm_male) Check bad skin color asignation in head
     ☐ Review and adjust z-index layout in whole citizens
     ☐ Review exportModel function in citizens UI
-    ✔ Back camera to initial position when edit mode is closed @done(25-04-22 11:45)
+    ☐ Make loading UI with message prop
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
