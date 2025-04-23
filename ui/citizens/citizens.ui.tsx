@@ -3,12 +3,15 @@ import AvatarEditor from "../../components/avatar/editor.component";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import HudUI from "../avatar/hud.ui";
 import { BasicData, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
-import { FeatureInterface } from "../../interfaces/api.interface";
+import { FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../../components/avatar/viewer.component";
 import { FilterList } from "../../utils/common.util";
 import { setEditMode } from "../../store/citizensMetadataSlice";
+import DetailsUI from "./common/details.ui";
+import SnackbarProvider from "./snackbar/snackbar.provider";
 
 interface CitizensUIProps {
+	singleInitData?: SingleInterface;
 	exportData: ExportInterface;
 	featureList: FeatureInterface[];
 	isReady: boolean;
@@ -17,7 +20,7 @@ interface CitizensUIProps {
 	handleOptionChange: (id, path, name, category) => Promise<void>;
 }
 
-export default function CitizensUI({ exportData, featureList, isReady, handleReady, handleExport, handleOptionChange }: CitizensUIProps) {
+export default function CitizensUI({ singleInitData, exportData, featureList, isReady, handleReady, handleExport, handleOptionChange }: CitizensUIProps) {
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
@@ -90,77 +93,85 @@ export default function CitizensUI({ exportData, featureList, isReady, handleRea
 	}, [didEditMode])
 
 	return (
-		<div className="w-full h-dvh text-white">
-			{
-				campaignParams && campaignParams !== null && selectedCitizen !== null &&
-				<>
-					<div className="fixed top-0 right-0 h-dvh flex justify-end">
-						<AvatarEditor
-							avatarBasePath={
-								campaignParams.armature
-							}
-							editMode={didEditMode}
-							lights={
-								campaignParams.config.lights
-							}
-							defaultShadow={
-								campaignParams.config
-									.defShadow
-							}
-							defaultCamera={
-								campaignParams.config.defCam
-							}
-							postProcessing={
-								campaignParams.config
-									.postProcessing
-							}
-							onReady={() => {
-								return handleReady();
-							}
-							}
-						/>
-					</div>
-					{isReady &&
-						<div className="fixed w-full z-50 dark">
-							<HudUI
-								selectedOption={selectedOption}
-								editModeSelected={didEditMode}
-								selectListCategory={
-									(campaignParams.features &&
-										campaignParams.accessories && [
-											...campaignParams.features,
-											...campaignParams.accessories,
-										]) ||
-									[]
+		<SnackbarProvider>
+			<div className="w-full h-dvh text-white">
+				{
+					campaignParams && campaignParams !== null && selectedCitizen !== null &&
+					<>
+						{/* AVATAR EDITOR */}
+						<div className="fixed top-0 right-0 h-dvh flex justify-end">
+							<AvatarEditor
+								avatarBasePath={
+									campaignParams.armature
 								}
-								optionList={optionList}
-								selectedCategory={selectedCategory}
-								campaignSkinColorConfig={
-									campaignParams?.config.skin ||
-									{}
+								editMode={didEditMode}
+								lights={
+									campaignParams.config.lights
 								}
-								skinColor={'#FFFFFF'}
-								//TODO: Save combination
-								changeView={() => dispatch(setEditMode(false))}
-								onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
-								onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
-								onSkinColorChange={() => { }}
-								exportModel={() => handleExport()}
-								isCustomCampaignHud
-								onClickBackButton={() => dispatch(setEditMode(false))}
-								isLoading={false}
+								defaultShadow={
+									campaignParams.config
+										.defShadow
+								}
+								defaultCamera={
+									campaignParams.config.defCam
+								}
+								postProcessing={
+									campaignParams.config
+										.postProcessing
+								}
+								onReady={() => {
+									return handleReady();
+								}
+								}
 							/>
 						</div>
-					}
-				</>
+						{/* CITIZEN DETAILS */}
+						{singleInitData && singleInitData.features.length > 0 &&
+							<DetailsUI data={singleInitData.features} handleDownload={() => handleExport()} imgUrl={selectedCitizen.imageUrl} loading={false} />
+						}
+						{/* EDIT MODE HUD */}
+						{isReady &&
+							<div className="fixed w-full z-50 dark">
+								<HudUI
+									selectedOption={selectedOption}
+									editModeSelected={didEditMode}
+									selectListCategory={
+										(campaignParams.features &&
+											campaignParams.accessories && [
+												...campaignParams.features,
+												...campaignParams.accessories,
+											]) ||
+										[]
+									}
+									optionList={optionList}
+									selectedCategory={selectedCategory}
+									campaignSkinColorConfig={
+										campaignParams?.config.skin ||
+										{}
+									}
+									skinColor={'#FFFFFF'}
+									//TODO: Save combination
+									changeView={() => dispatch(setEditMode(false))}
+									onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
+									onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
+									onSkinColorChange={() => { }}
+									exportModel={() => handleExport()}
+									isCustomCampaignHud
+									onClickBackButton={() => dispatch(setEditMode(false))}
+									isLoading={false}
+								/>
+							</div>
+						}
+					</>
 
-			}
-			{
-				!isReady &&
-				<div className="fixed inset-0 w-full h-dvh flex justify-center items-center bg-gradient-to-b from-[#151515] to-[#0C0C0C]">
-					<h1 className="text-white text-2xl">Loading Environment...</h1>
-				</div>
-			}
-		</div>
+				}
+				{
+					!isReady &&
+					<div className="fixed inset-0 w-full h-dvh flex justify-center items-center bg-gradient-to-b from-[#151515] to-[#0C0C0C]">
+						<h1 className="text-white text-2xl">Loading Environment...</h1>
+					</div>
+				}
+			</div>
+		</SnackbarProvider>
 	)
 }
