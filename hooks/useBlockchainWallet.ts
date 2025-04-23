@@ -9,7 +9,7 @@ import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
-import { GetFollowerCounts } from '../utils/web3/citizens.util';
+import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
 import { Campaign, LuksoCampaign, SolanaCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect } from '../store/CitizensAuthSlice';
@@ -31,8 +31,6 @@ export function useBlockchainWallet() {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { ready, user, authenticated } = usePrivy();
-  const { wallets: ethereumWallets } = useWallets();
-  const { wallets: solanaWallets } = useSolanaWallets();
   const { login } = useLogin();
   const { logout } = useLogout();
 
@@ -168,15 +166,28 @@ export function useBlockchainWallet() {
   useEffect(() => {
     if (ready && authenticated) {
       if (user?.wallet) {
-        const chainType = user?.wallet?.chainType as Blockchain;
-        if (chainType === Blockchain.Ethereum) {
-          ethereumWallets[0].getEthereumProvider().then((provider) => {
-            const ethersProvider = new ethers.BrowserProvider(provider);
-            dispatch(connect({ address: user?.wallet?.address as string, blockchainType: chainType, provider: ethersProvider }));
-          });
-        } else if (chainType === Blockchain.Solana) {
-          dispatch(connect({ address: user?.wallet?.address, blockchainType: chainType, provider: null }));
+        const connectPromise = async () => {
+          const chainType = user?.wallet?.chainType as Blockchain;
+
+          if (user?.wallet?.address === undefined) {
+            LogError(Module.Citizens, "User address is undefined, can't connect to blockchain");
+            return; // If the user address is undefined, log the error and return
+          }
+
+          if (chainType === Blockchain.Ethereum) {
+            const walletName = await GetUniversalProfileData(user?.wallet?.address);
+
+            if (walletName.success) {
+              dispatch(connect({ address: user?.wallet?.address, walletName: walletName.value.name, blockchainType: chainType }));
+            } else {
+              dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
+            }
+            
+          } else if (chainType === Blockchain.Solana) {
+            dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
+          }
         }
+        connectPromise();
       } // Set the user as logged in
     }
     if (ready && !authenticated) {
