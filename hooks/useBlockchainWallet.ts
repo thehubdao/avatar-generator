@@ -168,7 +168,7 @@ export function useBlockchainWallet() {
   }
 
   useEffect(() => {
-    if (ready && authenticated) {
+    if (ready && authenticated && ethereumWallets.length > 0) {
       if (user?.wallet) {
         const connectPromise = async () => {
           const chainType = user?.wallet?.chainType as Blockchain;
@@ -200,7 +200,7 @@ export function useBlockchainWallet() {
     if (ready && !authenticated) {
       dispatch(disconnect());
     }
-  }, [ready, authenticated]);
+  }, [ready, authenticated, ethereumWallets]);
 
   useEffect(() => {
     if (isConnected === true) {
