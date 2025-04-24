@@ -1,9 +1,9 @@
 import CitizenLeaderBoardUI from "../../../ui/citizens/leaderboard/leaderboard.ui";
 import { FollowUser, UnfollowUser } from "../../../utils/web3/citizens.util";
-import { useBlockchainProvider } from "../../../hooks/useBlockchainProvider";
+import { useBlockchainProvider } from "../../../contexts/BlockchainContext";
 
 export default function CitizenLeaderBoardComponent() {
-  const provider = useBlockchainProvider();
+  const { provider } = useBlockchainProvider();
 
   const handleFollowUser = async (address: string) => {
     if (provider) {
