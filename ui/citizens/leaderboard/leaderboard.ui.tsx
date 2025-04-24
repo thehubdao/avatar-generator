@@ -1,9 +1,13 @@
 import Image from "next/image";
 import { useAppSelector } from "../../../store/hooks";
-// import FollowButton from "../common/followButton.ui";
+import FollowButton from "../common/followButton.ui";
 
+interface CitizenLeaderBoardUIProps {
+  onFollowUser: (address: string) => Promise<boolean>;
+  onUnfollowUser: (address: string) => Promise<boolean>;
+}
 
-export default function CitizenLeaderBoardUI() {
+export default function CitizenLeaderBoardUI({onFollowUser, onUnfollowUser}: CitizenLeaderBoardUIProps) {
   const leaderboardData = useAppSelector(state => state.citizensMetadata.leaderboardData);
   return (
     <div className="relative w-full min-h-screen py-32 px-6 2xl:px-0">
@@ -60,7 +64,7 @@ export default function CitizenLeaderBoardUI() {
                           </div>
                         </div>
                         <div className='grow hidden lg:flex justify-end'>
-                          {/* <FollowButton user={user} onFollowUser={(address) => onFollowUser(address)} onUnfollowUser={(address) => onUnfollowUser(address)} /> */}
+                          <FollowButton user={user} onFollowUser={(address) => onFollowUser(address)} onUnfollowUser={(address) => onUnfollowUser(address)} />
                         </div>
                       </td>
                       <td className="text-sm sm:text-base text-center">{user.level}</td>
@@ -69,7 +73,7 @@ export default function CitizenLeaderBoardUI() {
                       <td className="text-sm sm:text-base text-center lg:pr-5">{user.xp}</td>
                       <td className='lg:hidden'>
                         <div className='w-full flex justify-center'>
-                          {/* <FollowButton user={user} onFollowUser={(address) => onFollowUser(address)} onUnfollowUser={(address) => onUnfollowUser(address)} /> */}
+                          <FollowButton user={user} onFollowUser={(address) => onFollowUser(address)} onUnfollowUser={(address) => onUnfollowUser(address)} />
                         </div>
                       </td>
                     </tr>
