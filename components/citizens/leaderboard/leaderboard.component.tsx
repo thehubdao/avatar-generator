@@ -11,6 +11,9 @@ export default function CitizenLeaderBoardComponent() {
       if (result.success) {
         // TODO: Update the leaderboard
       }
+      return result.success;
+    } else {
+      return false;
     }
   };
 
@@ -20,8 +23,11 @@ export default function CitizenLeaderBoardComponent() {
       if (result.success) {
         // TODO: Update the leaderboard
       }
+      return result.success;
+    } else {
+      return false;
     }
   };
 
-  return <CitizenLeaderBoardUI />;
+  return <CitizenLeaderBoardUI onFollowUser={(address) => handleFollowUser(address)} onUnfollowUser={(address) => handleUnfollowUser(address)} />;
 }
