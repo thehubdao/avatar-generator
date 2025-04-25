@@ -3,14 +3,14 @@ import { useBlockchainWallet } from "../hooks/useBlockchainWallet";
 import { useAppSelector } from "../store/hooks";
 import React from "react";
 import CitizensLoginComponent from "../components/citizens/login/login.component";
+import { BlockchainProvider } from "../contexts/BlockchainContext";
 
 export default function CitizensLayout({
   children, // will be a page or nested layout
 }: {
   children: React.ReactElement
 }) {
-  const { HandleLogin, HandleLogout } = useBlockchainWallet();
-
+  const { HandleLogin, HandleLogout, provider } = useBlockchainWallet();
   const isConnected = useAppSelector(state => state.citizensAuth.connected);
 
   return (
@@ -27,7 +27,9 @@ export default function CitizensLayout({
             <main className="w-full min-h-dvh">
               {
                 isConnected === true ?
-                children
+                <BlockchainProvider provider={provider}>
+                  {children}
+                </BlockchainProvider>
                 :
                 <CitizensLoginComponent handleLogin={HandleLogin} />
               }

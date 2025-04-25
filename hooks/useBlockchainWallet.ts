@@ -1,5 +1,5 @@
 import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Blockchain } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
@@ -17,7 +17,7 @@ import { useAppSelector } from '../store/hooks';
 import { GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
-import { ethers } from 'ethers';
+import { BrowserProvider } from 'ethers';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -28,6 +28,9 @@ export function useBlockchainWallet() {
 
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
+
+  const { wallets: ethereumWallets, ready: ethereumReady } = useWallets();
+  const [provider, setProvider] = useState<BrowserProvider | null>(null);
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { ready, user, authenticated } = usePrivy();
@@ -174,16 +177,19 @@ export function useBlockchainWallet() {
             return; // If the user address is undefined, log the error and return
           }
 
-          if (chainType === Blockchain.Ethereum) {
-            const walletName = await GetUniversalProfileData(user?.wallet?.address);
+          if (chainType === Blockchain.Ethereum && ethereumReady) {
+            const provider = await ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
+            const walletName = await GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
+            setProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
 
             if (walletName.success) {
               dispatch(connect({ address: user?.wallet?.address, walletName: walletName.value.name, blockchainType: chainType }));
             } else {
               dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
             }
-            
+
           } else if (chainType === Blockchain.Solana) {
+            //TODO: Set provider to solana provider
             dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
           }
         }
@@ -193,7 +199,7 @@ export function useBlockchainWallet() {
     if (ready && !authenticated) {
       dispatch(disconnect());
     }
-  }, [ready, authenticated]);
+  }, [ready, authenticated, ethereumReady]);
 
   useEffect(() => {
     if (isConnected === true) {
@@ -219,6 +225,7 @@ export function useBlockchainWallet() {
 
   return {
     HandleLogin,
-    HandleLogout
+    HandleLogout,
+    provider
   };
 } 
