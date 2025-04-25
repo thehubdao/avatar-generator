@@ -18,7 +18,6 @@ import { GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
-import { ethers } from 'ethers';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
