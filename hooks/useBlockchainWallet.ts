@@ -30,7 +30,7 @@ export function useBlockchainWallet() {
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
-  const { wallets: ethereumWallets } = useWallets();
+  const { wallets: ethereumWallets, ready: ethereumReady } = useWallets();
   const [provider, setProvider] = useState<BrowserProvider | null>(null);
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -168,7 +168,7 @@ export function useBlockchainWallet() {
   }
 
   useEffect(() => {
-    if (ready && authenticated && ethereumWallets.length > 0) {
+    if (ready && authenticated) {
       if (user?.wallet) {
         const connectPromise = async () => {
           const chainType = user?.wallet?.chainType as Blockchain;
@@ -178,7 +178,7 @@ export function useBlockchainWallet() {
             return; // If the user address is undefined, log the error and return
           }
 
-          if (chainType === Blockchain.Ethereum) {
+          if (chainType === Blockchain.Ethereum && ethereumReady) {
             const provider = await ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
             const walletName = await GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
             setProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
@@ -200,7 +200,7 @@ export function useBlockchainWallet() {
     if (ready && !authenticated) {
       dispatch(disconnect());
     }
-  }, [ready, authenticated, ethereumWallets]);
+  }, [ready, authenticated, ethereumReady]);
 
   useEffect(() => {
     if (isConnected === true) {
