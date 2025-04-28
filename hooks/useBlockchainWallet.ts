@@ -18,6 +18,7 @@ import { GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
+import { useAuthUi } from '@futureverse/auth-ui';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -36,6 +37,8 @@ export function useBlockchainWallet() {
   const { ready, user, authenticated } = usePrivy();
   const { login } = useLogin();
   const { logout } = useLogout();
+  const { openLogin } = useAuthUi();
+
 
   const getCampaignParams = async (campaign: Campaign) => {
     const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
@@ -158,7 +161,11 @@ export function useBlockchainWallet() {
 
   /* Tanto el blockchain como la campaña se seleccionan manualmente en cada boton que llama esta función */
   const HandleLogin = async (blockchain: Blockchain | undefined, campaign: Campaign | undefined) => {
-    login({ walletChainType: BlockchainToWalletChainType(blockchain) });
+    if (blockchain === Blockchain.Root) {
+      openLogin();
+    } else {
+      login({ walletChainType: BlockchainToWalletChainType(blockchain) });
+    }
     dispatch(setSelectedCampaign(campaign ?? null));
   }
 
