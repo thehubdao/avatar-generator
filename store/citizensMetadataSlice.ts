@@ -20,7 +20,7 @@ const initialState: CitizensMetadataState = {
   citizensMetadata: null,
   selectedCampaign: null,
   campaignParameters: null,
-  selectedCitizen: null, // Cannot be void string, only null or valid combination string
+  selectedCitizen: null,
   followUserData: null,  // Both follower and following count are -1, meaning this blockchain does not support follow user data
   leaderboardData: null,
   userFeatures: null,
