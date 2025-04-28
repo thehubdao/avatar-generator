@@ -4,14 +4,18 @@ import { PinataSDK } from "pinata-web3";
 import { tempCampaignSwitch } from "./web3/lukso/contract.util[deprecated]";
 import { UploadFile } from "./firebase.util";
 import { Campaign } from "../enums/citizens/common.enum";
+import { Result } from "../types/common.type";
+import { CommonErrorCode, Module } from "../enums/common.enum";
+import { LogError } from "./common.util";
 
 
 const pinata = new PinataSDK({ pinataGateway: 'lukso.mypinata.cloud', pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT })
 
 
-export const uploadMetadata = async (tokenMetadata: CitizenMetadata, metadataThumbnail: Blob | undefined, combination: string, campaign: Campaign) => {
-    if (metadataThumbnail) {
-        const imageFile = new File([metadataThumbnail], `${combination}.png`)
+export async function uploadMetadata(tokenMetadata: CitizenMetadata, metadataThumbnail: Blob | undefined, combination: string, campaign: Campaign): Promise<Result<{ uri: string, imageUrl: string }>> {
+    try{
+        if (metadataThumbnail) {
+            const imageFile = new File([metadataThumbnail], `${combination}.png`)
 
         // Add type check to handle 'kumi' campaign case
         const campaignPath = campaign === 'kumi' ? 'kumi' : tempCampaignSwitch[campaign]
@@ -32,5 +36,11 @@ export const uploadMetadata = async (tokenMetadata: CitizenMetadata, metadataThu
     },]]
 
     const metadata = await pinata.upload.json({ 'LSP4Metadata': tokenMetadata }, {cidVersion: 1, metadata:{name: `z-${campaign}-${tokenMetadata.tokenId}-metadata`}})
-    return { uri: metadata.IpfsHash, imageUrl }
+    
+    return { success: true, value: { uri: metadata.IpfsHash, imageUrl } }
+}catch(error){
+    const err = error as Error
+    void LogError(Module.Citizens, 'Error on uploading metadata', error)
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.InternalError }
+}
 }
