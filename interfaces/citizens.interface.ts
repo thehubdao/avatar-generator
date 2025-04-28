@@ -46,14 +46,14 @@ export interface CitizenMetadataImage {
 export interface CitizenMetadata {
   fallbackImageUrl: string;
   imageUrl: string;
-  combination: string;
-  baseCombination: string;
+  combination: string; // This is the current combination of the citizen, features that are available if the user has balance of them
+  baseCombination: string; // This is the base combination of the citizen, features that are always available and linked to the citizen
   campaign: Campaign;
   tokenId: string;
   name: string;
   description: string;
   images: Array<Array<CitizenMetadataImage>>;
-  attributes?: Array<{ key: string, value: string, type: string }>;
+  attributes: Array<{ key: string, value: string, type: string }>;
   links?: [];
   assets?: [];
   body: {
