@@ -363,6 +363,7 @@ export default function CitizensComponent() {
 
     dispatch(setCitizensMetadata(updatedCitizensMetadata));
     dispatch(setSelectedCitizen(newMetadata));
+    // TODO: Handle success case at UI
   }
 
   async function saveKumiCombination() {
