@@ -301,31 +301,31 @@ export async function SetTokenMetadata(campaign: Campaign, tokenId: string, meta
                 url: metadataUrl,
             },
         },
-    ])
-    const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [ToHex64(Number(tokenId)), metadataDataKey, metadataDataValue.values[0]])
+    ]);
+    const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [ToHex64(Number(tokenId)), metadataDataKey, metadataDataValue.values[0]]);
     const tx = await (UNIVERSAL_PROFILE_CONTRACT.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         targetContractAddress, // address zero
         0, // amount to the fund the contract with when deploying
         setMetadataDataEncodedFunction
-    )
-    await tx.wait()
-    return { success: true, value: undefined }
+    );
+    await tx.wait();
+    return { success: true, value: undefined };
 }
 
 export async function BurnDrop(from: string, campaign: string, drop: BodyPart): Promise<Result<void>> {
-    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
-    if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError }
+    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
+    if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError };
 
-    const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name })
-    if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError }
+    const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name });
+    if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError };
 
-    const dropContract = new Contract(dropPair.contract_address, WearableContractAbi, PROVIDER)
-    const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1])
+    const dropContract = new Contract(dropPair.contract_address, WearableContractAbi, PROVIDER);
+    const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1]);
     const tx = await (UNIVERSAL_PROFILE_CONTRACT.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         dropPair.contract_address,
         0, // amount to the fund the contract with when deploying
         burnEncondedFunction
-    )
-    await tx.wait()
-    return { success: true, value: undefined }
+    );
+    await tx.wait();
+    return { success: true, value: undefined };
 }
