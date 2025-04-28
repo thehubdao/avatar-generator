@@ -51,6 +51,7 @@ interface HudUIProps {
   exportAllow?: ModelExtension[];
   onClickBackButton: () => void
   isLoading: boolean
+  handleSaveCombination: () => Promise<void>
 }
 
 export default function HudUI({
@@ -69,7 +70,8 @@ export default function HudUI({
   isCustomCampaignHud,
   exportAllow,
   onClickBackButton,
-  isLoading
+  isLoading,
+  handleSaveCombination
 }: HudUIProps) {
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
@@ -284,7 +286,11 @@ export default function HudUI({
             </div>
             <div className="w-full grid grid-cols-2 gap-4 pt-8">
               <Button label="Go Back" light className="w-full" textStyles="w-full text-center" handleClick={() => setIsSaveModalOpen(false)} />
-              <Button label="Save" light className="w-full" textStyles="w-full text-center" handleClick={() => { changeView(); setIsSaveModalOpen(false); }} />
+              <Button label="Save" light className="w-full" textStyles="w-full text-center" handleClick={() => {
+                handleSaveCombination();
+                changeView();
+                setIsSaveModalOpen(false);
+              }} />
             </div>
           </div>
         </Modal>
