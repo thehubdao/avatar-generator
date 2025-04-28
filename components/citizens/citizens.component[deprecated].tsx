@@ -20,7 +20,7 @@ import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetAvatarSingleByC
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
-import { fileCampaignNameLabel } from "../../constants/lukso/labels.constant";
+import { FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { StorageLocation } from "../../enums/firebase.enum";
 import { useCallback, useState } from "react";
@@ -564,7 +564,7 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
       ? modelGLBPromise.value
       : undefined
     const filesName =
-      fileCampaignNameLabel[campaignParams?.campaign as keyof typeof fileCampaignNameLabel] +
+      FILE_CAMPAIGN_NAME_LABEL[campaignParams?.campaign as keyof typeof FILE_CAMPAIGN_NAME_LABEL] +
       currentCollection.citizenMetadata.tokenId
     if (modelVRM && modelGLBPromise.success) {
       await SaveFile(modelVRM, `${filesName}.vrm`)
