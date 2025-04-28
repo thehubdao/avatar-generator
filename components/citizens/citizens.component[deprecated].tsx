@@ -970,58 +970,45 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
           <div className="fixed w-full z-10 dark">
             {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View &&
               <HudUI
-                selectedOption={selectedOpc.find(
-                  (e) => e.id === selectedCategory
-                )}
-                editModeSelected={
-                  isEditModeSelected
-                }
-                selectListCategory={
-                  (campaignParams.features &&
-                    campaignParams.accessories && [
-                      ...campaignParams.features,
-                      ...campaignParams.accessories,
-                    ]) ||
-                  []
-                }
-                // optionList
-                optionList={optionListShow}
-                // selectedCategory
-                selectedCategory={selectedCategory}
-                campaignSkinColorConfig={
-                  campaignParams?.config.skin ||
-                  {}
-                }
-                skinColor={skinColor}
-                changeView={() => {
-                  saveCombination()
-                  setIsEditModeSelected(!isEditModeSelected)
-                  // void updateStage(!isEditModeSelected) @GabCh15 tiene la misma funcionalidad de lukso?
-                }}
-                // changeCategory
-                onOptionChange={(id, path, name) =>
-                  void onOptionChange(
-                    id,
-                    path,
-                    name
-                  )
-                }
-                // onCategoryChange
-                onCategoryTypeChange={(value) =>
-                  onCategoryTypeChange(value)
-                }
-                onSkinColorChange={(value) =>
-                  void onClickChangeSkinColor(
-                    value
-                  )
-                }
-                exportModel={() => exportModel()}
-                isCustomCampaignHud
-                onClickBackButton={() =>
-                  setIsEditModeSelected(false)
-                }
-                isLoading={isLoading}
-              />
+              selectedOption={selectedOpc.find(
+                (e) => e.id === selectedCategory
+              )}
+              editModeSelected={isEditModeSelected}
+              selectListCategory={(campaignParams.features &&
+                campaignParams.accessories && [
+                  ...campaignParams.features,
+                  ...campaignParams.accessories,
+                ]) ||
+                []}
+              // optionList
+              optionList={optionListShow}
+              // selectedCategory
+              selectedCategory={selectedCategory}
+              campaignSkinColorConfig={campaignParams?.config.skin ||
+                {}}
+              skinColor={skinColor}
+              changeView={() => {
+                saveCombination();
+                setIsEditModeSelected(!isEditModeSelected);
+                // void updateStage(!isEditModeSelected) @GabCh15 tiene la misma funcionalidad de lukso?
+              } }
+              // changeCategory
+              onOptionChange={(id, path, name) => void onOptionChange(
+                id,
+                path,
+                name
+              )}
+              // onCategoryChange
+              onCategoryTypeChange={(value) => onCategoryTypeChange(value)}
+              onSkinColorChange={(value) => void onClickChangeSkinColor(
+                value
+              )}
+              exportModel={() => exportModel()}
+              isCustomCampaignHud
+              onClickBackButton={() => setIsEditModeSelected(false)}
+              isLoading={isLoading} handleSaveCombination={function (): Promise<void> {
+                throw new Error("Function not implemented.");
+              } }              />
             }
           </div>
           {/* CANVAS */}
