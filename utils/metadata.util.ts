@@ -12,7 +12,7 @@ import { LogError } from "./common.util";
 const pinata = new PinataSDK({ pinataGateway: 'lukso.mypinata.cloud', pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT })
 
 
-export async function uploadMetadata(tokenMetadata: CitizenMetadata, metadataThumbnail: Blob | undefined, combination: string, campaign: Campaign): Promise<Result<{ uri: string, imageUrl: string }>> {
+export async function UploadMetadata(tokenMetadata: CitizenMetadata, metadataThumbnail: Blob | undefined, combination: string, campaign: Campaign): Promise<Result<{ uri: string, imageUrl: string }>> {
     try{
         if (metadataThumbnail) {
             const imageFile = new File([metadataThumbnail], `${combination}.png`)
