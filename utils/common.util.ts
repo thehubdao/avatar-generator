@@ -145,3 +145,11 @@ export function FormatWalletAddress(address: string, splitCount: number = 4): st
 
   return `${primerosCuatro}...${ultimosCuatro}`
 }
+
+export function ToHex64(num: number) {
+  let hex = num.toString(16);
+
+  hex = hex.padStart(64, '0');
+
+  return '0x' + hex;
+}
