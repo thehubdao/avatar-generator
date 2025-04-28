@@ -1,19 +1,20 @@
-import { Contract } from 'ethers';
+import { Contract, ethers } from 'ethers';
 import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json';
 import { Drop, TokenId } from '../../../interfaces/citizens.interface';
 import { GetEthereumIPFSData, GetEthereumImageUrl, GetFollowStatuses, GetUniversalProfileData } from '../citizens.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json';
 import { CitizenMetadata } from '../../../interfaces/citizens.interface';
 import { Result } from '../../../types/common.type';
-import { LogError } from '../../../utils/common.util';
+import { LogError, ToHex64 } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { Campaign, LuksoCampaign } from '../../../enums/citizens/common.enum';
-import { LUKSO_CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH } from '../../../constants/lukso/contract.constant';
+import { LUKSO_CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH, UNIVERSAL_PROFILE_CONTRACT, OPERATION_CALL, EOA } from '../../../constants/lukso/contract.constant';
 import { GetCollectionDocs, GetLeaderboardData } from '../../firebase.util';
 import WearableContractAbi from '../../../constants/abi/WearableContractABI.json'
 import { CampaignDrops } from '../../../types/citizens.type';
 import { LeaderboardEntry } from '../../../types/leaderboard.type';
-
+import { BodyPart } from '../../../interfaces/avatar.interface';
+    
 export async function GetTokensOf(contractAddress: string, address: string): Promise<Result<string[]>> {
     try {
         const contract = new Contract(contractAddress, AvatarContractAbi, PROVIDER);
@@ -279,4 +280,52 @@ export async function GetFullLeaderboardData(walletAddress: string): Promise<Res
         entry.isFollowing = followStatuses[entry.address] || false;
       });
     return { success: true, value: leaderboardWithProfileData };
+}
+
+export async function SetTokenMetadata(campaign: Campaign, tokenId: string, metadataUri: string): Promise<Result<void>> {
+    const targetContractAddress = LUKSO_CAMPAIGN_WEB3_DATA[campaign].contractAddress;
+    const avatarContract = new ethers.Contract(
+        targetContractAddress,
+        AvatarContractAbi,
+        PROVIDER,
+    );
+
+    const metadataUrl = `ipfs://${metadataUri}`;
+    const metadataIpfsData = await GetEthereumIPFSData(metadataUrl.split('//')[1]);
+    const metadataDataKey = AVATAR_ERC725_CONTRACT.encodeKeyName('LSP4Metadata');
+    const metadataDataValue = AVATAR_ERC725_CONTRACT.encodeData([
+        {
+            keyName: 'LSP4Metadata',
+            value: {
+                json: metadataIpfsData,
+                url: metadataUrl,
+            },
+        },
+    ]);
+    const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [ToHex64(Number(tokenId)), metadataDataKey, metadataDataValue.values[0]]);
+    const tx = await (UNIVERSAL_PROFILE_CONTRACT.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
+        targetContractAddress, // address zero
+        0, // amount to the fund the contract with when deploying
+        setMetadataDataEncodedFunction
+    );
+    await tx.wait();
+    return { success: true, value: undefined };
+}
+
+export async function BurnDrop(from: string, campaign: string, drop: BodyPart): Promise<Result<void>> {
+    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
+    if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError };
+
+    const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name });
+    if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError };
+
+    const dropContract = new Contract(dropPair.contract_address, WearableContractAbi, PROVIDER);
+    const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1]);
+    const tx = await (UNIVERSAL_PROFILE_CONTRACT.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
+        dropPair.contract_address,
+        0, // amount to the fund the contract with when deploying
+        burnEncondedFunction
+    );
+    await tx.wait();
+    return { success: true, value: undefined };
 }

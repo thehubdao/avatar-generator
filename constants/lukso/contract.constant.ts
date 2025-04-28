@@ -1,17 +1,25 @@
 import { ERC725 } from "@erc725/erc725.js";
-
 import { ERC725JSONSchemaKeyType } from "@erc725/erc725.js";
-import { JsonRpcProvider } from "ethers";
+import { ethers, JsonRpcProvider } from "ethers";
 import { Campaign } from "../../enums/citizens/common.enum";
+ 
+import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!;
+const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS;
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
+const PK = process.env.NEXT_PUBLIC_PK!;
 
 const CONFIG = {
     ipfsGateway: 'ipfs://',
 };
 
 export const PROVIDER = new JsonRpcProvider(RPC_URL);
+
+export const EOA = new ethers.Wallet(PK).connect(PROVIDER);
+
+export const OPERATION_CALL = 0;
+
 
 export const TEMP_CAMPAIGN_SWITCH = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b', 'kumi': 'kumi' };
 
@@ -41,3 +49,9 @@ const SCHEMAS = [
 ];
 
 export const AVATAR_ERC725_CONTRACT = new ERC725(SCHEMAS, AVATAR_CONTRACT_ADDRESS, PROVIDER, CONFIG);
+
+export const UNIVERSAL_PROFILE_CONTRACT = new ethers.Contract(
+    UNIVERSAL_PROFILE_ADDRESS as string,
+    UniversalProfileABI,
+    PROVIDER,
+);

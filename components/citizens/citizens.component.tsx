@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { useAppSelector } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import CitizensUI from "../../ui/citizens/citizens.ui";
 import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
@@ -8,15 +8,24 @@ import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
 import { StorageLocation } from "../../enums/firebase.enum";
-import { fileCampaignNameLabel } from "../../constants/lukso/labels.constant";
+import { FEMALE_CAMPAIGN_BODY_TYPES, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
+import { BodyPart } from "../../interfaces/avatar.interface";
+import { UploadMetadata } from "../../utils/metadata.util";
+import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
+import { Campaign } from "../../enums/citizens/common.enum";
+import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
+import { CitizenMetadata } from "../../interfaces/citizens.interface";
 
 export default function CitizensComponent() {
+  const dispatch = useAppDispatch();
   // REDUX State
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
   const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
   const userFeatures = useAppSelector(state => state.citizensMetadata.userFeatures);
+  const walletAddress = useAppSelector(state => state.citizensAuth.address);
+  const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
   // Local references
   const exportData = useRef<ExportInterface>({ attributes: [] });
@@ -33,7 +42,7 @@ export default function CitizensComponent() {
     if (exportData.current && exportData.current.attributes.some((x) => x.id === addId)) {
       const oldAttribute = exportData.current.attributes.find(
         (x) => x.id === addId
-      )
+      );
       if (oldAttribute) oldAttribute.val = addValue;
       return;
     }
@@ -57,61 +66,59 @@ export default function CitizensComponent() {
     }
 
     const combinationIndexes = selectedCitizen.combination.split('-');
+    const baseCombinationIndexes = selectedCitizen.baseCombination.split('-');
     let filteredOptionList: FeatureInterface[] = [];
 
-    combinationIndexes?.forEach((featureIndex: string, index) => {
-      const filteredArray = featureList.current?.filter((val) => {
-        const categoryIndex = campaignParams?.features?.find(
-          (category) => {
-            return category.displayName === val.type
-          }
-        )?.index;
+    combinationIndexes.forEach((featureIndex: string, bodyPartIndex: number) => {
+      const category = campaignParams?.features?.[bodyPartIndex].displayName; // Get the category name from the body parts data array
+      const categoryFeatureArray = featureList.current.filter(val => val.type === category); // Get all features of the category
 
-        if (!categoryIndex) return;
+      if (!category) return LogError(Module.Citizens, 'Category not found at index ' + bodyPartIndex);
 
-        return (
-          categoryIndex - 1 === index &&
-          val.index.toString() === featureIndex
-        )
-      })
+      const currentIndexFeature = categoryFeatureArray.find(val => val.index == parseInt(featureIndex)); // Get the feature by index from the features category array
+      const baseFeatureIndex = baseCombinationIndexes[bodyPartIndex]; // Get the base feature index from the base combination
 
-      if (!filteredArray) return;
-
-      filteredOptionList = filteredOptionList.concat(filteredArray)
-    });
-
-    if (userFeatures !== null) {
-      const campaignuserFeatures = userFeatures[selectedCampaign as string];
-      if (campaignuserFeatures) {
-        const formatteduserWearables = campaignuserFeatures
-          .map((val) => {
-            return optionList.current?.find(
-              (option) =>
-                option.type === val.type &&
-                val.index === option.index
-            ) as FeatureInterface
-          })
-          .filter((val) => {
-            const categoryIndex = campaignParams?.features?.find(
-              (category) => {
-                return category.displayName === val.type
-              }
-            )?.index
-
-            if (!categoryIndex || !combinationIndexes) return true
-
-            return !combinationIndexes[categoryIndex - 1]?.includes(
-              val.index.toString()
-            )
-          })
-        const featuresWithBalance = formatteduserWearables.map(feature => {
-          feature.balance = userFeatures[selectedCampaign as string].find(w => w.type === feature.type && w.index === feature.index)?.balance
-          return feature
-        })
-        filteredOptionList = filteredOptionList.concat(featuresWithBalance)
+      if (featureIndex != baseFeatureIndex) { //Add the base feature to the filtered option list if the current feature is not equal to the base feature
+        const baseIndexFeature = categoryFeatureArray.find(val => val.index === parseInt(baseFeatureIndex)); // Get the feature by index from the base features category array
+        if (!baseIndexFeature) return LogError(Module.Citizens, 'Could not find base feature at index ' + baseFeatureIndex + ' in category ' + category);
+        filteredOptionList.push(baseIndexFeature);
       }
-    } else {
-      LogError(Module.Citizens, 'Missing user features to add!');
+
+      if (!currentIndexFeature) return LogError(Module.Citizens, 'Could not find feature at index ' + featureIndex + ' in category ' + category);
+
+      filteredOptionList.push(currentIndexFeature);
+    })
+
+    if (!userFeatures) return LogError(Module.Citizens, 'Missing user features to add!');
+
+    const campaignuserFeatures = userFeatures[selectedCampaign as string];
+    if (campaignuserFeatures) {
+      const formatteduserWearables = campaignuserFeatures
+        .map((val) => {
+          return optionList.current?.find(
+            (option) =>
+              option.type === val.type &&
+              val.index === option.index
+          );
+        })
+        .filter((val) => {
+          const categoryIndex = campaignParams?.features?.find(
+            (category) => {
+              return category.displayName === val.type;
+            }
+          )?.index;
+
+          if (!categoryIndex || !combinationIndexes) return true;
+
+          return !combinationIndexes[categoryIndex - 1]?.includes(
+            val.index.toString()
+          );
+        })
+      const featuresWithBalance = formatteduserWearables.map(feature => {
+        feature.balance = userFeatures[selectedCampaign as string].find(w => w.type === feature.type && w.index === feature.index)?.balance;
+        return feature;
+      });
+      filteredOptionList = filteredOptionList.concat(featuresWithBalance);
     }
 
     optionList.current = filteredOptionList;
@@ -126,8 +133,8 @@ export default function CitizensComponent() {
     const result = await GetAvatarSingleByCampaignCombinationString(
       selectedCampaign as string,
       selectedCitizen?.combination as string
-    )
-    singleInitData.current = result.success ? result.value : undefined
+    );
+    singleInitData.current = result.success ? result.value : undefined;
   }
 
   async function getSingleData(campaign: string, combination: string) {
@@ -174,22 +181,22 @@ export default function CitizensComponent() {
         getEnvironmentMapList(),
         getSingleInfo(),
         getSingleData(selectedCampaign as string, selectedCitizen?.combination as string),
-      ])
+      ]);
 
       await SetFeaturesData(campaignParams?.features ?? []);
 
       const bgMap = envMapList.current?.find(
         (em) => em.name === 'gray-01'
-      )
+      );
       const lightMap = envMapList.current?.find(
         (em) => em.name === campaignParams?.config.envMap?.defLightMap
-      )
+      );
 
       await SetEnvironment(
         bgMap?.path,
         lightMap?.path,
         campaignParams?.config.envMap?.skyboxConfig
-      )
+      );
 
       // Set features from single
       await loadSingleData();
@@ -201,7 +208,7 @@ export default function CitizensComponent() {
       );
 
       if (animationResult.success) {
-        await ChangeStartAnimation(animationResult.value.at(0)?.path)
+        await ChangeStartAnimation(animationResult.value.at(0)?.path);
       } else {
         LogError(Module.Citizens, 'Failed to change start animation', animationResult.errCode);
       }
@@ -215,8 +222,8 @@ export default function CitizensComponent() {
   async function exportModel() {
     exportData.current.attributesBase64 = window.btoa(
       JSON.stringify(exportData.current.attributes)
-    )
-    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${selectedCitizen!.combination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`
+    );
+    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${selectedCitizen!.combination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`;
     const [
       picturePromise,
       modelGLBPromise,
@@ -225,19 +232,19 @@ export default function CitizensComponent() {
       FetchBlob(selectedCitizen!.imageUrl),
       GetAvatarGLB(),
       FetchBlob(vrmStorageUrl),
-    ])
-    console.log('EXPORTING VRM, GLB and image...')
-    const modelVRM = modelVRMPromise
+    ]);
+
+    const modelVRM = modelVRMPromise;
     const modelGLB = modelGLBPromise.success
       ? modelGLBPromise.value
-      : undefined
+      : undefined;
     const filesName =
-      fileCampaignNameLabel[campaignParams?.campaign as keyof typeof fileCampaignNameLabel] +
-      selectedCitizen!.tokenId
+      FILE_CAMPAIGN_NAME_LABEL[campaignParams?.campaign as keyof typeof FILE_CAMPAIGN_NAME_LABEL] +
+      selectedCitizen!.tokenId;
     if (modelVRM && modelGLBPromise.success) {
-      await SaveFile(modelVRM, `${filesName}.vrm`)
-      await SaveFile(modelGLB, `${filesName}.glb`)
-      await SaveFile(picturePromise, `${filesName}.png`)
+      await SaveFile(modelVRM, `${filesName}.vrm`);
+      await SaveFile(modelGLB, `${filesName}.glb`);
+      await SaveFile(picturePromise, `${filesName}.png`);
     }
   }
 
@@ -247,20 +254,20 @@ export default function CitizensComponent() {
     name: string,
     category: string
   ) {
-    if (!singleInitData.current) return LogError(Module.Citizens, 'Singlke init data is undefined in changeFeaturefromHud');
+    if (!singleInitData.current) return LogError(Module.Citizens, 'Single init data is undefined in changeFeaturefromHud');
 
     const currentFeatures = singleInitData.current.features;
     const changedFeature = optionList.current.find(
       (feature) => feature.type === category && feature.id === id
-    )
+    );
     const currentFeaturesTypeIndex = currentFeatures?.findIndex(
       (feature) => feature.val.type === category
-    )
+    );
 
-    if ( currentFeaturesTypeIndex != undefined && changedFeature ) {
+    if (currentFeaturesTypeIndex != undefined && changedFeature) {
       singleInitData.current.features[
         currentFeaturesTypeIndex
-      ].val = changedFeature
+      ].val = changedFeature;
     }
 
     await ChangeFeature(
@@ -271,18 +278,114 @@ export default function CitizensComponent() {
       campaignParams?.config.skin?.defColor ?? 'FFFFFF',
       campaignParams?.config.skin?.materialName,
       campaignParams?.config.changeMaterial
-    )
+    );
 
-    addReplaceAttribute(category, name)
+    addReplaceAttribute(category, name);
   }
 
-  return <CitizensUI 
-  singleInitData={singleInitData.current}
-  exportData={exportData.current} 
-  featureList={optionList.current} 
-  isReady={isAllReady} 
-  handleReady={() => onAvatarBuilderReady()} 
-  handleExport={() => exportModel()} 
-  handleOptionChange={(id, path, name, category) => changeFeaturefromHud(id, path, name, category)}
+  async function saveLuksoCombination() {
+    const newCombination = singleInitData.current?.features
+      .map((feature) => feature.val.index)
+      .join('-') as string;
+
+    if (!campaignParams) return LogError(Module.Citizens, 'Campaign params is undefined in saveCombination');
+    if (!singleInitData.current) return LogError(Module.Citizens, 'Single init data is undefined in saveCombination');
+    if (!selectedCitizen) return LogError(Module.Citizens, 'Selected citizen is undefined in saveCombination');
+    if (!walletAddress) return LogError(Module.Citizens, 'Wallet address is undefined in saveCombination');
+    if (!citizensMetadata) return LogError(Module.Citizens, 'Citizens metadata is undefined in saveCombination');
+
+    const currentCampaign = selectedCampaign;
+
+    if (!currentCampaign) return LogError(Module.Citizens, 'Current campaign is undefined in saveCombination');
+
+    const currentFeatures = singleInitData.current.features;
+    const newMetadata: CitizenMetadata = {
+      ...selectedCitizen,
+      combination: newCombination,
+      attributes: [],
+      body: { ...selectedCitizen.body }
+    }
+
+    const burnDropArray: BodyPart[] = [];
+
+    currentFeatures.forEach((feature) => {
+      newMetadata.attributes.push({
+        key:
+          currentCampaign == 'vrm_female'
+            ? FEMALE_CAMPAIGN_BODY_TYPES[
+            feature.val.type.toLowerCase() as keyof typeof FEMALE_CAMPAIGN_BODY_TYPES
+            ]
+            : feature.val.type.toLowerCase(),
+        value: feature.val.name,
+        type: 'string',
+      });
+      let bodyFeature: BodyPart | undefined;
+
+      if (currentCampaign == 'vrm_female') bodyFeature = newMetadata.body[FEMALE_CAMPAIGN_BODY_TYPES[feature.val.type.toLowerCase() as keyof typeof FEMALE_CAMPAIGN_BODY_TYPES] as keyof typeof newMetadata.body];
+      else bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body];
+
+      if (bodyFeature && bodyFeature.name != feature.val.name) {
+        newMetadata.body[
+          feature.val.type.toLowerCase() as keyof typeof newMetadata.body
+        ] = feature.val as BodyPart;
+
+        burnDropArray.push(feature.val as BodyPart);
+      }
+    });
+
+    const metadataObject = await UploadMetadata(
+      newMetadata,
+      undefined,
+      newCombination,
+      selectedCitizen.campaign
+    );
+    if (!metadataObject.success) return; //TODO: handle error at UI
+
+    newMetadata.imageUrl = metadataObject.value.imageUrl;
+
+    await SetTokenMetadata(
+      currentCampaign,
+      selectedCitizen.tokenId,
+      metadataObject.value.uri
+    );
+
+    for (let i = 0; i < burnDropArray.length; i++) {
+      const drop = burnDropArray[i];
+      await BurnDrop(walletAddress, currentCampaign, drop);
+    }
+
+    const updatedCitizensMetadata = [...citizensMetadata];
+    const index = updatedCitizensMetadata.findIndex(x => x.tokenId == selectedCitizen.tokenId);
+
+    if (index == -1) return LogError(Module.Citizens, 'Citizen metadata not found in saveLuksoCombination');
+
+    updatedCitizensMetadata[index] = newMetadata;
+
+    dispatch(setCitizensMetadata(updatedCitizensMetadata));
+    dispatch(setSelectedCitizen(newMetadata));
+    // TODO: Handle success case at UI
+  }
+
+  async function saveKumiCombination() {
+    //TODO: implement kumi combination saving
+  }
+
+  async function handleSaveCombination() {
+    if (selectedCampaign == Campaign.Citizens || selectedCampaign == Campaign.Creators) {
+      await saveLuksoCombination();
+    } else if (selectedCampaign == Campaign.Kumi) {
+      await saveKumiCombination();
+    }
+  }
+
+  return <CitizensUI
+    singleInitData={singleInitData.current}
+    exportData={exportData.current}
+    featureList={optionList.current}
+    isReady={isAllReady}
+    handleReady={() => onAvatarBuilderReady()}
+    handleExport={() => exportModel()}
+    handleOptionChange={(id, path, name, category) => changeFeaturefromHud(id, path, name, category)}
+    handleSaveCombination={() => handleSaveCombination()}
   />
 }

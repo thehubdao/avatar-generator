@@ -18,9 +18,10 @@ interface CitizensUIProps {
 	handleReady: () => Promise<void>;
 	handleExport: () => Promise<void>;
 	handleOptionChange: (id, path, name, category) => Promise<void>;
+	handleSaveCombination: () => Promise<void>;
 }
 
-export default function CitizensUI({ singleInitData, exportData, featureList, isReady, handleReady, handleExport, handleOptionChange }: CitizensUIProps) {
+export default function CitizensUI({ singleInitData, exportData, featureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination }: CitizensUIProps) {
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
@@ -151,6 +152,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 									}
 									skinColor={'#FFFFFF'}
 									//TODO: Save combination
+									handleSaveCombination={() => handleSaveCombination()}
 									changeView={() => dispatch(setEditMode(false))}
 									onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
 									onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}

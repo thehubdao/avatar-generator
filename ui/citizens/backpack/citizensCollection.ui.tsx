@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { CitizenMetadata } from "../../../interfaces/citizens.interface";
 import { LogError } from "../../../utils/common.util";
 import { Module } from "../../../enums/common.enum";
-import { campaignLabels } from "../../../constants/lukso/labels.constant";
+import { CAMPAIGN_LABELS } from "../../../constants/lukso/labels.constant";
 import { CardSize, CitizensPageLocation } from "../../../enums/citizens/common.enum";
 import SearchSVG from "../common/SVG/searchSVG.ui";
 import SelectorUI from "../common/selector.ui";
@@ -96,7 +96,7 @@ export default function CitizensCollection() {
                 filteredList.current.map((tokenMetadata) => (
                   <CampaignCard
                     key={tokenMetadata.campaign + tokenMetadata.tokenId}
-                    title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
+                    title={`${CAMPAIGN_LABELS[tokenMetadata.campaign as keyof typeof CAMPAIGN_LABELS].nftName} #${tokenMetadata.tokenId}`}
                     tokenID={'#' + tokenMetadata.tokenId}
                     imgSrc={tokenMetadata.imageUrl}
                     imgAlt={tokenMetadata.name}
@@ -116,7 +116,7 @@ export default function CitizensCollection() {
               {tokenList && tokenList.map((tokenMetadata) => (
                 <CampaignCard
                   key={tokenMetadata.campaign + tokenMetadata.tokenId}
-                  title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
+                  title={`${CAMPAIGN_LABELS[tokenMetadata.campaign as keyof typeof CAMPAIGN_LABELS].nftName} #${tokenMetadata.tokenId}`}
                   tokenID={'#' + tokenMetadata.tokenId}
                   imgSrc={tokenMetadata.imageUrl}
                   imgAlt={tokenMetadata.name}

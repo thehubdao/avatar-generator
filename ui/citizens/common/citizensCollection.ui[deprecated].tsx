@@ -5,7 +5,7 @@ import { LogError } from "../../../utils/common.util";
 import { Module } from "../../../enums/common.enum";
 import SelectorUI from "./selector.ui";
 import CampaignCard from "./campaignCard.ui";
-import { campaignLabels } from "../../../constants/lukso/labels.constant";
+import { CAMPAIGN_LABELS } from "../../../constants/lukso/labels.constant";
 import { Campaign, CardSize } from "../../../enums/citizens/common.enum";
 import { CollectionType } from "../../../interfaces/avatar.interface";
 
@@ -91,7 +91,7 @@ export default function CitizensCollection({ tokenList, currentCollection, updat
                 filteredList.current.map((tokenMetadata) => (
                   <CampaignCard
                     key={tokenMetadata.campaign + tokenMetadata.tokenId}
-                    title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
+                    title={`${CAMPAIGN_LABELS[tokenMetadata.campaign as keyof typeof CAMPAIGN_LABELS].nftName} #${tokenMetadata.tokenId}`}
                     tokenID={'#' + tokenMetadata.tokenId}
                     imgSrc={tokenMetadata.imageUrl}
                     imgAlt={tokenMetadata.name}
@@ -111,7 +111,7 @@ export default function CitizensCollection({ tokenList, currentCollection, updat
               {tokenList && tokenList.map((tokenMetadata) => (
                 <CampaignCard
                   key={tokenMetadata.campaign + tokenMetadata.tokenId}
-                  title={`${campaignLabels[tokenMetadata.campaign as keyof typeof campaignLabels].nftName} #${tokenMetadata.tokenId}`}
+                  title={`${CAMPAIGN_LABELS[tokenMetadata.campaign as keyof typeof CAMPAIGN_LABELS].nftName} #${tokenMetadata.tokenId}`}
                   tokenID={'#' + tokenMetadata.tokenId}
                   imgSrc={tokenMetadata.imageUrl}
                   imgAlt={tokenMetadata.name}

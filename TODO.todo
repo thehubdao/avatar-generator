@@ -10,6 +10,7 @@ TODO:
     ☐ Review and adjust z-index layout in whole citizens
     ☐ Review exportModel function in citizens UI
     ☐ Make loading UI with message prop
+    ☐ Make Save Combination Button be more visible on some screen sizes
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component

@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import Button from "./button.ui";
 import ArrowSVG from "./SVG/arrowSVG.ui";
 import { useOnClickOutside } from "usehooks-ts";
-import { campaignLabels } from "../../../constants/lukso/labels.constant";
+import { CAMPAIGN_LABELS } from "../../../constants/lukso/labels.constant";
 
 interface SelectorUIProps {
   list?: string[];
@@ -35,7 +35,7 @@ export default function SelectorUI({ list, areCampaigns, selection, label = 'CHO
           </div>
         </Button>
       </div>
-      <p className="absolute top-full left-0 sm:left-auto sm:right-0 px-2 sm:mt-1 text-xs text-white/20">{areCampaigns ? campaignLabels[selection?.toLowerCase() as keyof typeof campaignLabels]?.dropdownName : selection}</p>
+      <p className="absolute top-full left-0 sm:left-auto sm:right-0 px-2 sm:mt-1 text-xs text-white/20">{areCampaigns ? CAMPAIGN_LABELS[selection?.toLowerCase() as keyof typeof CAMPAIGN_LABELS]?.dropdownName : selection}</p>
       {isSelectorOpen &&
         <div className={`absolute top-full ${dropDownPosition} w-48 md:w-full max-h-96 overflow-y-auto rounded-2xl bg-white mt-2 z-10`}>
           {
@@ -44,7 +44,7 @@ export default function SelectorUI({ list, areCampaigns, selection, label = 'CHO
                 selectionHandler(el);
                 setIsSelectorOpen(false);
               }}>
-                <p className="text-center text-sm truncate">{areCampaigns ? campaignLabels[el.toLowerCase() as keyof typeof campaignLabels]?.dropdownName : el}</p>
+                <p className="text-center text-sm truncate">{areCampaigns ? CAMPAIGN_LABELS[el.toLowerCase() as keyof typeof CAMPAIGN_LABELS]?.dropdownName : el}</p>
               </div>
             ))
           }

@@ -20,7 +20,7 @@ import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetAvatarSingleByC
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
-import { fileCampaignNameLabel } from "../../constants/lukso/labels.constant";
+import { FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { StorageLocation } from "../../enums/firebase.enum";
 import { useCallback, useState } from "react";
@@ -564,7 +564,7 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
       ? modelGLBPromise.value
       : undefined
     const filesName =
-      fileCampaignNameLabel[campaignParams?.campaign as keyof typeof fileCampaignNameLabel] +
+      FILE_CAMPAIGN_NAME_LABEL[campaignParams?.campaign as keyof typeof FILE_CAMPAIGN_NAME_LABEL] +
       currentCollection.citizenMetadata.tokenId
     if (modelVRM && modelGLBPromise.success) {
       await SaveFile(modelVRM, `${filesName}.vrm`)
@@ -970,58 +970,45 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
           <div className="fixed w-full z-10 dark">
             {currentCollection.combination && campaignParams && campaignParams.campaign && currentSection === CitizensSections.View &&
               <HudUI
-                selectedOption={selectedOpc.find(
-                  (e) => e.id === selectedCategory
-                )}
-                editModeSelected={
-                  isEditModeSelected
-                }
-                selectListCategory={
-                  (campaignParams.features &&
-                    campaignParams.accessories && [
-                      ...campaignParams.features,
-                      ...campaignParams.accessories,
-                    ]) ||
-                  []
-                }
-                // optionList
-                optionList={optionListShow}
-                // selectedCategory
-                selectedCategory={selectedCategory}
-                campaignSkinColorConfig={
-                  campaignParams?.config.skin ||
-                  {}
-                }
-                skinColor={skinColor}
-                changeView={() => {
-                  saveCombination()
-                  setIsEditModeSelected(!isEditModeSelected)
-                  // void updateStage(!isEditModeSelected) @GabCh15 tiene la misma funcionalidad de lukso?
-                }}
-                // changeCategory
-                onOptionChange={(id, path, name) =>
-                  void onOptionChange(
-                    id,
-                    path,
-                    name
-                  )
-                }
-                // onCategoryChange
-                onCategoryTypeChange={(value) =>
-                  onCategoryTypeChange(value)
-                }
-                onSkinColorChange={(value) =>
-                  void onClickChangeSkinColor(
-                    value
-                  )
-                }
-                exportModel={() => exportModel()}
-                isCustomCampaignHud
-                onClickBackButton={() =>
-                  setIsEditModeSelected(false)
-                }
-                isLoading={isLoading}
-              />
+              selectedOption={selectedOpc.find(
+                (e) => e.id === selectedCategory
+              )}
+              editModeSelected={isEditModeSelected}
+              selectListCategory={(campaignParams.features &&
+                campaignParams.accessories && [
+                  ...campaignParams.features,
+                  ...campaignParams.accessories,
+                ]) ||
+                []}
+              // optionList
+              optionList={optionListShow}
+              // selectedCategory
+              selectedCategory={selectedCategory}
+              campaignSkinColorConfig={campaignParams?.config.skin ||
+                {}}
+              skinColor={skinColor}
+              changeView={() => {
+                saveCombination();
+                setIsEditModeSelected(!isEditModeSelected);
+                // void updateStage(!isEditModeSelected) @GabCh15 tiene la misma funcionalidad de lukso?
+              } }
+              // changeCategory
+              onOptionChange={(id, path, name) => void onOptionChange(
+                id,
+                path,
+                name
+              )}
+              // onCategoryChange
+              onCategoryTypeChange={(value) => onCategoryTypeChange(value)}
+              onSkinColorChange={(value) => void onClickChangeSkinColor(
+                value
+              )}
+              exportModel={() => exportModel()}
+              isCustomCampaignHud
+              onClickBackButton={() => setIsEditModeSelected(false)}
+              isLoading={isLoading} handleSaveCombination={function (): Promise<void> {
+                throw new Error("Function not implemented.");
+              } }              />
             }
           </div>
           {/* CANVAS */}
