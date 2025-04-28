@@ -1,9 +1,9 @@
-export const fileCampaignNameLabel = {
+export const FILE_CAMPAIGN_NAME_LABEL = {
     vrm_male: 'Lukso_Creator_#',
     vrm_female:'Lukso_Critizen_#'
 }
 
-export const campaignLabels = {
+export const CAMPAIGN_LABELS = {
     'all': {
       campaignName: 'all',
       nftName: 'Choose Campaign',
@@ -17,3 +17,14 @@ export const campaignLabels = {
     'kumi': { campaignName: 'kumi', nftName: 'Kumi Citizen', dropdownName: 'Kumi Citizens' }
   }
   
+  //NOTE: female campaign has it's types different from the DB
+  export const FEMALE_CAMPAIGN_BODY_TYPES = {
+        head: 'hair',
+        face: 'accesories',
+        legs: 'legs',
+        chest: 'chest',
+        shoes: 'feet',
+        accesories: 'face',
+        feet: 'shoes',
+        hair: 'head'
+      }
