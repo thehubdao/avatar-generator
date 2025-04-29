@@ -21,7 +21,7 @@ const customThemeConfig: ThemeConfig = {
     
 };
 
-const clientId = 'iSacWyAeaQ6YnHnwc91mk';
+const clientId = '_I8ed6ePWVvtBg-Hu6yeW';
 
 
 const authClient = new FutureverseAuthClient({
