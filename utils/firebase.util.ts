@@ -522,7 +522,7 @@ export async function UploadFile(file: File | null | undefined, fileType: Storag
   if (file == null) return void LogError(Module.FirebaseUtil, "Missing file to upload");
 
   const { ref, uploadBytes } = await import('@firebase/storage');
-  const { uuidv4 } = await import('@firebase/util');
+  const { v4: uuidv4 } = await import('uuid');
 
   const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
   const realSection = sectionType ? '/' + sectionType.toLowerCase().replace('acc', '') : '';
