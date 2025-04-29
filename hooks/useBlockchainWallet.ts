@@ -19,6 +19,8 @@ import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
 import { useAuthUi } from '@futureverse/auth-ui';
+import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
+import { Signer } from '@futureverse/signer';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -30,11 +32,13 @@ export function useBlockchainWallet() {
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
-  const { wallets: ethereumWallets, ready: ethereumReady } = useWallets();
-  const [provider, setProvider] = useState<BrowserProvider | null>(null);
+  const signer = useFutureverseSigner();
+  const { wallets: ethereumWallets, ready: ethereumReady } = useWallets(); //Privy Wallets
+  const [provider, setProvider] = useState<BrowserProvider | Signer | null>(null);
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { ready, user, authenticated } = usePrivy();
+  const { userSession, isFetchingSession, signOutPass } = useAuth();
   const { login } = useLogin();
   const { logout } = useLogout();
   const { openLogin } = useAuthUi();
@@ -170,9 +174,14 @@ export function useBlockchainWallet() {
   }
 
   const HandleLogout = async () => {
-    logout();
+    if (blockchainType === Blockchain.Root) {
+      signOutPass({ flow: 'silent', disableConsent: true });
+    } else {
+      logout();
+    }
   }
 
+  //Privy Logic
   useEffect(() => {
     if (ready && authenticated) {
       if (user?.wallet) {
@@ -203,10 +212,20 @@ export function useBlockchainWallet() {
         connectPromise();
       } // Set the user as logged in
     }
-    if (ready && !authenticated) {
+    if (ready && !authenticated && (blockchainType == Blockchain.Ethereum || blockchainType == Blockchain.Solana)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
       dispatch(disconnect());
     }
   }, [ready, authenticated, ethereumReady]);
+
+  //Root Logic
+  useEffect(() => {
+    if (!isFetchingSession && userSession) {
+      dispatch(connect({ address: userSession.linked[0].eoa, walletName: null, blockchainType: Blockchain.Root }));
+    }
+    if (!isFetchingSession && !userSession && blockchainType === Blockchain.Root) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+      dispatch(disconnect());
+    }
+  }, [isFetchingSession, userSession]);
 
   useEffect(() => {
     if (isConnected === true) {
