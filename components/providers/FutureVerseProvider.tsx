@@ -4,14 +4,12 @@ import { createWagmiConfig } from '@futureverse/auth-react/wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cookieStorage, createStorage } from 'wagmi';
 import { AuthUiProvider } from '@futureverse/auth-ui';
-import { clientId, customThemeConfig } from '../../constants/root/pass.constant';
-
-
+import { CLIENT_ID, CUSTOM_THEME_CONFIG } from '../../constants/root/pass.constant';
 
 export default function FutureVerseProvider({ children }: { children: React.ReactNode }) {
 
     const authClient = new FutureverseAuthClient({
-        clientId,
+        clientId: CLIENT_ID,
         environment: 'staging',
         redirectUri: 'http://localhost:3000',
         signInFlow: 'popup',
@@ -31,7 +29,7 @@ export default function FutureVerseProvider({ children }: { children: React.Reac
         <QueryClientProvider client={queryClient}>
             <FutureverseWagmiProvider getWagmiConfig={getWagmiConfig}>
                 <FutureverseAuthProvider authClient={authClient}>
-                    <AuthUiProvider themeConfig={customThemeConfig} authClient={authClient}>
+                    <AuthUiProvider themeConfig={CUSTOM_THEME_CONFIG} authClient={authClient}>
                         {children}
                     </AuthUiProvider>
                 </FutureverseAuthProvider>

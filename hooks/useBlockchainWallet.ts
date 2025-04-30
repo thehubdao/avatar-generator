@@ -43,7 +43,6 @@ export function useBlockchainWallet() {
   const { logout } = useLogout();
   const { openLogin } = useAuthUi();
 
-
   const getCampaignParams = async (campaign: Campaign) => {
     const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
     if (campaignParams.success) {

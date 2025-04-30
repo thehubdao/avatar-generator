@@ -1,7 +1,7 @@
 import { ThemeConfig } from "@futureverse/auth-ui";
 import { DefaultTheme } from "@futureverse/auth-ui";
 
-export const customThemeConfig: ThemeConfig = {
+export const CUSTOM_THEME_CONFIG: ThemeConfig = {
     ...DefaultTheme,
     colors: {
         ...DefaultTheme.colors,
@@ -14,7 +14,6 @@ export const customThemeConfig: ThemeConfig = {
         default: 10,
     },
     showCloseButton: true,
-
 };
 
-export const clientId = '_I8ed6ePWVvtBg-Hu6yeW';
+export const CLIENT_ID = '_I8ed6ePWVvtBg-Hu6yeW';
