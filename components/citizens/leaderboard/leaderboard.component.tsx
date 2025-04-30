@@ -3,11 +3,12 @@ import { FollowUser, UnfollowUser } from "../../../utils/web3/citizens.util";
 import { useBlockchainProvider } from "../../../contexts/BlockchainContext";
 
 export default function CitizenLeaderBoardComponent() {
-  const { provider } = useBlockchainProvider();
+  const { ethersProvider } = useBlockchainProvider();
+
 
   const handleFollowUser = async (address: string) => {
-    if (provider) {
-      const result = await FollowUser(address, provider);
+    if (ethersProvider) {
+      const result = await FollowUser(address, ethersProvider);
       if (result.success) {
         // TODO: Update the leaderboard
       }
@@ -18,8 +19,8 @@ export default function CitizenLeaderBoardComponent() {
   };
 
   const handleUnfollowUser = async (address: string) => {
-    if (provider) {
-      const result = await UnfollowUser(address, provider);
+    if (ethersProvider) {
+      const result = await UnfollowUser(address, ethersProvider);
       if (result.success) {
         // TODO: Update the leaderboard
       }

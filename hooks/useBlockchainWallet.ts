@@ -18,6 +18,9 @@ import { GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
+import { useAuthUi } from '@futureverse/auth-ui';
+import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
+import { Signer } from '@futureverse/signer';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -29,13 +32,16 @@ export function useBlockchainWallet() {
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
-  const { wallets: ethereumWallets, ready: ethereumReady } = useWallets();
-  const [provider, setProvider] = useState<BrowserProvider | null>(null);
+  const signer = useFutureverseSigner();
+  const { wallets: ethereumWallets, ready: ethereumReady } = useWallets(); //Privy Wallets
+  const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { ready, user, authenticated } = usePrivy();
+  const { userSession, isFetchingSession, signOutPass } = useAuth();
   const { login } = useLogin();
   const { logout } = useLogout();
+  const { openLogin } = useAuthUi();
 
   const getCampaignParams = async (campaign: Campaign) => {
     const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
@@ -158,14 +164,23 @@ export function useBlockchainWallet() {
 
   /* Tanto el blockchain como la campaña se seleccionan manualmente en cada boton que llama esta función */
   const HandleLogin = async (blockchain: Blockchain | undefined, campaign: Campaign | undefined) => {
-    login({ walletChainType: BlockchainToWalletChainType(blockchain) });
+    if (blockchain === Blockchain.Root) {
+      openLogin();
+    } else {
+      login({ walletChainType: BlockchainToWalletChainType(blockchain) });
+    }
     dispatch(setSelectedCampaign(campaign ?? null));
   }
 
   const HandleLogout = async () => {
-    logout();
+    if (blockchainType === Blockchain.Root) {
+      signOutPass({ flow: 'silent', disableConsent: true });
+    } else {
+      logout();
+    }
   }
 
+  //Privy Logic
   useEffect(() => {
     if (ready && authenticated) {
       if (user?.wallet) {
@@ -180,7 +195,7 @@ export function useBlockchainWallet() {
           if (chainType === Blockchain.Ethereum && ethereumReady) {
             const provider = await ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
             const walletName = await GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
-            setProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
+            setEthersProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
 
             if (walletName.success) {
               dispatch(connect({ address: user?.wallet?.address, walletName: walletName.value.name, blockchainType: chainType }));
@@ -196,10 +211,20 @@ export function useBlockchainWallet() {
         connectPromise();
       } // Set the user as logged in
     }
-    if (ready && !authenticated) {
+    if (ready && !authenticated && (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
       dispatch(disconnect());
     }
   }, [ready, authenticated, ethereumReady]);
+
+  //Root Logic
+  useEffect(() => {
+    if (!isFetchingSession && userSession) {
+      dispatch(connect({ address: userSession.linked[0].eoa, walletName: null, blockchainType: Blockchain.Root }));
+    }
+    if (!isFetchingSession && !userSession && blockchainType === Blockchain.Root) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+      dispatch(disconnect());
+    }
+  }, [isFetchingSession, userSession]);
 
   useEffect(() => {
     if (isConnected === true) {
@@ -226,6 +251,6 @@ export function useBlockchainWallet() {
   return {
     HandleLogin,
     HandleLogout,
-    provider
+    ethersProvider
   };
 } 

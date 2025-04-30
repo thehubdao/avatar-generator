@@ -10,7 +10,7 @@ export default function CitizensLayout({
 }: {
   children: React.ReactElement
 }) {
-  const { HandleLogin, HandleLogout, provider } = useBlockchainWallet();
+  const { HandleLogin, HandleLogout, ethersProvider } = useBlockchainWallet();
   const isConnected = useAppSelector(state => state.citizensAuth.connected);
 
   return (
@@ -27,7 +27,7 @@ export default function CitizensLayout({
             <main className="w-full min-h-dvh">
               {
                 isConnected === true ?
-                <BlockchainProvider provider={provider}>
+                <BlockchainProvider ethersProvider={ethersProvider}>
                   {children}
                 </BlockchainProvider>
                 :
