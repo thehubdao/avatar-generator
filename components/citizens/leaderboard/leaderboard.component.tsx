@@ -1,7 +1,6 @@
 import CitizenLeaderBoardUI from "../../../ui/citizens/leaderboard/leaderboard.ui";
 import { FollowUser, UnfollowUser } from "../../../utils/web3/citizens.util";
 import { useBlockchainProvider } from "../../../contexts/BlockchainContext";
-import { BrowserProvider } from "ethers";
 
 export default function CitizenLeaderBoardComponent() {
   const { ethersProvider } = useBlockchainProvider();
