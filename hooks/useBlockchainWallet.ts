@@ -34,7 +34,7 @@ export function useBlockchainWallet() {
 
   const signer = useFutureverseSigner();
   const { wallets: ethereumWallets, ready: ethereumReady } = useWallets(); //Privy Wallets
-  const [provider, setProvider] = useState<BrowserProvider | Signer | null>(null);
+  const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { ready, user, authenticated } = usePrivy();
@@ -196,7 +196,7 @@ export function useBlockchainWallet() {
           if (chainType === Blockchain.Ethereum && ethereumReady) {
             const provider = await ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
             const walletName = await GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
-            setProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
+            setEthersProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
 
             if (walletName.success) {
               dispatch(connect({ address: user?.wallet?.address, walletName: walletName.value.name, blockchainType: chainType }));
@@ -252,6 +252,6 @@ export function useBlockchainWallet() {
   return {
     HandleLogin,
     HandleLogout,
-    provider
+    ethersProvider
   };
 } 
