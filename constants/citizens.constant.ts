@@ -57,13 +57,13 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     campaign: Campaign.Creators,
     blockChain: Blockchain.Ethereum
   },
-    {
-      name: 'Kumi',
-      image: '/resources/images/campaings/kumi_collection.jpg',
-      campaign: Campaign.Kumi,
-      blockChain: Blockchain.Solana
-    },
-    {
+  {
+    name: 'Kumi',
+    image: '/resources/images/campaings/kumi_collection.jpg',
+    campaign: Campaign.Kumi,
+    blockChain: Blockchain.Solana
+  },
+  {
     name: 'Based Citizens',
     image: '/resources/images/campaings/based_collection.jpg',
     campaign: Campaign.Based,
