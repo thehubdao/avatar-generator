@@ -16,7 +16,7 @@ interface MintUIProps {
   campaignDescription?: string;
   price?: number;
   supply?: number;
-  baseCombination?: string;
+  baseCombination
   mintRedirect: () => void;
 }
 

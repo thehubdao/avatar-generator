@@ -1,6 +1,6 @@
 import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
-import { useEffect, useState } from 'react';
-import { Blockchain } from '../enums/blockchain/common.enum';
+import { useEffect, useRef, useState } from 'react';
+import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
@@ -35,6 +35,10 @@ export function useBlockchainWallet() {
   const signer = useFutureverseSigner();
   const { wallets: ethereumWallets, ready: ethereumReady } = useWallets(); //Privy Wallets
   const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
+  const [loginLibraryFlags, setLoginLibraryFlags] = useState<{ [key in LoginLibrary]: boolean | null }>({
+    [LoginLibrary.Privy]: null,
+    [LoginLibrary.Pass]: null
+  });
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { ready, user, authenticated } = usePrivy();
@@ -178,6 +182,7 @@ export function useBlockchainWallet() {
     } else {
       logout();
     }
+    dispatch(disconnect());
   }
 
   //Privy Logic
@@ -211,9 +216,13 @@ export function useBlockchainWallet() {
         connectPromise();
       } // Set the user as logged in
     }
-    if (ready && !authenticated && (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
-      dispatch(disconnect());
+    if (ready && !authenticated) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+      console.log(blockchainType);
+      if (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana) dispatch(disconnect());
+      else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: false }));  
     }
+
+    /*     if(ready && !authenticated) */
   }, [ready, authenticated, ethereumReady]);
 
   //Root Logic
@@ -221,8 +230,10 @@ export function useBlockchainWallet() {
     if (!isFetchingSession && userSession) {
       dispatch(connect({ address: userSession.linked[0].eoa, walletName: null, blockchainType: Blockchain.Root }));
     }
-    if (!isFetchingSession && !userSession && blockchainType === Blockchain.Root) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
-      dispatch(disconnect());
+    if (!isFetchingSession && !userSession) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+      console.log(blockchainType);
+      if (blockchainType === Blockchain.Root) dispatch(disconnect());
+      else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: false }));
     }
   }, [isFetchingSession, userSession]);
 
@@ -248,6 +259,15 @@ export function useBlockchainWallet() {
     }
   }, [selectedCampaign, isConnected]);
 
+
+  useEffect(() => {
+    const loginLibraryFilter = Object.values(loginLibraryFlags).filter(flag => flag === true || flag === null);
+    console.log(loginLibraryFilter);
+    if(loginLibraryFilter.length === 0) {
+      dispatch(disconnect());
+    }
+  },[loginLibraryFlags])
+  
   return {
     HandleLogin,
     HandleLogout,

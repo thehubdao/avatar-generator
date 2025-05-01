@@ -4,3 +4,8 @@ export enum Blockchain {
     Ethereum = "ethereum",
     Root = "root"
 }
+
+export enum LoginLibrary{ //TODO: Add here each new library used to login
+    Privy = "privy",
+    Pass = "pass"
+}
