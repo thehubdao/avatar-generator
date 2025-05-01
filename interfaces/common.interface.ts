@@ -76,6 +76,15 @@ export interface CampaignConfig {
   extraExport?: ModelExtension[];
 }
 
+export interface CampaignInfo {
+  name: string;
+  description: string;
+  imgUrl: string;
+  price: number;
+  supply: number;
+  baseCombination: string;
+}
+
 /***
  * Update CampaignParameterName enum as well, when changing names on this interface
   */
@@ -86,7 +95,8 @@ export interface CampaignParameters {
   accessories?: FeatureBasic[];
   config: CampaignConfig;
   r_val?: Record<RandomTier, number>;
-  campaign?:Campaign
+  campaign?:Campaign;
+  campaignInfo?: CampaignInfo;
 }
 
 export interface CampaignAssets {
