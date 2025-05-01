@@ -11,6 +11,7 @@ TODO:
     ☐ Review exportModel function in citizens UI
     ☐ Make loading UI with message prop
     ☐ Make Save Combination Button be more visible on some screen sizes
+    ☐ Implement getSolanaUserFeaturesPromise function when solana campaign is fully ready in useBlockchainWallet hook
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
