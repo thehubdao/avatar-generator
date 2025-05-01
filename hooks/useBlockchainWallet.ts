@@ -1,5 +1,5 @@
 import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
@@ -20,7 +20,6 @@ import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
 import { useAuthUi } from '@futureverse/auth-ui';
 import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
-import { Signer } from '@futureverse/signer';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
