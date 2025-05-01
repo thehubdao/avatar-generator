@@ -216,7 +216,6 @@ export function useBlockchainWallet() {
       } // Set the user as logged in
     }
     if (ready && !authenticated) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
-      console.log(blockchainType);
       if (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana) dispatch(disconnect());
       else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: false }));  
     }
@@ -224,13 +223,12 @@ export function useBlockchainWallet() {
     /*     if(ready && !authenticated) */
   }, [ready, authenticated, ethereumReady]);
 
-  //Root Logic
+  // Root Logic
   useEffect(() => {
     if (!isFetchingSession && userSession) {
       dispatch(connect({ address: userSession.linked[0].eoa, walletName: null, blockchainType: Blockchain.Root }));
     }
     if (!isFetchingSession && !userSession) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
-      console.log(blockchainType);
       if (blockchainType === Blockchain.Root) dispatch(disconnect());
       else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: false }));
     }
@@ -261,7 +259,6 @@ export function useBlockchainWallet() {
 
   useEffect(() => {
     const loginLibraryFilter = Object.values(loginLibraryFlags).filter(flag => flag === true || flag === null);
-    console.log(loginLibraryFilter);
     if(loginLibraryFilter.length === 0) {
       dispatch(disconnect());
     }
