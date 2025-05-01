@@ -1,4 +1,4 @@
-import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
+import { useLogin, useLogout, usePrivy, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
-import { Campaign, LuksoCampaign, SolanaCampaign } from '../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect } from '../store/CitizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetParameter } from '../utils/firebase.util';
@@ -19,7 +19,7 @@ import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
 import { useAuthUi } from '@futureverse/auth-ui';
-import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
+import { useAuth } from '@futureverse/auth-react';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -31,8 +31,7 @@ export function useBlockchainWallet() {
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
-  const signer = useFutureverseSigner();
-  const { wallets: ethereumWallets, ready: ethereumReady } = useWallets(); //Privy Wallets
+  const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Wallets
   const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
   const [loginLibraryFlags, setLoginLibraryFlags] = useState<{ [key in LoginLibrary]: boolean | null }>({
     [LoginLibrary.Privy]: null,
@@ -75,10 +74,6 @@ export function useBlockchainWallet() {
     if (features.success) return { success: true, value: features.value };
 
     return { success: false, errMessage: features.errMessage, errCode: features.errCode };
-  }
-
-  async function getSolanaUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<SolanaCampaign>>> {
-    return { success: true, value: { [SolanaCampaign.Kumi]: [] } }; //TODO: Implement this function when solana campaign is fully ready
   }
 
   const fetchEthereumLeaderboardData = async () => {
@@ -196,7 +191,7 @@ export function useBlockchainWallet() {
             return; // If the user address is undefined, log the error and return
           }
 
-          if (chainType === Blockchain.Ethereum && ethereumReady) {
+          if (chainType === Blockchain.Ethereum && isEthereumReady) {
             const provider = await ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
             const walletName = await GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
             setEthersProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
@@ -221,7 +216,7 @@ export function useBlockchainWallet() {
     }
 
     /*     if(ready && !authenticated) */
-  }, [ready, authenticated, ethereumReady]);
+  }, [ready, authenticated, isEthereumReady]);
 
   // Root Logic
   useEffect(() => {
