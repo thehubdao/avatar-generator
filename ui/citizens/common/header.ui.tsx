@@ -17,6 +17,7 @@ interface HeaderUIProps {
 export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
   const dispatch = useAppDispatch();
   const isLoggedIn = useAppSelector(state => state.citizensAuth.connected);
+  const didMintingMode = useAppSelector(state => state.citizensMetadata.mintingMode);
 
   const [isBurguerOpen, setIsBurguerOpen] = useState(false);
 
@@ -43,7 +44,7 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
         <LogoTheHub />
       </div>
       {/* NAVBAR */}
-      {isLoggedIn &&
+      {isLoggedIn && !didMintingMode &&
         <>
           <div className={`fixed z-50 xl:relative inset-6 xl:inset-0 bg-citizens-dark xl:bg-inherit h-fit ${isBurguerOpen ? 'block' : 'hidden xl:block'}`}>
             <div className='w-full px-4 pt-4 pb-24 flex justify-between xl:hidden'>
