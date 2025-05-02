@@ -1,7 +1,7 @@
 import { useLogin, useLogout, usePrivy, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setMintingMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
 import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
@@ -102,16 +102,27 @@ export function useBlockchainWallet() {
 
           if (userCampaigns.length > 0) {
             dispatch(setSelectedCampaign(userCampaigns[0]));
+            dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
+            dispatch(setMintingMode(false));
           } else {
-            //TODO: Handle this case, go to minting here
+            // MINTING FLOW
+            dispatch(setSelectedCampaign(Campaign.Creators)); // Set the selected campaign to Citizens by default when no campaign is selected
+            dispatch(setSelectedCitizen({
+              baseCombination: '0-0-0-0-0',
+              combination: '0-0-0-0-0',
+              campaign: Campaign.Creators
+            } as CitizenMetadata));
           }
-
-          dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0]));
         } else if (!citizen) {
-          //TODO: Handle this case, go to minting here
-          dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0]));
+          // MINTING FLOW
+          dispatch(setSelectedCitizen({
+            baseCombination: '0-0-0-0-0',
+            combination: '0-0-0-0-0',
+            campaign: selectedCampaign
+          } as CitizenMetadata));
         } else {
           dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
+          dispatch(setMintingMode(false));
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
         LogError(Module.Citizens, ethereumCitizensMetadata.errMessage, ethereumCitizensMetadata.errCode);
@@ -139,19 +150,31 @@ export function useBlockchainWallet() {
         dispatch(setCitizensMetadata(solanaCitizensMetadata.value));
 
         if (selectedCampaign === null) {
-          const userCampaigns = [...new Set(solanaCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata          
+          const userCampaigns = [...new Set(solanaCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
+
           if (userCampaigns.length > 0) {
             dispatch(setSelectedCampaign(userCampaigns[0]));
+            dispatch(setSelectedCitizen(solanaCitizensMetadata.value[0]));
+            dispatch(setMintingMode(false));
           } else {
-            //TODO: Handle this case, go to minting here
+            // MINTING FLOW
+            dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
+            dispatch(setSelectedCitizen({
+              baseCombination: '0-0-0-0-0-0-0-0-0-0',
+              combination: '0-0-0-0-0-0-0-0-0-0',
+              campaign: Campaign.Kumi
+            } as CitizenMetadata));
           }
-
-          dispatch(setSelectedCitizen(solanaCitizensMetadata.value[0]));
         } else if (!citizen) {
-          //TODO: Handle this case, go to minting here
-          dispatch(setSelectedCitizen(solanaCitizensMetadata.value[0]));
+          // MINTING FLOW
+          dispatch(setSelectedCitizen({
+            baseCombination: '0-0-0-0-0-0-0-0-0-0',
+            combination: '0-0-0-0-0-0-0-0-0-0',
+            campaign: selectedCampaign
+          } as CitizenMetadata));
         } else {
           dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
+          dispatch(setMintingMode(false));
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
         LogError(Module.Citizens, solanaCitizensMetadata.errMessage, solanaCitizensMetadata.errCode);
