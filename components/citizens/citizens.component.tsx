@@ -215,7 +215,7 @@ export default function CitizensComponent() {
 
       setIsAllReady(true);
     } catch (error) {
-      console.error('Error getting environment map list', error);
+      LogError(Module.Citizens, 'Error in onAvatarBuilderReady', error);
     }
   }
 
