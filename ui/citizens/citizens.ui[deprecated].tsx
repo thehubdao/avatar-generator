@@ -13,7 +13,7 @@ import Modal from "./common/modal.ui";
 import Button from "./common/button.ui";
 import { DataBaseDrop } from "../../interfaces/citizens.interface";
 import { useEffect, useState } from "react";
-import MintUI from "./sections/mint.ui";
+import MintUI from "./common/mint.ui";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
