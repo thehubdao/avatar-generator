@@ -20,9 +20,10 @@ interface CitizensUIProps {
 	handleExport: () => Promise<void>;
 	handleOptionChange: (id, path, name, category) => Promise<void>;
 	handleSaveCombination: () => Promise<void>;
+	handleMinting: () => Promise<boolean>;
 }
 
-export default function CitizensUI({ singleInitData, exportData, featureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination }: CitizensUIProps) {
+export default function CitizensUI({ singleInitData, exportData, featureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleMinting }: CitizensUIProps) {
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
@@ -133,7 +134,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 								<>
 									{/* MINTING */}
 									{isReady &&
-										<MintUI mintRedirect={() => { }} />
+										<MintUI onMinting={() => handleMinting()} />
 									}
 								</>
 								:
