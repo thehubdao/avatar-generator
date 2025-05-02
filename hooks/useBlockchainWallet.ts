@@ -199,7 +199,6 @@ export function useBlockchainWallet() {
     } else {
       logout();
     }
-    dispatch(disconnect());
   }
 
   //Privy Logic
@@ -224,10 +223,12 @@ export function useBlockchainWallet() {
             } else {
               dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
             }
+            setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
 
           } else if (chainType === Blockchain.Solana) {
             //TODO: Set provider to solana provider
             dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
+            setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
           }
         }
         connectPromise();
@@ -235,20 +236,20 @@ export function useBlockchainWallet() {
     }
     if (ready && !authenticated) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
       if (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana) dispatch(disconnect());
-      else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: false }));  
+      else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: false }));
     }
-
-    /*     if(ready && !authenticated) */
   }, [ready, authenticated, isEthereumReady]);
 
   // Root Logic
   useEffect(() => {
     if (!isFetchingSession && userSession) {
       dispatch(connect({ address: userSession.linked[0].eoa, walletName: null, blockchainType: Blockchain.Root }));
+      setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: true }));
     }
     if (!isFetchingSession && !userSession) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
       if (blockchainType === Blockchain.Root) dispatch(disconnect());
       else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: false }));
+      
     }
   }, [isFetchingSession, userSession]);
 
@@ -277,11 +278,11 @@ export function useBlockchainWallet() {
 
   useEffect(() => {
     const loginLibraryFilter = Object.values(loginLibraryFlags).filter(flag => flag === true || flag === null);
-    if(loginLibraryFilter.length === 0) {
+    if (loginLibraryFilter.length === 0)
       dispatch(disconnect());
-    }
-  },[loginLibraryFlags])
-  
+
+  }, [loginLibraryFlags])
+
   return {
     HandleLogin,
     HandleLogout,
