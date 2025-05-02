@@ -14,6 +14,7 @@ interface CitizensMetadataState {
   leaderboardData: LeaderboardEntry[] | null | undefined;
   userFeatures: CampaignDrops<AppCampaigns> | null;
   editMode: boolean;
+  mintingMode: boolean;
 }
 
 const initialState: CitizensMetadataState = {
@@ -25,6 +26,7 @@ const initialState: CitizensMetadataState = {
   leaderboardData: null,
   userFeatures: null,
   editMode: false,
+  mintingMode: true,
 }
 
 export const citizensMetadataSlice = createSlice({
@@ -55,9 +57,12 @@ export const citizensMetadataSlice = createSlice({
     },
     setEditMode: (state, action: PayloadAction<boolean>) => {
       state.editMode = action.payload;
+    },
+    setMintingMode: (state, action: PayloadAction<boolean>) => {
+      state.mintingMode = action.payload;
     }
   }
 });
 
-export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setFollowUserData, setLeaderboardData, setUserFeatures, setEditMode } = citizensMetadataSlice.actions;
+export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setFollowUserData, setLeaderboardData, setUserFeatures, setEditMode, setMintingMode } = citizensMetadataSlice.actions;
 export default citizensMetadataSlice.reducer;
