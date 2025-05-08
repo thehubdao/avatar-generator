@@ -15,6 +15,9 @@ import ExportButtonUI from "./common/exportButton.ui";
 import { ModelExtension } from "../../enums/export.enum";
 import Modal from "../citizens/common/modal.ui";
 import Button from "../citizens/common/button.ui";
+import { useSnackbar } from "../citizens/snackbar/snackbar.provider";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { setSavingMode } from "../../store/citizensMetadataSlice";
 
 interface HudUIProps {
 
@@ -51,7 +54,7 @@ interface HudUIProps {
   exportAllow?: ModelExtension[];
   onClickBackButton: () => void
   isLoading: boolean
-  handleSaveCombination: () => Promise<void>
+  handleSaveCombination: () => Promise<boolean>
 }
 
 export default function HudUI({
@@ -73,11 +76,24 @@ export default function HudUI({
   isLoading,
   handleSaveCombination
 }: HudUIProps) {
+  const dispatch = useAppDispatch();
+  const didSavingMode = useAppSelector(state => state.citizensMetadata.savingMode);
   const [isWindowGreaterThan1536, setIsWindowGreaterThan1536] = useState(false);
   const [shouldShowColorSelectorModal, setShouldShowColorSelectorModal] = useState<boolean>(false);
-  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false)
+  const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
 
+  const { showSnackbar } = useSnackbar();
 
+  async function onSaveCombination() {
+    dispatch(setSavingMode(true));
+    const isSuccess = await handleSaveCombination();
+    if (isSuccess) {
+      showSnackbar(<p>Your combination is saved!</p>);
+    } else {
+      showSnackbar(<p>Ups. We can´t to save the combination, try later.</p>);
+    }
+    dispatch(setSavingMode(false));
+  }
 
   //* todo, change this to redux to control screen size.
   // * This function allows us to know if the page has a width greater than 1536px.
@@ -287,13 +303,25 @@ export default function HudUI({
             <div className="w-full grid grid-cols-2 gap-4 pt-8">
               <Button label="Go Back" light className="w-full" textStyles="w-full text-center" handleClick={() => setIsSaveModalOpen(false)} />
               <Button label="Save" light className="w-full" textStyles="w-full text-center" handleClick={() => {
-                handleSaveCombination();
+                onSaveCombination();
                 changeView();
                 setIsSaveModalOpen(false);
               }} />
             </div>
           </div>
         </Modal>
+      }
+      {/* SAVE COMBINATION LOADING */}
+      {didSavingMode &&
+        <div className="fixed bottom-6 right-6 w-fit bg-black/25 backdrop-blur-sm px-6 py-4 rounded-2xl transition duration-300 ease-in-out animate-slide-in">
+          <div className="text-white text-center flex justify-center items-center gap-4">
+            <div className="w-2 sm:w-2 h-2 sm:h-4 border-t border-citizens-gray rounded-full animate-spin" />
+            <div className="text-start">
+              <p>Saving combination...</p>
+              <p className="text-xs">Do not close this window until the process is finished.</p>
+            </div>
+          </div>
+        </div>
       }
     </>
   )
