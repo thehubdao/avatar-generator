@@ -4,7 +4,7 @@ import CitizensUI from "../../ui/citizens/citizens.ui";
 import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData } from "../avatar/editor.component";
-import { LogError } from "../../utils/common.util";
+import { Delay, LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
 import { StorageLocation } from "../../enums/firebase.enum";
@@ -215,7 +215,7 @@ export default function CitizensComponent() {
 
       setIsAllReady(true);
     } catch (error) {
-      console.error('Error getting environment map list', error);
+      LogError(Module.Citizens, 'Error in onAvatarBuilderReady', error);
     }
   }
 
@@ -378,6 +378,17 @@ export default function CitizensComponent() {
     }
   }
 
+  async function onMinting() {
+      //TODO: Minting function
+      // await createAsset(wallets[0], {
+      //   name: "KUMI",
+      //   uri: "ipfs://" + process.env.NEXT_PUBLIC_KUMI_IPFS_HASH,
+      //   plugins: []
+      // });
+      await Delay(3000);
+      return Math.random() > 0.5;
+    }
+
   return <CitizensUI
     singleInitData={singleInitData.current}
     exportData={exportData.current}
@@ -387,5 +398,6 @@ export default function CitizensComponent() {
     handleExport={() => exportModel()}
     handleOptionChange={(id, path, name, category) => changeFeaturefromHud(id, path, name, category)}
     handleSaveCombination={() => handleSaveCombination()}
+    handleMinting={() => onMinting()}
   />
 }

@@ -12,7 +12,7 @@ export default function FutureVerseProvider({ children }: { children: React.Reac
         clientId: CLIENT_ID,
         environment: 'staging',
         redirectUri: 'http://localhost:3000',
-        signInFlow: 'popup',
+        signInFlow: 'redirect',
     });
     const queryClient = new QueryClient();
 

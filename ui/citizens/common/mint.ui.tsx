@@ -1,13 +1,13 @@
 import Image from "next/image";
 import { useState } from "react";
-import SocialButtons from "../common/socialButtons.ui";
-import Button from "../common/button.ui";
-import ArrowMintSVG from "../common/SVG/arrowMintSVG.ui";
-import Modal from "../common/modal.ui";
+import SocialButtons from "./socialButtons.ui";
+import Button from "./button.ui";
+import ArrowMintSVG from "./SVG/arrowMintSVG.ui";
+import Modal from "./modal.ui";
 import Loader from "../../lukso/common/loader.ui";
-import CheckedSVG from "../common/SVG/checkedSVG.ui";
-import { createAsset } from "../../../utils/web3/solana/contract.util[deprecated]";
-import { useSolanaWallets } from "@privy-io/react-auth";
+import CheckedSVG from "./SVG/checkedSVG.ui";
+import { useAppDispatch } from "../../../store/hooks";
+import { setMintingMode } from "../../../store/citizensMetadataSlice";
 
 interface MintUIProps {
   imgUrl?: string;
@@ -16,7 +16,7 @@ interface MintUIProps {
   campaignDescription?: string;
   price?: number;
   supply?: number;
-  mintRedirect: () => void;
+  onMinting: () => Promise<boolean>;
 }
 
 export default function MintUI({
@@ -26,13 +26,19 @@ export default function MintUI({
   campaignDescription = 'Minting a KUMI unlocks the gateway to the Fitchin Universe. It’s your chance to own a unique visual identity that’s truly yours. Dive in, create epic content, flex your avatar, climb the leaderboard, and snag exclusive wearables to stand out in style.',
   price,
   supply,
-  mintRedirect }: MintUIProps) {
+  onMinting }: MintUIProps) {
   const [isLoadedImage, setIsLoadedImage] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isMinting, setIsMinting] = useState<boolean>(false);
-  const [isMinted, setIsMinted] = useState<boolean>(false);
+  const [isMinted, setIsMinted] = useState<boolean | null>(null);
 
-  const { wallets } = useSolanaWallets();
+  const dispatch = useAppDispatch();
+
+  async function handleMint() {
+    setIsMinting(true);
+    const isSuccess = await onMinting();
+    setIsMinted(isSuccess);
+  }
 
   return (
     <>
@@ -42,9 +48,17 @@ export default function MintUI({
           <div className="hidden xl:block fixed top-24 left-6 md:w-[462px] h-[75vh] 2xl:h-[85vh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto">
             <div className="w-full pb-8">
               <div className="relative w-full h-[30vh] md:h-[250px] 2xl:h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
-                <Image src={imgUrl} alt={'Avatar detail'} fill className={`object-cover ${isLoadedImage ? 'opacity-100' : 'opacity-0'} transition-opacity`} onLoadingComplete={(img) => {
-                  if (img) setIsLoadedImage(true);
-                }} />
+                <Image
+                  priority
+                  src={imgUrl}
+                  alt={'Avatar detail'}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className={`object-cover ${isLoadedImage ? 'opacity-100' : 'opacity-0'} transition-opacity`}
+                  onLoadingComplete={(img) => {
+                    if (img) setIsLoadedImage(true);
+                  }}
+                />
                 {
                   !isLoadedImage &&
                   <div className="absolute w-8 h-8 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -102,24 +116,14 @@ export default function MintUI({
             </div>
             <div className="flex gap-4 pt-8">
               <Button label="Go Back" light handleClick={() => { setIsModalOpen(false) }} />
-              <Button label="Claim" light handleClick={async () => {
-                setIsMinting(true)
-
-                await createAsset(wallets[0], {
-                  name: "KUMI",
-                  uri: "ipfs://" + process.env.NEXT_PUBLIC_KUMI_IPFS_HASH,
-                  plugins: []
-                })
-                setIsMinted(true)
-                mintRedirect()
-              }} />
+              <Button label="Claim" light handleClick={() => handleMint()} />
             </div>
           </div>
         </Modal>
       }
       {
-        isMinting && !isMinted &&
-        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => { }}>
+        isMinting && isMinted === null &&
+        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => {}}>
           <div className="grid justify-items-center">
             <Loader size={69} />
             <div className="text-center text-white grid gap-4 pt-4">
@@ -130,11 +134,27 @@ export default function MintUI({
       }
       {
         isMinted &&
-        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => { }}>
+        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => dispatch(setMintingMode(false))}>
           <div className="grid justify-items-center">
             <div className="text-center text-white grid gap-4 pb-4">
               <p className="font-bold text-2xl">Congratulations!</p>
               <p className="text-lg">Your citizen has been claimed!</p>
+            </div>
+            <CheckedSVG />
+          </div>
+        </Modal>
+      }
+      {
+        isModalOpen && isMinted === false &&
+        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => {
+          setIsModalOpen(false);
+          setIsMinting(false);
+          setIsMinted(null);
+        }}>
+          <div className="grid justify-items-center">
+            <div className="text-center text-white grid gap-4 pb-4">
+              <p className="font-bold text-2xl">Ups!</p>
+              <p className="text-lg">We can&apos;t do the process right now, try again later!</p>
             </div>
             <CheckedSVG />
           </div>

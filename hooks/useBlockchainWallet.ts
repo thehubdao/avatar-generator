@@ -1,7 +1,7 @@
-import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
+import { useLogin, useLogout, usePrivy, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
-import { Blockchain } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
+import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setMintingMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
 import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
-import { Campaign, LuksoCampaign, SolanaCampaign } from '../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect } from '../store/CitizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetParameter } from '../utils/firebase.util';
@@ -19,8 +19,7 @@ import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
 import { useAuthUi } from '@futureverse/auth-ui';
-import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
-import { Signer } from '@futureverse/signer';
+import { useAuth } from '@futureverse/auth-react';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -32,9 +31,12 @@ export function useBlockchainWallet() {
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
-  const signer = useFutureverseSigner();
-  const { wallets: ethereumWallets, ready: ethereumReady } = useWallets(); //Privy Wallets
+  const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Wallets
   const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
+  const [loginLibraryFlags, setLoginLibraryFlags] = useState<{ [key in LoginLibrary]: boolean | null }>({
+    [LoginLibrary.Privy]: null,
+    [LoginLibrary.Pass]: null
+  });
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { ready, user, authenticated } = usePrivy();
@@ -74,10 +76,6 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: features.errMessage, errCode: features.errCode };
   }
 
-  async function getSolanaUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<SolanaCampaign>>> {
-    return { success: true, value: { [SolanaCampaign.Kumi]: [] } }; //TODO: Implement this function when solana campaign is fully ready
-  }
-
   const fetchEthereumLeaderboardData = async () => {
     const leaderboardData = await GetFullLeaderboardData(userAddress as string);
     if (leaderboardData.success) {
@@ -104,16 +102,27 @@ export function useBlockchainWallet() {
 
           if (userCampaigns.length > 0) {
             dispatch(setSelectedCampaign(userCampaigns[0]));
+            dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
+            dispatch(setMintingMode(false));
           } else {
-            //TODO: Handle this case, go to minting here
+            // MINTING FLOW
+            dispatch(setSelectedCampaign(Campaign.Creators)); // Set the selected campaign to Citizens by default when no campaign is selected
+            dispatch(setSelectedCitizen({
+              baseCombination: '0-0-0-0-0',
+              combination: '0-0-0-0-0',
+              campaign: Campaign.Creators
+            } as CitizenMetadata));
           }
-
-          dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0]));
         } else if (!citizen) {
-          //TODO: Handle this case, go to minting here
-          dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0]));
+          // MINTING FLOW
+          dispatch(setSelectedCitizen({
+            baseCombination: '0-0-0-0-0',
+            combination: '0-0-0-0-0',
+            campaign: selectedCampaign
+          } as CitizenMetadata));
         } else {
           dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
+          dispatch(setMintingMode(false));
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
         LogError(Module.Citizens, ethereumCitizensMetadata.errMessage, ethereumCitizensMetadata.errCode);
@@ -141,19 +150,31 @@ export function useBlockchainWallet() {
         dispatch(setCitizensMetadata(solanaCitizensMetadata.value));
 
         if (selectedCampaign === null) {
-          const userCampaigns = [...new Set(solanaCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata          
+          const userCampaigns = [...new Set(solanaCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
+
           if (userCampaigns.length > 0) {
             dispatch(setSelectedCampaign(userCampaigns[0]));
+            dispatch(setSelectedCitizen(solanaCitizensMetadata.value[0]));
+            dispatch(setMintingMode(false));
           } else {
-            //TODO: Handle this case, go to minting here
+            // MINTING FLOW
+            dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
+            dispatch(setSelectedCitizen({
+              baseCombination: '0-0-0-0-0-0-0-0-0-0',
+              combination: '0-0-0-0-0-0-0-0-0-0',
+              campaign: Campaign.Kumi
+            } as CitizenMetadata));
           }
-
-          dispatch(setSelectedCitizen(solanaCitizensMetadata.value[0]));
         } else if (!citizen) {
-          //TODO: Handle this case, go to minting here
-          dispatch(setSelectedCitizen(solanaCitizensMetadata.value[0]));
+          // MINTING FLOW
+          dispatch(setSelectedCitizen({
+            baseCombination: '0-0-0-0-0-0-0-0-0-0',
+            combination: '0-0-0-0-0-0-0-0-0-0',
+            campaign: selectedCampaign
+          } as CitizenMetadata));
         } else {
           dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
+          dispatch(setMintingMode(false));
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
         LogError(Module.Citizens, solanaCitizensMetadata.errMessage, solanaCitizensMetadata.errCode);
@@ -192,7 +213,7 @@ export function useBlockchainWallet() {
             return; // If the user address is undefined, log the error and return
           }
 
-          if (chainType === Blockchain.Ethereum && ethereumReady) {
+          if (chainType === Blockchain.Ethereum && isEthereumReady) {
             const provider = await ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
             const walletName = await GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
             setEthersProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
@@ -202,27 +223,33 @@ export function useBlockchainWallet() {
             } else {
               dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
             }
+            setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
 
           } else if (chainType === Blockchain.Solana) {
             //TODO: Set provider to solana provider
             dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
+            setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
           }
         }
         connectPromise();
       } // Set the user as logged in
     }
-    if (ready && !authenticated && (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
-      dispatch(disconnect());
+    if (ready && !authenticated) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+      if (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana) dispatch(disconnect());
+      else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: false }));
     }
-  }, [ready, authenticated, ethereumReady]);
+  }, [ready, authenticated, isEthereumReady]);
 
-  //Root Logic
+  // Root Logic
   useEffect(() => {
     if (!isFetchingSession && userSession) {
       dispatch(connect({ address: userSession.linked[0].eoa, walletName: null, blockchainType: Blockchain.Root }));
+      setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: true }));
     }
-    if (!isFetchingSession && !userSession && blockchainType === Blockchain.Root) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
-      dispatch(disconnect());
+    if (!isFetchingSession && !userSession) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+      if (blockchainType === Blockchain.Root) dispatch(disconnect());
+      else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: false }));
+      
     }
   }, [isFetchingSession, userSession]);
 
@@ -247,6 +274,14 @@ export function useBlockchainWallet() {
       getCampaignParams(selectedCampaign); // Get the campaign parameters
     }
   }, [selectedCampaign, isConnected]);
+
+
+  useEffect(() => {
+    const loginLibraryFilter = Object.values(loginLibraryFlags).filter(flag => flag === true || flag === null);
+    if (loginLibraryFilter.length === 0)
+      dispatch(disconnect());
+
+  }, [loginLibraryFlags])
 
   return {
     HandleLogin,

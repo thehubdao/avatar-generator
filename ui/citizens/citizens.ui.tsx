@@ -9,6 +9,7 @@ import { FilterList } from "../../utils/common.util";
 import { setEditMode } from "../../store/citizensMetadataSlice";
 import DetailsUI from "./common/details.ui";
 import SnackbarProvider from "./snackbar/snackbar.provider";
+import MintUI from "./common/mint.ui";
 
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
@@ -19,13 +20,15 @@ interface CitizensUIProps {
 	handleExport: () => Promise<void>;
 	handleOptionChange: (id, path, name, category) => Promise<void>;
 	handleSaveCombination: () => Promise<void>;
+	handleMinting: () => Promise<boolean>;
 }
 
-export default function CitizensUI({ singleInitData, exportData, featureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination }: CitizensUIProps) {
+export default function CitizensUI({ singleInitData, exportData, featureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleMinting }: CitizensUIProps) {
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
 	const didEditMode = useAppSelector(state => state.citizensMetadata.editMode);
+	const didMintingMode = useAppSelector(state => state.citizensMetadata.mintingMode);
 
 	// Local State
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
@@ -126,46 +129,57 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 								}
 							/>
 						</div>
-						{/* CITIZEN DETAILS */}
-						{singleInitData && singleInitData.features.length > 0 &&
-							<DetailsUI data={singleInitData.features} handleDownload={() => handleExport()} imgUrl={selectedCitizen.imageUrl} loading={false} />
-						}
-						{/* EDIT MODE HUD */}
-						{isReady &&
-							<div className="fixed w-full z-50 dark">
-								<HudUI
-									selectedOption={selectedOption}
-									editModeSelected={didEditMode}
-									selectListCategory={
-										(campaignParams.features &&
-											campaignParams.accessories && [
-												...campaignParams.features,
-												...campaignParams.accessories,
-											]) ||
-										[]
+						{
+							didMintingMode ?
+								<>
+									{/* MINTING */}
+									{isReady &&
+										<MintUI onMinting={() => handleMinting()} />
 									}
-									optionList={optionList}
-									selectedCategory={selectedCategory}
-									campaignSkinColorConfig={
-										campaignParams?.config.skin ||
-										{}
+								</>
+								:
+								<>
+									{/* CITIZEN DETAILS */}
+									{singleInitData && singleInitData.features.length > 0 &&
+										<DetailsUI data={singleInitData.features} handleDownload={() => handleExport()} imgUrl={selectedCitizen.imageUrl} loading={false} />
 									}
-									skinColor={'#FFFFFF'}
-									//TODO: Save combination
-									handleSaveCombination={() => handleSaveCombination()}
-									changeView={() => dispatch(setEditMode(false))}
-									onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
-									onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
-									onSkinColorChange={() => { }}
-									exportModel={() => handleExport()}
-									isCustomCampaignHud
-									onClickBackButton={() => dispatch(setEditMode(false))}
-									isLoading={false}
-								/>
-							</div>
+									{/* EDIT MODE HUD */}
+									{isReady &&
+										<div className="fixed w-full z-50 dark">
+											<HudUI
+												selectedOption={selectedOption}
+												editModeSelected={didEditMode}
+												selectListCategory={
+													(campaignParams.features &&
+														campaignParams.accessories && [
+															...campaignParams.features,
+															...campaignParams.accessories,
+														]) ||
+													[]
+												}
+												optionList={optionList}
+												selectedCategory={selectedCategory}
+												campaignSkinColorConfig={
+													campaignParams?.config.skin ||
+													{}
+												}
+												skinColor={'#FFFFFF'}
+												//TODO: Save combination
+												handleSaveCombination={() => handleSaveCombination()}
+												changeView={() => dispatch(setEditMode(false))}
+												onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
+												onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
+												onSkinColorChange={() => { }}
+												exportModel={() => handleExport()}
+												isCustomCampaignHud
+												onClickBackButton={() => dispatch(setEditMode(false))}
+												isLoading={false}
+											/>
+										</div>
+									}
+								</>
 						}
 					</>
-
 				}
 				{
 					!isReady &&

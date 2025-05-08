@@ -13,7 +13,7 @@ import Modal from "./common/modal.ui";
 import Button from "./common/button.ui";
 import { DataBaseDrop } from "../../interfaces/citizens.interface";
 import { useEffect, useState } from "react";
-import MintUI from "./sections/mint.ui";
+import MintUI from "./common/mint.ui";
 
 interface CitizensUIProps {
   currentSection: CitizensSections;
@@ -30,7 +30,7 @@ interface CitizensUIProps {
   handleUnfollowUser: (address: string) => Promise<boolean>;
   handleClaim: (drop: DataBaseDrop) => Promise<boolean>
   claimableDrops: DataBaseDrop[]
-  mintRedirect: () => void
+  mintRedirect: () => Promise<boolean>
 }
 
 
@@ -111,7 +111,7 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
         <Play />
       }
       {currentSection === CitizensSections.Mint &&
-        <MintUI supply={collectionSupply} mintRedirect={mintRedirect} />
+        <MintUI supply={collectionSupply} onMinting={mintRedirect} />
       }
     </>
   );
