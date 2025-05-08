@@ -30,7 +30,7 @@ interface CitizensUIProps {
   handleUnfollowUser: (address: string) => Promise<boolean>;
   handleClaim: (drop: DataBaseDrop) => Promise<boolean>
   claimableDrops: DataBaseDrop[]
-  mintRedirect: () => void
+  mintRedirect: () => Promise<boolean>
 }
 
 

@@ -1063,7 +1063,7 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
               throw new Error('Function not implemented.');
             } } handleClaim={function (): Promise<boolean> {
               throw new Error('Function not implemented.');
-            } } mintRedirect={function (): void {
+            } } mintRedirect={function (): Promise<boolean> {
               throw new Error('Function not implemented.');
             } }              /* handleClaim={handleEthereumClaim} mintRedirect={mintRedirect} */ />
           }
