@@ -14,7 +14,7 @@ import WearableContractAbi from '../../../constants/abi/WearableContractABI.json
 import { CampaignDrops } from '../../../types/citizens.type';
 import { LeaderboardEntry } from '../../../types/leaderboard.type';
 import { BodyPart } from '../../../interfaces/avatar.interface';
-    
+
 export async function GetTokensOf(contractAddress: string, address: string): Promise<Result<string[]>> {
     try {
         const contract = new Contract(contractAddress, AvatarContractAbi, PROVIDER);
@@ -203,7 +203,7 @@ export async function GetCampaignsTokensMetadata(address: string): Promise<Resul
 export async function GetCampaignUserFeatures(address: string, campaign: string): Promise<Result<Drop[]>> {
     try {
         const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
-        
+
         const balancePromises = dropsData.map(drop => {
             const contract = new Contract(drop.contract_address, WearableContractAbi, PROVIDER);
             return contract.balanceOf(address).then(balance => ({
@@ -223,10 +223,10 @@ export async function GetCampaignUserFeatures(address: string, campaign: string)
 
         return { success: true, value: features };
     } catch (error) {
-        return { 
-            success: false, 
-            errMessage: 'Error getting campaign user features', 
-            errCode: CommonErrorCode.FetchError 
+        return {
+            success: false,
+            errMessage: 'Error getting campaign user features',
+            errCode: CommonErrorCode.FetchError
         };
     }
 }
@@ -234,12 +234,12 @@ export async function GetCampaignUserFeatures(address: string, campaign: string)
 export async function GetUserFeatures(address: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
     try {
         const campaigns = Object.keys(LUKSO_CAMPAIGN_WEB3_DATA);
-        const campaignPromises = campaigns.map(campaign => 
+        const campaignPromises = campaigns.map(campaign =>
             GetCampaignUserFeatures(address, campaign)
         );
 
         const results = await Promise.all(campaignPromises);
-        
+
         const features = campaigns.reduce((acc, campaign, index) => {
             const result = results[index];
             if (result.success) {
@@ -252,10 +252,10 @@ export async function GetUserFeatures(address: string): Promise<Result<CampaignD
 
         return { success: true, value: features };
     } catch (error) {
-        return { 
-            success: false, 
-            errMessage: 'Error getting user features', 
-            errCode: CommonErrorCode.FetchError 
+        return {
+            success: false,
+            errMessage: 'Error getting user features',
+            errCode: CommonErrorCode.FetchError
         };
     }
 }
@@ -266,19 +266,25 @@ export async function GetFullLeaderboardData(walletAddress: string): Promise<Res
         const profileData = await GetUniversalProfileData(entry.address);
         if (!profileData.success) return entry; // If the profile data is not found, return the original entry
         return {
-          ...entry,
-          name: profileData.value.name,
-          profileImage: profileData.value.profileImage,
-          isFollowing: false
+            ...entry,
+            name: profileData.value.name,
+            profileImage: profileData.value.profileImage,
+            isFollowing: false
         };
-      }));
+    }));
 
-      if(!leaderboardWithProfileData) return { success: false, errMessage: 'Error getting leaderboard with profile data', errCode: CommonErrorCode.FetchError };
+    if (!leaderboardWithProfileData) return { success: false, errMessage: 'Error getting leaderboard with profile data', errCode: CommonErrorCode.FetchError };
 
-      const followStatuses = await GetFollowStatuses(leaderboardWithProfileData, PROVIDER, walletAddress as string);
-      leaderboardWithProfileData.forEach(entry => {
-        entry.isFollowing = followStatuses[entry.address] || false;
-      });
+    const followStatusesResult = await GetFollowStatuses(leaderboardWithProfileData, PROVIDER, walletAddress);
+
+    if (!followStatusesResult.success) return { success: false, errMessage: 'Error getting follow statuses', errCode: CommonErrorCode.FetchError };
+
+    const followStatuses = followStatusesResult.value;
+
+    leaderboardWithProfileData.forEach((entry, index) => {
+        leaderboardWithProfileData[index].isFollowing = followStatuses[entry.address] || false;
+    });
+
     return { success: true, value: leaderboardWithProfileData };
 }
 
