@@ -20,7 +20,7 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
     if (!isSuccess) {
       showSnackbar(<p>Follow failed, try again later.</p>);
     } else {
-      showSnackbar(<p>Followed {user.name}</p>);
+      showSnackbar(<p>{(user.name && user.name?.length > 0) ? user.name : user.address} followed!</p>);
     }
     setIsLoading(false);
   }
@@ -31,7 +31,7 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
     if (!isSuccess) {
       showSnackbar(<p>Unfollow failed, try again later.</p>);
     } else {
-      showSnackbar(<p>unfollowed {user.name}</p>);
+      showSnackbar(<p>{(user.name && user.name?.length > 0) ? user.name : user.address} unfollowed!</p>);
     }
     setIsLoading(false);
   }
@@ -52,7 +52,7 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
           {isLoading ?
             <div className="w-2 sm:w-2 h-2 sm:h-4 border-t border-citizens-dark rounded-full animate-spin" />
             :
-            <div className="scale-75">
+            <div className="scale-100">
               <AddUserSVG />
             </div>
           }
@@ -68,7 +68,7 @@ export default function FollowButton({ user, onFollowUser, onUnfollowUser }: Fol
           {isLoading ?
             <div className="w-2 sm:w-4 h-2 sm:h-4 border-t border-citizens-dark rounded-full animate-spin" />
             :
-            <div className="scale-75">
+            <div className="scale-100">
               <RemoveUserSVG />
             </div>
           }

@@ -288,15 +288,33 @@ export default function CitizensComponent() {
       .map((feature) => feature.val.index)
       .join('-') as string;
 
-    if (!campaignParams) return LogError(Module.Citizens, 'Campaign params is undefined in saveCombination');
-    if (!singleInitData.current) return LogError(Module.Citizens, 'Single init data is undefined in saveCombination');
-    if (!selectedCitizen) return LogError(Module.Citizens, 'Selected citizen is undefined in saveCombination');
-    if (!walletAddress) return LogError(Module.Citizens, 'Wallet address is undefined in saveCombination');
-    if (!citizensMetadata) return LogError(Module.Citizens, 'Citizens metadata is undefined in saveCombination');
+    if (!campaignParams) {
+      LogError(Module.Citizens, 'Campaign params is undefined in saveCombination');
+      return false;
+    }
+    if (!singleInitData.current) {
+      LogError(Module.Citizens, 'Single init data is undefined in saveCombination');
+      return false;
+    }
+    if (!selectedCitizen) {
+      LogError(Module.Citizens, 'Selected citizen is undefined in saveCombination');
+      return false;
+    }
+    if (!walletAddress) {
+      LogError(Module.Citizens, 'Wallet address is undefined in saveCombination');
+      return false;
+    }
+    if (!citizensMetadata) {
+      LogError(Module.Citizens, 'Citizens metadata is undefined in saveCombination');
+      return false;
+    }
 
     const currentCampaign = selectedCampaign;
 
-    if (!currentCampaign) return LogError(Module.Citizens, 'Current campaign is undefined in saveCombination');
+    if (!currentCampaign) {
+      LogError(Module.Citizens, 'Current campaign is undefined in saveCombination');
+      return false;
+    }
 
     const currentFeatures = singleInitData.current.features;
     const newMetadata: CitizenMetadata = {
@@ -339,7 +357,14 @@ export default function CitizensComponent() {
       newCombination,
       selectedCitizen.campaign
     );
-    if (!metadataObject.success) return; //TODO: handle error at UI
+    if (!metadataObject.success) {
+      LogError(
+        Module.Citizens,
+        'Failed to upload metadata on saveLuksoCombination',
+        metadataObject.errCode
+      );
+      return false;
+    }
 
     newMetadata.imageUrl = metadataObject.value.imageUrl;
 
@@ -357,25 +382,31 @@ export default function CitizensComponent() {
     const updatedCitizensMetadata = [...citizensMetadata];
     const index = updatedCitizensMetadata.findIndex(x => x.tokenId == selectedCitizen.tokenId);
 
-    if (index == -1) return LogError(Module.Citizens, 'Citizen metadata not found in saveLuksoCombination');
+    if (index == -1) {
+      LogError(Module.Citizens, 'Citizen metadata not found in saveLuksoCombination');
+      return false;
+    }
 
     updatedCitizensMetadata[index] = newMetadata;
 
     dispatch(setCitizensMetadata(updatedCitizensMetadata));
     dispatch(setSelectedCitizen(newMetadata));
-    // TODO: Handle success case at UI
+    return true; // return true in success, false in failure
   }
 
   async function saveKumiCombination() {
     //TODO: implement kumi combination saving
+    return false;
   }
 
   async function handleSaveCombination() {
+    let isSuccess = false;
     if (selectedCampaign == Campaign.Citizens || selectedCampaign == Campaign.Creators) {
-      await saveLuksoCombination();
+      isSuccess = await saveLuksoCombination();
     } else if (selectedCampaign == Campaign.Kumi) {
-      await saveKumiCombination();
+      isSuccess = await saveKumiCombination();
     }
+    return isSuccess;
   }
 
   async function onMinting() {

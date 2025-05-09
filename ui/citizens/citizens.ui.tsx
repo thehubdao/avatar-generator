@@ -19,7 +19,7 @@ interface CitizensUIProps {
 	handleReady: () => Promise<void>;
 	handleExport: () => Promise<void>;
 	handleOptionChange: (id, path, name, category) => Promise<void>;
-	handleSaveCombination: () => Promise<void>;
+	handleSaveCombination: () => Promise<boolean>;
 	handleMinting: () => Promise<boolean>;
 }
 
@@ -164,7 +164,6 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 													{}
 												}
 												skinColor={'#FFFFFF'}
-												//TODO: Save combination
 												handleSaveCombination={() => handleSaveCombination()}
 												changeView={() => dispatch(setEditMode(false))}
 												onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
