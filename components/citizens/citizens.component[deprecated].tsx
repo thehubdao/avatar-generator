@@ -1006,7 +1006,7 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
               exportModel={() => exportModel()}
               isCustomCampaignHud
               onClickBackButton={() => setIsEditModeSelected(false)}
-              isLoading={isLoading} handleSaveCombination={function (): Promise<void> {
+              isLoading={isLoading} handleSaveCombination={function (): Promise<boolean> {
                 throw new Error("Function not implemented.");
               } }              />
             }
