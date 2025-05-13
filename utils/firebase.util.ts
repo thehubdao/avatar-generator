@@ -266,7 +266,6 @@ export async function GetFile(path: string, campaign?: string): Promise<Result<A
     const { getBlob, ref } = await import('@firebase/storage');
     const campaignSection = campaign ? `${campaign.toLowerCase()}/` : '';
     const baseMeshRef = ref(await FirebaseUtil.Instance().Storage(), campaignSection + path);
-    console.log(baseMeshRef, campaignSection + path)
     // // Server Side
     // const stream = await getStream(baseMeshRef);
     // return stream;

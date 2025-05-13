@@ -51,6 +51,10 @@ const campaignWeb3Data: CampaignData = {
         contractAddress: '0x74654920356257981f6b63a65ad72d4d9bc21929',
         baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
     }, 'vrm_female': { contractAddress: '0x754a5d007d5f1188ef0db892ee115a7c01b38fa3', baseCid: '' },
+    kumi: {
+        contractAddress: '',
+        baseCid: ''
+    }
 }
 
 const schemas = [
@@ -264,7 +268,8 @@ export const getCampaignUserFeatures = async (address: string, campaign: string)
 export const getUserFeatures = async (address: string) => {
     const features: CampaignDrops = {
         vrm_male: [],
-        vrm_female: []
+        vrm_female: [],
+        kumi: []
     }
     for (const campaign of Object.keys(campaignWeb3Data)) {
         const campaignUserFeatures = await getCampaignUserFeatures(address, campaign)

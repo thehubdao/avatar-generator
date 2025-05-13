@@ -21,7 +21,7 @@ export async function getStaticProps() {
 }
 
 export default function LuksoAvatarView({ imagenes }: any) {
-  const [campaign, setCampaign] = useState<Campaign>('kumi')
+  const [campaign, setCampaign] = useState<Campaign>(process.env.NEXT_PUBLIC_CAMPAIGN as Campaign)
   const [campaignParams, setCampaignParams] = useState<CampaignParameters>()
 
   const getBlob = async () => {
