@@ -6,7 +6,7 @@ TODO:
     ✔ Back camera to initial position when edit mode is closed @done(25-04-22 11:45)
     ☐ Check double setCampaignParameters in useBlockchainWallet hook when change pages or change selectedCampaign
     ☐ Add ImageUrl and tokenId to Kumi minting metadata
-    ☐ (vrm_male) Check bad skin color asignation in head
+    ✔ (vrm_male) Check bad skin color asignation in head @done(25-05-13 18:37)
     ☐ Review and adjust z-index layout in whole citizens
     ☐ Review exportModel function in citizens UI
     ☐ Make loading UI with message prop
