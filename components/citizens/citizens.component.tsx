@@ -1,9 +1,9 @@
 import { useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import CitizensUI from "../../ui/citizens/citizens.ui";
-import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign } from "../../utils/api.util";
+import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign, PostRequestVRMProcessFile } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
-import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData } from "../avatar/editor.component";
+import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, GetAvatarVRM, SetEnvironment, SetFeaturesData } from "../avatar/editor.component";
 import { Delay, LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
@@ -16,6 +16,8 @@ import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util
 import { Campaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
 import { CitizenMetadata } from "../../interfaces/citizens.interface";
+import combinationArray from "../../array.json";
+import { UploadFile } from "../../utils/firebase.util";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -145,19 +147,9 @@ export default function CitizensComponent() {
       LogError(Module.Citizens, 'Failed to get single data', result.errCode);
       return;
     }
-
-    await getFeatureList();
-
-    singleInitData.current.features.forEach((feature) => {
-      addReplaceAttribute(feature.val.type, feature.val.name);
-    });
   }
 
   async function loadSingleData() {
-    if (selectedCitizen === null) {
-      LogError(Module.Citizens, 'Missing selected citizen to load single data!');
-      return;
-    }
     if (!singleInitData.current) {
       LogError(Module.Citizens, 'Missing single data!');
       return;
@@ -180,7 +172,6 @@ export default function CitizensComponent() {
       await Promise.all([
         getEnvironmentMapList(),
         getSingleInfo(),
-        getSingleData(selectedCampaign as string, selectedCitizen?.combination as string),
       ]);
 
       await SetFeaturesData(campaignParams?.features ?? []);
@@ -198,53 +189,31 @@ export default function CitizensComponent() {
         campaignParams?.config.envMap?.skyboxConfig
       );
 
-      // Set features from single
-      await loadSingleData();
-
-      // Set animation
-      const animationResult = await GetAnimationByCampaignAndName(
-        selectedCampaign,
-        campaignParams?.config.defAnimation
-      );
-
-      if (animationResult.success) {
-        await ChangeStartAnimation(animationResult.value.at(0)?.path);
-      } else {
-        LogError(Module.Citizens, 'Failed to change start animation', animationResult.errCode);
-      }
-
+      for (let i = 0; i < combinationArray.length; i++) {
+        const combination = combinationArray[i];
+        await getSingleData(selectedCampaign as string, combination);
+        await loadSingleData();
+        await exportModel(combination);
+}
       setIsAllReady(true);
     } catch (error) {
       LogError(Module.Citizens, 'Error in onAvatarBuilderReady', error);
     }
   }
 
-  async function exportModel() {
-    exportData.current.attributesBase64 = window.btoa(
-      JSON.stringify(exportData.current.attributes)
-    );
-    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${selectedCitizen!.combination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`;
-    const [
-      picturePromise,
-      modelGLBPromise,
-      modelVRMPromise,
-    ] = await Promise.all([
-      FetchBlob(selectedCitizen!.imageUrl),
+  async function exportModel(combination: string) {
+    const [modelGLBPromise, modelVRMPromise] = await Promise.all([
       GetAvatarGLB(),
-      FetchBlob(vrmStorageUrl),
+      GetAvatarVRM()
     ]);
-
-    const modelVRM = modelVRMPromise;
-    const modelGLB = modelGLBPromise.success
-      ? modelGLBPromise.value
-      : undefined;
-    const filesName =
-      FILE_CAMPAIGN_NAME_LABEL[campaignParams?.campaign as keyof typeof FILE_CAMPAIGN_NAME_LABEL] +
-      selectedCitizen!.tokenId;
-    if (modelVRM && modelGLBPromise.success) {
-      await SaveFile(modelVRM, `${filesName}.vrm`);
-      await SaveFile(modelGLB, `${filesName}.glb`);
-      await SaveFile(picturePromise, `${filesName}.png`);
+    console.log("Downloading for " + combination)
+    const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
+    const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
+    if (modelVRMPromise.success && modelGLBPromise.success) {
+      const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
+      await UploadFile(new File([refinedModelVRM], `${combination}.vrm`), StorageLocation.AvatarVrms, undefined, campaignParams?.campaign)
+      await SaveFile(modelGLB, `${combination}.glb`)
+      await SaveFile(refinedModelVRM, `${combination}.vrm`)
     }
   }
 
@@ -410,15 +379,15 @@ export default function CitizensComponent() {
   }
 
   async function onMinting() {
-      //TODO: Minting function
-      // await createAsset(wallets[0], {
-      //   name: "KUMI",
-      //   uri: "ipfs://" + process.env.NEXT_PUBLIC_KUMI_IPFS_HASH,
-      //   plugins: []
-      // });
-      await Delay(3000);
-      return Math.random() > 0.5;
-    }
+    //TODO: Minting function
+    // await createAsset(wallets[0], {
+    //   name: "KUMI",
+    //   uri: "ipfs://" + process.env.NEXT_PUBLIC_KUMI_IPFS_HASH,
+    //   plugins: []
+    // });
+    await Delay(3000);
+    return Math.random() > 0.5;
+  }
 
   return <CitizensUI
     singleInitData={singleInitData.current}
@@ -426,7 +395,7 @@ export default function CitizensComponent() {
     featureList={optionList.current}
     isReady={isAllReady}
     handleReady={() => onAvatarBuilderReady()}
-    handleExport={() => exportModel()}
+    handleExport={() => exportModel(selectedCitizen?.combination as string)}
     handleOptionChange={(id, path, name, category) => changeFeaturefromHud(id, path, name, category)}
     handleSaveCombination={() => handleSaveCombination()}
     handleMinting={() => onMinting()}

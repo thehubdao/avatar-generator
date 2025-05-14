@@ -10,7 +10,7 @@ import { setEditMode } from "../../store/citizensMetadataSlice";
 import DetailsUI from "./common/details.ui";
 import SnackbarProvider from "./snackbar/snackbar.provider";
 import MintUI from "./common/mint.ui";
-
+import { useBlockchainWallet } from "../../hooks/useBlockchainWallet";
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
 	exportData: ExportInterface;
@@ -29,6 +29,8 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
 	const didEditMode = useAppSelector(state => state.citizensMetadata.editMode);
 	const didMintingMode = useAppSelector(state => state.citizensMetadata.mintingMode);
+
+	useBlockchainWallet();
 
 	// Local State
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
@@ -100,7 +102,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 		<SnackbarProvider>
 			<div className="w-full h-dvh text-white">
 				{
-					campaignParams && campaignParams !== null && selectedCitizen !== null &&
+					campaignParams && campaignParams !== null &&
 					<>
 						{/* AVATAR EDITOR */}
 						<div className="fixed top-0 right-0 h-dvh flex justify-end">
@@ -129,62 +131,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 								}
 							/>
 						</div>
-						{
-							didMintingMode ?
-								<>
-									{/* MINTING */}
-									{isReady &&
-										<MintUI onMinting={() => handleMinting()} />
-									}
-								</>
-								:
-								<>
-									{/* CITIZEN DETAILS */}
-									{singleInitData && singleInitData.features.length > 0 &&
-										<DetailsUI data={singleInitData.features} handleDownload={() => handleExport()} imgUrl={selectedCitizen.imageUrl} loading={false} />
-									}
-									{/* EDIT MODE HUD */}
-									{isReady &&
-										<div className="fixed w-full z-50 dark">
-											<HudUI
-												selectedOption={selectedOption}
-												editModeSelected={didEditMode}
-												selectListCategory={
-													(campaignParams.features &&
-														campaignParams.accessories && [
-															...campaignParams.features,
-															...campaignParams.accessories,
-														]) ||
-													[]
-												}
-												optionList={optionList}
-												selectedCategory={selectedCategory}
-												campaignSkinColorConfig={
-													campaignParams?.config.skin ||
-													{}
-												}
-												skinColor={'#FFFFFF'}
-												handleSaveCombination={() => handleSaveCombination()}
-												changeView={() => dispatch(setEditMode(false))}
-												onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
-												onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
-												onSkinColorChange={() => { }}
-												exportModel={() => handleExport()}
-												isCustomCampaignHud
-												onClickBackButton={() => dispatch(setEditMode(false))}
-												isLoading={false}
-											/>
-										</div>
-									}
-								</>
-						}
 					</>
-				}
-				{
-					!isReady &&
-					<div className="fixed inset-0 w-full h-dvh flex justify-center items-center bg-gradient-to-b from-[#151515] to-[#0C0C0C]">
-						<h1 className="text-white text-2xl">Loading Environment...</h1>
-					</div>
 				}
 			</div>
 		</SnackbarProvider>
