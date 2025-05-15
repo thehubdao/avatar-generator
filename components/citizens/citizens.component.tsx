@@ -16,6 +16,7 @@ import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util
 import { Campaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
 import { CitizenMetadata } from "../../interfaces/citizens.interface";
+import { mintKumiCitizen } from "../../utils/web3/solana/contract.util";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -410,15 +411,14 @@ export default function CitizensComponent() {
   }
 
   async function onMinting() {
-      //TODO: Minting function
-      // await createAsset(wallets[0], {
-      //   name: "KUMI",
-      //   uri: "ipfs://" + process.env.NEXT_PUBLIC_KUMI_IPFS_HASH,
-      //   plugins: []
-      // });
-      await Delay(3000);
-      return Math.random() > 0.5;
+    //TODO: Minting function
+    if (selectedCampaign == Campaign.Kumi) {
+      const mintResult = await mintKumiCitizen();
+      if (mintResult.success) return true;
+      else return false;
     }
+    return Math.random() > 0.5;
+  }
 
   return <CitizensUI
     singleInitData={singleInitData.current}
