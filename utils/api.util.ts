@@ -11,7 +11,7 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
-import { DataBaseDrop } from "../interfaces/citizens.interface";
+import { DataBaseDrop, UserXPData } from "../interfaces/citizens.interface";
 
 //#region Generic
 type QueryParams = { [p: string]: string | number | undefined | null };
@@ -185,6 +185,17 @@ export async function FetchClaimableDrops(dropId?: string): Promise<DataBaseDrop
   const url = dropId ? `/api/v1/drops?id=${dropId}` : '/api/v1/drops';
   const response = await fetch(url);
   if (!response.ok) throw new Error('Failed to fetch claimable drops');
+  const data = await response.json();
+  return data.data;
+}
+
+export async function GetUserXPData(address: string): Promise<UserXPData> {
+  const response = await fetch('/api/v1/auth/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address }),
+  });
+  if (!response.ok) throw new Error('Failed to get user XP data');
   const data = await response.json();
   return data.data;
 }
