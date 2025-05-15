@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setMintingMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
-import { CitizenMetadata } from '../interfaces/citizens.interface';
+import { CitizenMetadata, FollowUserData } from '../interfaces/citizens.interface';
 import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
@@ -20,6 +20,8 @@ import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
 import { useAuthUi } from '@futureverse/auth-ui';
 import { useAuth } from '@futureverse/auth-react';
+import { GetUserXPData } from '../utils/api.util';
+import { LeaderboardEntry } from '../types/leaderboard.type';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -76,23 +78,32 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: features.errMessage, errCode: features.errCode };
   }
 
-  const fetchEthereumLeaderboardData = async () => {
-    const leaderboardData = await GetFullLeaderboardData(userAddress as string);
-    if (leaderboardData.success) {
-      dispatch(setLeaderboardData(leaderboardData.value));
-    } else {
-      LogError(Module.Citizens, leaderboardData.errMessage, leaderboardData.errCode);
-    }
+  async function getEthereumFollowerCountPromise(walletAddress: string): Promise<Result<FollowUserData>> {
+    const followerCount = await GetFollowerCounts(walletAddress);
+
+    if (followerCount.success) return { success: true, value: followerCount.value };
+
+    return { success: false, errMessage: followerCount.errMessage, errCode: followerCount.errCode };
   }
+
+  async function getEthereumLeaderboardDataPromise(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
+    const leaderboardData = await GetFullLeaderboardData(walletAddress);
+
+    if (leaderboardData.success) return { success: true, value: leaderboardData.value };
+
+    return { success: false, errMessage: leaderboardData.errMessage, errCode: leaderboardData.errCode };
+  }
+
 
   const fetchCitizensMetadata = async (walletAddress: string) => {
     if (blockchainType === Blockchain.Ethereum) {
       const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
-      const followerCountResult = await GetFollowerCounts(walletAddress); // Get the follower count
+      const followerCountResult = await getEthereumFollowerCountPromise(walletAddress); // Get the follower count
       const ethereumUserFeatures = await getEthereumUserFeaturesPromise(walletAddress); // Get the user features
-      if (ethereumCitizensMetadata.success) {
-        fetchEthereumLeaderboardData(); // Fetch the leaderboard data
+      const ethereumLeaderboardData = await getEthereumLeaderboardDataPromise(walletAddress); // Get the leaderboard data
 
+      //Ethereum Citizens Metadata dispatch
+      if (ethereumCitizensMetadata.success) {
         const citizen = ethereumCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
 
         dispatch(setCitizensMetadata(ethereumCitizensMetadata.value));
@@ -128,12 +139,14 @@ export function useBlockchainWallet() {
         LogError(Module.Citizens, ethereumCitizensMetadata.errMessage, ethereumCitizensMetadata.errCode);
       }
 
+      //Follower count dispatch
       if (followerCountResult.success) {
         dispatch(setFollowUserData(followerCountResult.value));
       } else { // If error, log the error, follow user data will be null
         LogError(Module.Citizens, followerCountResult.errMessage, followerCountResult.errCode);
       }
 
+      //Ethereum User Features dispatch
       if (ethereumUserFeatures.success) {
         const ethereumFeatures = ethereumUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the ethereum features to the AppCampaigns type, this depends on the wearables got for current campaign
         dispatch(setUserFeatures(ethereumFeatures));
@@ -141,6 +154,12 @@ export function useBlockchainWallet() {
         LogError(Module.Citizens, ethereumUserFeatures.errMessage, ethereumUserFeatures.errCode);
       }
 
+      //Ethereum Leaderboard Data dispatch
+      if (ethereumLeaderboardData.success) {
+        dispatch(setLeaderboardData(ethereumLeaderboardData.value));
+      } else {
+        LogError(Module.Citizens, ethereumLeaderboardData.errMessage, ethereumLeaderboardData.errCode);
+      }
     } else if (blockchainType === Blockchain.Solana) {
       const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
 
@@ -216,18 +235,19 @@ export function useBlockchainWallet() {
           if (chainType === Blockchain.Ethereum && isEthereumReady) {
             const provider = await ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
             const walletName = await GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
+            const xpData = await GetUserXPData(user?.wallet?.address); // Get the user XP data
+            
             setEthersProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
-
             if (walletName.success) {
-              dispatch(connect({ address: user?.wallet?.address, walletName: walletName.value.name, blockchainType: chainType }));
+              dispatch(connect({ address: user?.wallet?.address, walletName: walletName.value.name, blockchainType: chainType, xpData }));
             } else {
-              dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
+              dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType, xpData }));
             }
             setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
 
           } else if (chainType === Blockchain.Solana) {
             //TODO: Set provider to solana provider
-            dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
+            dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType, xpData: null }));
             setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
           }
         }
@@ -243,7 +263,7 @@ export function useBlockchainWallet() {
   // Root Logic
   useEffect(() => {
     if (!isFetchingSession && userSession) {
-      dispatch(connect({ address: userSession.linked[0].eoa, walletName: null, blockchainType: Blockchain.Root }));
+      dispatch(connect({ address: userSession.linked[0].eoa, walletName: null, blockchainType: Blockchain.Root, xpData: null }));
       setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: true }));
     }
     if (!isFetchingSession && !userSession) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
