@@ -62,3 +62,8 @@ export enum LuksoCampaign{
 export enum SolanaCampaign{
   Kumi = "kumi",
 }
+
+export enum CandyMachineGroup{
+  Holder = "holder",
+  Public = "public",
+}
