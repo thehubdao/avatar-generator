@@ -5,7 +5,6 @@ import StarSVG from "./SVG/starSVG.ui";
 import { useFollowCount } from "../../../hooks/useFollowCount";
 import { FormatWalletAddress } from "../../../utils/common.util";
 import { useUniversalProfile } from '../../../hooks/useUniversalProfile';
-import { useXPVerification } from '../../../hooks/useXPVerification';
 import LogoutSVG from "./SVG/logoutSVG.ui";
 import { useOnClickOutside } from "usehooks-ts";
 import { Blockchain } from "../../../enums/blockchain/common.enum";
@@ -22,10 +21,10 @@ export default function ConnectButton({ address, onLogin, onLogout }: ConnectBut
 
   const isLoggedIn = useAppSelector(state => state.citizensAuth.connected);
   const blockchainType = useAppSelector(state => state.citizensAuth.blockchainType);
-
+  const xpData = useAppSelector(state => state.citizensAuth.xpData);
+  
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const { followerCount, followingCount } = useFollowCount(address);
-  const { xpData } = useXPVerification();
 
   const userXP = xpData?.xp ?? 0;
   const userLevel = xpData?.level ?? 0;
