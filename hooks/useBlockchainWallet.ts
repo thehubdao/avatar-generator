@@ -1,10 +1,10 @@
-import { useLogin, useLogout, usePrivy, useWallets } from '@privy-io/react-auth';
+import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setMintingMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
-import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
+import { GetCollectionAssetByOwner, InitializeUmi } from '../utils/web3/solana/contract.util';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
@@ -31,7 +31,8 @@ export function useBlockchainWallet() {
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
-  const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Wallets
+  const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Ethereum Wallets
+  const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets
   const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
   const [loginLibraryFlags, setLoginLibraryFlags] = useState<{ [key in LoginLibrary]: boolean | null }>({
     [LoginLibrary.Privy]: null,
@@ -225,8 +226,11 @@ export function useBlockchainWallet() {
             }
             setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
 
-          } else if (chainType === Blockchain.Solana) {
-            //TODO: Set provider to solana provider
+          } else if (chainType === Blockchain.Solana && isSolanaReady) {
+            const solanaWallet = solanaWallets[0];
+
+            await InitializeUmi(solanaWallet);
+
             dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
             setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
           }
@@ -238,7 +242,7 @@ export function useBlockchainWallet() {
       if (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana) dispatch(disconnect());
       else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: false }));
     }
-  }, [ready, authenticated, isEthereumReady]);
+  }, [ready, authenticated, isEthereumReady, isSolanaReady]);
 
   // Root Logic
   useEffect(() => {
