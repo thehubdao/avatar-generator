@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { Blockchain } from '../enums/blockchain/common.enum';
-import { UserXPData } from '../interfaces/citizens.interface';
+import { FollowUserData, UserXPData } from '../interfaces/citizens.interface';
 
 export interface AuthState {
   connected: boolean | null;
@@ -8,6 +8,7 @@ export interface AuthState {
   walletName: string | null;
   blockchainType: Blockchain | null;
   xpData: UserXPData | null;
+  followUserData: FollowUserData | null;
 }
 
 const initialState: AuthState = {
@@ -16,18 +17,20 @@ const initialState: AuthState = {
   walletName: null,
   blockchainType: null,
   xpData: null,
+  followUserData: null,  // Both follower and following count are -1, meaning this blockchain does not support follow user data
 }
 
 export const citizensAuthSlice = createSlice({
   name: 'citizensAuth',
   initialState,
   reducers: {
-    connect: (state, action: PayloadAction<{address: string, walletName: string | null, blockchainType: Blockchain, xpData: UserXPData | null}>) => {
+    connect: (state, action: PayloadAction<{address: string, walletName: string | null, blockchainType: Blockchain, xpData: UserXPData | null, followUserData: FollowUserData | null}>) => {
       state.connected = true;
       state.address = action.payload.address;
       state.walletName = action.payload.walletName;
       state.blockchainType = action.payload.blockchainType;
       state.xpData = action.payload.xpData;
+      state.followUserData = action.payload.followUserData;
     },
     disconnect: (state) => {
       state.connected = false;
