@@ -171,10 +171,14 @@ export default function LuksoComponent({
     const modelVRM = modelVRMPromise.success ? modelVRMPromise.value : undefined;
     const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
     if (modelVRMPromise.success && modelGLBPromise.success) {
-      const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
-      await UploadFile(new File([refinedModelVRM], `${combination}.vrm`), StorageLocation.AvatarVrms, undefined, campaignParams?.campaign)
       await SaveFile(modelGLB, `${combination}.glb`)
-      await SaveFile(refinedModelVRM, `${combination}.vrm`)
+      try {
+        const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
+        await UploadFile(new File([refinedModelVRM], `${combination}.vrm`), StorageLocation.AvatarVrms, undefined, campaignParams?.campaign)
+        await SaveFile(refinedModelVRM, `${combination}.vrm`)
+      } catch (error) {
+        console.error(error)
+      }
     }
   }
 
