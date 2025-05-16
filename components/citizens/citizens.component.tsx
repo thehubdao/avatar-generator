@@ -4,7 +4,7 @@ import CitizensUI from "../../ui/citizens/citizens.ui";
 import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData } from "../avatar/editor.component";
-import { Delay, LogError } from "../../utils/common.util";
+import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
 import { StorageLocation } from "../../enums/firebase.enum";
@@ -16,7 +16,7 @@ import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util
 import { Campaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
 import { CitizenMetadata } from "../../interfaces/citizens.interface";
-import { GetCollectionAssetByOwner, mintKumiCitizen } from "../../utils/web3/solana/contract.util";
+import { GetCollectionAssetByOwner, MintKumiCitizen } from "../../utils/web3/solana/contract.util";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -413,7 +413,7 @@ export default function CitizensComponent() {
   async function onMinting() {
     //TODO: Minting function
     if (selectedCampaign == Campaign.Kumi) {
-      const mintResult = await mintKumiCitizen();
+      const mintResult = await MintKumiCitizen();
       if (mintResult.success && walletAddress) {
         const asset = await GetCollectionAssetByOwner(walletAddress);
         if (asset.success) {

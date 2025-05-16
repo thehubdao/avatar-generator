@@ -104,7 +104,7 @@ export async function GetCollectionAssetByOwner(
 
 }
 
-export async function getKumiCandyMachineGuardGroup(walletAddress: string, collectionId: PublicKey): Promise<Result<{ group: CandyMachineGroup, mintArgs: GuardSetMintArgs }>> {
+export async function GetKumiCandyMachineGuardGroup(walletAddress: string, collectionId: PublicKey): Promise<Result<{ group: CandyMachineGroup, mintArgs: GuardSetMintArgs }>> {
     const assetsResult = await GetCollectionAssetByOwner(walletAddress, collectionId);
     if (!assetsResult.success) return {
         success: false,
@@ -123,9 +123,9 @@ export async function getKumiCandyMachineGuardGroup(walletAddress: string, colle
     };
 }
 
-export async function mintKumiCitizen(): Promise<Result<boolean>> {
+export async function MintKumiCitizen(): Promise<Result<boolean>> {
     const nftAccount = generateSigner(UMI); //Generate a new NFT account address
-    const groupResult = await getKumiCandyMachineGuardGroup(UMI.identity.publicKey, COLLECTION_ID);
+    const groupResult = await GetKumiCandyMachineGuardGroup(UMI.identity.publicKey, COLLECTION_ID);
 
     if (!groupResult.success) return {
         success: false,
@@ -136,7 +136,7 @@ export async function mintKumiCitizen(): Promise<Result<boolean>> {
         candyMachine: KUMI_CANDY_MACHINE_ID, asset: nftAccount, collection: COLLECTION_ID, group: some(groupResult.value.group), mintArgs: groupResult.value.mintArgs,
     });
 
-    const result = await transactionBuilder()
+    await transactionBuilder()
         .add(setComputeUnitLimit(UMI, { units: 300_000 }))
         .add(mintTx)
         .sendAndConfirm(UMI, { send: { commitment: 'confirmed' } });
