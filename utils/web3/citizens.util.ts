@@ -149,8 +149,7 @@ export async function UnfollowUser(addressToUnfollow: string, provider: BrowserP
 
 export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], provider: JsonRpcProvider, walletAddress: string): Promise<Result<Record<string, boolean>>> {
   try {
-    const signer = await provider.getSigner();
-    const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, signer);
+    const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
 
     // Check follow status for each user in parallel
     const statuses = await Promise.all(

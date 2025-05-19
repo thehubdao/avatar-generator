@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import CitizensUI from "../../ui/citizens/citizens.ui";
 import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
-import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData } from "../avatar/editor.component";
+import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData, ChangeSkinColor } from "../avatar/editor.component";
 import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
@@ -171,7 +171,7 @@ export default function CitizensComponent() {
         path,
         name,
         type,
-        campaignParams?.config.skin?.defColor ?? 'ffffff'
+        campaignParams?.config.skin?.defColor ?? 'FFFFFF'
       );
     }
   }
@@ -201,6 +201,9 @@ export default function CitizensComponent() {
 
       // Set features from single
       await loadSingleData();
+
+      // Set skin tone
+      await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'FFFFFF');
 
       // Set animation
       const animationResult = await GetAnimationByCampaignAndName(
