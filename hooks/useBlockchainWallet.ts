@@ -1,9 +1,9 @@
 import { useLogin, useLogout, usePrivy, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setMintingMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setLeaderboardData, setMintingMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
-import { CitizenMetadata } from '../interfaces/citizens.interface';
+import { CitizenMetadata, FollowUserData } from '../interfaces/citizens.interface';
 import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
@@ -12,7 +12,7 @@ import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
 import { Campaign, LuksoCampaign } from '../enums/citizens/common.enum';
-import { connect, disconnect } from '../store/CitizensAuthSlice';
+import { connect, disconnect } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
@@ -20,6 +20,8 @@ import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
 import { useAuthUi } from '@futureverse/auth-ui';
 import { useAuth } from '@futureverse/auth-react';
+import { GetUserXPData } from '../utils/api.util';
+import { LeaderboardEntry } from '../types/leaderboard.type';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -76,23 +78,38 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: features.errMessage, errCode: features.errCode };
   }
 
-  const fetchEthereumLeaderboardData = async () => {
-    const leaderboardData = await GetFullLeaderboardData(userAddress as string);
-    if (leaderboardData.success) {
-      dispatch(setLeaderboardData(leaderboardData.value));
-    } else {
-      LogError(Module.Citizens, leaderboardData.errMessage, leaderboardData.errCode);
-    }
+  async function getEthereumFollowerCountPromise(walletAddress: string): Promise<Result<FollowUserData>> {
+    const followerCount = await GetFollowerCounts(walletAddress);
+
+    if (followerCount.success) return { success: true, value: followerCount.value };
+
+    return { success: false, errMessage: followerCount.errMessage, errCode: followerCount.errCode };
   }
 
-  const fetchCitizensMetadata = async (walletAddress: string) => {
+  async function getEthereumLeaderboardDataPromise(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
+    const leaderboardData = await GetFullLeaderboardData(walletAddress);
+
+    if (leaderboardData.success) return { success: true, value: leaderboardData.value };
+
+    return { success: false, errMessage: leaderboardData.errMessage, errCode: leaderboardData.errCode };
+  }
+
+
+  const fetchAppData = async () => {
+    const walletAddress = userAddress;
+
+    if (walletAddress === null) {
+      LogError(Module.Citizens, "User address is null, can't fetch app data");
+      return;
+    }
+
     if (blockchainType === Blockchain.Ethereum) {
       const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
-      const followerCountResult = await GetFollowerCounts(walletAddress); // Get the follower count
       const ethereumUserFeatures = await getEthereumUserFeaturesPromise(walletAddress); // Get the user features
-      if (ethereumCitizensMetadata.success) {
-        fetchEthereumLeaderboardData(); // Fetch the leaderboard data
+      const ethereumLeaderboardData = await getEthereumLeaderboardDataPromise(walletAddress); // Get the leaderboard data
 
+      //Ethereum Citizens Metadata dispatch
+      if (ethereumCitizensMetadata.success) {
         const citizen = ethereumCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
 
         dispatch(setCitizensMetadata(ethereumCitizensMetadata.value));
@@ -128,12 +145,7 @@ export function useBlockchainWallet() {
         LogError(Module.Citizens, ethereumCitizensMetadata.errMessage, ethereumCitizensMetadata.errCode);
       }
 
-      if (followerCountResult.success) {
-        dispatch(setFollowUserData(followerCountResult.value));
-      } else { // If error, log the error, follow user data will be null
-        LogError(Module.Citizens, followerCountResult.errMessage, followerCountResult.errCode);
-      }
-
+      //Ethereum User Features dispatch
       if (ethereumUserFeatures.success) {
         const ethereumFeatures = ethereumUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the ethereum features to the AppCampaigns type, this depends on the wearables got for current campaign
         dispatch(setUserFeatures(ethereumFeatures));
@@ -141,6 +153,12 @@ export function useBlockchainWallet() {
         LogError(Module.Citizens, ethereumUserFeatures.errMessage, ethereumUserFeatures.errCode);
       }
 
+      //Ethereum Leaderboard Data dispatch
+      if (ethereumLeaderboardData.success) {
+        dispatch(setLeaderboardData(ethereumLeaderboardData.value));
+      } else {
+        LogError(Module.Citizens, ethereumLeaderboardData.errMessage, ethereumLeaderboardData.errCode);
+      }
     } else if (blockchainType === Blockchain.Solana) {
       const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
 
@@ -179,7 +197,6 @@ export function useBlockchainWallet() {
       } else { // If error, log the error, citizens metadata and selected combination will be null
         LogError(Module.Citizens, solanaCitizensMetadata.errMessage, solanaCitizensMetadata.errCode);
       }
-      dispatch(setFollowUserData({ followerCount: -1, followingCount: -1 })); // Set the follow user data to -1, meaning this blockchain does not support follow user data
     }
   };
 
@@ -216,18 +233,29 @@ export function useBlockchainWallet() {
           if (chainType === Blockchain.Ethereum && isEthereumReady) {
             const provider = await ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
             const walletName = await GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
+            const xpData = await GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
+            const followerCount = await getEthereumFollowerCountPromise(user?.wallet?.address); // Get the follower count
+
             setEthersProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
 
-            if (walletName.success) {
-              dispatch(connect({ address: user?.wallet?.address, walletName: walletName.value.name, blockchainType: chainType }));
-            } else {
-              dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
-            }
+            dispatch(connect({
+              address: user?.wallet?.address,
+              walletName: walletName.success ? walletName.value.name : null,
+              blockchainType: chainType, xpData: xpData.success ? xpData.value : null,
+              followUserData: followerCount.success ? followerCount.value : null
+            }));
+
             setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
 
           } else if (chainType === Blockchain.Solana) {
             //TODO: Set provider to solana provider
-            dispatch(connect({ address: user?.wallet?.address, walletName: null, blockchainType: chainType }));
+            dispatch(connect({
+              address: user?.wallet?.address,
+              walletName: null,
+              blockchainType: chainType,
+              xpData: null,
+              followUserData: { followerCount: -1, followingCount: -1 }// Set the follow user data to -1, meaning this blockchain does not support follow user data
+            }));
             setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
           }
         }
@@ -243,13 +271,13 @@ export function useBlockchainWallet() {
   // Root Logic
   useEffect(() => {
     if (!isFetchingSession && userSession) {
-      dispatch(connect({ address: userSession.linked[0].eoa, walletName: null, blockchainType: Blockchain.Root }));
+      dispatch(connect({ address: userSession.linked[0].eoa, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
       setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: true }));
     }
     if (!isFetchingSession && !userSession) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
       if (blockchainType === Blockchain.Root) dispatch(disconnect());
       else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: false }));
-      
+
     }
   }, [isFetchingSession, userSession]);
 
@@ -260,7 +288,7 @@ export function useBlockchainWallet() {
           LogError(Module.Citizens, "User address is null, can't fetch citizens metadata");
           return;
         }
-        fetchCitizensMetadata(userAddress);
+        fetchAppData();
       }
     }
     else if (isConnected === false) {

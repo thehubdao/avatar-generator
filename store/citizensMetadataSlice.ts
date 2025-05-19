@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CitizenMetadata, FollowUserData } from '../interfaces/citizens.interface';
+import { CitizenMetadata } from '../interfaces/citizens.interface';
 import { Campaign } from '../enums/citizens/common.enum';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { LeaderboardEntry } from '../types/leaderboard.type';
@@ -10,7 +10,6 @@ interface CitizensMetadataState {
   selectedCampaign: Campaign | null;
   campaignParameters: CampaignParameters | null;
   selectedCitizen: CitizenMetadata | null;
-  followUserData: FollowUserData | null;
   leaderboardData: LeaderboardEntry[] | null | undefined;
   userFeatures: CampaignDrops<AppCampaigns> | null;
   editMode: boolean;
@@ -23,7 +22,6 @@ const initialState: CitizensMetadataState = {
   selectedCampaign: null,
   campaignParameters: null,
   selectedCitizen: null,
-  followUserData: null,  // Both follower and following count are -1, meaning this blockchain does not support follow user data
   leaderboardData: null,
   userFeatures: null,
   editMode: false,
@@ -48,9 +46,6 @@ export const citizensMetadataSlice = createSlice({
     setSelectedCitizen: (state, action: PayloadAction<CitizenMetadata>) => {
       state.selectedCitizen = action.payload;
     },
-    setFollowUserData: (state, action: PayloadAction<FollowUserData>) => {
-      state.followUserData = action.payload;
-    },
     setLeaderboardData: (state, action: PayloadAction<LeaderboardEntry[] | undefined>) => {
       state.leaderboardData = action.payload;
     },
@@ -69,5 +64,5 @@ export const citizensMetadataSlice = createSlice({
   }
 });
 
-export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setFollowUserData, setLeaderboardData, setUserFeatures, setEditMode, setMintingMode, setSavingMode } = citizensMetadataSlice.actions;
+export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMintingMode, setSavingMode } = citizensMetadataSlice.actions;
 export default citizensMetadataSlice.reducer;

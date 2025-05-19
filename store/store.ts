@@ -4,7 +4,7 @@ import addCampaignSlice from './addCampaignSlice';
 import currentCampaignSlice from './currentCampaignSlice';
 import addAssetSlice from './addAssetSlice';
 import citizensMetadataSlice from './citizensMetadataSlice';
-import citizensAuthSlice from './CitizensAuthSlice';
+import citizensAuthSlice from './citizensAuthSlice';
 
 const store = configureStore({
   reducer: {

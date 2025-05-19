@@ -98,3 +98,9 @@ export interface FollowUserData {
   followingCount: number;
 }
 
+export interface UserXPData {
+  xp: number;
+  level: number;
+  nextLevelXP: number;
+}
+

@@ -1,7 +1,8 @@
 import { XPReward } from '../../../constants/lukso/xp.constant';
+import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { CreateNotification, UpdateUserXP } from '../../../utils/firebase.util';
 
-export async function HandleBurnXPReward(address: string, burnCount: number): Promise<void> {
+export async function HandleBurnXPReward(address: string, burnCount: number, blockchainType: Blockchain): Promise<void> {
   try {
     const totalXP = burnCount * XPReward.BurnDrop;
     
@@ -14,7 +15,8 @@ export async function HandleBurnXPReward(address: string, burnCount: number): Pr
       message: `You earned ${totalXP} XP for burning ${burnCount} drops!`,
       points: totalXP,
       time: new Date().toISOString(),
-      id: ''
+      id: '',
+      blockchainType
     });
 
   } catch (error) {
