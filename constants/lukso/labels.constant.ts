@@ -1,6 +1,10 @@
-export const FILE_CAMPAIGN_NAME_LABEL = {
+import { Campaign } from "../../enums/citizens/common.enum"
+
+export const FILE_CAMPAIGN_NAME_LABEL: Record<Campaign, string> = {
     vrm_male: 'Lukso_Creator_#',
-    vrm_female:'Lukso_Critizen_#'
+    vrm_female:'Lukso_Critizen_#',
+    kumi: 'Kumi_Citizen_#',
+    root_citizens: 'Root_Citizen_#'
 }
 
 export const CAMPAIGN_LABELS = {
