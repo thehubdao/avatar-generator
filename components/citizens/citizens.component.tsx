@@ -429,6 +429,7 @@ export default function CitizensComponent() {
         return true;
       }
       else return false;
+      
     }
     return Math.random() > 0.5;
   }
