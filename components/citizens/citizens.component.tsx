@@ -17,6 +17,7 @@ import { Campaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
 import { CitizenMetadata } from "../../interfaces/citizens.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen } from "../../utils/web3/solana/contract.util";
+import { GetVrmUrl } from "../../utils/web3/citizens.util";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -227,7 +228,7 @@ export default function CitizensComponent() {
     exportData.current.attributesBase64 = window.btoa(
       JSON.stringify(exportData.current.attributes)
     );
-    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${selectedCitizen!.combination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`;
+    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaignParams?.campaign}%2F${StorageLocation.AvatarVrms}%2F${selectedCitizen?.combination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`;
     const [
       picturePromise,
       modelGLBPromise,
@@ -250,6 +251,47 @@ export default function CitizensComponent() {
       await SaveFile(modelGLB, `${filesName}.glb`);
       await SaveFile(picturePromise, `${filesName}.png`);
     }
+  }
+
+  async function exportGlb(): Promise<boolean> { //This function exports the glb file
+    if (!selectedCitizen) return false;
+    const result = await GetAvatarGLB();
+    if (result.success) {
+      const fileName =
+        FILE_CAMPAIGN_NAME_LABEL[selectedCitizen.campaign as keyof typeof FILE_CAMPAIGN_NAME_LABEL] +
+        selectedCitizen.tokenId;
+      await SaveFile(result.value, `${fileName}.glb`);
+      return true;
+    }
+    return false;
+  }
+
+  async function exportVrm(): Promise<boolean> { //This function exports the vrm file
+    if (!selectedCitizen) return false;
+    const vrmStorageUrl = await GetVrmUrl(selectedCitizen.campaign, selectedCitizen.combination);
+    const result = await FetchBlob(vrmStorageUrl);
+    if (result) {
+      const fileName =
+        FILE_CAMPAIGN_NAME_LABEL[selectedCitizen.campaign as keyof typeof FILE_CAMPAIGN_NAME_LABEL] +
+        selectedCitizen!.tokenId;
+      await SaveFile(result, `${fileName}.vrm`);
+      return true;
+    }
+    return false;
+  }
+
+
+  async function exportImage(): Promise<boolean> { //This function exports the image file
+    if (!selectedCitizen) return false;
+    const result = await FetchBlob(selectedCitizen.imageUrl);
+    if (result) {
+      const fileName =
+        FILE_CAMPAIGN_NAME_LABEL[selectedCitizen.campaign as keyof typeof FILE_CAMPAIGN_NAME_LABEL] +
+        selectedCitizen!.tokenId;
+      await SaveFile(result, `${fileName}.png`);
+      return true;
+    }
+    return false;
   }
 
   async function changeFeaturefromHud(
