@@ -11,7 +11,8 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
-import { DataBaseDrop } from "../interfaces/citizens.interface";
+import { DataBaseDrop, UserXPData } from "../interfaces/citizens.interface";
+import { Blockchain } from "../enums/blockchain/common.enum";
 
 //#region Generic
 type QueryParams = { [p: string]: string | number | undefined | null };
@@ -187,4 +188,15 @@ export async function FetchClaimableDrops(dropId?: string): Promise<DataBaseDrop
   if (!response.ok) throw new Error('Failed to fetch claimable drops');
   const data = await response.json();
   return data.data;
+}
+
+export async function GetUserXPData(address: string, blockchainType: Blockchain): Promise<Result<UserXPData>> {
+  const response = await fetch('/api/v1/auth/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address, blockchainType }),
+  });
+  if (!response.ok) return { success: false, errMessage: 'Failed to get user XP data', errCode: CommonErrorCode.GetNoData };
+  const data = await response.json();
+  return { success: true, value: data.data };
 }

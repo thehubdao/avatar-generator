@@ -37,6 +37,7 @@ import { DataBaseDrop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
 import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/lukso/contract.util[deprecated]";
 import { AVATAR_DOWNLOADED_STATUS, AVATAR_STATUS } from "../constants/firebase.constant";
+import { Blockchain } from "../enums/blockchain/common.enum";
 
 export type LogInStructure = {
   user: string;
@@ -905,7 +906,7 @@ export async function GetRandomCombination() {
   }
 }
 
-async function HandleFollowerChange(address: string, newCount: number, oldCount: number) {
+async function HandleFollowerChange(address: string, newCount: number, oldCount: number, blockchainType: Blockchain) {
   const newFollowers = newCount - oldCount;
   if (newFollowers <= 0) return;
 
@@ -918,11 +919,13 @@ async function HandleFollowerChange(address: string, newCount: number, oldCount:
     message: GenerateFollowerMessage(newFollowers, xpGained, xpResult.value),
     points: xpGained,
     time: new Date().toISOString(),
-    id: ''
-  });
+    id: '',
+    blockchainType: blockchainType
+  },
+);
 }
 
-async function HandleFollowingChange(address: string, newCount: number, oldCount: number) {
+async function HandleFollowingChange(address: string, newCount: number, oldCount: number, blockchainType: Blockchain) {
   const newFollowing = newCount - oldCount;
   if (newFollowing <= 0) return;
 
@@ -935,8 +938,10 @@ async function HandleFollowingChange(address: string, newCount: number, oldCount
     message: GenerateFollowingMessage(newFollowing, xpGained, xpResult.value),
     points: xpGained,
     time: new Date().toISOString(),
-    id: ''
-  });
+    id: '',
+    blockchainType: blockchainType
+  }
+);
 }
 
 function GenerateFollowerMessage(count: number, xp: number, levelInfo: { leveledUp: boolean, newLevel: number }) {
@@ -955,7 +960,7 @@ function GenerateFollowingMessage(count: number, xp: number, levelInfo: { levele
   return message;
 }
 
-export async function UpdateLastLoginDate(address: string): Promise<Result<boolean>> {
+export async function UpdateLastLoginDate(address: string, blockchainType: Blockchain): Promise<Result<boolean>> {
   if (address == undefined) Raise("Missing address to update last login date!");
 
   try {
@@ -989,7 +994,8 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
             message: GenerateLoginMessage(xpGained, XPReward.WeeklyLoginStreak, xpResult.value),
             points: xpGained,
             time: new Date().toISOString(),
-            id: ''
+            id: '',
+            blockchainType: blockchainType
           });
         }
 
@@ -998,7 +1004,7 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         userData.loginStreak = 1;
       }
       // Add holdings XP check after login rewards
-      await HandleHoldingsXPReward(address);
+      await HandleHoldingsXPReward(address, blockchainType);
 
       // Get current follower and following counts
       const followerCountsResult = await GetFollowerCounts(address);
@@ -1007,11 +1013,11 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
 
       // Check if follower/following counts have increased
       if (followerCount > (userData.followerCount || 0)) {
-        await HandleFollowerChange(address, followerCount, userData.followerCount || 0);
+        await HandleFollowerChange(address, followerCount, userData.followerCount || 0, blockchainType);
       }
 
       if (followingCount > (userData.followingCount || 0)) {
-        await HandleFollowingChange(address, followingCount, userData.followingCount || 0);
+        await HandleFollowingChange(address, followingCount, userData.followingCount || 0, blockchainType);
       }
 
       await setDoc(userDocRef, {
@@ -1035,7 +1041,8 @@ export async function UpdateLastLoginDate(address: string): Promise<Result<boole
         xpForNextLevel: 100,
         followerCount: 0,
         followingCount: 0,
-        loginStreak: 1
+        loginStreak: 1,
+        blockchainType: blockchainType
       });
     }
 
@@ -1085,9 +1092,9 @@ export async function UpdateUserXP(userId: string, xpToAdd: number): Promise<Res
   }
 }
 
-export async function GenerateSessionToken(address: string): Promise<string> {
+export async function GenerateSessionToken(address: string, blockchainType: Blockchain): Promise<string> {
   try {
-    await UpdateLastLoginDate(address);
+    await UpdateLastLoginDate(address, blockchainType);
 
     const token = jwt.sign(
       {
@@ -1104,9 +1111,9 @@ export async function GenerateSessionToken(address: string): Promise<string> {
   }
 }
 
-export async function CreateNotification(userId: string, notification: { title: string, message: string, points: number, time: string, id: string }): Promise<Result<boolean>> {
+export async function CreateNotification(userAddress: string, notification: { title: string, message: string, points: number, time: string, id: string, blockchainType: Blockchain }): Promise<Result<boolean>> {
   try {
-    const notificationRef = doc(collection(await FirebaseUtil.Instance().DB(), `${FirestoreGlobalLocation.User}/${userId}/notifications`));
+    const notificationRef = doc(collection(await FirebaseUtil.Instance().DB(), `${FirestoreGlobalLocation.User}/${userAddress}/notifications`));
     notification.id = notificationRef.id;
     await setDoc(notificationRef, notification);
     return { success: true, value: true };
@@ -1117,9 +1124,9 @@ export async function CreateNotification(userId: string, notification: { title: 
   }
 }
 
-export async function GetUserNotifications(userId: string, limitCount: number = 8): Promise<Notification[]> {
+export async function GetUserNotifications(userAddress: string, limitCount: number = 8): Promise<Notification[]> {
   try {
-    const notificationsRef = collection(await FirebaseUtil.Instance().DB(), `${FirestoreGlobalLocation.User}/${userId}/notifications`);
+    const notificationsRef = collection(await FirebaseUtil.Instance().DB(), `${FirestoreGlobalLocation.User}/${userAddress}/notifications`);
     const q = query(notificationsRef, orderBy("time", "desc"), limit(limitCount));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => doc.data() as Notification);
@@ -1204,10 +1211,10 @@ export async function GetClaimableDrops(dropId?: string): Promise<DataBaseDrop[]
   }
 }
 
-export async function GetLeaderboardData(): Promise<LeaderboardEntry[]> {
+export async function GetLeaderboardData(blockchainType: Blockchain = Blockchain.Lukso): Promise<LeaderboardEntry[]> {
   const db = await FirebaseUtil.Instance().DB();
   const usersRef = collection(db, 'user');
-  const q = query(usersRef, orderBy('xp', 'desc'), limit(20));
+  const q = query(usersRef, orderBy('xp', 'desc'), limit(20), where('blockchainType', '==', blockchainType));
   const querySnapshot = await getDocs(q);
   return querySnapshot.docs.map(doc => ({
     id: doc.id,
@@ -1252,7 +1259,7 @@ async function CalculateCitizensXP(citizensCount: number): Promise<number> {
   return Math.floor(totalXP);
 }
 
-export async function HandleHoldingsXPReward(address: string): Promise<void> {
+export async function HandleHoldingsXPReward(address: string, blockchainType: Blockchain): Promise<void> {
   try {
     const db = await FirebaseUtil.Instance().DB();
     const userRef = doc(db, `${FirestoreGlobalLocation.User}/${address.toLowerCase()}`);
@@ -1288,7 +1295,8 @@ export async function HandleHoldingsXPReward(address: string): Promise<void> {
           message: GenerateHoldingsMessage(citizensXP, wearablesXP, totalXP),
           points: totalXP,
           time: new Date().toISOString(),
-          id: ''
+          id: '',
+          blockchainType: blockchainType
         });
       }
     }

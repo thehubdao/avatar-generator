@@ -14,6 +14,7 @@ import WearableContractAbi from '../../../constants/abi/WearableContractABI.json
 import { CampaignDrops } from '../../../types/citizens.type';
 import { LeaderboardEntry } from '../../../types/leaderboard.type';
 import { BodyPart } from '../../../interfaces/avatar.interface';
+import { Blockchain } from '../../../enums/blockchain/common.enum';
 
 export async function GetTokensOf(contractAddress: string, address: string): Promise<Result<string[]>> {
     try {
@@ -261,7 +262,7 @@ export async function GetUserFeatures(address: string): Promise<Result<CampaignD
 }
 
 export async function GetFullLeaderboardData(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
-    const leaderboardData = await GetLeaderboardData();
+    const leaderboardData = await GetLeaderboardData(Blockchain.Ethereum);
     const leaderboardWithProfileData = await Promise.all(leaderboardData.map(async (entry: LeaderboardEntry) => {
         const profileData = await GetUniversalProfileData(entry.address);
         if (!profileData.success) return entry; // If the profile data is not found, return the original entry
