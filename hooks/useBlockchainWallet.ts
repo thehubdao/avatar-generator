@@ -1,9 +1,9 @@
 import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setLeaderboardData, setMintingMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
-import { GetCampaignCitizensMetadata, InitializeUmi } from '../utils/web3/solana/contract.util';
+import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, InitializeUmi } from '../utils/web3/solana/contract.util';
 import { CitizenMetadata, FollowUserData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
@@ -177,6 +177,18 @@ export function useBlockchainWallet() {
             dispatch(setMintingMode(false));
           } else {
             // MINTING FLOW
+
+            const mintingSupply = await GetCollectionSupply();
+            const mintingPrice = await GetMintingPrice(walletAddress);
+
+            if (mintingSupply.success) {
+              dispatch(setMintSupply(mintingSupply.value));
+            } else void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
+
+            if (mintingPrice.success) {
+              dispatch(setMintingPrice(mintingPrice.value));
+            } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
+
             dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
             dispatch(setSelectedCitizen({
               baseCombination: '0-0-0-0-0-0-0-0-0-0',

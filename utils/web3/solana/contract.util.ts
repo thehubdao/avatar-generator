@@ -1,6 +1,6 @@
 import { generateSigner, PublicKey, publicKey, signerIdentity, some, transactionBuilder } from '@metaplex-foundation/umi';
-import { AssetV1, fetchAssetsByOwner, mplCore } from '@metaplex-foundation/mpl-core';
-import { Result, ResultFail, ResultSuccessful } from '../../../types/common.type';
+import { AssetV1, fetchAssetsByOwner, fetchCollection, mplCore } from '@metaplex-foundation/mpl-core';
+import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { UMI, COLLECTION_ID, KUMI_CANDY_MACHINE_ID, KUMI_CANDY_MACHINE_TREASURY, COLLECTION_GUARD_ID } from '../../../constants/solana/contract.constant';
@@ -60,7 +60,7 @@ export async function GetAssetsByOwner(walletAddress: string): Promise<Result<As
 export async function GetCollectionAssetByOwner(
     walletAddress: string,
     collectionId: PublicKey = COLLECTION_ID
-): Promise<Result< AssetV1 | undefined>> {
+): Promise<Result<AssetV1 | undefined>> {
     const assetsResult = await GetAssetsByOwner(walletAddress);
     if (!assetsResult.success) return {
         success: false,
@@ -71,10 +71,10 @@ export async function GetCollectionAssetByOwner(
     const collectionAsset = assetsResult.value.find(
         asset => asset.updateAuthority.address === collectionId.toString()
     );
-   
+
     return {
         success: true,
-        value: collectionAsset 
+        value: collectionAsset
     };
 
 }
@@ -103,7 +103,7 @@ export async function GetSolanaCitizenMetadata(collectionAsset: AssetV1): Promis
 
     return {
         success: true,
-        value: assetMetadata 
+        value: assetMetadata
     };
 }
 
@@ -116,14 +116,14 @@ export async function GetCampaignCitizensMetadata(walletAddress: string): Promis
         errCode: CommonErrorCode.GetNoData
     };
 
-    if(!assetsResult.value) return {
+    if (!assetsResult.value) return {
         success: true,
         value: [] //Return empty array because we don't have any collection asset. Means user has to mint
     };
 
     const citizenMetadataResult = await GetSolanaCitizenMetadata(assetsResult.value);
 
-    if(!citizenMetadataResult.success) return {
+    if (!citizenMetadataResult.success) return {
         success: false,
         errMessage: "Couldn't get citizens metadata correctly",
         errCode: CommonErrorCode.GetNoData
@@ -133,7 +133,7 @@ export async function GetCampaignCitizensMetadata(walletAddress: string): Promis
         success: true,
         value: [citizenMetadataResult.value]
     };
-    
+
 }
 
 export async function GetKumiCandyMachineGuardGroup(walletAddress: string, collectionGuardId: PublicKey): Promise<Result<{ group: CandyMachineGroup, mintArgs: GuardSetMintArgs }>> {
@@ -146,13 +146,38 @@ export async function GetKumiCandyMachineGuardGroup(walletAddress: string, colle
     console.log(assetsResult.value, collectionGuardId);
     if (assetsResult.value) return {
         success: true,
-        value: { group: CandyMachineGroup.Holder, mintArgs: { solPayment: some({ destination: KUMI_CANDY_MACHINE_TREASURY }), assetGate: some({ asset:assetsResult.value.publicKey }) } }
+        value: { group: CandyMachineGroup.Holder, mintArgs: { solPayment: some({ destination: KUMI_CANDY_MACHINE_TREASURY }), assetGate: some({ asset: assetsResult.value.publicKey }) } }
     };
 
     return {
         success: true,
         value: { group: CandyMachineGroup.Public, mintArgs: { solPayment: some({ destination: KUMI_CANDY_MACHINE_TREASURY }) } }
     };
+}
+
+export async function GetMintingPrice(walletAddress: string): Promise<Result<number>> {
+    const mintingPrice = await GetKumiCandyMachineGuardGroup(walletAddress, COLLECTION_GUARD_ID);
+    if (!mintingPrice.success) return {
+        success: false,
+        errMessage: mintingPrice.errMessage,
+        errCode: CommonErrorCode.GetNoData
+    };
+
+    if (mintingPrice.value.group === CandyMachineGroup.Holder) return {
+        success: true,
+        value: 0.0042
+    };
+    if (mintingPrice.value.group === CandyMachineGroup.Public) return {
+        success: true,
+        value: 0.2
+    };
+
+    return {
+        success: false,
+        errMessage: "Couldn't get minting price correctly",
+        errCode: CommonErrorCode.GetNoData
+    };
+
 }
 
 export async function MintKumiCitizen(): Promise<Result<boolean>> {
@@ -178,4 +203,22 @@ export async function MintKumiCitizen(): Promise<Result<boolean>> {
         success: true,
         value: true
     };
+}
+
+export async function GetCollectionSupply(collectionId: PublicKey = COLLECTION_ID): Promise<Result<number>> {
+    try {
+        const collection = await fetchCollection(UMI, collectionId.toString());
+        return {
+            success: true,
+            value: collection.numMinted
+        };
+    } catch (e) {
+        const err = e as Error
+        void LogError(Module.SolanaContractUtil, "Couldn't get collection supply", e);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.GetNoData
+        };
+    }
 }

@@ -6,7 +6,7 @@ import ArrowMintSVG from "./SVG/arrowMintSVG.ui";
 import Modal from "./modal.ui";
 import Loader from "../../lukso/common/loader.ui";
 import CheckedSVG from "./SVG/checkedSVG.ui";
-import { useAppDispatch } from "../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { setMintingMode } from "../../../store/citizensMetadataSlice";
 
 interface MintUIProps {
@@ -20,10 +20,10 @@ interface MintUIProps {
 }
 
 export default function MintUI({
-  imgUrl = '/resources/images/campaings/kumi_collection.jpg',
-  avatarDescription = '"Kum Kum" inspired the nickname of the football legend Kun Agüero. Today, we honor his nickname and celebrate his career by presenting "KUMI," a FREE-to-claim, 3D interoperable avatar that showcases the future of Web3 gaming and the internet',
-  campaignName = 'KUMI CITIZENS',
-  campaignDescription = 'Minting a KUMI unlocks the gateway to the Fitchin Universe. It’s your chance to own a unique visual identity that’s truly yours. Dive in, create epic content, flex your avatar, climb the leaderboard, and snag exclusive wearables to stand out in style.',
+  imgUrl = '',
+  avatarDescription,
+  campaignName,
+  campaignDescription,
   price,
   supply,
   onMinting }: MintUIProps) {
@@ -33,6 +33,9 @@ export default function MintUI({
   const [isMinted, setIsMinted] = useState<boolean | null>(null);
 
   const dispatch = useAppDispatch();
+
+  const mintingSupply = useAppSelector((state) => state.citizensMetadata.mintSupply);
+  const mintingPrice = useAppSelector((state) => state.citizensMetadata.mintingPrice);
 
   async function handleMint() {
     setIsMinting(true);
@@ -83,7 +86,7 @@ export default function MintUI({
               <SocialButtons className='w-full flex justify-center gap-4 scale-75 order-4 xl:order-none' />
               <div className="text-center font-semibold">
                 <p className="xl:text-lg">PUBLIC MINT</p>
-                <p>{price} SOL</p>
+                <p>{price || mintingPrice} SOL</p>
               </div>
               <div className="xl:hidden w-full flex flex-col items-center" >
                 <Button label="Mint" withIcon light handleClick={() => { setIsModalOpen(true) }} textStyles="text-start text-xl px-8">
@@ -91,7 +94,7 @@ export default function MintUI({
                     <ArrowMintSVG />
                   </div>
                 </Button>
-                <p className="font-medium text-center pt-4 text-white">Current Supply: {supply}</p>
+                <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
               </div >
             </div>
           </div >
@@ -102,7 +105,7 @@ export default function MintUI({
                 <ArrowMintSVG />
               </div>
             </Button>
-            <p className="font-medium text-center pt-4 text-white">Current Supply: {supply}</p>
+            <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
           </div >
         </>
       }

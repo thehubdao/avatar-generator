@@ -12,6 +12,8 @@ interface CitizensMetadataState {
   selectedCitizen: CitizenMetadata | null;
   leaderboardData: LeaderboardEntry[] | null | undefined;
   userFeatures: CampaignDrops<AppCampaigns> | null;
+  mintSupply: number | null;
+  mintingPrice: number | null;
   editMode: boolean;
   mintingMode: boolean;
   savingMode: boolean;
@@ -24,6 +26,8 @@ const initialState: CitizensMetadataState = {
   selectedCitizen: null,
   leaderboardData: null,
   userFeatures: null,
+  mintSupply: null,
+  mintingPrice: null,
   editMode: false,
   mintingMode: true,
   savingMode: false
@@ -60,9 +64,15 @@ export const citizensMetadataSlice = createSlice({
     },
     setSavingMode: (state, action: PayloadAction<boolean>) => {
       state.savingMode = action.payload;
+    },
+    setMintSupply: (state, action: PayloadAction<number | null>) => {
+      state.mintSupply = action.payload;
+    },
+    setMintingPrice: (state, action: PayloadAction<number | null>) => {
+      state.mintingPrice = action.payload;
     }
   }
 });
 
-export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMintingMode, setSavingMode } = citizensMetadataSlice.actions;
+export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice } = citizensMetadataSlice.actions;
 export default citizensMetadataSlice.reducer;
