@@ -17,17 +17,16 @@ import { Campaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
 import { CitizenMetadata } from "../../interfaces/citizens.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen } from "../../utils/web3/solana/contract.util";
-import { RootState } from "../../store/store";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
   // REDUX State
-  const selectedCampaign = useAppSelector((state: RootState) => state.citizensMetadata.selectedCampaign);
-  const campaignParams = useAppSelector((state: RootState) => state.citizensMetadata.campaignParameters);
-  const selectedCitizen = useAppSelector((state: RootState) => state.citizensMetadata.selectedCitizen);
-  const userFeatures = useAppSelector((state: RootState) => state.citizensMetadata.userFeatures);
-  const walletAddress = useAppSelector((state: RootState) => state.citizensAuth.address);
-  const citizensMetadata = useAppSelector((state: RootState) => state.citizensMetadata.citizensMetadata);
+  const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
+  const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
+  const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
+  const userFeatures = useAppSelector(state => state.citizensMetadata.userFeatures);
+  const walletAddress = useAppSelector(state => state.citizensAuth.address);
+  const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
   // Local references
   const exportData = useRef<ExportInterface>({ attributes: [] });
@@ -429,7 +428,7 @@ export default function CitizensComponent() {
         return true;
       }
       else return false;
-      
+
     }
     return Math.random() > 0.5;
   }
