@@ -109,7 +109,7 @@ export async function GetSolanaCitizenMetadata(collectionAsset: AssetV1): Promis
 
 export async function GetCampaignCitizensMetadata(walletAddress: string): Promise<Result<CitizenMetadata[]>> { //This function will change when we add more campaigns to Solana to handle multiple collectionIds
     const assetsResult = await GetCollectionAssetByOwner(walletAddress, COLLECTION_ID);
-    console.log(assetsResult, COLLECTION_ID);
+
     if (!assetsResult.success) return {
         success: false,
         errMessage: assetsResult.errMessage,
@@ -143,7 +143,7 @@ export async function GetKumiCandyMachineGuardGroup(walletAddress: string, colle
         errMessage: assetsResult.errMessage,
         errCode: CommonErrorCode.GetNoData
     };
-    console.log(assetsResult.value, collectionGuardId);
+
     if (assetsResult.value) return {
         success: true,
         value: { group: CandyMachineGroup.Holder, mintArgs: { solPayment: some({ destination: KUMI_CANDY_MACHINE_TREASURY }), assetGate: some({ asset: assetsResult.value.publicKey }) } }
@@ -189,7 +189,7 @@ export async function MintKumiCitizen(): Promise<Result<boolean>> {
         errMessage: groupResult.errMessage,
         errCode: CommonErrorCode.GetNoData
     };
-    console.log(groupResult.value);
+
     const mintTx = mintV1(UMI, {
         candyMachine: KUMI_CANDY_MACHINE_ID, asset: nftAccount, collection: COLLECTION_ID, group: some(groupResult.value.group), mintArgs: groupResult.value.mintArgs,
     });
