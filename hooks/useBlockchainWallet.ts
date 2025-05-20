@@ -4,7 +4,7 @@ import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, InitializeUmi } from '../utils/web3/solana/contract.util';
-import { CitizenMetadata, FollowUserData } from '../interfaces/citizens.interface';
+import { CitizenMetadata, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
@@ -95,6 +95,27 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: leaderboardData.errMessage, errCode: leaderboardData.errCode };
   }
 
+  async function getSolanaMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
+    const mintingSupply = await GetCollectionSupply();
+    const mintingPrice = await GetMintingPrice(walletAddress);
+    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined }
+
+    if (mintingSupply.success) {
+      mintingData.mintSupply = mintingSupply.value;
+    } else void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
+
+    if (mintingPrice.success) {
+      mintingData.mintPrice = mintingPrice.value;
+    } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
+
+    if (!mintingSupply.success && !mintingPrice.success) {
+      void LogError(Module.Citizens, "Couldn't set dynamic data", mintingSupply.errCode);
+      return { success: false, errMessage: "Couldn't set dynamic data", errCode: '' };
+    }
+
+    return { success: true, value: mintingData };
+  }
+
 
   const fetchAppData = async () => {
     const walletAddress = userAddress;
@@ -178,16 +199,11 @@ export function useBlockchainWallet() {
           } else {
             // MINTING FLOW
 
-            const mintingSupply = await GetCollectionSupply();
-            const mintingPrice = await GetMintingPrice(walletAddress);
-
-            if (mintingSupply.success) {
-              dispatch(setMintSupply(mintingSupply.value));
-            } else void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
-
-            if (mintingPrice.success) {
-              dispatch(setMintingPrice(mintingPrice.value));
-            } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
+            const mintingData = await getSolanaMintingDataPromise(walletAddress);
+            if (mintingData.success) {
+              dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
+              dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+            }
 
             dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
             dispatch(setSelectedCitizen({
@@ -198,6 +214,13 @@ export function useBlockchainWallet() {
           }
         } else if (!citizen) {
           // MINTING FLOW
+
+          const mintingData = await getSolanaMintingDataPromise(walletAddress);
+          if (mintingData.success) {
+            dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
+            dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+          }
+
           dispatch(setSelectedCitizen({
             baseCombination: '0-0-0-0-0-0-0-0-0-0',
             combination: '0-0-0-0-0-0-0-0-0-0',

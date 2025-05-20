@@ -112,3 +112,8 @@ export interface MintingUiData {
   price?: number;
   supply?: number;
 }
+
+export interface MintingData {
+  mintSupply: number | undefined;
+  mintPrice: number | undefined;
+}
