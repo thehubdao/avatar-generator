@@ -3,5 +3,8 @@ import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
 
 export const KUMI_CANDY_MACHINE_ID = publicKey(process.env.NEXT_PUBLIC_KUMI_CANDY_MACHINE_ID || '');
 export const COLLECTION_ID = publicKey(process.env.NEXT_PUBLIC_COLLECTION_ID || '');
+export const COLLECTION_GUARD_ID = publicKey(process.env.NEXT_PUBLIC_GUARD_COLLECTION_ID || '');
 export const KUMI_CANDY_MACHINE_TREASURY = publicKey(process.env.NEXT_PUBLIC_KUMI_CANDY_MACHINE_TREASURY || '');
-export const UMI = createUmi(process.env.NEXT_PUBLIC_SOLANA_RPC_URL || '');
+export const UMI = createUmi(process.env.NEXT_PUBLIC_SOLANA_RPC_URL || '', {
+    commitment: 'finalized'
+});

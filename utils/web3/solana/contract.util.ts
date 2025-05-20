@@ -1,9 +1,9 @@
 import { generateSigner, PublicKey, publicKey, signerIdentity, some, transactionBuilder } from '@metaplex-foundation/umi';
 import { AssetV1, fetchAssetsByOwner, mplCore } from '@metaplex-foundation/mpl-core';
-import { Result } from '../../../types/common.type';
+import { Result, ResultFail, ResultSuccessful } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
-import { UMI, COLLECTION_ID, KUMI_CANDY_MACHINE_ID, KUMI_CANDY_MACHINE_TREASURY } from '../../../constants/solana/contract.constant';
+import { UMI, COLLECTION_ID, KUMI_CANDY_MACHINE_ID, KUMI_CANDY_MACHINE_TREASURY, COLLECTION_GUARD_ID } from '../../../constants/solana/contract.constant';
 import { CitizenMetadata } from '../../../interfaces/citizens.interface';
 import { GetSolanaImageUrl, GetSolanaIPFSData } from '../citizens.util';
 import { ConnectedSolanaWallet } from '@privy-io/react-auth';
@@ -60,7 +60,7 @@ export async function GetAssetsByOwner(walletAddress: string): Promise<Result<As
 export async function GetCollectionAssetByOwner(
     walletAddress: string,
     collectionId: PublicKey = COLLECTION_ID
-): Promise<Result<CitizenMetadata[]>> {
+): Promise<Result< AssetV1 | undefined>> {
     const assetsResult = await GetAssetsByOwner(walletAddress);
     if (!assetsResult.success) return {
         success: false,
@@ -71,11 +71,15 @@ export async function GetCollectionAssetByOwner(
     const collectionAsset = assetsResult.value.find(
         asset => asset.updateAuthority.address === collectionId.toString()
     );
-    if (!collectionAsset) return {
+   
+    return {
         success: true,
-        value: [] //Return empty array because we don't have any collection asset. Means user has to mint
+        value: collectionAsset 
     };
 
+}
+
+export async function GetSolanaCitizenMetadata(collectionAsset: AssetV1): Promise<Result<CitizenMetadata>> {
     const cid = collectionAsset.uri.split('//')[1];
     const ipfsDataResult = await GetSolanaIPFSData(cid); // Get the Solana token metadata from IPFS
 
@@ -99,22 +103,50 @@ export async function GetCollectionAssetByOwner(
 
     return {
         success: true,
-        value: [assetMetadata] //Temporarily return as array while we add more campaigns to Solana
+        value: assetMetadata 
     };
-
 }
 
-export async function GetKumiCandyMachineGuardGroup(walletAddress: string, collectionId: PublicKey): Promise<Result<{ group: CandyMachineGroup, mintArgs: GuardSetMintArgs }>> {
-    const assetsResult = await GetCollectionAssetByOwner(walletAddress, collectionId);
+export async function GetCampaignCitizensMetadata(walletAddress: string): Promise<Result<CitizenMetadata[]>> { //This function will change when we add more campaigns to Solana to handle multiple collectionIds
+    const assetsResult = await GetCollectionAssetByOwner(walletAddress, COLLECTION_ID);
+    console.log(assetsResult, COLLECTION_ID);
     if (!assetsResult.success) return {
         success: false,
         errMessage: assetsResult.errMessage,
         errCode: CommonErrorCode.GetNoData
     };
 
-    if (assetsResult.value.length > 0) return {
+    if(!assetsResult.value) return {
         success: true,
-        value: { group: CandyMachineGroup.Holder, mintArgs: { solPayment: some({ destination: KUMI_CANDY_MACHINE_TREASURY }), assetGate: some({ requiredCollection: COLLECTION_ID }) } }
+        value: [] //Return empty array because we don't have any collection asset. Means user has to mint
+    };
+
+    const citizenMetadataResult = await GetSolanaCitizenMetadata(assetsResult.value);
+
+    if(!citizenMetadataResult.success) return {
+        success: false,
+        errMessage: "Couldn't get citizens metadata correctly",
+        errCode: CommonErrorCode.GetNoData
+    };
+
+    return {
+        success: true,
+        value: [citizenMetadataResult.value]
+    };
+    
+}
+
+export async function GetKumiCandyMachineGuardGroup(walletAddress: string, collectionGuardId: PublicKey): Promise<Result<{ group: CandyMachineGroup, mintArgs: GuardSetMintArgs }>> {
+    const assetsResult = await GetCollectionAssetByOwner(walletAddress, collectionGuardId);
+    if (!assetsResult.success) return {
+        success: false,
+        errMessage: assetsResult.errMessage,
+        errCode: CommonErrorCode.GetNoData
+    };
+    console.log(assetsResult.value, collectionGuardId);
+    if (assetsResult.value) return {
+        success: true,
+        value: { group: CandyMachineGroup.Holder, mintArgs: { solPayment: some({ destination: KUMI_CANDY_MACHINE_TREASURY }), assetGate: some({ asset:assetsResult.value.publicKey }) } }
     };
 
     return {
@@ -125,21 +157,22 @@ export async function GetKumiCandyMachineGuardGroup(walletAddress: string, colle
 
 export async function MintKumiCitizen(): Promise<Result<boolean>> {
     const nftAccount = generateSigner(UMI); //Generate a new NFT account address
-    const groupResult = await GetKumiCandyMachineGuardGroup(UMI.identity.publicKey, COLLECTION_ID);
+    const groupResult = await GetKumiCandyMachineGuardGroup(UMI.identity.publicKey, COLLECTION_GUARD_ID);
 
     if (!groupResult.success) return {
         success: false,
         errMessage: groupResult.errMessage,
         errCode: CommonErrorCode.GetNoData
     };
+    console.log(groupResult.value);
     const mintTx = mintV1(UMI, {
         candyMachine: KUMI_CANDY_MACHINE_ID, asset: nftAccount, collection: COLLECTION_ID, group: some(groupResult.value.group), mintArgs: groupResult.value.mintArgs,
     });
 
     await transactionBuilder()
-        .add(setComputeUnitLimit(UMI, { units: 300_000 }))
+        .add(setComputeUnitLimit(UMI, { units: 600_000 }))
         .add(mintTx)
-        .sendAndConfirm(UMI, { send: { commitment: 'confirmed' } });
+        .sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
 
     return {
         success: true,
