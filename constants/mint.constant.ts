@@ -12,4 +12,3 @@ export const MINTING_UI_DATA: Record<Campaign, MintingUiData | undefined> = {
     [Campaign.Creators]: undefined,
     [Campaign.Based]: undefined
 }
-    

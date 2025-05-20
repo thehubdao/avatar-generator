@@ -112,4 +112,3 @@ export interface MintingUiData {
   price?: number;
   supply?: number;
 }
-
