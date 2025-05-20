@@ -16,7 +16,7 @@ import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util
 import { Campaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
 import { CitizenMetadata } from "../../interfaces/citizens.interface";
-import { GetCollectionAssetByOwner, MintKumiCitizen } from "../../utils/web3/solana/contract.util";
+import { GetCampaignCitizensMetadata, MintKumiCitizen } from "../../utils/web3/solana/contract.util";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -418,7 +418,7 @@ export default function CitizensComponent() {
     if (selectedCampaign == Campaign.Kumi) {
       const mintResult = await MintKumiCitizen();
       if (mintResult.success && walletAddress) {
-        const asset = await GetCollectionAssetByOwner(walletAddress);
+        const asset = await GetCampaignCitizensMetadata(walletAddress);
         if (asset.success) {
           console.log('asset', asset.value);
           dispatch(setCitizensMetadata(asset.value));

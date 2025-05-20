@@ -4,7 +4,7 @@ import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setFollowUserData, setLeaderboardData, setMintingMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { CitizenMetadata } from '../interfaces/citizens.interface';
-import { GetCollectionAssetByOwner, InitializeUmi } from '../utils/web3/solana/contract.util';
+import { GetCampaignCitizensMetadata, GetCollectionAssetByOwner, GetSolanaCitizenMetadata, InitializeUmi } from '../utils/web3/solana/contract.util';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
@@ -54,7 +54,7 @@ export function useBlockchainWallet() {
   }
 
   async function getSolanaTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
-    const asset = await GetCollectionAssetByOwner(walletAddress);
+    const asset = await GetCampaignCitizensMetadata(walletAddress);
 
     if (asset.success) return { success: true, value: asset.value };
 
