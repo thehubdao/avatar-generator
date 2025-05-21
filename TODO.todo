@@ -14,6 +14,11 @@ TODO:
     ☐ Implement getSolanaUserFeaturesPromise function when solana campaign is fully ready in useBlockchainWallet hook
     ☐ Check minting process when in a subroute of citizens, citizens/backpack for example(Minting process is not working in this case)
     ☐ Make .env cleanup
+    ☐ Use the old loading UI for the whole app
+    ☐ Change free minting text at kumi description
+    ☐ At holder minting price, put free minting + 0.0042 platform fee
+    ☐ Adjust minting at phone screen sizes
+    ☐ Put address/name for logged in user in respective place
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
