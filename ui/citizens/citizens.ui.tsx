@@ -10,6 +10,7 @@ import { setEditMode } from "../../store/citizensMetadataSlice";
 import DetailsUI from "./common/details.ui";
 import SnackbarProvider from "./snackbar/snackbar.provider";
 import MintUI from "./common/mint.ui";
+import { MINTING_UI_DATA } from "../../constants/mint.constant";
 
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
@@ -27,6 +28,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
+	const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
 	const didEditMode = useAppSelector(state => state.citizensMetadata.editMode);
 	const didMintingMode = useAppSelector(state => state.citizensMetadata.mintingMode);
 
@@ -134,7 +136,13 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 								<>
 									{/* MINTING */}
 									{isReady &&
-										<MintUI onMinting={() => handleMinting()} />
+										<MintUI
+											imgUrl={selectedCampaign ? MINTING_UI_DATA[selectedCampaign]?.imgUrl : undefined}
+											avatarDescription={selectedCampaign ? MINTING_UI_DATA[selectedCampaign]?.avatarDescription : undefined}
+											campaignName={selectedCampaign ? MINTING_UI_DATA[selectedCampaign]?.campaignName : undefined}
+											campaignDescription={selectedCampaign ? MINTING_UI_DATA[selectedCampaign]?.campaignDescription : undefined}
+											onMinting={() => handleMinting()}
+										/>
 									}
 								</>
 								:

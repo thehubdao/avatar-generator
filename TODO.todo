@@ -12,6 +12,8 @@ TODO:
     ☐ Make loading UI with message prop
     ☐ Make Save Combination Button be more visible on some screen sizes
     ☐ Implement getSolanaUserFeaturesPromise function when solana campaign is fully ready in useBlockchainWallet hook
+    ☐ Check minting process when in a subroute of citizens, citizens/backpack for example(Minting process is not working in this case)
+    ☐ Make .env cleanup
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component

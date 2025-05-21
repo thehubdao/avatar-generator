@@ -1,10 +1,10 @@
-import { useLogin, useLogout, usePrivy, useWallets } from '@privy-io/react-auth';
+import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setLeaderboardData, setMintingMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
-import { CitizenMetadata, FollowUserData } from '../interfaces/citizens.interface';
-import { GetCollectionAssetByOwner } from '../utils/web3/solana/contract.util';
+import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, InitializeUmi } from '../utils/web3/solana/contract.util';
+import { CitizenMetadata, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
@@ -33,7 +33,8 @@ export function useBlockchainWallet() {
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
-  const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Wallets
+  const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Ethereum Wallets
+  const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets
   const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
   const [loginLibraryFlags, setLoginLibraryFlags] = useState<{ [key in LoginLibrary]: boolean | null }>({
     [LoginLibrary.Privy]: null,
@@ -55,7 +56,7 @@ export function useBlockchainWallet() {
   }
 
   async function getSolanaTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
-    const asset = await GetCollectionAssetByOwner(walletAddress);
+    const asset = await GetCampaignCitizensMetadata(walletAddress);
 
     if (asset.success) return { success: true, value: asset.value };
 
@@ -92,6 +93,27 @@ export function useBlockchainWallet() {
     if (leaderboardData.success) return { success: true, value: leaderboardData.value };
 
     return { success: false, errMessage: leaderboardData.errMessage, errCode: leaderboardData.errCode };
+  }
+
+  async function getSolanaMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
+    const mintingSupply = await GetCollectionSupply();
+    const mintingPrice = await GetMintingPrice(walletAddress);
+    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined }
+
+    if (mintingSupply.success) {
+      mintingData.mintSupply = mintingSupply.value;
+    } else void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
+
+    if (mintingPrice.success) {
+      mintingData.mintPrice = mintingPrice.value;
+    } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
+
+    if (!mintingSupply.success && !mintingPrice.success) {
+      void LogError(Module.Citizens, "Couldn't set dynamic data", mintingSupply.errCode);
+      return { success: false, errMessage: "Couldn't set dynamic data", errCode: '' };
+    }
+
+    return { success: true, value: mintingData };
   }
 
 
@@ -176,6 +198,13 @@ export function useBlockchainWallet() {
             dispatch(setMintingMode(false));
           } else {
             // MINTING FLOW
+
+            const mintingData = await getSolanaMintingDataPromise(walletAddress);
+            if (mintingData.success) {
+              dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
+              dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+            }
+
             dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
             dispatch(setSelectedCitizen({
               baseCombination: '0-0-0-0-0-0-0-0-0-0',
@@ -185,6 +214,13 @@ export function useBlockchainWallet() {
           }
         } else if (!citizen) {
           // MINTING FLOW
+
+          const mintingData = await getSolanaMintingDataPromise(walletAddress);
+          if (mintingData.success) {
+            dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
+            dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+          }
+
           dispatch(setSelectedCitizen({
             baseCombination: '0-0-0-0-0-0-0-0-0-0',
             combination: '0-0-0-0-0-0-0-0-0-0',
@@ -247,8 +283,11 @@ export function useBlockchainWallet() {
 
             setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
 
-          } else if (chainType === Blockchain.Solana) {
-            //TODO: Set provider to solana provider
+          } else if (chainType === Blockchain.Solana && isSolanaReady) {
+            const solanaWallet = solanaWallets[0];
+
+            await InitializeUmi(solanaWallet);
+
             dispatch(connect({
               address: user?.wallet?.address,
               walletName: null,
@@ -266,7 +305,7 @@ export function useBlockchainWallet() {
       if (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana) dispatch(disconnect());
       else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: false }));
     }
-  }, [ready, authenticated, isEthereumReady]);
+  }, [ready, authenticated, isEthereumReady, isSolanaReady]);
 
   // Root Logic
   useEffect(() => {

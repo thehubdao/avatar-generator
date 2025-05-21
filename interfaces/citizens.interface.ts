@@ -104,3 +104,16 @@ export interface UserXPData {
   nextLevelXP: number;
 }
 
+export interface MintingUiData {
+  imgUrl: string;
+  avatarDescription: string;
+  campaignName: string;
+  campaignDescription: string;
+  price?: number;
+  supply?: number;
+}
+
+export interface MintingData {
+  mintSupply?: number;
+  mintPrice?: number;
+}
