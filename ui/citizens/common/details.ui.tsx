@@ -6,10 +6,11 @@ import DownloadSVG from "./SVG/downloadSVG.ui";
 import Modal from "./modal.ui";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 import { useSnackbar } from "../snackbar/snackbar.provider";
+import { ModelExtension } from "../../../enums/export.enum";
 
 interface DetailsUIProps {
   data: IndexFeatureInterface[];
-  handleDownload: () => Promise<void>;
+  handleDownload: (type: ModelExtension) => Promise<boolean>;
   imgUrl: string;
   loading?: boolean;
 }
@@ -22,10 +23,18 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
 
   const [isLoadedImage, setIsLoadedImage] = useState<boolean>();
 
-  const handleDownloadingSnackbar = () => {
+  const handleDownloading = async (type: ModelExtension) => {
     showSnackbar(
-      <p>Your Citizen is being downloaded, please wait...</p>
+      <p>Your {type} is being downloaded, please wait...</p>
     );
+
+    const isSuccess = await handleDownload(type);
+
+    if (!isSuccess) {
+      showSnackbar(
+        <p>Ups, an error has occurred, try later.</p>
+      );
+    }
   }
 
   return <>
@@ -41,9 +50,16 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
           </div>
           <div className="w-full px-7 pb-9 pt-7">
             <div className="relative w-full h-[30vh] md:h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
-              <Image src={imgUrl} alt={'Avatar detail'} fill className={`object-cover ${isLoadedImage ? 'opacity-100' : 'opacity-0'} transition-opacity`} onLoadingComplete={(img) => {
-                if (img) setIsLoadedImage(true);
-              }} />
+              <Image
+                src={imgUrl}
+                alt={'Avatar detail'}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className={`object-cover ${isLoadedImage ? 'opacity-100' : 'opacity-0'} transition-opacity`}
+                onLoadingComplete={(img) => {
+                  if (img) setIsLoadedImage(true);
+                }}
+              />
               {
                 !isLoadedImage &&
                 <div className="absolute w-8 h-8 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
@@ -88,11 +104,14 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
           </div>
           <div className="grid gap-4 pt-8">
             <Button label="Download VRM" light handleClick={() => {
-              handleDownload();
-              handleDownloadingSnackbar();
+              handleDownloading(ModelExtension.VRM);
             }} />
-            <Button label="Download GLB" light handleClick={() => { }} />
-            <Button label="Download PNG" light handleClick={() => { }} />
+            <Button label="Download GLB" light handleClick={() => {
+              handleDownloading(ModelExtension.GLB);
+            }} />
+            <Button label="Download PNG" light handleClick={() => {
+              handleDownloading(ModelExtension.PNG);
+            }} />
           </div>
         </div>
       </Modal>
