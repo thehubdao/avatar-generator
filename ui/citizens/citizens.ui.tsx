@@ -10,6 +10,7 @@ import { setEditMode } from "../../store/citizensMetadataSlice";
 import DetailsUI from "./common/details.ui";
 import SnackbarProvider from "./snackbar/snackbar.provider";
 import MintUI from "./common/mint.ui";
+import { ModelExtension } from "../../enums/export.enum";
 
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
@@ -17,7 +18,7 @@ interface CitizensUIProps {
 	featureList: FeatureInterface[];
 	isReady: boolean;
 	handleReady: () => Promise<void>;
-	handleExport: () => Promise<void>;
+	handleExport: (type?: ModelExtension) => Promise<boolean>;
 	handleOptionChange: (id, path, name, category) => Promise<void>;
 	handleSaveCombination: () => Promise<boolean>;
 	handleMinting: () => Promise<boolean>;
@@ -141,7 +142,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 								<>
 									{/* CITIZEN DETAILS */}
 									{singleInitData && singleInitData.features.length > 0 &&
-										<DetailsUI data={singleInitData.features} handleDownload={() => handleExport()} imgUrl={selectedCitizen.imageUrl} loading={false} />
+										<DetailsUI data={singleInitData.features} handleDownload={(type) => handleExport(type)} imgUrl={selectedCitizen.imageUrl} loading={false} />
 									}
 									{/* EDIT MODE HUD */}
 									{isReady &&
@@ -169,7 +170,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 												onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
 												onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
 												onSkinColorChange={() => { }}
-												exportModel={() => handleExport()}
+												exportModel={(type) => handleExport(type)}
 												isCustomCampaignHud
 												onClickBackButton={() => dispatch(setEditMode(false))}
 												isLoading={false}
