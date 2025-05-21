@@ -49,7 +49,7 @@ interface HudUIProps {
 
   editModeSelected: boolean;
   changeView: () => void;
-  exportModel: () => Promise<void>;
+  exportModel: (type?: ModelExtension) => Promise<boolean | void>;
   isCustomCampaignHud?: boolean;
   exportAllow?: ModelExtension[];
   onClickBackButton: () => void
