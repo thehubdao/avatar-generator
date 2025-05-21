@@ -420,7 +420,6 @@ export default function CitizensComponent() {
       if (mintResult.success && walletAddress) {
         const asset = await GetCampaignCitizensMetadata(walletAddress);
         if (asset.success) {
-          console.log('asset', asset.value);
           dispatch(setCitizensMetadata(asset.value));
           dispatch(setSelectedCitizen(asset.value[0]));
         }
@@ -428,9 +427,8 @@ export default function CitizensComponent() {
         return true;
       }
       else return false;
-
     }
-    return Math.random() > 0.5;
+    return false;
   }
 
   return <CitizensUI
