@@ -1,5 +1,5 @@
 import { generateSigner, PublicKey, publicKey, signerIdentity, some, transactionBuilder } from '@metaplex-foundation/umi';
-import { AssetV1, fetchAssetsByOwner, fetchCollection, mplCore } from '@metaplex-foundation/mpl-core';
+import { AssetV1, fetchAssetsByOwner, fetchCollection, mplCore, transferV1 } from '@metaplex-foundation/mpl-core';
 import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
@@ -14,6 +14,7 @@ import {
 } from '@metaplex-foundation/umi-web3js-adapters';
 import { CandyMachineGroup } from '../../../enums/citizens/common.enum';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
+import { findAssetSignerPda } from '@metaplex-foundation/mpl-core';
 
 export async function InitializeUmi(wallet: ConnectedSolanaWallet) {
     UMI.use(signerIdentity({
@@ -222,3 +223,30 @@ export async function GetCollectionSupply(collectionId: PublicKey = COLLECTION_I
         };
     }
 }
+
+export async function TransferToAsset(walletAddress: string, assetAddress: string, sourceAssetAddress: string): Promise<Result<boolean>> {
+    try {
+        const sourceAssetPublicKey = publicKey(sourceAssetAddress);
+        const sourceAssetPda = findAssetSignerPda(UMI, { asset: sourceAssetPublicKey });
+
+    const transferTx = transferV1(UMI, {
+        asset: publicKey(assetAddress),
+        newOwner: sourceAssetPda,
+    });
+    
+    await transferTx.sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
+
+    return {
+            success: true,
+            value: true
+        };
+    } catch (e) {
+        const err = e as Error
+        void LogError(Module.SolanaContractUtil, "Couldn't transfer to asset", e);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        };
+    }
+} 
