@@ -114,6 +114,6 @@ export interface MintingUiData {
 }
 
 export interface MintingData {
-  mintSupply: number | undefined;
-  mintPrice: number | undefined;
+  mintSupply?: number;
+  mintPrice?: number;
 }

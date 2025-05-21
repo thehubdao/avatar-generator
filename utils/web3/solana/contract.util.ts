@@ -79,7 +79,6 @@ export async function GetCollectionAssetByOwner(
     };
 
 }
-
 export async function GetSolanaCitizenMetadata(collectionAsset: AssetV1): Promise<Result<CitizenMetadata>> {
     const cid = collectionAsset.uri.split('//')[1];
     const ipfsDataResult = await GetSolanaIPFSData(cid); // Get the Solana token metadata from IPFS
@@ -178,32 +177,40 @@ export async function GetMintingPrice(walletAddress: string): Promise<Result<num
         errMessage: "Couldn't get minting price correctly",
         errCode: CommonErrorCode.GetNoData
     };
-
 }
-
 export async function MintKumiCitizen(): Promise<Result<boolean>> {
-    const nftAccount = generateSigner(UMI); //Generate a new NFT account address
-    const groupResult = await GetKumiCandyMachineGuardGroup(UMI.identity.publicKey, COLLECTION_GUARD_ID);
+    try {
+        const nftAccount = generateSigner(UMI); //Generate a new NFT account address
+        const groupResult = await GetKumiCandyMachineGuardGroup(UMI.identity.publicKey, COLLECTION_GUARD_ID);
 
-    if (!groupResult.success) return {
-        success: false,
-        errMessage: groupResult.errMessage,
-        errCode: CommonErrorCode.GetNoData
-    };
+        if (!groupResult.success) return {
+            success: false,
+            errMessage: groupResult.errMessage,
+            errCode: CommonErrorCode.GetNoData
+        };
 
-    const mintTx = mintV1(UMI, {
-        candyMachine: KUMI_CANDY_MACHINE_ID, asset: nftAccount, collection: COLLECTION_ID, group: some(groupResult.value.group), mintArgs: groupResult.value.mintArgs,
-    });
+        const mintTx = mintV1(UMI, {
+            candyMachine: KUMI_CANDY_MACHINE_ID, asset: nftAccount, collection: COLLECTION_ID, group: some(groupResult.value.group), mintArgs: groupResult.value.mintArgs,
+        });
 
-    await transactionBuilder()
-        .add(setComputeUnitLimit(UMI, { units: 600_000 }))
-        .add(mintTx)
-        .sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
+        await transactionBuilder()
+            .add(setComputeUnitLimit(UMI, { units: 600_000 }))
+            .add(mintTx)
+            .sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
 
-    return {
-        success: true,
-        value: true
-    };
+        return {
+            success: true,
+            value: true
+        };
+    } catch (e) {
+        const err = e as Error
+        void LogError(Module.SolanaContractUtil, "Couldn't mint kumi citizen", e);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        };
+    }
 }
 
 export async function GetCollectionSupply(collectionId: PublicKey = COLLECTION_ID): Promise<Result<number>> {
