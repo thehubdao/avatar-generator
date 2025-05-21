@@ -1,10 +1,10 @@
-import { generateSigner, PublicKey, publicKey, signerIdentity, some, transactionBuilder } from '@metaplex-foundation/umi';
-import { AssetV1, fetchAssetsByOwner, fetchCollection, mplCore, transferV1 } from '@metaplex-foundation/mpl-core';
+import { createNoopSigner, generateSigner, PublicKey, publicKey, signerIdentity, some, transactionBuilder } from '@metaplex-foundation/umi';
+import { AssetV1, execute, fetchAsset, fetchAssetsByOwner, fetchCollection, mplCore, transfer, transferV1 } from '@metaplex-foundation/mpl-core';
 import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { UMI, COLLECTION_ID, KUMI_CANDY_MACHINE_ID, KUMI_CANDY_MACHINE_TREASURY, COLLECTION_GUARD_ID } from '../../../constants/solana/contract.constant';
-import { CitizenMetadata } from '../../../interfaces/citizens.interface';
+import { CitizenMetadata, Drop } from '../../../interfaces/citizens.interface';
 import { GetSolanaImageUrl, GetSolanaIPFSData } from '../citizens.util';
 import { ConnectedSolanaWallet } from '@privy-io/react-auth';
 import { GuardSetMintArgs, mintV1, mplCandyMachine } from '@metaplex-foundation/mpl-core-candy-machine';
@@ -12,9 +12,11 @@ import {
     fromWeb3JsTransaction,
     toWeb3JsTransaction
 } from '@metaplex-foundation/umi-web3js-adapters';
-import { CandyMachineGroup } from '../../../enums/citizens/common.enum';
+import { CandyMachineGroup, SolanaCampaign } from '../../../enums/citizens/common.enum';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { findAssetSignerPda } from '@metaplex-foundation/mpl-core';
+import { CampaignDrops } from '../../../types/citizens.type';
+import { GetCollectionDocs } from '../../firebase.util';
 
 export async function InitializeUmi(wallet: ConnectedSolanaWallet) {
     UMI.use(signerIdentity({
@@ -231,19 +233,50 @@ export async function GetCollectionSupply(collectionId: PublicKey = COLLECTION_I
     }
 }
 
-export async function TransferToAsset(walletAddress: string, assetAddress: string, sourceAssetAddress: string): Promise<Result<boolean>> {
+export async function GetUserFeatureAssets(walletAddress: string, campaign: SolanaCampaign): Promise<Result<CampaignDrops<SolanaCampaign>>> {
+    try {
+        const assetsResult = await GetAssetsByOwner(walletAddress);
+        const userFeatures: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
+
+        if (!assetsResult.success) return {
+            success: false,
+            errMessage: assetsResult.errMessage,
+            errCode: CommonErrorCode.GetNoData
+        };
+
+        const userFeaturesAssets = userFeatures.filter(feature => {
+            const asset = assetsResult.value.find(asset => asset.updateAuthority.address === feature.contract_address);
+            return asset;
+        });
+
+        return {
+            success: true,
+            value: { [campaign]: userFeaturesAssets }
+        };
+    } catch (e) {
+        const err = e as Error
+        void LogError(Module.SolanaContractUtil, "Couldn't get user feature assets", e);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        }
+    }
+}
+
+export async function TransferToAsset(assetAddress: string, sourceAssetAddress: string): Promise<Result<boolean>> {
     try {
         const sourceAssetPublicKey = publicKey(sourceAssetAddress);
         const sourceAssetPda = findAssetSignerPda(UMI, { asset: sourceAssetPublicKey });
 
-    const transferTx = transferV1(UMI, {
-        asset: publicKey(assetAddress),
-        newOwner: sourceAssetPda,
-    });
-    
-    await transferTx.sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
+        const transferTx = transferV1(UMI, {
+            asset: publicKey(assetAddress),
+            newOwner: sourceAssetPda,
+        });
 
-    return {
+        await transferTx.sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
+
+        return {
             success: true,
             value: true
         };
@@ -256,4 +289,54 @@ export async function TransferToAsset(walletAddress: string, assetAddress: strin
             errCode: CommonErrorCode.InternalError
         };
     }
-} 
+}
+
+export async function TransferFromAsset(assetAddress: string, sourceAssetAddress: string): Promise<Result<boolean>> {
+    try {
+        const sourceAssetPublicKey = publicKey(sourceAssetAddress);
+        const sourceAssetPda = findAssetSignerPda(UMI, { asset: sourceAssetPublicKey });
+        const sourceAssetPdaSigner = createNoopSigner(sourceAssetPda[0]);
+        const sourceAsset = await fetchAsset(UMI, sourceAssetPublicKey);
+
+        const sourceCollection =
+            sourceAsset.updateAuthority.type == 'Collection' && sourceAsset.updateAuthority.address
+                ? await fetchCollection(UMI, sourceAsset.updateAuthority.address)
+                : undefined
+
+        const asset = await fetchAsset(UMI, publicKey(assetAddress));
+
+        const collection =
+            asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
+                ? await fetchCollection(UMI, asset.updateAuthority.address)
+                : undefined
+
+
+
+        const transferAssetTx = transfer(UMI, {
+            asset,
+            collection,
+            authority: sourceAssetPdaSigner,
+            newOwner: UMI.identity.publicKey,
+        })
+        await execute(UMI, {
+            asset: sourceAsset,
+            collection: sourceCollection,
+            instructions: transferAssetTx,
+            assetSigner: sourceAssetPda,
+        }).sendAndConfirm(UMI, { send: { commitment: 'finalized' } })
+
+        return {
+            success: true,
+            value: true
+        };
+
+    } catch (e) {
+        const err = e as Error
+        void LogError(Module.SolanaContractUtil, "Couldn't transfer from asset", e);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        };
+    }
+}

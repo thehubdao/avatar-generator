@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
-import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, InitializeUmi } from '../utils/web3/solana/contract.util';
+import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
 import { CitizenMetadata, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
-import { Campaign, LuksoCampaign } from '../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign, SolanaCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetParameter } from '../utils/firebase.util';
@@ -93,6 +93,14 @@ export function useBlockchainWallet() {
     if (leaderboardData.success) return { success: true, value: leaderboardData.value };
 
     return { success: false, errMessage: leaderboardData.errMessage, errCode: leaderboardData.errCode };
+  }
+
+  async function getSolanaUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<SolanaCampaign>>> {
+    const features = await GetUserFeatureAssets(walletAddress, SolanaCampaign.Kumi);
+
+    if (features.success) return { success: true, value: features.value };
+
+    return { success: false, errMessage: features.errMessage, errCode: features.errCode };
   }
 
   async function getSolanaMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
@@ -183,6 +191,7 @@ export function useBlockchainWallet() {
       }
     } else if (blockchainType === Blockchain.Solana) {
       const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
+      const solanaUserFeatures = await getSolanaUserFeaturesPromise(walletAddress); // Get the user features
 
       if (solanaCitizensMetadata.success) {
         const citizen = solanaCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
@@ -232,6 +241,13 @@ export function useBlockchainWallet() {
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
         LogError(Module.Citizens, solanaCitizensMetadata.errMessage, solanaCitizensMetadata.errCode);
+      }
+
+      if (solanaUserFeatures.success) {
+        const solanaFeatures = solanaUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the solana features to the AppCampaigns type, this depends on the wearables got for current campaign
+        dispatch(setUserFeatures(solanaFeatures));
+      } else {
+        LogError(Module.Citizens, solanaUserFeatures.errMessage, solanaUserFeatures.errCode);
       }
     }
   };

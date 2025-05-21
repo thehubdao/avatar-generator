@@ -293,30 +293,30 @@ export default function CitizensComponent() {
       .join('-') as string;
 
     if (!campaignParams) {
-      LogError(Module.Citizens, 'Campaign params is undefined in saveCombination');
+      LogError(Module.Citizens, 'Campaign params is undefined in Lukso saveCombination');
       return false;
     }
     if (!singleInitData.current) {
-      LogError(Module.Citizens, 'Single init data is undefined in saveCombination');
+      LogError(Module.Citizens, 'Single init data is undefined in Lukso saveCombination');
       return false;
     }
     if (!selectedCitizen) {
-      LogError(Module.Citizens, 'Selected citizen is undefined in saveCombination');
+      LogError(Module.Citizens, 'Selected citizen is undefined in Lukso saveCombination');
       return false;
     }
     if (!walletAddress) {
-      LogError(Module.Citizens, 'Wallet address is undefined in saveCombination');
+      LogError(Module.Citizens, 'Wallet address is undefined in Lukso saveCombination');
       return false;
     }
     if (!citizensMetadata) {
-      LogError(Module.Citizens, 'Citizens metadata is undefined in saveCombination');
+      LogError(Module.Citizens, 'Citizens metadata is undefined in Lukso saveCombination');
       return false;
     }
 
     const currentCampaign = selectedCampaign;
 
     if (!currentCampaign) {
-      LogError(Module.Citizens, 'Current campaign is undefined in saveCombination');
+      LogError(Module.Citizens, 'Current campaign is undefined in Lukso saveCombination');
       return false;
     }
 
@@ -399,7 +399,40 @@ export default function CitizensComponent() {
   }
 
   async function saveKumiCombination() {
-    //TODO: implement kumi combination saving
+    const newCombination = singleInitData.current?.features
+    .map((feature) => feature.val.index)
+    .join('-') as string;
+
+    if (!campaignParams) {
+      LogError(Module.Citizens, 'Campaign params is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!singleInitData.current) {
+      LogError(Module.Citizens, 'Single init data is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!selectedCitizen) {
+      LogError(Module.Citizens, 'Selected citizen is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!walletAddress) {
+      LogError(Module.Citizens, 'Wallet address is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!citizensMetadata) {
+      LogError(Module.Citizens, 'Citizens metadata is undefined in Kumi saveCombination');
+      return false;
+    }
+
+    const currentCampaign = selectedCampaign;
+
+    if (!currentCampaign) {
+      LogError(Module.Citizens, 'Current campaign is undefined in Kumi saveCombination');
+      return false;
+    }
+
+    
+
     return false;
   }
 
