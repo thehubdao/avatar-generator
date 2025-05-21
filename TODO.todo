@@ -14,6 +14,7 @@ TODO:
     ☐ Implement getSolanaUserFeaturesPromise function when solana campaign is fully ready in useBlockchainWallet hook
     ☐ Check minting process when in a subroute of citizens, citizens/backpack for example(Minting process is not working in this case)
     ☐ Make .env cleanup
+    ☐ Review ID error when create more than 2 snackbars
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
