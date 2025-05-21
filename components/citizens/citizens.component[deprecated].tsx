@@ -570,7 +570,8 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
       await SaveFile(modelVRM, `${filesName}.vrm`)
       await SaveFile(modelGLB, `${filesName}.glb`)
       await SaveFile(picturePromise, `${filesName}.png`)
-    }
+      return true;
+    } else return false;
   }
 
   async function onOptionChange(

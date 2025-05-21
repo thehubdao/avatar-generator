@@ -22,7 +22,7 @@ interface CitizensUIProps {
   isSavingCombination?: boolean;
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: CitizenMetadata) => void;
   features?: IndexFeatureInterface[];
-  exportModel: () => Promise<void>;
+  exportModel: () => Promise<boolean>;
   address: string;
   leaderboardData?: LeaderboardEntry[];
   provider: JsonRpcProvider | null;
