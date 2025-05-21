@@ -6,5 +6,6 @@
 
 export enum ModelExtension {
   GLB = 'glb',
-  VRM = 'vrm'
+  VRM = 'vrm',
+  PNG = 'png',
 }
