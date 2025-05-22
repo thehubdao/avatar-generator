@@ -1,7 +1,7 @@
 import { Contract, ethers } from 'ethers';
 import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json';
 import { Drop, TokenId } from '../../../interfaces/citizens.interface';
-import { GetEthereumIPFSData, GetEthereumImageUrl, GetFollowStatuses, GetUniversalProfileData } from '../citizens.util';
+import { GetLuksoImageUrl, GetFollowStatuses, GetLuksoIPFSData, GetUniversalProfileData } from '../citizens.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json';
 import { CitizenMetadata } from '../../../interfaces/citizens.interface';
 import { Result } from '../../../types/common.type';
@@ -123,18 +123,25 @@ export async function GetCampaignTokenMetadataUris(campaign: Campaign, tokenIds:
     }
 }
 
-export async function GetEthereumTokenMetadata(tokenId: TokenId): Promise<Result<CitizenMetadata>> {
-    const ipfsDataResult = await GetEthereumIPFSData(tokenId.metadataUri);
+export async function GetLuksoTokenMetadata(tokenId: TokenId): Promise<Result<CitizenMetadata>> {
+    const ipfsDataResult = await GetLuksoIPFSData(tokenId.metadataUri);
     if (!ipfsDataResult.success || !ipfsDataResult.value) return { success: false, errMessage: 'Error on getting token metadata', errCode: '' };
 
-    const metadata = ipfsDataResult.value;
-    metadata.tokenId = tokenId.tokenId;
-    metadata.campaign = tokenId.campaign as Campaign;
+    const luksoMetadata = ipfsDataResult.value;
+    const metadata = {
+        tokenId: tokenId.tokenId,
+        campaign: tokenId.campaign as Campaign,
+        combination: luksoMetadata.combination,
+        baseCombination: luksoMetadata.combination,
+        imageUrl: luksoMetadata.imageUrl,
+        fallbackImageUrl: luksoMetadata.fallbackImageUrl,
+        rawMetadata: luksoMetadata,
+    } as CitizenMetadata;
 
-    if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-');
-    if (!metadata.baseCombination) metadata.baseCombination = metadata.combination;
+    if (!luksoMetadata.combination && luksoMetadata.body) metadata.combination = Object.values(luksoMetadata.body).map(({ index }) => { return index }).join('-');
+    if (!luksoMetadata.baseCombination) metadata.baseCombination = metadata.combination;
     metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${TEMP_CAMPAIGN_SWITCH[tokenId.campaign as keyof typeof TEMP_CAMPAIGN_SWITCH]}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`;
-    const imageUrlResult = GetEthereumImageUrl(metadata);
+    const imageUrlResult = GetLuksoImageUrl(metadata);
     if (imageUrlResult.success) metadata.fallbackImageUrl = imageUrlResult.value; // There could be some cases where the image url is not valid
 
     return { success: true, value: metadata };
@@ -162,7 +169,7 @@ export async function GetTokensMetadata(campaign: Campaign, tokenIds: string[]):
             const decodedData = decodedDataArray[i];
             const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenId}`;
             if (!baseCid && !decodedData.value) continue;
-            const tokenMetadataResult = await GetEthereumTokenMetadata({ metadataUri, campaign, tokenId });
+            const tokenMetadataResult = await GetLuksoTokenMetadata({ metadataUri, campaign, tokenId });
             if (tokenMetadataResult.success) metadatasArray.push(tokenMetadataResult.value);
         }
 
@@ -298,7 +305,7 @@ export async function SetTokenMetadata(campaign: Campaign, tokenId: string, meta
     );
 
     const metadataUrl = `ipfs://${metadataUri}`;
-    const metadataIpfsData = await GetEthereumIPFSData(metadataUrl.split('//')[1]);
+    const metadataIpfsData = await GetLuksoIPFSData(metadataUrl.split('//')[1]);
     const metadataDataKey = AVATAR_ERC725_CONTRACT.encodeKeyName('LSP4Metadata');
     const metadataDataValue = AVATAR_ERC725_CONTRACT.encodeData([
         {

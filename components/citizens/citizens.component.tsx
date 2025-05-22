@@ -11,11 +11,11 @@ import { StorageLocation } from "../../enums/firebase.enum";
 import { FEMALE_CAMPAIGN_BODY_TYPES, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { BodyPart } from "../../interfaces/avatar.interface";
-import { UploadMetadata } from "../../utils/metadata.util";
+import { UploadLuksoMetadata } from "../../utils/metadata.util";
 import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
 import { Campaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
-import { CitizenMetadata } from "../../interfaces/citizens.interface";
+import { CitizenMetadata, LuksoMetadata } from "../../interfaces/citizens.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen } from "../../utils/web3/solana/contract.util";
 
 export default function CitizensComponent() {
@@ -321,17 +321,24 @@ export default function CitizensComponent() {
     }
 
     const currentFeatures = singleInitData.current.features;
-    const newMetadata: CitizenMetadata = {
+    const newCitizenMetadata = { //Make a copy of the selected citizen metadata
       ...selectedCitizen,
       combination: newCombination,
-      attributes: [],
-      body: { ...selectedCitizen.body }
+      rawMetadata: {
+        ...selectedCitizen.rawMetadata,
+        combination: newCombination,
+        body: {
+          ...(selectedCitizen.rawMetadata as LuksoMetadata).body
+        }
+      } as LuksoMetadata
     }
+
+    newCitizenMetadata.rawMetadata.attributes = []; //Reset attributes to be replaced
 
     const burnDropArray: BodyPart[] = [];
 
     currentFeatures.forEach((feature) => {
-      newMetadata.attributes.push({
+      newCitizenMetadata.rawMetadata.attributes.push({
         key:
           currentCampaign == 'vrm_female'
             ? FEMALE_CAMPAIGN_BODY_TYPES[
@@ -343,21 +350,22 @@ export default function CitizensComponent() {
       });
       let bodyFeature: BodyPart | undefined;
 
-      if (currentCampaign == 'vrm_female') bodyFeature = newMetadata.body[FEMALE_CAMPAIGN_BODY_TYPES[feature.val.type.toLowerCase() as keyof typeof FEMALE_CAMPAIGN_BODY_TYPES] as keyof typeof newMetadata.body];
-      else bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body];
+
+
+      if (currentCampaign == 'vrm_female') bodyFeature = newCitizenMetadata.rawMetadata.body[FEMALE_CAMPAIGN_BODY_TYPES[feature.val.type.toLowerCase() as keyof typeof FEMALE_CAMPAIGN_BODY_TYPES] as keyof typeof newCitizenMetadata.rawMetadata.body];
+      else bodyFeature = newCitizenMetadata.rawMetadata.body[feature.val.type.toLowerCase() as keyof typeof newCitizenMetadata.rawMetadata.body];
 
       if (bodyFeature && bodyFeature.name != feature.val.name) {
-        newMetadata.body[
-          feature.val.type.toLowerCase() as keyof typeof newMetadata.body
+        newCitizenMetadata.rawMetadata.body[
+          feature.val.type.toLowerCase() as keyof typeof newCitizenMetadata.rawMetadata.body
         ] = feature.val as BodyPart;
 
         burnDropArray.push(feature.val as BodyPart);
       }
     });
 
-    const metadataObject = await UploadMetadata(
-      newMetadata,
-      undefined,
+    const metadataObject = await UploadLuksoMetadata(
+      newCitizenMetadata.rawMetadata,
       newCombination,
       selectedCitizen.campaign
     );
@@ -370,7 +378,8 @@ export default function CitizensComponent() {
       return false;
     }
 
-    newMetadata.imageUrl = metadataObject.value.imageUrl;
+    newCitizenMetadata.imageUrl = metadataObject.value.imageUrl;
+    newCitizenMetadata.rawMetadata.imageUrl = metadataObject.value.imageUrl;
 
     await SetTokenMetadata(
       currentCampaign,
@@ -391,17 +400,18 @@ export default function CitizensComponent() {
       return false;
     }
 
-    updatedCitizensMetadata[index] = newMetadata;
+    updatedCitizensMetadata[index] = newCitizenMetadata;
 
     dispatch(setCitizensMetadata(updatedCitizensMetadata));
-    dispatch(setSelectedCitizen(newMetadata));
+    dispatch(setSelectedCitizen(newCitizenMetadata));
+
     return true; // return true in success, false in failure
   }
 
   async function saveKumiCombination() {
     const newCombination = singleInitData.current?.features
-    .map((feature) => feature.val.index)
-    .join('-') as string;
+      .map((feature) => feature.val.index)
+      .join('-') as string;
 
     if (!campaignParams) {
       LogError(Module.Citizens, 'Campaign params is undefined in Kumi saveCombination');
@@ -431,7 +441,7 @@ export default function CitizensComponent() {
       return false;
     }
 
-    
+
 
     return false;
   }

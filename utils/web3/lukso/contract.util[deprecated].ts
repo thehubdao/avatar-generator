@@ -4,7 +4,7 @@ import ProxyContractAbi from '../../../constants/abi/AvatarProxyContractABI.json
 import WerableContractAbi from '../../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { CampaignData, Drop, TokenId, CitizenMetadata, DataBaseDrop } from '../../../interfaces/citizens.interface';
-import { GetEthereumIPFSData, GetEthereumImageUrl, GetSolanaIPFSData, GetSolanaImageUrl } from '../citizens.util';
+import { GetLuksoImageUrl, GetSolanaIPFSData, GetSolanaImageUrl } from '../citizens.util';
 import { GetCollectionDocs } from '../../firebase.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../../constants/abi/UniversalProfileABI.json'
@@ -205,7 +205,7 @@ export async function GetEthereumTokenMetadata(tokenId: TokenId): Promise<Result
     if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
     if (!metadata.baseCombination) metadata.baseCombination = metadata.combination
     metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch]}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
-    const imageUrlResult = GetEthereumImageUrl(metadata)
+    const imageUrlResult = GetLuksoImageUrl(metadata)
     if (imageUrlResult.success) metadata.fallbackImageUrl = imageUrlResult.value
 
     return { success: true, value: metadata }

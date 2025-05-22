@@ -2,17 +2,17 @@ import { BrowserProvider, ethers, JsonRpcProvider } from "ethers";
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
 import { LeaderboardEntry } from "../../types/leaderboard.type";
-import { CitizenMetadata, FollowUserData } from "../../interfaces/citizens.interface";
+import { CitizenMetadata, FollowUserData, LuksoMetadata } from "../../interfaces/citizens.interface";
 import { Result } from '../../types/common.type';
 import { CommonErrorCode, Module } from "../../enums/common.enum";
 import { LogError } from "../common.util";
 import { IPFS_GATEWAY_API_KEY, IPFS_GATEWAY_URL, LSP26_ABI, LSP26_ADDRESS } from "../../constants/citizens.constant";
 
-export async function GetEthereumIPFSData(cid: string): Promise<Result<CitizenMetadata>> {
+export async function GetLuksoIPFSData(cid: string): Promise<Result<LuksoMetadata>> {
   try {
     const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
     const ipfsRequest = await fetch(ipfsHTTPUrl);
-    const ipfsData = await ipfsRequest.json() as { 'LSP4Metadata': CitizenMetadata };
+    const ipfsData = await ipfsRequest.json() as { 'LSP4Metadata': LuksoMetadata };
 
     return { success: true, value: ipfsData.LSP4Metadata };
   } catch (error) {
@@ -38,9 +38,10 @@ export async function GetSolanaIPFSData(cid: string): Promise<Result<CitizenMeta
   }
 }
 
-export function GetEthereumImageUrl(metadata: CitizenMetadata): Result<string> {
+export function GetLuksoImageUrl(metadata: CitizenMetadata): Result<string> {
   try {
-    const ipfsUrl = metadata.images[0][0].url
+    const luksoMetadata = metadata.rawMetadata as LuksoMetadata;
+    const ipfsUrl = luksoMetadata.images[0][0].url
     const cid = ipfsUrl.split('//')[1]
 
     const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
