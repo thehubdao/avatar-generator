@@ -52,7 +52,6 @@ export interface CitizenMetadata {
   tokenId: string;
   name: string;
   description: string;
-  attributes: Array<{ key: string, value: string, type: string }>;
   rawMetadata: SolanaMetadata | LuksoMetadata;
 }
 
@@ -82,7 +81,7 @@ export interface SolanaMetadata {
   symbol: string;
   description: string;
   image: string;
-  attributes: Array<{ key: string, value: string, type: string }>;
+  attributes: Array<SolanaAttribute>;
   properties: {
     files: Array<{ uri: string, type: string }>;
     category: string;
@@ -90,6 +89,13 @@ export interface SolanaMetadata {
   combination: string;
   baseCombination: string;
   vrm_url: string;
+  asset_address: string;
+}
+
+export interface SolanaAttribute {
+  trait_type: string;
+  value: string;
+  asset_address?: string;
 }
 
 export interface CitizenAttribute {

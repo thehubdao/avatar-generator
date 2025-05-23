@@ -1,10 +1,10 @@
-import { createNoopSigner, generateSigner, PublicKey, publicKey, signerIdentity, some, transactionBuilder } from '@metaplex-foundation/umi';
-import { AssetV1, execute, fetchAsset, fetchAssetsByOwner, fetchCollection, mplCore, transfer, transferV1 } from '@metaplex-foundation/mpl-core';
+import { createNoopSigner, generateSigner, PublicKey, publicKey, signerIdentity, some, TransactionBuilder, transactionBuilder } from '@metaplex-foundation/umi';
+import { AssetV1, execute, fetchAsset, fetchAssetsByOwner, fetchCollection, mplCore, transfer, transferV1, update } from '@metaplex-foundation/mpl-core';
 import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { UMI, COLLECTION_ID, KUMI_CANDY_MACHINE_ID, KUMI_CANDY_MACHINE_TREASURY, COLLECTION_GUARD_ID } from '../../../constants/solana/contract.constant';
-import { CitizenMetadata, Drop } from '../../../interfaces/citizens.interface';
+import { CitizenMetadata, Drop, SolanaAttribute, SolanaMetadata } from '../../../interfaces/citizens.interface';
 import { GetSolanaImageUrl, GetSolanaIPFSData } from '../citizens.util';
 import { ConnectedSolanaWallet } from '@privy-io/react-auth';
 import { GuardSetMintArgs, mintV1, mplCandyMachine } from '@metaplex-foundation/mpl-core-candy-machine';
@@ -12,7 +12,7 @@ import {
     fromWeb3JsTransaction,
     toWeb3JsTransaction
 } from '@metaplex-foundation/umi-web3js-adapters';
-import { CandyMachineGroup, SolanaCampaign } from '../../../enums/citizens/common.enum';
+import { Campaign, CandyMachineGroup, SolanaCampaign } from '../../../enums/citizens/common.enum';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { findAssetSignerPda } from '@metaplex-foundation/mpl-core';
 import { CampaignDrops } from '../../../types/citizens.type';
@@ -81,8 +81,8 @@ export async function GetCollectionAssetByOwner(
     };
 
 }
-export async function GetSolanaCitizenMetadata(collectionAsset: AssetV1): Promise<Result<CitizenMetadata>> {
-    const cid = collectionAsset.uri.split('//')[1];
+export async function GetSolanaCitizenMetadata(assetAddress: AssetV1): Promise<Result<CitizenMetadata>> {
+    const cid = assetAddress.uri.split('//')[1];
     const ipfsDataResult = await GetSolanaIPFSData(cid); // Get the Solana token metadata from IPFS
 
     if (!ipfsDataResult.success) return {
@@ -90,8 +90,24 @@ export async function GetSolanaCitizenMetadata(collectionAsset: AssetV1): Promis
         errMessage: ipfsDataResult.errMessage,
         errCode: CommonErrorCode.FetchError
     };
-    const assetMetadata = ipfsDataResult.value;
-    const imageUrlResult = GetSolanaImageUrl(assetMetadata);
+
+    const solanaMetadata: SolanaMetadata = ipfsDataResult.value as SolanaMetadata;
+
+    solanaMetadata.asset_address = assetAddress.publicKey.toString();
+
+    const citizenMetadata: CitizenMetadata = {
+        fallbackImageUrl: '',
+        imageUrl: '',
+        combination: ipfsDataResult.value.combination,
+        baseCombination: ipfsDataResult.value.baseCombination,
+        campaign: Campaign.Kumi,
+        tokenId: assetAddress.name.split('#')[1],
+        name: ipfsDataResult.value.name,
+        description: ipfsDataResult.value.description,
+        rawMetadata: solanaMetadata
+    }
+
+    const imageUrlResult = GetSolanaImageUrl(citizenMetadata);
 
     if (!imageUrlResult.success) return {
         success: false,
@@ -99,13 +115,13 @@ export async function GetSolanaCitizenMetadata(collectionAsset: AssetV1): Promis
         errCode: CommonErrorCode.FetchError
     };
 
-    assetMetadata.imageUrl = imageUrlResult.value; // take the ipfs data and add the imageUrl and fallbackImageUrl
-    assetMetadata.fallbackImageUrl = imageUrlResult.value;
-    assetMetadata.tokenId = collectionAsset.key.toString(); //set the tokenId
+    citizenMetadata.imageUrl = imageUrlResult.value;
+    citizenMetadata.fallbackImageUrl = imageUrlResult.value;
+
 
     return {
         success: true,
-        value: assetMetadata
+        value: citizenMetadata
     };
 }
 
@@ -244,14 +260,22 @@ export async function GetUserFeatureAssets(walletAddress: string, campaign: Sola
             errCode: CommonErrorCode.GetNoData
         };
 
-        const userFeaturesAssets = userFeatures.filter(feature => {
-            const asset = assetsResult.value.find(asset => asset.updateAuthority.address === feature.contract_address);
-            return asset;
-        });
+        let userFeaturesAssets = userFeatures.map(feature => { // For solana, we set the asset address instead of the collection address as it works different
+            const asset = assetsResult.value.find(asset => asset.updateAuthority.address === feature.contract_address)
+
+            if (!asset) return undefined;
+
+            return {
+                ...feature,
+                contract_address: asset.publicKey.toString()
+            };
+        })
+
+        userFeaturesAssets = userFeaturesAssets.filter(feature => feature !== undefined);
 
         return {
             success: true,
-            value: { [campaign]: userFeaturesAssets }
+            value: { [campaign]: userFeaturesAssets as Drop[] }
         };
     } catch (e) {
         const err = e as Error
@@ -264,25 +288,24 @@ export async function GetUserFeatureAssets(walletAddress: string, campaign: Sola
     }
 }
 
-export async function TransferToAsset(assetAddress: string, sourceAssetAddress: string): Promise<Result<boolean>> {
+export function TransferToAsset(assetAddress: string, sourceAssetAddress: string): Result<TransactionBuilder> {
     try {
         const sourceAssetPublicKey = publicKey(sourceAssetAddress);
         const sourceAssetPda = findAssetSignerPda(UMI, { asset: sourceAssetPublicKey });
 
-        const transferTx = transferV1(UMI, {
+        const transferInstruction = transferV1(UMI, {
             asset: publicKey(assetAddress),
             newOwner: sourceAssetPda,
         });
 
-        await transferTx.sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
 
         return {
             success: true,
-            value: true
+            value: transferInstruction
         };
     } catch (e) {
         const err = e as Error
-        void LogError(Module.SolanaContractUtil, "Couldn't transfer to asset", e);
+        void LogError(Module.SolanaContractUtil, "Couldn't build transfer to asset instruction", e);
         return {
             success: false,
             errMessage: err.message,
@@ -291,7 +314,7 @@ export async function TransferToAsset(assetAddress: string, sourceAssetAddress: 
     }
 }
 
-export async function TransferFromAsset(assetAddress: string, sourceAssetAddress: string): Promise<Result<boolean>> {
+export async function TransferFromAsset(assetAddress: string, sourceAssetAddress: string): Promise<Result<TransactionBuilder>> {
     try {
         const sourceAssetPublicKey = publicKey(sourceAssetAddress);
         const sourceAssetPda = findAssetSignerPda(UMI, { asset: sourceAssetPublicKey });
@@ -318,25 +341,153 @@ export async function TransferFromAsset(assetAddress: string, sourceAssetAddress
             authority: sourceAssetPdaSigner,
             newOwner: UMI.identity.publicKey,
         })
-        await execute(UMI, {
+        const executeInstruction = execute(UMI, {
             asset: sourceAsset,
             collection: sourceCollection,
             instructions: transferAssetTx,
             assetSigner: sourceAssetPda,
-        }).sendAndConfirm(UMI, { send: { commitment: 'finalized' } })
+        })
 
         return {
             success: true,
-            value: true
+            value: executeInstruction
         };
 
     } catch (e) {
         const err = e as Error
-        void LogError(Module.SolanaContractUtil, "Couldn't transfer from asset", e);
+        void LogError(Module.SolanaContractUtil, "Couldn't build transfer from asset instruction", e);
         return {
             success: false,
             errMessage: err.message,
             errCode: CommonErrorCode.InternalError
         };
+    }
+}
+
+async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<TransactionBuilder>> {
+    try {
+        const assetPublicKey = publicKey(assetAddress);
+        const asset = await fetchAsset(UMI, assetPublicKey);
+
+        const collection = asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
+            ? await fetchCollection(UMI, asset.updateAuthority.address)
+            : undefined
+
+        const updateAssetInstruction = update(UMI, {
+            asset,
+            collection,
+            uri
+        })
+
+        return {
+            success: true,
+            value: updateAssetInstruction
+        };
+    } catch (e) {
+        const err = e as Error
+        void LogError(Module.SolanaContractUtil, "Couldn't build update asset instruction", e);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        }
+    }
+}
+
+async function UnequipFeatures(assetAddress: string, features: SolanaAttribute[]): Promise<Result<TransactionBuilder>> {
+    const txBuilder = transactionBuilder();
+
+    for (let index = 0; index < features.length; index++) {
+        const feature = features[index];
+        const transferFromAssetInstruction = await TransferFromAsset(feature.asset_address as string, assetAddress);
+
+        if (!transferFromAssetInstruction.success) return {
+            success: false,
+            errMessage: "Couldn't complete unequip features transaction building",
+            errCode: CommonErrorCode.InternalError
+        };
+        txBuilder.add(transferFromAssetInstruction.value);
+    }
+
+    return {
+        success: true,
+        value: txBuilder
+    };
+
+}
+export async function EquipFeatures(assetAddress: string, metadataIpfsCid: string, features: SolanaAttribute[]): Promise<Result<TransactionBuilder>> {
+        const txBuilder = transactionBuilder();
+
+        for (let index = 0; index < features.length; index++) {
+            const feature = features[index];
+            const transferToAssetInstruction = TransferToAsset(feature.asset_address as string, assetAddress);
+
+            if (!transferToAssetInstruction.success) return {
+                success: false,
+                errMessage: "Couldn't complete transaction building",
+                errCode: CommonErrorCode.InternalError
+            };
+
+            txBuilder.add(transferToAssetInstruction.value);
+        }
+
+        return {
+            success: true,
+            value: txBuilder
+        };
+}
+
+export async function SetNewCombination(assetAddress: string, metadataIpfsCid: string, newFeatures: SolanaAttribute[], oldFeatures: SolanaAttribute[]): Promise<Result<boolean>> {
+    try {
+        const txBuilder = transactionBuilder();
+        const updateAssetInstruction = await UpdateAsset(assetAddress, metadataIpfsCid);
+
+        if (!updateAssetInstruction.success) return {
+            success: false,
+            errMessage: "Couldn't complete transaction building",
+            errCode: CommonErrorCode.InternalError
+        };
+
+        txBuilder.add(updateAssetInstruction.value);
+
+        const equipFeaturesInstruction = await EquipFeatures(assetAddress, metadataIpfsCid, newFeatures);
+
+        if (!equipFeaturesInstruction.success) return {
+            success: false,
+            errMessage: "Couldn't complete transaction building",
+            errCode: CommonErrorCode.InternalError
+        };
+
+        txBuilder.add(equipFeaturesInstruction.value);
+
+        const unequipFeaturesInstruction = await UnequipFeatures(assetAddress, oldFeatures);
+
+        if (!unequipFeaturesInstruction.success) return {   
+            success: false,
+            errMessage: "Couldn't complete transaction building",
+            errCode: CommonErrorCode.InternalError
+        };
+
+        txBuilder.add(updateAssetInstruction.value);
+
+        const tx = await txBuilder.sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
+
+        console.log(tx);
+        const fetchAssetResult = await UMI.rpc.getTransaction(tx.signature)
+        console.log(fetchAssetResult,
+            fetchAssetResult?.meta.logs
+        );
+        return {
+            success: true,
+            value: true
+        }
+    } catch (e) {
+        const err = e as Error
+        void LogError(Module.SolanaContractUtil, "Couldn't set new combination", e);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        }
     }
 }

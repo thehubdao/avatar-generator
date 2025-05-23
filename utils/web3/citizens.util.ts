@@ -2,7 +2,7 @@ import { BrowserProvider, ethers, JsonRpcProvider } from "ethers";
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
 import { LeaderboardEntry } from "../../types/leaderboard.type";
-import { CitizenMetadata, FollowUserData, LuksoMetadata } from "../../interfaces/citizens.interface";
+import { CitizenMetadata, FollowUserData, LuksoMetadata, SolanaMetadata } from "../../interfaces/citizens.interface";
 import { Result } from '../../types/common.type';
 import { CommonErrorCode, Module } from "../../enums/common.enum";
 import { LogError } from "../common.util";
@@ -22,15 +22,14 @@ export async function GetLuksoIPFSData(cid: string): Promise<Result<LuksoMetadat
   }
 }
 
-export async function GetSolanaIPFSData(cid: string): Promise<Result<CitizenMetadata>> {
+export async function GetSolanaIPFSData(cid: string): Promise<Result<SolanaMetadata>> {
   try {
     const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
     const ipfsRequest = await fetch(ipfsHTTPUrl);
     const ipfsData = await ipfsRequest.json();
-    const ipfsDataResult = ipfsData as CitizenMetadata;
-    ipfsDataResult.imageUrl = ipfsData.image;
+    const ipfsDataResult = ipfsData as SolanaMetadata ;
 
-    return { success: true, value: ipfsData };
+    return { success: true, value: ipfsDataResult };
   } catch (error) {
     const err = error as Error;
     LogError(Module.Citizens, 'Error on getting token metadata', err.stack);
@@ -55,7 +54,7 @@ export function GetLuksoImageUrl(metadata: CitizenMetadata): Result<string> {
 
 export function GetSolanaImageUrl(metadata: CitizenMetadata): Result<string> {
   try {
-    const cid = metadata.imageUrl.split('//')[1];
+    const cid = (metadata.rawMetadata as SolanaMetadata).image.split('//')[1];
     const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
     
     return { success: true, value: imageUrl };

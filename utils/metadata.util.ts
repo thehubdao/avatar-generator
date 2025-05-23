@@ -56,20 +56,18 @@ export async function UploadSolanaMetadata(tokenMetadata: CitizenMetadata, combi
         const vrmCid = await pinata.upload.file(vrmFile, {cidVersion: 1, metadata:{name: `${campaign}-${combination}-vrm`}});
 
         const solanaMetadata: SolanaMetadata = {
-            name: tokenMetadata.name,
-            symbol: tokenMetadata.tokenId,
-            description: tokenMetadata.description,
-            image: imageCid.IpfsHash,
-            attributes: tokenMetadata.attributes,
+            ...tokenMetadata.rawMetadata as SolanaMetadata,
+            image: `ipfs://${imageCid.IpfsHash}`,
             properties: {
-                files: [{uri: vrmCid.IpfsHash, type: "model/vrm"}],
+                files: [{uri: `ipfs://${imageCid.IpfsHash}`, type: "image/png"}],
                 category: "avatar"
             },
-            combination: tokenMetadata.combination,
-            baseCombination: tokenMetadata.baseCombination,
-            vrm_url: vrmCid.IpfsHash
+            vrm_url: `ipfs://${vrmCid.IpfsHash}`
         }
 
+        const metadata = await pinata.upload.json({solanaMetadata }, {cidVersion: 1, metadata:{name: `z-${campaign}-${tokenMetadata.tokenId}-metadata`}});
+
+        return { success: true, value: { uri: metadata.IpfsHash, imageUrl } };
     }catch(error){
         const err = error as Error;
         void LogError(Module.Citizens, 'Error on uploading Solana metadata', error);
