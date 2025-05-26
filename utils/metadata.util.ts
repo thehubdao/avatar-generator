@@ -65,7 +65,7 @@ export async function UploadSolanaMetadata(tokenMetadata: CitizenMetadata, combi
             vrm_url: `ipfs://${vrmCid.IpfsHash}`
         }
 
-        const metadata = await pinata.upload.json({solanaMetadata }, {cidVersion: 1, metadata:{name: `z-${campaign}-${tokenMetadata.tokenId}-metadata`}});
+        const metadata = await pinata.upload.json(solanaMetadata, {cidVersion: 1, metadata:{name: `z-${campaign}-${tokenMetadata.tokenId}-metadata`}});
 
         return { success: true, value: { uri: metadata.IpfsHash, imageUrl } };
     }catch(error){
