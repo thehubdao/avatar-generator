@@ -15,7 +15,7 @@ import { UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.
 import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
 import { Campaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
-import { CitizenMetadata, Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
+import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { Result } from "../../types/common.type";
 
@@ -533,7 +533,7 @@ export default function CitizensComponent() {
     //TODO: Minting function
     if (selectedCampaign == Campaign.Kumi) {
       const mintResult = await MintKumiCitizen();
-      if (walletAddress) {
+      if (mintResult.success && walletAddress) {
         const fetchResult = await fetchSolanaMetadata(walletAddress);
         if (fetchResult.success) {
           return true;
