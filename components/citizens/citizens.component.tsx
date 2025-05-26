@@ -17,6 +17,8 @@ import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMet
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
+import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
+import { Result } from "../../types/common.type";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
