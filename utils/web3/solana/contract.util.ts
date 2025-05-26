@@ -299,7 +299,6 @@ export async function TransferToAsset(assetAddress: string, sourceAssetAddress: 
             asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
                 ? await fetchCollection(UMI, asset.updateAuthority.address)
                 : undefined
-        console.log(collection);
         const transferInstruction = transferV1(UMI, {
             collection: collection?.publicKey,
             asset: assetPublicKey,
@@ -380,7 +379,6 @@ async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<Tr
         const collection = asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
             ? await fetchCollection(UMI, asset.updateAuthority.address)
             : undefined
-        console.log(collection);
         const updateAssetInstruction = update(UMI, {
             asset,
             collection,
