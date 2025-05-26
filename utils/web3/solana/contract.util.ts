@@ -163,7 +163,7 @@ export async function GetKumiCandyMachineGuardGroup(walletAddress: string, colle
         errCode: CommonErrorCode.GetNoData
     };
 
-    if (assetsResult.value) return {
+    if (assetsResult.value && assetsResult.value.length > 0) return {
         success: true,
         value: { group: CandyMachineGroup.Holder, mintArgs: { solPayment: some({ destination: KUMI_CANDY_MACHINE_TREASURY }), assetGate: some({ asset: assetsResult.value[0].publicKey }) } }
     };
