@@ -7,7 +7,7 @@ import { AiOutlineLoading } from "react-icons/ai";
 
 interface ExportButtonUIProps {
   children?: string | JSX.Element;
-  onClickEvent: (type: ModelExtension) => Promise<void>;
+  onClickEvent: (type: ModelExtension) => Promise<boolean | void>;
   allowExtension?: ModelExtension[];
 }
 

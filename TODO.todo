@@ -19,6 +19,7 @@ TODO:
     ☐ At holder minting price, put free minting + 0.0042 platform fee
     ☐ Adjust minting at phone screen sizes
     ☐ Put address/name for logged in user in respective place
+    ☐ Review ID error when create more than 2 snackbars
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
