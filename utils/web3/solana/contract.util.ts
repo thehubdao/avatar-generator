@@ -288,13 +288,20 @@ export async function GetUserFeatureAssets(walletAddress: string, campaign: Sola
     }
 }
 
-export function TransferToAsset(assetAddress: string, sourceAssetAddress: string): Result<TransactionBuilder> {
+export async function TransferToAsset(assetAddress: string, sourceAssetAddress: string): Promise<Result<TransactionBuilder>> {
     try {
         const sourceAssetPublicKey = publicKey(sourceAssetAddress);
         const sourceAssetPda = findAssetSignerPda(UMI, { asset: sourceAssetPublicKey });
-
+        const assetPublicKey = publicKey(assetAddress);
+        const asset = await fetchAsset(UMI, assetPublicKey);
+        const collection =
+            asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
+                ? await fetchCollection(UMI, asset.updateAuthority.address)
+            : undefined
+        console.log(collection);
         const transferInstruction = transferV1(UMI, {
-            asset: publicKey(assetAddress),
+            collection: collection?.publicKey,
+            asset: assetPublicKey,
             newOwner: sourceAssetPda,
         });
 
@@ -372,7 +379,7 @@ async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<Tr
         const collection = asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
             ? await fetchCollection(UMI, asset.updateAuthority.address)
             : undefined
-
+        console.log(collection);
         const updateAssetInstruction = update(UMI, {
             asset,
             collection,
@@ -395,7 +402,7 @@ async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<Tr
 }
 
 async function UnequipFeatures(assetAddress: string, features: SolanaAttribute[]): Promise<Result<TransactionBuilder>> {
-    const txBuilder = transactionBuilder();
+    let txBuilder = transactionBuilder();
 
     for (let index = 0; index < features.length; index++) {
         const feature = features[index];
@@ -406,7 +413,7 @@ async function UnequipFeatures(assetAddress: string, features: SolanaAttribute[]
             errMessage: "Couldn't complete unequip features transaction building",
             errCode: CommonErrorCode.InternalError
         };
-        txBuilder.add(transferFromAssetInstruction.value);
+        txBuilder = txBuilder.add(transferFromAssetInstruction.value);
     }
 
     return {
@@ -415,68 +422,60 @@ async function UnequipFeatures(assetAddress: string, features: SolanaAttribute[]
     };
 
 }
-export async function EquipFeatures(assetAddress: string, metadataIpfsCid: string, features: SolanaAttribute[]): Promise<Result<TransactionBuilder>> {
-        const txBuilder = transactionBuilder();
+export async function EquipFeatures(assetAddress: string, features: SolanaAttribute[]): Promise<Result<TransactionBuilder>> {
+    let txBuilder = transactionBuilder();
 
-        for (let index = 0; index < features.length; index++) {
-            const feature = features[index];
-            const transferToAssetInstruction = TransferToAsset(feature.asset_address as string, assetAddress);
+    for (let index = 0; index < features.length; index++) {
+        const feature = features[index];
+        const transferToAssetInstruction = await TransferToAsset(feature.asset_address as string, assetAddress);
 
-            if (!transferToAssetInstruction.success) return {
-                success: false,
-                errMessage: "Couldn't complete transaction building",
-                errCode: CommonErrorCode.InternalError
-            };
-
-            txBuilder.add(transferToAssetInstruction.value);
-        }
-
-        return {
-            success: true,
-            value: txBuilder
+        if (!transferToAssetInstruction.success) return {
+            success: false,
+            errMessage: "Couldn't complete transaction building",
+            errCode: CommonErrorCode.InternalError
         };
+
+        txBuilder = txBuilder.add(transferToAssetInstruction.value);
+    }
+
+    return {
+        success: true,
+        value: txBuilder
+    };
 }
 
 export async function SetNewCombination(assetAddress: string, metadataIpfsCid: string, newFeatures: SolanaAttribute[], oldFeatures: SolanaAttribute[]): Promise<Result<boolean>> {
     try {
-        const txBuilder = transactionBuilder();
-        const updateAssetInstruction = await UpdateAsset(assetAddress, metadataIpfsCid);
+        let txBuilder = transactionBuilder();
+        const updateAssetInstruction = await UpdateAsset(assetAddress, `ipfs://${metadataIpfsCid}`);
 
         if (!updateAssetInstruction.success) return {
             success: false,
             errMessage: "Couldn't complete transaction building",
             errCode: CommonErrorCode.InternalError
         };
+        txBuilder = txBuilder.add(updateAssetInstruction.value);
 
-        txBuilder.add(updateAssetInstruction.value);
-
-        const equipFeaturesInstruction = await EquipFeatures(assetAddress, metadataIpfsCid, newFeatures);
+        const equipFeaturesInstruction = await EquipFeatures(assetAddress, newFeatures);
 
         if (!equipFeaturesInstruction.success) return {
             success: false,
             errMessage: "Couldn't complete transaction building",
             errCode: CommonErrorCode.InternalError
         };
-
-        txBuilder.add(equipFeaturesInstruction.value);
+        txBuilder = txBuilder.add(equipFeaturesInstruction.value);
 
         const unequipFeaturesInstruction = await UnequipFeatures(assetAddress, oldFeatures);
 
-        if (!unequipFeaturesInstruction.success) return {   
+        if (!unequipFeaturesInstruction.success) return {
             success: false,
             errMessage: "Couldn't complete transaction building",
             errCode: CommonErrorCode.InternalError
         };
+        txBuilder = txBuilder.add(unequipFeaturesInstruction.value);
 
-        txBuilder.add(updateAssetInstruction.value);
+        await txBuilder.sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
 
-        const tx = await txBuilder.sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
-
-        console.log(tx);
-        const fetchAssetResult = await UMI.rpc.getTransaction(tx.signature)
-        console.log(fetchAssetResult,
-            fetchAssetResult?.meta.logs
-        );
         return {
             success: true,
             value: true

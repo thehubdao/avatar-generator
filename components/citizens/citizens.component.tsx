@@ -17,6 +17,7 @@ import { Campaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
 import { CitizenMetadata, Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
+import { Result } from "../../types/common.type";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -287,6 +288,17 @@ export default function CitizensComponent() {
     addReplaceAttribute(category, name);
   }
 
+  async function fetchSolanaMetadata(walletAddress: string): Promise<Result<boolean>> {
+    const asset = await GetCampaignCitizensMetadata(walletAddress);
+    if (asset.success) {
+      dispatch(setCitizensMetadata(asset.value));
+      dispatch(setSelectedCitizen(asset.value[0]));
+      return { success: true, value: true };
+    }
+    LogError(Module.Citizens, 'Failed to fetch solana metadata', asset.errCode);
+    return { success: false, errMessage: asset.errMessage, errCode: asset.errCode };
+  }
+
   async function saveLuksoCombination() {
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
@@ -497,12 +509,15 @@ export default function CitizensComponent() {
 
     newCitizenMetadata.imageUrl = metadataObject.value.imageUrl;
 
-    console.log(newCitizenMetadata, metadataObject, "SOLANA METADATA");
-
     const result = await SetNewCombination((selectedCitizen.rawMetadata as SolanaMetadata).asset_address, metadataObject.value.uri, newAttributes, oldAttributes);
 
-    return result.success;
+    const fetchResult = await fetchSolanaMetadata(walletAddress);
+
+    return fetchResult.success && result.success;
+
   }
+
+
 
   async function handleSaveCombination() {
     let isSuccess = false;
@@ -518,16 +533,13 @@ export default function CitizensComponent() {
     //TODO: Minting function
     if (selectedCampaign == Campaign.Kumi) {
       const mintResult = await MintKumiCitizen();
-      if (mintResult.success && walletAddress) {
-        const asset = await GetCampaignCitizensMetadata(walletAddress);
-        if (asset.success) {
-          dispatch(setCitizensMetadata(asset.value));
-          dispatch(setSelectedCitizen(asset.value[0]));
+      if (walletAddress) {
+        const fetchResult = await fetchSolanaMetadata(walletAddress);
+        if (fetchResult.success) {
+          return true;
         }
-        else return false;
-        return true;
+        return false;
       }
-      else return false;
     }
     return false;
   }
