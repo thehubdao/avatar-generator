@@ -59,7 +59,8 @@ export enum Module {
   VrmUtil = 'VrmUtil',
   Citizens = 'Citizens',
   LuksoContractUtil = 'LuksoContractUtil',
-  SolanaContractUtil = 'SolanaContractUtil'
+  SolanaContractUtil = 'SolanaContractUtil',
+  RootContractUtil = 'RootContractUtil'
 }
 
 export enum EmailResult {

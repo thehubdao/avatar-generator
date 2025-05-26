@@ -18,6 +18,7 @@ import { CitizenMetadata } from "../../interfaces/citizens.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen } from "../../utils/web3/solana/contract.util";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
+import { MintRootAsset } from "../../utils/web3/root/contract.util";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -224,7 +225,7 @@ export default function CitizensComponent() {
     }
   }
 
-  async function exportModel( type?: ModelExtension ) {
+  async function exportModel(type?: ModelExtension) {
     switch (type) {
       case ModelExtension.GLB:
         return await exportGlb();
@@ -440,8 +441,8 @@ export default function CitizensComponent() {
   }
 
   async function onMinting() {
-    //TODO: Minting function
-    if (selectedCampaign == Campaign.Kumi) {
+
+    if (selectedCampaign == Campaign.Kumi) {    /* Kumi Minting Function */
       const mintResult = await MintKumiCitizen();
       if (mintResult.success && walletAddress) {
         const asset = await GetCampaignCitizensMetadata(walletAddress);
@@ -450,6 +451,16 @@ export default function CitizensComponent() {
           dispatch(setSelectedCitizen(asset.value[0]));
         }
         else return false;
+        return true;
+      }
+      else return false;
+    } else if (selectedCampaign == Campaign.Based) {     /* Based Minting Function */
+      if (!walletAddress) {
+        LogError(Module.Citizens, 'Wallet address is undefined in onMinting');
+        return false;
+      }
+      const mintResult = await MintRootAsset(walletAddress);
+      if (mintResult.success) {
         return true;
       }
       else return false;

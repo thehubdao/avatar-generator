@@ -51,7 +51,7 @@ export enum Campaign {
   Citizens = "vrm_female",
   Creators = "vrm_male",
   Kumi = "kumi",
-  Based = "root_citizens"
+  Based = "root citizens"
 }
 
 export enum LuksoCampaign{
