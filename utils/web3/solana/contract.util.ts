@@ -63,7 +63,7 @@ export async function GetAssetsByOwner(walletAddress: string): Promise<Result<As
 export async function GetCollectionAssetByOwner(
     walletAddress: string,
     collectionId: PublicKey = COLLECTION_ID
-): Promise<Result<AssetV1 | undefined>> {
+): Promise<Result<AssetV1[]>> {
     const assetsResult = await GetAssetsByOwner(walletAddress);
     if (!assetsResult.success) return {
         success: false,
@@ -71,7 +71,7 @@ export async function GetCollectionAssetByOwner(
         errCode: CommonErrorCode.GetNoData
     };
 
-    const collectionAsset = assetsResult.value.find(
+    const collectionAsset = assetsResult.value.filter(
         asset => asset.updateAuthority.address === collectionId.toString()
     );
 
@@ -139,17 +139,18 @@ export async function GetCampaignCitizensMetadata(walletAddress: string): Promis
         value: [] //Return empty array because we don't have any collection asset. Means user has to mint
     };
 
-    const citizenMetadataResult = await GetSolanaCitizenMetadata(assetsResult.value);
-
-    if (!citizenMetadataResult.success) return {
-        success: false,
-        errMessage: "Couldn't get citizens metadata correctly",
-        errCode: CommonErrorCode.GetNoData
-    };
+    const citizensMetadata = await Promise.all(assetsResult.value.map(async (asset) => {
+        const citizenMetadataResult = await GetSolanaCitizenMetadata(asset);
+        if (!citizenMetadataResult.success) {
+            void LogError(Module.SolanaContractUtil, "Couldn't get citizen metadata correctly", citizenMetadataResult.errMessage);
+            return undefined
+        }
+        return citizenMetadataResult.value;
+    }));
 
     return {
         success: true,
-        value: [citizenMetadataResult.value]
+        value: citizensMetadata.filter(citizenMetadata => citizenMetadata !== undefined)
     };
 
 }
@@ -164,7 +165,7 @@ export async function GetKumiCandyMachineGuardGroup(walletAddress: string, colle
 
     if (assetsResult.value) return {
         success: true,
-        value: { group: CandyMachineGroup.Holder, mintArgs: { solPayment: some({ destination: KUMI_CANDY_MACHINE_TREASURY }), assetGate: some({ asset: assetsResult.value.publicKey }) } }
+        value: { group: CandyMachineGroup.Holder, mintArgs: { solPayment: some({ destination: KUMI_CANDY_MACHINE_TREASURY }), assetGate: some({ asset: assetsResult.value[0].publicKey }) } }
     };
 
     return {
@@ -297,7 +298,7 @@ export async function TransferToAsset(assetAddress: string, sourceAssetAddress: 
         const collection =
             asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
                 ? await fetchCollection(UMI, asset.updateAuthority.address)
-            : undefined
+                : undefined
         console.log(collection);
         const transferInstruction = transferV1(UMI, {
             collection: collection?.publicKey,
