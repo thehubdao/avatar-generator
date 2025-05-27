@@ -6,6 +6,7 @@ import { Signer } from '@futureverse/signer';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { LogError } from '../../common.util';
+import '@therootnetwork/api-types';
 
 let api: ApiPromise;
 let signer: Signer;
@@ -18,11 +19,24 @@ export async function InitializeApi(_signer: Signer, _signerEoa: string) {
   signerEoa = _signerEoa;
 }
 
+export async function GetRootAssets(address: string): Promise<Result<any>> {
+  try {
+    console.log(NFT_COLLECTION_ID, address);
+    const ownedTokens = await api.rpc.nft.ownedTokens(NFT_COLLECTION_ID, address, undefined, 1);
+    console.log(ownedTokens);
+    return { success: true, value: ownedTokens };
+  } catch (error) {
+    const e = error as Error;
+    LogError(Module.RootContractUtil, 'Error on getting Root Asset');
+    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+  }
+}
+
 export async function MintRootAsset(
   address: string,
 ): Promise<Result<boolean>> {
   try {
-    const mintBuilder = TransactionBuilder.nft(api, signer, address, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
+    const mintBuilder = TransactionBuilder.nft(api, signer, address, NFT_COLLECTION_ID).mint({ quantity: MINT_AMOUNT, walletAddress: address });
     const tx = await mintBuilder.signAndSend();
 
     return { success: true, value: true };

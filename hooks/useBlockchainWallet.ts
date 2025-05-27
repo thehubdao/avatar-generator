@@ -22,7 +22,7 @@ import { useAuthUi } from '@futureverse/auth-ui';
 import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
-import { InitializeApi } from '../utils/web3/root/contract.util';
+import { GetRootAssets, InitializeApi } from '../utils/web3/root/contract.util';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -85,11 +85,11 @@ export function useBlockchainWallet() {
   }
 
   async function getRootTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
-    const asset = { success: true, value: [] };
+    const asset = await GetRootAssets(walletAddress);
 
     if (asset.success) return { success: true, value: asset.value };
 
-    return { success: false, errMessage: '', errCode: '' };
+    return { success: false, errMessage: asset.errMessage, errCode: asset.errCode };
   }
 
   async function getEthereumUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
@@ -360,10 +360,11 @@ export function useBlockchainWallet() {
 
   // Root Logic
   useEffect(() => {
-    if (!isFetchingSession && userSession && signer) {
-      const eoa = userSession.linked[0].eoa;
+    const connectPromise = async () => {
+      if (!isFetchingSession && userSession && signer) {
+        const eoa = userSession.linked[0].eoa;
 
-      InitializeApi(signer, eoa);
+      await InitializeApi(signer, eoa);
 
       dispatch(connect({ address: eoa, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
       setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: true }));
@@ -372,7 +373,8 @@ export function useBlockchainWallet() {
       if (blockchainType === Blockchain.Root) dispatch(disconnect());
       else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: false }));
 
-    }
+    }}
+    connectPromise();
   }, [isFetchingSession, userSession]);
 
   useEffect(() => {
