@@ -379,7 +379,7 @@ async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<Tr
         const collection = asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
             ? await fetchCollection(UMI, asset.updateAuthority.address)
             : undefined
-            console.log("EFDJDSAfsda")
+
         const updateAssetInstruction = update(UMI, {
             asset,
             collection,
@@ -448,6 +448,7 @@ export async function EquipFeatures(assetAddress: string, features: SolanaAttrib
 
 export async function SetNewCombination(assetAddress: string, metadataIpfsCid: string, newFeatures: SolanaAttribute[], oldFeatures: SolanaAttribute[]): Promise<Result<boolean>> {
     try {
+        console.log(assetAddress, metadataIpfsCid, newFeatures, oldFeatures);
         let txBuilder = transactionBuilder();
         const updateAssetInstruction = await UpdateAsset(assetAddress, `ipfs://${metadataIpfsCid}`);
 
