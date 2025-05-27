@@ -20,6 +20,8 @@ TODO:
     ☐ Adjust minting at phone screen sizes
     ☐ Put address/name for logged in user in respective place
     ☐ Review ID error when create more than 2 snackbars
+    ☐ Change save combination popup text about burnt wearables 
+    ☐ Remove skin colour in mobile
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
