@@ -3,7 +3,7 @@ import { AssetV1, execute, fetchAsset, fetchAssetsByOwner, fetchCollection, mplC
 import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
-import { UMI, COLLECTION_ID, KUMI_CANDY_MACHINE_ID, KUMI_CANDY_MACHINE_TREASURY, COLLECTION_GUARD_ID } from '../../../constants/solana/contract.constant';
+import { UMI, COLLECTION_ID, KUMI_CANDY_MACHINE_ID, KUMI_CANDY_MACHINE_TREASURY, COLLECTION_GUARD_ID, ADMIN_SIGNER } from '../../../constants/solana/contract.constant';
 import { CitizenMetadata, Drop, SolanaAttribute, SolanaMetadata } from '../../../interfaces/citizens.interface';
 import { GetSolanaImageUrl, GetSolanaIPFSData } from '../citizens.util';
 import { ConnectedSolanaWallet } from '@privy-io/react-auth';
@@ -379,10 +379,13 @@ async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<Tr
         const collection = asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
             ? await fetchCollection(UMI, asset.updateAuthority.address)
             : undefined
+            console.log("EFDJDSAfsda")
         const updateAssetInstruction = update(UMI, {
             asset,
             collection,
-            uri
+            uri,
+            payer: createNoopSigner(UMI.identity.publicKey),
+            authority: ADMIN_SIGNER,
         })
 
         return {
