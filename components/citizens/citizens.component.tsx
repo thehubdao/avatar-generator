@@ -522,8 +522,6 @@ export default function CitizensComponent() {
       } as SolanaMetadata
     }
 
-    console.log(newCitizenMetadata, 'newCitizenMetadata');
-
     const metadataObject = await UploadSolanaMetadata(
       newCitizenMetadata,
       newCombination,
