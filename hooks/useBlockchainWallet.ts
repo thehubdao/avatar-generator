@@ -383,7 +383,7 @@ export function useBlockchainWallet() {
       if (!isFetchingSession && userSession && signer) {
         const eoa = userSession.linked[0].eoa;
 
-        await InitializeApi(signer, eoa);
+        await InitializeApi(signer);
 
         dispatch(connect({ address: eoa, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
         setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: true }));

@@ -1,5 +1,4 @@
 import { Keyring, WsProvider } from '@polkadot/api';
-import { Signer } from '@futureverse/signer';
 import { hexToU8a } from '@polkadot/util';
 
 const ROOT_NETWORK_WS_URL = process.env.NEXT_PUBLIC_ROOT_NETWORK_WS_URL;

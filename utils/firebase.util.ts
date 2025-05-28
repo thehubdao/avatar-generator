@@ -1377,7 +1377,7 @@ export async function TrackUserLogin(address: string): Promise<Result<boolean>> 
   }
 }
 
-export async function storeAssetData(assetData: AssetData): Promise<Result<boolean>> {
+export async function StoreAssetData(assetData: AssetData): Promise<Result<boolean>> {
   try {
     const { tokenId, campaign, collectionId } = assetData;
     const db = await FirebaseUtil.Instance().DB();
@@ -1392,7 +1392,7 @@ export async function storeAssetData(assetData: AssetData): Promise<Result<boole
   }
 }
 
-export async function getAssetData(campaign: string, collectionId: string, tokenId: string): Promise<Result<AssetData>> {
+export async function GetAssetData(campaign: string, collectionId: string, tokenId: string): Promise<Result<AssetData>> {
   try {
     const db = await FirebaseUtil.Instance().DB();
     const assetDataCollection = collection(db, `${FirestoreGlobalLocation.Campaign}/${campaign}/${FirestoreLocation.AssetData}`);

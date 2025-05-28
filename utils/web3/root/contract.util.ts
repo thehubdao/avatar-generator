@@ -7,7 +7,7 @@ import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { LogError } from '../../common.util';
 import '@therootnetwork/api-types';
-import { getAssetData, storeAssetData } from '../../firebase.util';
+import { GetAssetData, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { Campaign, CampaignBaseCombination } from '../../../enums/citizens/common.enum';
 import { CitizenMetadata, RootMetadata } from '../../../interfaces/citizens.interface';
@@ -15,13 +15,11 @@ import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 
 let api: ApiPromise;
 let signer: Signer;
-let signerEoa: string;
 
 
-export async function InitializeApi(_signer: Signer, _signerEoa: string) {
+export async function InitializeApi(_signer: Signer) {
   api = await ApiPromise.create({ ...getApiOptions(), provider: PROVIDER });
   signer = _signer;
-  signerEoa = _signerEoa;
 }
 
 export async function GetRootAssetTokenIds(address: string): Promise<Result<number[]>> {
@@ -41,7 +39,7 @@ export async function GetRootAssetTokenIds(address: string): Promise<Result<numb
 
 export async function GetRootAssetMetadata(tokenId: string): Promise<Result<CitizenMetadata>> {
   try {
-    const assetDataResult = await getAssetData(Campaign.Based, NFT_COLLECTION_ID as string, tokenId);
+    const assetDataResult = await GetAssetData(Campaign.Based, NFT_COLLECTION_ID as string, tokenId);
 
     if (!assetDataResult.success) return { success: false, errMessage: assetDataResult.errMessage, errCode: assetDataResult.errCode };
 
@@ -95,7 +93,7 @@ export async function MintRootAsset(
     if (tokenIdsResult.success) {
       const tokenIds = tokenIdsResult.value;
       const tokenId = tokenIds[tokenIds.length - 1].toString();
-      await storeAssetData({
+      await StoreAssetData({
         address,
         tokenId,
         campaign: Campaign.Based,
