@@ -10,15 +10,15 @@ import { ExportInterface } from "../../interfaces/common.interface";
 import { FEMALE_CAMPAIGN_BODY_TYPES, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { BodyPart } from "../../interfaces/avatar.interface";
-import { UploadMetadata } from "../../utils/metadata.util";
+import { UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
 import { Campaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
-import { CitizenMetadata } from "../../interfaces/citizens.interface";
-import { GetCampaignCitizensMetadata, MintKumiCitizen } from "../../utils/web3/solana/contract.util";
+import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { MintRootAsset } from "../../utils/web3/root/contract.util";
+import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -314,51 +314,69 @@ export default function CitizensComponent() {
     addReplaceAttribute(category, name);
   }
 
+  async function fetchSolanaMetadata(walletAddress: string): Promise<boolean> {
+    const asset = await GetCampaignCitizensMetadata(walletAddress);
+    if (asset.success) {
+      dispatch(setCitizensMetadata(asset.value));
+      dispatch(setSelectedCitizen(asset.value[0]));
+      return true;
+    }
+    LogError(Module.Citizens, 'Failed to fetch solana metadata', asset.errCode);
+    return false;
+  }
+
   async function saveLuksoCombination() {
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
       .join('-') as string;
 
     if (!campaignParams) {
-      LogError(Module.Citizens, 'Campaign params is undefined in saveCombination');
+      LogError(Module.Citizens, 'Campaign params is undefined in Lukso saveCombination');
       return false;
     }
     if (!singleInitData.current) {
-      LogError(Module.Citizens, 'Single init data is undefined in saveCombination');
+      LogError(Module.Citizens, 'Single init data is undefined in Lukso saveCombination');
       return false;
     }
     if (!selectedCitizen) {
-      LogError(Module.Citizens, 'Selected citizen is undefined in saveCombination');
+      LogError(Module.Citizens, 'Selected citizen is undefined in Lukso saveCombination');
       return false;
     }
     if (!walletAddress) {
-      LogError(Module.Citizens, 'Wallet address is undefined in saveCombination');
+      LogError(Module.Citizens, 'Wallet address is undefined in Lukso saveCombination');
       return false;
     }
     if (!citizensMetadata) {
-      LogError(Module.Citizens, 'Citizens metadata is undefined in saveCombination');
+      LogError(Module.Citizens, 'Citizens metadata is undefined in Lukso saveCombination');
       return false;
     }
 
     const currentCampaign = selectedCampaign;
 
     if (!currentCampaign) {
-      LogError(Module.Citizens, 'Current campaign is undefined in saveCombination');
+      LogError(Module.Citizens, 'Current campaign is undefined in Lukso saveCombination');
       return false;
     }
 
     const currentFeatures = singleInitData.current.features;
-    const newMetadata: CitizenMetadata = {
+    const newCitizenMetadata = { //Make a copy of the selected citizen metadata
       ...selectedCitizen,
       combination: newCombination,
-      attributes: [],
-      body: { ...selectedCitizen.body }
+      rawMetadata: {
+        ...selectedCitizen.rawMetadata,
+        combination: newCombination,
+        body: {
+          ...(selectedCitizen.rawMetadata as LuksoMetadata).body
+        }
+      } as LuksoMetadata
     }
+
+    newCitizenMetadata.rawMetadata.attributes = []; //Reset attributes to be replaced
 
     const burnDropArray: BodyPart[] = [];
 
     currentFeatures.forEach((feature) => {
-      newMetadata.attributes.push({
+      newCitizenMetadata.rawMetadata.attributes.push({
         key:
           currentCampaign == 'vrm_female'
             ? FEMALE_CAMPAIGN_BODY_TYPES[
@@ -368,23 +386,21 @@ export default function CitizensComponent() {
         value: feature.val.name,
         type: 'string',
       });
-      let bodyFeature: BodyPart | undefined;
-
-      if (currentCampaign == 'vrm_female') bodyFeature = newMetadata.body[FEMALE_CAMPAIGN_BODY_TYPES[feature.val.type.toLowerCase() as keyof typeof FEMALE_CAMPAIGN_BODY_TYPES] as keyof typeof newMetadata.body];
-      else bodyFeature = newMetadata.body[feature.val.type.toLowerCase() as keyof typeof newMetadata.body];
+      let bodyFeature: BodyPart | undefined;   
+      if (currentCampaign == 'vrm_female') bodyFeature = newCitizenMetadata.rawMetadata.body[FEMALE_CAMPAIGN_BODY_TYPES[feature.val.type.toLowerCase() as keyof typeof FEMALE_CAMPAIGN_BODY_TYPES] as keyof typeof newCitizenMetadata.rawMetadata.body];
+      else bodyFeature = newCitizenMetadata.rawMetadata.body[feature.val.type.toLowerCase() as keyof typeof newCitizenMetadata.rawMetadata.body];
 
       if (bodyFeature && bodyFeature.name != feature.val.name) {
-        newMetadata.body[
-          feature.val.type.toLowerCase() as keyof typeof newMetadata.body
+        newCitizenMetadata.rawMetadata.body[
+          feature.val.type.toLowerCase() as keyof typeof newCitizenMetadata.rawMetadata.body
         ] = feature.val as BodyPart;
 
         burnDropArray.push(feature.val as BodyPart);
       }
     });
 
-    const metadataObject = await UploadMetadata(
-      newMetadata,
-      undefined,
+    const metadataObject = await UploadLuksoMetadata(
+      newCitizenMetadata.rawMetadata,
       newCombination,
       selectedCitizen.campaign
     );
@@ -397,7 +413,8 @@ export default function CitizensComponent() {
       return false;
     }
 
-    newMetadata.imageUrl = metadataObject.value.imageUrl;
+    newCitizenMetadata.imageUrl = metadataObject.value.imageUrl;
+    newCitizenMetadata.rawMetadata.imageUrl = metadataObject.value.imageUrl;
 
     await SetTokenMetadata(
       currentCampaign,
@@ -418,16 +435,105 @@ export default function CitizensComponent() {
       return false;
     }
 
-    updatedCitizensMetadata[index] = newMetadata;
+    updatedCitizensMetadata[index] = newCitizenMetadata;
 
     dispatch(setCitizensMetadata(updatedCitizensMetadata));
-    dispatch(setSelectedCitizen(newMetadata));
+    dispatch(setSelectedCitizen(newCitizenMetadata));
+
     return true; // return true in success, false in failure
   }
 
-  async function saveKumiCombination() {
-    //TODO: implement kumi combination saving
-    return false;
+  async function saveSolanaCombination() {
+    const newCombination = singleInitData.current?.features
+      .map((feature) => feature.val.index)
+      .join('-') as string; // Save the new combination as string from features
+
+    if (!campaignParams) {
+      LogError(Module.Citizens, 'Campaign params is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!singleInitData.current) {
+      LogError(Module.Citizens, 'Single init data is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!selectedCitizen) {
+      LogError(Module.Citizens, 'Selected citizen is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!walletAddress) {
+      LogError(Module.Citizens, 'Wallet address is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!citizensMetadata) {
+      LogError(Module.Citizens, 'Citizens metadata is undefined in Kumi saveCombination');
+      return false;
+    }
+
+    const currentCampaign = selectedCampaign;
+
+    if (!currentCampaign) {
+      LogError(Module.Citizens, 'Current campaign is undefined in Kumi saveCombination');
+      return false;
+    }
+
+    const attributes: SolanaAttribute[] = []; //Convert from current features to attribute list 
+
+    const oldCombinationArray = selectedCitizen.combination.split('-');
+    const newCombinationArray = newCombination.split('-');
+    const oldAttributes: SolanaAttribute[] = []; //This array will contain the attributes to be unequipped
+    const newAttributes: SolanaAttribute[] = []; //This array will contain the attributes to be equipped
+    if (userFeatures && userFeatures[selectedCampaign as string] != null) newCombinationArray.forEach((featureIndex, index) => {
+        const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
+        if (!indexType) return undefined;
+
+        const oldAttribute = (selectedCitizen.rawMetadata as SolanaMetadata).attributes[index]; //Get the old feature to be unequipped and transferred back to wallet if not base feature
+        const newAttribute = userFeatures[currentCampaign as string].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newCombinationArray[index])) as Drop; //Get the new feature to be equipped and transferred to source asset in case it's not base feature
+
+        const attribute = newAttribute ? { //Add asset address to the attribute newAttribute exists
+          trait_type: indexType.toUpperCase(),
+          value: newAttribute?.name.toUpperCase(),
+          asset_address: newAttribute?.contract_address
+        } : {
+          trait_type: indexType.toUpperCase(),
+          value: singleInitData.current?.features[index]?.val.name.toUpperCase() as string, //Set the feature name to the new feature index
+        }
+        attributes.push(attribute); 
+
+        if (oldCombinationArray[index] == featureIndex) return undefined; //If the new feature is the same as the old feature, skip
+
+        if (oldAttribute && oldAttribute.asset_address) oldAttributes.push(oldAttribute); //If the old feature is not base feature, add it to the old features array. We know it's not base feature because it has an asset_address
+        if (attribute && attribute.asset_address) newAttributes.push(attribute); //If the new feature is not base feature, add it to the new features array. We know it's not base feature because we get it from user features
+      });
+
+    const newCitizenMetadata = { //Make a copy of the selected citizen metadata
+      ...selectedCitizen,
+      combination: newCombination,
+      rawMetadata: {
+        ...selectedCitizen.rawMetadata,
+        combination: newCombination,
+        attributes,
+      } as SolanaMetadata
+    }
+
+    const metadataObject = await UploadSolanaMetadata(
+      newCitizenMetadata,
+      newCombination,
+      selectedCitizen.campaign
+    );
+
+    if (!metadataObject.success) {
+      LogError(Module.Citizens, 'Failed to upload metadata on saveSolanaCombination', metadataObject.errCode);
+      return false;
+    }
+
+    newCitizenMetadata.imageUrl = metadataObject.value.imageUrl;
+
+    const result = await SetNewCombination((selectedCitizen.rawMetadata as SolanaMetadata).asset_address, metadataObject.value.uri, newAttributes, oldAttributes);
+
+    const isFetchSuccess = await fetchSolanaMetadata(walletAddress);
+
+    return isFetchSuccess && result.success;
+
   }
 
   async function handleSaveCombination() {
@@ -435,7 +541,7 @@ export default function CitizensComponent() {
     if (selectedCampaign == Campaign.Citizens || selectedCampaign == Campaign.Creators) {
       isSuccess = await saveLuksoCombination();
     } else if (selectedCampaign == Campaign.Kumi) {
-      isSuccess = await saveKumiCombination();
+      isSuccess = await saveSolanaCombination();
     }
     return isSuccess;
   }
@@ -445,13 +551,8 @@ export default function CitizensComponent() {
     if (selectedCampaign == Campaign.Kumi) {    /* Kumi Minting Function */
       const mintResult = await MintKumiCitizen();
       if (mintResult.success && walletAddress) {
-        const asset = await GetCampaignCitizensMetadata(walletAddress);
-        if (asset.success) {
-          dispatch(setCitizensMetadata(asset.value));
-          dispatch(setSelectedCitizen(asset.value[0]));
-        }
-        else return false;
-        return true;
+        const isFetchSuccess = await fetchSolanaMetadata(walletAddress);
+        return isFetchSuccess;
       }
       else return false;
     } else if (selectedCampaign == Campaign.Based) {     /* Based Minting Function */
