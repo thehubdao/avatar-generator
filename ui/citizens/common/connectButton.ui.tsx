@@ -3,19 +3,17 @@ import ArrowSVG from "./SVG/arrowSVG.ui";
 import Image from "next/image";
 import StarSVG from "./SVG/starSVG.ui";
 import { FormatWalletAddress } from "../../../utils/common.util";
-import { useUniversalProfile } from '../../../hooks/useUniversalProfile';
 import LogoutSVG from "./SVG/logoutSVG.ui";
 import { useOnClickOutside } from "usehooks-ts";
 import { Blockchain } from "../../../enums/blockchain/common.enum";
 import { useAppSelector } from "../../../store/hooks";
 
 interface ConnectButtonProps {
-  address?: string;
   onLogin: () => void;
   onLogout: () => void;
 }
 
-export default function ConnectButton({ address, onLogin, onLogout }: ConnectButtonProps) {
+export default function ConnectButton({ onLogin, onLogout }: ConnectButtonProps) {
   const parentDOM = useRef(null);
 
   const isLoggedIn = useAppSelector(state => state.citizensAuth.connected);
@@ -23,12 +21,12 @@ export default function ConnectButton({ address, onLogin, onLogout }: ConnectBut
   const xpData = useAppSelector(state => state.citizensAuth.xpData);
   const followUserData = useAppSelector(state => state.citizensAuth.followUserData);
 
+  const address = useAppSelector(state => state.citizensAuth.address);
+  const walletName = useAppSelector(state => state.citizensAuth.walletName);
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-
-
-
-  const { name, profileImage } = useUniversalProfile(address);
+  const [profileImage, ] = useState<string | undefined>();
 
   useOnClickOutside(parentDOM, () => setIsOpen(false));
 
@@ -54,7 +52,7 @@ export default function ConnectButton({ address, onLogin, onLogout }: ConnectBut
             </div>
             <div className="truncate">
               <p className="font-light text-lg px-4 truncate">
-                {name || (address ? FormatWalletAddress(address, 6) : 'No name')}
+                { walletName ? walletName : address ? FormatWalletAddress(address, 6) : 'No address' }
               </p>
             </div>
             <div className={`w-9 h-9 flex justify-center items-center ${isOpen ? 'rotate-180' : ''}`}>
@@ -93,7 +91,7 @@ export default function ConnectButton({ address, onLogin, onLogout }: ConnectBut
                 </div>
                 <div className="flex flex-col items-center max-w-[240px] px-5">
                   <p className="w-full font-light text-center text-2xl pt-4 pb-1 truncate">
-                    {name || (address ? FormatWalletAddress(address, 6) : 'No name')}
+                    {address ? FormatWalletAddress(address, 6) : 'No address'}
                   </p>
                   {blockchainType !== Blockchain.Solana && <div className="w-full flex justify-between">
                     <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-3 sm:px-4">
