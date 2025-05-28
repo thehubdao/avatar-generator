@@ -314,15 +314,15 @@ export default function CitizensComponent() {
     addReplaceAttribute(category, name);
   }
 
-  async function fetchSolanaMetadata(walletAddress: string): Promise<Result<boolean>> {
+  async function fetchSolanaMetadata(walletAddress: string): Promise<boolean> {
     const asset = await GetCampaignCitizensMetadata(walletAddress);
     if (asset.success) {
       dispatch(setCitizensMetadata(asset.value));
       dispatch(setSelectedCitizen(asset.value[0]));
-      return { success: true, value: true };
+      return true;
     }
     LogError(Module.Citizens, 'Failed to fetch solana metadata', asset.errCode);
-    return { success: false, errMessage: asset.errMessage, errCode: asset.errCode };
+    return false;
   }
 
   async function saveLuksoCombination() {
@@ -386,10 +386,7 @@ export default function CitizensComponent() {
         value: feature.val.name,
         type: 'string',
       });
-      let bodyFeature: BodyPart | undefined;
-
-
-
+      let bodyFeature: BodyPart | undefined;   
       if (currentCampaign == 'vrm_female') bodyFeature = newCitizenMetadata.rawMetadata.body[FEMALE_CAMPAIGN_BODY_TYPES[feature.val.type.toLowerCase() as keyof typeof FEMALE_CAMPAIGN_BODY_TYPES] as keyof typeof newCitizenMetadata.rawMetadata.body];
       else bodyFeature = newCitizenMetadata.rawMetadata.body[feature.val.type.toLowerCase() as keyof typeof newCitizenMetadata.rawMetadata.body];
 
@@ -479,18 +476,14 @@ export default function CitizensComponent() {
       return false;
     }
 
-    const attributes: SolanaAttribute[] = [] //Convert from current features to attribute list 
+    const attributes: SolanaAttribute[] = []; //Convert from current features to attribute list 
 
     const oldCombinationArray = selectedCitizen.combination.split('-');
     const newCombinationArray = newCombination.split('-');
     const oldAttributes: SolanaAttribute[] = []; //This array will contain the attributes to be unequipped
     const newAttributes: SolanaAttribute[] = []; //This array will contain the attributes to be equipped
-
-    if (userFeatures && userFeatures[selectedCampaign as string] != null)
-
-      newCombinationArray.forEach((featureIndex, index) => {
+    if (userFeatures && userFeatures[selectedCampaign as string] != null) newCombinationArray.forEach((featureIndex, index) => {
         const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
-
         if (!indexType) return undefined;
 
         const oldAttribute = (selectedCitizen.rawMetadata as SolanaMetadata).attributes[index]; //Get the old feature to be unequipped and transferred back to wallet if not base feature
@@ -504,13 +497,13 @@ export default function CitizensComponent() {
           trait_type: indexType.toUpperCase(),
           value: singleInitData.current?.features[index]?.val.name.toUpperCase() as string, //Set the feature name to the new feature index
         }
-        attributes.push(attribute)
+        attributes.push(attribute); 
 
         if (oldCombinationArray[index] == featureIndex) return undefined; //If the new feature is the same as the old feature, skip
 
         if (oldAttribute && oldAttribute.asset_address) oldAttributes.push(oldAttribute); //If the old feature is not base feature, add it to the old features array. We know it's not base feature because it has an asset_address
         if (attribute && attribute.asset_address) newAttributes.push(attribute); //If the new feature is not base feature, add it to the new features array. We know it's not base feature because we get it from user features
-      })
+      });
 
     const newCitizenMetadata = { //Make a copy of the selected citizen metadata
       ...selectedCitizen,
@@ -539,7 +532,7 @@ export default function CitizensComponent() {
 
     const fetchResult = await fetchSolanaMetadata(walletAddress);
 
-    return fetchResult.success && result.success;
+    return fetchResult && result.success;
 
   }
 
@@ -561,10 +554,7 @@ export default function CitizensComponent() {
       const mintResult = await MintKumiCitizen();
       if (mintResult.success && walletAddress) {
         const fetchResult = await fetchSolanaMetadata(walletAddress);
-        if (fetchResult.success) {
-          return true;
-        }
-        return false;
+        return fetchResult;
       }
     }
     return false;

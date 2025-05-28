@@ -361,7 +361,7 @@ export async function TransferFromAsset(assetAddress: string, sourceAssetAddress
         };
 
     } catch (e) {
-        const err = e as Error
+        const err = e as Error;
         void LogError(Module.SolanaContractUtil, "Couldn't build transfer from asset instruction", e);
         return {
             success: false,
@@ -378,7 +378,7 @@ async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<Tr
 
         const collection = asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
             ? await fetchCollection(UMI, asset.updateAuthority.address)
-            : undefined
+            : undefined;
 
         const updateAssetInstruction = update(UMI, {
             asset,
@@ -386,14 +386,14 @@ async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<Tr
             uri,
             payer: createNoopSigner(UMI.identity.publicKey),
             authority: ADMIN_SIGNER,
-        })
+        });
 
         return {
             success: true,
             value: updateAssetInstruction
         };
     } catch (e) {
-        const err = e as Error
+        const err = e as Error;
         void LogError(Module.SolanaContractUtil, "Couldn't build update asset instruction", e);
         return {
             success: false,
@@ -483,7 +483,7 @@ export async function SetNewCombination(assetAddress: string, metadataIpfsCid: s
             value: true
         }
     } catch (e) {
-        const err = e as Error
+        const err = e as Error;
         void LogError(Module.SolanaContractUtil, "Couldn't set new combination", e);
         return {
             success: false,
