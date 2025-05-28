@@ -205,7 +205,7 @@ export default function CitizensComponent() {
       await loadSingleData();
 
       // Set skin tone
-      await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'FFFFFF');
+      await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'FFFFFF', campaignParams?.config.skin?.materialName);
 
       // Set animation
       const animationResult = await GetAnimationByCampaignAndName(
