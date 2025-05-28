@@ -18,7 +18,6 @@ import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from 
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
-import { Result } from "../../types/common.type";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -530,9 +529,9 @@ export default function CitizensComponent() {
 
     const result = await SetNewCombination((selectedCitizen.rawMetadata as SolanaMetadata).asset_address, metadataObject.value.uri, newAttributes, oldAttributes);
 
-    const fetchResult = await fetchSolanaMetadata(walletAddress);
+    const isFetchSuccess = await fetchSolanaMetadata(walletAddress);
 
-    return fetchResult && result.success;
+    return isFetchSuccess && result.success;
 
   }
 
@@ -553,8 +552,8 @@ export default function CitizensComponent() {
     if (selectedCampaign == Campaign.Kumi) {
       const mintResult = await MintKumiCitizen();
       if (mintResult.success && walletAddress) {
-        const fetchResult = await fetchSolanaMetadata(walletAddress);
-        return fetchResult;
+        const isFetchSuccess = await fetchSolanaMetadata(walletAddress);
+        return isFetchSuccess;
       }
     }
     return false;
