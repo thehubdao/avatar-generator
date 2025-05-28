@@ -52,7 +52,7 @@ export interface CitizenMetadata {
   tokenId: string;
   name: string;
   description: string;
-  rawMetadata: SolanaMetadata | LuksoMetadata;
+  rawMetadata: SolanaMetadata | LuksoMetadata | RootMetadata;
 }
 
 export interface LuksoMetadata {
@@ -91,6 +91,8 @@ export interface SolanaMetadata {
   vrm_url: string;
   asset_address: string;
 }
+
+export interface RootMetadata{}
 
 export interface SolanaAttribute {
   trait_type: string;
