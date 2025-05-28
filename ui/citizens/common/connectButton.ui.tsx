@@ -23,10 +23,9 @@ export default function ConnectButton({ onLogin, onLogout }: ConnectButtonProps)
 
   const address = useAppSelector(state => state.citizensAuth.address);
   const walletName = useAppSelector(state => state.citizensAuth.walletName);
+  const profileImage = useAppSelector(state => state.citizensAuth.profileImage);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const [profileImage, ] = useState<string | undefined>();
 
   useOnClickOutside(parentDOM, () => setIsOpen(false));
 
@@ -35,24 +34,28 @@ export default function ConnectButton({ onLogin, onLogout }: ConnectButtonProps)
       {isLoggedIn ? (
         <>
           <button className="w-full flex justify-between items-center p-1" onClick={() => setIsOpen(!isOpen)}>
-            <div>
+            <div className="relative w-9 h-9 rounded-full overflow-hidden">
               {profileImage ? (
-                <div className="w-9 h-9 rounded-full overflow-hidden">
-                  <Image
-                    src={profileImage}
-                    width={36}
-                    height={36}
-                    alt="Profile"
-                    className="object-cover"
-                  />
-                </div>
+                <Image
+                  src={profileImage}
+                  width={36}
+                  height={36}
+                  alt="Profile"
+                  className="object-cover"
+                />
               ) : (
-                <div className="w-9 h-9 bg-gray-300 rounded-full" />
+                <Image
+                  src={'https://lipsum.app/random/36x36/'}
+                  alt="Profile"
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover"
+                />
               )}
             </div>
             <div className="truncate">
               <p className="font-light text-lg px-4 truncate">
-                { walletName ? walletName : address ? FormatWalletAddress(address, 6) : 'No address' }
+                {walletName ? walletName : address ? FormatWalletAddress(address, 6) : 'No address'}
               </p>
             </div>
             <div className={`w-9 h-9 flex justify-center items-center ${isOpen ? 'rotate-180' : ''}`}>
@@ -74,7 +77,7 @@ export default function ConnectButton({ onLogin, onLogout }: ConnectButtonProps)
                   ) : (
                     <Image
                       src={'https://lipsum.app/random/280x300/'}
-                      alt="Default"
+                      alt="Profile"
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       className="object-cover"
