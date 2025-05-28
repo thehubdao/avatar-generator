@@ -6,6 +6,7 @@ export interface AuthState {
   connected: boolean | null;
   address: string | null;
   walletName: string | null;
+  profileImage?: string | null;
   blockchainType: Blockchain | null;
   xpData: UserXPData | null;
   followUserData: FollowUserData | null;
@@ -15,6 +16,7 @@ const initialState: AuthState = {
   connected: null,
   address: null,
   walletName: null,
+  profileImage: undefined,  // Optional, can be set later
   blockchainType: null,
   xpData: null,
   followUserData: null,  // Both follower and following count are -1, meaning this blockchain does not support follow user data

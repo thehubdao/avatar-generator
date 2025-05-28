@@ -40,7 +40,7 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
     if (location) GoToPage(location);
   }
   return (
-    <header className="fixed w-dvw z-50 inset-0 h-fit flex justify-between items-center pt-8 px-6">
+    <header className="fixed w-full z-50 inset-0 h-fit flex justify-between items-center pt-8 px-6">
       {/* LOGO THE HUB */}
       <div className="w-fit h-fit" >
         <LogoTheHub />
@@ -48,7 +48,7 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
       {/* NAVBAR */}
       {isLoggedIn && !didMintingMode && !didSavingMode && !didEditMode &&
         <>
-          <div className={`fixed z-50 xl:relative inset-6 xl:inset-0 bg-citizens-dark xl:bg-inherit h-fit ${isBurguerOpen ? 'block' : 'hidden xl:block'}`}>
+          <div className={`fixed z-50 xl:relative inset-6 xl:inset-0 bg-citizens-dark xl:bg-inherit h-fit ${isBurguerOpen ? 'block rounded-3xl' : 'hidden xl:block'}`}>
             <div className='w-full px-4 pt-4 pb-24 flex justify-between xl:hidden'>
               <Image
                 src='/resources/images/the-hub-logo-white.svg'
