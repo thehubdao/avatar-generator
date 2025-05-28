@@ -12,12 +12,12 @@ import { SaveFile } from "../../utils/exporter.util";
 import { BodyPart } from "../../interfaces/avatar.interface";
 import { UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
-import { Campaign } from "../../enums/citizens/common.enum";
+import { CampaignBaseCombination, Campaign, CampaignBaseUrl } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
-import { MintRootAsset } from "../../utils/web3/root/contract.util";
+import { GetRootAssetsMetadata, MintRootAsset } from "../../utils/web3/root/contract.util";
 import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
 
 export default function CitizensComponent() {
@@ -325,6 +325,17 @@ export default function CitizensComponent() {
     return false;
   }
 
+  async function fetchRootMetadata(walletAddress: string): Promise<boolean> {
+    const asset = await GetRootAssetsMetadata(walletAddress);
+    if (asset.success) {
+      dispatch(setCitizensMetadata(asset.value));
+      dispatch(setSelectedCitizen(asset.value[0]));
+      return true;
+    }
+    LogError(Module.Citizens, 'Failed to fetch solana metadata', asset.errCode);
+    return false;
+  }
+
   async function saveLuksoCombination() {
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
@@ -386,7 +397,7 @@ export default function CitizensComponent() {
         value: feature.val.name,
         type: 'string',
       });
-      let bodyFeature: BodyPart | undefined;   
+      let bodyFeature: BodyPart | undefined;
       if (currentCampaign == 'vrm_female') bodyFeature = newCitizenMetadata.rawMetadata.body[FEMALE_CAMPAIGN_BODY_TYPES[feature.val.type.toLowerCase() as keyof typeof FEMALE_CAMPAIGN_BODY_TYPES] as keyof typeof newCitizenMetadata.rawMetadata.body];
       else bodyFeature = newCitizenMetadata.rawMetadata.body[feature.val.type.toLowerCase() as keyof typeof newCitizenMetadata.rawMetadata.body];
 
@@ -483,27 +494,27 @@ export default function CitizensComponent() {
     const oldAttributes: SolanaAttribute[] = []; //This array will contain the attributes to be unequipped
     const newAttributes: SolanaAttribute[] = []; //This array will contain the attributes to be equipped
     if (userFeatures && userFeatures[selectedCampaign as string] != null) newCombinationArray.forEach((featureIndex, index) => {
-        const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
-        if (!indexType) return undefined;
+      const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
+      if (!indexType) return undefined;
 
-        const oldAttribute = (selectedCitizen.rawMetadata as SolanaMetadata).attributes[index]; //Get the old feature to be unequipped and transferred back to wallet if not base feature
-        const newAttribute = userFeatures[currentCampaign as string].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newCombinationArray[index])) as Drop; //Get the new feature to be equipped and transferred to source asset in case it's not base feature
+      const oldAttribute = (selectedCitizen.rawMetadata as SolanaMetadata).attributes[index]; //Get the old feature to be unequipped and transferred back to wallet if not base feature
+      const newAttribute = userFeatures[currentCampaign as string].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newCombinationArray[index])) as Drop; //Get the new feature to be equipped and transferred to source asset in case it's not base feature
 
-        const attribute = newAttribute ? { //Add asset address to the attribute newAttribute exists
-          trait_type: indexType.toUpperCase(),
-          value: newAttribute?.name.toUpperCase(),
-          asset_address: newAttribute?.contract_address
-        } : {
-          trait_type: indexType.toUpperCase(),
-          value: singleInitData.current?.features[index]?.val.name.toUpperCase() as string, //Set the feature name to the new feature index
-        }
-        attributes.push(attribute); 
+      const attribute = newAttribute ? { //Add asset address to the attribute newAttribute exists
+        trait_type: indexType.toUpperCase(),
+        value: newAttribute?.name.toUpperCase(),
+        asset_address: newAttribute?.contract_address
+      } : {
+        trait_type: indexType.toUpperCase(),
+        value: singleInitData.current?.features[index]?.val.name.toUpperCase() as string, //Set the feature name to the new feature index
+      }
+      attributes.push(attribute);
 
-        if (oldCombinationArray[index] == featureIndex) return undefined; //If the new feature is the same as the old feature, skip
+      if (oldCombinationArray[index] == featureIndex) return undefined; //If the new feature is the same as the old feature, skip
 
-        if (oldAttribute && oldAttribute.asset_address) oldAttributes.push(oldAttribute); //If the old feature is not base feature, add it to the old features array. We know it's not base feature because it has an asset_address
-        if (attribute && attribute.asset_address) newAttributes.push(attribute); //If the new feature is not base feature, add it to the new features array. We know it's not base feature because we get it from user features
-      });
+      if (oldAttribute && oldAttribute.asset_address) oldAttributes.push(oldAttribute); //If the old feature is not base feature, add it to the old features array. We know it's not base feature because it has an asset_address
+      if (attribute && attribute.asset_address) newAttributes.push(attribute); //If the new feature is not base feature, add it to the new features array. We know it's not base feature because we get it from user features
+    });
 
     const newCitizenMetadata = { //Make a copy of the selected citizen metadata
       ...selectedCitizen,
@@ -547,6 +558,10 @@ export default function CitizensComponent() {
   }
 
   async function onMinting() {
+    if (!walletAddress) {
+      LogError(Module.Citizens, 'Wallet address is undefined in onMinting');
+      return false;
+    }
 
     if (selectedCampaign == Campaign.Kumi) {    /* Kumi Minting Function */
       const mintResult = await MintKumiCitizen();
@@ -556,13 +571,11 @@ export default function CitizensComponent() {
       }
       else return false;
     } else if (selectedCampaign == Campaign.Based) {     /* Based Minting Function */
-      if (!walletAddress) {
-        LogError(Module.Citizens, 'Wallet address is undefined in onMinting');
-        return false;
-      }
-      const mintResult = await MintRootAsset(walletAddress);
+
+      const mintResult = await MintRootAsset(walletAddress, CampaignBaseCombination.Based, CampaignBaseUrl.Based);
       if (mintResult.success) {
-        return true;
+        const isFetchSuccess = await fetchRootMetadata(walletAddress);
+        return isFetchSuccess;
       }
       else return false;
     }

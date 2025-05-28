@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
-import { Campaign, LuksoCampaign, SolanaCampaign } from '../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination } from '../enums/citizens/common.enum';
 import { connect, disconnect } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetParameter } from '../utils/firebase.util';
@@ -22,7 +22,7 @@ import { useAuthUi } from '@futureverse/auth-ui';
 import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
-import { GetRootAssets, InitializeApi } from '../utils/web3/root/contract.util';
+import { GetRootAssetsMetadata, InitializeApi } from '../utils/web3/root/contract.util';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -42,7 +42,7 @@ export function useBlockchainWallet() {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
 
-  /* Fetching relating hooks */
+  /* Fetching relatedhooks */
   const { ready, user, authenticated } = usePrivy(); //Privy Auth
   const { userSession, isFetchingSession, signOutPass } = useAuth(); //Pass Auth
 
@@ -85,8 +85,7 @@ export function useBlockchainWallet() {
   }
 
   async function getRootTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
-    const asset = await GetRootAssets(walletAddress);
-
+    const asset = await GetRootAssetsMetadata(walletAddress);
     if (asset.success) return { success: true, value: asset.value };
 
     return { success: false, errMessage: asset.errMessage, errCode: asset.errCode };
@@ -237,8 +236,8 @@ export function useBlockchainWallet() {
 
             dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
             dispatch(setSelectedCitizen({
-              baseCombination: '0-0-0-0-0-0-0-0-0-0',
-              combination: '0-0-0-0-0-0-0-0-0-0',
+              baseCombination: CampaignBaseCombination.Kumi,
+              combination: CampaignBaseCombination.Kumi,
               campaign: Campaign.Kumi
             } as CitizenMetadata));
           }
@@ -252,8 +251,8 @@ export function useBlockchainWallet() {
           }
 
           dispatch(setSelectedCitizen({
-            baseCombination: '0-0-0-0-0-0-0-0-0-0',
-            combination: '0-0-0-0-0-0-0-0-0-0',
+            baseCombination: CampaignBaseCombination.Kumi,
+            combination: CampaignBaseCombination.Kumi,
             campaign: selectedCampaign
           } as CitizenMetadata));
         } else {
@@ -272,32 +271,36 @@ export function useBlockchainWallet() {
       }
     } else if (blockchainType === Blockchain.Root) {
       const rootCitizensMetadata = await getRootTokensMetadataPromise(walletAddress);
-      console.log(rootCitizensMetadata, 'rootCitizensMetadata');
+
       if (rootCitizensMetadata.success) {
         const citizen = rootCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
-        console.log(citizen, 'citizen');
 
-        if (selectedCampaign === null) {
-          dispatch(setCitizensMetadata(rootCitizensMetadata.value));
+        dispatch(setCitizensMetadata(rootCitizensMetadata.value));
 
-          if (rootCitizensMetadata.value.length > 0) {
-            dispatch(setSelectedCampaign(rootCitizensMetadata.value[0].campaign));
+        if (selectedCampaign === null) { //Logic when user is logged in and no campaign is selected, refreshing page case
+          const userCampaigns = [...new Set(rootCitizensMetadata.value.map(item => item.campaign))];
+
+          if (userCampaigns.length > 0) { //If user has campaigns, set the first one as selected campaign
+            dispatch(setSelectedCampaign(userCampaigns[0]));
             dispatch(setSelectedCitizen(rootCitizensMetadata.value[0]));
-          } else {
+            dispatch(setMintingMode(false));
+          } else {//If user has no campaigns, set the based campaign as selected campaign and keep minting mode
             dispatch(setSelectedCampaign(Campaign.Based)); // Set the selected campaign by default when no campaign is selected
             dispatch(setSelectedCitizen({
-              baseCombination: '0-0-0-0-0-0-0',
-              combination: '0-0-0-0-0-0-0',
+              baseCombination: CampaignBaseCombination.Based,
+              combination: CampaignBaseCombination.Based,
               campaign: Campaign.Based
             } as CitizenMetadata));
           }
-        } else if (!citizen) {
-          dispatch(setSelectedCampaign(Campaign.Based)); // Set the selected campaign by default when no campaign is selected
+        } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
           dispatch(setSelectedCitizen({
-            baseCombination: '0-0-0-0-0-0-0',
-            combination: '0-0-0-0-0-0-0',
+            baseCombination: CampaignBaseCombination.Based,
+            combination: CampaignBaseCombination.Based,
             campaign: Campaign.Based
           } as CitizenMetadata));
+        } else {
+          dispatch(setSelectedCitizen(citizen));
+          dispatch(setMintingMode(false));
         }
       }
     }
