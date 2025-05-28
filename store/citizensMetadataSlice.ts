@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CitizenMetadata } from '../interfaces/citizens.interface';
+import { CitizenMetadata} from '../interfaces/citizens.interface';
 import { Campaign } from '../enums/citizens/common.enum';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { LeaderboardEntry } from '../types/leaderboard.type';

@@ -7,7 +7,7 @@ import { CitizensCollection, DataBaseDrop } from "../../interfaces/citizens.inte
 import Button from "../../ui/citizens/common/button.ui";
 import ArrowLinkSVG from "../../ui/citizens/common/SVG/arrowLinkSVG.ui";
 import { Campaign, CitizensSections } from "../../enums/citizens/common.enum";
-import { BodyPart, CollectionType } from "../../interfaces/avatar.interface";
+import { CollectionType } from "../../interfaces/avatar.interface";
 import AvatarEditor, {
   ChangeFeature,
   ChangeSkinColor,
@@ -473,7 +473,7 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
       LogError(Module.Lukso, 'Missing single data!');
       return;
     }
-    for (const { val } of singleInitData.features) {
+/*     for (const { val } of singleInitData.features) {
       const { id, path, type, name } = val;
       const { citizenMetadata } = currentCollection;
       const bodyIndex = val.type.toLowerCase() as keyof typeof citizenMetadata.body;
@@ -489,7 +489,7 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
         type,
         campaignParams?.config.skin?.defColor ?? 'ffffff'
       );
-    }
+    } */
   }
 
   async function onAvatarBuilderReady(

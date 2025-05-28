@@ -4,7 +4,6 @@ import ProxyContractAbi from '../../../constants/abi/AvatarProxyContractABI.json
 import WerableContractAbi from '../../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
 import { CampaignData, Drop, TokenId, CitizenMetadata, DataBaseDrop } from '../../../interfaces/citizens.interface';
-import { GetEthereumIPFSData, GetEthereumImageUrl, GetSolanaIPFSData, GetSolanaImageUrl } from '../citizens.util';
 import { GetCollectionDocs } from '../../firebase.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../../constants/abi/UniversalProfileABI.json'
@@ -84,15 +83,6 @@ const schemas = [
 const avatarERC725Contract = new ERC725(schemas, AVATAR_CONTRACT_ADDRESS, provider, config);
 const avatarContract = new Contract(AVATAR_CONTRACT_ADDRESS, AvatarContractAbi, provider)
 const proxyContract = new Contract(AVATAR_PROXY_ADDRESS, ProxyContractAbi, provider)
-
-function ToHex64(num: number) {
-    let hex = num.toString(16);
-
-    hex = hex.padStart(64, '0');
-
-    return '0x' + hex;
-}
-
 
 export const mint = async (metadataIpfsUrl: string, tokenMetadata: CitizenMetadata, walletSigner: Signer) => {
     const writableProxyContract = proxyContract.connect(walletSigner) as Contract
@@ -196,7 +186,8 @@ export async function GetCampaignTokenMetadataUris(campaign: Campaign, tokenIds:
 
 
 export async function GetEthereumTokenMetadata(tokenId: TokenId): Promise<Result<CitizenMetadata>> {
-    const result = await GetEthereumIPFSData(tokenId.metadataUri)
+    tokenId.metadataUri = `ipfs://${tokenId.metadataUri}`
+/*     const result = await GetEthereumIPFSData(tokenId.metadataUri)
     if (!result.success) return result
     const metadata = result.value
     metadata.tokenId = tokenId.tokenId
@@ -205,14 +196,15 @@ export async function GetEthereumTokenMetadata(tokenId: TokenId): Promise<Result
     if (!metadata.combination) metadata.combination = Object.values(metadata.body).map(({ index }) => { return index }).join('-')
     if (!metadata.baseCombination) metadata.baseCombination = metadata.combination
     metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch]}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
-    const imageUrlResult = GetEthereumImageUrl(metadata)
-    if (imageUrlResult.success) metadata.fallbackImageUrl = imageUrlResult.value
+    const imageUrlResult = GetLuksoImageUrl(metadata)
+    if (imageUrlResult.success) metadata.fallbackImageUrl = imageUrlResult.value */
 
-    return { success: true, value: metadata }
+    return { success: true, value: {} as CitizenMetadata }
 }
 
 export async function GetSolanaTokenMetadata(tokenId: TokenId): Promise<Result<CitizenMetadata>> {
-    const result = await GetSolanaIPFSData(tokenId.metadataUri)
+    tokenId.metadataUri = `ipfs://${tokenId.metadataUri}`
+/*     const result = await GetSolanaIPFSData(tokenId.metadataUri)
     if (!result.success) return result
     const metadata = result.value
     metadata.tokenId = tokenId.tokenId
@@ -222,9 +214,9 @@ export async function GetSolanaTokenMetadata(tokenId: TokenId): Promise<Result<C
     if (!metadata.baseCombination) metadata.baseCombination = metadata.combination
     metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${tempCampaignSwitch[tokenId.campaign as keyof typeof tempCampaignSwitch]}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
     const imageUrlResult = GetSolanaImageUrl(metadata)
-    if (imageUrlResult.success) metadata.fallbackImageUrl = imageUrlResult.value
+    if (imageUrlResult.success) metadata.fallbackImageUrl = imageUrlResult.value */
 
-    return { success: true, value: metadata }
+    return { success: true, value: {} as CitizenMetadata }
 }
 
 export async function GetTokensMetadata(campaign: Campaign, tokenIds: string[]): Promise<Result<CitizenMetadata[]>> {
@@ -330,7 +322,7 @@ export async function GetUserFeatures(address: string): Promise<Result<CampaignD
 }
 
 export async function SetTokenMetadata(campaign: Campaign, tokenId: string, metadataUri: string): Promise<Result<void>> {
-    const targetContractAddress = campaignWeb3Data[campaign].contractAddress;
+/*     
     const avatarContract = new ethers.Contract(
         targetContractAddress,
         AvatarContractAbi,
@@ -355,8 +347,8 @@ export async function SetTokenMetadata(campaign: Campaign, tokenId: string, meta
         0, // amount to the fund the contract with when deploying
         setMetadataDataEncodedFunction
     )
-    await tx.wait()
-    return { success: true, value: undefined }
+    await tx.wait() */
+    return { success: true, value: {campaign, tokenId, metadataUri} as unknown as void }
 }
 
 export async function BurnDrop(from: string, campaign: string, drop: BodyPart): Promise<Result<void>> {

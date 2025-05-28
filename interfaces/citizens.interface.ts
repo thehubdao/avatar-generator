@@ -52,6 +52,18 @@ export interface CitizenMetadata {
   tokenId: string;
   name: string;
   description: string;
+  rawMetadata: SolanaMetadata | LuksoMetadata;
+}
+
+export interface LuksoMetadata {
+  fallbackImageUrl: string;
+  imageUrl: string;
+  combination: string; 
+  baseCombination: string;
+  campaign: Campaign;
+  tokenId: string;
+  name: string;
+  description: string;
   images: Array<Array<CitizenMetadataImage>>;
   attributes: Array<{ key: string, value: string, type: string }>;
   links?: [];
@@ -62,6 +74,28 @@ export interface CitizenMetadata {
     chest?: BodyPart;
     legs?: BodyPart;
   };
+}
+
+export interface SolanaMetadata {
+  name: string;
+  symbol: string;
+  description: string;
+  image: string;
+  attributes: Array<SolanaAttribute>;
+  properties: {
+    files: Array<{ uri: string, type: string }>;
+    category: string;
+  };
+  combination: string;
+  baseCombination: string;
+  vrm_url: string;
+  asset_address: string;
+}
+
+export interface SolanaAttribute {
+  trait_type: string;
+  value: string;
+  asset_address?: string;
 }
 
 export interface CitizenAttribute {
