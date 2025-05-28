@@ -15,6 +15,7 @@ import {
   AdminUser,
   AGParameters,
   AGQueryConstraints,
+  AssetData,
   LogInInterface,
   UserInterface,
   UserWithPass
@@ -409,6 +410,7 @@ export async function GetParameter<T>(campaign: string | undefined, parameter: P
       { success: true, value: data };
   } catch (e) {
     const err = e as FirebaseError;
+    console.log(err)
     void LogError(Module.FirebaseUtil, err.message, e);
     return { success: false, errMessage: err.message, errCode: err.code };
   }
@@ -1371,6 +1373,35 @@ export async function TrackUserLogin(address: string): Promise<Result<boolean>> 
   } catch (e) {
     const err = e as FirebaseError;
     void LogError(Module.FirebaseUtil, `Error tracking user login: ${err.message}`);
+    return { success: false, errMessage: err.message, errCode: err.code };
+  }
+}
+
+export async function storeAssetData(assetData: AssetData): Promise<Result<boolean>> {
+  try {
+    const { tokenId, campaign, collectionId } = assetData;
+    const db = await FirebaseUtil.Instance().DB();
+    const assetDataCollection = collection(db, `${FirestoreGlobalLocation.Campaign}/${campaign}/${FirestoreLocation.AssetData}`);
+    const assetRef = doc(assetDataCollection, `${collectionId}:${tokenId}`);
+    await setDoc(assetRef, assetData, { merge: true });
+    return { success: true, value: true };
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error storing asset data: ${err.message}`);
+    return { success: false, errMessage: err.message, errCode: err.code };
+  }
+}
+
+export async function getAssetData(campaign: string, collectionId: string, tokenId: string): Promise<Result<AssetData>> {
+  try {
+    const db = await FirebaseUtil.Instance().DB();
+    const assetDataCollection = collection(db, `${FirestoreGlobalLocation.Campaign}/${campaign}/${FirestoreLocation.AssetData}`);
+    const assetRef = doc(assetDataCollection, `${collectionId}:${tokenId}`);
+    const assetDoc = await getDoc(assetRef);
+    return { success: true, value: assetDoc.data() as AssetData };
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error getting asset data: ${err.message}`);
     return { success: false, errMessage: err.message, errCode: err.code };
   }
 }
