@@ -18,57 +18,57 @@ export async function GetVrmUrl(campaign: Campaign, combination: string): Promis
 }
 
 export async function UploadLuksoMetadata(tokenMetadata: LuksoMetadata, combination: string, campaign: Campaign): Promise<Result<{ uri: string, imageUrl: string }>> {
-    try{
-    const imageUrl = await GetImageUrl(campaign, combination);
-    const imageResponse = await fetch(imageUrl);
-    const imageBlob = await imageResponse.blob();
-    const file = new File([imageBlob], `${combination}.png`, { type: "image/png" });
-    const upload = await pinata.upload.file(file, {cidVersion: 0, metadata:{name: `${campaign}-${tokenMetadata.tokenId}-thumbnail`}});
-    tokenMetadata.images = [[{
-        width: 1024,
-        height: 974,
-        url: `ipfs://${upload.IpfsHash}`,
-        verification: {}
-    },]];
+    try {
+        const imageUrl = await GetImageUrl(campaign, combination);
+        const imageResponse = await fetch(imageUrl);
+        const imageBlob = await imageResponse.blob();
+        const file = new File([imageBlob], `${combination}.png`, { type: "image/png" });
+        const upload = await pinata.upload.file(file, { cidVersion: 0, metadata: { name: `${campaign}-${tokenMetadata.tokenId}-thumbnail` } });
+        tokenMetadata.images = [[{
+            width: 1024,
+            height: 974,
+            url: `ipfs://${upload.IpfsHash}`,
+            verification: {}
+        },]];
 
-    const metadata = await pinata.upload.json({ 'LSP4Metadata': tokenMetadata }, {cidVersion: 1, metadata:{name: `z-${campaign}-${tokenMetadata.tokenId}-metadata`}});
-    
-    return { success: true, value: { uri: metadata.IpfsHash, imageUrl } };
-}catch(error){
-    const err = error as Error;
-    void LogError(Module.Citizens, 'Error on uploading Lukso metadata', error);
-    return { success: false, errMessage: err.message, errCode: CommonErrorCode.InternalError };
-}
+        const metadata = await pinata.upload.json({ 'LSP4Metadata': tokenMetadata }, { cidVersion: 1, metadata: { name: `z-${campaign}-${tokenMetadata.tokenId}-metadata` } });
+
+        return { success: true, value: { uri: metadata.IpfsHash, imageUrl } };
+    } catch (error) {
+        const err = error as Error;
+        void LogError(Module.Citizens, 'Error on uploading Lukso metadata', error);
+        return { success: false, errMessage: err.message, errCode: CommonErrorCode.InternalError };
+    }
 }
 
 export async function UploadSolanaMetadata(tokenMetadata: CitizenMetadata, combination: string, campaign: Campaign): Promise<Result<{ uri: string, imageUrl: string }>> {
-    try{
+    try {
         const imageUrl = await GetImageUrl(campaign, combination);
         const imageResponse = await fetch(imageUrl);
         const imageBlob = await imageResponse.blob();
         const imageFile = new File([imageBlob], `${combination}.png`, { type: "image/png" });
-        const imageCid = await pinata.upload.file(imageFile, {cidVersion: 1, metadata:{name: `${campaign}-${combination}-thumbnail`}});
+        const imageCid = await pinata.upload.file(imageFile, { cidVersion: 1, metadata: { name: `${campaign}-${combination}-thumbnail` } });
 
         const vrmUrl = await GetVrmUrl(campaign, combination);
         const vrmResponse = await fetch(vrmUrl);
         const vrmBlob = await vrmResponse.blob();
         const vrmFile = new File([vrmBlob], `${combination}.vrm`, { type: "model/vrm" });
-        const vrmCid = await pinata.upload.file(vrmFile, {cidVersion: 1, metadata:{name: `${campaign}-${combination}-vrm`}});
+        const vrmCid = await pinata.upload.file(vrmFile, { cidVersion: 1, metadata: { name: `${campaign}-${combination}-vrm` } });
 
         const solanaMetadata: SolanaMetadata = {
             ...tokenMetadata.rawMetadata as SolanaMetadata,
             image: `ipfs://${imageCid.IpfsHash}`,
             properties: {
-                files: [{uri: `ipfs://${imageCid.IpfsHash}`, type: "image/png"}],
+                files: [{ uri: `ipfs://${imageCid.IpfsHash}`, type: "image/png" }],
                 category: "avatar"
             },
             vrm_url: `ipfs://${vrmCid.IpfsHash}`
         }
 
-        const metadata = await pinata.upload.json(solanaMetadata, {cidVersion: 1, metadata:{name: `z-${campaign}-${tokenMetadata.tokenId}-metadata`}});
+        const metadata = await pinata.upload.json(solanaMetadata, { cidVersion: 1, metadata: { name: `z-${campaign}-${tokenMetadata.tokenId}-metadata` } });
 
         return { success: true, value: { uri: metadata.IpfsHash, imageUrl } };
-    }catch(error){
+    } catch (error) {
         const err = error as Error;
         void LogError(Module.Citizens, 'Error on uploading Solana metadata', error);
         return { success: false, errMessage: err.message, errCode: CommonErrorCode.InternalError };

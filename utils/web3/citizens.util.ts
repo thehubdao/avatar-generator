@@ -28,7 +28,7 @@ export async function GetSolanaIPFSData(cid: string): Promise<Result<SolanaMetad
     const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
     const ipfsRequest = await fetch(ipfsHTTPUrl);
     const ipfsData = await ipfsRequest.json();
-    const ipfsDataResult = ipfsData as SolanaMetadata ;
+    const ipfsDataResult = ipfsData as SolanaMetadata;
 
     return { success: true, value: ipfsDataResult };
   } catch (error) {
@@ -41,15 +41,15 @@ export async function GetSolanaIPFSData(cid: string): Promise<Result<SolanaMetad
 export function GetLuksoImageUrl(metadata: CitizenMetadata): Result<string> {
   try {
     const luksoMetadata = metadata.rawMetadata as LuksoMetadata;
-    const ipfsUrl = luksoMetadata.images[0][0].url
-    const cid = ipfsUrl.split('//')[1]
+    const ipfsUrl = luksoMetadata.images[0][0].url;
+    const cid = ipfsUrl.split('//')[1];
 
     const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
     return { success: true, value: imageUrl };
   } catch (error) {
     const err = error as Error;
     LogError(Module.Citizens, 'Error on getting Ethereum image url', err.stack);
-    return { success: false, errMessage: err.message, errCode: ''};
+    return { success: false, errMessage: err.message, errCode: '' };
   }
 }
 
@@ -57,7 +57,7 @@ export function GetSolanaImageUrl(metadata: CitizenMetadata): Result<string> {
   try {
     const cid = (metadata.rawMetadata as SolanaMetadata).image.split('//')[1];
     const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
-    
+
     return { success: true, value: imageUrl };
   } catch (error) {
     const err = error as Error;
@@ -175,6 +175,6 @@ export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], pro
 }
 
 export async function GetVrmUrl(campaign: string, combination: string): Promise<string> {
-    const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign}%2F${StorageLocation.AvatarVrms}%2F${combination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`;
-   return vrmStorageUrl;
+  const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign}%2F${StorageLocation.AvatarVrms}%2F${combination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`;
+  return vrmStorageUrl;
 }

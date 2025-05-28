@@ -118,7 +118,6 @@ export async function GetSolanaCitizenMetadata(assetAddress: AssetV1): Promise<R
     citizenMetadata.imageUrl = imageUrlResult.value;
     citizenMetadata.fallbackImageUrl = imageUrlResult.value;
 
-
     return {
         success: true,
         value: citizenMetadata
@@ -262,7 +261,7 @@ export async function GetUserFeatureAssets(walletAddress: string, campaign: Sola
         };
 
         let userFeaturesAssets = userFeatures.map(feature => { // For solana, we set the asset address instead of the collection address as it works different
-            const asset = assetsResult.value.find(asset => asset.updateAuthority.address === feature.contract_address)
+            const asset = assetsResult.value.find(asset => asset.updateAuthority.address === feature.contract_address);
 
             if (!asset) return undefined;
 
@@ -298,20 +297,19 @@ export async function TransferToAsset(assetAddress: string, sourceAssetAddress: 
         const collection =
             asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
                 ? await fetchCollection(UMI, asset.updateAuthority.address)
-                : undefined
+                : undefined;
         const transferInstruction = transferV1(UMI, {
             collection: collection?.publicKey,
             asset: assetPublicKey,
             newOwner: sourceAssetPda,
         });
 
-
         return {
             success: true,
             value: transferInstruction
         };
     } catch (e) {
-        const err = e as Error
+        const err = e as Error;
         void LogError(Module.SolanaContractUtil, "Couldn't build transfer to asset instruction", e);
         return {
             success: false,
@@ -331,29 +329,28 @@ export async function TransferFromAsset(assetAddress: string, sourceAssetAddress
         const sourceCollection =
             sourceAsset.updateAuthority.type == 'Collection' && sourceAsset.updateAuthority.address
                 ? await fetchCollection(UMI, sourceAsset.updateAuthority.address)
-                : undefined
+                : undefined;
 
         const asset = await fetchAsset(UMI, publicKey(assetAddress));
 
         const collection =
             asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
                 ? await fetchCollection(UMI, asset.updateAuthority.address)
-                : undefined
-
-
+                : undefined;
 
         const transferAssetTx = transfer(UMI, {
             asset,
             collection,
             authority: sourceAssetPdaSigner,
             newOwner: UMI.identity.publicKey,
-        })
+        });
+
         const executeInstruction = execute(UMI, {
             asset: sourceAsset,
             collection: sourceCollection,
             instructions: transferAssetTx,
             assetSigner: sourceAssetPda,
-        })
+        });
 
         return {
             success: true,

@@ -535,8 +535,6 @@ export default function CitizensComponent() {
 
   }
 
-
-
   async function handleSaveCombination() {
     let isSuccess = false;
     if (selectedCampaign == Campaign.Citizens || selectedCampaign == Campaign.Creators) {

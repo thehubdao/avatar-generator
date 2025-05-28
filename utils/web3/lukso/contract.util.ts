@@ -138,7 +138,7 @@ export async function GetLuksoTokenMetadata(tokenId: TokenId): Promise<Result<Ci
         rawMetadata: luksoMetadata,
     } as CitizenMetadata;
 
-    if (!luksoMetadata.combination && luksoMetadata.body) metadata.combination = Object.values(luksoMetadata.body).map(({ index }) => { return index }).join('-');
+    if (!luksoMetadata.combination && luksoMetadata.body) metadata.combination = Object.values(luksoMetadata.body).map(({ index }) => index).join('-');
     if (!luksoMetadata.baseCombination) metadata.baseCombination = metadata.combination;
     metadata.imageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${TEMP_CAMPAIGN_SWITCH[tokenId.campaign as keyof typeof TEMP_CAMPAIGN_SWITCH]}%2Favatar_images%2F${metadata.combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`;
     const imageUrlResult = GetLuksoImageUrl(metadata);
