@@ -21,10 +21,12 @@ export async function InitializeApi(_signer: Signer, _signerEoa: string) {
 
 export async function GetRootAssets(address: string): Promise<Result<any>> {
   try {
-    console.log(NFT_COLLECTION_ID, address);
-    const ownedTokens = await api.rpc.nft.ownedTokens(NFT_COLLECTION_ID, address, undefined, 1);
-    console.log(ownedTokens);
-    return { success: true, value: ownedTokens };
+    const ownedTokens = await api.rpc.nft.ownedTokens(NFT_COLLECTION_ID, address, 0, 1000);
+
+    const jsonResponse = ownedTokens.toJSON();
+    const tokenIds = jsonResponse[2];
+
+    return { success: true, value: tokenIds };
   } catch (error) {
     const e = error as Error;
     LogError(Module.RootContractUtil, 'Error on getting Root Asset');
@@ -36,7 +38,7 @@ export async function MintRootAsset(
   address: string,
 ): Promise<Result<boolean>> {
   try {
-    const mintBuilder = TransactionBuilder.nft(api, signer, address, NFT_COLLECTION_ID).mint({ quantity: MINT_AMOUNT, walletAddress: address });
+    const mintBuilder = TransactionBuilder.nft(api, signer, address, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
     const tx = await mintBuilder.signAndSend();
 
     return { success: true, value: true };

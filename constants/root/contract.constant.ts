@@ -13,5 +13,5 @@ export const ADMIN_SIGNER = KEYRING.addFromSeed(SEED_U8A);
 
 export const MINT_AMOUNT = 1;
 
-export const NFT_COLLECTION_ID = Number(process.env.NEXT_PUBLIC_NFT_COLLECTION_ID);
+export const NFT_COLLECTION_ID = process.env.NEXT_PUBLIC_NFT_COLLECTION_ID;
 export const NFT_COLLECTION_ADDRESS = process.env.NEXT_PUBLIC_NFT_COLLECTION_ADDRESS;
