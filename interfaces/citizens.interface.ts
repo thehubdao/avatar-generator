@@ -92,7 +92,14 @@ export interface SolanaMetadata {
   asset_address: string;
 }
 
-export interface RootMetadata{}
+export interface RootMetadata{
+  imageUrl: string;
+  combination: string;
+  baseCombination: string;
+  campaign: Campaign;
+  collectionId: string;
+  tokenId: string;
+}
 
 export interface SolanaAttribute {
   trait_type: string;
