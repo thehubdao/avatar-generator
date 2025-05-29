@@ -29,7 +29,7 @@ export async function GetRootAssetTokenIds(address: string): Promise<Result<numb
 export async function HasSftBalance(address: string, sftDropId: string): Promise<Result<boolean>> {
   try {
     const [sftCollectionId, sftTokenId] = sftDropId.split(':');
-    const token = await api.query.sft.tokenInfo([
+    const token = await API.query.sft.tokenInfo([
       sftCollectionId,
       sftTokenId,
     ]);
