@@ -260,7 +260,7 @@ export async function GetUserFeatureAssets(walletAddress: string, campaign: Sola
             errCode: CommonErrorCode.GetNoData
         };
 
-        let userFeaturesAssets = userFeatures.map(feature => { // For solana, we set the asset address instead of the collection address as it works different
+        const userFeaturesAssets = userFeatures.map(feature => { // For solana, we set the asset address instead of the collection address as it works different
             const asset = assetsResult.value.find(asset => asset.updateAuthority.address === feature.contract_address);
 
             if (!asset) return undefined;
@@ -271,11 +271,11 @@ export async function GetUserFeatureAssets(walletAddress: string, campaign: Sola
             };
         })
 
-        userFeaturesAssets = userFeaturesAssets.filter(feature => feature !== undefined);
+        const filteredUserFeaturesAssets = userFeaturesAssets.filter(feature => feature !== undefined);
 
         return {
             success: true,
-            value: { [campaign]: userFeaturesAssets as Drop[] }
+            value: { [campaign]: filteredUserFeaturesAssets }
         };
     } catch (e) {
         const err = e as Error
