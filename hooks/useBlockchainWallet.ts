@@ -25,7 +25,6 @@ import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetRootAssetsMetadata } from '../utils/web3/root/contract.util';
 import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
   const isConnected = useAppSelector(state => state.citizensAuth.connected);
