@@ -18,7 +18,9 @@ import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from 
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { GetRootAssetsMetadata, MintRootAsset } from "../../utils/web3/root/contract.util";
-import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
+import { Drop, LuksoMetadata, RootMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
+import { StoreAssetData } from "../../utils/firebase.util";
+import { AssetData } from "../../interfaces/firebase.interface";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -541,12 +543,58 @@ export default function CitizensComponent() {
 
   }
 
+  async function saveRootCombination(): Promise<boolean> {
+    const newCombination = singleInitData.current?.features
+      .map((feature) => feature.val.index)
+      .join('-') as string;
+
+    if (!campaignParams) {
+      LogError(Module.Citizens, 'Campaign params is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!singleInitData.current) {
+      LogError(Module.Citizens, 'Single init data is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!selectedCitizen) {
+      LogError(Module.Citizens, 'Selected citizen is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!walletAddress) {
+      LogError(Module.Citizens, 'Wallet address is undefined in Kumi saveCombination');
+      return false;
+    }
+    if (!citizensMetadata) {
+      LogError(Module.Citizens, 'Citizens metadata is undefined in Kumi saveCombination');
+      return false;
+    }
+
+    const currentCampaign = selectedCampaign;
+
+    if (!currentCampaign) {
+      LogError(Module.Citizens, 'Current campaign is undefined in Kumi saveCombination');
+      return false;
+    }
+
+    await StoreAssetData({
+      imageUrl: selectedCitizen.imageUrl,
+      tokenId: selectedCitizen.tokenId,
+      collectionId: (selectedCitizen.rawMetadata as RootMetadata).collectionId,
+      campaign: currentCampaign,
+    } as AssetData);
+
+    return true;
+
+  }
+
   async function handleSaveCombination() {
     let isSuccess = false;
     if (selectedCampaign == Campaign.Citizens || selectedCampaign == Campaign.Creators) {
       isSuccess = await saveLuksoCombination();
     } else if (selectedCampaign == Campaign.Kumi) {
       isSuccess = await saveSolanaCombination();
+    } else if (selectedCampaign == Campaign.Based) {
+      isSuccess = await saveRootCombination();
     }
     return isSuccess;
   }
