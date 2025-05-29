@@ -60,7 +60,8 @@ export enum Module {
   Citizens = 'Citizens',
   LuksoContractUtil = 'LuksoContractUtil',
   SolanaContractUtil = 'SolanaContractUtil',
-  RootContractUtil = 'RootContractUtil'
+  RootContractUtil = 'RootContractUtil',
+  RootContractConstant = 'RootContractConstant'
 }
 
 export enum EmailResult {

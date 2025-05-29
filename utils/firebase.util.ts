@@ -410,7 +410,6 @@ export async function GetParameter<T>(campaign: string | undefined, parameter: P
       { success: true, value: data };
   } catch (e) {
     const err = e as FirebaseError;
-    console.log(err)
     void LogError(Module.FirebaseUtil, err.message, e);
     return { success: false, errMessage: err.message, errCode: err.code };
   }

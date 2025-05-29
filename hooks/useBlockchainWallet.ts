@@ -22,7 +22,8 @@ import { useAuthUi } from '@futureverse/auth-ui';
 import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
-import { GetRootAssetsMetadata, InitializeApi } from '../utils/web3/root/contract.util';
+import { GetRootAssetsMetadata } from '../utils/web3/root/contract.util';
+import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export function useBlockchainWallet() {
@@ -39,8 +40,6 @@ export function useBlockchainWallet() {
     [LoginLibrary.Privy]: null,
     [LoginLibrary.Pass]: null
   });
-
-  // eslint-disable-next-line @typescript-eslint/naming-convention
 
   /* Fetching relatedhooks */
   const { ready, user, authenticated } = usePrivy(); //Privy Auth
@@ -383,7 +382,7 @@ export function useBlockchainWallet() {
       if (!isFetchingSession && userSession && signer) {
         const eoa = userSession.linked[0].eoa;
 
-        await InitializeApi(signer);
+        await InitializeContractEssentialData(signer);
 
         dispatch(connect({ address: eoa, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
         setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: true }));

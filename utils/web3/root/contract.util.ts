@@ -1,8 +1,5 @@
-import { ApiPromise } from '@polkadot/api';
-import { getApiOptions } from "@therootnetwork/api";
-import { MINT_AMOUNT, NFT_COLLECTION_ID, PROVIDER } from '../../../constants/root/contract.constant';
+import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER } from '../../../constants/root/contract.constant';
 import { TransactionBuilder } from '@futureverse/transact';
-import { Signer } from '@futureverse/signer';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { LogError } from '../../common.util';
@@ -13,18 +10,9 @@ import { Campaign, CampaignBaseCombination } from '../../../enums/citizens/commo
 import { CitizenMetadata, RootMetadata } from '../../../interfaces/citizens.interface';
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 
-let api: ApiPromise;
-let signer: Signer;
-
-
-export async function InitializeApi(_signer: Signer) {
-  api = await ApiPromise.create({ ...getApiOptions(), provider: PROVIDER });
-  signer = _signer;
-}
-
 export async function GetRootAssetTokenIds(address: string): Promise<Result<number[]>> {
   try {
-    const ownedTokens = await api.rpc.nft.ownedTokens(NFT_COLLECTION_ID, address, 0, 1000);
+    const ownedTokens = await API.rpc.nft.ownedTokens(NFT_COLLECTION_ID, address, 0, 1000);
 
     const jsonResponse = ownedTokens.toJSON();
     const tokenIds = jsonResponse[2];
@@ -87,7 +75,7 @@ export async function MintRootAsset(
   imageUrl: string
 ): Promise<Result<boolean>> {
   try {
-    const mintBuilder = TransactionBuilder.nft(api, signer, address, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
+    const mintBuilder = TransactionBuilder.nft(API, SIGNER, address, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
     await mintBuilder.signAndSend();
     const tokenIdsResult = await GetRootAssetTokenIds(address);
     if (tokenIdsResult.success) {
