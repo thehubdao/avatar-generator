@@ -4,11 +4,12 @@ import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { LogError } from '../../common.util';
 import '@therootnetwork/api-types';
-import { GetAssetData, StoreAssetData } from '../../firebase.util';
+import { GetAssetData, GetCollectionDocs, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
-import { Campaign, CampaignBaseCombination } from '../../../enums/citizens/common.enum';
-import { CitizenMetadata, RootMetadata } from '../../../interfaces/citizens.interface';
+import { Campaign, CampaignBaseCombination, RootCampaign, SolanaCampaign } from '../../../enums/citizens/common.enum';
+import { CitizenMetadata, Drop, RootMetadata } from '../../../interfaces/citizens.interface';
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
+import { CampaignDrops } from '../../../types/citizens.type';
 
 export async function GetRootAssetTokenIds(address: string): Promise<Result<number[]>> {
   try {
@@ -18,6 +19,37 @@ export async function GetRootAssetTokenIds(address: string): Promise<Result<numb
     const tokenIds = jsonResponse[2];
 
     return { success: true, value: tokenIds as number[] };
+  } catch (error) {
+    const e = error as Error;
+    LogError(Module.RootContractUtil, 'Error on getting Root Asset');
+    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+  }
+}
+
+export async function HasSftBalance(address: string, sftDropId: string): Promise<Result<boolean>> {
+  try {
+    const [sftCollectionId, sftTokenId] = sftDropId.split(':');
+    const token = await api.query.sft.tokenInfo([
+      sftCollectionId,
+      sftTokenId,
+    ]);
+    const info = token.toHuman() as {
+      tokenName: string;
+      ownedTokens: [
+        string,
+        { freeBalance: string; reservedBalance: string },
+      ][];
+    };
+
+    const firstOwned = info.ownedTokens.find(owned => {
+      return (
+        owned[0].toLowerCase() === address.toLowerCase()
+      );
+    });
+
+    const hasBalance = firstOwned ? Number(firstOwned[1].freeBalance) > 0 : false;
+
+    return { success: true, value: hasBalance };
   } catch (error) {
     const e = error as Error;
     LogError(Module.RootContractUtil, 'Error on getting Root Asset');
@@ -82,7 +114,6 @@ export async function MintRootAsset(
       const tokenIds = tokenIdsResult.value;
       const tokenId = tokenIds[tokenIds.length - 1].toString();
       await StoreAssetData({
-        address,
         tokenId,
         campaign: Campaign.Based,
         collectionId: NFT_COLLECTION_ID as string,
@@ -103,5 +134,39 @@ export async function MintRootAsset(
     const e = error as Error;
     LogError(Module.RootContractUtil, 'Error on minting Root Asset');
     return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+  }
+}
+
+export async function GetUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {
+  try {
+    const rootDrops: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
+
+    if (!rootDrops.length) return {
+      success: false,
+      errMessage: "No drops found",
+      errCode: CommonErrorCode.GetNoData
+    };
+
+    const dropsCheckPromiseList = rootDrops.map(async (drop) => {
+      const dropData = await HasSftBalance(address, drop.contract_address);
+      return dropData ? drop : undefined;
+    });
+
+    const dropsCheck = await Promise.all(dropsCheckPromiseList);
+
+    const filteredDrops = dropsCheck.filter((dropCheck) => dropCheck !== undefined);
+
+    return {
+      success: true,
+      value: { [campaign]: filteredDrops }
+    };
+  } catch (e) {
+    const err = e as Error
+    void LogError(Module.SolanaContractUtil, "Couldn't get user feature assets", e);
+    return {
+      success: false,
+      errMessage: err.message,
+      errCode: CommonErrorCode.InternalError
+    }
   }
 }
