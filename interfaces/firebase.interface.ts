@@ -1,5 +1,7 @@
 ﻿import { Timestamp } from "firebase/firestore";
 import {UserRoleValues} from "../enums/firebase.enum";
+import { Campaign } from "../enums/citizens/common.enum";
+import { Blockchain } from "../enums/blockchain/common.enum";
 
 export interface AGQueryConstraints {
   campaign?: string;
@@ -38,4 +40,17 @@ export interface UserWithPass extends UserInterface{
 
 export interface AGParameters {
   campaigns: string[],
+}
+
+export interface AssetData {
+  address: string;
+  tokenId: string;
+  campaign: Campaign;
+  collectionId: string;
+  blockchainType: Blockchain;
+  baseCombination: string;
+  combination: string;
+  imageUrl: string;
+  name: string;
+  description: string;
 }

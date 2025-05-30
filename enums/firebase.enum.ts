@@ -6,6 +6,7 @@ export enum FirestoreLocation {
     Stages = 'stages',
     EnvMaps = 'env_maps',
     Parameters = '/',
+    AssetData = 'asset_data',
 }
 
 export enum FirestoreGlobalLocation {

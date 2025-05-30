@@ -54,16 +54,30 @@ export enum Campaign {
   Based = "root_citizens"
 }
 
-export enum LuksoCampaign{
+export enum LuksoCampaign {
   Citizens = "vrm_female",
   Creators = "vrm_male",
 }
 
-export enum SolanaCampaign{
+export enum SolanaCampaign {
   Kumi = "kumi",
 }
 
-export enum CandyMachineGroup{
+export enum CandyMachineGroup {
   Holder = "holder",
   Public = "public",
+}
+
+export enum CampaignBaseCombination { 
+  Citizens = "0-0-0-0-0",
+  Creators = "0-0-0-0-0",
+  Kumi = "0-0-0-0-0-0-0-0-0-0",
+  Based = "0-0-0-0-0-0-0",
+}
+
+export enum CampaignBaseUrl {
+  Citizens = "",
+  Creators = "",
+  Kumi = "",
+  Based = "https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/root_citizens%2Fthumb%2Fimagen_2025-05-28_110559759.png?alt=media&token=79f77a75-62d0-4053-944f-afc10ee5330f",
 }

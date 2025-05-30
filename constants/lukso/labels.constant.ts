@@ -18,7 +18,8 @@ export const CAMPAIGN_LABELS = {
       nftName: 'Lukso Citizen',
       dropdownName: 'Lukso Citizens'
     }, 'vrm_male': { campaignName: 'vrm_male', nftName: 'Lukso Creator', dropdownName: 'Lukso Creators' },
-    'kumi': { campaignName: 'kumi', nftName: 'Kumi Citizen', dropdownName: 'Kumi Citizens' }
+    'kumi': { campaignName: 'kumi', nftName: 'Kumi Citizen', dropdownName: 'Kumi Citizens' },
+    'root_citizens': { campaignName: 'root_citizens', nftName: 'Root Citizen', dropdownName: 'Root Citizens' }
   }
   
   //NOTE: female campaign has it's types different from the DB
