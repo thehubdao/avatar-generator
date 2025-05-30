@@ -239,7 +239,7 @@ export async function GetCampaignUserFeatures(address: string, campaign: string)
     }
 }
 
-export async function GetUserFeatures(address: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
+export async function GetLuksoUserFeatures(address: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
     try {
         const campaigns = Object.keys(LUKSO_CAMPAIGN_WEB3_DATA);
         const campaignPromises = campaigns.map(campaign =>

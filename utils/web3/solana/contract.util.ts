@@ -249,7 +249,7 @@ export async function GetCollectionSupply(collectionId: PublicKey = COLLECTION_I
     }
 }
 
-export async function GetUserFeatureAssets(walletAddress: string, campaign: SolanaCampaign): Promise<Result<CampaignDrops<SolanaCampaign>>> {
+export async function GetSolanaUserFeatureAssets(walletAddress: string, campaign: SolanaCampaign): Promise<Result<CampaignDrops<SolanaCampaign>>> {
     try {
         const assetsResult = await GetAssetsByOwner(walletAddress);
         const userFeatures: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
