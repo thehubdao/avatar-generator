@@ -134,6 +134,12 @@ export interface Drop {
   name: string;
 }
 
+export interface RootDrop extends Drop {
+  schemaPart: string;
+  tokenId: string;
+  collectionId: string;
+}
+
 export interface CampaignMetadata extends Record<Campaign, CitizenMetadata[]> { }
 
 export interface FollowUserData {
