@@ -2,8 +2,8 @@ import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@pr
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setClaimableDrops, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
-import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
-import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
+import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetLuksoUserFeatures } from '../utils/web3/lukso/contract.util';
+import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetSolanaUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
 import { CitizenMetadata, ClaimableDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType, GetSdkConnection, SetSdkConnection } from '../utils/web3/web3.util';
-import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination } from '../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination, RootCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetClaimableDrops, GetParameter } from '../utils/firebase.util';
@@ -22,8 +22,8 @@ import { useAuthUi } from '@futureverse/auth-ui';
 import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
-import { GetRootAssetsMetadata } from '../utils/web3/root/contract.util';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
+import { GetRootAssetsMetadata, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
 import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 
 export function useBlockchainWallet() {
@@ -88,7 +88,23 @@ export function useBlockchainWallet() {
   }
 
   async function getEthereumUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
-    const features = await GetUserFeatures(walletAddress);
+    const features = await GetLuksoUserFeatures(walletAddress);
+
+    if (features.success) return { success: true, value: features.value };
+
+    return { success: false, errMessage: features.errMessage, errCode: features.errCode };
+  }
+
+  async function getSolanaUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<SolanaCampaign>>> {
+    const features = await GetSolanaUserFeatureAssets(walletAddress, SolanaCampaign.Kumi);
+
+    if (features.success) return { success: true, value: features.value };
+
+    return { success: false, errMessage: features.errMessage, errCode: features.errCode };
+  }
+
+  async function getRootUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<RootCampaign>>> {
+    const features = await GetRootUserFeatureAssets(walletAddress, RootCampaign.Based);
 
     if (features.success) return { success: true, value: features.value };
 
@@ -108,14 +124,6 @@ export function useBlockchainWallet() {
     if (leaderboardData.success) return { success: true, value: leaderboardData.value };
 
     return { success: false, errMessage: leaderboardData.errMessage, errCode: leaderboardData.errCode };
-  }
-
-  async function getSolanaUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<SolanaCampaign>>> {
-    const features = await GetUserFeatureAssets(walletAddress, SolanaCampaign.Kumi);
-
-    if (features.success) return { success: true, value: features.value };
-
-    return { success: false, errMessage: features.errMessage, errCode: features.errCode };
   }
 
   async function getSolanaMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
@@ -282,6 +290,7 @@ export function useBlockchainWallet() {
       }
     } else if (blockchainType === Blockchain.Root) {
       const rootCitizensMetadata = await getRootTokensMetadataPromise(walletAddress);
+      const rootUserFeatures = await getRootUserFeaturesPromise(walletAddress);
 
       if (rootCitizensMetadata.success) {
         const citizen = rootCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
@@ -313,6 +322,12 @@ export function useBlockchainWallet() {
           dispatch(setSelectedCitizen(citizen));
           dispatch(setMintingMode(false));
         }
+      }
+      if (rootUserFeatures.success) {
+        const rootFeatures = rootUserFeatures.value as CampaignDrops<AppCampaigns>;
+        dispatch(setUserFeatures(rootFeatures));
+      } else {
+        LogError(Module.Citizens, rootUserFeatures.errMessage, rootUserFeatures.errCode);
       }
     }
   };
