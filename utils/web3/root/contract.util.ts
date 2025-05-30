@@ -1,4 +1,4 @@
-import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER } from '../../../constants/root/contract.constant';
+import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, NFT_COLLECTION_ADDRESS, CHAIN_ID, ASSET_REGISTER_SDK } from '../../../constants/root/contract.constant';
 import { TransactionBuilder } from '@futureverse/transact';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
@@ -6,10 +6,11 @@ import { LogError } from '../../common.util';
 import '@therootnetwork/api-types';
 import { GetAssetData, GetCollectionDocs, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
-import { Campaign, CampaignBaseCombination, RootCampaign, SolanaCampaign } from '../../../enums/citizens/common.enum';
-import { CitizenMetadata, Drop, RootMetadata } from '../../../interfaces/citizens.interface';
+import { Campaign, CampaignBaseCombination, RootCampaign } from '../../../enums/citizens/common.enum';
+import { CitizenMetadata, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
+import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
 
 export async function GetRootAssetTokenIds(address: string): Promise<Result<number[]>> {
   try {
@@ -26,9 +27,8 @@ export async function GetRootAssetTokenIds(address: string): Promise<Result<numb
   }
 }
 
-export async function HasSftBalance(address: string, sftDropId: string): Promise<Result<boolean>> {
+export async function HasSftBalance(address: string, sftCollectionId: string, sftTokenId: string): Promise<Result<boolean>> {
   try {
-    const [sftCollectionId, sftTokenId] = sftDropId.split(':');
     const token = await API.query.sft.tokenInfo([
       sftCollectionId,
       sftTokenId,
@@ -137,9 +137,9 @@ export async function MintRootAsset(
   }
 }
 
-export async function GetUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {
+export async function GetRootUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {
   try {
-    const rootDrops: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
+    const rootDrops: RootDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as RootDrop[];
 
     if (!rootDrops.length) return {
       success: false,
@@ -148,7 +148,7 @@ export async function GetUserFeatureAssets(address: string, campaign: RootCampai
     };
 
     const dropsCheckPromiseList = rootDrops.map(async (drop) => {
-      const dropData = await HasSftBalance(address, drop.contract_address);
+      const dropData = await HasSftBalance(address, drop.collectionId, drop.tokenId);
       return dropData ? drop : undefined;
     });
 
@@ -169,4 +169,93 @@ export async function GetUserFeatureAssets(address: string, campaign: RootCampai
       errCode: CommonErrorCode.InternalError
     }
   }
+}
+
+function CreateAssetLinkOperationMessage(schemaPart: string, parent_contract_address: string, parent_tokenId: string, child_contract_address: string, child_tokenId: string): Result<Operation> {
+
+  if (!schemaPart || !parent_contract_address || !parent_tokenId || !child_contract_address || !child_tokenId) {
+    return { success: false, errMessage: 'Missing information to create "create" asset link operation', errCode: CommonErrorCode.MissingInfo };
+  }
+
+  const createAssetLinkOperation: Operation = {
+    type: 'asset-link',
+    action: 'create',
+    args: [
+      `equipWith_${schemaPart}`,
+      `did:fv-asset:${CHAIN_ID}:evm:${parent_contract_address}:${parent_tokenId}`,
+      `did:fv-asset:${CHAIN_ID}:evm:${child_contract_address}:${child_tokenId}`,
+    ],
+  }
+
+  return { success: true, value: createAssetLinkOperation };
+}
+
+function DeleteAssetLinkOperationMessage(schemaPart: string, parent_contract_address: string, parent_tokenId: string, child_contract_address: string, child_tokenId: string): Result<Operation> {
+
+  if (!schemaPart || !parent_contract_address || !parent_tokenId || !child_contract_address || !child_tokenId) {
+    return { success: false, errMessage: 'Missing information to create "delete" asset link operation', errCode: CommonErrorCode.MissingInfo };
+  }
+
+  const createAssetLinkOperation: Operation = {
+    type: 'asset-link',
+    action: 'delete',
+    args: [
+      `equipWith_${schemaPart}`,
+      `did:fv-asset:${CHAIN_ID}:evm:${parent_contract_address}:${parent_tokenId}`,
+      `did:fv-asset:${CHAIN_ID}:evm:${child_contract_address}:${child_tokenId}`,
+    ],
+  }
+
+  return { success: true, value: createAssetLinkOperation };
+}
+
+export async function EquipFeaturesOperations(parent_contract_address: string, parent_tokenId: string, newAttributes: RootDrop[]): Promise<Result<Operation[]>> {
+  const operations: Operation[] = [];
+
+  for (const attribute of newAttributes) {
+    const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_contract_address, parent_tokenId, attribute.contract_address, attribute.tokenId);
+    if (!createAssetLinkOperation.success) return { success: false, errMessage: createAssetLinkOperation.errMessage, errCode: createAssetLinkOperation.errCode };
+    operations.push(createAssetLinkOperation.value);
+  }
+
+  return { success: true, value: operations };
+}
+
+export async function UnequipFeaturesOperations(parent_contract_address: string, parent_tokenId: string, oldAttributes: RootDrop[]): Promise<Result<Operation[]>> {
+  const operations: Operation[] = [];
+
+  for (const attribute of oldAttributes) {
+    const deleteAssetLinkOperation = DeleteAssetLinkOperationMessage(attribute.schemaPart, parent_contract_address, parent_tokenId, attribute.contract_address, attribute.tokenId);
+    if (!deleteAssetLinkOperation.success) return { success: false, errMessage: deleteAssetLinkOperation.errMessage, errCode: deleteAssetLinkOperation.errCode };
+    operations.push(deleteAssetLinkOperation.value);
+  }
+
+  return { success: true, value: operations };
+}
+
+export async function SetRootNewCombination(address: string, parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
+  const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ADDRESS, parent_tokenId, newAttributes);
+  const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ADDRESS, parent_tokenId, oldAttributes);
+
+  if (!equipOperations.success || !unequipOperations.success) return { success: false, errMessage: 'Error on setting new combination. All operations must be successful', errCode: CommonErrorCode.InternalError };
+
+  const allOperations = [...equipOperations.value, ...unequipOperations.value];
+  /* const [nonce] = await ASSET_REGISTER_SDK.nonceForChainAddress(address as `0x${string}`).execute(); */
+  const artm = new ARTM({ address, statement: STATEMENTS.ASSET_UPDATE, operations: allOperations, nonce:2 });
+  const signature = await SIGNER.signMessage('\x19Ethereum Signed Message:\n' + artm.message);
+  console.log(signature);
+  const input = {
+    signature,
+    transaction: artm.message,
+  };
+  const response = await ASSET_REGISTER_SDK.submitTransaction(input).execute();
+  
+  const transactionStatus = await ASSET_REGISTER_SDK.transaction({
+    transactionHash: response[0],
+  }).execute();
+
+  console.log(transactionStatus);
+  
+
+  return { success: true, value: true };
 }
