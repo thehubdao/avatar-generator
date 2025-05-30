@@ -171,9 +171,9 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
   }
 }
 
-function CreateAssetLinkOperationMessage(schemaPart: string, parent_contract_address: string, parent_tokenId: string, child_contract_address: string, child_tokenId: string): Result<Operation> {
+function CreateAssetLinkOperationMessage(schemaPart: string, parent_collection_id: string, parent_token_id: string, child_collection_id: string, child_token_id: string): Result<Operation> {
 
-  if (!schemaPart || !parent_contract_address || !parent_tokenId || !child_contract_address || !child_tokenId) {
+  if (!schemaPart || !parent_collection_id || !parent_token_id || !child_collection_id || !child_token_id) {
     return { success: false, errMessage: 'Missing information to create "create" asset link operation', errCode: CommonErrorCode.MissingInfo };
   }
 
@@ -182,17 +182,17 @@ function CreateAssetLinkOperationMessage(schemaPart: string, parent_contract_add
     action: 'create',
     args: [
       `equipWith_${schemaPart}`,
-      `did:fv-asset:${CHAIN_ID}:evm:${parent_contract_address}:${parent_tokenId}`,
-      `did:fv-asset:${CHAIN_ID}:evm:${child_contract_address}:${child_tokenId}`,
+      `did:fv-asset:${CHAIN_ID}:root:${parent_collection_id}:${parent_token_id}`,
+      `did:fv-asset:${CHAIN_ID}:root:${child_collection_id}:${child_token_id}`,
     ],
   }
 
   return { success: true, value: createAssetLinkOperation };
 }
 
-function DeleteAssetLinkOperationMessage(schemaPart: string, parent_contract_address: string, parent_tokenId: string, child_contract_address: string, child_tokenId: string): Result<Operation> {
+function DeleteAssetLinkOperationMessage(schemaPart: string, parent_collection_id: string, parent_token_id: string, child_collection_id: string, child_token_id: string): Result<Operation> {
 
-  if (!schemaPart || !parent_contract_address || !parent_tokenId || !child_contract_address || !child_tokenId) {
+  if (!schemaPart || !parent_collection_id || !parent_token_id || !child_collection_id || !child_token_id) {
     return { success: false, errMessage: 'Missing information to create "delete" asset link operation', errCode: CommonErrorCode.MissingInfo };
   }
 
@@ -201,19 +201,19 @@ function DeleteAssetLinkOperationMessage(schemaPart: string, parent_contract_add
     action: 'delete',
     args: [
       `equipWith_${schemaPart}`,
-      `did:fv-asset:${CHAIN_ID}:evm:${parent_contract_address}:${parent_tokenId}`,
-      `did:fv-asset:${CHAIN_ID}:evm:${child_contract_address}:${child_tokenId}`,
+      `did:fv-asset:${CHAIN_ID}:root:${parent_collection_id}:${parent_token_id}`,
+      `did:fv-asset:${CHAIN_ID}:root:${child_collection_id}:${child_token_id}`,
     ],
   }
 
   return { success: true, value: createAssetLinkOperation };
 }
 
-export async function EquipFeaturesOperations(parent_contract_address: string, parent_tokenId: string, newAttributes: RootDrop[]): Promise<Result<Operation[]>> {
+export async function EquipFeaturesOperations(parent_collection_id: string, parent_token_id: string, newAttributes: RootDrop[]): Promise<Result<Operation[]>> {
   const operations: Operation[] = [];
 
   for (const attribute of newAttributes) {
-    const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_contract_address, parent_tokenId, attribute.contract_address, attribute.tokenId);
+    const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, attribute.collectionId, attribute.tokenId);
     if (!createAssetLinkOperation.success) return { success: false, errMessage: createAssetLinkOperation.errMessage, errCode: createAssetLinkOperation.errCode };
     operations.push(createAssetLinkOperation.value);
   }
@@ -221,11 +221,11 @@ export async function EquipFeaturesOperations(parent_contract_address: string, p
   return { success: true, value: operations };
 }
 
-export async function UnequipFeaturesOperations(parent_contract_address: string, parent_tokenId: string, oldAttributes: RootDrop[]): Promise<Result<Operation[]>> {
+export async function UnequipFeaturesOperations(parent_collection_id: string, parent_token_id: string, oldAttributes: RootDrop[]): Promise<Result<Operation[]>> {
   const operations: Operation[] = [];
 
   for (const attribute of oldAttributes) {
-    const deleteAssetLinkOperation = DeleteAssetLinkOperationMessage(attribute.schemaPart, parent_contract_address, parent_tokenId, attribute.contract_address, attribute.tokenId);
+    const deleteAssetLinkOperation = DeleteAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, attribute.collectionId, attribute.tokenId);
     if (!deleteAssetLinkOperation.success) return { success: false, errMessage: deleteAssetLinkOperation.errMessage, errCode: deleteAssetLinkOperation.errCode };
     operations.push(deleteAssetLinkOperation.value);
   }
@@ -234,15 +234,15 @@ export async function UnequipFeaturesOperations(parent_contract_address: string,
 }
 
 export async function SetRootNewCombination(address: string, parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
-  const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ADDRESS, parent_tokenId, newAttributes);
-  const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ADDRESS, parent_tokenId, oldAttributes);
+  const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, newAttributes);
+  const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, oldAttributes);
 
   if (!equipOperations.success || !unequipOperations.success) return { success: false, errMessage: 'Error on setting new combination. All operations must be successful', errCode: CommonErrorCode.InternalError };
 
-  const allOperations = [...equipOperations.value, ...unequipOperations.value];
-  /* const [nonce] = await ASSET_REGISTER_SDK.nonceForChainAddress(address as `0x${string}`).execute(); */
-  const artm = new ARTM({ address, statement: STATEMENTS.ASSET_UPDATE, operations: allOperations, nonce:2 });
-  const signature = await SIGNER.signMessage('\x19Ethereum Signed Message:\n' + artm.message);
+  const allOperations = [...unequipOperations.value, ...equipOperations.value];
+  const [nonce] = await ASSET_REGISTER_SDK.nonceForChainAddress(address as `0x${string}`).execute();
+  const artm = new ARTM({ address, statement: STATEMENTS.ASSET_UPDATE, operations: allOperations, nonce });
+  const signature = await SIGNER.signMessage(artm.message);
   console.log(signature);
   const input = {
     signature,
