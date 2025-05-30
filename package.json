@@ -16,6 +16,8 @@
     "@erc725/erc725.js": "^0.22.0",
     "@filebase/sdk": "^1.0.6",
     "@firebase/auth": "^1.9.1",
+    "@futureverse/artm": "^2.3.2",
+    "@futureverse/asset-register": "^2.79.2",
     "@futureverse/auth-react": "^4.2.1",
     "@futureverse/auth-ui": "^0.9.2",
     "@futureverse/transact": "^0.7.2",
