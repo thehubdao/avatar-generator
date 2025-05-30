@@ -186,16 +186,16 @@ export function useBlockchainWallet() {
             // MINTING FLOW
             dispatch(setSelectedCampaign(Campaign.Creators)); // Set the selected campaign to Citizens by default when no campaign is selected
             dispatch(setSelectedCitizen({
-              baseCombination: '0-0-0-0-0',
-              combination: '0-0-0-0-0',
+              baseCombination: CampaignBaseCombination.Creators,
+              combination: CampaignBaseCombination.Creators,
               campaign: Campaign.Creators
             } as CitizenMetadata));
           }
         } else if (!citizen) {
           // MINTING FLOW
           dispatch(setSelectedCitizen({
-            baseCombination: '0-0-0-0-0',
-            combination: '0-0-0-0-0',
+            baseCombination: CampaignBaseCombination.Creators,
+            combination: CampaignBaseCombination.Creators,
             campaign: selectedCampaign
           } as CitizenMetadata));
         } else {
