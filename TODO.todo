@@ -22,6 +22,7 @@ TODO:
     ☐ Remove skin colour in mobile
     ☐ Change default edit mode body part
     ☐ Fix details page labels for large type names
+    ☐ Check undefined value when error in backpack data for loading behavior
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
