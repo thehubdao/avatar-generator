@@ -7,6 +7,7 @@ export interface CitizensCollection {
   image: string;
   campaign: Campaign;
   blockChain: Blockchain;
+  active: boolean;
 }
 
 export interface DataBaseDrop {
@@ -159,4 +160,5 @@ export interface MintingUiData {
 export interface MintingData {
   mintSupply?: number;
   mintPrice?: number;
+  isHolder?: boolean;
 }
