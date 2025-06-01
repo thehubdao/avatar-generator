@@ -8,6 +8,8 @@ import Loader from "../../lukso/common/loader.ui";
 import CheckedSVG from "./SVG/checkedSVG.ui";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { setMintingMode } from "../../../store/citizensMetadataSlice";
+import PlusSVG from "./SVG/plusSVG.ui";
+import { useMediaQuery } from "usehooks-ts";
 
 interface MintUIProps {
   imgUrl?: string;
@@ -32,10 +34,16 @@ export default function MintUI({
   const [isMinting, setIsMinting] = useState<boolean>(false);
   const [isMinted, setIsMinted] = useState<boolean | null>(null);
 
+  const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false);
+  const [isMintOpen, setIsMintOpen] = useState<boolean>(false);
+
   const dispatch = useAppDispatch();
 
   const mintingSupply = useAppSelector((state) => state.citizensMetadata.mintSupply);
   const mintingPrice = useAppSelector((state) => state.citizensMetadata.mintingPrice);
+  const isHolder = useAppSelector((state) => state.citizensAuth.isHolder);
+
+  const isMatchMobile = useMediaQuery('(max-width: 1024px)');
 
   async function handleMint() {
     setIsMinting(true);
@@ -43,14 +51,25 @@ export default function MintUI({
     setIsMinted(isSuccess);
   }
 
+  function handleButtonClick(type: 'info' | 'mint') {
+    if (type === 'info') {
+      setIsInfoOpen(!isInfoOpen);
+      setIsMintOpen(false);
+    }
+    if (type === 'mint') {
+      setIsMintOpen(!isMintOpen);
+      setIsInfoOpen(false);
+    }
+  }
+
   return (
     <>
       {!isModalOpen &&
         <>
           {/* AVATAR DESCRIPTION */}
-          <div className="hidden xl:block fixed top-24 left-6 md:w-[462px] h-[75vh] 2xl:h-[85vh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto">
+          <div className={`${isMatchMobile ? (isInfoOpen ? 'block' : 'hidden') : ''} fixed bottom-20 lg:bottom-6 xl:bottom-auto top-auto xl:top-24 left-6 w-[326px] sm:w-[462px] h-fit xl:h-[75vh] 2xl:h-[85vh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto`}>
             <div className="w-full pb-8">
-              <div className="relative w-full h-[30vh] md:h-[250px] 2xl:h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
+              <div className="relative w-full h-[30vh] lg:h-[250px] 2xl:h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
                 <Image
                   priority
                   src={imgUrl}
@@ -71,22 +90,22 @@ export default function MintUI({
               </div>
             </div>
             <div>
-              <p className="text-center 2xl:text-xl">{avatarDescription}</p>
+              <p className="text-center text-xs xl:text-base 2xl:text-xl">{avatarDescription}</p>
             </div>
           </div >
           {/* CAMPAIGN DESCRIPTION */}
-          <div className="fixed bottom-6 xl:bottom-auto top-auto xl:top-24 right-6 xl:right-6 md:w-[462px] h-fit xl:h-[75vh] 2xl:h-[85vh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto" >
+          <div className={`${isMatchMobile ? (isMintOpen ? 'block' : 'hidden') : ''} fixed bottom-20 lg:bottom-6 xl:bottom-auto top-auto xl:top-24 right-6 w-[326px] sm:w-[462px] h-fit xl:h-[75vh] 2xl:h-[85vh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto`} >
             <div className="relative h-full flex flex-col justify-between gap-4 xl:gap-0 2xl:py-16">
               <h1 className="text-center text-2xl font-semibold">
                 {campaignName}
               </h1>
-              <p className="hidden lg:block text-center text-xs xl:text-base">
+              <p className="block text-center text-xs xl:text-base">
                 {campaignDescription}
               </p>
               <SocialButtons className='w-full flex justify-center gap-4 scale-75 order-4 xl:order-none' />
               <div className="text-center font-semibold">
-                <p className="xl:text-lg">PUBLIC MINT</p>
-                <p>{price || mintingPrice} SOL</p>
+                <p className="xl:text-lg">{isHolder ? 'FREE MINT' : 'PUBLIC MINT'}</p>
+                <p><span className="font-light text-sm">{isHolder ? 'Platform fee: ' : ''}</span>{price || mintingPrice} SOL</p>
               </div>
               <div className="xl:hidden w-full flex flex-col items-center" >
                 <Button label="Mint" withIcon light handleClick={() => { setIsModalOpen(true) }} textStyles="text-start text-xl px-8">
@@ -96,6 +115,31 @@ export default function MintUI({
                 </Button>
                 <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
               </div >
+            </div>
+          </div >
+          {/* UI BUTTONS MOBILE */}
+          <div className="fixed lg:hidden bottom-6 xl:bottom-auto top-auto xl:top-24 left-6 xl:right-6 w-40 bg-citizens-dark shadow-citizens-btn rounded-[20px] py-2 px-4" onClick={() => handleButtonClick('info')}>
+            <div className="flex z-10">
+              <p className={`font-light text-lg text-white uppercase grow`}>&#47;&#47;&#47; INFO</p>
+              <div className="w-10 h-[27px] border border-white rounded-full flex justify-center items-center cursor-pointer">
+                {isInfoOpen ?
+                  <div className="w-[14px] h-[2px] bg-white" />
+                  :
+                  <PlusSVG />
+                }
+              </div>
+            </div>
+          </div >
+          <div className="fixed lg:hidden bottom-6 xl:bottom-auto top-auto xl:top-24 right-6 xl:right-6 w-40 bg-citizens-dark shadow-citizens-btn rounded-[20px] py-2 px-4" onClick={() => handleButtonClick('mint')}>
+            <div className="flex z-10">
+              <p className={`font-light text-lg text-white uppercase grow`}>&#47;&#47;&#47; MINT</p>
+              <div className="w-10 h-[27px] border border-white rounded-full flex justify-center items-center cursor-pointer">
+                {isMintOpen ?
+                  <div className="w-[14px] h-[2px] bg-white" />
+                  :
+                  <PlusSVG />
+                }
+              </div>
             </div>
           </div >
           {/* MINT BUTTON */}
@@ -126,7 +170,7 @@ export default function MintUI({
       }
       {
         isMinting && isMinted === null &&
-        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => {}}>
+        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => { }}>
           <div className="grid justify-items-center">
             <Loader size={69} />
             <div className="text-center text-white grid gap-4 pt-4">
