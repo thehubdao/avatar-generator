@@ -11,6 +11,7 @@ import { CitizenMetadata, RootDrop, RootMetadata } from '../../../interfaces/cit
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
+import { RootTransactionStatus } from '../../../enums/web3';
 
 export async function GetRootAssetTokenIds(address: string): Promise<Result<number[]>> {
   try {
@@ -181,7 +182,7 @@ function CreateAssetLinkOperationMessage(schemaPart: string, parent_collection_i
     type: 'asset-link',
     action: 'create',
     args: [
-      `equipWith_${schemaPart}`,
+      `equippedWith_${schemaPart}`,
       `did:fv-asset:${CHAIN_ID}:root:${parent_collection_id}:${parent_token_id}`,
       `did:fv-asset:${CHAIN_ID}:root:${child_collection_id}:${child_token_id}`,
     ],
@@ -200,7 +201,7 @@ function DeleteAssetLinkOperationMessage(schemaPart: string, parent_collection_i
     type: 'asset-link',
     action: 'delete',
     args: [
-      `equipWith_${schemaPart}`,
+      `equippedWith_${schemaPart}`,
       `did:fv-asset:${CHAIN_ID}:root:${parent_collection_id}:${parent_token_id}`,
       `did:fv-asset:${CHAIN_ID}:root:${child_collection_id}:${child_token_id}`,
     ],
@@ -243,19 +244,26 @@ export async function SetRootNewCombination(address: string, parent_tokenId: str
   const [nonce] = await ASSET_REGISTER_SDK.nonceForChainAddress(address as `0x${string}`).execute();
   const artm = new ARTM({ address, statement: STATEMENTS.ASSET_UPDATE, operations: allOperations, nonce });
   const signature = await SIGNER.signMessage(artm.message);
-  console.log(signature);
+
   const input = {
     signature,
     transaction: artm.message,
   };
   const response = await ASSET_REGISTER_SDK.submitTransaction(input).execute();
-  
-  const transactionStatus = await ASSET_REGISTER_SDK.transaction({
+
+  const [{ transactionHash }] = await ASSET_REGISTER_SDK.transaction({
     transactionHash: response[0],
   }).execute();
 
-  console.log(transactionStatus);
-  
+  let [{ status }]: { status: RootTransactionStatus }[] = await ASSET_REGISTER_SDK.transaction({ transactionHash }).execute();
+  while (status === RootTransactionStatus.PENDING) {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    [{ status }] = await ASSET_REGISTER_SDK.transaction({ transactionHash }).execute();
+  }
 
-  return { success: true, value: true };
+  if (status === RootTransactionStatus.SUCCESS) {
+    return { success: true, value: true };
+  }
+
+  return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
 }
