@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CollectionSections } from "../../../enums/citizens/common.enum";
 import CitizensCollection from "./citizensCollection.ui";
 import { useAppSelector } from "../../../store/hooks";
+import LoadingUI from "../common/loading.ui";
 
 export default function CitizensBackpackUI() {
   const loadedTokens = useAppSelector(state => state.citizensMetadata.citizensMetadata);
@@ -10,6 +11,12 @@ export default function CitizensBackpackUI() {
 
   return (
     <div className="relative w-full min-h-screen py-32">
+      {/* LOADER */}
+      <LoadingUI
+        loadingText='Loading tokens data'
+        errorText='Sorry, data is not loaded, try again later.'
+        dataValidate={loadedTokens}
+      />
       <div className="relative container mx-auto">
         <h1 className="font-monument text-white text-4xl sm:text-6xl text-center px-6">
           {selectedList === CollectionSections.CITIZENS && 'MY CITIZENS'}
