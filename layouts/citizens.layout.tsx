@@ -4,6 +4,7 @@ import { useAppSelector } from "../store/hooks";
 import React from "react";
 import CitizensLoginComponent from "../components/citizens/login/login.component";
 import { BlockchainProvider } from "../contexts/BlockchainContext";
+import LoadingUI from "../ui/citizens/common/loading.ui";
 
 export default function CitizensLayout({
   children, // will be a page or nested layout
@@ -18,9 +19,7 @@ export default function CitizensLayout({
       {/* Loading while waiting for login state */}
       {
         isConnected === null ?
-          <div className="flex justify-center items-center h-screen">
-            <h1 className="text-white text-2xl">Loading Citizens Portal...</h1>
-          </div>
+          <LoadingUI loadingText="Loading Citizens Portal" dataValidate={isConnected}/>
           :
           <>
             <HeaderUI onLogin={() => HandleLogin(undefined, undefined)} onLogout={() => HandleLogout()} />
