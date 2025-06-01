@@ -12,6 +12,7 @@ import SnackbarProvider from "./snackbar/snackbar.provider";
 import MintUI from "./common/mint.ui";
 import { MINTING_UI_DATA } from "../../constants/mint.constant";
 import { ModelExtension } from "../../enums/export.enum";
+import LoadingUI from "./common/loading.ui";
 
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
@@ -191,9 +192,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 				}
 				{
 					!isReady &&
-					<div className="fixed inset-0 w-full h-dvh flex justify-center items-center bg-gradient-to-b from-[#151515] to-[#0C0C0C]">
-						<h1 className="text-white text-2xl">Loading Environment...</h1>
-					</div>
+					<LoadingUI loadingText="Loading Environment" dataValidate={null}/>
 				}
 			</div>
 		</SnackbarProvider>
