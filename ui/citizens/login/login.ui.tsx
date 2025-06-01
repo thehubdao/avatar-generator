@@ -61,7 +61,8 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 					</div>
 				</div>
 				{/* FRESH DROPS */}
-				<div className="xl:pt-12 px-6">
+				{ false && // Temporarily disabled
+					<div className="xl:pt-12 px-6">
 					{/* TABLE */}
 					<div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
 						{/* TABLE TITLE */}
@@ -69,7 +70,8 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 						{/* NEWS LIST */}
 						<FreshDropsUI setSelectedCampaign={(blockChain, campaign) => handleLogin(blockChain, campaign)} />
 					</div>
-				</div>
+					</div>
+				}
 				{/* COMMUNITY CONTENT */}
 				<div>
 					<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-12 pt-20 leading-none">COMMUNITY CONTENT</h2>
