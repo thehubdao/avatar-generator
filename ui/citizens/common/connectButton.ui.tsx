@@ -20,10 +20,13 @@ export default function ConnectButton({ onLogin, onLogout }: ConnectButtonProps)
   const blockchainType = useAppSelector(state => state.citizensAuth.blockchainType);
   const xpData = useAppSelector(state => state.citizensAuth.xpData);
   const followUserData = useAppSelector(state => state.citizensAuth.followUserData);
-
+  
   const address = useAppSelector(state => state.citizensAuth.address);
   const walletName = useAppSelector(state => state.citizensAuth.walletName);
   const profileImage = useAppSelector(state => state.citizensAuth.profileImage);
+  
+  const isEditMode = useAppSelector(state => state.citizensMetadata.editMode);
+  const isMintingMode = useAppSelector(state => state.citizensMetadata.mintingMode);
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
@@ -63,7 +66,7 @@ export default function ConnectButton({ onLogin, onLogout }: ConnectButtonProps)
             </div>
           </button>
           {isOpen && (
-            <div className="absolute top-full xl:right-0 w-[320px] sm:w-[376px] mt-3">
+            <div className={`absolute top-full ${isEditMode || isMintingMode ? 'right-0':''} xl:right-0 w-[320px] sm:w-[376px] mt-3`}>
               <div className="grid grid-cols-[112px_1fr] sm:grid-cols-[144px_1fr] bg-white rounded-[20px] overflow-hidden">
                 <div className="relative h-full w-28 sm:w-36">
                   {profileImage ? (
@@ -93,7 +96,7 @@ export default function ConnectButton({ onLogin, onLogout }: ConnectButtonProps)
                   </div>}
                 </div>
                 <div className="flex flex-col items-center max-w-[240px] px-5">
-                  <p className="w-full font-light text-center text-2xl pt-4 pb-1 truncate">
+                  <p className="w-full font-light text-center text-lg xl:text-2xl pt-4 pb-1 truncate">
                     {address ? FormatWalletAddress(address, 6) : 'No address'}
                   </p>
                   {blockchainType !== Blockchain.Solana && <div className="w-full flex justify-between">
