@@ -174,6 +174,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 													{}
 												}
 												skinColor={'#FFFFFF'}
+												hideSkinSelector={true}
 												handleSaveCombination={() => handleSaveCombination()}
 												changeView={() => dispatch(setEditMode(false))}
 												onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
