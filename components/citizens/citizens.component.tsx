@@ -83,7 +83,9 @@ export default function CitizensComponent() {
 
       if (featureIndex != baseFeatureIndex) { //Add the base feature to the filtered option list if the current feature is not equal to the base feature
         const baseIndexFeature = categoryFeatureArray.find(val => val.index === parseInt(baseFeatureIndex)); // Get the feature by index from the base features category array
+
         if (!baseIndexFeature) return LogError(Module.Citizens, 'Could not find base feature at index ' + baseFeatureIndex + ' in category ' + category);
+        
         filteredOptionList.push(baseIndexFeature);
       }
 
