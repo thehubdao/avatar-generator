@@ -6,6 +6,7 @@ export interface AuthState {
   connected: boolean | null;
   address: string | null;
   walletName: string | null;
+  isHolder: boolean | null;
   profileImage?: string | null;
   blockchainType: Blockchain | null;
   xpData: UserXPData | null;
@@ -16,6 +17,7 @@ const initialState: AuthState = {
   connected: null,
   address: null,
   walletName: null,
+  isHolder: null,
   profileImage: undefined,  // Optional, can be set later
   blockchainType: null,
   xpData: null,
@@ -47,8 +49,11 @@ export const citizensAuthSlice = createSlice({
     setBlockChainType: (state, action: PayloadAction<string>) => {
       state.address = action.payload;
     },
+    setIsHolder: (state, action: PayloadAction<boolean | null>) => {
+      state.isHolder = action.payload;
+    },
   }
 })
 
-export const { connect, disconnect, setAddress } = citizensAuthSlice.actions
+export const { connect, disconnect, setAddress, setIsHolder } = citizensAuthSlice.actions
 export default citizensAuthSlice.reducer

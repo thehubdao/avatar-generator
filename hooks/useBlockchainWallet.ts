@@ -12,7 +12,7 @@ import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
 import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination } from '../enums/citizens/common.enum';
-import { connect, disconnect } from '../store/citizensAuthSlice';
+import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
@@ -124,14 +124,15 @@ export function useBlockchainWallet() {
   async function getSolanaMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
     const mintingSupply = await GetCollectionSupply();
     const mintingPrice = await GetMintingPrice(walletAddress);
-    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined }
+    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined, isHolder: undefined }
 
     if (mintingSupply.success) {
       mintingData.mintSupply = mintingSupply.value;
     } else void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
 
     if (mintingPrice.success) {
-      mintingData.mintPrice = mintingPrice.value;
+      mintingData.mintPrice = mintingPrice.value.price;
+      mintingData.isHolder = mintingPrice.value.isHolder;
     } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
 
     if (!mintingSupply.success && !mintingPrice.success) {
@@ -230,6 +231,7 @@ export function useBlockchainWallet() {
             if (mintingData.success) {
               dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
               dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+              dispatch(setIsHolder(mintingData.value.isHolder ?? null));
             }
 
             dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
