@@ -10,6 +10,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { setMintingMode } from "../../../store/citizensMetadataSlice";
 import PlusSVG from "./SVG/plusSVG.ui";
 import { useMediaQuery } from "usehooks-ts";
+import Counter from "./counter.ui";
 
 interface MintUIProps {
   imgUrl?: string;
@@ -37,6 +38,8 @@ export default function MintUI({
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false);
   const [isMintOpen, setIsMintOpen] = useState<boolean>(false);
 
+  const [isMintingAllowed, setIsMintingAllowed] = useState<boolean>(false);
+
   const dispatch = useAppDispatch();
 
   const mintingSupply = useAppSelector((state) => state.citizensMetadata.mintSupply);
@@ -60,6 +63,10 @@ export default function MintUI({
       setIsMintOpen(!isMintOpen);
       setIsInfoOpen(false);
     }
+  }
+
+  function handleTimeReachedZero() {
+    setIsMintingAllowed(true);
   }
 
   return (
@@ -108,12 +115,17 @@ export default function MintUI({
                 <p><span className="font-light text-sm">{isHolder ? 'Platform fee: ' : ''}</span>{price || mintingPrice} SOL</p>
               </div>
               <div className="xl:hidden w-full flex flex-col items-center" >
-                <Button label="Mint" withIcon light handleClick={() => { setIsModalOpen(true) }} textStyles="text-start text-xl px-8">
-                  <div className="pr-8">
-                    <ArrowMintSVG />
-                  </div>
-                </Button>
-                <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
+                {isMintingAllowed ?
+                  <>
+                    <Button label="Mint" withIcon light handleClick={() => { setIsModalOpen(true) }} textStyles="text-start text-xl px-8">
+                      <div className="pr-8">
+                        <ArrowMintSVG />
+                      </div>
+                    </Button>
+                    <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
+                  </>
+                  :
+                  <Counter onReachZero={() => handleTimeReachedZero()}/>}
               </div >
             </div>
           </div >
@@ -144,12 +156,18 @@ export default function MintUI({
           </div >
           {/* MINT BUTTON */}
           < div className="hidden xl:block fixed bottom-6 left-1/2 -translate-x-1/2"  >
-            <Button label="Mint" withIcon light handleClick={() => { setIsModalOpen(true) }} textStyles="text-start text-xl px-8">
-              <div className="pr-8">
-                <ArrowMintSVG />
-              </div>
-            </Button>
-            <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
+            {isMintingAllowed ?
+              <>
+                <Button label="Mint" withIcon light handleClick={() => { setIsModalOpen(true) }} textStyles="text-start text-xl px-8">
+                  <div className="pr-8">
+                    <ArrowMintSVG />
+                  </div>
+                </Button>
+                <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
+              </>
+              :
+              <Counter onReachZero={() => handleTimeReachedZero()}/>
+            }
           </div >
         </>
       }
