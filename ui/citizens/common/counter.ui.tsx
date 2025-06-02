@@ -6,7 +6,7 @@ interface CounterProps {
   onReachZero: () => void;
 }
 
-export default function Counter({ targetDate = new Date('2025-06-03T16:00:00'), onReachZero }: CounterProps) {
+export default function Counter({ targetDate = new Date('2025-06-02T23:30:00.000Z'), onReachZero }: CounterProps) {
   const container = useRef<HTMLDivElement>(null);
 
   const [isTimeCalculated, setIsTimeCalculated] = useState<boolean>(false);
