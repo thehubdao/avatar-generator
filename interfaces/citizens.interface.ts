@@ -162,3 +162,10 @@ export interface MintingData {
   mintPrice?: number;
   isHolder?: boolean;
 }
+
+export interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
