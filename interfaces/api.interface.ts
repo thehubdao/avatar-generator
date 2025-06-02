@@ -19,6 +19,7 @@ export interface AssetInterface {
 export interface FeatureInterface extends AssetInterface {
   id: string;
   tier: RandomTier;
+  isBase: boolean;
 }
 
 export interface AccessoryInterface extends AssetInterface {

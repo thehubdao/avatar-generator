@@ -72,23 +72,23 @@ export default function CitizensComponent() {
     const baseCombinationIndexes = selectedCitizen.baseCombination.split('-');
     let filteredOptionList: FeatureInterface[] = [];
 
-    combinationIndexes.forEach((featureIndex: string, bodyPartIndex: number) => {
+    baseCombinationIndexes.forEach((featureIndex: string, bodyPartIndex: number) => {
       const category = campaignParams?.features?.[bodyPartIndex].displayName; // Get the category name from the body parts data array
       const categoryFeatureArray = featureList.current.filter(val => val.type === category); // Get all features of the category
 
       if (!category) return LogError(Module.Citizens, 'Category not found at index ' + bodyPartIndex);
 
       const currentIndexFeature = categoryFeatureArray.find(val => val.index == parseInt(featureIndex)); // Get the feature by index from the features category array
-      const baseFeatureIndex = baseCombinationIndexes[bodyPartIndex]; // Get the base feature index from the base combination
+      const combinationFeatureIndex = combinationIndexes[bodyPartIndex]; // Get the base feature index from the base combination
 
-      if (featureIndex != baseFeatureIndex) { //Add the base feature to the filtered option list if the current feature is not equal to the base feature
-        const baseIndexFeature = categoryFeatureArray.find(val => val.index === parseInt(baseFeatureIndex)); // Get the feature by index from the base features category array
-        if (!baseIndexFeature) return LogError(Module.Citizens, 'Could not find base feature at index ' + baseFeatureIndex + ' in category ' + category);
-        filteredOptionList.push(baseIndexFeature);
+      if (featureIndex != combinationFeatureIndex) { //Add the base feature to the filtered option list if the current feature is not equal to the base feature
+        const combinationIndexFeature = categoryFeatureArray.find(val => val.index === parseInt(combinationFeatureIndex)); // Get the feature by index from the base features category array
+        if (!combinationIndexFeature) return LogError(Module.Citizens, 'Could not find feature at index ' + combinationFeatureIndex + ' in category ' + category);
+        filteredOptionList.push(combinationIndexFeature);
       }
 
       if (!currentIndexFeature) return LogError(Module.Citizens, 'Could not find feature at index ' + featureIndex + ' in category ' + category);
-
+      currentIndexFeature.isBase = true;
       filteredOptionList.push(currentIndexFeature);
     })
 
