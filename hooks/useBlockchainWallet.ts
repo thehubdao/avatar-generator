@@ -23,7 +23,6 @@ import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetRootAssetsMetadata } from '../utils/web3/root/contract.util';
-import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -397,6 +396,8 @@ export function useBlockchainWallet() {
 
           } else if (chainType === Blockchain.Solana && isSolanaReady) {
             const solanaWallet = solanaWallets[0];
+
+            console.log("solanaWallet", solanaWallets);
 
             await InitializeUmi(solanaWallet);
 
