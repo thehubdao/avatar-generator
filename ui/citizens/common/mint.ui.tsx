@@ -74,7 +74,7 @@ export default function MintUI({
       {!isModalOpen &&
         <>
           {/* AVATAR DESCRIPTION */}
-          <div className={`${isMatchMobile ? (isInfoOpen ? 'block' : 'hidden') : ''} fixed bottom-20 lg:bottom-6 xl:bottom-auto top-auto xl:top-24 left-6 w-[326px] sm:w-[462px] h-fit xl:h-[75vh] 2xl:h-[85vh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto`}>
+          <div className={`${isMatchMobile ? (isInfoOpen ? 'block' : 'hidden') : ''} fixed bottom-20 lg:bottom-6 xl:bottom-auto top-auto xl:top-24 left-6 w-[326px] sm:w-[462px] h-fit min-h-[50dvh] xl:h-[75dvh] 2xl:h-[85dvh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto`}>
             <div className="w-full pb-8">
               <div className="relative w-full h-[30vh] lg:h-[250px] 2xl:h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
                 <Image
@@ -101,7 +101,7 @@ export default function MintUI({
             </div>
           </div >
           {/* CAMPAIGN DESCRIPTION */}
-          <div className={`${isMatchMobile ? (isMintOpen ? 'block' : 'hidden') : ''} fixed bottom-20 lg:bottom-6 xl:bottom-auto top-auto xl:top-24 right-6 w-[326px] sm:w-[462px] h-fit xl:h-[75vh] 2xl:h-[85vh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto`} >
+          <div className={`${isMatchMobile ? (isMintOpen ? 'block' : 'hidden') : ''} fixed bottom-20 lg:bottom-6 xl:bottom-auto top-auto xl:top-24 right-6 w-[326px] sm:w-[462px] h-fit min-h-[50dvh] xl:h-[75dvh] 2xl:h-[85dvh] bg-citizens-dark shadow-citizens-btn rounded-[20px] p-8 2xl:p-12 text-white overflow-auto`} >
             <div className="relative h-full flex flex-col justify-between gap-4 xl:gap-0 2xl:py-16">
               <h1 className="text-center text-2xl font-semibold">
                 {campaignName}
