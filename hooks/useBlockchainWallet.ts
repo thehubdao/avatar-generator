@@ -132,6 +132,7 @@ export function useBlockchainWallet() {
 
     if (mintingPrice.success) {
       mintingData.mintPrice = mintingPrice.value.price;
+      console.log(mintingPrice.value)
       mintingData.isHolder = mintingPrice.value.isHolder;
     } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
 
@@ -426,6 +427,7 @@ export function useBlockchainWallet() {
       dispatch(disconnect());
 
   }, [loginLibraryFlags])
+
 
   return {
     HandleLogin,
