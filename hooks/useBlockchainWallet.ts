@@ -249,6 +249,7 @@ export function useBlockchainWallet() {
           if (mintingData.success) {
             dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
             dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+            dispatch(setIsHolder(mintingData.value.isHolder ?? null));
           }
 
           dispatch(setSelectedCitizen({
