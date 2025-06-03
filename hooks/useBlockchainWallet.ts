@@ -339,7 +339,11 @@ export function useBlockchainWallet() {
               const hasPhantom = spans.some(span => span.textContent?.trim() === 'Phantom');
               const hasSolana = spans.some(span => span.textContent?.trim() === 'Solana');
               if (hasPhantom && !hasSolana) {
-                button.remove();
+                try { 
+                  button.remove(); 
+                } catch (error) {
+                  LogError(Module.Citizens, "Error removing phantom button", error);
+                }
               }
             });
             clearInterval(interval); 
