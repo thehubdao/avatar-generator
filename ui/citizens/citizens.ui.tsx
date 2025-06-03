@@ -36,7 +36,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 
 	// Local State
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
-	const [selectedCategory, setSelectedCategory] = useState<string>('head');
+	const [selectedCategory, setSelectedCategory] = useState<string>('');
 	const [selectedOption, setSelectedOption] = useState<BasicData>();
 
 	function updateFeatureCamPosition(
@@ -54,7 +54,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 		if (opt) {
 			setSelectedOption(opt);
 		} else {
-			const option = exportData?.attributes.find(
+			const option = exportData.attributes.find(
 				(e) => e.id === selectedCategory
 			)
 			setSelectedOption(option);
@@ -85,7 +85,13 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 	}, [featureList])
 
 	useEffect(() => {
-		onSelectedOptionChange();
+		if (isReady) {
+			if (selectedCategory === '') {
+				setSelectedCategory(exportData.attributes[0].id);
+			} else {
+				onSelectedOptionChange();
+			}
+		}
 	}, [isReady, selectedCategory])
 
 	useEffect(() => {
@@ -193,7 +199,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 				}
 				{
 					!isReady &&
-					<LoadingUI loadingText="Loading Environment" dataValidate={null}/>
+					<LoadingUI loadingText="Loading Environment" dataValidate={null} />
 				}
 			</div>
 		</SnackbarProvider>
