@@ -67,7 +67,7 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     active: true
   },
   {
-    name: 'Based Citizens',
+    name: 'Root Citizens',
     image: '/resources/images/campaings/based_collection.jpg',
     campaign: Campaign.Based,
     blockChain: Blockchain.Root,
