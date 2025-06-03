@@ -36,7 +36,7 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 						{/* TITLE */}
 						<h1 className="font-monument text-[53px] md:text-[120px] 2xl:text-[170px] text-white text-center leading-[0.8]"><span className="text-[46px] md:text-[104px] 2xl:text-[150px]">CITIZENS</span><br /> PORTAL</h1>
 						{/* TEXT */}
-						<p className="text-[15px] lg:text-[34px] 2xl:text-[48px] text-white text-center leading-none">The home of creators in the 3D Web</p>
+						<p className="text-[15px] lg:text-[34px] 2xl:text-[48px] text-white text-center leading-none">Fully on-chain avatar platform</p>
 						{/* BUTTON */}
 						<div className="w-full flex justify-center pt-6">
 							<button type="button" className="w-fit h-16 bg-white rounded-[28px] px-10 md:px-24 font-light text-2xl" onClick={() => handleLogin(undefined, undefined)}>
@@ -51,15 +51,16 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 					<CampaignList collections={LOGIN_COLLECTIONS} handleClick={handleLogin} />
 				</div>
 				{/* WHATS NEW */}
-				<div className="xl:pt-12 px-6">
-					{/* TABLE */}
-					<div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
-						{/* TABLE TITLE */}
+				{false && // Temporarily disabled
+					<div className="xl:pt-12 px-6">
+						{/* TABLE */}
+						<div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
+							{/* TABLE TITLE */}
 						<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-8 pt-10 border-b-[1px] border-white/10">WHATS NEW?</h2>
 						{/* NEWS LIST */}
 						<NewsUI />
 					</div>
-				</div>
+				</div>}
 				{/* FRESH DROPS */}
 				{ false && // Temporarily disabled
 					<div className="xl:pt-12 px-6">
