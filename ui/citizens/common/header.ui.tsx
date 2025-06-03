@@ -5,7 +5,7 @@ import LogoTheHub from "./SVG/logoTheHubSVG.ui";
 import Image from "next/image";
 import Button from "./button.ui";
 import SocialButtons from "./socialButtons.ui";
-import { CitizensPageLocation } from "../../../enums/citizens/common.enum";
+import { Campaign, CitizensPageLocation } from "../../../enums/citizens/common.enum";
 import { GoToPage } from "../../../utils/router.util";
 import { setEditMode } from "../../../store/citizensMetadataSlice";
 
@@ -20,6 +20,7 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
   const didMintingMode = useAppSelector(state => state.citizensMetadata.mintingMode);
   const didSavingMode = useAppSelector(state => state.citizensMetadata.savingMode);
   const didEditMode = useAppSelector(state => state.citizensMetadata.editMode);
+  const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
 
   const [isBurguerOpen, setIsBurguerOpen] = useState(false);
 
@@ -71,9 +72,9 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
               <Button label="Backpack" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                 handleNavbarClick(CitizensPageLocation.BACKPACK);
               }} />
-              <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+              {selectedCampaign !== Campaign.Kumi && <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                 handleNavbarClick(CitizensPageLocation.LEADERBOARD);
-              }} />
+              }} />}
               <Button label="play" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                 handleNavbarClick(CitizensPageLocation.PLAY);
               }} />
