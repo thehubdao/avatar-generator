@@ -41,7 +41,7 @@ export function useBlockchainWallet() {
   });
 
   /* Fetching relatedhooks */
-  const { ready, user, authenticated } = usePrivy(); //Privy Auth
+  const { ready, user, authenticated, isModalOpen } = usePrivy(); //Privy Auth
   const { userSession, isFetchingSession, signOutPass } = useAuth(); //Pass Auth
 
   /* Login and Logout related hooks */
@@ -132,7 +132,6 @@ export function useBlockchainWallet() {
 
     if (mintingPrice.success) {
       mintingData.mintPrice = mintingPrice.value.price;
-      console.log(mintingPrice.value)
       mintingData.isHolder = mintingPrice.value.isHolder;
     } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
 
@@ -325,6 +324,34 @@ export function useBlockchainWallet() {
       logout();
     }
   }
+
+//Remove Phantom from ethereum login methods
+  useEffect(() => {
+    if (isModalOpen) {
+      let tries = 0;
+      const maxTries = 20;
+      const interval = setInterval(() => {
+        const loginMethodsContainer = document.getElementsByClassName('LoginMethodContainer-sc-ddbf22b4-2 kyjaKo');
+        if (loginMethodsContainer[0]) {
+          const buttons = loginMethodsContainer[0].querySelectorAll('button.LoginMethodButton-sc-ddbf22b4-5.ConnectWalletButton-sc-d36fbdf7-0.jnyHUx.eva-DEt.login-method-button');
+          if (buttons.length > 0) {
+            buttons.forEach(button => {
+              const spans = Array.from(button.querySelectorAll('span')) as HTMLSpanElement[];
+              const hasPhantom = spans.some(span => span.textContent?.trim() === 'Phantom');
+              const hasSolana = spans.some(span => span.textContent?.trim() === 'Solana');
+              if (hasPhantom && !hasSolana) {
+                button.remove();
+              }
+            });
+            clearInterval(interval); 
+          }
+        }
+        tries++;
+        if (tries > maxTries) clearInterval(interval); 
+      }, 1);
+      return () => clearInterval(interval); 
+    }
+  }, [isModalOpen]);
 
   //Privy Logic
   useEffect(() => {
