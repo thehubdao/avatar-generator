@@ -37,7 +37,6 @@ export function useBlockchainWallet() {
   const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
   const [loginLibraryFlags, setLoginLibraryFlags] = useState<{ [key in LoginLibrary]: boolean | null }>({
     [LoginLibrary.Privy]: null,
-    [LoginLibrary.Pass]: null
   });
 
   /* Fetching relatedhooks */
@@ -406,7 +405,7 @@ export function useBlockchainWallet() {
     }
   }, [ready, authenticated, isEthereumReady, isSolanaReady]);
 
-  // Root Logic
+/*   // Root Logic
   useEffect(() => {
     const connectPromise = async () => {
       if (!isFetchingSession && userSession && signer) {
@@ -420,11 +419,11 @@ export function useBlockchainWallet() {
       if (!isFetchingSession && !userSession) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
         if (blockchainType === Blockchain.Root) dispatch(disconnect());
         else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: false }));
-
+        console.log(new Date().toISOString(), "disconnecting", blockchainType)
       }
     }
     connectPromise();
-  }, [isFetchingSession, userSession]);
+  }, [isFetchingSession, userSession]); */
 
   useEffect(() => {
     if (isConnected === true) {
