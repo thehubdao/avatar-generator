@@ -84,7 +84,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
             </ul>
             
             <p>
-              Whether you're exploring virtual worlds, expressing your creativity, or building 
+              Whether you&apos;re exploring virtual worlds, expressing your creativity, or building 
               your digital presence, Citizens Portal provides the tools and platform to bring 
               your vision to life.
             </p>
