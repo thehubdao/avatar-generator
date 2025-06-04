@@ -68,7 +68,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
           <div className="space-y-4 text-white/80 font-work font-light text-base leading-relaxed">
             <p>
               Citizens Portal is a fully on-chain avatar platform that empowers users to create, 
-              customize, and own their digital identities in the metaverse.
+              customize, and own their digital identities in the 3d Web.
             </p>
             
             <p>
@@ -78,7 +78,7 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
             <ul className="space-y-2 ml-6 list-disc">
               <li>Create unique, customizable avatars with extensive personalization options</li>
               <li>Mint your avatars as NFTs with full ownership rights</li>
-              <li>Participate in exclusive campaigns and community events</li>
+              <li>Use your avatars on over 200 platforms</li>
               <li>Access your avatar wardrobe and backpack of collected items</li>
               <li>Join a vibrant community of digital creators and collectors</li>
             </ul>

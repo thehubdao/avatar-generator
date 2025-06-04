@@ -54,9 +54,7 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
           
           {/* ABOUT BUTTON - Only show when not logged in, positioned next to logo */}
           {!isLoggedIn && (
-            <div className="hidden md:block">
-              <AboutButton onClick={() => setIsAboutModalOpen(true)} />
-            </div>
+            <AboutButton onClick={() => setIsAboutModalOpen(true)} />
           )}
         </div>
       {/* NAVBAR */}
