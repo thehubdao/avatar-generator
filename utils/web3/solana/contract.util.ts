@@ -18,10 +18,11 @@ import { findAssetSignerPda } from '@metaplex-foundation/mpl-core';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { GetCollectionDocs } from '../../firebase.util';
 
-export async function InitializeUmi(wallet: ConnectedSolanaWallet) {
-    UMI.use(signerIdentity({
-        publicKey: publicKey(wallet.address),
-        signMessage: async (message: Uint8Array) =>
+export async function InitializeUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
+    try {
+        UMI.use(signerIdentity({
+            publicKey: publicKey(wallet.address),
+            signMessage: async (message: Uint8Array) =>
             await wallet.signMessage(message),
         signTransaction: async (transaction) => {
             const web3JsTransaction = toWeb3JsTransaction(transaction);
@@ -35,9 +36,22 @@ export async function InitializeUmi(wallet: ConnectedSolanaWallet) {
             );
             return signedTxs.map(fromWeb3JsTransaction);
         }
-    }));
-    UMI.use(mplCore());
-    UMI.use(mplCandyMachine());
+        }));
+        UMI.use(mplCore());
+        UMI.use(mplCandyMachine());
+        return {
+            success: true,
+            value: true
+        };
+    } catch (e) {
+        const err = e as Error;
+        void LogError(Module.SolanaContractUtil, "Couldn't initialize UMI", err.message);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        };
+    }
 }
 
 export async function GetAssetsByOwner(walletAddress: string): Promise<Result<AssetV1[]>> {
