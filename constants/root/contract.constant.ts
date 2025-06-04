@@ -1,5 +1,4 @@
-import { ApiPromise, Keyring, WsProvider } from '@polkadot/api';
-import { hexToU8a } from '@polkadot/util';
+import { ApiPromise, WsProvider } from '@polkadot/api';
 import { getApiOptions } from '@therootnetwork/api';
 import { LogError } from '../../utils/common.util';
 import { Module } from '../../enums/common.enum';
