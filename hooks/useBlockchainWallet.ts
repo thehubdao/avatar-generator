@@ -399,7 +399,7 @@ export function useBlockchainWallet() {
 
             const result = await InitializeUmi(solanaWallet);
 
-            if (result.success) return dispatch(disconnect());
+            if (!result.success) return dispatch(disconnect());
 
             dispatch(connect({
               address: user?.wallet?.address,
