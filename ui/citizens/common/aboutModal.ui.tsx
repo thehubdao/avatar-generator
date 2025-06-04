@@ -68,31 +68,54 @@ export default function AboutModal({ isOpen, onClose }: AboutModalProps) {
           <div className="space-y-4 text-white/80 font-work font-light text-base leading-relaxed">
             <p>
               Citizens Portal is a fully on-chain avatar platform that empowers users to create, 
-              customize, and own their digital identities across the 3D Web.
+              customize, and own their digital identities in the metaverse.
             </p>
             
             <p>
-              Built with cutting edge avatar technology, the Citizens Portal allows you to:
+              Built on cutting-edge blockchain technology, Citizens Portal allows you to:
             </p>
             
             <ul className="space-y-2 ml-6 list-disc">
               <li>Create unique, customizable avatars with extensive personalization options</li>
               <li>Mint your avatars as NFTs with full ownership rights</li>
-              <li>Play with your Citizen on over 200 platforms</li>
-              <li>Access your avatar backpack to see your collected items</li>
+              <li>Participate in exclusive campaigns and community events</li>
+              <li>Access your avatar wardrobe and backpack of collected items</li>
               <li>Join a vibrant community of digital creators and collectors</li>
             </ul>
             
             <p>
               Whether you're exploring virtual worlds, expressing your creativity, or building 
-              your digital odentity, Citizens Portal provides the tools and platform to bring 
+              your digital presence, Citizens Portal provides the tools and platform to bring 
               your vision to life.
             </p>
             
-            <div className="pt-4 border-t border-white/10">
-              <p className="text-sm text-white/60 text-center">
-                Powered by Creador Labs UG - Building the future of digital identity
-              </p>
+            <div className="pt-4 space-y-4">
+              <div className="text-center">
+                <p className="text-base text-white/90 mb-3">Learn more about THE HUB</p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+                  <a 
+                    href="https://www.thehubdao.xyz/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
+                  >
+                    Visit THE HUB DAO
+                  </a>
+                  <a 
+                    href="https://docs.thehubdao.xyz/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors duration-200 text-sm font-medium"
+                  >
+                    Documentation
+                  </a>
+                </div>
+              </div>
+              <div className="pt-2 border-t border-white/10">
+                <p className="text-sm text-white/60 text-center">
+                  Powered by Creador Labs UG - Building the future of digital identity
+                </p>
+              </div>
             </div>
           </div>
         </div>
