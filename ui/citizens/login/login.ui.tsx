@@ -12,6 +12,7 @@ import BackedBy from "./backedBy.ui";
 import { Blockchain } from "../../../enums/blockchain/common.enum";
 import { Campaign } from "../../../enums/citizens/common.enum";
 
+
 interface CitizensLoginUIProps {
 	handleLogin: (blockChain: Blockchain | undefined, campaign: Campaign | undefined) => void;
 }
@@ -31,6 +32,7 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 					<div className="hidden lg:block absolute bottom-0 right-0 xl:right-6 w-[75vh] xl:w-[80vh] h-[75vh] xl:h-[80vh] overflow-hidden rounded-[58px] xl:z-10">
 						<Image src={'/resources/images/citizens/login/background-citizen.png'} fill alt="" className="object-cover object-[0%_15%]" sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" />
 					</div>
+
 					{/* CONTENT */}
 					<div className="absolute top-1/2 left-1/2 -translate-x-1/2 lg:-translate-x-0 lg:left-20 -translate-y-1/2 px-6">
 						{/* TITLE */}
