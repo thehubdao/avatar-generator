@@ -23,9 +23,9 @@ export async function GetLuksoIPFSData(cid: string): Promise<Result<LuksoMetadat
   }
 }
 
-export async function GetSolanaIPFSData(cid: string): Promise<Result<SolanaMetadata>> {
+export async function GetSolanaIPFSData(url: string): Promise<Result<SolanaMetadata>> {
   try {
-    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
+    const ipfsHTTPUrl = url;
     const ipfsRequest = await fetch(ipfsHTTPUrl);
     const ipfsData = await ipfsRequest.json();
     const ipfsDataResult = ipfsData as SolanaMetadata;

@@ -96,8 +96,8 @@ export async function GetCollectionAssetByOwner(
 
 }
 export async function GetSolanaCitizenMetadata(assetAddress: AssetV1): Promise<Result<CitizenMetadata>> {
-    const cid = assetAddress.uri.split('//')[1];
-    const ipfsDataResult = await GetSolanaIPFSData(cid); // Get the Solana token metadata from IPFS
+    const url = assetAddress.uri;
+    const ipfsDataResult = await GetSolanaIPFSData(url); // Get the Solana token metadata from IPFS
 
     if (!ipfsDataResult.success) return {
         success: false,
