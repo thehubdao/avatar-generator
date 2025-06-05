@@ -43,11 +43,11 @@ export default function App({ Component, pageProps }: AppProps) {
                 }
             `}</style>
             <Provider store={store}>
-                <PrivyAuthProvider>
                     <FutureVerseProvider>
-                        <Component {...pageProps} />
+                        <PrivyAuthProvider>
+                            <Component {...pageProps} />
+                        </PrivyAuthProvider>
                     </FutureVerseProvider>
-                </PrivyAuthProvider>
             </Provider>
         </>
     )

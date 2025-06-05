@@ -15,8 +15,8 @@ export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
           "accentColor": "#A7C080",
           "theme": "#222224",
           "walletList": [
-          "universal_profile", "phantom"
-          ], 
+          "universal_profile", "phantom", "detected_solana_wallets"
+          ],
           walletChainType:'ethereum-and-solana'
         },
         externalWallets: {

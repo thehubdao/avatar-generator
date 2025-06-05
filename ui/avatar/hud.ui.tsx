@@ -45,6 +45,7 @@ interface HudUIProps {
 
   campaignSkinColorConfig: ColorConfig;
   skinColor: string;
+  hideSkinSelector?: boolean;
   onSkinColorChange: (value: string) => void;
 
   editModeSelected: boolean;
@@ -66,6 +67,7 @@ export default function HudUI({
   selectedOption,
   campaignSkinColorConfig,
   skinColor,
+  hideSkinSelector = false,
   onSkinColorChange,
   editModeSelected,
   changeView,
@@ -159,16 +161,18 @@ export default function HudUI({
                   activeOpc={selectedCategory}
                   handleClick={(value: string) => onCategoryTypeChange(value)}
                 />
-                <div className="flex text-gray-normal dark:text-gray-light mx-4 items-center">
+                <div className="flex text-gray-normal dark:text-gray-light mx-4 items-center h-14">
                   <HudFeatureTitleUI selectedFeature={RemovedAcc(selectedCategory)} size="small" />
-                  <AGButton nm fit onClickEvent={() => setShouldShowColorSelectorModal(true)}>
-                    <div className="w-full flex justify-center items-center gap-3 text-xs font-semibold">
-                      <p>SKIN</p>
-                      <div className="shadow-flat-soft dark:shadow-citizens-input h-7 w-7 rounded-sm p-1">
-                        <div className="w-full h-full rounded-sm" style={{ backgroundColor: ('#' + skinColor) }} />
+                  { !hideSkinSelector &&
+                    <AGButton nm fit onClickEvent={() => setShouldShowColorSelectorModal(true)}>
+                      <div className="w-full flex justify-center items-center gap-3 text-xs font-semibold">
+                        <p>SKIN</p>
+                        <div className="shadow-flat-soft dark:shadow-citizens-input h-7 w-7 rounded-sm p-1">
+                          <div className="w-full h-full rounded-sm" style={{ backgroundColor: ('#' + skinColor) }} />
+                        </div>
                       </div>
-                    </div>
-                  </AGButton>
+                    </AGButton>
+                  }
                 </div>
               </div>
             </div>

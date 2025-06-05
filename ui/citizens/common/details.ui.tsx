@@ -72,7 +72,7 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
             {
               data.map((item, index) => (
                 <div key={index} className="grid justify-items-center text-sm">
-                  <h3 className="uppercase">{item.val.type}</h3>
+                  <h3 className="font-bold uppercase w-full truncate text-center text-citizens-blue">{item.val.type}</h3>
                   <p className="capitalize">{item.val.name}</p>
                 </div>
               ))

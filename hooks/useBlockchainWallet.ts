@@ -12,7 +12,7 @@ import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
 import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination, RootCampaign } from '../enums/citizens/common.enum';
-import { connect, disconnect } from '../store/citizensAuthSlice';
+import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
@@ -23,7 +23,6 @@ import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetRootAssetsMetadata, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
-import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -37,11 +36,10 @@ export function useBlockchainWallet() {
   const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
   const [loginLibraryFlags, setLoginLibraryFlags] = useState<{ [key in LoginLibrary]: boolean | null }>({
     [LoginLibrary.Privy]: null,
-    [LoginLibrary.Pass]: null
   });
 
   /* Fetching relatedhooks */
-  const { ready, user, authenticated } = usePrivy(); //Privy Auth
+  const { ready, user, authenticated, isModalOpen } = usePrivy(); //Privy Auth
   const { userSession, isFetchingSession, signOutPass } = useAuth(); //Pass Auth
 
   /* Login and Logout related hooks */
@@ -132,14 +130,15 @@ export function useBlockchainWallet() {
   async function getSolanaMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
     const mintingSupply = await GetCollectionSupply();
     const mintingPrice = await GetMintingPrice(walletAddress);
-    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined }
+    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined, isHolder: undefined }
 
     if (mintingSupply.success) {
       mintingData.mintSupply = mintingSupply.value;
     } else void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
 
     if (mintingPrice.success) {
-      mintingData.mintPrice = mintingPrice.value;
+      mintingData.mintPrice = mintingPrice.value.price;
+      mintingData.isHolder = mintingPrice.value.isHolder;
     } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
 
     if (!mintingSupply.success && !mintingPrice.success) {
@@ -238,6 +237,7 @@ export function useBlockchainWallet() {
             if (mintingData.success) {
               dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
               dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+              dispatch(setIsHolder(mintingData.value.isHolder ?? null));
             }
 
             dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
@@ -254,6 +254,7 @@ export function useBlockchainWallet() {
           if (mintingData.success) {
             dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
             dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+            dispatch(setIsHolder(mintingData.value.isHolder ?? null));
           }
 
           dispatch(setSelectedCitizen({
@@ -337,6 +338,48 @@ export function useBlockchainWallet() {
     }
   }
 
+//Remove Phantom from ethereum login methods
+  useEffect(() => {
+    if (isModalOpen) {
+      let tries = 0;
+      const maxTries = 200; // Más intentos para cubrir más tiempo
+      const interval = setInterval(() => {
+        try {
+          const containers = document.querySelectorAll('[class*="LoginMethodContainer"], [class*="WalletListContainer"]');
+          containers.forEach(container => {
+            const buttons = container.querySelectorAll('button');
+            buttons.forEach(button => {
+              if (button instanceof HTMLButtonElement) {
+                const spans = Array.from(button.querySelectorAll('span')) as HTMLSpanElement[];
+                const text = spans.map(span => span.textContent?.trim()).join(' ');
+                const isPhantom = text.includes('Phantom');
+                const isBackpack = text.includes('Backpack');
+                const isUniversal = text.includes('universal_profile');
+                const isSolana = text.includes('Solana');
+                if ((isPhantom || isBackpack) && !isSolana) {
+                  button.style.display = 'none';
+                  button.setAttribute('disabled', 'true');
+                  button.style.pointerEvents = 'none';
+                }
+                if (isUniversal && isSolana) {
+                  button.style.display = 'none';
+                  button.setAttribute('disabled', 'true');
+                  button.style.pointerEvents = 'none';
+                }
+              }
+            });
+          });
+        } catch (error) {
+          LogError(Module.Citizens, "Error in wallet button filtering", error);
+          clearInterval(interval);
+        }
+        tries++;
+        if (tries > maxTries) clearInterval(interval);
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, [isModalOpen]);
+
   //Privy Logic
   useEffect(() => {
     if (ready && authenticated) {
@@ -369,6 +412,8 @@ export function useBlockchainWallet() {
           } else if (chainType === Blockchain.Solana && isSolanaReady) {
             const solanaWallet = solanaWallets[0];
 
+            console.log("solanaWallet", solanaWallets);
+
             await InitializeUmi(solanaWallet);
 
             dispatch(connect({
@@ -390,7 +435,7 @@ export function useBlockchainWallet() {
     }
   }, [ready, authenticated, isEthereumReady, isSolanaReady]);
 
-  // Root Logic
+/*   // Root Logic
   useEffect(() => {
     const connectPromise = async () => {
       if (!isFetchingSession && userSession && signer) {
@@ -404,11 +449,11 @@ export function useBlockchainWallet() {
       if (!isFetchingSession && !userSession) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
         if (blockchainType === Blockchain.Root) dispatch(disconnect());
         else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: false }));
-
+        console.log(new Date().toISOString(), "disconnecting", blockchainType)
       }
     }
     connectPromise();
-  }, [isFetchingSession, userSession]);
+  }, [isFetchingSession, userSession]); */
 
   useEffect(() => {
     if (isConnected === true) {
@@ -439,6 +484,7 @@ export function useBlockchainWallet() {
       dispatch(disconnect());
 
   }, [loginLibraryFlags])
+
 
   return {
     HandleLogin,

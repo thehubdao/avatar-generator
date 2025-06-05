@@ -4,26 +4,25 @@ TODO:
     ✔ Add selected campaign + combination to app state @done(25-03-31 14:08)
     ✔ Add error handling to GetEthereumTokenMetadata and GetTokensMetadata at lukso/contract.util.ts @done(25-04-01 13:40)
     ✔ Back camera to initial position when edit mode is closed @done(25-04-22 11:45)
+    ✔ (vrm_male) Check bad skin color asignation in head @done(25-05-13 18:37)
+    ✔ Review and adjust z-index layout in whole citizens @done(25-06-01 15:29)
+    ✔ Make loading UI with message prop @done(25-06-01 15:30)
+    ✔ Put address/name for logged in user in respective place @done(25-06-01 15:30)
     ☐ Check double setCampaignParameters in useBlockchainWallet hook when change pages or change selectedCampaign
     ☐ Add ImageUrl and tokenId to Kumi minting metadata
-    ✔ (vrm_male) Check bad skin color asignation in head @done(25-05-13 18:37)
-    ☐ Review and adjust z-index layout in whole citizens
-    ☐ Review exportModel function in citizens UI
-    ☐ Make loading UI with message prop
     ☐ Make Save Combination Button be more visible on some screen sizes
     ☐ Implement getSolanaUserFeaturesPromise function when solana campaign is fully ready in useBlockchainWallet hook
     ☐ Check minting process when in a subroute of citizens, citizens/backpack for example(Minting process is not working in this case)
     ☐ Make .env cleanup
-    ☐ Use the old loading UI for the whole app
     ☐ Change free minting text at kumi description
     ☐ At holder minting price, put free minting + 0.0042 platform fee
     ☐ Adjust minting at phone screen sizes
-    ☐ Put address/name for logged in user in respective place
     ☐ Review ID error when create more than 2 snackbars
     ☐ Change save combination popup text about burnt wearables 
     ☐ Remove skin colour in mobile
     ☐ Change default edit mode body part
     ☐ Fix details page labels for large type names
+    ☐ Check undefined value when error in backpack data for loading behavior
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component

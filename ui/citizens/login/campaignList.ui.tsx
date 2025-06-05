@@ -31,10 +31,10 @@ export default function CampaignList({ collections, handleClick }: CampaignListP
                 imgSrc={el.image}
                 imgAlt={el.name}
                 overlayText={
-                  "LOG IN"
+                  el.active ? "LOG IN":"COMING SOON"
                 }
                 size={CardSize.Big}
-                handleClick={() => handleClick(el.blockChain, el.campaign)}
+                handleClick={() =>{ if(el.active) handleClick(el.blockChain, el.campaign)}}
               />
             </SwiperSlide>
           ))

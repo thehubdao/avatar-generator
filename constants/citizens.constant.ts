@@ -49,25 +49,29 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     name: 'Lukso Citizens',
     image: '/resources/images/campaings/citizens_collection.jpg',
     campaign: Campaign.Citizens,
-    blockChain: Blockchain.Ethereum
+    blockChain: Blockchain.Ethereum,
+    active: true
   },
   {
     name: 'Lukso Creators',
     image: '/resources/images/campaings/creators_collection.jpg',
     campaign: Campaign.Creators,
-    blockChain: Blockchain.Ethereum
+    blockChain: Blockchain.Ethereum,
+    active: true
   },
   {
     name: 'Kumi',
     image: '/resources/images/campaings/kumi_collection.jpg',
     campaign: Campaign.Kumi,
-    blockChain: Blockchain.Solana
+    blockChain: Blockchain.Solana,
+    active: true
   },
   {
-    name: 'Based Citizens',
+    name: 'Root Citizens',
     image: '/resources/images/campaings/based_collection.jpg',
     campaign: Campaign.Based,
-    blockChain: Blockchain.Root
+    blockChain: Blockchain.Root,
+    active: false
   }
 ];
 

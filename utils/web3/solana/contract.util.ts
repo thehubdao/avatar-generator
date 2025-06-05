@@ -173,7 +173,7 @@ export async function GetKumiCandyMachineGuardGroup(walletAddress: string, colle
     };
 }
 
-export async function GetMintingPrice(walletAddress: string): Promise<Result<number>> {
+export async function GetMintingPrice(walletAddress: string): Promise<Result<{ price: number, isHolder?: boolean }>> {
     const mintingPrice = await GetKumiCandyMachineGuardGroup(walletAddress, COLLECTION_GUARD_ID);
     if (!mintingPrice.success) return {
         success: false,
@@ -183,11 +183,17 @@ export async function GetMintingPrice(walletAddress: string): Promise<Result<num
 
     if (mintingPrice.value.group === CandyMachineGroup.Holder) return {
         success: true,
-        value: 0.0042
+        value: {
+            price: 0.0042, // This is the price for holders
+            isHolder: true
+        }
     };
     if (mintingPrice.value.group === CandyMachineGroup.Public) return {
         success: true,
-        value: 0.2
+        value: {
+            price: 0.2, // This is the price for public
+            isHolder: false
+        }
     };
 
     return {

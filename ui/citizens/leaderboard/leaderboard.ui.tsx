@@ -2,6 +2,7 @@ import Image from "next/image";
 import { useAppSelector } from "../../../store/hooks";
 import FollowButton from "../common/followButton.ui";
 import SnackbarProvider from "../snackbar/snackbar.provider";
+import LoadingUI from "../common/loading.ui";
 
 interface CitizenLeaderBoardUIProps {
   onFollowUser: (address: string) => Promise<boolean>;
@@ -13,19 +14,12 @@ export default function CitizenLeaderBoardUI({ onFollowUser, onUnfollowUser }: C
   return (
     <SnackbarProvider>
       <div className="relative w-full min-h-screen py-32 px-6 2xl:px-0">
-        {/* NO DATA */}
-        {leaderboardData === undefined &&
-          <div className={`fixed inset-0 w-full h-screen flex flex-col justify-center items-center gap-4`}>
-            <p className=" text-white text-xl font-light">Sorry, data is not loaded, try again later.</p>
-          </div>
-        }
         {/* LOADER */}
-        {leaderboardData === null &&
-          <div className={`fixed inset-0 w-full h-screen flex flex-col justify-center items-center gap-4`}>
-            <p className=" text-white text-xl font-light">Loading leaderboard data</p>
-            <div className="w-4 h-4 border-t rounded-full animate-spin"></div>
-          </div>
-        }
+        <LoadingUI
+          loadingText='Loading leaderboard data'
+          errorText='Sorry, data is not loaded, try again later.'
+          dataValidate={leaderboardData}
+        />
         {/* DATA TABLE */}
         {
           leaderboardData && leaderboardData.length > 0 &&
