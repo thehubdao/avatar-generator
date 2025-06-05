@@ -401,7 +401,6 @@ export function useBlockchainWallet() {
 
             if (!result.success) {
               logout();
-              dispatch(disconnect());
               return;
             }
 
