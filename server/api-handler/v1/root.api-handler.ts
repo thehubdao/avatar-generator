@@ -5,7 +5,7 @@ import { RequestResponse } from "../request.api-handler";
 
 
 export async function  PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<string[]>>) {
-    const data = req.query;
+    const data = req.body;
   
     if (!data)
       return RequestResponse(res, "BadRequest", false,  DefaultApiResponse.MissingInfo);
