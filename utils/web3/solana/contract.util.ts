@@ -198,14 +198,14 @@ export async function GetMintingPrice(walletAddress: string): Promise<Result<{ p
     if (mintingPrice.value.group === CandyMachineGroup.Holder) return {
         success: true,
         value: {
-            price: 0.0042, // This is the price for holders
+            price: 0.008, // This is the price for holders
             isHolder: true
         }
     };
     if (mintingPrice.value.group === CandyMachineGroup.Public) return {
         success: true,
         value: {
-            price: 0.2, // This is the price for public
+            price: 0.204, // This is the price for public
             isHolder: false
         }
     };
