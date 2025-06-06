@@ -23,6 +23,7 @@ import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetRootAssetsMetadata, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
+import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -36,6 +37,7 @@ export function useBlockchainWallet() {
   const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
   const [loginLibraryFlags, setLoginLibraryFlags] = useState<{ [key in LoginLibrary]: boolean | null }>({
     [LoginLibrary.Privy]: null,
+    [LoginLibrary.Pass]: null
   });
 
   /* Fetching relatedhooks */
@@ -435,7 +437,7 @@ export function useBlockchainWallet() {
     }
   }, [ready, authenticated, isEthereumReady, isSolanaReady]);
 
-/*   // Root Logic
+  // Root Logic
   useEffect(() => {
     const connectPromise = async () => {
       if (!isFetchingSession && userSession && signer) {
@@ -453,7 +455,7 @@ export function useBlockchainWallet() {
       }
     }
     connectPromise();
-  }, [isFetchingSession, userSession]); */
+  }, [isFetchingSession, userSession]);
 
   useEffect(() => {
     if (isConnected === true) {
