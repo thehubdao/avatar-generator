@@ -17,6 +17,7 @@ import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { findAssetSignerPda } from '@metaplex-foundation/mpl-core';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { GetCollectionDocs } from '../../firebase.util';
+import { GetIpfsHttpsUrl } from '../../metadata.util';
 
 export async function InitializeUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
     try {
@@ -466,7 +467,7 @@ export async function EquipFeatures(assetAddress: string, features: SolanaAttrib
 export async function SetNewCombination(assetAddress: string, metadataIpfsCid: string, newFeatures: SolanaAttribute[], oldFeatures: SolanaAttribute[]): Promise<Result<boolean>> {
     try {
         let txBuilder = transactionBuilder();
-        const updateAssetInstruction = await UpdateAsset(assetAddress, `ipfs://${metadataIpfsCid}`);
+        const updateAssetInstruction = await UpdateAsset(assetAddress, await GetIpfsHttpsUrl(metadataIpfsCid));
 
         if (!updateAssetInstruction.success) return {
             success: false,
