@@ -164,9 +164,14 @@ export interface MintingUiData {
   supply?: number;
 }
 
+export interface MintingPriceData {
+  mintPrice?: number;
+  mintingPriceSymbol?: string;
+}
+
 export interface MintingData {
   mintSupply?: number;
-  mintPrice?: number;
+  mintPrice?: MintingPriceData;
   isHolder?: boolean;
 }
 

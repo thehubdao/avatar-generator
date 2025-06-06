@@ -7,7 +7,7 @@ import '@therootnetwork/api-types';
 import { GetAssetData, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { Campaign, CampaignBaseCombination, RootCampaign } from '../../../enums/citizens/common.enum';
-import { CitizenMetadata, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
+import { CitizenMetadata, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
@@ -138,6 +138,30 @@ export async function MintRootAsset(
     LogError(Module.RootContractUtil, 'Error on minting Root Asset');
     return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
   }
+}
+
+export async function GetRootCollectionSupply(): Promise<Result<number>> {
+  try {
+    const collection = await API.query.nft.collectionInfo(NFT_COLLECTION_ID);
+    const { collectionIssuance } = collection.toHuman() as { collectionIssuance: number };
+
+    return {
+      success: true,
+      value: collectionIssuance
+    };
+  } catch (e) {
+    const err = e as Error
+    void LogError(Module.SolanaContractUtil, "Couldn't get collection supply", e);
+    return {
+      success: false,
+      errMessage: err.message,
+      errCode: CommonErrorCode.GetNoData
+    };
+  }
+}
+
+export async function GetRootMintingPrice(address: string): Promise<Result<MintingPriceData>> {
+  return { success: true, value: { mintPrice: 0, mintingPriceSymbol: 'XRP' } };
 }
 
 export async function GetRootUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {

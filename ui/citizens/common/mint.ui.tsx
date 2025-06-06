@@ -112,7 +112,7 @@ export default function MintUI({
               <SocialButtons className='w-full flex justify-center gap-4 scale-75 order-4 xl:order-none' />
               <div className="text-center font-semibold">
                 <p className="xl:text-lg">{isHolder ? 'FREE MINT' : 'PUBLIC MINT'}</p>
-                <p><span className="font-light text-sm">{isHolder ? 'Platform fee: ' : ''}</span>{price || mintingPrice} SOL</p>
+                <p><span className="font-light text-sm">{isHolder ? 'Platform fee: ' : ''}</span>{price || mintingPrice?.mintPrice} {mintingPrice?.mintingPriceSymbol}</p>
               </div>
               <div className="xl:hidden w-full flex flex-col items-center" >
                 {isMintingAllowed ?
