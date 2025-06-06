@@ -160,7 +160,7 @@ export async function GetRootCollectionSupply(): Promise<Result<number>> {
   }
 }
 
-export async function GetRootMintingPrice(address: string): Promise<Result<MintingPriceData>> {
+export async function GetRootMintingPrice(): Promise<Result<MintingPriceData>> {
   return { success: true, value: { mintPrice: 0, mintingPriceSymbol: 'XRP' } };
 }
 
