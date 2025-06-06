@@ -186,6 +186,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     if (!setRootAssetImageUrlResult.success) return { success: false, errMessage: setRootAssetImageUrlResult.errMessage, errCode: setRootAssetImageUrlResult.errCode };
 
     const setRootAssetMetadataResult = await StoreAssetData({
+        campaign: Campaign.Based,
         tokenId: token_id,
         collectionId: collection_id,
         combination: newCombination,
