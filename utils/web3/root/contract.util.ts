@@ -12,6 +12,8 @@ import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
 import { RootTransactionStatus } from '../../../enums/web3';
+import { CreateAssetLinkOperationMessage, DeleteAssetLinkOperationMessage } from './registry.util';
+import { GetCampaignDrops } from '../citizens.util';
 
 export async function GetRootAssetTokenIds(address: string): Promise<Result<number[]>> {
   try {
@@ -140,15 +142,16 @@ export async function MintRootAsset(
 
 export async function GetRootUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {
   try {
-    const rootDrops: RootDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as RootDrop[];
+    const rootDrops = await GetCampaignDrops<RootDrop>(campaign);
+    if (!rootDrops.success) return rootDrops;
 
-    if (!rootDrops.length) return {
+    if (rootDrops.value.length === 0) return {
       success: false,
       errMessage: "No drops found",
       errCode: CommonErrorCode.GetNoData
     };
 
-    const dropsCheckPromiseList = rootDrops.map(async (drop) => {
+    const dropsCheckPromiseList = rootDrops.value.map(async (drop) => {
       const dropData = await HasSftBalance(address, drop.collectionId, drop.tokenId);
       return dropData ? drop : undefined;
     });
@@ -170,44 +173,6 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
       errCode: CommonErrorCode.InternalError
     }
   }
-}
-
-function CreateAssetLinkOperationMessage(schemaPart: string, parent_collection_id: string, parent_token_id: string, child_collection_id: string, child_token_id: string): Result<Operation> {
-
-  if (!schemaPart || !parent_collection_id || !parent_token_id || !child_collection_id || !child_token_id) {
-    return { success: false, errMessage: 'Missing information to create "create" asset link operation', errCode: CommonErrorCode.MissingInfo };
-  }
-
-  const createAssetLinkOperation: Operation = {
-    type: 'asset-link',
-    action: 'create',
-    args: [
-      `equippedWith_${schemaPart}`,
-      `did:fv-asset:${CHAIN_ID}:root:${parent_collection_id}:${parent_token_id}`,
-      `did:fv-asset:${CHAIN_ID}:root:${child_collection_id}:${child_token_id}`,
-    ],
-  }
-
-  return { success: true, value: createAssetLinkOperation };
-}
-
-function DeleteAssetLinkOperationMessage(schemaPart: string, parent_collection_id: string, parent_token_id: string, child_collection_id: string, child_token_id: string): Result<Operation> {
-
-  if (!schemaPart || !parent_collection_id || !parent_token_id || !child_collection_id || !child_token_id) {
-    return { success: false, errMessage: 'Missing information to create "delete" asset link operation', errCode: CommonErrorCode.MissingInfo };
-  }
-
-  const createAssetLinkOperation: Operation = {
-    type: 'asset-link',
-    action: 'delete',
-    args: [
-      `equippedWith_${schemaPart}`,
-      `did:fv-asset:${CHAIN_ID}:root:${parent_collection_id}:${parent_token_id}`,
-      `did:fv-asset:${CHAIN_ID}:root:${child_collection_id}:${child_token_id}`,
-    ],
-  }
-
-  return { success: true, value: createAssetLinkOperation };
 }
 
 export async function EquipFeaturesOperations(parent_collection_id: string, parent_token_id: string, newAttributes: RootDrop[]): Promise<Result<Operation[]>> {
@@ -267,3 +232,4 @@ export async function SetRootNewCombination(address: string, parent_tokenId: str
 
   return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
 }
+
