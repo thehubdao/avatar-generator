@@ -10,7 +10,7 @@ import { ExportInterface } from "../../interfaces/common.interface";
 import { FEMALE_CAMPAIGN_BODY_TYPES, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { BodyPart } from "../../interfaces/avatar.interface";
-import { UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
+import { GetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
 import { CampaignBaseCombination, Campaign, CampaignBaseUrl } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
@@ -616,9 +616,9 @@ export default function CitizensComponent() {
       LogError(Module.Citizens, 'Failed to set new combination on saveRootCombination', setNewCombinationResult.errCode);
       return false;
     }
-
+    const newImageUrl = await GetImageUrl(currentCampaign, newCombination);
     const storeAssetDataResult = await StoreAssetData({
-      imageUrl: selectedCitizen.imageUrl,
+      imageUrl: newImageUrl,
       tokenId: selectedCitizen.tokenId,
       collectionId: (selectedCitizen.rawMetadata as RootMetadata).collectionId,
       campaign: currentCampaign,
