@@ -414,8 +414,6 @@ export function useBlockchainWallet() {
           } else if (chainType === Blockchain.Solana && isSolanaReady) {
             const solanaWallet = solanaWallets[0];
 
-            console.log("solanaWallet", solanaWallets);
-
             await InitializeUmi(solanaWallet);
 
             dispatch(connect({
@@ -451,7 +449,6 @@ export function useBlockchainWallet() {
       if (!isFetchingSession && !userSession) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
         if (blockchainType === Blockchain.Root) dispatch(disconnect());
         else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: false }));
-        console.log(new Date().toISOString(), "disconnecting", blockchainType)
       }
     }
     connectPromise();
