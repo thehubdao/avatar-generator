@@ -5,7 +5,7 @@ import { Module } from '../../enums/common.enum';
 import { Signer } from '@futureverse/signer';
 import { AssetRegister } from '@futureverse/asset-register/v2'
 
-const ROOT_NETWORK_WS_URL = process.env.NEXT_PUBLIC_ROOT_NETWORK_WS_URL;
+export const ROOT_NETWORK_WS_URL = process.env.NEXT_PUBLIC_ROOT_NETWORK_WS_URL;
 
 export const PROVIDER = new WsProvider(ROOT_NETWORK_WS_URL);
 
@@ -18,6 +18,8 @@ export const ROOT_GQL_API_URL = process.env.NEXT_PUBLIC_ROOT_GQL_API_URL as stri
 export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN as string;
 export const ORIGIN = process.env.NEXT_PUBLIC_ORIGIN as string;
 export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID as string;
+
+export const ROOT_SIGNER_PK = process.env.ROOT_SIGNER_PK as string;
 
 export let ASSET_REGISTER_SDK: AssetRegister;
 
