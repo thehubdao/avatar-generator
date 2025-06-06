@@ -23,7 +23,7 @@ import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
-import { GetRootAssetsMetadata, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
+import { GetRootAssetsMetadata, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
 import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 
 export function useBlockchainWallet() {
@@ -124,6 +124,18 @@ export function useBlockchainWallet() {
     if (leaderboardData.success) return { success: true, value: leaderboardData.value };
 
     return { success: false, errMessage: leaderboardData.errMessage, errCode: leaderboardData.errCode };
+  }
+
+  async function getRootMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
+    const mintingSupply = await GetRootCollectionSupply();
+    const mintingPrice = await GetRootMintingPrice(walletAddress);
+    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined, isHolder: undefined }
+
+    if (mintingSupply.success) {
+      mintingData.mintSupply = mintingSupply.value;
+    } else void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
+
+    return { success: true, value: mintingData };
   }
 
   async function getSolanaMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
@@ -305,6 +317,13 @@ export function useBlockchainWallet() {
             dispatch(setSelectedCitizen(rootCitizensMetadata.value[0]));
             dispatch(setMintingMode(false));
           } else {//If user has no campaigns, set the based campaign as selected campaign and keep minting mode
+
+            const mintingData = await getRootMintingDataPromise(walletAddress);
+            if (mintingData.success) {
+              dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
+              dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+            }
+
             dispatch(setSelectedCampaign(Campaign.Based)); // Set the selected campaign by default when no campaign is selected
             dispatch(setSelectedCitizen({
               baseCombination: CampaignBaseCombination.Based,
@@ -313,6 +332,13 @@ export function useBlockchainWallet() {
             } as CitizenMetadata));
           }
         } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
+
+          const mintingData = await getRootMintingDataPromise(walletAddress);
+          if (mintingData.success) {
+            dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
+            dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+          }
+
           dispatch(setSelectedCitizen({
             baseCombination: CampaignBaseCombination.Based,
             combination: CampaignBaseCombination.Based,

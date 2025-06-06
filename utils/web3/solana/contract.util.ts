@@ -4,7 +4,7 @@ import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { UMI, COLLECTION_ID, KUMI_CANDY_MACHINE_ID, KUMI_CANDY_MACHINE_TREASURY, COLLECTION_GUARD_ID, ADMIN_SIGNER } from '../../../constants/solana/contract.constant';
-import { CitizenMetadata, Drop, SolanaAttribute, SolanaMetadata } from '../../../interfaces/citizens.interface';
+import { CitizenMetadata, Drop, MintingPriceData, SolanaAttribute, SolanaMetadata } from '../../../interfaces/citizens.interface';
 import { GetSolanaImageUrl, GetSolanaIPFSData } from '../citizens.util';
 import { ConnectedSolanaWallet } from '@privy-io/react-auth';
 import { GuardSetMintArgs, mintV1, mplCandyMachine } from '@metaplex-foundation/mpl-core-candy-machine';
@@ -188,7 +188,7 @@ export async function GetKumiCandyMachineGuardGroup(walletAddress: string, colle
     };
 }
 
-export async function GetMintingPrice(walletAddress: string): Promise<Result<{ price: number, isHolder?: boolean }>> {
+export async function GetMintingPrice(walletAddress: string): Promise<Result<{ price: MintingPriceData, isHolder?: boolean }>> {
     const mintingPrice = await GetKumiCandyMachineGuardGroup(walletAddress, COLLECTION_GUARD_ID);
     if (!mintingPrice.success) return {
         success: false,
@@ -199,14 +199,14 @@ export async function GetMintingPrice(walletAddress: string): Promise<Result<{ p
     if (mintingPrice.value.group === CandyMachineGroup.Holder) return {
         success: true,
         value: {
-            price: 0.008, // This is the price for holders
+            price: { mintPrice: 0.008, mintingPriceSymbol: 'SOL' }, // This is the price for holders
             isHolder: true
         }
     };
     if (mintingPrice.value.group === CandyMachineGroup.Public) return {
         success: true,
         value: {
-            price: 0.204, // This is the price for public
+            price: { mintPrice: 0.204, mintingPriceSymbol: 'SOL' }, // This is the price for public
             isHolder: false
         }
     };
