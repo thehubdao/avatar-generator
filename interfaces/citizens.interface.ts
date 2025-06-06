@@ -132,6 +132,7 @@ export interface Drop {
   index: number;
   type: string;
   name: string;
+  typeIndex: number;
 }
 
 export interface RootDrop extends Drop {
@@ -173,4 +174,12 @@ export interface TimeLeft {
   hours: number;
   minutes: number;
   seconds: number;
+}
+
+export interface AssetLink {
+  asset: {
+    tokenId: string;
+    collectionId: string;
+    schema: { name: string };
+  };
 }
