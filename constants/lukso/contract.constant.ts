@@ -21,7 +21,7 @@ export const EOA = new ethers.Wallet(PK).connect(PROVIDER);
 export const OPERATION_CALL = 0;
 
 
-export const TEMP_CAMPAIGN_SWITCH = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b', 'kumi': 'kumi' };
+export const TEMP_CAMPAIGN_SWITCH = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b', 'kumi': 'kumi', 'root_citizens': 'root_citizens' };
 
 //MAINNET
 export const LUKSO_CAMPAIGN_WEB3_DATA = {
