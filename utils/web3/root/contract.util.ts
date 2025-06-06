@@ -1,10 +1,10 @@
-import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, CHAIN_ID, ASSET_REGISTER_SDK } from '../../../constants/root/contract.constant';
+import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK } from '../../../constants/root/contract.constant';
 import { TransactionBuilder } from '@futureverse/transact';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { LogError } from '../../common.util';
 import '@therootnetwork/api-types';
-import { GetAssetData, GetCollectionDocs, StoreAssetData } from '../../firebase.util';
+import { GetAssetData, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { Campaign, CampaignBaseCombination, RootCampaign } from '../../../enums/citizens/common.enum';
 import { CitizenMetadata, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';

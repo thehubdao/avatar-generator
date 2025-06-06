@@ -2,7 +2,7 @@ import { BrowserProvider, ethers, JsonRpcProvider } from "ethers";
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
 import { LeaderboardEntry } from "../../types/leaderboard.type";
-import { CitizenMetadata, Drop, FollowUserData, LuksoMetadata, RootDrop, SolanaMetadata } from "../../interfaces/citizens.interface";
+import { CitizenMetadata, FollowUserData, LuksoMetadata, SolanaMetadata } from "../../interfaces/citizens.interface";
 import { Result } from '../../types/common.type';
 import { CommonErrorCode, Module } from "../../enums/common.enum";
 import { LogError } from "../common.util";

@@ -7,7 +7,7 @@ import { Campaign } from "../../../enums/citizens/common.enum";
 import { GetCampaignDrops } from "../citizens.util";
 import { GetRootAssetMetadata } from "./contract.util";
 import { GetParameter } from "../../firebase.util";
-import { CampaignParameters, FeatureBasic } from "../../../interfaces/common.interface";
+import { FeatureBasic } from "../../../interfaces/common.interface";
 
 export function CreateAssetLinkOperationMessage(schemaPart: string, parent_collection_id: string, parent_token_id: string, child_collection_id: string, child_token_id: string): Result<Operation> {
 
