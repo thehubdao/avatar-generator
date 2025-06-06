@@ -129,14 +129,18 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: leaderboardData.errMessage, errCode: leaderboardData.errCode };
   }
 
-  async function getRootMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
+  async function getRootMintingDataPromise(): Promise<Result<MintingData>> {
     const mintingSupply = await GetRootCollectionSupply();
-    const mintingPrice = await GetRootMintingPrice(walletAddress);
+    const mintingPrice = await GetRootMintingPrice();
     const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined, isHolder: undefined }
 
     if (mintingSupply.success) {
       mintingData.mintSupply = mintingSupply.value;
     } else void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
+
+    if(mintingPrice.success){
+      mintingData.mintPrice = mintingPrice.value;
+    } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
 
     return { success: true, value: mintingData };
   }
@@ -308,7 +312,7 @@ export function useBlockchainWallet() {
             dispatch(setMintingMode(false));
           } else {//If user has no campaigns, set the based campaign as selected campaign and keep minting mode
 
-            const mintingData = await getRootMintingDataPromise(walletAddress);
+            const mintingData = await getRootMintingDataPromise();
             if (mintingData.success) {
               dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
               dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
@@ -323,7 +327,7 @@ export function useBlockchainWallet() {
           }
         } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
 
-          const mintingData = await getRootMintingDataPromise(walletAddress);
+          const mintingData = await getRootMintingDataPromise();
           if (mintingData.success) {
             dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
             dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
