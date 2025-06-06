@@ -1,13 +1,18 @@
 import { Operation } from "@futureverse/artm";
-import { CHAIN_ID, ROOT_GQL_API_URL } from "../../../constants/root/contract.constant";
+import { CHAIN_ID, DOMAIN, ORIGIN, ROOT_GQL_API_URL, ROOT_NETWORK_WS_URL } from "../../../constants/root/contract.constant";
 import { CampaignParameterName, CommonErrorCode } from "../../../enums/common.enum";
 import { Result } from "../../../types/common.type";
 import { AssetLink, RootDrop } from "../../../interfaces/citizens.interface";
 import { Campaign } from "../../../enums/citizens/common.enum";
 import { GetCampaignDrops } from "../citizens.util";
 import { GetRootAssetMetadata } from "./contract.util";
-import { GetParameter } from "../../firebase.util";
+import { GetParameter, StoreAssetData } from "../../firebase.util";
 import { FeatureBasic } from "../../../interfaces/common.interface";
+import { createSiweMessage, generateSiweNonce } from "viem/siwe";
+import { createWalletClient, getAddress, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { GetImageUrl } from "../../metadata.util";
+import { AssetData } from "../../../interfaces/firebase.interface";
 
 export function CreateAssetLinkOperationMessage(schemaPart: string, parent_collection_id: string, parent_token_id: string, child_collection_id: string, child_token_id: string): Result<Operation> {
 
@@ -106,13 +111,89 @@ export async function GetRootAssetNewCombination(collection_id: string, token_id
     return { success: true, value: newCombination };
 }
 
-export async function UpdateRootAsset(address: string, collection_id: string, token_id: string): Promise<Result<boolean>> {
+export async function GetRootRegistryAuthToken(PK: string): Promise<Result<string>> {
+    try {
+        const walletClient = createWalletClient({
+            account: privateKeyToAccount(`0x${PK}`),
+            transport: http(ROOT_NETWORK_WS_URL)
+        })
+
+        const message = createSiweMessage({
+            version: "1",
+            nonce: generateSiweNonce(),
+            address: getAddress(walletClient.account.address),
+            uri: ORIGIN,
+            domain: DOMAIN,
+            issuedAt: new Date(),
+            expirationTime: new Date(Date.now() + 1000 * 60 * 60),
+            chainId: Number(CHAIN_ID),
+            statement: ""
+        });
+
+        const signature = await walletClient.signMessage({
+            message: message,
+        });
+
+        const base64Message = Buffer.from(message).toString('base64');
+        const base64Signature = Buffer.from(signature).toString('base64');
+
+        const token = `${base64Message}.${base64Signature}`;
+
+        return { success: true, value: token };
+    } catch (error) {
+        const Error = error as Error;
+        return { success: false, errMessage: Error.message, errCode: CommonErrorCode.InternalError };
+    }
+}
+
+
+export async function SetRootAssetImageUrl(imageUrl: string, collection_id: string, token_id: string, authToken: string): Promise<Result<boolean>> {
+    try {
+        const graphqlRegisterAssetImageMutation = JSON.stringify({
+            query: "mutation RegisterAssetImage($registerAssetImageInput2: RegisterAssetImageInput!) {\n  registerAssetImage(input: $registerAssetImageInput2) {\n    assetImage {\n      id\n      collectionId\n      tokenId\n      url\n      version\n    }\n  }\n}",
+            variables: { "registerAssetImageInput2": { "url": imageUrl, "collectionId": `${CHAIN_ID}:root:${collection_id}`, "tokenId": token_id } }
+        })
+
+        const result = await fetch(ROOT_GQL_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken
+            },
+            body: graphqlRegisterAssetImageMutation,
+        });
+        const resultText = await result.text();
+        const resultJson = JSON.parse(resultText);
+        if (resultJson.errors)
+            return { success: false, errMessage: resultJson.errors[0].message, errCode: CommonErrorCode.InternalError };
+
+        return { success: true, value: true };
+    } catch (error) {
+        const Error = error as Error;
+        return { success: false, errMessage: Error.message, errCode: CommonErrorCode.InternalError };
+    }
+}
+
+export async function UpdateRootAsset(collection_id: string, token_id: string, authToken: string): Promise<Result<boolean>> {
     const newCombinationResult = await GetRootAssetNewCombination(collection_id, token_id);
 
     if (!newCombinationResult.success) return { success: false, errMessage: newCombinationResult.errMessage, errCode: newCombinationResult.errCode };
 
     const newCombination = newCombinationResult.value;
-    console.log(newCombination);
+    const imageUrl = await GetImageUrl(Campaign.Based, newCombination);
+    const setRootAssetImageUrlResult = await SetRootAssetImageUrl(imageUrl, collection_id, token_id, authToken);
+
+    if (!setRootAssetImageUrlResult.success) return { success: false, errMessage: setRootAssetImageUrlResult.errMessage, errCode: setRootAssetImageUrlResult.errCode };
+
+    const setRootAssetMetadataResult = await StoreAssetData({
+        tokenId: token_id,
+        collectionId: collection_id,
+        combination: newCombination,
+        imageUrl: imageUrl
+    } as AssetData);
+
+    if (!setRootAssetMetadataResult.success) return { success: false, errMessage: setRootAssetMetadataResult.errMessage, errCode: setRootAssetMetadataResult.errCode };
+
     return { success: true, value: true };
 }
 
