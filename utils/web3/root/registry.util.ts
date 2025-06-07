@@ -73,6 +73,7 @@ export async function GetAssetLinks(collection_id: string, token_id: string): Pr
 }
 
 export async function GetRootAssetNewCombination(collection_id: string, token_id: string): Promise<Result<string>> {
+    console.log(collection_id, token_id, "collection_id, token_id");
     const assetCurrentCombinationResult = await GetRootAssetMetadata(token_id);
 
     if (!assetCurrentCombinationResult.success) return { success: false, errMessage: assetCurrentCombinationResult.errMessage, errCode: assetCurrentCombinationResult.errCode };
