@@ -468,7 +468,6 @@ export function useBlockchainWallet() {
   // Root Logic
   useEffect(() => {
     const connectPromise = async () => {
-      console.log(isFetchingSession, userSession, signer, "IS FETCHING SESSION, USER SESSION, SIGNER");
       if (!isFetchingSession && userSession && signer) {
         const eoa = userSession.linked[0].eoa;
 
