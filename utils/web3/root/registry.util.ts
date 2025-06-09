@@ -3,9 +3,9 @@ import { CHAIN_ID, DOMAIN, ORIGIN, ROOT_GQL_API_URL, ROOT_NETWORK_WS_URL } from 
 import { CampaignParameterName, CommonErrorCode } from "../../../enums/common.enum";
 import { Result } from "../../../types/common.type";
 import { AssetLink, RootDrop } from "../../../interfaces/citizens.interface";
-import { Campaign, CampaignBaseCombination } from "../../../enums/citizens/common.enum";
+import { Campaign } from "../../../enums/citizens/common.enum";
 import { GetCampaignDrops } from "../citizens.util";
-import { GetRootAssetMetadata, SetAvatarTransferableTx, SetRootAssetsTransferable } from "./contract.util";
+import { GetRootAssetMetadata } from "./contract.util";
 import { GetParameter, StoreAssetData } from "../../firebase.util";
 import { FeatureBasic } from "../../../interfaces/common.interface";
 import { createSiweMessage, generateSiweNonce } from "viem/siwe";
@@ -13,7 +13,6 @@ import { createWalletClient, getAddress, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { GetImageUrl } from "../../metadata.util";
 import { AssetData } from "../../../interfaces/firebase.interface";
-import { SubmittableExtrinsic } from "@polkadot/api/types";
 
 export function CreateAssetLinkOperationMessage(schemaPart: string, parent_collection_id: string, parent_token_id: string, child_collection_id: string, child_token_id: string): Result<Operation> {
 

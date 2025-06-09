@@ -1,4 +1,4 @@
-import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, PROVIDER, ROOT_SIGNER_PK, KEYRING_SIGNER } from '../../../constants/root/contract.constant';
+import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER } from '../../../constants/root/contract.constant';
 import { TransactionBuilder } from '@futureverse/transact';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
