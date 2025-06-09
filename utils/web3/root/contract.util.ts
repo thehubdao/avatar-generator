@@ -57,8 +57,9 @@ export async function HasSftBalance(address: string, sftCollectionId: string, sf
     };
 
     const firstOwned = info.ownedTokens.find(owned => {
+      const owner = owned[0].toLowerCase();
       return (
-        owned[0].toLowerCase() === address.toLowerCase()
+        owner === address.toLowerCase()
       );
     });
 
@@ -189,11 +190,10 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
 
     const dropsCheckPromiseList = rootDrops.value.map(async (drop) => {
       const dropData = await HasSftBalance(address, drop.collectionId, drop.tokenId);
-      return dropData ? drop : undefined;
+      if (!dropData.success) return undefined;
+      return dropData.value ? drop : undefined;
     });
-
     const dropsCheck = await Promise.all(dropsCheckPromiseList);
-
     const filteredDrops = dropsCheck.filter((dropCheck) => dropCheck !== undefined);
 
     return {
@@ -290,17 +290,17 @@ export async function SetRootAssetsTransferable(collectionId: string, tokenId: s
     const oldFeatureIndex = Number(oldCombinationArray[i]);
     const newFeatureIndex = Number(newCombinationArray[i]);
 
-    if(oldFeatureIndex == newFeatureIndex) continue; //If the feature index is the same, skip
+    if (oldFeatureIndex == newFeatureIndex) continue; //If the feature index is the same, skip
 
-    if(oldFeatureIndex !== 0) { //If the feature index is not 0, it means it's a wearable, will be marked as transferable as it got unequipped
+    if (oldFeatureIndex !== 0) { //If the feature index is not 0, it means it's a wearable, will be marked as transferable as it got unequipped
       const drop = rootDrops.find(drop => drop.index === oldFeatureIndex && drop.type === campaignFeatures[oldFeatureIndex].displayName);
-      if(!drop) return { success: false, errMessage: 'Drop not found for old feature index', errCode: CommonErrorCode.InternalError };
+      if (!drop) return { success: false, errMessage: 'Drop not found for old feature index', errCode: CommonErrorCode.InternalError };
       txs.push(await SetWearableTransferableTx(drop.collectionId, drop.tokenId, true));
     }
 
-    if(newFeatureIndex != 0) { //If the feature index is not 0, it means it's a wearable, will be marked as non transferable as it got equipped
+    if (newFeatureIndex != 0) { //If the feature index is not 0, it means it's a wearable, will be marked as non transferable as it got equipped
       const drop = rootDrops.find(drop => drop.index === newFeatureIndex && drop.type === campaignFeatures[newFeatureIndex].displayName);
-      if(!drop) return { success: false, errMessage: 'Drop not found for new feature index', errCode: CommonErrorCode.InternalError };
+      if (!drop) return { success: false, errMessage: 'Drop not found for new feature index', errCode: CommonErrorCode.InternalError };
       txs.push(await SetWearableTransferableTx(drop.collectionId, drop.tokenId, false));
     }
   }
