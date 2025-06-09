@@ -1,4 +1,4 @@
-import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK } from '../../../constants/root/contract.constant';
+import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, PROVIDER, ROOT_SIGNER_PK, KEYRING_SIGNER } from '../../../constants/root/contract.constant';
 import { TransactionBuilder } from '@futureverse/transact';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
@@ -14,6 +14,18 @@ import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
 import { RootTransactionStatus } from '../../../enums/web3';
 import { CreateAssetLinkOperationMessage, DeleteAssetLinkOperationMessage } from './registry.util';
 import { GetCampaignDrops } from '../citizens.util';
+import { Keyring } from '@polkadot/api';
+import { hexToU8a } from '@polkadot/util';
+import { KeyringPair } from '@polkadot/keyring/types';
+import { SubmittableExtrinsic } from '@polkadot/api/types';
+import { FeatureBasic } from '../../../interfaces/common.interface';
+
+export function GetAdminSigner(): KeyringPair {
+  const keyring = new Keyring({ type: "ethereum" });
+  const seedU8a = hexToU8a(ROOT_SIGNER_PK);
+  const adminSigner = keyring.addFromSeed(seedU8a);
+  return adminSigner
+}
 
 export async function GetRootAssetTokenIds(address: string): Promise<Result<number[]>> {
   try {
@@ -257,3 +269,47 @@ export async function SetRootNewCombination(address: string, parent_tokenId: str
   return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
 }
 
+export function SetAvatarTransferableTx(collectionId: string, tokenId: string, transferable: boolean) {
+  const transferableTx = API.tx.nft.setTokenTransferableFlag([collectionId, tokenId], transferable);
+  return transferableTx;
+}
+
+async function SetWearableTransferableTx(collectionId: string, tokenId: string, transferable: boolean) {
+  const transferableTx = API.tx.sft.setTokenTransferableFlag([collectionId, tokenId], transferable);
+  return transferableTx;
+}
+
+export async function SetRootAssetsTransferable(collectionId: string, tokenId: string, oldCombination: string, newCombination: string, campaignFeatures: FeatureBasic[], rootDrops: RootDrop[]): Promise<Result<boolean>> {
+  if (oldCombination === newCombination) return { success: false, errMessage: 'Old and new combination are the same', errCode: CommonErrorCode.InternalError };
+
+  const txs: SubmittableExtrinsic<"promise">[] = [];
+  const oldCombinationArray = oldCombination.split('-');
+  const newCombinationArray = newCombination.split('-');
+
+  for (let i = 0; i < oldCombinationArray.length; i++) {
+    const oldFeatureIndex = Number(oldCombinationArray[i]);
+    const newFeatureIndex = Number(newCombinationArray[i]);
+
+    if(oldFeatureIndex == newFeatureIndex) continue; //If the feature index is the same, skip
+
+    if(oldFeatureIndex !== 0) { //If the feature index is not 0, it means it's a wearable, will be marked as transferable as it got unequipped
+      const drop = rootDrops.find(drop => drop.index === oldFeatureIndex && drop.type === campaignFeatures[oldFeatureIndex].displayName);
+      if(!drop) return { success: false, errMessage: 'Drop not found for old feature index', errCode: CommonErrorCode.InternalError };
+      txs.push(await SetWearableTransferableTx(drop.collectionId, drop.tokenId, true));
+    }
+
+    if(newFeatureIndex != 0) { //If the feature index is not 0, it means it's a wearable, will be marked as non transferable as it got equipped
+      const drop = rootDrops.find(drop => drop.index === newFeatureIndex && drop.type === campaignFeatures[newFeatureIndex].displayName);
+      if(!drop) return { success: false, errMessage: 'Drop not found for new feature index', errCode: CommonErrorCode.InternalError };
+      txs.push(await SetWearableTransferableTx(drop.collectionId, drop.tokenId, false));
+    }
+  }
+
+  if (newCombination === CampaignBaseCombination.Based) txs.push(SetAvatarTransferableTx(collectionId, tokenId, true)); //If the new combination is base combination, mark avatar as transferable
+  else txs.push(SetAvatarTransferableTx(collectionId, tokenId, false)); //If the new combination is not base combination, mark avatar as non transferable
+
+  const batchTx = API.tx.utility.batch(txs);
+  await batchTx.signAndSend(KEYRING_SIGNER);
+
+  return { success: true, value: true };
+}
