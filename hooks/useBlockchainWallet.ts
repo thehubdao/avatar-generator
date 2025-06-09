@@ -483,6 +483,7 @@ export function useBlockchainWallet() {
   useEffect(() => {
     const connectPromise = async () => {
       const loginLibaryflag = GetSdkConnection();
+
       if (!isFetchingSession && userSession && signer) {
         const eoa = userSession.linked[0].eoa;
 
@@ -497,7 +498,7 @@ export function useBlockchainWallet() {
       }
     }
     connectPromise();
-  }, [isFetchingSession, userSession]);
+  }, [isFetchingSession, userSession, signer]);
 
   useEffect(() => {
     if (isConnected === true) {
