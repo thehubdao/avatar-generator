@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
-import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
+import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetUserFeatureAssets, InitializeClientUmi } from '../utils/web3/solana/contract.util';
 import { CitizenMetadata, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
@@ -399,7 +399,7 @@ export function useBlockchainWallet() {
 
             console.log("solanaWallet", solanaWallets);
 
-            await InitializeUmi(solanaWallet);
+            await InitializeClientUmi(solanaWallet);
 
             dispatch(connect({
               address: user?.wallet?.address,

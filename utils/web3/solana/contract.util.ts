@@ -17,8 +17,9 @@ import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { findAssetSignerPda } from '@metaplex-foundation/mpl-core';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { GetCollectionDocs } from '../../firebase.util';
+import { GetSolanaUpdateTransaction } from '../../api.util';
 
-export async function InitializeUmi(wallet: ConnectedSolanaWallet) {
+export async function InitializeClientUmi(wallet: ConnectedSolanaWallet) {
     UMI.use(signerIdentity({
         publicKey: publicKey(wallet.address),
         signMessage: async (message: Uint8Array) =>
@@ -374,7 +375,8 @@ export async function TransferFromAsset(assetAddress: string, sourceAssetAddress
     }
 }
 
-async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<TransactionBuilder>> {
+//This function will be only callable successfully by server
+export async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<TransactionBuilder>> {
     try {
         const assetPublicKey = publicKey(assetAddress);
         const asset = await fetchAsset(UMI, assetPublicKey);
@@ -382,6 +384,12 @@ async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<Tr
         const collection = asset.updateAuthority.type == 'Collection' && asset.updateAuthority.address
             ? await fetchCollection(UMI, asset.updateAuthority.address)
             : undefined;
+
+        if (!ADMIN_SIGNER) return {
+            success: false,
+            errMessage: "Admin signer not initialized. Check if you are calling this function from server side",
+            errCode: CommonErrorCode.InternalError
+        };
 
         const updateAssetInstruction = update(UMI, {
             asset,
@@ -452,7 +460,7 @@ export async function EquipFeatures(assetAddress: string, features: SolanaAttrib
 export async function SetNewCombination(assetAddress: string, metadataIpfsCid: string, newFeatures: SolanaAttribute[], oldFeatures: SolanaAttribute[]): Promise<Result<boolean>> {
     try {
         let txBuilder = transactionBuilder();
-        const updateAssetInstruction = await UpdateAsset(assetAddress, `ipfs://${metadataIpfsCid}`);
+        const updateAssetInstruction = await GetSolanaUpdateTransaction(assetAddress, `ipfs://${metadataIpfsCid}`);
 
         if (!updateAssetInstruction.success) return {
             success: false,
