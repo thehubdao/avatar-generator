@@ -9,7 +9,6 @@ export const KUMI_CANDY_MACHINE_TREASURY = publicKey(process.env.NEXT_PUBLIC_KUM
 export const UMI = createUmi(process.env.NEXT_PUBLIC_SOLANA_RPC_URL || '', {
     commitment: 'finalized'
 });
-
-export const ADMIN_WALLET_SECRET_KEY = bs58.decode(process.env.NEXT_PUBLIC_KUMI_ADMIN_WALLET_SECRET_KEY || '');
+export const ADMIN_WALLET_SECRET_KEY = bs58.decode(process.env.KUMI_ADMIN_WALLET_SECRET_KEY || '');
 export const ADMIN_WALLET_KEYPAIR = UMI.eddsa.createKeypairFromSecretKey(new Uint8Array(ADMIN_WALLET_SECRET_KEY));
 export const ADMIN_SIGNER = createSignerFromKeypair(UMI, ADMIN_WALLET_KEYPAIR);
