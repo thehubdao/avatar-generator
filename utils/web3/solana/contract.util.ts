@@ -20,7 +20,7 @@ import { GetCollectionDocs } from '../../firebase.util';
 import { GetIpfsHttpsUrl } from '../../metadata.util';
 import { GetSolanaUpdateTransaction } from '../../api.util';
 
-export async function InitializeUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
+export async function InitializeClientUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
     try {
         UMI.use(signerIdentity({
             publicKey: publicKey(wallet.address),
