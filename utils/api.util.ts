@@ -13,6 +13,7 @@ import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
 import { ClaimableDrop, UserXPData } from "../interfaces/citizens.interface";
 import { Blockchain } from "../enums/blockchain/common.enum";
+import { TransactionBuilder } from "@metaplex-foundation/umi";
 
 //#region Generic
 type QueryParams = { [p: string]: string | number | undefined | null };
@@ -197,6 +198,19 @@ export async function GetUserXPData(address: string, blockchainType: Blockchain)
     body: JSON.stringify({ address, blockchainType }),
   });
   if (!response.ok) return { success: false, errMessage: 'Failed to get user XP data', errCode: CommonErrorCode.GetNoData };
+  const data = await response.json();
+  return { success: true, value: data.data };
+}
+
+export async function GetSolanaUpdateTransaction(assetAddress: string, uri: string): Promise<Result<TransactionBuilder>> {
+  const response = await fetch(ApiRoutesV1.Solana, {
+    method: 'GET',
+    body: JSON.stringify({ assetAddress, uri }),
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  });
+  if (!response.ok) return { success: false, errMessage: 'Failed to get solana update transaction', errCode: CommonErrorCode.GetNoData };
   const data = await response.json();
   return { success: true, value: data.data };
 }
