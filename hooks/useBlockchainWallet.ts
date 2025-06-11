@@ -41,9 +41,7 @@ export function useBlockchainWallet() {
   const { ready, user, authenticated, isModalOpen } = usePrivy(); //Privy Auth
   const { userSession, isFetchingSession, signOutPass } = useAuth(); //Pass Auth
 
-
   /* Login and Logout related hooks */
-
   const { login } = useLogin(); //Privy Login
   const { logout } = useLogout(); //Privy Logout
 
@@ -54,8 +52,7 @@ export function useBlockchainWallet() {
   const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Ethereum Wallets
   const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets
 
-  const signer = useFutureverseSigner();
-
+  const signer = useFutureverseSigner(); 
 
   const getCampaignParams = async (campaign: Campaign) => {
     const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
