@@ -13,7 +13,6 @@ import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
 import { DataBaseDrop, SolanaAttribute, UserXPData } from "../interfaces/citizens.interface";
 import { Blockchain } from "../enums/blockchain/common.enum";
-import { Transaction, TransactionBuilder } from "@metaplex-foundation/umi";
 
 //#region Generic
 type QueryParams = { [p: string]: string | number | undefined | null };

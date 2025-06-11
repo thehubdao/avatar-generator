@@ -6,9 +6,7 @@ import { FirebaseError } from "@firebase/util";
 import { LogError } from "../../../utils/common.util";
 import { Module } from "../../../enums/common.enum";
 import { InitializeServerAdminData } from "../../../constants/solana/contract.constant";
-import { TransactionBuilder } from "@metaplex-foundation/umi";
-import { SetNewCombinationSerializedTransaction, UpdateAsset } from "../../../utils/web3/solana/contract.util";
-import { ADMIN_SIGNER } from "../../../constants/root/contract.constant";
+import { SetNewCombinationSerializedTransaction } from "../../../utils/web3/solana/contract.util";
 
 // Initialize admin data when the module loads
 InitializeServerAdminData();
