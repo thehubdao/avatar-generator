@@ -1,4 +1,5 @@
-import { createNoopSigner, generateSigner, PublicKey, publicKey, signerIdentity, some, TransactionBuilder, transactionBuilder } from '@metaplex-foundation/umi';
+import { createNoopSigner, generateSigner, PublicKey, publicKey, Signer, signerIdentity, some, Transaction, TransactionBuilder, transactionBuilder } from '@metaplex-foundation/umi';
+import { base64 } from '@metaplex-foundation/umi/serializers';
 import { AssetV1, execute, fetchAsset, fetchAssetsByOwner, fetchCollection, mplCore, transfer, transferV1, update } from '@metaplex-foundation/mpl-core';
 import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
@@ -17,27 +18,43 @@ import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { findAssetSignerPda } from '@metaplex-foundation/mpl-core';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { GetCollectionDocs } from '../../firebase.util';
+import { GetSolanaSetNewCombinationSerializedTransaction } from '../../api.util';
 
-export async function InitializeUmi(wallet: ConnectedSolanaWallet) {
-    UMI.use(signerIdentity({
-        publicKey: publicKey(wallet.address),
-        signMessage: async (message: Uint8Array) =>
-            await wallet.signMessage(message),
-        signTransaction: async (transaction) => {
-            const web3JsTransaction = toWeb3JsTransaction(transaction);
-            const signedTx = await wallet.signTransaction(web3JsTransaction);
-            return fromWeb3JsTransaction(signedTx);
-        },
-        signAllTransactions: async (transactions) => {
-            const web3JsTransactions = transactions.map(toWeb3JsTransaction);
-            const signedTxs = await Promise.all(
-                web3JsTransactions.map(tx => wallet.signTransaction(tx))
-            );
-            return signedTxs.map(fromWeb3JsTransaction);
-        }
-    }));
-    UMI.use(mplCore());
-    UMI.use(mplCandyMachine());
+
+export async function InitializeClientUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
+    try {
+        UMI.use(signerIdentity({
+            publicKey: publicKey(wallet.address),
+            signMessage: async (message: Uint8Array) =>
+                await wallet.signMessage(message),
+            signTransaction: async (transaction) => {
+                const web3JsTransaction = toWeb3JsTransaction(transaction);
+                const signedTx = await wallet.signTransaction(web3JsTransaction);
+                return fromWeb3JsTransaction(signedTx);
+            },
+            signAllTransactions: async (transactions) => {
+                const web3JsTransactions = transactions.map(toWeb3JsTransaction);
+                const signedTxs = await Promise.all(
+                    web3JsTransactions.map(tx => wallet.signTransaction(tx))
+                );
+                return signedTxs.map(fromWeb3JsTransaction);
+            }
+        }));
+        UMI.use(mplCore());
+        UMI.use(mplCandyMachine());
+        return {
+            success: true,
+            value: true
+        };
+    } catch (e) {
+        const err = e as Error;
+        void LogError(Module.SolanaContractUtil, "Couldn't initialize UMI", err.message);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        };
+    }
 }
 
 export async function GetAssetsByOwner(walletAddress: string): Promise<Result<AssetV1[]>> {
@@ -82,9 +99,8 @@ export async function GetCollectionAssetByOwner(
 
 }
 export async function GetSolanaCitizenMetadata(assetAddress: AssetV1): Promise<Result<CitizenMetadata>> {
-    const cid = assetAddress.uri.split('//')[1];
-    const ipfsDataResult = await GetSolanaIPFSData(cid); // Get the Solana token metadata from IPFS
-
+    const url = assetAddress.uri;
+    const ipfsDataResult = await GetSolanaIPFSData(url); // Get the Solana token metadata from IPFS
     if (!ipfsDataResult.success) return {
         success: false,
         errMessage: ipfsDataResult.errMessage,
@@ -126,7 +142,6 @@ export async function GetSolanaCitizenMetadata(assetAddress: AssetV1): Promise<R
 
 export async function GetCampaignCitizensMetadata(walletAddress: string): Promise<Result<CitizenMetadata[]>> { //This function will change when we add more campaigns to Solana to handle multiple collectionIds
     const assetsResult = await GetCollectionAssetByOwner(walletAddress, COLLECTION_ID);
-
     if (!assetsResult.success) return {
         success: false,
         errMessage: assetsResult.errMessage,
@@ -294,7 +309,7 @@ export async function GetSolanaUserFeatureAssets(walletAddress: string, campaign
     }
 }
 
-export async function TransferToAsset(assetAddress: string, sourceAssetAddress: string): Promise<Result<TransactionBuilder>> {
+export async function TransferToAsset(assetAddress: string, sourceAssetAddress: string, payerSigner: Signer): Promise<Result<TransactionBuilder>> {
     try {
         const sourceAssetPublicKey = publicKey(sourceAssetAddress);
         const sourceAssetPda = findAssetSignerPda(UMI, { asset: sourceAssetPublicKey });
@@ -308,6 +323,7 @@ export async function TransferToAsset(assetAddress: string, sourceAssetAddress: 
             collection: collection?.publicKey,
             asset: assetPublicKey,
             newOwner: sourceAssetPda,
+            authority: payerSigner,
         });
 
         return {
@@ -325,7 +341,7 @@ export async function TransferToAsset(assetAddress: string, sourceAssetAddress: 
     }
 }
 
-export async function TransferFromAsset(assetAddress: string, sourceAssetAddress: string): Promise<Result<TransactionBuilder>> {
+export async function TransferFromAsset(assetAddress: string, sourceAssetAddress: string, newOwner: PublicKey): Promise<Result<TransactionBuilder>> {
     try {
         const sourceAssetPublicKey = publicKey(sourceAssetAddress);
         const sourceAssetPda = findAssetSignerPda(UMI, { asset: sourceAssetPublicKey });
@@ -348,7 +364,7 @@ export async function TransferFromAsset(assetAddress: string, sourceAssetAddress
             asset,
             collection,
             authority: sourceAssetPdaSigner,
-            newOwner: UMI.identity.publicKey,
+            newOwner,
         });
 
         const executeInstruction = execute(UMI, {
@@ -374,7 +390,8 @@ export async function TransferFromAsset(assetAddress: string, sourceAssetAddress
     }
 }
 
-async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<TransactionBuilder>> {
+//This function will be only callable successfully by server
+export async function UpdateAsset(assetAddress: string, uri: string, payerAddress: string): Promise<Result<TransactionBuilder>> {
     try {
         const assetPublicKey = publicKey(assetAddress);
         const asset = await fetchAsset(UMI, assetPublicKey);
@@ -383,11 +400,17 @@ async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<Tr
             ? await fetchCollection(UMI, asset.updateAuthority.address)
             : undefined;
 
+        if (!ADMIN_SIGNER) return {
+            success: false,
+            errMessage: "Admin signer not initialized. Check if you are calling this function from server side",
+            errCode: CommonErrorCode.InternalError
+        };
+
         const updateAssetInstruction = update(UMI, {
             asset,
             collection,
             uri,
-            payer: createNoopSigner(UMI.identity.publicKey),
+            payer: createNoopSigner(publicKey(payerAddress)),
             authority: ADMIN_SIGNER,
         });
 
@@ -406,12 +429,12 @@ async function UpdateAsset(assetAddress: string, uri: string): Promise<Result<Tr
     }
 }
 
-async function UnequipFeatures(assetAddress: string, features: SolanaAttribute[]): Promise<Result<TransactionBuilder>> {
+async function UnequipFeatures(assetAddress: string, features: SolanaAttribute[], newOwner: PublicKey): Promise<Result<TransactionBuilder>> {
     let txBuilder = transactionBuilder();
 
     for (let index = 0; index < features.length; index++) {
         const feature = features[index];
-        const transferFromAssetInstruction = await TransferFromAsset(feature.asset_address as string, assetAddress);
+        const transferFromAssetInstruction = await TransferFromAsset(feature.asset_address as string, assetAddress, newOwner);
 
         if (!transferFromAssetInstruction.success) return {
             success: false,
@@ -427,12 +450,12 @@ async function UnequipFeatures(assetAddress: string, features: SolanaAttribute[]
     };
 
 }
-export async function EquipFeatures(assetAddress: string, features: SolanaAttribute[]): Promise<Result<TransactionBuilder>> {
+export async function EquipFeatures(assetAddress: string, features: SolanaAttribute[], payerSigner: Signer): Promise<Result<TransactionBuilder>> {
     let txBuilder = transactionBuilder();
 
     for (let index = 0; index < features.length; index++) {
         const feature = features[index];
-        const transferToAssetInstruction = await TransferToAsset(feature.asset_address as string, assetAddress);
+        const transferToAssetInstruction = await TransferToAsset(feature.asset_address as string, assetAddress, payerSigner);
 
         if (!transferToAssetInstruction.success) return {
             success: false,
@@ -449,10 +472,11 @@ export async function EquipFeatures(assetAddress: string, features: SolanaAttrib
     };
 }
 
-export async function SetNewCombination(assetAddress: string, metadataIpfsCid: string, newFeatures: SolanaAttribute[], oldFeatures: SolanaAttribute[]): Promise<Result<boolean>> {
+export async function SetNewCombinationSerializedTransaction(assetAddress: string, metadataIpfsCid: string, newFeatures: SolanaAttribute[], oldFeatures: SolanaAttribute[], payerAddress: string): Promise<Result<string>> {
     try {
         let txBuilder = transactionBuilder();
-        const updateAssetInstruction = await UpdateAsset(assetAddress, `ipfs://${metadataIpfsCid}`);
+        const updateAssetInstruction = await UpdateAsset(assetAddress, `ipfs://${metadataIpfsCid}`, payerAddress);
+        const payerSigner = createNoopSigner(publicKey(payerAddress));
 
         if (!updateAssetInstruction.success) return {
             success: false,
@@ -461,16 +485,17 @@ export async function SetNewCombination(assetAddress: string, metadataIpfsCid: s
         };
         txBuilder = txBuilder.add(updateAssetInstruction.value);
 
-        const equipFeaturesInstruction = await EquipFeatures(assetAddress, newFeatures);
+        const equipFeaturesInstruction = await EquipFeatures(assetAddress, newFeatures, payerSigner);
 
         if (!equipFeaturesInstruction.success) return {
             success: false,
             errMessage: "Couldn't complete transaction building",
             errCode: CommonErrorCode.InternalError
         };
+
         txBuilder = txBuilder.add(equipFeaturesInstruction.value);
 
-        const unequipFeaturesInstruction = await UnequipFeatures(assetAddress, oldFeatures);
+        const unequipFeaturesInstruction = await UnequipFeatures(assetAddress, oldFeatures, payerSigner.publicKey);
 
         if (!unequipFeaturesInstruction.success) return {
             success: false,
@@ -479,11 +504,17 @@ export async function SetNewCombination(assetAddress: string, metadataIpfsCid: s
         };
         txBuilder = txBuilder.add(unequipFeaturesInstruction.value);
 
-        await txBuilder.sendAndConfirm(UMI, { send: { commitment: 'finalized' } });
+        const serializedTxBuilder = await SerializeTransaction(txBuilder);
+
+        if (!serializedTxBuilder.success) return {
+            success: false,
+            errMessage: serializedTxBuilder.errMessage,
+            errCode: CommonErrorCode.InternalError
+        };
 
         return {
             success: true,
-            value: true
+            value: serializedTxBuilder.value
         }
     } catch (e) {
         const err = e as Error;
@@ -493,5 +524,76 @@ export async function SetNewCombination(assetAddress: string, metadataIpfsCid: s
             errMessage: err.message,
             errCode: CommonErrorCode.InternalError
         }
+    }
+}
+
+export async function SetNewCombination(assetAddress: string, metadataIpfsCid: string, newFeatures: SolanaAttribute[], oldFeatures: SolanaAttribute[]): Promise<Result<boolean>> {
+    const serializedTx = await GetSolanaSetNewCombinationSerializedTransaction(assetAddress, metadataIpfsCid, newFeatures, oldFeatures, UMI.identity.publicKey.toString());
+    if (!serializedTx.success) return {
+        success: false,
+        errMessage: serializedTx.errMessage,
+        errCode: CommonErrorCode.InternalError
+    };
+    const deserializedTx = await DeserializeTransaction(serializedTx.value);
+    if (!deserializedTx.success) return {
+        success: false,
+        errMessage: deserializedTx.errMessage,
+        errCode: CommonErrorCode.InternalError
+    };
+    try {
+        const signedDeserialziedTx = await UMI.identity.signTransaction(deserializedTx.value);
+        await UMI.rpc.sendTransaction(signedDeserialziedTx);
+    } catch (e) {
+        const err = e as Error;
+        void LogError(Module.SolanaContractUtil, "Couldn't send transaction", e);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        };
+    }
+    return {
+        success: true,
+        value: true
+    };
+}
+
+export async function SerializeTransaction(transaction: TransactionBuilder): Promise<Result<string>> {
+    try {
+        const signedTx = await transaction.buildAndSign(UMI);
+        const serialiedTx = UMI.transactions.serialize(signedTx);
+        const serializedCreateAssetTxAsString = base64.deserialize(serialiedTx)[0];
+        return {
+            success: true,
+            value: serializedCreateAssetTxAsString
+        };
+    } catch (e) {
+        const err = e as Error;
+        void LogError(Module.SolanaContractUtil, "Couldn't serialize transaction", e);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        };
+    }
+}
+
+export async function DeserializeTransaction(serializedTx: string): Promise<Result<Transaction>> {
+    try {
+        const deserializedCreateAssetTxAsU8 = base64.serialize(serializedTx);
+        const deserializedCreateAssetTx = UMI.transactions.deserialize(deserializedCreateAssetTxAsU8);
+
+        return {
+            success: true,
+            value: deserializedCreateAssetTx
+        };
+    } catch (e) {
+        const err = e as Error;
+        void LogError(Module.SolanaContractUtil, "Couldn't deserialize transaction", e);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        };
     }
 }

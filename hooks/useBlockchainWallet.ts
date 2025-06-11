@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetLuksoUserFeatures } from '../utils/web3/lukso/contract.util';
-import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetSolanaUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
+import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetSolanaUserFeatureAssets, InitializeClientUmi } from '../utils/web3/solana/contract.util';
 import { CitizenMetadata, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
@@ -42,7 +42,7 @@ export function useBlockchainWallet() {
 
   /* Fetching relatedhooks */
   const { ready, user, authenticated, isModalOpen } = usePrivy(); //Privy Auth
-  const { userSession, isFetchingSession, signOutPass } = useAuth(); //Pass Auth
+  const { signOutPass } = useAuth(); //Pass Auth
 
   /* Login and Logout related hooks */
 
@@ -55,9 +55,6 @@ export function useBlockchainWallet() {
 
   const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Ethereum Wallets
   const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets
-
-  const signer = useFutureverseSigner(); //Futureverse Signer
-
 
   const getCampaignParams = async (campaign: Campaign) => {
     const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
@@ -370,7 +367,7 @@ export function useBlockchainWallet() {
     }
   }
 
-//Remove Phantom from ethereum login methods
+  //Remove Phantom from ethereum login methods
   useEffect(() => {
     if (isModalOpen) {
       let tries = 0;
@@ -444,7 +441,12 @@ export function useBlockchainWallet() {
           } else if (chainType === Blockchain.Solana && isSolanaReady) {
             const solanaWallet = solanaWallets[0];
 
-            await InitializeUmi(solanaWallet);
+            const result = await InitializeClientUmi(solanaWallet);
+
+            if (!result.success) {
+              logout();
+              return;
+            }
 
             dispatch(connect({
               address: user?.wallet?.address,
@@ -464,25 +466,6 @@ export function useBlockchainWallet() {
       else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: false }));
     }
   }, [ready, authenticated, isEthereumReady, isSolanaReady]);
-
-  // Root Logic
-  useEffect(() => {
-    const connectPromise = async () => {
-      if (!isFetchingSession && userSession && signer) {
-        const eoa = userSession.linked[0].eoa;
-
-        await InitializeContractEssentialData(signer);
-
-        dispatch(connect({ address: eoa, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
-        setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: true }));
-      }
-      if (!isFetchingSession && !userSession) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
-        if (blockchainType === Blockchain.Root) dispatch(disconnect());
-        else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Pass]: false }));
-      }
-    }
-    connectPromise();
-  }, [isFetchingSession, userSession, signer]);
 
   useEffect(() => {
     if (isConnected === true) {

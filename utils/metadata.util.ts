@@ -13,6 +13,10 @@ export async function GetImageUrl(campaign: Campaign, combination: string): Prom
     return `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${TEMP_CAMPAIGN_SWITCH[campaign]}%2Favatar_images%2F${combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
 }
 
+export async function GetIpfsHttpsUrl(cid: string): Promise<string> {
+    return `https://thehub.mypinata.cloud/ipfs/${cid}`
+}
+
 export async function GetVrmUrl(campaign: Campaign, combination: string): Promise<string> {
     return `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign}%2Favatar_vrms%2F${combination}.vrm?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
 }
