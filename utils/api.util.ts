@@ -11,9 +11,9 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
-import { DataBaseDrop, UserXPData } from "../interfaces/citizens.interface";
+import { DataBaseDrop, SolanaAttribute, UserXPData } from "../interfaces/citizens.interface";
 import { Blockchain } from "../enums/blockchain/common.enum";
-import { TransactionBuilder } from "@metaplex-foundation/umi";
+import { Transaction, TransactionBuilder } from "@metaplex-foundation/umi";
 
 //#region Generic
 type QueryParams = { [p: string]: string | number | undefined | null };
@@ -202,15 +202,15 @@ export async function GetUserXPData(address: string, blockchainType: Blockchain)
   return { success: true, value: data.data };
 }
 
-export async function GetSolanaUpdateTransaction(assetAddress: string, uri: string): Promise<Result<TransactionBuilder>> {
+export async function GetSolanaSetNewCombinationSerializedTransaction(assetAddress: string, metadataIpfsCid: string, newFeatures: SolanaAttribute[], oldFeatures: SolanaAttribute[], payerAddress: string): Promise<Result<string>> {
   const response = await fetch(ApiRoutesV1.Solana, {
-    method: 'GET',
-    body: JSON.stringify({ assetAddress, uri }),
+    method: 'POST',
+    body: JSON.stringify({ assetAddress, metadataIpfsCid, newFeatures, oldFeatures, payerAddress }),
     headers: {
       'Content-Type': 'application/json'
     }
   });
   if (!response.ok) return { success: false, errMessage: 'Failed to get solana update transaction', errCode: CommonErrorCode.GetNoData };
-  const data = await response.json();
-  return { success: true, value: data.data };
+  const {data} = await response.json();
+  return { success: true, value: data };
 }
