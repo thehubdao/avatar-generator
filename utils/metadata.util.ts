@@ -1,6 +1,6 @@
 import { CitizenMetadata, LuksoMetadata, SolanaMetadata } from "../interfaces/citizens.interface";
 import { PinataSDK } from "pinata-web3";
-import { Campaign } from "../enums/citizens/common.enum";
+import { Campaign, CampaignBaseCombination } from "../enums/citizens/common.enum";
 import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { LogError } from "./common.util";
@@ -10,6 +10,7 @@ import { TEMP_CAMPAIGN_SWITCH } from "../constants/lukso/contract.constant";
 const pinata = new PinataSDK({ pinataGateway: 'lukso.mypinata.cloud', pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT })
 
 export async function GetImageUrl(campaign: Campaign, combination: string): Promise<string> {
+    combination = CampaignBaseCombination.Based; //TEMPORARILY SET TO BASE COMBINATION FOR ALL NFTS
     return `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${TEMP_CAMPAIGN_SWITCH[campaign]}%2Favatar_images%2F${combination}.png?alt=media&token=d6808b15-0859-4025-8397-f3137bb170cb`
 }
 
