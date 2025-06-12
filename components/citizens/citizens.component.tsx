@@ -12,15 +12,16 @@ import { SaveFile } from "../../utils/exporter.util";
 import { BodyPart } from "../../interfaces/avatar.interface";
 import { GetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
-import { CampaignBaseCombination, Campaign, CampaignBaseUrl } from "../../enums/citizens/common.enum";
-import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
+import { CampaignBaseCombination, Campaign, CampaignBaseUrl, RootCampaign } from "../../enums/citizens/common.enum";
+import { setCitizensMetadata, setSelectedCitizen, setUserFeatures } from "../../store/citizensMetadataSlice";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
-import { GetRootAssetsMetadata, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
+import { GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
 import { Drop, LuksoMetadata, RootDrop, RootMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
 import { StoreAssetData } from "../../utils/firebase.util";
 import { AssetData } from "../../interfaces/firebase.interface";
+import { AppCampaigns, CampaignDrops } from "../../types/citizens.type";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -332,6 +333,16 @@ export default function CitizensComponent() {
     return false;
   }
 
+  async function fetchRootUserFeatureAssets(walletAddress: string, campaign: RootCampaign): Promise<boolean> {
+    const result = await GetRootUserFeatureAssets(walletAddress, campaign);
+    if (result.success) {
+      dispatch(setUserFeatures(result.value as CampaignDrops<AppCampaigns>));
+      return true;
+    }
+    LogError(Module.Citizens, 'Failed to fetch root user feature assets', result.errCode);
+    return false;
+  }
+
   async function saveLuksoCombination() {
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
@@ -622,9 +633,10 @@ export default function CitizensComponent() {
       return false;
     }
 
-    const isFetchSuccess = await fetchRootMetadata(walletAddress);
+    const isMetadataFetchSuccess = await fetchRootMetadata(walletAddress);
+    const isUserFeatureFetchSuccess = await fetchRootUserFeatureAssets(walletAddress, RootCampaign[currentCampaign]);
 
-    return isFetchSuccess;
+    return isMetadataFetchSuccess && isUserFeatureFetchSuccess;
   }
 
   async function handleSaveCombination() {

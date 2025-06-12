@@ -7,12 +7,12 @@ import '@therootnetwork/api-types';
 import { GetAssetData, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { Campaign, CampaignBaseCombination, RootCampaign } from '../../../enums/citizens/common.enum';
-import { CitizenMetadata, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
+import { CitizenMetadata, LinkableToken, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
 import { RootTransactionStatus } from '../../../enums/web3';
-import { CreateAssetLinkOperationMessage, DeleteAssetLinkOperationMessage } from './registry.util';
+import { CreateAssetLinkOperationMessage, DeleteAssetLinkOperationMessage, GetLinkableTokenId } from './registry.util';
 import { GetCampaignDrops } from '../citizens.util';
 import { Keyring } from '@polkadot/api';
 import { hexToU8a } from '@polkadot/util';
@@ -27,9 +27,9 @@ export function GetAdminSigner(): KeyringPair {
   return adminSigner
 }
 
-export async function GetRootAssetTokenIds(address: string): Promise<Result<number[]>> {
+export async function GetRootAssetTokenIds(address: string, collectionId: string): Promise<Result<number[]>> {
   try {
-    const ownedTokens = await API.rpc.nft.ownedTokens(NFT_COLLECTION_ID, address, 0, 1000);
+    const ownedTokens = await API.rpc.nft.ownedTokens(collectionId, address, 0, 1000);
 
     const jsonResponse = ownedTokens.toJSON();
     const tokenIds = jsonResponse[2];
@@ -73,6 +73,34 @@ export async function HasSftBalance(address: string, sftCollectionId: string, sf
   }
 }
 
+export async function GetLinkableTokenIds(address: string, collectionId: string): Promise<Result<LinkableToken[]>> {
+  try {
+    const tokenIdsResult = await GetRootAssetTokenIds(address, collectionId);
+
+    if (!tokenIdsResult.success) return { success: false, errMessage: tokenIdsResult.errMessage, errCode: tokenIdsResult.errCode };
+
+    const tokenIds = tokenIdsResult.value;
+    const linkableTokenIdsPromises = tokenIds.map(async (tokenId) => {
+      {
+        const isLinkableResult = await GetLinkableTokenId(collectionId, tokenId.toString());
+
+        if (!isLinkableResult.success) return null;
+        if (!isLinkableResult.value) return null;
+
+        return isLinkableResult.value;
+      }
+    });
+    const linkableTokenIdsResults = await Promise.all(linkableTokenIdsPromises);
+    const linkableTokenIds = linkableTokenIdsResults.filter(linkable => linkable !== null);
+
+    return { success: true, value: linkableTokenIds };
+  } catch (error) {
+    const e = error as Error;
+    LogError(Module.RootContractUtil, 'Error on getting linkable token ids');
+    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+  }
+}
+
 export async function GetRootAssetMetadata(tokenId: string): Promise<Result<CitizenMetadata>> {
   try {
     const assetDataResult = await GetAssetData(Campaign.Based, NFT_COLLECTION_ID as string, tokenId);
@@ -102,7 +130,7 @@ export async function GetRootAssetMetadata(tokenId: string): Promise<Result<Citi
 }
 
 export async function GetRootAssetsMetadata(address: string): Promise<Result<CitizenMetadata[]>> {
-  const tokenIdsResult = await GetRootAssetTokenIds(address);
+  const tokenIdsResult = await GetRootAssetTokenIds(address, NFT_COLLECTION_ID);
 
   if (!tokenIdsResult.success)
     return { success: false, errMessage: tokenIdsResult.errMessage, errCode: tokenIdsResult.errCode };
@@ -125,7 +153,7 @@ export async function MintRootAsset(
   try {
     const mintBuilder = TransactionBuilder.nft(API, SIGNER, address, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
     await mintBuilder.signAndSend();
-    const tokenIdsResult = await GetRootAssetTokenIds(address);
+    const tokenIdsResult = await GetRootAssetTokenIds(address, NFT_COLLECTION_ID);
     if (tokenIdsResult.success) {
       const tokenIds = tokenIdsResult.value;
       const tokenId = tokenIds[tokenIds.length - 1].toString();
@@ -189,12 +217,18 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
     };
 
     const dropsCheckPromiseList = rootDrops.value.map(async (drop) => {
-      const dropData = await HasSftBalance(address, drop.collectionId, drop.tokenId);
-      if (!dropData.success) return undefined;
-      return dropData.value ? drop : undefined;
+      const linkableTokenIdsResult = await GetLinkableTokenIds(address, drop.collectionId); //Get the linkable token ids for the drop
+
+      if (!linkableTokenIdsResult.success) return null;
+      if (linkableTokenIdsResult.value.length === 0) return null;
+
+      drop.linkableTokens = linkableTokenIdsResult.value;
+
+      return drop;
     });
+
     const dropsCheck = await Promise.all(dropsCheckPromiseList);
-    const filteredDrops = dropsCheck.filter((dropCheck) => dropCheck !== undefined);
+    const filteredDrops = dropsCheck.filter((dropCheck) => dropCheck !== null); //Filter out the drops that are linkable
 
     return {
       success: true,
@@ -215,7 +249,8 @@ export async function EquipFeaturesOperations(parent_collection_id: string, pare
   const operations: Operation[] = [];
 
   for (const attribute of newAttributes) {
-    const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, attribute.collectionId, attribute.tokenId);
+    const firstLinkableToken = attribute.linkableTokens[0];
+    const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, attribute.collectionId, firstLinkableToken.tokenId);
     if (!createAssetLinkOperation.success) return { success: false, errMessage: createAssetLinkOperation.errMessage, errCode: createAssetLinkOperation.errCode };
     operations.push(createAssetLinkOperation.value);
   }
@@ -227,7 +262,11 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
   const operations: Operation[] = [];
 
   for (const attribute of oldAttributes) {
-    const deleteAssetLinkOperation = DeleteAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, attribute.collectionId, attribute.tokenId);
+    const linkedToken = attribute.linkableTokens.find(linkableToken => linkableToken.parentTokenId === parent_token_id);
+
+    if(!linkedToken) return { success: false, errMessage: 'Linked token not found', errCode: CommonErrorCode.InternalError };
+
+    const deleteAssetLinkOperation = DeleteAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, attribute.collectionId, linkedToken.tokenId);
     if (!deleteAssetLinkOperation.success) return { success: false, errMessage: deleteAssetLinkOperation.errMessage, errCode: deleteAssetLinkOperation.errCode };
     operations.push(deleteAssetLinkOperation.value);
   }
@@ -269,13 +308,8 @@ export async function SetRootNewCombination(address: string, parent_tokenId: str
   return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
 }
 
-export function SetAvatarTransferableTx(collectionId: string, tokenId: string, transferable: boolean) {
+export function SetAssetTransferableTx(collectionId: string, tokenId: string, transferable: boolean) {
   const transferableTx = API.tx.nft.setTokenTransferableFlag([collectionId, tokenId], transferable);
-  return transferableTx;
-}
-
-async function SetWearableTransferableTx(collectionId: string, tokenId: string, transferable: boolean) {
-  const transferableTx = API.tx.sft.setTokenTransferableFlag([collectionId, tokenId], transferable);
   return transferableTx;
 }
 
@@ -295,18 +329,20 @@ export async function SetRootAssetsTransferable(collectionId: string, tokenId: s
     if (oldFeatureIndex !== 0) { //If the feature index is not 0, it means it's a wearable, will be marked as transferable as it got unequipped
       const drop = rootDrops.find(drop => drop.index === oldFeatureIndex && drop.type === campaignFeatures[oldFeatureIndex].displayName);
       if (!drop) return { success: false, errMessage: 'Drop not found for old feature index', errCode: CommonErrorCode.InternalError };
-      txs.push(await SetWearableTransferableTx(drop.collectionId, drop.tokenId, true));
+      const firstLinkableToken = drop.linkableTokens[0];
+      txs.push(SetAssetTransferableTx(drop.collectionId, firstLinkableToken.tokenId, true));
     }
 
     if (newFeatureIndex != 0) { //If the feature index is not 0, it means it's a wearable, will be marked as non transferable as it got equipped
       const drop = rootDrops.find(drop => drop.index === newFeatureIndex && drop.type === campaignFeatures[newFeatureIndex].displayName);
       if (!drop) return { success: false, errMessage: 'Drop not found for new feature index', errCode: CommonErrorCode.InternalError };
-      txs.push(await SetWearableTransferableTx(drop.collectionId, drop.tokenId, false));
+      const firstLinkableToken = drop.linkableTokens[0];
+      txs.push(SetAssetTransferableTx(drop.collectionId, firstLinkableToken.tokenId, false));
     }
   }
 
-  if (newCombination === CampaignBaseCombination.Based) txs.push(SetAvatarTransferableTx(collectionId, tokenId, true)); //If the new combination is base combination, mark avatar as transferable
-  else txs.push(SetAvatarTransferableTx(collectionId, tokenId, false)); //If the new combination is not base combination, mark avatar as non transferable
+  if (newCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, true)); //If the new combination is base combination, mark avatar as transferable
+  else txs.push(SetAssetTransferableTx(collectionId, tokenId, false)); //If the new combination is not base combination, mark avatar as non transferable
 
   const batchTx = API.tx.utility.batch(txs);
   await batchTx.signAndSend(KEYRING_SIGNER);

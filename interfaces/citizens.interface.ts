@@ -134,11 +134,17 @@ export interface Drop {
   name: string;
   typeIndex: number;
 }
+export interface LinkableToken {
+  tokenId: string;
+  parentTokenId?: string;
+  parentCollectionId?: string;
+  isLinkable: boolean;
+}
 
 export interface RootDrop extends Drop {
   schemaPart: string;
-  tokenId: string;
   collectionId: string;
+  linkableTokens: LinkableToken[];
 }
 
 export interface CampaignMetadata extends Record<Campaign, CitizenMetadata[]> { }

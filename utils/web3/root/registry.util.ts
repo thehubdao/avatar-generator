@@ -1,11 +1,11 @@
 import { Operation } from "@futureverse/artm";
 import { CHAIN_ID, DOMAIN, ORIGIN, ROOT_GQL_API_URL, ROOT_NETWORK_WS_URL } from "../../../constants/root/contract.constant";
-import { CampaignParameterName, CommonErrorCode } from "../../../enums/common.enum";
+import { CampaignParameterName, CommonErrorCode, Module } from "../../../enums/common.enum";
 import { Result } from "../../../types/common.type";
-import { AssetLink, RootDrop } from "../../../interfaces/citizens.interface";
+import { AssetLink, LinkableToken, RootDrop } from "../../../interfaces/citizens.interface";
 import { Campaign } from "../../../enums/citizens/common.enum";
 import { GetCampaignDrops } from "../citizens.util";
-import { GetRootAssetMetadata } from "./contract.util";
+import { GetRootAssetMetadata, SetRootAssetsTransferable } from "./contract.util";
 import { GetParameter, StoreAssetData } from "../../firebase.util";
 import { FeatureBasic } from "../../../interfaces/common.interface";
 import { createSiweMessage, generateSiweNonce } from "viem/siwe";
@@ -13,6 +13,7 @@ import { createWalletClient, getAddress, http } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { GetImageUrl } from "../../metadata.util";
 import { AssetData } from "../../../interfaces/firebase.interface";
+import { LogError } from "../../common.util";
 
 export function CreateAssetLinkOperationMessage(schemaPart: string, parent_collection_id: string, parent_token_id: string, child_collection_id: string, child_token_id: string): Result<Operation> {
 
@@ -53,6 +54,7 @@ export function DeleteAssetLinkOperationMessage(schemaPart: string, parent_colle
 }
 
 export async function GetAssetLinks(collection_id: string, token_id: string): Promise<Result<AssetLink[]>> {
+    try {
     const graphqlLinksQuery = JSON.stringify({
         query: "query Asset($tokenId: String!, $collectionId: CollectionId! ) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        childLinks {\n          asset {\n            tokenId\n            collectionId\n            schema {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n}",
         variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}` }
@@ -70,9 +72,41 @@ export async function GetAssetLinks(collection_id: string, token_id: string): Pr
     const links = resultJson.data.asset.links.childLinks as AssetLink[];
 
     return { success: true, value: links };
+  } catch (error) {
+    const e = error as Error;
+    LogError(Module.RootRegistryUtil, 'Error on getting asset links');
+    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+  }
 }
 
+export async function GetLinkableTokenId(collectionId: string, tokenId: string): Promise<Result<LinkableToken>> {
+    try {
+    const graphqlParentLinkQuery = JSON.stringify({
+        query: "query Query($tokenId: String!, $collectionId: CollectionId!) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        id\n        parentLink {\n          id\n          collectionId\n          tokenId\n        }\n      }\n    }\n  }\n}",
+        variables: { "tokenId": tokenId, "collectionId": `${CHAIN_ID}:root:${collectionId}` }
+    })
+
+    const result = await fetch(ROOT_GQL_API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: graphqlParentLinkQuery,
+    });
+    const resultText = await result.text();
+    const resultJson = JSON.parse(resultText);
+    const parentLink = resultJson.data.asset.links.parentLink;
+    const linkableTokenId = parentLink === null ? { tokenId, isLinkable: false } : { tokenId: parentLink.tokenId, parentTokenId: parentLink.tokenId, parentCollectionId: parentLink.collectionId, isLinkable: true };
+
+    return { success: true, value: linkableTokenId };
+  } catch (error) {
+    const e = error as Error;
+    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+  }
+  }
+
 export async function GetRootAssetNewCombination(collection_id: string, token_id: string, currentCombination: string, campaignFeatures: FeatureBasic[], rootDrops: RootDrop[]): Promise<Result<string>> {
+    try {
     const assetCurrentCombinationArray = currentCombination.split('-');
 
     const assetLinksResult = await GetAssetLinks(collection_id, token_id);
@@ -86,7 +120,7 @@ export async function GetRootAssetNewCombination(collection_id: string, token_id
         if (!link) return 0; // If there's no link, use base feature
 
         const dropCollectionId = link.asset.collectionId.split(':')[2]; //If there's a link, get the collection id of the link
-        const newIndex = rootDrops.find(drop => drop.type === link.asset.schema.name && drop.collectionId === dropCollectionId && drop.tokenId === link.asset.tokenId); //Get the index of the new feature from drops array
+        const newIndex = rootDrops.find(drop => drop.type === link.asset.schema.name && drop.collectionId === dropCollectionId); //Get the index of the new feature from drops array
 
         if (!newIndex) return 0;
         return newIndex.index;
@@ -95,6 +129,11 @@ export async function GetRootAssetNewCombination(collection_id: string, token_id
     const newCombination = newCombinationArray.join('-'); //Join the new combination array to get the new combination
 
     return { success: true, value: newCombination };
+  } catch (error) {
+    const e = error as Error;
+    LogError(Module.RootRegistryUtil, 'Error on getting root asset new combination');
+    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+  }
 }
 
 export async function GetRootRegistryAuthToken(PK: string): Promise<Result<string>> {
@@ -128,6 +167,7 @@ export async function GetRootRegistryAuthToken(PK: string): Promise<Result<strin
         return { success: true, value: token };
     } catch (error) {
         const Error = error as Error;
+        LogError(Module.RootRegistryUtil, 'Error on getting root registry auth token');
         return { success: false, errMessage: Error.message, errCode: CommonErrorCode.InternalError };
     }
 }
@@ -156,11 +196,13 @@ export async function SetRootAssetImageUrl(imageUrl: string, collection_id: stri
         return { success: true, value: true };
     } catch (error) {
         const Error = error as Error;
+        LogError(Module.RootRegistryUtil, 'Error on setting root asset image url');
         return { success: false, errMessage: Error.message, errCode: CommonErrorCode.InternalError };
     }
 }
 
 export async function UpdateRootAsset(collection_id: string, token_id: string, authToken: string): Promise<Result<boolean>> {
+    try {
     const assetCurrentCombinationResult = await GetRootAssetMetadata(token_id);
     if (!assetCurrentCombinationResult.success) return { success: false, errMessage: assetCurrentCombinationResult.errMessage, errCode: assetCurrentCombinationResult.errCode };
     const assetCurrentCombination = assetCurrentCombinationResult.value.combination;
@@ -181,8 +223,8 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     if (!newCombinationResult.success) return { success: false, errMessage: newCombinationResult.errMessage, errCode: newCombinationResult.errCode };
     const newCombination = newCombinationResult.value;
 
-/*     const setRootAssetsTransferableResult = await SetRootAssetsTransferable(collection_id, token_id, assetCurrentCombination, newCombination, campaignFeatures, rootDropsArray);
-    if (!setRootAssetsTransferableResult.success) return { success: false, errMessage: setRootAssetsTransferableResult.errMessage, errCode: setRootAssetsTransferableResult.errCode }; */
+    const setRootAssetsTransferableResult = await SetRootAssetsTransferable(collection_id, token_id, assetCurrentCombination, newCombination, campaignFeatures, rootDropsArray);
+    if (!setRootAssetsTransferableResult.success) return { success: false, errMessage: setRootAssetsTransferableResult.errMessage, errCode: setRootAssetsTransferableResult.errCode };
 
     const imageUrl = await GetImageUrl(Campaign.Based, newCombination);
     const setRootAssetImageUrlResult = await SetRootAssetImageUrl(imageUrl, collection_id, token_id, authToken);
@@ -199,4 +241,9 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     if (!setRootAssetMetadataResult.success) return { success: false, errMessage: setRootAssetMetadataResult.errMessage, errCode: setRootAssetMetadataResult.errCode };
 
     return { success: true, value: true };
+  } catch (error) {
+    const Error = error as Error;
+    LogError(Module.RootRegistryUtil, 'Error on updating root asset');
+    return { success: false, errMessage: Error.message, errCode: CommonErrorCode.InternalError };
+  }
 }
