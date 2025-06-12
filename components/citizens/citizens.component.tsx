@@ -12,7 +12,7 @@ import { SaveFile } from "../../utils/exporter.util";
 import { BodyPart } from "../../interfaces/avatar.interface";
 import { GetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
-import { CampaignBaseCombination, Campaign, CampaignBaseUrl, RootCampaign } from "../../enums/citizens/common.enum";
+import { Campaign, CampaignBaseCombination, CampaignBaseUrl, RootCampaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen, setUserFeatures } from "../../store/citizensMetadataSlice";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
@@ -343,6 +343,7 @@ export default function CitizensComponent() {
 
   async function fetchRootUserFeatureAssets(walletAddress: string, campaign: RootCampaign): Promise<boolean> {
     const result = await GetRootUserFeatureAssets(walletAddress, campaign);
+
     if (result.success) {
       dispatch(setUserFeatures(result.value as CampaignDrops<AppCampaigns>));
       return true;
@@ -640,9 +641,8 @@ export default function CitizensComponent() {
       LogError(Module.Citizens, 'Failed to store asset data on saveRootCombination', storeAssetDataResult.errCode);
       return false;
     }
-
     const isMetadataFetchSuccess = await fetchRootMetadata(walletAddress);
-    const isUserFeatureFetchSuccess = await fetchRootUserFeatureAssets(walletAddress, RootCampaign[currentCampaign]);
+    const isUserFeatureFetchSuccess = await fetchRootUserFeatureAssets(walletAddress, RootCampaign.Based);
 
     return isMetadataFetchSuccess && isUserFeatureFetchSuccess;
   }
