@@ -96,7 +96,7 @@ export async function GetLinkableTokenId(collectionId: string, tokenId: string):
     const resultText = await result.text();
     const resultJson = JSON.parse(resultText);
     const parentLink = resultJson.data.asset.links.parentLink;
-    const linkableTokenId = parentLink === null ? { tokenId, isLinkable: false } : { tokenId: parentLink.tokenId, parentTokenId: parentLink.tokenId, parentCollectionId: parentLink.collectionId, isLinkable: true };
+    const linkableTokenId = parentLink === null ? { tokenId, isLinkable: true } : { tokenId, parentTokenId: parentLink.tokenId, parentCollectionId: parentLink.collectionId, isLinkable: false };
 
     return { success: true, value: linkableTokenId };
   } catch (error) {
