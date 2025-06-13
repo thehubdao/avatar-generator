@@ -550,7 +550,7 @@ export default function CitizensComponent() {
     );
 
     if (!metadataObject.success) {
-      LogError(Module.Citizens, 'Failed to upload metadata on saveSolanaCombination', metadataObject.errCode);
+      LogError(Module.Citizens, 'Failed to upload metadata on saveSolanaCombination', metadataObject.errMessage);
       return false;
     }
 
@@ -559,7 +559,7 @@ export default function CitizensComponent() {
     const setNewCombinationResult = await SetNewCombination((selectedCitizen.rawMetadata as SolanaMetadata).asset_address, metadataObject.value.uri, newAttributes, oldAttributes);
 
     if (!setNewCombinationResult.success) {
-      LogError(Module.Citizens, 'Failed to set new combination on saveSolanaCombination', setNewCombinationResult.errCode);
+      LogError(Module.Citizens, 'Failed to set new combination on saveSolanaCombination', setNewCombinationResult.errMessage);
       return false;
     }
 
@@ -625,7 +625,7 @@ export default function CitizensComponent() {
     const setNewCombinationResult = await SetRootNewCombination(walletAddress, selectedCitizen.tokenId, newAttributes, oldAttributes);
 
     if(!setNewCombinationResult.success) {
-      LogError(Module.Citizens, 'Failed to set new combination on saveRootCombination', setNewCombinationResult.errCode);
+      LogError(Module.Citizens, 'Failed to set new combination on saveRootCombination', setNewCombinationResult.errMessage);
       return false;
     }
     const newImageUrl = await GetImageUrl(currentCampaign, newCombination);
@@ -638,7 +638,7 @@ export default function CitizensComponent() {
     } as AssetData);
 
     if(!storeAssetDataResult.success) {
-      LogError(Module.Citizens, 'Failed to store asset data on saveRootCombination', storeAssetDataResult.errCode);
+      LogError(Module.Citizens, 'Failed to store asset data on saveRootCombination', storeAssetDataResult.errMessage);
       return false;
     }
     const isMetadataFetchSuccess = await fetchRootMetadata(walletAddress);
