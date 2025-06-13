@@ -83,7 +83,7 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
               <Button label="Backpack" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                 handleNavbarClick(CitizensPageLocation.BACKPACK);
               }} />
-              {selectedCampaign !== Campaign.Kumi && <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+              {selectedCampaign !== Campaign.Kumi && selectedCampaign !== Campaign.Based && <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                 handleNavbarClick(CitizensPageLocation.LEADERBOARD);
               }} />}
               <Button label="play" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
