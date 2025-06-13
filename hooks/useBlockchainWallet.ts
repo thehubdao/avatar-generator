@@ -73,9 +73,7 @@ export function useBlockchainWallet() {
   }
 
   async function getEthereumTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
-    console.log(new Date().toISOString(), "getEthereumTokensMetadataPromise START")
     const tokensMetadata = await GetCampaignsTokensMetadata(walletAddress);
-    console.log(new Date().toISOString(), "getEthereumTokensMetadataPromise END")
 
     if (tokensMetadata.success) return { success: true, value: tokensMetadata.value };
 
@@ -90,9 +88,7 @@ export function useBlockchainWallet() {
   }
 
   async function getEthereumUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
-    console.log(new Date().toISOString(), "getEthereumUserFeaturesPromise START")
     const features = await GetUserFeatures(walletAddress);
-    console.log(new Date().toISOString(), "getEthereumUserFeaturesPromise END")
 
     if (features.success) return { success: true, value: features.value };
 
@@ -100,9 +96,7 @@ export function useBlockchainWallet() {
   }
 
   async function getEthereumFollowerCountPromise(walletAddress: string): Promise<Result<FollowUserData>> {
-    console.log(new Date().toISOString(), "getEthereumFollowerCountPromise START")
     const followerCount = await GetFollowerCounts(walletAddress);
-    console.log(new Date().toISOString(), "getEthereumFollowerCountPromise END")
 
     if (followerCount.success) return { success: true, value: followerCount.value };
 
@@ -110,9 +104,7 @@ export function useBlockchainWallet() {
   }
 
   async function getEthereumLeaderboardDataPromise(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
-    console.log(new Date().toISOString(), "getEthereumLeaderboardDataPromise START")
     const leaderboardData = await GetFullLeaderboardData(walletAddress);
-    console.log(new Date().toISOString(), "getEthereumLeaderboardDataPromise END")
     if (leaderboardData.success) return { success: true, value: leaderboardData.value };
 
     return { success: false, errMessage: leaderboardData.errMessage, errCode: leaderboardData.errCode };
