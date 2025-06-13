@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import CitizensUI from "../../ui/citizens/citizens.ui";
 import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign, PostRequestVRMProcessFile } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
-import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, GetAvatarVRM, SetEnvironment, SetFeaturesData } from "../avatar/editor.component";
+import { ChangeFeature, ChangeSkinColor, ChangeStartAnimation, GetAvatarGLB, GetAvatarVRM, SetEnvironment, SetFeaturesData } from "../avatar/editor.component";
 import { Delay, LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
@@ -156,7 +156,7 @@ export default function CitizensComponent() {
     }
     for (const { val } of singleInitData.current.features) {
       const { id, path, type, name } = val;
-
+console.log(campaignParams?.config.skin?.defColor)
       await ChangeFeature(
         id,
         path,
@@ -188,11 +188,12 @@ export default function CitizensComponent() {
         lightMap?.path,
         campaignParams?.config.envMap?.skyboxConfig
       );
-
+    
       for (let i = 0; i < combinationArray.length; i++) {
         const combination = combinationArray[i];
         await getSingleData(selectedCampaign as string, combination);
         await loadSingleData();
+        await ChangeSkinColor(campaignParams?.config.skin?.defColor ?? 'FFFFFF', campaignParams?.config.skin?.materialName);
         await exportModel(combination);
 }
       setIsAllReady(true);
