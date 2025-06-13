@@ -212,7 +212,7 @@ console.log(campaignParams?.config.skin?.defColor)
     const modelGLB = modelGLBPromise.success ? modelGLBPromise.value : undefined;
     if (modelVRMPromise.success && modelGLBPromise.success) {
       const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
-      await UploadFile(new File([refinedModelVRM], `${combination}.vrm`), StorageLocation.AvatarVrms, undefined, campaignParams?.campaign)
+      await UploadFile(new File([refinedModelVRM], `${combination}.vrm`), StorageLocation.AvatarVrms, undefined, selectedCampaign as string)
       await SaveFile(modelGLB, `${combination}.glb`)
       await SaveFile(refinedModelVRM, `${combination}.vrm`)
     }
