@@ -30,7 +30,7 @@ export function GetAdminSigner(): KeyringPair {
 export async function GetRootAssetTokenIds(address: string, collectionId: string): Promise<Result<number[]>> {
   try {
     const ownedTokens = await API.rpc.nft.ownedTokens(collectionId, address, 0, 1000);
-
+    console.log('ownedTokens', ownedTokens, address, collectionId);
     const jsonResponse = ownedTokens.toJSON();
     const tokenIds = jsonResponse[2];
 
@@ -131,7 +131,7 @@ export async function GetRootAssetMetadata(tokenId: string): Promise<Result<Citi
 
 export async function GetRootAssetsMetadata(address: string): Promise<Result<CitizenMetadata[]>> {
   const tokenIdsResult = await GetRootAssetTokenIds(address, NFT_COLLECTION_ID);
-
+  console.log('tokenIdsResult', tokenIdsResult);
   if (!tokenIdsResult.success)
     return { success: false, errMessage: tokenIdsResult.errMessage, errCode: tokenIdsResult.errCode };
 
@@ -141,7 +141,7 @@ export async function GetRootAssetsMetadata(address: string): Promise<Result<Cit
 
   const filteredMetadata = metadataArray.filter(metadata => metadata.success);
   const mappedMetadata = filteredMetadata.map(metadata => metadata.value);
-
+  console.log('mappedMetadata', mappedMetadata);
   return { success: true, value: mappedMetadata };
 }
 
@@ -275,6 +275,7 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
 }
 
 export async function SetRootNewCombination(address: string, parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
+  try {
   const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, newAttributes);
   const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, oldAttributes);
 
@@ -305,7 +306,16 @@ export async function SetRootNewCombination(address: string, parent_tokenId: str
     return { success: true, value: true };
   }
 
-  return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
+    return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
+  } catch (e) {
+    const err = e as Error
+    void LogError(Module.SolanaContractUtil, "Couldn't set new combination", e);
+    return {
+      success: false,
+      errMessage: err.message,
+      errCode: CommonErrorCode.InternalError
+    }
+  }
 }
 
 export function SetAssetTransferableTx(collectionId: string, tokenId: string, transferable: boolean) {
