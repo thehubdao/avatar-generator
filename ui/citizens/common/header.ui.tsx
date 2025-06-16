@@ -8,6 +8,8 @@ import SocialButtons from "./socialButtons.ui";
 import { Campaign, CitizensPageLocation } from "../../../enums/citizens/common.enum";
 import { GoToPage } from "../../../utils/router.util";
 import { setEditMode } from "../../../store/citizensMetadataSlice";
+import AboutButton from "./aboutButton.ui";
+import AboutModal from "./aboutModal.ui";
 
 interface HeaderUIProps {
   onLogin?: () => void;
@@ -23,6 +25,7 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
   const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
 
   const [isBurguerOpen, setIsBurguerOpen] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
 
   const handleLogin = () => {
     if (onLogin) {
@@ -41,11 +44,19 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
     if (location) GoToPage(location);
   }
   return (
-    <header className="fixed w-full z-50 inset-0 h-fit flex justify-between items-center pt-8 px-6">
-      {/* LOGO THE HUB */}
-      <div className="w-fit h-fit" >
-        <LogoTheHub />
-      </div>
+    <>
+      <header className="fixed w-full z-50 inset-0 h-fit flex justify-between items-center pt-8 px-6">
+        {/* LEFT SECTION - LOGO AND ABOUT BUTTON */}
+        <div className="flex items-center gap-6">
+          <div className="w-fit h-fit" >
+            <LogoTheHub />
+          </div>
+          
+          {/* ABOUT BUTTON - Only show when not logged in, positioned next to logo */}
+          {!isLoggedIn && (
+            <AboutButton onClick={() => setIsAboutModalOpen(true)} />
+          )}
+        </div>
       {/* NAVBAR */}
       {isLoggedIn && !didMintingMode && !didSavingMode && !didEditMode &&
         <>
@@ -96,5 +107,12 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
         <ConnectButton onLogin={() => handleLogin()} onLogout={() => handleLogout()} />
       </div>
     </header>
+    
+    {/* ABOUT MODAL */}
+    <AboutModal 
+      isOpen={isAboutModalOpen} 
+      onClose={() => setIsAboutModalOpen(false)} 
+    />
+  </>
   )
 }
