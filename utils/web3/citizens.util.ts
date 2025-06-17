@@ -111,7 +111,7 @@ export async function GetUniversalProfileData(address: string): Promise<Result<{
 
   } catch (error) {
     const err = error as Error;
-    LogError(Module.Citizens, 'Error on getting universal profile data for', err.stack);
+    LogError(Module.Citizens, 'Error on getting universal profile data for ' + address, err.stack);
     return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }

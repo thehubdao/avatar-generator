@@ -282,30 +282,41 @@ export async function GetUserFeatures(address: string): Promise<Result<CampaignD
 
 export async function GetFullLeaderboardData(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
     const leaderboardData = await GetLeaderboardData(Blockchain.Ethereum);
-    const leaderboardWithProfileData = await Promise.all(leaderboardData.map(async (entry: LeaderboardEntry) => {
-        const profileData = await GetUniversalProfileData(entry.address);
-        if (!profileData.success) return entry; // If the profile data is not found, return the original entry
-        return {
-            ...entry,
-            name: profileData.value.name,
-            profileImage: profileData.value.profileImage,
-            isFollowing: false
+    
+    const followStatusesPromise = GetFollowStatuses(leaderboardData, PROVIDER, walletAddress);
+    const profileDataPromises = leaderboardData.map(async (entry: LeaderboardEntry) => {
+            const profileData = await GetUniversalProfileData(entry.address);
+            if (!profileData.success) return entry;
+            return {
+                ...entry,
+                name: profileData.success ? profileData.value.name : entry.name,
+                profileImage: profileData.success ? profileData.value.profileImage : entry.profileImage,
+                isFollowing: false
+            } as LeaderboardEntry;
+        }
+    );
+
+    const [followStatusesResult, ...leaderboardWithProfileData] = await Promise.all([
+        followStatusesPromise,
+        ...profileDataPromises
+    ]) as [Result<Record<string, boolean>>, ...LeaderboardEntry[]];
+
+    if (!followStatusesResult.success) {
+        return { 
+            success: false, 
+            errMessage: 'Error getting follow statuses', 
+            errCode: CommonErrorCode.FetchError 
         };
-    }));
-
-    if (!leaderboardWithProfileData) return { success: false, errMessage: 'Error getting leaderboard with profile data', errCode: CommonErrorCode.FetchError };
-
-    const followStatusesResult = await GetFollowStatuses(leaderboardWithProfileData, PROVIDER, walletAddress);
-
-    if (!followStatusesResult.success) return { success: false, errMessage: 'Error getting follow statuses', errCode: CommonErrorCode.FetchError };
+    }
 
     const followStatuses = followStatusesResult.value;
 
-    leaderboardWithProfileData.forEach((entry, index) => {
-        leaderboardWithProfileData[index].isFollowing = followStatuses[entry.address] || false;
-    });
+    const finalLeaderboardData = leaderboardWithProfileData.map(entry => ({
+        ...entry,
+        isFollowing: followStatuses[entry.address] || false
+    }));
 
-    return { success: true, value: leaderboardWithProfileData };
+    return { success: true, value: finalLeaderboardData };
 }
 
 export async function SetTokenMetadata(campaign: Campaign, tokenId: string, metadataUri: string): Promise<Result<void>> {
