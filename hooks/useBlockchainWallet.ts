@@ -147,11 +147,9 @@ export function useBlockchainWallet() {
     }
 
     if (blockchainType === Blockchain.Ethereum) {
-      console.log(new Date().toISOString(), "fetchAppData START")
       const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
       const ethereumUserFeatures = await getEthereumUserFeaturesPromise(walletAddress); // Get the user features
       const ethereumLeaderboardData = await getEthereumLeaderboardDataPromise(walletAddress); // Get the leaderboard data
-      console.log(new Date().toISOString(), "fetchAppData END")
 
       //Ethereum Citizens Metadata dispatch
       if (ethereumCitizensMetadata.success) {
