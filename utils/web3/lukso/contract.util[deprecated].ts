@@ -373,7 +373,8 @@ export async function BurnDrop(from: string, campaign: string, drop: BodyPart): 
 async function GetBalancesBatch(contractAddresses: string[], address: string) {
     const promises = contractAddresses.map(async (contractAddress) => {
         const contract = new Contract(contractAddress, AvatarContractAbi, provider);
-        return contract.balanceOf(address);
+        const balance = await contract.balanceOf(address);
+        return { contractAddress, balance: Number(balance) };
     });
 
     const balances = await Promise.all(promises);

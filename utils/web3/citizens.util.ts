@@ -69,9 +69,10 @@ export async function GetFollowerCounts(address: string): Promise<Result<FollowU
   try {
     const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_RPC_URL);
     const lsp26Contract = new ethers.Contract(LSP26_ADDRESS, LSP26_ABI, provider);
+    const followerCountPromise = lsp26Contract.followerCount(address);
+    const followingCountPromise = lsp26Contract.followingCount(address);
 
-    const followerCount = await lsp26Contract.followerCount(address);
-    const followingCount = await lsp26Contract.followingCount(address);
+    const [followerCount, followingCount] = await Promise.all([followerCountPromise, followingCountPromise]);
 
     return { success: true, value: { followerCount: Number(followerCount), followingCount: Number(followingCount) } };
   } catch (error) {
@@ -110,7 +111,7 @@ export async function GetUniversalProfileData(address: string): Promise<Result<{
 
   } catch (error) {
     const err = error as Error;
-    LogError(Module.Citizens, 'Error on getting universal profile data', err.stack);
+    LogError(Module.Citizens, 'Error on getting universal profile data for', err.stack);
     return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
