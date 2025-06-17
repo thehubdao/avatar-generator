@@ -41,3 +41,5 @@ yarn-error.log*
 # test pages
 /pages/test/
 /pages/api/testeo.ts
+
+*.yaml

@@ -17,11 +17,13 @@ import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { findAssetSignerPda } from '@metaplex-foundation/mpl-core';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { GetCollectionDocs } from '../../firebase.util';
+import { GetIpfsHttpsUrl } from '../../metadata.util';
 
-export async function InitializeUmi(wallet: ConnectedSolanaWallet) {
-    UMI.use(signerIdentity({
-        publicKey: publicKey(wallet.address),
-        signMessage: async (message: Uint8Array) =>
+export async function InitializeUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
+    try {
+        UMI.use(signerIdentity({
+            publicKey: publicKey(wallet.address),
+            signMessage: async (message: Uint8Array) =>
             await wallet.signMessage(message),
         signTransaction: async (transaction) => {
             const web3JsTransaction = toWeb3JsTransaction(transaction);
@@ -35,9 +37,22 @@ export async function InitializeUmi(wallet: ConnectedSolanaWallet) {
             );
             return signedTxs.map(fromWeb3JsTransaction);
         }
-    }));
-    UMI.use(mplCore());
-    UMI.use(mplCandyMachine());
+        }));
+        UMI.use(mplCore());
+        UMI.use(mplCandyMachine());
+        return {
+            success: true,
+            value: true
+        };
+    } catch (e) {
+        const err = e as Error;
+        void LogError(Module.SolanaContractUtil, "Couldn't initialize UMI", err.message);
+        return {
+            success: false,
+            errMessage: err.message,
+            errCode: CommonErrorCode.InternalError
+        };
+    }
 }
 
 export async function GetAssetsByOwner(walletAddress: string): Promise<Result<AssetV1[]>> {
@@ -82,8 +97,8 @@ export async function GetCollectionAssetByOwner(
 
 }
 export async function GetSolanaCitizenMetadata(assetAddress: AssetV1): Promise<Result<CitizenMetadata>> {
-    const cid = assetAddress.uri.split('//')[1];
-    const ipfsDataResult = await GetSolanaIPFSData(cid); // Get the Solana token metadata from IPFS
+    const url = assetAddress.uri;
+    const ipfsDataResult = await GetSolanaIPFSData(url); // Get the Solana token metadata from IPFS
 
     if (!ipfsDataResult.success) return {
         success: false,
@@ -184,14 +199,14 @@ export async function GetMintingPrice(walletAddress: string): Promise<Result<{ p
     if (mintingPrice.value.group === CandyMachineGroup.Holder) return {
         success: true,
         value: {
-            price: 0.0042, // This is the price for holders
+            price: 0.008, // This is the price for holders
             isHolder: true
         }
     };
     if (mintingPrice.value.group === CandyMachineGroup.Public) return {
         success: true,
         value: {
-            price: 0.2, // This is the price for public
+            price: 0.204, // This is the price for public
             isHolder: false
         }
     };
@@ -452,7 +467,7 @@ export async function EquipFeatures(assetAddress: string, features: SolanaAttrib
 export async function SetNewCombination(assetAddress: string, metadataIpfsCid: string, newFeatures: SolanaAttribute[], oldFeatures: SolanaAttribute[]): Promise<Result<boolean>> {
     try {
         let txBuilder = transactionBuilder();
-        const updateAssetInstruction = await UpdateAsset(assetAddress, `ipfs://${metadataIpfsCid}`);
+        const updateAssetInstruction = await UpdateAsset(assetAddress, await GetIpfsHttpsUrl(metadataIpfsCid));
 
         if (!updateAssetInstruction.success) return {
             success: false,

@@ -35,7 +35,7 @@ const nextConfig = {
     return config;
   },
   images: {
-    domains: ["api.universalprofile.cloud","firebasestorage.googleapis.com", "nftstorage.link", "gateway.pinata.cloud", "lukso.mypinata.cloud", "ipfs.io","universal.page"],
+    domains: ["api.universalprofile.cloud","firebasestorage.googleapis.com", "nftstorage.link", "gateway.pinata.cloud", "lukso.mypinata.cloud", "ipfs.io","universal.page", "thehub.mypinata.cloud"],
     remotePatterns: [
       {
         protocol: 'https',

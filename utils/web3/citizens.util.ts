@@ -23,9 +23,9 @@ export async function GetLuksoIPFSData(cid: string): Promise<Result<LuksoMetadat
   }
 }
 
-export async function GetSolanaIPFSData(cid: string): Promise<Result<SolanaMetadata>> {
+export async function GetSolanaIPFSData(url: string): Promise<Result<SolanaMetadata>> {
   try {
-    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
+    const ipfsHTTPUrl = url;
     const ipfsRequest = await fetch(ipfsHTTPUrl);
     const ipfsData = await ipfsRequest.json();
     const ipfsDataResult = ipfsData as SolanaMetadata;
@@ -55,10 +55,9 @@ export function GetLuksoImageUrl(metadata: CitizenMetadata): Result<string> {
 
 export function GetSolanaImageUrl(metadata: CitizenMetadata): Result<string> {
   try {
-    const cid = (metadata.rawMetadata as SolanaMetadata).image.split('//')[1];
-    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
+    const url = (metadata.rawMetadata as SolanaMetadata).image;
 
-    return { success: true, value: imageUrl };
+    return { success: true, value: url };
   } catch (error) {
     const err = error as Error;
     LogError(Module.Citizens, 'Error on getting Solana image url', err.stack);
