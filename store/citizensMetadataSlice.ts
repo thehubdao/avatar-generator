@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CitizenMetadata} from '../interfaces/citizens.interface';
-import { Campaign } from '../enums/citizens/common.enum';
+import { CitizenMetadata, ClaimableDrop} from '../interfaces/citizens.interface';
+import { Campaign, LuksoCampaign } from '../enums/citizens/common.enum';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { AppCampaigns, CampaignDrops } from '../types/citizens.type';
@@ -12,6 +12,7 @@ interface CitizensMetadataState {
   selectedCitizen: CitizenMetadata | null;
   leaderboardData: LeaderboardEntry[] | null | undefined;
   userFeatures: CampaignDrops<AppCampaigns> | null;
+  claimableDrops: Record<LuksoCampaign, ClaimableDrop[]> | null;
   mintSupply: number | null;
   mintingPrice: number | null;
   editMode: boolean;
@@ -28,6 +29,7 @@ const initialState: CitizensMetadataState = {
   userFeatures: null,
   mintSupply: null,
   mintingPrice: null,
+  claimableDrops: null,
   editMode: false,
   mintingMode: true,
   savingMode: false
@@ -70,9 +72,12 @@ export const citizensMetadataSlice = createSlice({
     },
     setMintingPrice: (state, action: PayloadAction<number | null>) => {
       state.mintingPrice = action.payload;
+    },
+    setClaimableDrops: (state, action: PayloadAction<Record<LuksoCampaign, ClaimableDrop[]>>) => {
+      state.claimableDrops = action.payload;
     }
   }
 });
 
-export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice } = citizensMetadataSlice.actions;
+export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice, setClaimableDrops } = citizensMetadataSlice.actions;
 export default citizensMetadataSlice.reducer;
