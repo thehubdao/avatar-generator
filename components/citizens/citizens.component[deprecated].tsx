@@ -3,7 +3,7 @@
 import { BasicData, CampaignParameters, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import { TokenId, CitizenMetadata } from "../../interfaces/citizens.interface";
 import CitizensUI from "../../ui/citizens/citizens.ui[deprecated]";
-import { CitizensCollection, DataBaseDrop } from "../../interfaces/citizens.interface";
+import { CitizensCollection, ClaimableDrop } from "../../interfaces/citizens.interface";
 import Button from "../../ui/citizens/common/button.ui";
 import ArrowLinkSVG from "../../ui/citizens/common/SVG/arrowLinkSVG.ui";
 import { Campaign, CitizensSections } from "../../enums/citizens/common.enum";
@@ -109,7 +109,7 @@ export default function CitizensComponent({ campaignParams, isLoggedIn, setCampa
   const [tokenIdList] = useState<TokenId[]>();
   const [userWearables] = useState<any | undefined>(undefined);
 
-  const [claimableDrops, ] = useState<DataBaseDrop[]>([])
+  const [claimableDrops, ] = useState<ClaimableDrop[]>([])
 
   const [leaderboardData, ] = useState<LeaderboardEntry[] | undefined>([]);
 

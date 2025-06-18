@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ApproveClaimForUser } from '../../../utils/web3/drops.util';
+import { ApproveClaimForUser } from '../../../utils/web3/drops.util[deprecated]';
 import { ApiResponse } from '../../../interfaces/api.interface';
 import {RequestResponse} from '../request.api-handler'
-import { DataBaseDrop } from '../../../interfaces/citizens.interface';
+import { ClaimableDrop } from '../../../interfaces/citizens.interface';
 
-export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<DataBaseDrop[] | { approved: boolean }>>) {
+export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<ClaimableDrop[] | { approved: boolean }>>) {
   const { method, body } = req;
 
   switch (method) {
