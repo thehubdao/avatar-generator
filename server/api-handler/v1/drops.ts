@@ -23,7 +23,7 @@ async function HandleApproveClaim(body: NextApiRequest['body'], res: NextApiResp
   }
 
   try {
-    const isApproved = await ApproveClaimForUser(address, dropId);
+    const isApproved = await ApproveClaimForUser();
     return RequestResponse(res, "Successful", true, JSON.stringify({ approved: isApproved }));
   } catch (error) {
     console.error('Error approving claim:', error);
