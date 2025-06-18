@@ -44,7 +44,13 @@ export enum CardSize {
 
 export enum PaymentType {
   LYX = "LYX",
-  TOKEN = "TOKEN"
+  SOL = "SOL",
+  ETH = "ETH"
+}
+
+export enum HoldingCondition {
+  HAS_ANY = "|", //Means the user needs to be holding any of the tokens
+  HAS_ALL = "&" //Means the user needs to be holding all the tokens
 }
 
 export enum Campaign {
@@ -55,12 +61,12 @@ export enum Campaign {
 }
 
 export enum LuksoCampaign {
-  Citizens = "vrm_female",
-  Creators = "vrm_male",
+  Citizens = Campaign.Citizens,
+  Creators = Campaign.Creators,
 }
 
 export enum SolanaCampaign {
-  Kumi = "kumi",
+  Kumi = Campaign.Kumi,
 }
 
 export enum CandyMachineGroup {

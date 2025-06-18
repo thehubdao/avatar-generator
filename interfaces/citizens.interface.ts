@@ -1,5 +1,5 @@
 import { Blockchain } from "../enums/blockchain/common.enum";
-import { Campaign, PaymentType } from "../enums/citizens/common.enum";
+import { Campaign, HoldingCondition, PaymentType } from "../enums/citizens/common.enum";
 import { BodyPart } from "./avatar.interface";
 
 export interface CitizensCollection {
@@ -10,22 +10,21 @@ export interface CitizensCollection {
   active: boolean;
 }
 
-export interface DataBaseDrop {
-  holdingCondition: string;
+export interface ClaimableDrop {
   holdingAddresses: {
     contractAddress: string;
-    tokenName: string;
-  }[];
+    tokenName: string; //This is the name of the collection that the user needs to be holding
+  }[]; //If this array is not empty, means the user needs to be holding
   id: string;
   name: string;
   description: string;
   imageUrl: string;
-  requiredXP: number;
-  paymentType: PaymentType;
-  price?: number;
-  requiredToken?: string;
+  requiredXP: number; //XP required to claim the drop
+  paymentType: PaymentType; //Type of payment required to claim the drop
+  price: number; //Price of the drop in the payment type
   contractAddress: string;
-  owned: boolean;
+  holdingCondition?: HoldingCondition; //Condition to be applied to the holdingAddresses
+  owned: boolean; //true if the user has already claimed the drop
 }
 
 export interface Game {
