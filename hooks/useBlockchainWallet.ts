@@ -1,10 +1,10 @@
 import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setClaimableDrops, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
-import { CitizenMetadata, FollowUserData, MintingData } from '../interfaces/citizens.interface';
+import { CitizenMetadata, ClaimableDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
@@ -14,7 +14,7 @@ import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
 import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination } from '../enums/citizens/common.enum';
 import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
-import { GetParameter } from '../utils/firebase.util';
+import { GetClaimableDrops, GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
@@ -23,6 +23,7 @@ import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetRootAssetsMetadata } from '../utils/web3/root/contract.util';
+import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -137,6 +138,11 @@ export function useBlockchainWallet() {
     return { success: true, value: mintingData };
   }
 
+  async function getClaimableDropsPromise(): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
+    const drops = await GetLuksoClaimableDrops();
+    if (drops.success) return { success: true, value: drops.value };
+    return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
+  }
 
   const fetchAppData = async () => {
     const walletAddress = userAddress;
@@ -150,7 +156,9 @@ export function useBlockchainWallet() {
       const ethereumCitizensMetadataPromise = getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
       const ethereumUserFeaturesPromise = getEthereumUserFeaturesPromise(walletAddress); // Get the user features
       const ethereumLeaderboardDataPromise = getEthereumLeaderboardDataPromise(walletAddress); // Get the leaderboard data
-      const [ethereumCitizensMetadata, ethereumUserFeatures, ethereumLeaderboardData] = await Promise.all([ethereumCitizensMetadataPromise, ethereumUserFeaturesPromise, ethereumLeaderboardDataPromise]);
+      const ethereumClaimableDropsPromise = getClaimableDropsPromise(); // Get the claimable drops
+      const [ethereumCitizensMetadata, ethereumUserFeatures, ethereumLeaderboardData, ethereumClaimableDrops] = await Promise.all([ethereumCitizensMetadataPromise, ethereumUserFeaturesPromise, ethereumLeaderboardDataPromise, ethereumClaimableDropsPromise, ethereumClaimableDropsPromise]);
+
       //Ethereum Citizens Metadata dispatch
       if (ethereumCitizensMetadata.success) {
         const citizen = ethereumCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
@@ -201,6 +209,12 @@ export function useBlockchainWallet() {
         dispatch(setLeaderboardData(ethereumLeaderboardData.value));
       } else {
         LogError(Module.Citizens, ethereumLeaderboardData.errMessage, ethereumLeaderboardData.errCode);
+      }
+
+      if (ethereumClaimableDrops.success) {
+        dispatch(setClaimableDrops(ethereumClaimableDrops.value));
+      } else {
+        LogError(Module.Citizens, ethereumClaimableDrops.errMessage, ethereumClaimableDrops.errCode);
       }
     } else if (blockchainType === Blockchain.Solana) {
       const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
