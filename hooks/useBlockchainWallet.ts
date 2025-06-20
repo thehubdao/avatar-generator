@@ -10,7 +10,7 @@ import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
-import { BlockchainToWalletChainType } from '../utils/web3/web3.util';
+import { BlockchainToWalletChainType, GetSdkConnection, SetSdkConnection } from '../utils/web3/web3.util';
 import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination } from '../enums/citizens/common.enum';
 import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
@@ -24,6 +24,7 @@ import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetRootAssetsMetadata } from '../utils/web3/root/contract.util';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
+import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -35,13 +36,11 @@ export function useBlockchainWallet() {
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
   const [ethersProvider, setEthersProvider] = useState<BrowserProvider | null>(null);
-  const [loginLibraryFlags, setLoginLibraryFlags] = useState<{ [key in LoginLibrary]: boolean | null }>({
-    [LoginLibrary.Privy]: null,
-  });
 
-  /* Fetching relatedhooks */
+  /* Fetching related hooks */
   const { ready, user, authenticated, isModalOpen } = usePrivy(); //Privy Auth
-  const { signOutPass } = useAuth(); //Pass Auth
+  const { userSession, isFetchingSession, signOutPass } = useAuth(); //Pass Auth
+
 
   /* Login and Logout related hooks */
 
@@ -54,6 +53,9 @@ export function useBlockchainWallet() {
 
   const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Ethereum Wallets
   const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets
+
+  const signer = useFutureverseSigner();
+
 
   const getCampaignParams = async (campaign: Campaign) => {
     const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
@@ -377,6 +379,7 @@ export function useBlockchainWallet() {
 
   //Privy Logic
   useEffect(() => {
+    const loginLibaryflag = GetSdkConnection();
     if (ready && authenticated) {
       if (user?.wallet) {
         const connectPromise = async () => {
@@ -402,8 +405,6 @@ export function useBlockchainWallet() {
               followUserData: followerCount.success ? followerCount.value : null
             }));
 
-            setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
-
           } else if (chainType === Blockchain.Solana && isSolanaReady) {
             const solanaWallet = solanaWallets[0];
 
@@ -421,17 +422,54 @@ export function useBlockchainWallet() {
               xpData: null,
               followUserData: { followerCount: -1, followingCount: -1 }// Set the follow user data to -1, meaning this blockchain does not support follow user data
             }));
-            setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: true }));
           }
+          SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Privy]: true });
         }
         connectPromise();
       } // Set the user as logged in
     }
-    if (ready && !authenticated) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
-      if (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana) dispatch(disconnect());
-      else setLoginLibraryFlags(prev => ({ ...prev, [LoginLibrary.Privy]: false }));
+    if (ready && !authenticated && (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+      dispatch(disconnect());
+      SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Privy]: false });
     }
   }, [ready, authenticated, isEthereumReady, isSolanaReady]);
+
+  // Root Logic
+  useEffect(() => {
+    const connectPromise = async () => {
+      const loginLibaryflag = GetSdkConnection();
+      if (!isFetchingSession && userSession && signer) {
+        const eoa = userSession.linked[0].eoa;
+
+        await InitializeContractEssentialData(signer);
+
+        dispatch(connect({ address: eoa, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
+        SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: true });
+      }
+      if (!isFetchingSession && !userSession && blockchainType === Blockchain.Root) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+        dispatch(disconnect());
+        SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: false });
+      }
+    }
+    connectPromise();
+  }, [isFetchingSession, userSession, signer]);
+
+  useEffect(() => {
+    const loginLibraryFlag = GetSdkConnection();
+
+    if (loginLibraryFlag === null) {
+      dispatch(disconnect());
+      SetSdkConnection({ [LoginLibrary.Privy]: false, [LoginLibrary.Pass]: false });
+      return;
+    }
+
+    const loginLibraryFilter = Object.values(loginLibraryFlag).filter(flag => flag === true || flag === null);
+
+    if (loginLibraryFilter.length === 0) {
+      dispatch(disconnect());
+    }
+  }, []);
+
 
   useEffect(() => {
     if (isConnected === true) {
@@ -454,15 +492,6 @@ export function useBlockchainWallet() {
       getCampaignParams(selectedCampaign); // Get the campaign parameters
     }
   }, [selectedCampaign, isConnected]);
-
-
-  useEffect(() => {
-    const loginLibraryFilter = Object.values(loginLibraryFlags).filter(flag => flag === true || flag === null);
-    if (loginLibraryFilter.length === 0)
-      dispatch(disconnect());
-
-  }, [loginLibraryFlags])
-
 
   return {
     HandleLogin,
