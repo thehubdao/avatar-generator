@@ -102,7 +102,6 @@ export function useBlockchainWallet() {
 
   async function getEthereumLeaderboardDataPromise(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
     const leaderboardData = await GetFullLeaderboardData(walletAddress);
-
     if (leaderboardData.success) return { success: true, value: leaderboardData.value };
 
     return { success: false, errMessage: leaderboardData.errMessage, errCode: leaderboardData.errCode };
@@ -148,10 +147,10 @@ export function useBlockchainWallet() {
     }
 
     if (blockchainType === Blockchain.Ethereum) {
-      const ethereumCitizensMetadata = await getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
-      const ethereumUserFeatures = await getEthereumUserFeaturesPromise(walletAddress); // Get the user features
-      const ethereumLeaderboardData = await getEthereumLeaderboardDataPromise(walletAddress); // Get the leaderboard data
-
+      const ethereumCitizensMetadataPromise = getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
+      const ethereumUserFeaturesPromise = getEthereumUserFeaturesPromise(walletAddress); // Get the user features
+      const ethereumLeaderboardDataPromise = getEthereumLeaderboardDataPromise(walletAddress); // Get the leaderboard data
+      const [ethereumCitizensMetadata, ethereumUserFeatures, ethereumLeaderboardData] = await Promise.all([ethereumCitizensMetadataPromise, ethereumUserFeaturesPromise, ethereumLeaderboardDataPromise]);
       //Ethereum Citizens Metadata dispatch
       if (ethereumCitizensMetadata.success) {
         const citizen = ethereumCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
@@ -375,11 +374,11 @@ export function useBlockchainWallet() {
           }
 
           if (chainType === Blockchain.Ethereum && isEthereumReady) {
-            const provider = await ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
-            const walletName = await GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
-            const xpData = await GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
-            const followerCount = await getEthereumFollowerCountPromise(user?.wallet?.address); // Get the follower count
-
+            const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
+            const walletNamePromise = GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
+            const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
+            const followerCountPromise = getEthereumFollowerCountPromise(user?.wallet?.address); // Get the follower count
+            const [provider, walletName, xpData, followerCount] = await Promise.all([providerPromise, walletNamePromise, xpDataPromise, followerCountPromise]);
             setEthersProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
 
             dispatch(connect({
