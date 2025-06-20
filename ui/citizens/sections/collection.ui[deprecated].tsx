@@ -5,14 +5,14 @@ import WearablesCollection from "../common/wearablesCollection.ui";
 import { useState } from "react";
 import { Campaign, CollectionSections } from "../../../enums/citizens/common.enum";
 import { JsonRpcProvider } from "ethers";
-import { DataBaseDrop } from "../../../interfaces/citizens.interface";
+import { ClaimableDrop } from "../../../interfaces/citizens.interface";
 interface CollectionProps {
   loadedTokens?: CitizenMetadata[];
   currentCollection: CollectionType
   updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: CitizenMetadata) => void;
   provider: JsonRpcProvider | null;
-  claimableDrops: DataBaseDrop[]
-  handleClaim: (drop: DataBaseDrop) => Promise<boolean>
+  claimableDrops: ClaimableDrop[]
+  handleClaim: (drop: ClaimableDrop) => Promise<boolean>
 }
 
 

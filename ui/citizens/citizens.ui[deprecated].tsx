@@ -11,7 +11,7 @@ import { LeaderboardEntry } from '../../types/leaderboard.type';
 import { JsonRpcProvider } from "ethers";
 import Modal from "./common/modal.ui";
 import Button from "./common/button.ui";
-import { DataBaseDrop } from "../../interfaces/citizens.interface";
+import { ClaimableDrop } from "../../interfaces/citizens.interface";
 import { useEffect, useState } from "react";
 import MintUI from "./common/mint.ui";
 
@@ -28,8 +28,8 @@ interface CitizensUIProps {
   provider: JsonRpcProvider | null;
   handleFollowUser: (address: string) => Promise<boolean>;
   handleUnfollowUser: (address: string) => Promise<boolean>;
-  handleClaim: (drop: DataBaseDrop) => Promise<boolean>
-  claimableDrops: DataBaseDrop[]
+  handleClaim: (drop: ClaimableDrop) => Promise<boolean>
+  claimableDrops: ClaimableDrop[]
   mintRedirect: () => Promise<boolean>
 }
 

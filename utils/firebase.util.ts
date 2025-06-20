@@ -34,11 +34,12 @@ import { deleteDoc, doc, getDoc, increment, orderBy, Timestamp } from 'firebase/
 import jwt from 'jsonwebtoken';
 import { GetFollowerCounts } from "./web3/citizens.util";
 import { XPReward } from "../constants/lukso/xp.constant";
-import { DataBaseDrop } from "../interfaces/citizens.interface";
+import { ClaimableDrop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
 import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/lukso/contract.util[deprecated]";
 import { AVATAR_DOWNLOADED_STATUS, AVATAR_STATUS } from "../constants/firebase.constant";
 import { Blockchain } from "../enums/blockchain/common.enum";
+import { Campaign } from "../enums/citizens/common.enum";
 
 export type LogInStructure = {
   user: string;
@@ -1188,27 +1189,16 @@ function GenerateLoginMessage(xpGained: number, streakBonusXP: number, levelInfo
   return message;
 }
 
-export async function GetClaimableDrops(dropId?: string): Promise<DataBaseDrop[]> {
+export async function GetClaimableDrops(campaign: Campaign): Promise<Result<ClaimableDrop[]>> {
   try {
     const db = await FirebaseUtil.Instance().DB();
-    const dropsCollection = collection(db, 'claimableDrops');
+    const dropsCollection = collection(db, `campaign/${campaign}/claimableDrops`);
 
-    let query;
-    if (dropId) {
-      query = doc(dropsCollection, dropId);
-      const dropDoc = await getDoc(query);
-      return dropDoc.exists() ? [dropDoc.data() as DataBaseDrop] : [];
-    } else {
-      query = dropsCollection;
-      const querySnapshot = await getDocs(query);
-      return querySnapshot.docs.map(doc => {
-        const data = doc.data() as Record<string, unknown>;
-        return { ...data, id: doc.id } as DataBaseDrop;
-      });
-    }
+    const querySnapshot = await getDocs(dropsCollection);
+    return { success: true, value: querySnapshot.docs.map(doc => doc.data() as ClaimableDrop) };
   } catch (error) {
-    console.error('Error fetching claimable drops:', error);
-    return [];
+    void LogError(Module.FirebaseUtil, `Error fetching claimable drops: ${error}`);
+    return { success: false, errMessage: "Error fetching claimable drops", errCode: CommonErrorCode.FetchError };
   }
 }
 

@@ -1,10 +1,10 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ApproveClaimForUser } from '../../../utils/web3/drops.util';
+import { ApproveClaimForUser } from '../../../utils/web3/drops.util[deprecated]';
 import { ApiResponse } from '../../../interfaces/api.interface';
 import {RequestResponse} from '../request.api-handler'
-import { DataBaseDrop } from '../../../interfaces/citizens.interface';
+import { ClaimableDrop } from '../../../interfaces/citizens.interface';
 
-export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<DataBaseDrop[] | { approved: boolean }>>) {
+export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<ClaimableDrop[] | { approved: boolean }>>) {
   const { method, body } = req;
 
   switch (method) {
@@ -23,7 +23,7 @@ async function HandleApproveClaim(body: NextApiRequest['body'], res: NextApiResp
   }
 
   try {
-    const isApproved = await ApproveClaimForUser(address, dropId);
+    const isApproved = await ApproveClaimForUser();
     return RequestResponse(res, "Successful", true, JSON.stringify({ approved: isApproved }));
   } catch (error) {
     console.error('Error approving claim:', error);

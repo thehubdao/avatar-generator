@@ -1,30 +1,17 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { ApproveClaimForUser } from '../../../../utils/web3/drops.util';
+import { ApproveClaimForUser } from '../../../../utils/web3/drops.util[deprecated]';
 import { ApiResponse } from '../../../../interfaces/api.interface';
 import { RequestResponse } from '../../../../server/api-handler/request.api-handler';
-import { DataBaseDrop } from '../../../../interfaces/citizens.interface';
-import { GetClaimableDrops } from '../../../../utils/firebase.util';
+import { ClaimableDrop } from '../../../../interfaces/citizens.interface';
 
-export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<DataBaseDrop[] | { approved: boolean }>>) {
-  const { method, query, body } = req;
+export default async function Handler(req: NextApiRequest, res: NextApiResponse<ApiResponse<ClaimableDrop[] | { approved: boolean }>>) {
+  const { method, body } = req;
 
   switch (method) {
-    case 'GET':
-      return HandleGetDrops(query.id as string | undefined, res);
     case 'POST':
       return HandleApproveClaim(body, res);
     default:
       return RequestResponse(res, "NotFound", false, "Method Not Allowed");
-  }
-}
-
-async function HandleGetDrops(dropId: string | undefined, res: NextApiResponse<ApiResponse<DataBaseDrop[]>>) {
-  try {
-    const drops = await GetClaimableDrops(dropId);
-    return RequestResponse(res, "Successful", true, "", drops);
-  } catch (error) {
-    console.error('Error fetching drops:', error);
-    return RequestResponse(res, "ServerError", false, "Internal Server Error");
   }
 }
 
@@ -36,7 +23,7 @@ async function HandleApproveClaim(body: NextApiRequest['body'], res: NextApiResp
   }
 
   try {
-    const isApproved = await ApproveClaimForUser(address, dropId);
+    const isApproved = await ApproveClaimForUser();
     return RequestResponse(res, "Successful", true, "", { approved: isApproved });
   } catch (error) {
     console.error('Error approving claim:', error);

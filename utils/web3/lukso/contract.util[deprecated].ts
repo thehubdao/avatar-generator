@@ -3,7 +3,7 @@ import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../../constants/abi/AvatarProxyContractABI.json'
 import WerableContractAbi from '../../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
-import { CampaignData, Drop, TokenId, CitizenMetadata, DataBaseDrop } from '../../../interfaces/citizens.interface';
+import { CampaignData, Drop, TokenId, CitizenMetadata, ClaimableDrop } from '../../../interfaces/citizens.interface';
 import { GetCollectionDocs } from '../../firebase.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../../constants/abi/UniversalProfileABI.json'
@@ -393,7 +393,7 @@ export async function GetWearablesHoldings(address: string, contractAddresses: s
 }
 
 
-export async function CheckClaimStatus(drop: DataBaseDrop, provider: JsonRpcProvider, address: string): Promise<Result<boolean>> {
+export async function CheckClaimStatus(drop: ClaimableDrop, provider: JsonRpcProvider, address: string): Promise<Result<boolean>> {
     try {
         const signer = await provider.getSigner();
         const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer);
@@ -407,7 +407,7 @@ export async function CheckClaimStatus(drop: DataBaseDrop, provider: JsonRpcProv
 }
 
 export async function ClaimDrop(
-    drop: DataBaseDrop,
+    drop: ClaimableDrop,
     provider: JsonRpcProvider,
     userAddress: string
 ): Promise<Result<boolean>> {

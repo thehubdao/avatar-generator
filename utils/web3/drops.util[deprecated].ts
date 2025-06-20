@@ -1,19 +1,13 @@
-import { Contract, ethers } from 'ethers';
-import ClaimableDropABI from '../../constants/abi/ClaimableDropABI.json';
-import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json';
-import { GetClaimableDrops } from '../../utils/firebase.util';
-import { PaymentType } from '../../enums/citizens/common.enum';
+/* const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL; */
+/* const PK = process.env.NEXT_PUBLIC_PK!;
+const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS; */
 
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
-const PK = process.env.NEXT_PUBLIC_PK!;
-const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS;
-
-const provider = new ethers.JsonRpcProvider(RPC_URL);
-const EOA = new ethers.Wallet(PK, provider);
+/* const provider = new ethers.JsonRpcProvider(RPC_URL); */
+/* const EOA = new ethers.Wallet(PK, provider);
 const universalProfile = new ethers.Contract(UNIVERSAL_PROFILE_ADDRESS!, UniversalProfileABI, provider);
-
-export async function ApproveClaimForUser(address: string, dropId: string): Promise<boolean> {
-  try {
+ */
+export async function ApproveClaimForUser(): Promise<boolean> {
+/*   try {
     const drops = await GetClaimableDrops(dropId);
     if (drops.length === 0) {
       console.error('Drop not found');
@@ -58,5 +52,6 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
   } catch (error) {
     console.error('Error in approveClaimForUser:', error);
     return false;
-  }
+  } */
+ return false;
 }
