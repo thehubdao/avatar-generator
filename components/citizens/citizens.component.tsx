@@ -551,6 +551,11 @@ export default function CitizensComponent() {
     return isSuccess;
   }
 
+  async function onBuying() {
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    return false; // This is a placeholder for the buying function, it should be replaced with the implementation
+  }
+
   async function onMinting() {
     if (!walletAddress) {
       LogError(Module.Citizens, 'Wallet address is undefined in onMinting');
@@ -580,11 +585,13 @@ export default function CitizensComponent() {
     singleInitData={singleInitData.current}
     exportData={exportData.current}
     featureList={optionList.current}
+    marketplaceFeatureList={optionList.current}
     isReady={isAllReady}
     handleReady={() => onAvatarBuilderReady()}
     handleExport={(type) => exportModel(type)}
     handleOptionChange={(id, path, name, category) => changeFeaturefromHud(id, path, name, category)}
     handleSaveCombination={() => handleSaveCombination()}
+    handleBuying={() => onBuying()}
     handleMinting={() => onMinting()}
   />
 }
