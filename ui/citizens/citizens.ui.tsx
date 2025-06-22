@@ -6,7 +6,7 @@ import { BasicData, ExportInterface, LookAtVectors } from "../../interfaces/comm
 import { FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../../components/avatar/viewer.component";
 import { FilterList } from "../../utils/common.util";
-import { setEditMode } from "../../store/citizensMetadataSlice";
+import { setEditMode, setMarketplaceMode } from "../../store/citizensMetadataSlice";
 import DetailsUI from "./common/details.ui";
 import SnackbarProvider from "./snackbar/snackbar.provider";
 import MintUI from "./common/mint.ui";
@@ -18,26 +18,34 @@ interface CitizensUIProps {
 	singleInitData?: SingleInterface;
 	exportData: ExportInterface;
 	featureList: FeatureInterface[];
+	marketplaceFeatureList?: FeatureInterface[];
 	isReady: boolean;
 	handleReady: () => Promise<void>;
 	handleExport: (type?: ModelExtension) => Promise<boolean>;
 	handleOptionChange: (id, path, name, category) => Promise<void>;
 	handleSaveCombination: () => Promise<boolean>;
+	handleBuying: () => Promise<boolean>;
 	handleMinting: () => Promise<boolean>;
 }
 
-export default function CitizensUI({ singleInitData, exportData, featureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleMinting }: CitizensUIProps) {
+export default function CitizensUI({ singleInitData, exportData, featureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleBuying, handleMinting }: CitizensUIProps) {
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
 	const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
 	const didEditMode = useAppSelector(state => state.citizensMetadata.editMode);
 	const didMintingMode = useAppSelector(state => state.citizensMetadata.mintingMode);
+	const didMarketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
 
-	// Local State
+	// Edit mode local State
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
 	const [selectedOption, setSelectedOption] = useState<BasicData>();
+
+	// Marketplace local State
+	// const [marketplaceOptionList, setMarketplaceOptionList] = useState<FeatureInterface[]>();
+	// const [marketplaceSelectedCategory, setMarketplaceSelectedCategory] = useState<string>('');
+	// const [marketplaceSelectedOption, setMarketplaceSelectedOption] = useState<BasicData>();
 
 	function updateFeatureCamPosition(
 		index: string,
@@ -118,7 +126,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 								avatarBasePath={
 									campaignParams.armature
 								}
-								editMode={didEditMode}
+								editMode={didEditMode || didMarketplaceMode}
 								lights={
 									campaignParams.config.lights
 								}
@@ -163,6 +171,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 									{isReady &&
 										<div className="fixed w-full z-50 dark">
 											<HudUI
+												HUDTitle="CUSTOMIZATION"
 												selectedOption={selectedOption}
 												editModeSelected={didEditMode}
 												selectListCategory={
@@ -189,6 +198,41 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 												exportModel={(type) => handleExport(type)}
 												isCustomCampaignHud
 												onClickBackButton={() => dispatch(setEditMode(false))}
+												isLoading={false}
+											/>
+										</div>
+									}
+									{/* MARKETPLACE MODE HUD */}
+									{isReady &&
+										<div className="fixed w-full z-50 dark">
+											<HudUI
+												HUDTitle="MARKETPLACE"
+												selectedOption={selectedOption}
+												editModeSelected={didMarketplaceMode}
+												selectListCategory={
+													(campaignParams.features &&
+														campaignParams.accessories && [
+															...campaignParams.features,
+															...campaignParams.accessories,
+														]) ||
+													[]
+												}
+												optionList={optionList}
+												selectedCategory={selectedCategory}
+												campaignSkinColorConfig={
+													campaignParams?.config.skin ||
+													{}
+												}
+												skinColor={'#FFFFFF'}
+												hideSkinSelector={true}
+												handleSaveCombination={() => handleBuying()}
+												changeView={() => dispatch(setMarketplaceMode(false))}
+												onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
+												onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
+												onSkinColorChange={() => { }}
+												exportModel={(type) => handleExport(type)}
+												isCustomCampaignHud
+												onClickBackButton={() => dispatch(setMarketplaceMode(false))}
 												isLoading={false}
 											/>
 										</div>
