@@ -498,6 +498,22 @@ export function useBlockchainWallet() {
   }, [isFetchingSession, userSession, signer]);
 
   useEffect(() => {
+    const loginLibraryFlag = GetSdkConnection();
+
+    if (loginLibraryFlag === null) {
+      dispatch(disconnect());
+      SetSdkConnection({ [LoginLibrary.Privy]: false, [LoginLibrary.Pass]: false });
+      return;
+    }
+
+    const loginLibraryFilter = Object.values(loginLibraryFlag).filter(flag => flag === true || flag === null);
+
+    if (loginLibraryFilter.length === 0) {
+      dispatch(disconnect());
+    }
+  }, [isFetchingSession]);
+
+  useEffect(() => {
     if (isConnected === true) {
       if (citizensMetadata === null) {
         if (userAddress === null) {
