@@ -20,8 +20,7 @@ import { CampaignDrops } from '../../../types/citizens.type';
 import { GetCollectionDocs } from '../../firebase.util';
 import { GetSolanaSetNewCombinationSerializedTransaction } from '../../api.util';
 
-
-export async function InitializeClientUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
+export async function InitializeUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
     try {
         UMI.use(signerIdentity({
             publicKey: publicKey(wallet.address),
