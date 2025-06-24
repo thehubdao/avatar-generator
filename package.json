@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "dev:prod-env": "dotenv -e .env.production next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -83,6 +84,8 @@
     "@typescript-eslint/eslint-plugin": "^6.8.0",
     "@typescript-eslint/parser": "^6.8.0",
     "autoprefixer": "^10.4.16",
+    "cross-env": "^7.0.3",
+    "dotenv-cli": "^8.0.0",
     "eslint": "8.51.0",
     "eslint-config-next": "13.5.5",
     "node-loader": "^2.0.0",
