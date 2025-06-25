@@ -482,11 +482,12 @@ export function useBlockchainWallet() {
       const loginLibaryflag = GetSdkConnection();
 
       if (!isFetchingSession && userSession && signer) {
-        const eoa = userSession.linked[0].eoa;
+        console.log('userSession', userSession);
+        const futurePassAddress = userSession.futurepass;
 
         await InitializeContractEssentialData(signer);
 
-        dispatch(connect({ address: eoa, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
+        dispatch(connect({ address: futurePassAddress, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: true });
       }
       if (!isFetchingSession && !userSession && blockchainType === Blockchain.Root) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
