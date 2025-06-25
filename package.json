@@ -20,7 +20,7 @@
     "@futureverse/artm": "^2.3.2",
     "@futureverse/asset-register": "^2.79.2",
     "@futureverse/auth-react": "^4.2.2",
-    "@futureverse/auth-ui": "^0.9.2",
+    "@futureverse/auth-ui": "^0.15.0",
     "@futureverse/transact": "^0.7.2",
     "@helia/car": "^4.0.0",
     "@lukso/lsp-smart-contracts": "^0.12.1",
