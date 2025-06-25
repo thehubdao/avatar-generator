@@ -172,7 +172,9 @@ export async function GetTokensMetadata(campaign: Campaign, tokenIds: string[]):
 
             const tokenMetadataResult = await GetLuksoTokenMetadata({ metadataUri, campaign, tokenId: tokenIdNumber });
 
-            if (tokenMetadataResult.success) return tokenMetadataResult.value;
+            if (!tokenMetadataResult.success) return null;
+
+            return tokenMetadataResult.value;
         })
         const metadatasResultArray = await Promise.all(metadataPromises);
         const metadatasArray = metadatasResultArray.filter((metadata) => metadata !== null) as CitizenMetadata[];
