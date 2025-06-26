@@ -482,10 +482,9 @@ export function useBlockchainWallet() {
       const loginLibaryflag = GetSdkConnection();
 
       if (!isFetchingSession && userSession && signer) {
-        console.log('userSession', userSession);
         const futurePassAddress = userSession.futurepass;
 
-        await InitializeContractEssentialData(signer, undefined, futurePassAddress);
+        await InitializeContractEssentialData(signer);
 
         dispatch(connect({ address: futurePassAddress, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: true });
