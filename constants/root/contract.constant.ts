@@ -29,7 +29,7 @@ export let SIGNER: Signer;
 export let KEYRING_SIGNER: KeyringPair;
 
 
-export async function InitializeContractEssentialData(_signer?: Signer, _keyringSigner?: KeyringPair) {
+export async function InitializeContractEssentialData(_signer?: Signer, _keyringSigner?: KeyringPair, _walletAddress?: string) {
 
   if (API) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Api already initialized');
   API = await ApiPromise.create({ ...getApiOptions(), provider: PROVIDER });
@@ -55,7 +55,7 @@ export async function InitializeContractEssentialData(_signer?: Signer, _keyring
       domain: DOMAIN,
       origin: ORIGIN,
       chainId: Number(CHAIN_ID),
-      walletAddress: await SIGNER.getAddress() as `0x${string}`,
+      walletAddress: (_walletAddress || await SIGNER.getAddress()) as `0x${string}`,
     },
   });
 }
