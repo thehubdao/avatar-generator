@@ -32,7 +32,7 @@ export async function GetRootAssetTokenIds(address: string, collectionId: string
     const ownedTokens = await API.rpc.nft.ownedTokens(collectionId, address, 0, 1000);
     const jsonResponse = ownedTokens.toJSON();
     const tokenIds = jsonResponse[2];
-console.log('tokenIds', tokenIds, ownedTokens, address, collectionId)
+
     return { success: true, value: tokenIds as number[] };
   } catch (error) {
     const e = error as Error;
@@ -150,7 +150,7 @@ export async function MintRootAsset(
 ): Promise<Result<boolean>> {
   try {
     const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
-    const mintBuilder = TransactionBuilder.nft(API, SIGNER, EOA_ADDRESS, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: EOA_ADDRESS });
+    const mintBuilder = TransactionBuilder.nft(API, SIGNER, EOA_ADDRESS, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
     await mintBuilder.signAndSend();
     const tokenIdsResult = await GetRootAssetTokenIds(address, NFT_COLLECTION_ID);
     if (tokenIdsResult.success) {
