@@ -3,32 +3,35 @@ import { ApiResponse } from "../../../interfaces/api.interface";
 import { DefaultApiResponse } from "../../enums/api.enum";
 import { RequestResponse } from "../request.api-handler";
 import { GetRootRegistryAuthToken, UpdateRootAsset } from "../../../utils/web3/root/registry.util";
-import { ROOT_SIGNER_PK } from "../../../constants/root/contract.constant";
+import { InitializeContractEssentialData, ROOT_SIGNER_PK } from "../../../constants/root/contract.constant";
+import { GetAdminSigner } from "../../../utils/web3/root/contract.util";
 
 export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<string[]>>) {
-    const {data} = req.body;
-    const {events} = data;
-    const event = events[0];
-    const [,,,, collectionId, tokenId] = event.args[1].split(':');
+  const { data } = req.body;
+  const { events } = data;
+  const event = events[0];
+  const [, , , , collectionId, tokenId] = event.args[1].split(':');
 
-    if (!data)
-      return RequestResponse(res, "BadRequest", false,  DefaultApiResponse.MissingInfo);
-    console.log(data)
-    const authToken = await GetRootRegistryAuthToken(ROOT_SIGNER_PK);
+  if (!data)
+    return RequestResponse(res, "BadRequest", false, DefaultApiResponse.MissingInfo);
 
-    if (!authToken.success) return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
-    console.log(authToken.value)
-    const updateRootAssetResult = await UpdateRootAsset(collectionId, tokenId, authToken.value, events);
+  const authToken = await GetRootRegistryAuthToken(ROOT_SIGNER_PK);
 
-    if (!updateRootAssetResult.success) return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
-    console.log(updateRootAssetResult.value)
-    return RequestResponse(res, "Successful", true, DefaultApiResponse.PostSuccess);
-    
-  }
+  if (!authToken.success) return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
 
-  export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<string>>) {
-    const authToken = await GetRootRegistryAuthToken(ROOT_SIGNER_PK);
-    if (!authToken.success) return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
+  const adminSigner = GetAdminSigner();
+  await InitializeContractEssentialData(undefined, adminSigner);
+  const updateRootAssetResult = await UpdateRootAsset(collectionId, tokenId, authToken.value, events);
 
-    return RequestResponse(res, "Successful", true, DefaultApiResponse.PostSuccess, authToken.value);
-  }
+  if (!updateRootAssetResult.success) return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
+
+  return RequestResponse(res, "Successful", true, DefaultApiResponse.PostSuccess);
+
+}
+
+export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<string>>) {
+  const authToken = await GetRootRegistryAuthToken(ROOT_SIGNER_PK);
+  if (!authToken.success) return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
+
+  return RequestResponse(res, "Successful", true, DefaultApiResponse.PostSuccess, authToken.value);
+}

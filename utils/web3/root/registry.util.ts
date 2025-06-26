@@ -221,9 +221,9 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     if (!newCombinationResult.success) return { success: false, errMessage: newCombinationResult.errMessage, errCode: newCombinationResult.errCode };
     const newCombination = newCombinationResult.value;
 
-    const setRootAssetsTransferableResult = await SetRootAssetsTransferable(collection_id, token_id, operations, assetCurrentCombination, newCombination);
+/*     const setRootAssetsTransferableResult = await SetRootAssetsTransferable(collection_id, token_id, operations, assetCurrentCombination, newCombination); //Commented while we adjust this logic
 
-    if (!setRootAssetsTransferableResult.success) return { success: false, errMessage: setRootAssetsTransferableResult.errMessage, errCode: setRootAssetsTransferableResult.errCode };
+    if (!setRootAssetsTransferableResult.success) return { success: false, errMessage: setRootAssetsTransferableResult.errMessage, errCode: setRootAssetsTransferableResult.errCode }; */
 
     const imageUrl = await GetImageUrl(Campaign.Based, newCombination);
     const setRootAssetImageUrlResult = await SetRootAssetImageUrl(imageUrl, collection_id, token_id, authToken);
