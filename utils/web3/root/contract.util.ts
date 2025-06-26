@@ -30,7 +30,6 @@ export function GetAdminSigner(): KeyringPair {
 export async function GetRootAssetTokenIds(address: string, collectionId: string): Promise<Result<number[]>> {
   try {
     const ownedTokens = await API.rpc.nft.ownedTokens(collectionId, address, 0, 1000);
-    console.log('ownedTokens', ownedTokens, address, collectionId);
     const jsonResponse = ownedTokens.toJSON();
     const tokenIds = jsonResponse[2];
 
@@ -131,7 +130,6 @@ export async function GetRootAssetMetadata(tokenId: string): Promise<Result<Citi
 
 export async function GetRootAssetsMetadata(address: string): Promise<Result<CitizenMetadata[]>> {
   const tokenIdsResult = await GetRootAssetTokenIds(address, NFT_COLLECTION_ID);
-  console.log('tokenIdsResult', tokenIdsResult);
   if (!tokenIdsResult.success)
     return { success: false, errMessage: tokenIdsResult.errMessage, errCode: tokenIdsResult.errCode };
 
@@ -141,7 +139,7 @@ export async function GetRootAssetsMetadata(address: string): Promise<Result<Cit
 
   const filteredMetadata = metadataArray.filter(metadata => metadata.success);
   const mappedMetadata = filteredMetadata.map(metadata => metadata.value);
-  console.log('mappedMetadata', mappedMetadata);
+
   return { success: true, value: mappedMetadata };
 }
 
@@ -177,7 +175,7 @@ export async function MintRootAsset(
     return { success: true, value: true };
   } catch (error) {
     const e = error as Error;
-    LogError(Module.RootContractUtil, 'Error on minting Root Asset');
+    LogError(Module.RootContractUtil, 'Error on minting Root Asset', e.message);
     return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
   }
 }
