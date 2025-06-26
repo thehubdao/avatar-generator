@@ -7,7 +7,7 @@ import '@therootnetwork/api-types';
 import { GetAssetData, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { Campaign, CampaignBaseCombination, RootCampaign } from '../../../enums/citizens/common.enum';
-import { CitizenMetadata, LinkableToken, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
+import { AssetLink, CitizenMetadata, LinkableToken, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
@@ -19,6 +19,7 @@ import { hexToU8a } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { FeatureBasic } from '../../../interfaces/common.interface';
+import { AssetRegistryAction } from '../../../enums/root/common.enum';
 
 export function GetAdminSigner(): KeyringPair {
   const keyring = new Keyring({ type: "ethereum" });
@@ -263,7 +264,7 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
   for (const attribute of oldAttributes) {
     const linkedToken = attribute.linkableTokens.find(linkableToken => linkableToken.parentTokenId === parent_token_id);
 
-    if(!linkedToken) return { success: false, errMessage: 'Linked token not found', errCode: CommonErrorCode.InternalError };
+    if (!linkedToken) return { success: false, errMessage: 'Linked token not found', errCode: CommonErrorCode.InternalError };
 
     const deleteAssetLinkOperation = DeleteAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, attribute.collectionId, linkedToken.tokenId);
     if (!deleteAssetLinkOperation.success) return { success: false, errMessage: deleteAssetLinkOperation.errMessage, errCode: deleteAssetLinkOperation.errCode };
@@ -276,35 +277,35 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
 export async function SetRootNewCombination(address: string, parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
   try {
     const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
-  const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, newAttributes);
-  const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, oldAttributes);
+    const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, newAttributes);
+    const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, oldAttributes);
 
-  if (!equipOperations.success || !unequipOperations.success) return { success: false, errMessage: 'Error on setting new combination. All operations must be successful', errCode: CommonErrorCode.InternalError };
+    if (!equipOperations.success || !unequipOperations.success) return { success: false, errMessage: 'Error on setting new combination. All operations must be successful', errCode: CommonErrorCode.InternalError };
 
-  const allOperations = [...unequipOperations.value, ...equipOperations.value];
-  const [nonce] = await ASSET_REGISTER_SDK.nonceForChainAddress(EOA_ADDRESS as `0x${string}`).execute();
-  const artm = new ARTM({ address: EOA_ADDRESS, statement: STATEMENTS.ASSET_UPDATE, operations: allOperations, nonce });
-  const signature = await SIGNER.signMessage(artm.message);
+    const allOperations = [...unequipOperations.value, ...equipOperations.value];
+    const [nonce] = await ASSET_REGISTER_SDK.nonceForChainAddress(EOA_ADDRESS as `0x${string}`).execute();
+    const artm = new ARTM({ address: EOA_ADDRESS, statement: STATEMENTS.ASSET_UPDATE, operations: allOperations, nonce });
+    const signature = await SIGNER.signMessage(artm.message);
 
-  const input = {
-    signature,
-    transaction: artm.message,
-  };
-  const response = await ASSET_REGISTER_SDK.submitTransaction(input).execute();
+    const input = {
+      signature,
+      transaction: artm.message,
+    };
+    const response = await ASSET_REGISTER_SDK.submitTransaction(input).execute();
 
-  const [{ transactionHash }] = await ASSET_REGISTER_SDK.transaction({
-    transactionHash: response[0],
-  }).execute();
+    const [{ transactionHash }] = await ASSET_REGISTER_SDK.transaction({
+      transactionHash: response[0],
+    }).execute();
 
-  let [{ status }]: { status: RootTransactionStatus }[] = await ASSET_REGISTER_SDK.transaction({ transactionHash }).execute();
-  while (status === RootTransactionStatus.PENDING) {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    [{ status }] = await ASSET_REGISTER_SDK.transaction({ transactionHash }).execute();
-  }
+    let [{ status }]: { status: RootTransactionStatus }[] = await ASSET_REGISTER_SDK.transaction({ transactionHash }).execute();
+    while (status === RootTransactionStatus.PENDING) {
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      [{ status }] = await ASSET_REGISTER_SDK.transaction({ transactionHash }).execute();
+    }
 
-  if (status === RootTransactionStatus.SUCCESS) {
-    return { success: true, value: true };
-  }
+    if (status === RootTransactionStatus.SUCCESS) {
+      return { success: true, value: true };
+    }
 
     return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
   } catch (e) {
@@ -323,39 +324,32 @@ export function SetAssetTransferableTx(collectionId: string, tokenId: string, tr
   return transferableTx;
 }
 
-export async function SetRootAssetsTransferable(collectionId: string, tokenId: string, oldCombination: string, newCombination: string, campaignFeatures: FeatureBasic[], rootDrops: RootDrop[]): Promise<Result<boolean>> {
-  if (oldCombination === newCombination) return { success: false, errMessage: 'Old and new combination are the same', errCode: CommonErrorCode.InternalError };
+export async function SetRootAssetsTransferable(collectionId: string, tokenId: string, assetOperations: Operation[], oldCombination: string, newCombination: string): Promise<Result<boolean>> {
+  try {
+    if (assetOperations.length === 0) return { success: false, errMessage: 'No asset operations', errCode: CommonErrorCode.InternalError };
 
-  const txs: SubmittableExtrinsic<"promise">[] = [];
-  const oldCombinationArray = oldCombination.split('-');
-  const newCombinationArray = newCombination.split('-');
+    const txs: SubmittableExtrinsic<"promise">[] = [];
 
-  for (let i = 0; i < oldCombinationArray.length; i++) {
-    const oldFeatureIndex = Number(oldCombinationArray[i]);
-    const newFeatureIndex = Number(newCombinationArray[i]);
+    assetOperations.forEach(operation => {
+      const [,,,, collectionId, tokenId] = operation.args[2].split(':');
+      if (operation.action === AssetRegistryAction.Create) txs.push(SetAssetTransferableTx(collectionId, tokenId, true))
+      else if (operation.action === AssetRegistryAction.Delete) txs.push(SetAssetTransferableTx(collectionId, tokenId, false))
+  })
 
-    if (oldFeatureIndex == newFeatureIndex) continue; //If the feature index is the same, skip
+    if (newCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, true)); //If the new combination is base combination, mark avatar as transferable
+    else if (oldCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, false)); //If the new combination is not base combination, mark avatar as non transferable
 
-    if (oldFeatureIndex !== 0) { //If the feature index is not 0, it means it's a wearable, will be marked as transferable as it got unequipped
-      const drop = rootDrops.find(drop => drop.index === oldFeatureIndex && drop.type === campaignFeatures[oldFeatureIndex].displayName);
-      if (!drop) return { success: false, errMessage: 'Drop not found for old feature index', errCode: CommonErrorCode.InternalError };
-      const firstLinkableToken = drop.linkableTokens[0];
-      txs.push(SetAssetTransferableTx(drop.collectionId, firstLinkableToken.tokenId, true));
-    }
+    const batchTx = API.tx.utility.batch(txs);
+    await batchTx.signAndSend(KEYRING_SIGNER);
 
-    if (newFeatureIndex != 0) { //If the feature index is not 0, it means it's a wearable, will be marked as non transferable as it got equipped
-      const drop = rootDrops.find(drop => drop.index === newFeatureIndex && drop.type === campaignFeatures[newFeatureIndex].displayName);
-      if (!drop) return { success: false, errMessage: 'Drop not found for new feature index', errCode: CommonErrorCode.InternalError };
-      const firstLinkableToken = drop.linkableTokens[0];
-      txs.push(SetAssetTransferableTx(drop.collectionId, firstLinkableToken.tokenId, false));
+    return { success: true, value: true };
+  } catch (e) {
+    const err = e as Error
+    void LogError(Module.RootContractUtil, "Couldn't set root assets transferable", err.message);
+    return {
+      success: false,
+      errMessage: err.message,
+      errCode: CommonErrorCode.InternalError
     }
   }
-
-  if (newCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, true)); //If the new combination is base combination, mark avatar as transferable
-  else txs.push(SetAssetTransferableTx(collectionId, tokenId, false)); //If the new combination is not base combination, mark avatar as non transferable
-
-  const batchTx = API.tx.utility.batch(txs);
-  await batchTx.signAndSend(KEYRING_SIGNER);
-
-  return { success: true, value: true };
 }

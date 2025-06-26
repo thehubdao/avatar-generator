@@ -30,10 +30,10 @@ export let KEYRING_SIGNER: KeyringPair;
 
 
 export async function InitializeContractEssentialData(_signer?: Signer, _keyringSigner?: KeyringPair) {
-
+console.log("InitializeContractEssentialData")
   if (API) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Api already initialized');
   API = await ApiPromise.create({ ...getApiOptions(), provider: PROVIDER });
-
+console.log("API", API)
   if (KEYRING_SIGNER) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Keyring Signer already initialized');
   if (_keyringSigner) KEYRING_SIGNER = _keyringSigner;
 
