@@ -21,7 +21,7 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
 
   const adminSigner = GetAdminSigner();
   await InitializeContractEssentialData(undefined, adminSigner);
-  const updateRootAssetResult = await UpdateRootAsset(collectionId, tokenId, authToken.value, events);
+  const updateRootAssetResult = await UpdateRootAsset(collectionId, tokenId, authToken.value);
 
   if (!updateRootAssetResult.success) return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
 

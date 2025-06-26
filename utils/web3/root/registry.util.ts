@@ -5,7 +5,7 @@ import { Result } from "../../../types/common.type";
 import { AssetLink, LinkableToken, RootDrop } from "../../../interfaces/citizens.interface";
 import { Campaign } from "../../../enums/citizens/common.enum";
 import { GetCampaignDrops } from "../citizens.util";
-import { GetRootAssetMetadata, SetRootAssetsTransferable } from "./contract.util";
+import { GetRootAssetMetadata } from "./contract.util";
 import { GetParameter, StoreAssetData } from "../../firebase.util";
 import { FeatureBasic } from "../../../interfaces/common.interface";
 import { createSiweMessage, generateSiweNonce } from "viem/siwe";
@@ -196,7 +196,7 @@ export async function SetRootAssetImageUrl(imageUrl: string, collection_id: stri
     }
 }
 
-export async function UpdateRootAsset(collection_id: string, token_id: string, authToken: string, operations: Operation[]): Promise<Result<boolean>> {
+export async function UpdateRootAsset(collection_id: string, token_id: string, authToken: string): Promise<Result<boolean>> {
     const assetCurrentCombinationResult = await GetRootAssetMetadata(token_id);
     if (!assetCurrentCombinationResult.success) return { success: false, errMessage: assetCurrentCombinationResult.errMessage, errCode: assetCurrentCombinationResult.errCode };
     const assetCurrentCombination = assetCurrentCombinationResult.value.combination;
