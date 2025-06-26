@@ -34,15 +34,15 @@ export async function InitializeContractEssentialData(_signer?: Signer, _keyring
   if (API) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Api already initialized');
   API = await ApiPromise.create({ ...getApiOptions(), provider: PROVIDER });
 
-  if(KEYRING_SIGNER) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Keyring Signer already initialized');
-  if(_keyringSigner) KEYRING_SIGNER = _keyringSigner;
+  if (KEYRING_SIGNER) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Keyring Signer already initialized');
+  if (_keyringSigner) KEYRING_SIGNER = _keyringSigner;
 
   if (SIGNER) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Signer already initialized');
   if (_signer) SIGNER = _signer;
-  
 
   if (ASSET_REGISTER_SDK) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Asset Register SDK already initialized');
-  ASSET_REGISTER_SDK = new AssetRegister({
+
+  if (SIGNER) ASSET_REGISTER_SDK = new AssetRegister({
     url: ROOT_GQL_API_URL,
     auth: {
       sign: async (message) => {
