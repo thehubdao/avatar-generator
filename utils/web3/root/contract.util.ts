@@ -19,7 +19,6 @@ import { hexToU8a } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { FeatureBasic } from '../../../interfaces/common.interface';
-import { Sigmar } from '@next/font/google';
 
 export function GetAdminSigner(): KeyringPair {
   const keyring = new Keyring({ type: "ethereum" });
