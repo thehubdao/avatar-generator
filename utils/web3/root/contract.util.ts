@@ -275,14 +275,15 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
 
 export async function SetRootNewCombination(address: string, parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
   try {
+    const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
   const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, newAttributes);
   const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, oldAttributes);
 
   if (!equipOperations.success || !unequipOperations.success) return { success: false, errMessage: 'Error on setting new combination. All operations must be successful', errCode: CommonErrorCode.InternalError };
 
   const allOperations = [...unequipOperations.value, ...equipOperations.value];
-  const [nonce] = await ASSET_REGISTER_SDK.nonceForChainAddress(address as `0x${string}`).execute();
-  const artm = new ARTM({ address, statement: STATEMENTS.ASSET_UPDATE, operations: allOperations, nonce });
+  const [nonce] = await ASSET_REGISTER_SDK.nonceForChainAddress(EOA_ADDRESS as `0x${string}`).execute();
+  const artm = new ARTM({ address: EOA_ADDRESS, statement: STATEMENTS.ASSET_UPDATE, operations: allOperations, nonce });
   const signature = await SIGNER.signMessage(artm.message);
 
   const input = {
