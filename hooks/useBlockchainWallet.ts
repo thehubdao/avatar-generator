@@ -483,7 +483,7 @@ export function useBlockchainWallet() {
 
       if (!isFetchingSession && userSession && signer) {
         console.log('userSession', userSession);
-        const futurePassAddress = userSession.futurepass;
+        const futurePassAddress = userSession.eoa;
 
         await InitializeContractEssentialData(signer);
 
