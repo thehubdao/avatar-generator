@@ -32,7 +32,7 @@ export async function GetRootAssetTokenIds(address: string, collectionId: string
     const ownedTokens = await API.rpc.nft.ownedTokens(collectionId, address, 0, 1000);
     const jsonResponse = ownedTokens.toJSON();
     const tokenIds = jsonResponse[2];
-
+console.log('tokenIds', tokenIds, ownedTokens, address, collectionId)
     return { success: true, value: tokenIds as number[] };
   } catch (error) {
     const e = error as Error;
