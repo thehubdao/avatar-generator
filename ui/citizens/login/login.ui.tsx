@@ -42,7 +42,7 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 						{/* BUTTON */}
 						<div className="w-full flex justify-center pt-6">
 							<button type="button" className="w-fit h-16 bg-white rounded-[28px] px-10 md:px-24 font-light text-2xl" onClick={() => handleLogin(undefined, undefined)}>
-								FIND OUT MORE
+								GET YOUR CITIZEN
 							</button>
 						</div>
 					</div>
