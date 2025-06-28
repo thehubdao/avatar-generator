@@ -34,11 +34,12 @@ import { deleteDoc, doc, getDoc, increment, orderBy, Timestamp } from 'firebase/
 import jwt from 'jsonwebtoken';
 import { GetFollowerCounts } from "./web3/citizens.util";
 import { XPReward } from "../constants/lukso/xp.constant";
-import { DataBaseDrop } from "../interfaces/citizens.interface";
+import { ClaimableDrop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
 import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/lukso/contract.util[deprecated]";
 import { AVATAR_DOWNLOADED_STATUS, AVATAR_STATUS } from "../constants/firebase.constant";
 import { Blockchain } from "../enums/blockchain/common.enum";
+import { Campaign } from "../enums/citizens/common.enum";
 
 export type LogInStructure = {
   user: string;
@@ -923,7 +924,7 @@ async function HandleFollowerChange(address: string, newCount: number, oldCount:
     id: '',
     blockchainType: blockchainType
   },
-);
+  );
 }
 
 async function HandleFollowingChange(address: string, newCount: number, oldCount: number, blockchainType: Blockchain) {
@@ -942,7 +943,7 @@ async function HandleFollowingChange(address: string, newCount: number, oldCount
     id: '',
     blockchainType: blockchainType
   }
-);
+  );
 }
 
 function GenerateFollowerMessage(count: number, xp: number, levelInfo: { leveledUp: boolean, newLevel: number }) {
@@ -987,7 +988,6 @@ export async function UpdateLastLoginDate(address: string, blockchainType: Block
         if (userData.loginStreak % 7 === 0) {
           xpGained += XPReward.WeeklyLoginStreak;
         }
-
         const xpResult = await UpdateUserXP(address, xpGained);
         if (xpResult.success) {
           await CreateNotification(address, {
@@ -1027,6 +1027,7 @@ export async function UpdateLastLoginDate(address: string, blockchainType: Block
         followingCount,
         loginStreak: userData.loginStreak
       }, { merge: true });
+
     } else {
       // If the user doesn't exist, create a new document with all fields
       await setDoc(userDocRef, {
@@ -1188,27 +1189,16 @@ function GenerateLoginMessage(xpGained: number, streakBonusXP: number, levelInfo
   return message;
 }
 
-export async function GetClaimableDrops(dropId?: string): Promise<DataBaseDrop[]> {
+export async function GetClaimableDrops(campaign: Campaign): Promise<Result<ClaimableDrop[]>> {
   try {
     const db = await FirebaseUtil.Instance().DB();
-    const dropsCollection = collection(db, 'claimableDrops');
+    const dropsCollection = collection(db, `campaign/${campaign}/claimableDrops`);
 
-    let query;
-    if (dropId) {
-      query = doc(dropsCollection, dropId);
-      const dropDoc = await getDoc(query);
-      return dropDoc.exists() ? [dropDoc.data() as DataBaseDrop] : [];
-    } else {
-      query = dropsCollection;
-      const querySnapshot = await getDocs(query);
-      return querySnapshot.docs.map(doc => {
-        const data = doc.data() as Record<string, unknown>;
-        return { ...data, id: doc.id } as DataBaseDrop;
-      });
-    }
+    const querySnapshot = await getDocs(dropsCollection);
+    return { success: true, value: querySnapshot.docs.map(doc => doc.data() as ClaimableDrop) };
   } catch (error) {
-    console.error('Error fetching claimable drops:', error);
-    return [];
+    void LogError(Module.FirebaseUtil, `Error fetching claimable drops: ${error}`);
+    return { success: false, errMessage: "Error fetching claimable drops", errCode: CommonErrorCode.FetchError };
   }
 }
 
@@ -1232,23 +1222,25 @@ export async function GetLeaderboardData(blockchainType: Blockchain = Blockchain
 export async function GetDropsContractAddresses(): Promise<string[]> {
   try {
     const vrmTypes = ['vrm_female', 'vrm_male'];
-    const contractAddresses: string[] = [];
 
-    for (const vrmType of vrmTypes) {
+    const contractAddressesPromise = vrmTypes.map(async (vrmType) => {
       const dropsData = await GetCollectionDocs(`campaign/${vrmType}/drops`);
       const filteredAddresses = dropsData
         .filter(drop => drop.contract_address)
         .map(drop => drop.contract_address);
-      contractAddresses.push(...filteredAddresses);
-    }
-    return contractAddresses;
+      return filteredAddresses;
+    });
+
+    const contractAddresses = await Promise.all(contractAddressesPromise);
+
+    return contractAddresses.flat();
   } catch (error) {
     console.error('Error fetching drops contract addresses:', error);
     return [];
   }
 }
 
-async function CalculateCitizensXP(citizensCount: number): Promise<number> {
+function CalculateCitizensXP(citizensCount: number): number {
   let totalXP = 0;
 
   // Aplicar la fórmula para cada citizen
@@ -1267,9 +1259,12 @@ export async function HandleHoldingsXPReward(address: string, blockchainType: Bl
     const userDoc = await getDoc(userRef);
     const userData = userDoc.data() as UserInterface;
     // Get current holdings
+
     const contractAddresses = await GetDropsContractAddresses();
-    const currentCitizensHoldings = await GetCitizensHoldings(address);
-    const currentWearablesHoldings = await GetWearablesHoldings(address, contractAddresses);
+    const currentCitizensHoldingsPromise = GetCitizensHoldings(address);
+    const currentWearablesHoldingsPromise = GetWearablesHoldings(address, contractAddresses);
+    const [currentCitizensHoldings, currentWearablesHoldings] = await Promise.all([currentCitizensHoldingsPromise, currentWearablesHoldingsPromise]);
+
     // Get previous holdings from DB
     const previousCitizensHoldings = userData.citizensHoldings || 0;
     const previousWearablesHoldings = userData.wearablesHoldings || 0;
@@ -1278,20 +1273,20 @@ export async function HandleHoldingsXPReward(address: string, blockchainType: Bl
     const newWearables = currentWearablesHoldings - previousWearablesHoldings;
     if (newCitizens > 0 || newWearables > 0) {
       // Calculate XP only for new holdings
-      const citizensXP = await CalculateCitizensXP(newCitizens);
+      const citizensXP = CalculateCitizensXP(newCitizens);
       const wearablesXP = newWearables * XPReward.WearableHolding;
       const totalXP = citizensXP + wearablesXP;
       if (totalXP > 0) {
         // Update user XP
-        await UpdateUserXP(address, totalXP);
+        const updateXpPromise = UpdateUserXP(address, totalXP);
         // Update holdings record in DB
-        await setDoc(userRef, {
+        const setDocPromise = setDoc(userRef, {
           citizensHoldings: currentCitizensHoldings,
           wearablesHoldings: currentWearablesHoldings,
           lastHoldingsUpdate: Timestamp.now()
         }, { merge: true });
         // Create notification
-        await CreateNotification(address, {
+        const createNotificationPromise = CreateNotification(address, {
           title: 'New Holdings Reward',
           message: GenerateHoldingsMessage(citizensXP, wearablesXP, totalXP),
           points: totalXP,
@@ -1299,6 +1294,7 @@ export async function HandleHoldingsXPReward(address: string, blockchainType: Bl
           id: '',
           blockchainType: blockchainType
         });
+        await Promise.all([updateXpPromise, setDocPromise, createNotificationPromise]);
       }
     }
   } catch (error) {

@@ -61,7 +61,8 @@ export enum Module {
   LuksoContractUtil = 'LuksoContractUtil',
   SolanaContractUtil = 'SolanaContractUtil',
   RootContractUtil = 'RootContractUtil',
-  RootContractConstant = 'RootContractConstant'
+  RootContractConstant = 'RootContractConstant',
+  LuksoUtil = 'LuksoUtil'
 }
 
 export enum EmailResult {

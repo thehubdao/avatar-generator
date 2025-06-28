@@ -163,15 +163,21 @@ export async function GetTokensMetadata(campaign: Campaign, tokenIds: string[]):
         const decodedRawData = AVATAR_ERC725_CONTRACT.decodeData(metadataFormattedArray);
         const decodedDataArray = JSON.parse(JSON.stringify(decodedRawData));
 
-        const metadatasArray = [] as CitizenMetadata[];
-        for (let i = 0; i < tokenIds.length; i++) {
-            const tokenId = Number(tokenIds[i]).toString();
-            const decodedData = decodedDataArray[i];
+        const metadataPromises = tokenIds.map(async (tokenId, index) => {
+            const tokenIdNumber = Number(tokenId).toString();
+            const decodedData = decodedDataArray[index];
             const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenId}`;
-            if (!baseCid && !decodedData.value) continue;
-            const tokenMetadataResult = await GetLuksoTokenMetadata({ metadataUri, campaign, tokenId });
-            if (tokenMetadataResult.success) metadatasArray.push(tokenMetadataResult.value);
-        }
+
+            if (!baseCid && !decodedData.value) return null;
+
+            const tokenMetadataResult = await GetLuksoTokenMetadata({ metadataUri, campaign, tokenId: tokenIdNumber });
+
+            if (!tokenMetadataResult.success) return null;
+
+            return tokenMetadataResult.value;
+        })
+        const metadatasResultArray = await Promise.all(metadataPromises);
+        const metadatasArray = metadatasResultArray.filter((metadata) => metadata !== null) as CitizenMetadata[];
 
         return { success: true, value: metadatasArray };
     } catch (e) {
@@ -185,27 +191,35 @@ export async function GetCampaignTokensMetadata(campaign: Campaign, address: str
     const { contractAddress } = LUKSO_CAMPAIGN_WEB3_DATA[campaign];
     const typpedCampaign = campaign as keyof typeof LUKSO_CAMPAIGN_WEB3_DATA;
     const tokenIds = await GetCampaignTokenIds(contractAddress, address);
+
     if (!tokenIds.success) return { success: false, errMessage: tokenIds.errMessage, errCode: tokenIds.errCode };
 
     const tokensMetadataResult = await GetTokensMetadata(typpedCampaign as Campaign, tokenIds.value);
+
     if (!tokensMetadataResult.success) return { success: false, errMessage: tokensMetadataResult.errMessage, errCode: tokensMetadataResult.errCode };
 
     return { success: true, value: tokensMetadataResult.value };
 }
 
 export async function GetCampaignsTokensMetadata(address: string): Promise<Result<CitizenMetadata[]>> { //Fix error handling!!
-    let campaignsMetadatas: CitizenMetadata[] = [];
     let hasErrors = false;
-    for (const campaign of Object.keys(LUKSO_CAMPAIGN_WEB3_DATA)) {
+    const campaignsMetadatasPromises = Object.keys(LUKSO_CAMPAIGN_WEB3_DATA).map(async (campaign) => {
         const tokensMetadataResult = await GetCampaignTokensMetadata(campaign as Campaign, address);
+
         if (!tokensMetadataResult.success) {
             hasErrors = true;
-            continue;
+            return null;
         }
-        campaignsMetadatas = campaignsMetadatas.concat(tokensMetadataResult.value);
-    }
+
+        return tokensMetadataResult.value;
+    });
+    const campaignsMetadatasResult = await Promise.all(campaignsMetadatasPromises);
+    const campaignsMetadatasArray = campaignsMetadatasResult.filter((metadata) => metadata !== null);
+    const campaignsMetadatas = campaignsMetadatasArray.flat();
+
     if (hasErrors && campaignsMetadatas.length === 0) return { success: false, errMessage: 'No tokens metadata were loaded correctly', errCode: CommonErrorCode.FetchError };
-    return { success: true, value: campaignsMetadatas };
+    
+    return { success: true, value: campaignsMetadatas as CitizenMetadata[] };
 }
 
 export async function GetCampaignUserFeatures(address: string, campaign: string): Promise<Result<Drop[]>> {
@@ -270,30 +284,41 @@ export async function GetUserFeatures(address: string): Promise<Result<CampaignD
 
 export async function GetFullLeaderboardData(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
     const leaderboardData = await GetLeaderboardData(Blockchain.Ethereum);
-    const leaderboardWithProfileData = await Promise.all(leaderboardData.map(async (entry: LeaderboardEntry) => {
-        const profileData = await GetUniversalProfileData(entry.address);
-        if (!profileData.success) return entry; // If the profile data is not found, return the original entry
-        return {
-            ...entry,
-            name: profileData.value.name,
-            profileImage: profileData.value.profileImage,
-            isFollowing: false
+    
+    const followStatusesPromise = GetFollowStatuses(leaderboardData, PROVIDER, walletAddress);
+    const profileDataPromises = leaderboardData.map(async (entry: LeaderboardEntry) => {
+            const profileData = await GetUniversalProfileData(entry.address);
+            if (!profileData.success) return entry;
+            return {
+                ...entry,
+                name: profileData.success ? profileData.value.name : entry.name,
+                profileImage: profileData.success ? profileData.value.profileImage : entry.profileImage,
+                isFollowing: false
+            } as LeaderboardEntry;
+        }
+    );
+
+    const [followStatusesResult, ...leaderboardWithProfileData] = await Promise.all([
+        followStatusesPromise,
+        ...profileDataPromises
+    ]) as [Result<Record<string, boolean>>, ...LeaderboardEntry[]];
+
+    if (!followStatusesResult.success) {
+        return { 
+            success: false, 
+            errMessage: 'Error getting follow statuses', 
+            errCode: CommonErrorCode.FetchError 
         };
-    }));
-
-    if (!leaderboardWithProfileData) return { success: false, errMessage: 'Error getting leaderboard with profile data', errCode: CommonErrorCode.FetchError };
-
-    const followStatusesResult = await GetFollowStatuses(leaderboardWithProfileData, PROVIDER, walletAddress);
-
-    if (!followStatusesResult.success) return { success: false, errMessage: 'Error getting follow statuses', errCode: CommonErrorCode.FetchError };
+    }
 
     const followStatuses = followStatusesResult.value;
 
-    leaderboardWithProfileData.forEach((entry, index) => {
-        leaderboardWithProfileData[index].isFollowing = followStatuses[entry.address] || false;
-    });
+    const finalLeaderboardData = leaderboardWithProfileData.map(entry => ({
+        ...entry,
+        isFollowing: followStatuses[entry.address] || false
+    }));
 
-    return { success: true, value: leaderboardWithProfileData };
+    return { success: true, value: finalLeaderboardData };
 }
 
 export async function SetTokenMetadata(campaign: Campaign, tokenId: string, metadataUri: string): Promise<Result<void>> {

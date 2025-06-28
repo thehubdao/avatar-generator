@@ -1,5 +1,5 @@
 import { JsonRpcProvider } from "ethers";
-import { DataBaseDrop } from "../../../interfaces/citizens.interface";
+import { ClaimableDrop } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
 import {  useState } from "react";
@@ -8,7 +8,7 @@ import Button from "./button.ui";
 import { useSnackbar } from "../snackbar/snackbar.provider";
 
 interface DropItemCardProps {
-  drop: DataBaseDrop;
+  drop: ClaimableDrop;
   userXP: number;
   userAddress: string;
   provider: JsonRpcProvider;
@@ -54,7 +54,7 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
       key={drop.id}
       title={drop.name}
       tokenID={drop.owned ? 'Claimed' : undefined}
-      price={drop.owned ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : drop.paymentType === PaymentType.TOKEN ? `TOKEN-GATED` : `PRICE: ${drop.price} ${drop.paymentType}`}
+      price={drop.owned ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : drop.paymentType === PaymentType.ETH ? `TOKEN-GATED` : `PRICE: ${drop.price} ${drop.paymentType}`}
       chipColor={drop.owned ? undefined : isLock ? 'bg-citizens-yellow' : drop.paymentType === PaymentType.LYX ? 'bg-citizens-red' : 'bg-citizens-blue'}
       blocked={isLock}
       imgSrc={drop.imageUrl}

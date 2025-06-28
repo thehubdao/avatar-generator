@@ -11,7 +11,7 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
-import { DataBaseDrop, UserXPData } from "../interfaces/citizens.interface";
+import { ClaimableDrop, UserXPData } from "../interfaces/citizens.interface";
 import { Blockchain } from "../enums/blockchain/common.enum";
 
 //#region Generic
@@ -182,7 +182,7 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
   return data.data.approved;
 }
 
-export async function FetchClaimableDrops(dropId?: string): Promise<DataBaseDrop[]> {
+export async function FetchClaimableDrops(dropId?: string): Promise<ClaimableDrop[]> {
   const url = dropId ? `/api/v1/drops?id=${dropId}` : '/api/v1/drops';
   const response = await fetch(url);
   if (!response.ok) throw new Error('Failed to fetch claimable drops');

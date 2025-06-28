@@ -85,7 +85,7 @@ export default function CitizensComponent() {
         const baseIndexFeature = categoryFeatureArray.find(val => val.index === parseInt(baseFeatureIndex)); // Get the feature by index from the base features category array
 
         if (!baseIndexFeature) return LogError(Module.Citizens, 'Could not find base feature at index ' + baseFeatureIndex + ' in category ' + category);
-        
+
         filteredOptionList.push(baseIndexFeature);
       }
 
@@ -167,17 +167,11 @@ export default function CitizensComponent() {
       LogError(Module.Citizens, 'Missing single data!');
       return;
     }
-    for (const { val } of singleInitData.current.features) {
-      const { id, path, type, name } = val;
-
-      await ChangeFeature(
-        id,
-        path,
-        name,
-        type,
-        campaignParams?.config.skin?.defColor ?? 'FFFFFF'
-      );
-    }
+    const changeFeaturePromises = singleInitData.current.features.map(async (feature) => {
+      const { id, path, type, name } = feature.val;
+      await ChangeFeature(id, path, name, type, campaignParams?.config.skin?.defColor ?? 'FFFFFF');
+    });
+    await Promise.all(changeFeaturePromises);
   }
 
   async function onAvatarBuilderReady() {
@@ -187,7 +181,6 @@ export default function CitizensComponent() {
         getSingleInfo(),
         getSingleData(selectedCampaign as string, selectedCitizen?.combination as string),
       ]);
-
       await SetFeaturesData(campaignParams?.features ?? []);
 
       const bgMap = envMapList.current?.find(
@@ -201,7 +194,7 @@ export default function CitizensComponent() {
         bgMap?.path,
         lightMap?.path,
         campaignParams?.config.envMap?.skyboxConfig
-      );
+      ); 
 
       // Set features from single
       await loadSingleData();
@@ -220,7 +213,6 @@ export default function CitizensComponent() {
       } else {
         LogError(Module.Citizens, 'Failed to change start animation', animationResult.errCode);
       }
-
       setIsAllReady(true);
     } catch (error) {
       LogError(Module.Citizens, 'Error in onAvatarBuilderReady', error);
