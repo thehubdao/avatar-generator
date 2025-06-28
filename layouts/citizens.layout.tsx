@@ -5,6 +5,8 @@ import React from "react";
 import CitizensLoginComponent from "../components/citizens/login/login.component";
 import { BlockchainProvider } from "../contexts/BlockchainContext";
 import LoadingUI from "../ui/citizens/common/loading.ui";
+import { Blockchain } from "../enums/blockchain/common.enum";
+import { Campaign } from "../enums/citizens/common.enum";
 
 export default function CitizensLayout({
   children, // will be a page or nested layout
@@ -22,7 +24,7 @@ export default function CitizensLayout({
           <LoadingUI loadingText="Loading Citizens Portal" dataValidate={isConnected}/>
           :
           <>
-            <HeaderUI onLogin={() => HandleLogin(undefined, undefined)} onLogout={() => HandleLogout()} />
+            <HeaderUI onLogin={() => HandleLogin(Blockchain.Root, Campaign.Based)} onLogout={() => HandleLogout()} />
             <main className="w-full min-h-dvh">
               {
                 isConnected === true ?

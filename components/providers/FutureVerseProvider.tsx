@@ -5,13 +5,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cookieStorage, createStorage } from 'wagmi';
 import { AuthUiProvider } from '@futureverse/auth-ui';
 import { CLIENT_ID, CUSTOM_THEME_CONFIG } from '../../constants/root/pass.constant';
+import { ORIGIN } from '../../constants/root/contract.constant';
 
 export default function FutureVerseProvider({ children }: { children: React.ReactNode }) {
 
     const authClient = new FutureverseAuthClient({
         clientId: CLIENT_ID,
-        environment: 'staging',
-        redirectUri: 'http://localhost:3000',
+        environment: 'production',
+        redirectUri: ORIGIN,
         signInFlow: 'redirect',
     });
     const queryClient = new QueryClient();

@@ -71,7 +71,7 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     image: '/resources/images/campaings/based_collection.jpg',
     campaign: Campaign.Based,
     blockChain: Blockchain.Root,
-    active: false
+    active: true
   }
 ];
 

@@ -69,6 +69,10 @@ export enum SolanaCampaign {
   Kumi = Campaign.Kumi,
 }
 
+export enum RootCampaign {
+  Based = "root_citizens",
+}
+
 export enum CandyMachineGroup {
   Holder = "holder",
   Public = "public",
