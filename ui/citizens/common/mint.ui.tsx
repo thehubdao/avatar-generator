@@ -11,6 +11,8 @@ import { setMintingMode } from "../../../store/citizensMetadataSlice";
 import PlusSVG from "./SVG/plusSVG.ui";
 import { useMediaQuery } from "usehooks-ts";
 import Counter from "./counter.ui";
+import { Campaign } from "../../../enums/citizens/common.enum";
+import { MINTING_TARGET_DATE } from "../../../constants/citizens.constant";
 
 interface MintUIProps {
   imgUrl?: string;
@@ -39,6 +41,8 @@ export default function MintUI({
   const [isMintOpen, setIsMintOpen] = useState<boolean>(false);
 
   const [isMintingAllowed, setIsMintingAllowed] = useState<boolean>(false);
+
+  const selectedCampaign = useAppSelector((state) => state.citizensMetadata.selectedCampaign);
 
   const dispatch = useAppDispatch();
 
@@ -125,7 +129,7 @@ export default function MintUI({
                     <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
                   </>
                   :
-                  <Counter onReachZero={() => handleTimeReachedZero()}/>}
+                  <Counter onReachZero={() => handleTimeReachedZero()} targetDate={MINTING_TARGET_DATE[selectedCampaign as Campaign]}/>}
               </div >
             </div>
           </div >
@@ -166,7 +170,7 @@ export default function MintUI({
                 <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
               </>
               :
-              <Counter onReachZero={() => handleTimeReachedZero()}/>
+              <Counter onReachZero={() => handleTimeReachedZero()} targetDate={MINTING_TARGET_DATE[selectedCampaign as Campaign]}/>
             }
           </div >
         </>

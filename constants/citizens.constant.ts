@@ -232,3 +232,8 @@ export const GAMES: Game[] = [
     ]
   }
 ]
+
+export const MINTING_TARGET_DATE = {
+  [Campaign.Kumi]: new Date('2025-06-03T23:00:00.000Z'),
+  [Campaign.Based]: new Date('2025-06-28T23:00:00.000Z'),
+};
