@@ -2,7 +2,6 @@ import { LOGIN_NEWS } from "../../../constants/citizens.constant";
 import Link from "next/link";
 import Image from "next/image";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
 import 'swiper/css';
 
 export default function NewsUI() {
@@ -11,12 +10,8 @@ export default function NewsUI() {
       <Swiper
         spaceBetween={40}
         slidesPerView={1}
-        initialSlide={0}
+        initialSlide={1}
         centeredSlides={true}
-        autoplay={{
-          delay: 2500,
-          disableOnInteraction: true,
-        }}
         breakpoints={{
           1280: {
             slidesPerView: 2
@@ -25,7 +20,7 @@ export default function NewsUI() {
             slidesPerView: 3
           },
         }}
-        modules={[Autoplay]}
+        modules={[]}
       >
         {
           LOGIN_NEWS.map((item, index) => (

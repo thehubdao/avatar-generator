@@ -77,16 +77,16 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
 
 export const LOGIN_NEWS = [
   {
-    img: 'news-01',
-    link: ''
+    img: 'News_1',
+    link: 'https://thehub.io/news/citizens-portal-launch'
   },
   {
-    img: 'news-02',
-    link: ''
+    img: 'News_2',
+    link: 'https://thehub.io/news/kumi-citizens-drop'
   },
   {
-    img: 'news-03',
-    link: ''
+    img: 'News_3',
+    link: 'https://thehub.io/news/root-network-integration'
   }
 ];
 
