@@ -11,7 +11,7 @@ export default function FutureVerseProvider({ children }: { children: React.Reac
 
     const authClient = new FutureverseAuthClient({
         clientId: CLIENT_ID,
-        environment: 'production',
+        environment: 'staging',
         redirectUri: ORIGIN,
         signInFlow: 'redirect',
     });
