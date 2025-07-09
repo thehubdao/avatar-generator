@@ -99,7 +99,7 @@ export default function ConnectButton({ onLogin, onLogout }: ConnectButtonProps)
                   <p className="w-full font-light text-center text-lg xl:text-2xl pt-4 pb-1 truncate">
                     {address ? FormatWalletAddress(address, 6) : 'No address'}
                   </p>
-                  {blockchainType !== Blockchain.Solana && <div className="w-full flex justify-between">
+                  {blockchainType !== Blockchain.Solana && blockchainType !== Blockchain.Root && <div className="w-full flex justify-between">
                     <div className="font-medium text-xs text-center bg-citizens-gray rounded-md flex flex-col justify-center items-center py-2 px-3 sm:px-4">
                       <p>{followUserData?.followerCount}</p>
                       <p>Followers</p>

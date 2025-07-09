@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { TimeLeft } from "../../../interfaces/citizens.interface";
 
 interface CounterProps {
-  targetDate?: Date;
+  targetDate: Date;
   onReachZero: () => void;
 }
 
-export default function Counter({ targetDate = new Date('2025-06-03T23:00:00.000Z'), onReachZero }: CounterProps) {
+export default function Counter({ targetDate, onReachZero }: CounterProps) {
   const container = useRef<HTMLDivElement>(null);
 
   const [isTimeCalculated, setIsTimeCalculated] = useState<boolean>(false);

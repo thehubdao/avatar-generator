@@ -71,7 +71,7 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     image: '/resources/images/campaings/based_collection.jpg',
     campaign: Campaign.Based,
     blockChain: Blockchain.Root,
-    active: false
+    active: true
   }
 ];
 
@@ -232,3 +232,8 @@ export const GAMES: Game[] = [
     ]
   }
 ]
+
+export const MINTING_TARGET_DATE = {
+  [Campaign.Kumi]: new Date('2025-06-03T23:00:00.000Z'),
+  [Campaign.Based]: new Date('2025-08-10T23:00:00.000Z'),
+};
