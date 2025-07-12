@@ -38,6 +38,18 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
 	const [selectedOption, setSelectedOption] = useState<BasicData>();
+	const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+
+	// Loading text rotation for better UX
+	const loadingTexts = [
+		"Loading Environment",
+		"Initializing 3D Scene",
+		"Loading Avatar Model",
+		"Rendering Textures",
+		"Setting Up Lighting",
+		"Preparing Camera",
+		"Almost Ready..."
+	];
 
 	function updateFeatureCamPosition(
 		index: string,
@@ -105,6 +117,19 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 			})
 		}
 	}, [didEditMode])
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setLoadingTextIndex((prev) => (prev + 1) % loadingTexts.length);
+		}, 1500);
+		
+		// Stop rotation when ready
+		if (isReady) {
+			clearInterval(interval);
+		}
+		
+		return () => clearInterval(interval);
+	}, [isReady]);
 
 	return (
 		<SnackbarProvider>
@@ -199,7 +224,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 				}
 				{
 					!isReady &&
-					<LoadingUI loadingText="Loading Environment" dataValidate={null} />
+					<LoadingUI loadingText={loadingTexts[loadingTextIndex]} dataValidate={null} />
 				}
 			</div>
 		</SnackbarProvider>
