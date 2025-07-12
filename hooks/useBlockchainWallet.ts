@@ -50,9 +50,9 @@ export function useBlockchainWallet() {
   /* Signer related hooks */
 
   const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Ethereum Wallets
-  const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets
+  const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets   
 
-  const signer = useFutureverseSigner(); 
+  const signer = useFutureverseSigner();
 
   const getCampaignParams = async (campaign: Campaign) => {
     const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
@@ -69,7 +69,7 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: asset.errMessage, errCode: asset.errCode };
   }
 
-  async function getEthereumTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
+  async function getLuksoTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
     const tokensMetadata = await GetCampaignsTokensMetadata(walletAddress);
 
     if (tokensMetadata.success) return { success: true, value: tokensMetadata.value };
@@ -84,7 +84,7 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: asset.errMessage, errCode: asset.errCode };
   }
 
-  async function getEthereumUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
+  async function getLuksoUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
     const features = await GetLuksoUserFeatures(walletAddress);
 
     if (features.success) return { success: true, value: features.value };
@@ -108,7 +108,7 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: features.errMessage, errCode: features.errCode };
   }
 
-  async function getEthereumFollowerCountPromise(walletAddress: string): Promise<Result<FollowUserData>> {
+  async function getLuksoFollowerCountPromise(walletAddress: string): Promise<Result<FollowUserData>> {
     const followerCount = await GetFollowerCounts(walletAddress);
 
     if (followerCount.success) return { success: true, value: followerCount.value };
@@ -116,7 +116,7 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: followerCount.errMessage, errCode: followerCount.errCode };
   }
 
-  async function getEthereumLeaderboardDataPromise(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
+  async function getLuksoLeaderboardDataPromise(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
     const leaderboardData = await GetFullLeaderboardData(walletAddress);
     if (leaderboardData.success) return { success: true, value: leaderboardData.value };
 
@@ -132,7 +132,7 @@ export function useBlockchainWallet() {
       mintingData.mintSupply = mintingSupply.value;
     } else void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
 
-    if(mintingPrice.success){
+    if (mintingPrice.success) {
       mintingData.mintPrice = mintingPrice.value;
     } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
 
@@ -175,25 +175,25 @@ export function useBlockchainWallet() {
       return;
     }
 
-    if (blockchainType === Blockchain.Ethereum) {
-      const ethereumCitizensMetadataPromise = getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
-      const ethereumUserFeaturesPromise = getEthereumUserFeaturesPromise(walletAddress); // Get the user features
-      const ethereumLeaderboardDataPromise = getEthereumLeaderboardDataPromise(walletAddress); // Get the leaderboard data
-      const ethereumClaimableDropsPromise = getClaimableDropsPromise(); // Get the claimable drops
-      const [ethereumCitizensMetadata, ethereumUserFeatures, ethereumLeaderboardData, ethereumClaimableDrops] = await Promise.all([ethereumCitizensMetadataPromise, ethereumUserFeaturesPromise, ethereumLeaderboardDataPromise, ethereumClaimableDropsPromise, ethereumClaimableDropsPromise]);
+    if (blockchainType === Blockchain.Lukso) {
+      const luksoCitizensMetadataPromise = getLuksoTokensMetadataPromise(walletAddress); // Get the citizens Lukso metadata
+      const luksoUserFeaturesPromise = getLuksoUserFeaturesPromise(walletAddress); // Get the user features
+      const luksoLeaderboardDataPromise = getLuksoLeaderboardDataPromise(walletAddress); // Get the leaderboard data
+      const luksoClaimableDropsPromise = getClaimableDropsPromise(); // Get the claimable drops
+      const [luksoCitizensMetadata, luksoUserFeatures, luksoLeaderboardData, luksoClaimableDrops] = await Promise.all([luksoCitizensMetadataPromise, luksoUserFeaturesPromise, luksoLeaderboardDataPromise, luksoClaimableDropsPromise, luksoClaimableDropsPromise]);
 
-      //Ethereum Citizens Metadata dispatch
-      if (ethereumCitizensMetadata.success) {
-        const citizen = ethereumCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
+      //Lukso Citizens Metadata dispatch
+      if (luksoCitizensMetadata.success) {
+        const citizen = luksoCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
 
-        dispatch(setCitizensMetadata(ethereumCitizensMetadata.value));
+        dispatch(setCitizensMetadata(luksoCitizensMetadata.value));
 
         if (selectedCampaign === null) { //This case is handled when user refresh the page and is still logged in
-          const userCampaigns = [...new Set(ethereumCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
+          const userCampaigns = [...new Set(luksoCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
 
           if (userCampaigns.length > 0) {
             dispatch(setSelectedCampaign(userCampaigns[0]));
-            dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
+            dispatch(setSelectedCitizen(luksoCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
             dispatch(setMintingMode(false));
           } else {
             // MINTING FLOW
@@ -216,29 +216,31 @@ export function useBlockchainWallet() {
           dispatch(setMintingMode(false));
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
-        LogError(Module.Citizens, ethereumCitizensMetadata.errMessage, ethereumCitizensMetadata.errCode);
+        LogError(Module.Citizens, luksoCitizensMetadata.errMessage, luksoCitizensMetadata.errCode);
       }
 
-      //Ethereum User Features dispatch
-      if (ethereumUserFeatures.success) {
-        const ethereumFeatures = ethereumUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the ethereum features to the AppCampaigns type, this depends on the wearables got for current campaign
-        dispatch(setUserFeatures(ethereumFeatures));
+      //Lukso User Features dispatch
+      if (luksoUserFeatures.success) {
+        const luksoFeatures = luksoUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the lukso features to the AppCampaigns type, this depends on the wearables got for current campaign
+        dispatch(setUserFeatures(luksoFeatures));
       } else {
-        LogError(Module.Citizens, ethereumUserFeatures.errMessage, ethereumUserFeatures.errCode);
+        LogError(Module.Citizens, luksoUserFeatures.errMessage, luksoUserFeatures.errCode);
       }
 
-      //Ethereum Leaderboard Data dispatch
-      if (ethereumLeaderboardData.success) {
-        dispatch(setLeaderboardData(ethereumLeaderboardData.value));
+      //Lukso Leaderboard Data dispatch
+      if (luksoLeaderboardData.success) {
+        dispatch(setLeaderboardData(luksoLeaderboardData.value));
       } else {
-        LogError(Module.Citizens, ethereumLeaderboardData.errMessage, ethereumLeaderboardData.errCode);
+        LogError(Module.Citizens, luksoLeaderboardData.errMessage, luksoLeaderboardData.errCode);
       }
 
-      if (ethereumClaimableDrops.success) {
-        dispatch(setClaimableDrops(ethereumClaimableDrops.value));
+      if (luksoClaimableDrops.success) {
+        dispatch(setClaimableDrops(luksoClaimableDrops.value));
       } else {
-        LogError(Module.Citizens, ethereumClaimableDrops.errMessage, ethereumClaimableDrops.errCode);
+        LogError(Module.Citizens, luksoClaimableDrops.errMessage, luksoClaimableDrops.errCode);
       }
+    }else if (blockchainType === Blockchain.Polygon) {
+
     } else if (blockchainType === Blockchain.Solana) {
       const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
       const solanaUserFeatures = await getSolanaUserFeaturesPromise(walletAddress); // Get the user features
@@ -377,7 +379,7 @@ export function useBlockchainWallet() {
     }
   }
 
-  //Remove Phantom from ethereum login methods
+  //Remove Phantom from lukso login methods
   useEffect(() => {
     if (isModalOpen) {
       let tries = 0;
@@ -401,13 +403,12 @@ export function useBlockchainWallet() {
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
                 }
-                if((isUniversal || isPhantom || isBackpack || (isMetamask && isSolana)) && (selectedCampaign === Campaign.Polygon)){
-                  console.log(selectedCampaign);
+                if ((isUniversal || isPhantom || isBackpack || (isMetamask && isSolana)) && (selectedCampaign === Campaign.Polygon)) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
                 }
-                if(isMetamask && (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators)){
+                if (isMetamask && (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators)) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
@@ -439,21 +440,35 @@ export function useBlockchainWallet() {
             return; // If the user address is undefined, log the error and return
           }
 
-          if (chainType === Blockchain.Ethereum && isEthereumReady) {
-            const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
+          if ((selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators) && isEthereumReady) { //As Lukso and solana are part of lukso, we need to check if the campaign is citizens or creators
+            const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
             const walletNamePromise = GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
             const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
-            const followerCountPromise = getEthereumFollowerCountPromise(user?.wallet?.address); // Get the follower count
+            const followerCountPromise = getLuksoFollowerCountPromise(user?.wallet?.address); // Get the follower count
             const [provider, walletName, xpData, followerCount] = await Promise.all([providerPromise, walletNamePromise, xpDataPromise, followerCountPromise]);
             setEthersProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
 
             dispatch(connect({
               address: user?.wallet?.address,
               walletName: walletName.success ? walletName.value.name : null,
-              blockchainType: chainType, xpData: xpData.success ? xpData.value : null,
+              blockchainType: Blockchain.Lukso, xpData: xpData.success ? xpData.value : null,
               followUserData: followerCount.success ? followerCount.value : null
             }));
 
+          } else if (selectedCampaign === Campaign.Polygon && isEthereumReady) { //As Polygon is part of lukso, we need to check if the campaign is polygon
+            const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
+            const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
+            const [provider, xpData] = await Promise.all([providerPromise, xpDataPromise]);
+
+            setEthersProvider(new BrowserProvider(provider));
+
+            dispatch(connect({
+              address: user?.wallet?.address,
+              walletName: null,
+              blockchainType: Blockchain.Polygon,
+              xpData: xpData.success ? xpData.value : null,
+              followUserData: { followerCount: -1, followingCount: -1 }
+            }));
           } else if (chainType === Blockchain.Solana && isSolanaReady) {
             const solanaWallet = solanaWallets[0];
 
@@ -477,11 +492,11 @@ export function useBlockchainWallet() {
         connectPromise();
       } // Set the user as logged in
     }
-    if (ready && !authenticated && (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+    if (ready && !authenticated && (blockchainType === Blockchain.Lukso || blockchainType === Blockchain.Solana)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
       dispatch(disconnect());
       SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Privy]: false });
     }
-  }, [ready, authenticated, isEthereumReady, isSolanaReady]);
+  }, [ready, authenticated, isEthereumReady, isSolanaReady, selectedCampaign]);
 
   // Root Logic
   useEffect(() => {

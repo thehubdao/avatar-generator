@@ -35,13 +35,26 @@ export function PrivyAuthProvider({ children }: { children: React.ReactNode }) {
               "symbol": "SOL",
               "decimals": 9
             },
+
             rpcUrls: {
               default: {
                 http: ["https://api.devnet.solana.com"],
                 webSocket: undefined
               }
             }
+          },
+          {"name":"Polygon", "id":137, "nativeCurrency": {
+            "name": "Polygon",
+            "symbol": "MATIC",
+            "decimals": 18
+          },
+          rpcUrls: {
+            default: {
+              http: ["https://rpc-amoy.polygon.technology/"],
+              webSocket: undefined
+            }
           }
+        }
         ],
         
       }}
