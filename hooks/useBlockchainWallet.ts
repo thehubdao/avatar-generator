@@ -393,14 +393,21 @@ export function useBlockchainWallet() {
                 const text = spans.map(span => span.textContent?.trim()).join(' ');
                 const isPhantom = text.includes('Phantom');
                 const isBackpack = text.includes('Backpack');
-                const isUniversal = text.includes('universal_profile');
                 const isSolana = text.includes('Solana');
+                const isMetamask = text.includes('MetaMask');
+                const isUniversal = text.includes('universal_profile');
                 if ((isPhantom || isBackpack) && !isSolana) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
                 }
-                if (isUniversal && isSolana) {
+                if((isUniversal || isPhantom || isBackpack || (isMetamask && isSolana)) && (selectedCampaign === Campaign.Polygon)){
+                  console.log(selectedCampaign);
+                  button.style.display = 'none';
+                  button.setAttribute('disabled', 'true');
+                  button.style.pointerEvents = 'none';
+                }
+                if(isMetamask && (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators)){
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';

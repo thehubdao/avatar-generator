@@ -2,7 +2,8 @@ export enum Blockchain {
     Lukso = "lukso",
     Solana = "solana",
     Ethereum = "ethereum",
-    Root = "root"
+    Root = "root",
+    Polygon = "polygon"
 }
 
 export enum LoginLibrary{ //TODO: Add here each new library used to login

@@ -72,6 +72,13 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     campaign: Campaign.Based,
     blockChain: Blockchain.Root,
     active: true
+  },
+  {
+    name:'Polygon Citizens',
+    image: '/resources/images/campaings/citizens_collection.jpg',
+    campaign: Campaign.Polygon,
+    blockChain: Blockchain.Polygon,
+    active: true
   }
 ];
 
