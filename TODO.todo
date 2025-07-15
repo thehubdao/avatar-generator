@@ -26,3 +26,27 @@ TODO:
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
+
+MARKETPLACE:
+    FEATURES:
+        ☐ Multiple feature selection
+            - Add to cart
+            - Mark as selected and deselected
+        ☐ Shopping cart features
+            - list of selected features (free, blocked, paid)
+            - Remove feature from cart
+            - Total items and price
+            - Checkout button
+            - Responsive design
+            - cartOpen state
+    TODO:
+        ✔ remove save combination button from marketplace @done
+        ✔ don't add blocked features to shopping cart but allow to select them @done
+        ☐ fix error on selected feature when it is removed from cart from different feature category (baseExportData/exportData)
+        ✔ Add max items in list to scroll with responsive design @done
+        ☐ Review some features that change the 3d model but don't show in the shopping cart (underwear mask, face)
+        ☐ Add empty item in empty category
+        ✔ Fix decimal price in shopping cart @done
+    TO CONSIDER:
+        ☐ Add feature to save cart for later
+
