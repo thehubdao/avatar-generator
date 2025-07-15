@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CitizenMetadata, ClaimableDrop} from '../interfaces/citizens.interface';
 import { Campaign, LuksoCampaign } from '../enums/citizens/common.enum';
-import { CampaignParameters } from '../interfaces/common.interface';
+import { BasicData, CampaignParameters } from '../interfaces/common.interface';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { AppCampaigns, CampaignDrops } from '../types/citizens.type';
 
@@ -13,6 +13,7 @@ interface CitizensMetadataState {
   leaderboardData: LeaderboardEntry[] | null | undefined;
   userFeatures: CampaignDrops<AppCampaigns> | null;
   claimableDrops: Record<LuksoCampaign, ClaimableDrop[]> | null;
+  shoppingCart: BasicData[];
   mintSupply: number | null;
   mintingPrice: number | null;
   editMode: boolean;
@@ -31,8 +32,9 @@ const initialState: CitizensMetadataState = {
   mintSupply: null,
   mintingPrice: null,
   claimableDrops: null,
+  shoppingCart: [],
   editMode: false,
-  marketplaceMode: true,
+  marketplaceMode: false,
   mintingMode: true,
   savingMode: false
 }
@@ -80,9 +82,12 @@ export const citizensMetadataSlice = createSlice({
     },
     setClaimableDrops: (state, action: PayloadAction<Record<LuksoCampaign, ClaimableDrop[]>>) => {
       state.claimableDrops = action.payload;
+    },
+    setShoppingCart: (state, action: PayloadAction<BasicData[]>) => {
+      state.shoppingCart = action.payload;
     }
   }
 });
 
-export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMarketplaceMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice } = citizensMetadataSlice.actions;
+export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMarketplaceMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice, setClaimableDrops, setShoppingCart } = citizensMetadataSlice.actions;
 export default citizensMetadataSlice.reducer;
