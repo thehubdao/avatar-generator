@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import CitizensUI from "../../ui/citizens/citizens.ui";
 import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign } from "../../utils/api.util";
@@ -27,13 +27,16 @@ export default function CitizensComponent() {
   const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
   const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
   const userFeatures = useAppSelector(state => state.citizensMetadata.userFeatures);
+  const claimableDrops = useAppSelector(state => state.citizensMetadata.claimableDrops);
   const walletAddress = useAppSelector(state => state.citizensAuth.address);
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
   // Local references
+  const baseExportData = useRef<ExportInterface>({ attributes: [] });
   const exportData = useRef<ExportInterface>({ attributes: [] });
   const featureList = useRef<FeatureInterface[]>([]);
   const optionList = useRef<FeatureInterface[]>([]);
+  const claimableDropsList = useRef<FeatureInterface[]>([]);
   const envMapList = useRef<EnvMapInterface[]>();
   const singleInitData = useRef<SingleInterface>();
 
@@ -97,6 +100,7 @@ export default function CitizensComponent() {
     if (!userFeatures) return LogError(Module.Citizens, 'Missing user features to add!');
 
     const campaignuserFeatures = userFeatures[selectedCampaign as string];
+
     if (campaignuserFeatures) {
       const formatteduserWearables = campaignuserFeatures
         .map((val) => {
@@ -123,10 +127,37 @@ export default function CitizensComponent() {
         feature.balance = userFeatures[selectedCampaign as string].find(w => w.type === feature.type && w.index === feature.index)?.balance;
         return feature;
       });
+
       filteredOptionList = filteredOptionList.concat(featuresWithBalance);
     }
 
     optionList.current = filteredOptionList;
+
+    if (!claimableDrops) return LogError(Module.Citizens, 'Missing claimable drops to add!');
+
+    const campaignClaimableDrops = claimableDrops[selectedCampaign as string];
+
+    if (campaignClaimableDrops) {
+      const formattedClaimableDrops = campaignClaimableDrops
+        .map((drop) => {
+          return featureList.current?.find(
+            (option) =>
+              option.type === drop.featureType &&
+              drop.featureIndex === option.index
+          );
+        })
+        .filter(el => el !== undefined);
+
+      const claimableDropsWithMarketData = formattedClaimableDrops.map(feature => {
+        feature.price = claimableDrops[selectedCampaign as string].find(w => w.featureType === feature.type && w.featureIndex === feature.index)?.price;
+        feature.paymentType = claimableDrops[selectedCampaign as string].find(w => w.featureType === feature.type && w.featureIndex === feature.index)?.paymentType;
+        feature.requiredXP = claimableDrops[selectedCampaign as string].find(w => w.featureType === feature.type && w.featureIndex === feature.index)?.requiredXP;
+        feature.thumb = claimableDrops[selectedCampaign as string].find(w => w.featureType === feature.type && w.featureIndex === feature.index)?.imageUrl;
+        return feature;
+      })
+
+      claimableDropsList.current = claimableDropsWithMarketData;
+    }
   }
 
   async function getEnvironmentMapList() {
@@ -158,7 +189,7 @@ export default function CitizensComponent() {
     });
   }
 
-  async function loadSingleData() {
+  async function loadSingleData(specificType?: string) {
     if (selectedCitizen === null) {
       LogError(Module.Citizens, 'Missing selected citizen to load single data!');
       return;
@@ -169,6 +200,7 @@ export default function CitizensComponent() {
     }
     const changeFeaturePromises = singleInitData.current.features.map(async (feature) => {
       const { id, path, type, name } = feature.val;
+      if (specificType && specificType !== type) return; // Skip if specificType is provided and does not match the feature type
       await ChangeFeature(id, path, name, type, campaignParams?.config.skin?.defColor ?? 'FFFFFF');
     });
     await Promise.all(changeFeaturePromises);
@@ -194,7 +226,7 @@ export default function CitizensComponent() {
         bgMap?.path,
         lightMap?.path,
         campaignParams?.config.envMap?.skyboxConfig
-      ); 
+      );
 
       // Set features from single
       await loadSingleData();
@@ -581,11 +613,38 @@ export default function CitizensComponent() {
     return false;
   }
 
+  function onResetCombination(type?: string) {
+    loadSingleData(type);
+    // replace type with the base type if it exists
+    if (type) {
+      console.log('baseExportData on reset:', baseExportData.current.attributes);
+
+      const baseFeature = baseExportData.current.attributes.find(attr => attr.id === type);
+      if (baseFeature) {
+        exportData.current.attributes = exportData.current.attributes.filter(attr => attr.id !== type);
+        exportData.current.attributes.push(baseFeature);
+        console.log(`Reset combination for type ${type}:`, exportData.current.attributes, baseExportData.current.attributes, baseFeature);
+
+      }
+    } else {
+      // use spread operator
+      exportData.current.attributes = [...baseExportData.current.attributes]; // Reset to base export data
+      console.log(`Reset combination without type:`, exportData.current.attributes);
+
+    }
+  }
+
+  useEffect(() => {
+    // Initialize the export data with the base export data
+    console.log(`Change base export data:`, baseExportData.current.attributes);
+
+  }, [baseExportData.current.attributes]);
+
   return <CitizensUI
     singleInitData={singleInitData.current}
     exportData={exportData.current}
     featureList={optionList.current}
-    marketplaceFeatureList={optionList.current}
+    marketplaceFeatureList={claimableDropsList.current}
     isReady={isAllReady}
     handleReady={() => onAvatarBuilderReady()}
     handleExport={(type) => exportModel(type)}
@@ -593,5 +652,6 @@ export default function CitizensComponent() {
     handleSaveCombination={() => handleSaveCombination()}
     handleBuying={() => onBuying()}
     handleMinting={() => onMinting()}
+    handleResetCombination={(type) => onResetCombination(type)}
   />
 }
