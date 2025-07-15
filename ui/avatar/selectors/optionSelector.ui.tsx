@@ -1,8 +1,9 @@
+import { RandomTier } from "../../../enums/common.enum";
 import { FeatureInterface } from "../../../interfaces/api.interface";
 import { BasicData } from "../../../interfaces/common.interface";
 import LogoUI from "../../lukso/common/logo.ui";
 import OptionCardUI from "./optionCard.ui";
-import {MouseEvent} from "react";
+import { MouseEvent } from "react";
 
 interface OptionSelectorProps {
   list?: FeatureInterface[];
@@ -20,15 +21,24 @@ export default function OptionSelectorUI({ list, activeOption, handleClick }: Op
   return (
     <div className="flex flex-wrap flex-col gap-3 content-start overflow-x-auto h-[190px] dark:h-[220px] min-[1440px]:h-[390px]">
       {list ?
-        list.map(opt => {
-          return (
+        ( list.length > 0 ?
+          list.map(opt => (
             <div key={opt.id} onClick={event => selectFeature(event, opt)}>
               <OptionCardUI option={opt} isActive={activeOption && activeOption.val === opt.name} />
             </div>
-          )
-        })
+          ))
+          :
+          <OptionCardUI option={{
+            id: 'empty',
+            index: 0,
+            name: 'No options',
+            type: 'empty',
+            tier: RandomTier.Common,
+            path: '',
+          }}  />
+        )
         : // Make void list validation and loading view
-        <div className="w-1/6 translate-x-[200%] flex justify-center"> <LogoUI colorSecundary="rgba(25, 216, 243, 0.3)"/></div>
+        <div className="w-1/6 translate-x-[200%] flex justify-center"> <LogoUI colorSecundary="rgba(25, 216, 243, 0.3)" /></div>
       }
     </div>
   )
