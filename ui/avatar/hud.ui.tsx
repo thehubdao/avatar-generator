@@ -56,7 +56,7 @@ interface HudUIProps {
   exportAllow?: ModelExtension[];
   onClickBackButton: () => void
   isLoading: boolean
-  handleSaveCombination: () => Promise<boolean>
+  handleSaveCombination?: () => Promise<boolean>
 }
 
 export default function HudUI({
@@ -89,6 +89,10 @@ export default function HudUI({
   const { showSnackbar } = useSnackbar();
 
   async function onSaveCombination() {
+    if (!handleSaveCombination) {
+      showSnackbar(<p>Ups. We can´t to save the combination, try later.</p>);
+      return;
+    }
     dispatch(setSavingMode(true));
     const isSuccess = await handleSaveCombination();
     if (isSuccess) {
@@ -243,11 +247,13 @@ export default function HudUI({
                       <p className="font-poppins text-center 2xl:w-[240px] py-2">GO BACK</p>
                     </AGButton>
                   </div>
-                  <div className="fixed right-0 bottom-0 pb-6 pt-12 2xl:relative">
-                    <AGButton onClickEvent={() => setIsSaveModalOpen(true)} nm={isWindowGreaterThan1536}>
-                      <p className="font-poppins text-center w-[300px] py-2">SAVE COMBINATION</p>
-                    </AGButton>
-                  </div>
+                  { handleSaveCombination &&
+                    <div className="fixed right-0 bottom-0 pb-6 pt-12 2xl:relative">
+                      <AGButton onClickEvent={() => setIsSaveModalOpen(true)} nm={isWindowGreaterThan1536}>
+                        <p className="font-poppins text-center w-[300px] py-2">SAVE COMBINATION</p>
+                      </AGButton>
+                    </div>
+                  }
                 </div>
               }
               <div className="w-full">
