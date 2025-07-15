@@ -6,13 +6,14 @@ import { BasicData, ExportInterface, LookAtVectors } from "../../interfaces/comm
 import { FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../../components/avatar/viewer.component";
 import { FilterList } from "../../utils/common.util";
-import { setEditMode, setMarketplaceMode } from "../../store/citizensMetadataSlice";
+import { setEditMode, setMarketplaceMode, setShoppingCart } from "../../store/citizensMetadataSlice";
 import DetailsUI from "./common/details.ui";
 import SnackbarProvider from "./snackbar/snackbar.provider";
 import MintUI from "./common/mint.ui";
 import { MINTING_UI_DATA } from "../../constants/mint.constant";
 import { ModelExtension } from "../../enums/export.enum";
 import LoadingUI from "./common/loading.ui";
+import ShoppingCartUI from "./backpack/shoppingCart.ui";
 
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
@@ -26,11 +27,13 @@ interface CitizensUIProps {
 	handleSaveCombination: () => Promise<boolean>;
 	handleBuying: () => Promise<boolean>;
 	handleMinting: () => Promise<boolean>;
+	handleResetCombination: (type?: string) => void;
 }
 
-export default function CitizensUI({ singleInitData, exportData, featureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleBuying, handleMinting }: CitizensUIProps) {
+export default function CitizensUI({ singleInitData, exportData, featureList, marketplaceFeatureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleBuying, handleMinting, handleResetCombination }: CitizensUIProps) {
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
+	const shoppingCart = useAppSelector(state => state.citizensMetadata.shoppingCart);
 	const selectedCitizen = useAppSelector(state => state.citizensMetadata.selectedCitizen);
 	const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
 	const didEditMode = useAppSelector(state => state.citizensMetadata.editMode);
@@ -41,11 +44,6 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
 	const [selectedOption, setSelectedOption] = useState<BasicData>();
-
-	// Marketplace local State
-	// const [marketplaceOptionList, setMarketplaceOptionList] = useState<FeatureInterface[]>();
-	// const [marketplaceSelectedCategory, setMarketplaceSelectedCategory] = useState<string>('');
-	// const [marketplaceSelectedOption, setMarketplaceSelectedOption] = useState<BasicData>();
 
 	function updateFeatureCamPosition(
 		index: string,
@@ -77,10 +75,42 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 		});
 	}
 
+	function onMarketOptionChange (id: string, path: string, name: string) {		
+		handleOptionChange(id, path, name, selectedCategory);
+		onSelectedOptionChange({
+			id: id,
+			val: name
+		});
+		// Always replace the item in the shopping cart if another exists with the same category
+		const updatedCart = [
+			...shoppingCart.filter(item => item.detail !== selectedCategory),
+			{
+				id,
+				val: name,
+				detail: selectedCategory
+			}
+		];
+		dispatch(setShoppingCart(updatedCart));
+	}
+
+	function onMarketOptionRemove (type?: string) {
+		handleResetCombination(type);
+
+		// Remove the item from the shopping cart if it matches the category selected
+		if (type && type === selectedCategory) {
+			setSelectedOption(undefined);
+		}
+	}
+
 	function onCategoryChange(value: string) {
 		setSelectedCategory(value);
-		const filteredList = FilterList(featureList, 'type', value);
-		if (filteredList) setOptionList(filteredList);
+		if (didEditMode) {
+			const filteredList = FilterList(featureList, 'type', value);
+			setOptionList(filteredList);
+		} else if (didMarketplaceMode && marketplaceFeatureList) {
+			const filteredList = FilterList(marketplaceFeatureList, 'type', value);
+			setOptionList(filteredList);
+		}
 		updateFeatureCamPosition(value, {
 			...campaignParams?.config.featuresCamPos,
 			...campaignParams?.config.accCamPos,
@@ -88,9 +118,14 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 	}
 
 	useEffect(() => {
-		const filteredList = FilterList(featureList, 'type', selectedCategory);
-		setOptionList(filteredList);
-	}, [featureList])
+		if (didEditMode) {
+			const filteredList = FilterList(featureList, 'type', selectedCategory);
+			setOptionList(filteredList);
+		} else if (didMarketplaceMode && marketplaceFeatureList) {
+			const filteredList = FilterList(marketplaceFeatureList, 'type', selectedCategory);
+			setOptionList(filteredList);
+		}
+	}, [featureList, marketplaceFeatureList, didEditMode, didMarketplaceMode])
 
 	useEffect(() => {
 		if (isReady) {
@@ -113,6 +148,21 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 			})
 		}
 	}, [didEditMode])
+
+	useEffect(() => {
+		if (!didMarketplaceMode) {
+			dispatch(setShoppingCart([]));
+			handleResetCombination();
+			setSelectedOption(undefined);
+			AGChangeCamPosition(campaignParams?.config.defCam?.pos);
+			AGChangeLookAtPosition(campaignParams?.config.defCam?.lookAt);
+		} else {
+			updateFeatureCamPosition(selectedCategory, {
+				...campaignParams?.config.featuresCamPos,
+				...campaignParams?.config.accCamPos,
+			})
+		}
+	}, [didMarketplaceMode])
 
 	return (
 		<SnackbarProvider>
@@ -225,9 +275,8 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 												}
 												skinColor={'#FFFFFF'}
 												hideSkinSelector={true}
-												handleSaveCombination={() => handleBuying()}
 												changeView={() => dispatch(setMarketplaceMode(false))}
-												onOptionChange={(id, path, name) => onOptionChange(id, path, name)}
+												onOptionChange={(id, path, name) => onMarketOptionChange(id, path, name)}
 												onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
 												onSkinColorChange={() => { }}
 												exportModel={(type) => handleExport(type)}
@@ -235,6 +284,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, is
 												onClickBackButton={() => dispatch(setMarketplaceMode(false))}
 												isLoading={false}
 											/>
+											{didMarketplaceMode && <ShoppingCartUI onRemoveItem={(type) => onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />}
 										</div>
 									}
 								</>
