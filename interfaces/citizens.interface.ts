@@ -16,7 +16,9 @@ export interface ClaimableDrop {
     tokenName: string; //This is the name of the collection that the user needs to be holding
   }[]; //If this array is not empty, means the user needs to be holding
   id: string;
-  name: string;
+  featureIndex: number; //Index of the feature in the campaign
+  featureType: string; //Type of the feature, e.g. "body", "face", "head", etc.
+  featureName: string; //Name of the feature in the campaign
   description: string;
   imageUrl: string;
   requiredXP: number; //XP required to claim the drop
