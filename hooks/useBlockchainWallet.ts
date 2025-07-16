@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType, GetSdkConnection, SetSdkConnection } from '../utils/web3/web3.util';
-import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination, RootCampaign } from '../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination, RootCampaign, PolygonCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetClaimableDrops, GetParameter } from '../utils/firebase.util';
@@ -25,6 +25,8 @@ import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
 import { GetRootAssetsMetadata, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
 import { InitializeContractEssentialData } from '../constants/root/contract.constant';
+import { GetCampaignsPolygonTokensMetadata, GetPolygonUserFeatureAssets } from '../utils/web3/polygon/contract.util';
+import { InitializePolygonContractEssentialData } from '../constants/polygon/contract.constant';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -77,6 +79,12 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: tokensMetadata.errMessage, errCode: tokensMetadata.errCode };
   }
 
+  async function getPolygonTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
+    const tokensMetadata = await GetCampaignsPolygonTokensMetadata(walletAddress);
+    if (tokensMetadata.success) return { success: true, value: tokensMetadata.value };
+    return { success: false, errMessage: tokensMetadata.errMessage, errCode: tokensMetadata.errCode };
+  }
+
   async function getRootTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
     const asset = await GetRootAssetsMetadata(walletAddress);
     if (asset.success) return { success: true, value: asset.value };
@@ -94,6 +102,14 @@ export function useBlockchainWallet() {
 
   async function getSolanaUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<SolanaCampaign>>> {
     const features = await GetSolanaUserFeatureAssets(walletAddress, SolanaCampaign.Kumi);
+
+    if (features.success) return { success: true, value: features.value };
+
+    return { success: false, errMessage: features.errMessage, errCode: features.errCode };
+  }
+
+  async function getPolygonUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<PolygonCampaign>>> {
+    const features = await GetPolygonUserFeatureAssets(walletAddress, PolygonCampaign.Polygon);
 
     if (features.success) return { success: true, value: features.value };
 
@@ -239,8 +255,47 @@ export function useBlockchainWallet() {
       } else {
         LogError(Module.Citizens, luksoClaimableDrops.errMessage, luksoClaimableDrops.errCode);
       }
-    }else if (blockchainType === Blockchain.Polygon) {
+    } else if (blockchainType === Blockchain.Polygon) {
+      const polygonCitizensMetadata = await getPolygonTokensMetadataPromise(walletAddress);
+      const polygonUserFeatures = await getPolygonUserFeaturesPromise(walletAddress);
 
+      if (polygonCitizensMetadata.success) {
+        const citizen = polygonCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
+
+        dispatch(setCitizensMetadata(polygonCitizensMetadata.value));
+
+        if (selectedCampaign === null) { //Logic when user is logged in and no campaign is selected, refreshing page case
+          const userCampaigns = [...new Set(polygonCitizensMetadata.value.map(item => item.campaign))];
+
+          if (userCampaigns.length > 0) { //If user has campaigns, set the first one as selected campaign
+            dispatch(setSelectedCampaign(userCampaigns[0]));
+            dispatch(setSelectedCitizen(polygonCitizensMetadata.value[0]));
+            dispatch(setMintingMode(false));
+          } else {//If user has no campaigns, set the polygon campaign as selected campaign and keep minting mode
+            dispatch(setSelectedCampaign(Campaign.Polygon)); // Set the selected campaign by default when no campaign is selected
+            dispatch(setSelectedCitizen({
+              baseCombination: CampaignBaseCombination.Polygon,
+              combination: CampaignBaseCombination.Polygon,
+              campaign: Campaign.Polygon
+            } as CitizenMetadata));
+          }
+        } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
+          dispatch(setSelectedCitizen({
+            baseCombination: CampaignBaseCombination.Polygon,
+            combination: CampaignBaseCombination.Polygon,
+            campaign: Campaign.Polygon
+          } as CitizenMetadata));
+        } else {
+          dispatch(setSelectedCitizen(citizen));
+          dispatch(setMintingMode(false));
+        }
+      }
+      if (polygonUserFeatures.success) {
+        const polygonFeatures = polygonUserFeatures.value as CampaignDrops<AppCampaigns>;
+        dispatch(setUserFeatures(polygonFeatures));
+      } else {
+        LogError(Module.Citizens, polygonUserFeatures.errMessage, polygonUserFeatures.errCode);
+      }
     } else if (blockchainType === Blockchain.Solana) {
       const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
       const solanaUserFeatures = await getSolanaUserFeaturesPromise(walletAddress); // Get the user features
@@ -440,35 +495,50 @@ export function useBlockchainWallet() {
             return; // If the user address is undefined, log the error and return
           }
 
-          if ((selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators) && isEthereumReady) { //As Lukso and solana are part of lukso, we need to check if the campaign is citizens or creators
-            const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
-            const walletNamePromise = GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
-            const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
-            const followerCountPromise = getLuksoFollowerCountPromise(user?.wallet?.address); // Get the follower count
-            const [provider, walletName, xpData, followerCount] = await Promise.all([providerPromise, walletNamePromise, xpDataPromise, followerCountPromise]);
-            setEthersProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
+          if ((chainType === Blockchain.Ethereum) && isEthereumReady) { //As Lukso and solana are part of lukso, we need to check if the campaign is citizens or creators
+            if (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators) {
+              const provider = await ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
+              const browserProvider = new BrowserProvider(provider);
+              const currentChainId = await browserProvider.getNetwork();
+              console.log(currentChainId);
+              setEthersProvider(browserProvider); // Cast to BrowserProvider and set the provider
 
-            dispatch(connect({
-              address: user?.wallet?.address,
-              walletName: walletName.success ? walletName.value.name : null,
-              blockchainType: Blockchain.Lukso, xpData: xpData.success ? xpData.value : null,
-              followUserData: followerCount.success ? followerCount.value : null
-            }));
+              const walletNamePromise = GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
+              const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
+              const followerCountPromise = getLuksoFollowerCountPromise(user?.wallet?.address); // Get the follower count
+              const [walletName, xpData, followerCount] = await Promise.all([walletNamePromise, xpDataPromise, followerCountPromise]);
 
-          } else if (selectedCampaign === Campaign.Polygon && isEthereumReady) { //As Polygon is part of lukso, we need to check if the campaign is polygon
-            const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
-            const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
-            const [provider, xpData] = await Promise.all([providerPromise, xpDataPromise]);
 
-            setEthersProvider(new BrowserProvider(provider));
+              dispatch(connect({
+                address: user?.wallet?.address,
+                walletName: walletName.success ? walletName.value.name : null,
+                blockchainType: Blockchain.Lukso, xpData: xpData.success ? xpData.value : null,
+                followUserData: followerCount.success ? followerCount.value : null
+              }));
 
-            dispatch(connect({
-              address: user?.wallet?.address,
-              walletName: null,
-              blockchainType: Blockchain.Polygon,
-              xpData: xpData.success ? xpData.value : null,
-              followUserData: { followerCount: -1, followingCount: -1 }
-            }));
+            } else if (selectedCampaign === Campaign.Polygon && isEthereumReady) { //As Polygon is part of lukso, we need to check if the campaign is polygon
+              const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
+              const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
+              const [provider, xpData] = await Promise.all([providerPromise, xpDataPromise]);
+
+              const browserProvider = new BrowserProvider(provider);
+              const currentChainId = await browserProvider.getNetwork();
+
+              InitializePolygonContractEssentialData(await browserProvider.getSigner());
+
+              setEthersProvider(new BrowserProvider(provider));
+
+              dispatch(connect({
+                address: user?.wallet?.address,
+                walletName: null,
+                blockchainType: Blockchain.Polygon,
+                xpData: xpData.success ? xpData.value : null,
+                followUserData: { followerCount: -1, followingCount: -1 }
+              }));
+            } else if (selectedCampaign === null) {
+              dispatch(setSelectedCampaign(Campaign.Polygon));
+
+            }
           } else if (chainType === Blockchain.Solana && isSolanaReady) {
             const solanaWallet = solanaWallets[0];
 
@@ -492,7 +562,7 @@ export function useBlockchainWallet() {
         connectPromise();
       } // Set the user as logged in
     }
-    if (ready && !authenticated && (blockchainType === Blockchain.Lukso || blockchainType === Blockchain.Solana)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+    if (ready && !authenticated && (blockchainType === Blockchain.Lukso || blockchainType === Blockchain.Solana || blockchainType === Blockchain.Polygon)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
       dispatch(disconnect());
       SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Privy]: false });
     }

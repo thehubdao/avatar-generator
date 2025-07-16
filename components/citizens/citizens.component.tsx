@@ -7,21 +7,22 @@ import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetF
 import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
-import { FEMALE_CAMPAIGN_BODY_TYPES, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
+import { FEMALE_CAMPAIGN_BODY_TYPES, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { BodyPart } from "../../interfaces/avatar.interface";
-import { GetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
+import { GetImageUrl, UploadLuksoMetadata, UploadPolygonMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
-import { Campaign, CampaignBaseCombination, CampaignBaseUrl, RootCampaign } from "../../enums/citizens/common.enum";
+import { Campaign, CampaignBaseCombination, CampaignBaseUrl, PolygonCampaign, RootCampaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen, setUserFeatures } from "../../store/citizensMetadataSlice";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
-import { GetVrmUrl } from "../../utils/web3/citizens.util";
+import { GetCampaignDrops, GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
-import { Drop, LuksoMetadata, RootDrop, RootMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
+import { Drop, LuksoMetadata, PolygonDrop, PolygonMetadata, PolygonTrait, RootDrop, RootMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
 import { StoreAssetData } from "../../utils/firebase.util";
 import { AssetData } from "../../interfaces/firebase.interface";
 import { AppCampaigns, CampaignDrops } from "../../types/citizens.type";
+import { GetCampaignsPolygonTokensMetadata, GetPolygonUserFeatureAssets, MintPolygonCitizen, SetPolygonNewCombination } from "../../utils/web3/polygon/contract.util";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -197,7 +198,7 @@ export default function CitizensComponent() {
         bgMap?.path,
         lightMap?.path,
         campaignParams?.config.envMap?.skyboxConfig
-      ); 
+      );
 
       // Set features from single
       await loadSingleData();
@@ -330,6 +331,27 @@ export default function CitizensComponent() {
       return true;
     }
     LogError(Module.Citizens, 'Failed to fetch solana metadata', asset.errCode);
+    return false;
+  }
+
+  async function fetchPolygonMetadata(walletAddress: string): Promise<boolean> {
+    const asset = await GetCampaignsPolygonTokensMetadata(walletAddress);
+    if (asset.success) {
+      dispatch(setCitizensMetadata(asset.value));
+      dispatch(setSelectedCitizen(asset.value[0]));
+      return true;
+    }
+    LogError(Module.Citizens, 'Failed to fetch polygon metadata', asset.errCode);
+    return false;
+  }
+
+  async function fetchPolygonUserFeatureAssets(walletAddress: string, campaign: PolygonCampaign): Promise<boolean> {
+    const result = await GetPolygonUserFeatureAssets(walletAddress, campaign);
+    if (result.success) {
+      dispatch(setUserFeatures(result.value as CampaignDrops<AppCampaigns>));
+      return true;
+    }
+    LogError(Module.Citizens, 'Failed to fetch polygon user feature assets', result.errCode);
     return false;
   }
 
@@ -561,6 +583,126 @@ export default function CitizensComponent() {
 
   }
 
+
+  async function savePolygonCombination(): Promise<boolean> {
+    const newCombination = singleInitData.current?.features
+      .map((feature) => feature.val.index)
+      .join('-') as string;
+
+    if (!campaignParams) {
+      LogError(Module.Citizens, 'Campaign params is undefined in Root saveCombination');
+      return false;
+    }
+    if (!singleInitData.current) {
+      LogError(Module.Citizens, 'Single init data is undefined in Root saveCombination');
+      return false;
+    }
+    if (!selectedCitizen) {
+      LogError(Module.Citizens, 'Selected citizen is undefined in Root saveCombination');
+      return false;
+    }
+    if (!walletAddress) {
+      LogError(Module.Citizens, 'Wallet address is undefined in Root saveCombination');
+      return false;
+    }
+    if (!citizensMetadata) {
+      LogError(Module.Citizens, 'Citizens metadata is undefined in Root saveCombination');
+      return false;
+    }
+
+    const currentCampaign = selectedCampaign;
+
+    if (!currentCampaign) {
+      LogError(Module.Citizens, 'Current campaign is undefined in Root saveCombination');
+      return false;
+    }
+
+    const newCitizenMetadata = { //Make a copy of the selected citizen metadata
+      ...selectedCitizen,
+      combination: newCombination,
+      rawMetadata: {
+        ...selectedCitizen.rawMetadata,
+        combination: newCombination,
+      } as PolygonMetadata
+    }
+
+    const newCombinationArray = newCombination.split('-');
+    const oldCombinationArray = selectedCitizen.combination.split('-');
+    const newAttributes: PolygonDrop[] = [];
+    const oldAttributes: PolygonDrop[] = [];
+
+    const allDropsResult = await GetCampaignDrops<PolygonDrop>(selectedCampaign);
+
+    if (!allDropsResult.success) {
+      LogError(Module.Citizens, 'Failed to get all drops on savePolygonCombination', allDropsResult.errMessage);
+      return false;
+    }
+
+    const allDrops = allDropsResult.value;
+
+    const traits: PolygonTrait[] = [];
+
+    if (userFeatures && userFeatures[selectedCampaign] != null) newCombinationArray.forEach((newIndex, index) => {
+      const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
+      const oldIndex = oldCombinationArray[index]; //Get the type of the feature
+
+      if (!indexType) return undefined;
+
+      const newDrop = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) as PolygonDrop; //Get the new feature to be equipped
+      const oldDrop = allDrops.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)) as PolygonDrop; //Get the old feature to be unequipped
+
+      const traitIndex = newCitizenMetadata.rawMetadata.traits.findIndex((trait) => trait.trait_type === indexType);
+      const oldTrait = newCitizenMetadata.rawMetadata.traits[traitIndex];
+
+      console.log(oldTrait, newDrop,traitIndex, newCitizenMetadata.rawMetadata.traits);
+
+      const trait = newDrop ? { //Add asset address to the attribute newAttribute exists
+        trait_type: indexType.toUpperCase(),
+        value: newDrop?.name.toUpperCase(),
+        wearableAddress: newDrop?.contract_address,
+        wearableTokenId: newDrop?.tokenId
+      } : {
+        trait_type: indexType.toUpperCase(),
+        value: singleInitData.current?.features[index]?.val.name.toUpperCase() as string, //Set the feature name to the new feature index
+      }
+
+      traits.push(trait);
+
+      if (oldIndex == newIndex) return undefined;
+
+      if (newDrop && newDrop.index != 0) newAttributes.push(newDrop);
+      if (oldDrop && oldDrop.index != 0) oldAttributes.push({ ...oldDrop, contract_address: oldTrait.wearableAddress as string, tokenId: oldTrait.wearableTokenId as number });
+    });
+
+    newCitizenMetadata.rawMetadata.traits = traits;
+
+    const metadataObject = await UploadPolygonMetadata(
+      newCitizenMetadata,
+      newCombination,
+      selectedCitizen.campaign
+    );
+
+    if (!metadataObject.success) {
+      LogError(Module.Citizens, 'Failed to upload metadata on savePolygonCombination', metadataObject.errMessage);
+      return false;
+    }
+
+    //newCitizenMetadata.imageUrl = metadataObject.value.imageUrl;
+
+    newCitizenMetadata.imageUrl = "ipfs://bafkreidjpxnnzb3vro6a2glqaiyuljevagslasogzphrm2yfzuy62on5iy"; //Temporarily set the same image as the old one
+
+    const setNewCombinationResult = await SetPolygonNewCombination(selectedCitizen.tokenId, metadataObject.value.uri, oldAttributes, newAttributes);
+
+    if (!setNewCombinationResult.success) {
+      LogError(Module.Citizens, 'Failed to set new combination on savePolygonCombination', setNewCombinationResult.errMessage);
+      return false;
+    }
+    const isMetadataFetchSuccess = await fetchPolygonMetadata(walletAddress);
+    const isUserFeatureFetchSuccess = await fetchPolygonUserFeatureAssets(walletAddress, PolygonCampaign.Polygon);
+
+    return isMetadataFetchSuccess && isUserFeatureFetchSuccess;
+  }
+
   async function saveRootCombination(): Promise<boolean> {
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
@@ -598,25 +740,25 @@ export default function CitizensComponent() {
     const oldCombinationArray = selectedCitizen.combination.split('-');
     const newAttributes: RootDrop[] = [];
     const oldAttributes: RootDrop[] = [];
-    
+
     if (userFeatures && userFeatures[selectedCampaign] != null) newCombinationArray.forEach((newIndex, index) => {
       const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
       const oldIndex = oldCombinationArray[index]; //Get the type of the feature
 
       if (!indexType) return undefined;
 
-      if(oldIndex == newIndex) return undefined;
+      if (oldIndex == newIndex) return undefined;
 
       const newAttribute = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) as RootDrop; //Get the new feature to be equipped
       const oldAttribute = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)) as RootDrop; //Get the old feature to be unequipped
 
-      if(newAttribute) newAttributes.push(newAttribute);
-      if(oldAttribute) oldAttributes.push(oldAttribute);
+      if (newAttribute) newAttributes.push(newAttribute);
+      if (oldAttribute) oldAttributes.push(oldAttribute);
     });
 
     const setNewCombinationResult = await SetRootNewCombination(walletAddress, selectedCitizen.tokenId, newAttributes, oldAttributes);
 
-    if(!setNewCombinationResult.success) {
+    if (!setNewCombinationResult.success) {
       LogError(Module.Citizens, 'Failed to set new combination on saveRootCombination', setNewCombinationResult.errMessage);
       return false;
     }
@@ -629,7 +771,7 @@ export default function CitizensComponent() {
       combination: newCombination
     } as AssetData);
 
-    if(!storeAssetDataResult.success) {
+    if (!storeAssetDataResult.success) {
       LogError(Module.Citizens, 'Failed to store asset data on saveRootCombination', storeAssetDataResult.errMessage);
       return false;
     }
@@ -647,6 +789,8 @@ export default function CitizensComponent() {
       isSuccess = await saveSolanaCombination();
     } else if (selectedCampaign == Campaign.Based) {
       isSuccess = await saveRootCombination();
+    } else if (selectedCampaign == Campaign.Polygon) {
+      isSuccess = await savePolygonCombination();
     }
     return isSuccess;
   }
@@ -672,6 +816,12 @@ export default function CitizensComponent() {
         return isFetchSuccess;
       }
       else return false;
+    } else if (selectedCampaign == Campaign.Polygon) {
+      const mintResult = await MintPolygonCitizen(walletAddress);
+      if (mintResult.success) {
+        const isFetchSuccess = await fetchPolygonMetadata(walletAddress);
+        return isFetchSuccess;
+      }
     }
     return false;
   }

@@ -1,4 +1,4 @@
-import { CitizenMetadata, LuksoMetadata, SolanaMetadata } from "../interfaces/citizens.interface";
+import { CitizenMetadata, LuksoMetadata, PolygonMetadata, SolanaMetadata } from "../interfaces/citizens.interface";
 import { PinataSDK } from "pinata-web3";
 import { Campaign, CampaignBaseCombination } from "../enums/citizens/common.enum";
 import { Result } from "../types/common.type";
@@ -79,4 +79,27 @@ export async function UploadSolanaMetadata(tokenMetadata: CitizenMetadata, combi
         return { success: false, errMessage: err.message, errCode: CommonErrorCode.InternalError };
     }
 
+}
+
+export async function UploadPolygonMetadata(tokenMetadata: CitizenMetadata, combination: string, campaign: Campaign): Promise<Result<{ uri: string, imageUrl: string }>> {
+    try {
+        const imageUrl = await GetImageUrl(campaign, combination);
+        const imageResponse = await fetch(imageUrl);
+        const imageBlob = await imageResponse.blob();
+        const file = new File([imageBlob], `${combination}.png`, { type: "image/png" });
+        const upload = await pinata.upload.file(file, { cidVersion: 0, metadata: { name: `${campaign}-${tokenMetadata.tokenId}-thumbnail` } });
+
+        const polygonMetadata: PolygonMetadata = {
+            ...tokenMetadata.rawMetadata as PolygonMetadata,
+            image: `ipfs://${upload.IpfsHash}`
+        }
+
+        const metadata = await pinata.upload.json(polygonMetadata, { cidVersion: 1, metadata: { name: `${campaign}-${tokenMetadata.tokenId}-metadata` } });
+
+        return { success: true, value: { uri: `ipfs://${metadata.IpfsHash}`, imageUrl } };
+    } catch (error) {
+        const err = error as Error;
+        void LogError(Module.Citizens, 'Error on uploading Lukso metadata', error);
+        return { success: false, errMessage: err.message, errCode: CommonErrorCode.InternalError };
+    }
 }

@@ -60,6 +60,13 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     active: true
   },
   {
+    name:'Polygon Citizens',
+    image: '/resources/images/campaings/citizens_collection.jpg',
+    campaign: Campaign.Polygon,
+    blockChain: Blockchain.Polygon,
+    active: true
+  },
+  {
     name: 'Kumi',
     image: '/resources/images/campaings/kumi_collection.jpg',
     campaign: Campaign.Kumi,
@@ -71,13 +78,6 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     image: '/resources/images/campaings/based_collection.jpg',
     campaign: Campaign.Based,
     blockChain: Blockchain.Root,
-    active: true
-  },
-  {
-    name:'Polygon Citizens',
-    image: '/resources/images/campaings/citizens_collection.jpg',
-    campaign: Campaign.Polygon,
-    blockChain: Blockchain.Polygon,
     active: true
   }
 ];
@@ -243,4 +243,5 @@ export const GAMES: Game[] = [
 export const MINTING_TARGET_DATE = {
   [Campaign.Kumi]: new Date('2025-06-03T23:00:00.000Z'),
   [Campaign.Based]: new Date('2025-08-10T23:00:00.000Z'),
+  [Campaign.Polygon]: new Date('2025-07-12T23:00:00.000Z'),
 };

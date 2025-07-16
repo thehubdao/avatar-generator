@@ -10,6 +10,12 @@ export const MINTING_UI_DATA: Record<Campaign, MintingUiData | undefined> = {
     },
     [Campaign.Citizens]: undefined,
     [Campaign.Creators]: undefined,
+    [Campaign.Polygon]: {
+        imgUrl: '/resources/images/campaings/based_collection.jpg',
+        avatarDescription: '[Polygon Citizens Avatar Description]',
+        campaignName: 'POLYGON CITIZENS',
+        campaignDescription: '[Polygon Citizens Campaign Description]',
+    },
     [Campaign.Based]: {
         imgUrl: '/resources/images/campaings/based_collection.jpg',
         avatarDescription: "In a world dominated by adorable animals and quirky characters, Root Citizens emerge as the rebels who dare to be different. They are here to challenge the status quo, bullying the funny-looking creatures and taking over their realm through cunning scams and degenerate tactics.",

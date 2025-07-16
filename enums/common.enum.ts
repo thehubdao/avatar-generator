@@ -58,6 +58,7 @@ export enum Module {
   Lukso = 'LuksoComponent',
   VrmUtil = 'VrmUtil',
   Citizens = 'Citizens',
+  PolygonContractUtil = 'PolygonContractUtil',
   LuksoContractUtil = 'LuksoContractUtil',
   SolanaContractUtil = 'SolanaContractUtil',
   RootContractUtil = 'RootContractUtil',

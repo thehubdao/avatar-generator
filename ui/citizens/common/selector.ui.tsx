@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import Button from "./button.ui";
 import ArrowSVG from "./SVG/arrowSVG.ui";
 import { useOnClickOutside } from "usehooks-ts";
-import { CAMPAIGN_LABELS } from "../../../constants/lukso/labels.constant";
+import { CAMPAIGN_LABELS } from "../../../constants/labels.constant";
 
 interface SelectorUIProps {
   list?: string[];

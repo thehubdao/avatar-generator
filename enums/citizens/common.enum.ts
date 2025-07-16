@@ -71,7 +71,11 @@ export enum SolanaCampaign {
 }
 
 export enum RootCampaign {
-  Based = "root_citizens",
+  Based = Campaign.Based,
+}
+
+export enum PolygonCampaign {
+  Polygon = Campaign.Polygon,
 }
 
 export enum CandyMachineGroup {
@@ -84,6 +88,7 @@ export enum CampaignBaseCombination {
   Creators = "0-0-0-0-0",
   Kumi = "0-0-0-0-0-0-0-0-0-0",
   Based = "0-0-0-0-0-0-0",
+  Polygon = "0-0-0-0-0-0"
 }
 
 export enum CampaignBaseUrl {
@@ -91,4 +96,8 @@ export enum CampaignBaseUrl {
   Creators = "",
   Kumi = "",
   Based = "https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/root_citizens%2Fthumb%2Fimagen_2025-05-28_110559759.png?alt=media&token=79f77a75-62d0-4053-944f-afc10ee5330f",
+}
+
+export enum CampaignBaseCombinationUrl{
+  Polygon = "ipfs://bafkreibexolb5vh6qk4qbypjbnxoho2xtah4wqpx4ecpb4aig2c47ea3w4"
 }

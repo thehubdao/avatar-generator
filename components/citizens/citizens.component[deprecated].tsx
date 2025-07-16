@@ -20,7 +20,7 @@ import { GetAccessoryListByCampaign, GetEnvMapListByCampaign, GetAvatarSingleByC
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { FilterList, LogError, MixArrays } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
-import { FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
+import { FILE_CAMPAIGN_NAME_LABEL } from "../../constants/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { StorageLocation } from "../../enums/firebase.enum";
 import { useCallback, useState } from "react";
