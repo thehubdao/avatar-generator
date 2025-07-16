@@ -667,7 +667,6 @@ export default function CitizensComponent() {
       traits.push(trait);
 
       if (oldIndex == newIndex) return undefined;
-
       if (newDrop && newDrop.index != 0) newAttributes.push(newDrop);
       if (oldDrop && oldDrop.index != 0) oldAttributes.push({ ...oldDrop, contract_address: oldTrait.wearableAddress as string, tokenId: oldTrait.wearableTokenId as number });
     });
