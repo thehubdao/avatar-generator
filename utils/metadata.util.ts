@@ -94,6 +94,8 @@ export async function UploadPolygonMetadata(tokenMetadata: CitizenMetadata, comb
             image: `ipfs://${upload.IpfsHash}`
         }
 
+        polygonMetadata.image = "ipfs://bafkreidjpxnnzb3vro6a2glqaiyuljevagslasogzphrm2yfzuy62on5iy"; //Temporarily set the same image as the old one
+
         const metadata = await pinata.upload.json(polygonMetadata, { cidVersion: 1, metadata: { name: `${campaign}-${tokenMetadata.tokenId}-metadata` } });
 
         return { success: true, value: { uri: `ipfs://${metadata.IpfsHash}`, imageUrl } };

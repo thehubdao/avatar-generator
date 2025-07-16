@@ -453,6 +453,7 @@ export function useBlockchainWallet() {
                 const isSolana = text.includes('Solana');
                 const isMetamask = text.includes('MetaMask');
                 const isUniversal = text.includes('universal_profile');
+            
                 if ((isPhantom || isBackpack) && !isSolana) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
@@ -463,6 +464,7 @@ export function useBlockchainWallet() {
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
                 }
+                
                 if (isMetamask && (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators)) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
@@ -500,7 +502,7 @@ export function useBlockchainWallet() {
               const provider = await ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
               const browserProvider = new BrowserProvider(provider);
               const currentChainId = await browserProvider.getNetwork();
-              console.log(currentChainId);
+
               setEthersProvider(browserProvider); // Cast to BrowserProvider and set the provider
 
               const walletNamePromise = GetUniversalProfileData(user?.wallet?.address); // Get the wallet name

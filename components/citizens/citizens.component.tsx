@@ -651,10 +651,8 @@ export default function CitizensComponent() {
       const newDrop = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) as PolygonDrop; //Get the new feature to be equipped
       const oldDrop = allDrops.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)) as PolygonDrop; //Get the old feature to be unequipped
 
-      const traitIndex = newCitizenMetadata.rawMetadata.traits.findIndex((trait) => trait.trait_type === indexType);
+      const traitIndex = newCitizenMetadata.rawMetadata.traits.findIndex((trait) => trait.trait_type.toLowerCase() === indexType.toLowerCase());
       const oldTrait = newCitizenMetadata.rawMetadata.traits[traitIndex];
-
-      console.log(oldTrait, newDrop,traitIndex, newCitizenMetadata.rawMetadata.traits);
 
       const trait = newDrop ? { //Add asset address to the attribute newAttribute exists
         trait_type: indexType.toUpperCase(),
@@ -687,9 +685,7 @@ export default function CitizensComponent() {
       return false;
     }
 
-    //newCitizenMetadata.imageUrl = metadataObject.value.imageUrl;
-
-    newCitizenMetadata.imageUrl = "ipfs://bafkreidjpxnnzb3vro6a2glqaiyuljevagslasogzphrm2yfzuy62on5iy"; //Temporarily set the same image as the old one
+    newCitizenMetadata.imageUrl = metadataObject.value.imageUrl;
 
     const setNewCombinationResult = await SetPolygonNewCombination(selectedCitizen.tokenId, metadataObject.value.uri, oldAttributes, newAttributes);
 
