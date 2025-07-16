@@ -1,5 +1,5 @@
 import { Contract, TransactionResponse } from "ethers";
-import { CitizenMetadata, PolygonDrop, PolygonMetadata } from "../../../interfaces/citizens.interface";
+import { CitizenMetadata, PolygonDrop } from "../../../interfaces/citizens.interface";
 import { Result } from "../../../types/common.type";
 import { POLYGON_AVATAR_CONTRACT_ADDRESS, PROVIDER, SIGNER } from "../../../constants/polygon/contract.constant";
 import POLYGON_CONTRACT_ABI from "../../../constants/abi/polygon/PolygonContractABI.json";
@@ -8,7 +8,7 @@ import { LogError } from "../../common.util";
 import { CommonErrorCode, Module } from "../../../enums/common.enum";
 import { Campaign, CampaignBaseCombinationUrl, PolygonCampaign } from "../../../enums/citizens/common.enum";
 import { CampaignDrops } from "../../../types/citizens.type";
-import { GetCampaignDrops, GetPolygonImageUrl } from "../citizens.util";
+import { GetCampaignDrops, GetPolygonImageUrl, GetPolygonIpfsData } from "../citizens.util";
 
 export async function GetPolygonTokenIds(address: string): Promise<Result<number[]>> {
     try {
@@ -34,8 +34,13 @@ export async function GetCampaignsPolygonTokensMetadata(address: string): Promis
         const metadataPromises = tokenUris.map(async (tokenUri, index) => {
             try {
                 const tokenId = tokenIds[index];
-                const tokenMetadata = await fetch(tokenUri);
-                const metadataJson = await tokenMetadata.json() as PolygonMetadata;
+
+                const ipfsDataResult = await GetPolygonIpfsData(tokenUri);
+
+                if (!ipfsDataResult.success || !ipfsDataResult.value) return undefined;
+
+                const metadataJson = ipfsDataResult.value;
+
                 const metadata: CitizenMetadata = {
                     tokenId: tokenId.toString(),
                     campaign: Campaign.Polygon,

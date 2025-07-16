@@ -39,6 +39,20 @@ export async function GetSolanaIPFSData(url: string): Promise<Result<SolanaMetad
   }
 }
 
+export async function GetPolygonIpfsData(uri: string): Promise<Result<PolygonMetadata>> {
+  try {
+    const cid = uri.split('//')[1];
+    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
+    const ipfsRequest = await fetch(ipfsHTTPUrl);
+    const ipfsData = await ipfsRequest.json() as PolygonMetadata;
+    return { success: true, value: ipfsData };
+  } catch (error) {
+    const err = error as Error;
+    LogError(Module.Citizens, 'Error on getting token metadata', err.stack);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
+  }
+}
+
 export function GetLuksoImageUrl(metadata: CitizenMetadata): Result<string> {
   try {
     const luksoMetadata = metadata.rawMetadata as LuksoMetadata;
