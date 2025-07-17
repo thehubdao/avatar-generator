@@ -221,3 +221,14 @@ export async function SetPolygonNewCombination(tokenId: string, uri: string, old
         return { success: false, errMessage: 'Error setting Polygon combination', errCode: CommonErrorCode.InternalError };
     }
 }
+
+export async function GetPolygonCollectionSupply(): Promise<Result<number>> {
+    try {
+        const avatarContract = new Contract(POLYGON_AVATAR_CONTRACT_ADDRESS, POLYGON_CONTRACT_ABI, PROVIDER);
+        const supply = await avatarContract.getTotalSupply();
+        return { success: true, value: Number(supply) };
+    } catch (error) {
+        LogError(Module.PolygonContractUtil, 'Error getting Polygon collection supply', error);
+        return { success: false, errMessage: 'Error getting Polygon collection supply', errCode: CommonErrorCode.InternalError };
+    }
+}

@@ -25,7 +25,7 @@ import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
 import { GetRootAssetsMetadata, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
 import { InitializeContractEssentialData } from '../constants/root/contract.constant';
-import { GetCampaignsPolygonTokensMetadata, GetPolygonUserFeatureAssets } from '../utils/web3/polygon/contract.util';
+import { GetCampaignsPolygonTokensMetadata, GetPolygonCollectionSupply, GetPolygonUserFeatureAssets } from '../utils/web3/polygon/contract.util';
 import { InitializePolygonContractEssentialData } from '../constants/polygon/contract.constant';
 
 export function useBlockchainWallet() {
@@ -177,6 +177,20 @@ export function useBlockchainWallet() {
     return { success: true, value: mintingData };
   }
 
+  async function getPolygonMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
+    const mintingSupply = await GetPolygonCollectionSupply();
+    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined, isHolder: undefined }
+
+    if (mintingSupply.success) {
+      mintingData.mintSupply = mintingSupply.value;
+    } else {
+      void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
+      return { success: false, errMessage: "Couldn't set collection supply", errCode: '' };
+    }
+
+    return { success: true, value: mintingData };
+  }
+
   async function getClaimableDropsPromise(): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
     const drops = await GetLuksoClaimableDrops();
     if (drops.success) return { success: true, value: drops.value };
@@ -272,6 +286,12 @@ export function useBlockchainWallet() {
             dispatch(setSelectedCitizen(polygonCitizensMetadata.value[0]));
             dispatch(setMintingMode(false));
           } else {//If user has no campaigns, set the polygon campaign as selected campaign and keep minting mode
+            const mintingData = await getPolygonMintingDataPromise(walletAddress);
+
+            if (mintingData.success) {
+              dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+            }
+
             dispatch(setSelectedCampaign(Campaign.Polygon)); // Set the selected campaign by default when no campaign is selected
             dispatch(setSelectedCitizen({
               baseCombination: CampaignBaseCombination.Polygon,
@@ -280,6 +300,11 @@ export function useBlockchainWallet() {
             } as CitizenMetadata));
           }
         } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
+          const mintingData = await getPolygonMintingDataPromise(walletAddress);
+          if (mintingData.success) {
+            dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+          }
+
           dispatch(setSelectedCitizen({
             baseCombination: CampaignBaseCombination.Polygon,
             combination: CampaignBaseCombination.Polygon,
