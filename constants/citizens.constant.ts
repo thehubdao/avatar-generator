@@ -1,9 +1,10 @@
 import { Blockchain } from "../enums/blockchain/common.enum";
 import { BackedByLinks, Campaign } from "../enums/citizens/common.enum";
 import { CitizensCollection, Game } from "../interfaces/citizens.interface";
+import { throwError } from "../utils/common.util";
 
-export const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY;
-export const IPFS_GATEWAY_API_KEY = process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY;
+export const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY || throwError('NEXT_PUBLIC_IPFS_GATEWAY is required');
+export const IPFS_GATEWAY_API_KEY = process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY || throwError('NEXT_PUBLIC_IPFS_GATEWAY_API_KEY is required');
 export const LSP26_ADDRESS = '0xf01103E5a9909Fc0DBe8166dA7085e0285daDDcA';
 
 export const LSP26_ABI = [

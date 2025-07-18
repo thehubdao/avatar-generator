@@ -1,6 +1,6 @@
 import { ApiPromise, WsProvider } from '@polkadot/api';
 import { getApiOptions } from '@therootnetwork/api';
-import { LogError } from '../../utils/common.util';
+import { LogError, throwError } from '../../utils/common.util';
 import { Module } from '../../enums/common.enum';
 import { Signer } from '@futureverse/signer';
 import { AssetRegister } from '@futureverse/asset-register/v2'
@@ -12,15 +12,15 @@ export const PROVIDER = new WsProvider(ROOT_NETWORK_WS_URL);
 
 export const MINT_AMOUNT = 1;
 
-export const NFT_COLLECTION_ID = process.env.NEXT_PUBLIC_ROOT_NFT_COLLECTION_ID as string;
-export const NFT_COLLECTION_ADDRESS = process.env.NEXT_PUBLIC_NFT_COLLECTION_ADDRESS as string;
+export const NFT_COLLECTION_ID = process.env.NEXT_PUBLIC_ROOT_NFT_COLLECTION_ID || throwError('NEXT_PUBLIC_ROOT_NFT_COLLECTION_ID is required');
+export const NFT_COLLECTION_ADDRESS = process.env.NEXT_PUBLIC_NFT_COLLECTION_ADDRESS || throwError('NEXT_PUBLIC_NFT_COLLECTION_ADDRESS is required');
 
-export const ROOT_GQL_API_URL = process.env.NEXT_PUBLIC_ROOT_GQL_API_URL as string;
-export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN as string;
-export const ORIGIN = process.env.NEXT_PUBLIC_ORIGIN as string;
-export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID as string;
+export const ROOT_GQL_API_URL = process.env.NEXT_PUBLIC_ROOT_GQL_API_URL || throwError('NEXT_PUBLIC_ROOT_GQL_API_URL is required');
+export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || throwError('NEXT_PUBLIC_DOMAIN is required');
+export const ORIGIN = process.env.NEXT_PUBLIC_ORIGIN || throwError('NEXT_PUBLIC_ORIGIN is required');
+export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || throwError('NEXT_PUBLIC_CHAIN_ID is required');
 
-export const ROOT_SIGNER_PK = process.env.ROOT_SIGNER_PK as string;
+export const ROOT_SIGNER_PK = process.env.ROOT_SIGNER_PK || throwError('ROOT_SIGNER_PK is required');
 
 export let ASSET_REGISTER_SDK: AssetRegister;
 
