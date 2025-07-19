@@ -20,6 +20,7 @@ interface CitizensMetadataState {
   marketplaceMode: boolean;
   mintingMode: boolean;
   savingMode: boolean;
+  checkoutMode: boolean;
 }
 
 const initialState: CitizensMetadataState = {
@@ -36,7 +37,8 @@ const initialState: CitizensMetadataState = {
   editMode: false,
   marketplaceMode: false,
   mintingMode: true,
-  savingMode: false
+  savingMode: false,
+  checkoutMode: false,
 }
 
 export const citizensMetadataSlice = createSlice({
@@ -85,9 +87,12 @@ export const citizensMetadataSlice = createSlice({
     },
     setShoppingCart: (state, action: PayloadAction<BasicData[]>) => {
       state.shoppingCart = action.payload;
+    },
+    setCheckoutMode: (state, action: PayloadAction<boolean>) => {
+      state.checkoutMode = action.payload;
     }
   }
 });
 
-export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMarketplaceMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice, setClaimableDrops, setShoppingCart } = citizensMetadataSlice.actions;
+export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMarketplaceMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice, setClaimableDrops, setShoppingCart, setCheckoutMode } = citizensMetadataSlice.actions;
 export default citizensMetadataSlice.reducer;
