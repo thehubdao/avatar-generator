@@ -164,8 +164,14 @@ export function GenerateVrmScene(model: Object3D) {
   model.traverse(obj => {
     if (IsSkinnedMesh(obj)) {
       skinnedMeshArray.push(obj);
+      const clonedGeo = obj.geometry.clone()
+
+      // remove color attribute from buffer geometry
+      // this attribute is not needed and it's breaking the VRM convertion
+      delete clonedGeo.attributes.color;
+
       geometryArray.push({
-        ...obj.geometry.clone(),
+        ...clonedGeo,
         morphTargetsRelative: false,
         morphAttributes: {}
       } as BufferGeometry);
