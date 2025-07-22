@@ -154,17 +154,18 @@ export default function CitizensComponent() {
       LogError(Module.Citizens, 'Missing single data!');
       return;
     }
+    const changeFeaturePromises: Promise<void>[] = [];
     for (const { val } of singleInitData.current.features) {
       const { id, path, type, name } = val;
-console.log(campaignParams?.config.skin?.defColor)
-      await ChangeFeature(
+      changeFeaturePromises.push(ChangeFeature(
         id,
         path,
         name,
         type,
         campaignParams?.config.skin?.defColor ?? 'ffffff'
-      );
+      ));
     }
+    await Promise.all(changeFeaturePromises);
   }
 
   async function onAvatarBuilderReady() {
