@@ -4,12 +4,12 @@ import { ethers, JsonRpcProvider } from "ethers";
 import { Campaign } from "../../enums/citizens/common.enum";
  
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
-import { throwError } from "../../utils/common.util";
+import { ThrowError } from "../../utils/common.util";
 
-const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS || throwError('NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS is required');
-const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS || throwError('NEXT_PUBLIC_PROFILE_ADDRESS is required');
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || throwError('NEXT_PUBLIC_RPC_URL is required');
-const PK = process.env.NEXT_PUBLIC_PK || throwError('NEXT_PUBLIC_PK is required');
+const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS || ThrowError('NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS is required');
+const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS || ThrowError('NEXT_PUBLIC_PROFILE_ADDRESS is required');
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ThrowError('NEXT_PUBLIC_RPC_URL is required');
+const PK = process.env.NEXT_PUBLIC_PK || ThrowError('NEXT_PUBLIC_PK is required');
 
 const CONFIG = {
     ipfsGateway: 'ipfs://',

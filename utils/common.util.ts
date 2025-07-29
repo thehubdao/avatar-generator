@@ -154,6 +154,6 @@ export function ToHex64(num: number) {
   return '0x' + hex;
 }
 
-export function throwError(message: string): never {
+export function ThrowError(message: string): never {
     throw new Error(message);
 }
