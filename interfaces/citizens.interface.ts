@@ -1,5 +1,6 @@
 import { Blockchain } from "../enums/blockchain/common.enum";
 import { Campaign, HoldingCondition, PaymentType } from "../enums/citizens/common.enum";
+import { DropType } from "../enums/lukso/common.enum";
 import { BodyPart } from "./avatar.interface";
 
 export interface CitizensCollection {
@@ -134,6 +135,7 @@ export interface Drop {
   index: number;
   type: string;
   name: string;
+  dropType: DropType;
 }
 
 export interface CampaignMetadata extends Record<Campaign, CitizenMetadata[]> { }
