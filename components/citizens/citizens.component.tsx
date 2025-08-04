@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import CitizensUI from "../../ui/citizens/citizens.ui";
 import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign } from "../../utils/api.util";
@@ -7,19 +7,23 @@ import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetF
 import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
-import { FEMALE_CAMPAIGN_BODY_TYPES, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
+import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { BodyPart } from "../../interfaces/avatar.interface";
 import { UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
-import { BurnDrop, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
+import { BurnDrop, GetCampaignsTokensMetadata, GetUserFeatures, SetAvatarNewWearings, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
 import { CampaignBaseCombination, Campaign, CampaignBaseUrl } from "../../enums/citizens/common.enum";
-import { setCitizensMetadata, setSelectedCitizen } from "../../store/citizensMetadataSlice";
+import { setCitizensMetadata, setSelectedCitizen, setUserFeatures } from "../../store/citizensMetadataSlice";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { GetRootAssetsMetadata, MintRootAsset } from "../../utils/web3/root/contract.util";
-import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata } from "../../interfaces/citizens.interface";
-
+import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, LuksoDrop } from "../../interfaces/citizens.interface";
+import { DropType } from "../../enums/lukso/common.enum";
+import { GetCollectionDocs } from "../../utils/firebase.util";
+import { useBlockchainProvider } from "../../contexts/BlockchainContext";
+import { BigNumberish } from "ethers";
+import { AppCampaigns, CampaignDrops } from "../../types/citizens.type";
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
   // REDUX State
@@ -39,6 +43,8 @@ export default function CitizensComponent() {
   const claimableDropsList = useRef<FeatureInterface[]>([]);
   const envMapList = useRef<EnvMapInterface[]>();
   const singleInitData = useRef<SingleInterface>();
+
+  const browserProvider = useBlockchainProvider();
 
   // Local state
   const [isAllReady, setIsAllReady] = useState<boolean>(false);
@@ -362,6 +368,29 @@ export default function CitizensComponent() {
     return false;
   }
 
+  async function fetchLuksoMetadata(walletAddress: string): Promise<boolean> {
+    if (!selectedCitizen) {
+      LogError(Module.Citizens, 'Selected citizen is undefined in fetchLuksoMetadata');
+      return false;
+    }
+    const asset = await GetCampaignsTokensMetadata(walletAddress);
+    const userFeatures = await GetUserFeatures(walletAddress);
+    if (asset.success && userFeatures.success) {
+      dispatch(setCitizensMetadata(asset.value));
+      dispatch(setUserFeatures(userFeatures.value as CampaignDrops<AppCampaigns>));
+      const currentCitizen = asset.value.find(citizen => citizen.tokenId === selectedCitizen.tokenId);
+      if (currentCitizen) {
+        dispatch(setSelectedCitizen(currentCitizen));
+      } else {
+        LogError(Module.Citizens, 'Current citizen not found in fetched metadata');
+      }
+      return true;
+    }
+    LogError(Module.Citizens, 'Failed to fetch lukso metadata');
+    return false;
+
+  }
+
   async function saveLuksoCombination() {
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
@@ -395,7 +424,6 @@ export default function CitizensComponent() {
       return false;
     }
 
-    const currentFeatures = singleInitData.current.features;
     const newCitizenMetadata = { //Make a copy of the selected citizen metadata
       ...selectedCitizen,
       combination: newCombination,
@@ -410,31 +438,60 @@ export default function CitizensComponent() {
 
     newCitizenMetadata.rawMetadata.attributes = []; //Reset attributes to be replaced
 
-    const burnDropArray: BodyPart[] = [];
+    const burnDropArray: LuksoDrop[] = [];
 
-    currentFeatures.forEach((feature) => {
-      newCitizenMetadata.rawMetadata.attributes.push({
-        key:
-          currentCampaign == 'vrm_female'
-            ? FEMALE_CAMPAIGN_BODY_TYPES[
-            feature.val.type.toLowerCase() as keyof typeof FEMALE_CAMPAIGN_BODY_TYPES
-            ]
-            : feature.val.type.toLowerCase(),
-        value: feature.val.name,
+    const attributes: LuksoAttribute[] = []; //Convert from current features to attribute list
+
+    const oldCombinationArray = selectedCitizen.combination.split('-');
+    const newCombinationArray = newCombination.split('-');
+    const oldAttributes: LuksoAttribute[] = []; //This array will contain the attributes to be unequipped
+    const newAttributes: LuksoAttribute[] = []; //This array will contain the attributes to be equipped
+
+    const allDrops: Drop[] = await GetCollectionDocs(`campaign/${selectedCampaign}/drops`) as Drop[];
+
+
+    if (userFeatures && userFeatures[selectedCampaign as string] != null) newCombinationArray.forEach((newIndex, index) => {
+      const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
+      const oldIndex = oldCombinationArray[index];
+
+      if (!indexType) return undefined;
+
+      const newDrop: LuksoDrop = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)); //Get the old feature to be unequipped and transferred back to wallet if not base feature
+      const oldDrop: LuksoDrop = allDrops.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)) as LuksoDrop; //Get the new feature to be equipped and transferred to source asset in case it's not base feature
+
+      const key = CAMPAIGN_UNIVERSAL_PAGE_LABELS[
+        currentCampaign
+      ][indexType.toLowerCase()];
+
+      const newAttribute: LuksoAttribute = newDrop && newDrop.dropType === DropType.LSP8 ? { //Add asset address to the attribute newAttribute exists
+        key,
+        value: newDrop?.name,
         type: 'string',
-      });
-      let bodyFeature: BodyPart | undefined;
-      if (currentCampaign == 'vrm_female') bodyFeature = newCitizenMetadata.rawMetadata.body[FEMALE_CAMPAIGN_BODY_TYPES[feature.val.type.toLowerCase() as keyof typeof FEMALE_CAMPAIGN_BODY_TYPES] as keyof typeof newCitizenMetadata.rawMetadata.body];
-      else bodyFeature = newCitizenMetadata.rawMetadata.body[feature.val.type.toLowerCase() as keyof typeof newCitizenMetadata.rawMetadata.body];
-
-      if (bodyFeature && bodyFeature.name != feature.val.name) {
-        newCitizenMetadata.rawMetadata.body[
-          feature.val.type.toLowerCase() as keyof typeof newCitizenMetadata.rawMetadata.body
-        ] = feature.val as BodyPart;
-
-        burnDropArray.push(feature.val as BodyPart);
+        wearable_address: newDrop?.contract_address,
+        wearable_token_id: newDrop?.tokenId
+      } : {
+        key,
+        value: singleInitData.current?.features[index]?.val.name as string, //Set the feature name to the new feature index
+        type: 'string',
       }
+
+      const oldAttribute: LuksoAttribute | undefined = (selectedCitizen.rawMetadata as LuksoMetadata).attributes.find(attr => attr.key === newAttribute.key);
+
+      attributes.push(newAttribute);
+
+      if (oldIndex === newIndex) return undefined;
+
+      if (newDrop && newDrop.contract_address) {
+        console.log('newDrop', newDrop);
+        if (newDrop.dropType === DropType.LSP8 && newDrop.tokenId) newAttributes.push(newAttribute);
+        else burnDropArray.push(newDrop);
+      } //If the old feature is not base feature, add it to the old features array. We know it's not base feature because it has a token id and contract address
+      if (oldAttribute && oldAttribute.wearable_address && oldAttribute.wearable_token_id) {
+        oldAttributes.push(oldAttribute);
+      } //If the new feature is not base feature and has contract address and token id, add it to the new features array.
     });
+
+    newCitizenMetadata.rawMetadata.attributes = attributes;
 
     const metadataObject = await UploadLuksoMetadata(
       newCitizenMetadata.rawMetadata,
@@ -453,31 +510,29 @@ export default function CitizensComponent() {
     newCitizenMetadata.imageUrl = metadataObject.value.imageUrl;
     newCitizenMetadata.rawMetadata.imageUrl = metadataObject.value.imageUrl;
 
-    await SetTokenMetadata(
-      currentCampaign,
-      selectedCitizen.tokenId,
-      metadataObject.value.uri
-    );
+    const signer = await browserProvider?.ethersProvider?.getSigner();
 
+    if (!signer) {
+      LogError(Module.Citizens, 'Signer is undefined in saveLuksoCombination');
+      return false;
+    }
+
+    await SetAvatarNewWearings(
+      currentCampaign,
+      oldAttributes,
+      newAttributes,
+      selectedCitizen.tokenId,
+      metadataObject.value.uri,
+      signer
+    );
     for (let i = 0; i < burnDropArray.length; i++) {
       const drop = burnDropArray[i];
       await BurnDrop(walletAddress, currentCampaign, drop);
     }
 
-    const updatedCitizensMetadata = [...citizensMetadata];
-    const index = updatedCitizensMetadata.findIndex(x => x.tokenId == selectedCitizen.tokenId);
+    const isSuccess = await fetchLuksoMetadata(walletAddress)
 
-    if (index == -1) {
-      LogError(Module.Citizens, 'Citizen metadata not found in saveLuksoCombination');
-      return false;
-    }
-
-    updatedCitizensMetadata[index] = newCitizenMetadata;
-
-    dispatch(setCitizensMetadata(updatedCitizensMetadata));
-    dispatch(setSelectedCitizen(newCitizenMetadata));
-
-    return true; // return true in success, false in failure
+    return isSuccess; // return true in success, false in failure
   }
 
   async function saveSolanaCombination() {
@@ -519,8 +574,10 @@ export default function CitizensComponent() {
     const newCombinationArray = newCombination.split('-');
     const oldAttributes: SolanaAttribute[] = []; //This array will contain the attributes to be unequipped
     const newAttributes: SolanaAttribute[] = []; //This array will contain the attributes to be equipped
+
     if (userFeatures && userFeatures[selectedCampaign as string] != null) newCombinationArray.forEach((featureIndex, index) => {
       const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
+
       if (!indexType) return undefined;
 
       const oldAttribute = (selectedCitizen.rawMetadata as SolanaMetadata).attributes[index]; //Get the old feature to be unequipped and transferred back to wallet if not base feature

@@ -110,9 +110,12 @@ export interface SolanaAttribute {
   asset_address?: string;
 }
 
-export interface CitizenAttribute {
-  trait_type: string;
+export interface LuksoAttribute {
+  key: string;
   value: string;
+  type: string;
+  wearable_address?: string; // Optional, used for features that are linked to an asset
+  wearable_token_id?: string;
 }
 
 export interface TokenId {
@@ -130,12 +133,16 @@ export interface CampaignData extends Record<Campaign, CampaignWeb3Data> {
 }
 
 export interface Drop {
-  balance: number;
+  balance?: number;
   contract_address: string;
   index: number;
   type: string;
   name: string;
   dropType: DropType;
+}
+
+export interface LuksoDrop extends Drop {
+  tokenId?: string;
 }
 
 export interface CampaignMetadata extends Record<Campaign, CitizenMetadata[]> { }

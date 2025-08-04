@@ -1,6 +1,6 @@
-import { Contract, ethers } from 'ethers';
+import { Contract, ethers, JsonRpcSigner, Signer } from 'ethers';
 import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json';
-import { Drop, TokenId } from '../../../interfaces/citizens.interface';
+import { Drop, LuksoAttribute, LuksoDrop, TokenId } from '../../../interfaces/citizens.interface';
 import { GetLuksoImageUrl, GetFollowStatuses, GetLuksoIPFSData, GetUniversalProfileData } from '../citizens.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json';
 import { CitizenMetadata } from '../../../interfaces/citizens.interface';
@@ -8,13 +8,14 @@ import { Result } from '../../../types/common.type';
 import { LogError, ToHex64 } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { Campaign, LuksoCampaign } from '../../../enums/citizens/common.enum';
-import { LUKSO_CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH, UNIVERSAL_PROFILE_CONTRACT, OPERATION_CALL, EOA } from '../../../constants/lukso/contract.constant';
+import { LUKSO_CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH, UNIVERSAL_PROFILE_CONTRACT, OPERATION_CALL, EOA, AVATAR_EXTENSION_CONTRACT_ADDRESS_EXPORT } from '../../../constants/lukso/contract.constant';
 import { GetCollectionDocs, GetLeaderboardData } from '../../firebase.util';
 import WearableContractAbi from '../../../constants/abi/WearableContractABI.json'
+import AvatarContractExtensionAbi from '../../../constants/abi/AvatarContractExtensionABI.json';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { LeaderboardEntry } from '../../../types/leaderboard.type';
-import { BodyPart } from '../../../interfaces/avatar.interface';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
+import { DropType } from '../../../enums/lukso/common.enum';
 
 export async function GetTokensOf(contractAddress: string, address: string): Promise<Result<string[]>> {
     try {
@@ -132,7 +133,7 @@ export async function GetLuksoTokenMetadata(tokenId: TokenId): Promise<Result<Ci
         tokenId: tokenId.tokenId,
         campaign: tokenId.campaign as Campaign,
         combination: luksoMetadata.combination,
-        baseCombination: luksoMetadata.combination,
+        baseCombination: luksoMetadata.baseCombination,
         imageUrl: luksoMetadata.imageUrl,
         fallbackImageUrl: luksoMetadata.fallbackImageUrl,
         rawMetadata: luksoMetadata,
@@ -166,7 +167,7 @@ export async function GetTokensMetadata(campaign: Campaign, tokenIds: string[]):
         const metadataPromises = tokenIds.map(async (tokenId, index) => {
             const tokenIdNumber = Number(tokenId).toString();
             const decodedData = decodedDataArray[index];
-            const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenId}`;
+            const metadataUri = decodedData.value ? decodedData.value.url.split('//')[1] : `${baseCid}/${tokenIdNumber}`;
 
             if (!baseCid && !decodedData.value) return null;
 
@@ -218,33 +219,34 @@ export async function GetCampaignsTokensMetadata(address: string): Promise<Resul
     const campaignsMetadatas = campaignsMetadatasArray.flat();
 
     if (hasErrors && campaignsMetadatas.length === 0) return { success: false, errMessage: 'No tokens metadata were loaded correctly', errCode: CommonErrorCode.FetchError };
-    
+
     return { success: true, value: campaignsMetadatas as CitizenMetadata[] };
 }
 
-export async function GetCampaignUserFeatures(address: string, campaign: string): Promise<Result<Drop[]>> {
+export async function GetCampaignUserFeatures(address: string, campaign: string): Promise<Result<LuksoDrop[]>> {
     try {
-        const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
+        const dropsData: LuksoDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as LuksoDrop[];
 
-        const balancePromises = dropsData.map(drop => {
+        const balancePromises = dropsData.map(async drop => {
             const contract = new Contract(drop.contract_address, WearableContractAbi, PROVIDER);
-            return contract.balanceOf(address).then(balance => ({
-                drop,
+            if (drop.dropType === DropType.LSP8) {
+                const tokenIds = await contract.tokenIdsOf(address);
+                return contract.tokenIdsOf(address).then(tokenIds => {
+                    return { ...drop, tokenId: tokenIds.length > 0 ? Number(BigInt(tokenIds[0])).toString() : undefined } as LuksoDrop;
+                });
+            }
+            else return contract.balanceOf(address).then(balance => ({
+                ...drop,
                 balance: Number(balance)
             }));
         });
-
-        const results = await Promise.all(balancePromises);
-
+        const results: LuksoDrop[] = await Promise.all(balancePromises);
         const features = results
-            .filter(({ balance }) => balance > 0)
-            .map(({ drop, balance }) => ({
-                ...drop,
-                balance
-            }));
+            .filter(({ balance, tokenId }) => (balance && balance > 0) || tokenId);
 
         return { success: true, value: features };
     } catch (error) {
+        console.error('Error getting campaign user features:', error);
         return {
             success: false,
             errMessage: 'Error getting campaign user features',
@@ -284,18 +286,18 @@ export async function GetUserFeatures(address: string): Promise<Result<CampaignD
 
 export async function GetFullLeaderboardData(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
     const leaderboardData = await GetLeaderboardData(Blockchain.Ethereum);
-    
+
     const followStatusesPromise = GetFollowStatuses(leaderboardData, PROVIDER, walletAddress);
     const profileDataPromises = leaderboardData.map(async (entry: LeaderboardEntry) => {
-            const profileData = await GetUniversalProfileData(entry.address);
-            if (!profileData.success) return entry;
-            return {
-                ...entry,
-                name: profileData.success ? profileData.value.name : entry.name,
-                profileImage: profileData.success ? profileData.value.profileImage : entry.profileImage,
-                isFollowing: false
-            } as LeaderboardEntry;
-        }
+        const profileData = await GetUniversalProfileData(entry.address);
+        if (!profileData.success) return entry;
+        return {
+            ...entry,
+            name: profileData.success ? profileData.value.name : entry.name,
+            profileImage: profileData.success ? profileData.value.profileImage : entry.profileImage,
+            isFollowing: false
+        } as LeaderboardEntry;
+    }
     );
 
     const [followStatusesResult, ...leaderboardWithProfileData] = await Promise.all([
@@ -304,10 +306,10 @@ export async function GetFullLeaderboardData(walletAddress: string): Promise<Res
     ]) as [Result<Record<string, boolean>>, ...LeaderboardEntry[]];
 
     if (!followStatusesResult.success) {
-        return { 
-            success: false, 
-            errMessage: 'Error getting follow statuses', 
-            errCode: CommonErrorCode.FetchError 
+        return {
+            success: false,
+            errMessage: 'Error getting follow statuses',
+            errCode: CommonErrorCode.FetchError
         };
     }
 
@@ -351,11 +353,49 @@ export async function SetTokenMetadata(campaign: Campaign, tokenId: string, meta
     return { success: true, value: undefined };
 }
 
-export async function BurnDrop(from: string, campaign: string, drop: BodyPart): Promise<Result<void>> {
+export async function SetAvatarNewWearings(campaign: Campaign, oldAttributes: LuksoAttribute[], newAttributes: LuksoAttribute[], tokenId: string, metadataUri: string, signer: JsonRpcSigner): Promise<Result<void>> {
+    const targetContractAddress = LUKSO_CAMPAIGN_WEB3_DATA[campaign].contractAddress;
+
+
+    const metadataUrl = `ipfs://${metadataUri}`;
+    const metadataIpfsData = await GetLuksoIPFSData(metadataUrl.split('//')[1]);
+    const metadataDataValue = AVATAR_ERC725_CONTRACT.encodeData([
+        {
+            keyName: 'LSP4Metadata',
+            value: {
+                json: metadataIpfsData,
+                url: metadataUrl,
+            },
+        },
+    ]);
+
+    const wearablesToUnequip = oldAttributes.map((attribute) => ({
+        wearableContract: attribute.wearable_address, wearableTokenId: Number(attribute.wearable_token_id)
+    }));
+
+    const wearablesToEquip = newAttributes.map((attribute) => ({
+        wearableContract: attribute.wearable_address, wearableTokenId: Number(attribute.wearable_token_id)
+    }));
+
+    const extensionInterface = new ethers.Interface(AvatarContractExtensionAbi);
+    const setAvatarNewWearingsEncodedFunction = extensionInterface.encodeFunctionData('setAvatarNewWearings', [Number(tokenId), wearablesToUnequip, wearablesToEquip, metadataDataValue.values[0]]);
+
+    const nonce = await signer.getNonce();
+    const txPromise = (UNIVERSAL_PROFILE_CONTRACT.connect(signer) as Contract).execute(OPERATION_CALL, // operation type = CREATE
+        targetContractAddress, // address zero
+        0, // amount to the fund the contract with when deploying
+        setAvatarNewWearingsEncodedFunction);
+    const tx = await txPromise;
+    await tx.wait();
+
+    return { success: true, value: undefined };
+}
+
+export async function BurnDrop(from: string, campaign: string, drop: LuksoDrop): Promise<Result<void>> {
     const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
     if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError };
 
-    const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name });
+    const dropPair = dropsData.find((dropData) => { return dropData.index === drop.index && dropData.type === drop.type });
     if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError };
 
     const dropContract = new Contract(dropPair.contract_address, WearableContractAbi, PROVIDER);

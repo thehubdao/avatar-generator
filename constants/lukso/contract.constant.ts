@@ -6,6 +6,7 @@ import { Campaign } from "../../enums/citizens/common.enum";
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!;
+const AVATAR_EXTENSION_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_EXTENSION_CONTRACT_ADDRESS!;
 const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS;
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
 const PK = process.env.NEXT_PUBLIC_PK!;
@@ -55,3 +56,5 @@ export const UNIVERSAL_PROFILE_CONTRACT = new ethers.Contract(
     UniversalProfileABI,
     PROVIDER,
 );
+
+export const AVATAR_EXTENSION_CONTRACT_ADDRESS_EXPORT = AVATAR_EXTENSION_CONTRACT_ADDRESS;
