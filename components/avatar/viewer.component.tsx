@@ -156,15 +156,15 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
   });
 }
 
-export async function GetCanvasImageUrl(pos?: Vector3) {
+export async function GetCanvasImageUrl(pos?: Vector3): Promise<string | null> {
   if (_renderer == undefined) {
     void LogError(Module.Viewer, 'Missing scene');
-    return ''
+    return null;
   }
 
   if (_camera === undefined) {
     void LogError(Module.Viewer, 'Missing camera');
-    return ''
+    return null;
   }
 
   let shot: string;

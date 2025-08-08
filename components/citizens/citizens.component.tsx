@@ -22,6 +22,8 @@ import { DropType } from "../../enums/lukso/common.enum";
 import { GetCollectionDocs } from "../../utils/firebase.util";
 import { useBlockchainProvider } from "../../contexts/BlockchainContext";
 import { AppCampaigns, CampaignDrops } from "../../types/citizens.type";
+import { GetCanvasImageUrl } from "../avatar/viewer.component";
+import { Vector3 } from "three";
 import { Result } from "../../types/common.type";
 
 export default function CitizensComponent() {
@@ -301,6 +303,14 @@ export default function CitizensComponent() {
     return false;
   }
 
+  async function generateImage(pos?: Vector3): Promise<string | null> {
+    // @GabCh155: this function is to generate the image from the canvas
+    // you can create a new image when you need update the DB
+    // note that the image in details panel does not update from here, it still use the image from the DB
+    // to update the image in details panel, you need to update the image in the DB 
+    const imageURL = await GetCanvasImageUrl(pos);
+    return imageURL;
+  }
 
   async function exportImage(): Promise<boolean> { //This function exports the image file
     if (!selectedCitizen) return false;
