@@ -444,6 +444,7 @@ export async function BurnDrop(from: string, campaign: string, drop: LuksoDrop):
     const dropPair = dropsData.find((dropData) => { return dropData.index === drop.index && dropData.type === drop.type });
     if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError };
 
+    if(!EOA) return { success: false, errMessage: 'No EOA found', errCode: CommonErrorCode.FetchError };
     const dropContract = new Contract(dropPair.contract_address, OldWearableContractABI, PROVIDER);
     const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1]);
     const tx = await (UNIVERSAL_PROFILE_CONTRACT.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
