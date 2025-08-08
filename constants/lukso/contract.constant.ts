@@ -18,7 +18,7 @@ const CONFIG = {
 
 export const PROVIDER = new JsonRpcProvider(RPC_URL);
 
-export const EOA = new ethers.Wallet(AVATAR_ADMIN_PK).connect(PROVIDER);
+export const EOA = AVATAR_ADMIN_PK ? new ethers.Wallet(AVATAR_ADMIN_PK).connect(PROVIDER) : undefined;
 
 export const WEARABLE_ADMIN_SIGNER = WEARABLE_ADMIN_SIGNER_PK ? new Wallet(WEARABLE_ADMIN_SIGNER_PK).connect(PROVIDER) : undefined;
 
