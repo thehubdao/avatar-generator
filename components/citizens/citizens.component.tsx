@@ -1,7 +1,7 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import CitizensUI from "../../ui/citizens/citizens.ui";
-import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign } from "../../utils/api.util";
+import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign, RequestBurnDrops, RequestClaimApprove } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData, ChangeSkinColor } from "../avatar/editor.component";
 import { LogError } from "../../utils/common.util";
@@ -9,21 +9,21 @@ import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
-import { BodyPart } from "../../interfaces/avatar.interface";
 import { UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
-import { BurnDrop, GetCampaignsTokensMetadata, GetUserFeatures, SetAvatarNewWearings, SetTokenMetadata } from "../../utils/web3/lukso/contract.util";
+import { ClaimAndSetAvatarNewWearings, GetCampaignsTokensMetadata, GetUserFeatures, SetAvatarNewWearings } from "../../utils/web3/lukso/contract.util";
 import { CampaignBaseCombination, Campaign, CampaignBaseUrl } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen, setUserFeatures } from "../../store/citizensMetadataSlice";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { GetRootAssetsMetadata, MintRootAsset } from "../../utils/web3/root/contract.util";
-import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, LuksoDrop } from "../../interfaces/citizens.interface";
+import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, LuksoDrop, ClaimableDrop, DropToClaim } from "../../interfaces/citizens.interface";
 import { DropType } from "../../enums/lukso/common.enum";
 import { GetCollectionDocs } from "../../utils/firebase.util";
 import { useBlockchainProvider } from "../../contexts/BlockchainContext";
-import { BigNumberish } from "ethers";
 import { AppCampaigns, CampaignDrops } from "../../types/citizens.type";
+import { Result } from "../../types/common.type";
+
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
   // REDUX State
@@ -34,13 +34,16 @@ export default function CitizensComponent() {
   const claimableDrops = useAppSelector(state => state.citizensMetadata.claimableDrops);
   const walletAddress = useAppSelector(state => state.citizensAuth.address);
   const citizensMetadata = useAppSelector(state => state.citizensMetadata.citizensMetadata);
+  const shoppingCart = useAppSelector(state => state.citizensMetadata.shoppingCart);
+  const marketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
 
   // Local references
   const baseExportData = useRef<ExportInterface>({ attributes: [] });
   const exportData = useRef<ExportInterface>({ attributes: [] });
   const featureList = useRef<FeatureInterface[]>([]);
   const optionList = useRef<FeatureInterface[]>([]);
-  const claimableDropsList = useRef<FeatureInterface[]>([]);
+  const claimableDropsList = useRef<ClaimableDrop[]>([]);
+  const claimableDropsFeatureList = useRef<FeatureInterface[]>([]);
   const envMapList = useRef<EnvMapInterface[]>();
   const singleInitData = useRef<SingleInterface>();
 
@@ -142,16 +145,17 @@ export default function CitizensComponent() {
     if (!claimableDrops) return LogError(Module.Citizens, 'Missing claimable drops to add!');
 
     const campaignClaimableDrops = claimableDrops[selectedCampaign as string];
+    claimableDropsList.current = campaignClaimableDrops;
 
     if (campaignClaimableDrops) {
       const formattedClaimableDrops = campaignClaimableDrops
-        .map((drop) => {
-          return featureList.current?.find(
+        .map((drop) => (
+          featureList.current?.find(
             (option) =>
               option.type === drop.featureType &&
               drop.featureIndex === option.index
-          );
-        })
+          )
+        ))
         .filter(el => el !== undefined);
 
       const claimableDropsWithMarketData = formattedClaimableDrops.map(feature => {
@@ -162,7 +166,7 @@ export default function CitizensComponent() {
         return feature;
       })
 
-      claimableDropsList.current = claimableDropsWithMarketData;
+      claimableDropsFeatureList.current = claimableDropsWithMarketData;
     }
   }
 
@@ -320,19 +324,17 @@ export default function CitizensComponent() {
     if (!singleInitData.current) return LogError(Module.Citizens, 'Single init data is undefined in changeFeaturefromHud');
 
     const currentFeatures = singleInitData.current.features;
-    const changedFeature = optionList.current.find(
+    const changedFeature = featureList.current.find( //We take the changed feature from the full feature list because the user does not have the feature on its balance
       (feature) => feature.type === category && feature.id === id
     );
     const currentFeaturesTypeIndex = currentFeatures?.findIndex(
       (feature) => feature.val.type === category
     );
-
     if (currentFeaturesTypeIndex != undefined && changedFeature) {
       singleInitData.current.features[
         currentFeaturesTypeIndex
       ].val = changedFeature;
     }
-
     await ChangeFeature(
       id,
       path,
@@ -368,16 +370,25 @@ export default function CitizensComponent() {
     return false;
   }
 
+  async function fetchLuksoUserFeatures(walletAddress: string): Promise<Result<CampaignDrops<AppCampaigns>>> {
+    const userFeatures = await GetUserFeatures(walletAddress);
+    console.log('userFeatures', userFeatures);
+    if (userFeatures.success) {
+      dispatch(setUserFeatures(userFeatures.value as CampaignDrops<AppCampaigns>));
+      return { success: true, value: userFeatures.value as CampaignDrops<AppCampaigns> };
+    }
+    LogError(Module.Citizens, 'Failed to fetch user features', userFeatures.errCode);
+    return { success: false, errMessage: userFeatures.errMessage, errCode: userFeatures.errCode };
+  }
+
   async function fetchLuksoMetadata(walletAddress: string): Promise<boolean> {
     if (!selectedCitizen) {
       LogError(Module.Citizens, 'Selected citizen is undefined in fetchLuksoMetadata');
       return false;
     }
     const asset = await GetCampaignsTokensMetadata(walletAddress);
-    const userFeatures = await GetUserFeatures(walletAddress);
-    if (asset.success && userFeatures.success) {
+    if (asset.success) {
       dispatch(setCitizensMetadata(asset.value));
-      dispatch(setUserFeatures(userFeatures.value as CampaignDrops<AppCampaigns>));
       const currentCitizen = asset.value.find(citizen => citizen.tokenId === selectedCitizen.tokenId);
       if (currentCitizen) {
         dispatch(setSelectedCitizen(currentCitizen));
@@ -388,14 +399,14 @@ export default function CitizensComponent() {
     }
     LogError(Module.Citizens, 'Failed to fetch lukso metadata');
     return false;
-
   }
 
-  async function saveLuksoCombination() {
+  async function saveLuksoCombination(dropsToClaim?: DropToClaim[]) { // Pass in userFeatures in case we need to update just before executing this function
+    console.log(singleInitData, exportData)
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
       .join('-') as string;
-
+    console.log(newCombination)
     if (!campaignParams) {
       LogError(Module.Citizens, 'Campaign params is undefined in Lukso saveCombination');
       return false;
@@ -449,6 +460,7 @@ export default function CitizensComponent() {
 
     const allDrops: Drop[] = await GetCollectionDocs(`campaign/${selectedCampaign}/drops`) as Drop[];
 
+    console.log(userFeatures, 'userFeatures[currentCampaign]', currentCampaign, 'selectedCampaign', selectedCampaign, 'allDrops', allDrops);
 
     if (userFeatures && userFeatures[selectedCampaign as string] != null) newCombinationArray.forEach((newIndex, index) => {
       const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
@@ -457,7 +469,6 @@ export default function CitizensComponent() {
       if (!indexType) return undefined;
 
       const newDrop: LuksoDrop = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)); //Get the old feature to be unequipped and transferred back to wallet if not base feature
-      const oldDrop: LuksoDrop = allDrops.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)) as LuksoDrop; //Get the new feature to be equipped and transferred to source asset in case it's not base feature
 
       const key = CAMPAIGN_UNIVERSAL_PAGE_LABELS[
         currentCampaign
@@ -467,8 +478,8 @@ export default function CitizensComponent() {
         key,
         value: newDrop?.name,
         type: 'string',
-        wearable_address: newDrop?.contract_address,
-        wearable_token_id: newDrop?.tokenId
+        wearable_address: dropsToClaim ? dropsToClaim.find(drop => drop.wearableIndex === newIndex && drop.wearableType === indexType)?.wearableAddress : newDrop?.contract_address, //If the user is gonna claim the drop, we use predicted data
+        wearable_token_id: dropsToClaim ? dropsToClaim.find(drop => drop.wearableIndex === newIndex && drop.wearableType === indexType)?.wearablePredictedTokenId : newDrop?.tokenId //If the user is gonna claim the drop, we use predicted data
       } : {
         key,
         value: singleInitData.current?.features[index]?.val.name as string, //Set the feature name to the new feature index
@@ -480,7 +491,7 @@ export default function CitizensComponent() {
       attributes.push(newAttribute);
 
       if (oldIndex === newIndex) return undefined;
-
+      console.log('newDrop', newDrop);
       if (newDrop && newDrop.contract_address) {
         console.log('newDrop', newDrop);
         if (newDrop.dropType === DropType.LSP8 && newDrop.tokenId) newAttributes.push(newAttribute);
@@ -517,7 +528,8 @@ export default function CitizensComponent() {
       return false;
     }
 
-    await SetAvatarNewWearings(
+    if (marketplaceMode && dropsToClaim) await ClaimAndSetAvatarNewWearings(currentCampaign, dropsToClaim, oldAttributes, newAttributes, selectedCitizen.tokenId, metadataObject.value.uri, signer);
+    else await SetAvatarNewWearings(
       currentCampaign,
       oldAttributes,
       newAttributes,
@@ -525,14 +537,13 @@ export default function CitizensComponent() {
       metadataObject.value.uri,
       signer
     );
-    for (let i = 0; i < burnDropArray.length; i++) {
-      const drop = burnDropArray[i];
-      await BurnDrop(walletAddress, currentCampaign, drop);
-    }
 
-    const isSuccess = await fetchLuksoMetadata(walletAddress)
+    await RequestBurnDrops(burnDropArray, walletAddress, currentCampaign);
 
-    return isSuccess; // return true in success, false in failure
+    const isMetadataFetchSuccess = await fetchLuksoMetadata(walletAddress)
+    const isUserFeaturesFetchSuccess = await fetchLuksoUserFeatures(walletAddress);
+
+    return isMetadataFetchSuccess && isUserFeaturesFetchSuccess.success; // return true in success, false in failure
   }
 
   async function saveSolanaCombination() {
@@ -641,8 +652,51 @@ export default function CitizensComponent() {
   }
 
   async function onBuying() {
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return false; // This is a placeholder for the buying function, it should be replaced with the implementation
+    const signer = await browserProvider?.ethersProvider?.getSigner();
+    if (!signer) {
+      LogError(Module.Citizens, 'Signer is undefined in onBuying');
+      return false;
+    }
+    const _claimableDropsList = claimableDropsList.current;
+
+    if (!_claimableDropsList) {
+      LogError(Module.Citizens, 'Claimable drops are undefined in onBuying');
+      return false;
+    }
+
+    const claimableDrops: ClaimableDrop[] = []
+
+    for (let i = 0; i < shoppingCart.length; i++) {
+      const basicData = shoppingCart[i];
+
+      const claimableDropFound = _claimableDropsList.find(drop => drop.featureName === basicData.val);
+      console.log('claimableDropFound', claimableDropFound);
+      console.log(claimableDropsList)
+      if (!claimableDropFound) {
+        LogError(Module.Citizens, 'Claimable drop not found in claimable drops list in onBuying');
+        return false;
+      }
+
+      const claimableDrop: ClaimableDrop = claimableDropFound;
+
+      if (!claimableDrop) {
+        LogError(Module.Citizens, 'Claimable drop not found in claimable drops list in onBuying');
+        return false;
+      }
+
+      claimableDrops.push(claimableDrop);   
+    }
+    const claimResult = await RequestClaimApprove(claimableDrops, signer.address);
+    console.log('claimResult', claimResult);
+
+    if (!claimResult.success) {
+      LogError(Module.Citizens, 'Failed to claim drop in onBuying', claimResult.errCode);
+      return false;
+    }
+
+    await saveLuksoCombination(claimResult.value);
+
+    return true;
   }
 
   async function onMinting() {
@@ -701,7 +755,7 @@ export default function CitizensComponent() {
     singleInitData={singleInitData.current}
     exportData={exportData.current}
     featureList={optionList.current}
-    marketplaceFeatureList={claimableDropsList.current}
+    marketplaceFeatureList={claimableDropsFeatureList.current}
     isReady={isAllReady}
     handleReady={() => onAvatarBuilderReady()}
     handleExport={(type) => exportModel(type)}

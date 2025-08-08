@@ -30,6 +30,14 @@ export interface ClaimableDrop {
   owned: boolean; //true if the user has already claimed the drop
 }
 
+export interface DropToClaim {
+    wearableIndex:string;
+    wearableType:string;
+    wearableAddress: string;
+    wearablePredictedTokenId: string;
+    signature: string;
+}
+
 export interface Game {
   name: string;
   link: string;

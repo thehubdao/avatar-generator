@@ -1,16 +1,17 @@
-import { Contract, ethers, JsonRpcSigner, Signer } from 'ethers';
+import { Contract, ethers, JsonRpcSigner } from 'ethers';
 import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json';
-import { Drop, LuksoAttribute, LuksoDrop, TokenId } from '../../../interfaces/citizens.interface';
+import { ClaimableDrop, Drop, DropToClaim, LuksoAttribute, LuksoDrop, TokenId } from '../../../interfaces/citizens.interface';
 import { GetLuksoImageUrl, GetFollowStatuses, GetLuksoIPFSData, GetUniversalProfileData } from '../citizens.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json';
 import { CitizenMetadata } from '../../../interfaces/citizens.interface';
 import { Result } from '../../../types/common.type';
-import { LogError, ToHex64 } from '../../../utils/common.util';
+import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { Campaign, LuksoCampaign } from '../../../enums/citizens/common.enum';
-import { LUKSO_CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH, UNIVERSAL_PROFILE_CONTRACT, OPERATION_CALL, EOA, AVATAR_EXTENSION_CONTRACT_ADDRESS_EXPORT } from '../../../constants/lukso/contract.constant';
+import { LUKSO_CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH, UNIVERSAL_PROFILE_CONTRACT, OPERATION_CALL, EOA, WEARABLE_ADMIN_SIGNER } from '../../../constants/lukso/contract.constant';
 import { GetCollectionDocs, GetLeaderboardData } from '../../firebase.util';
-import WearableContractAbi from '../../../constants/abi/WearableContractABI.json'
+import WearableContractABI from '../../../constants/abi/WearableContractABI.json'
+import OldWearableContractABI from '../../../constants/abi/OldWearableContractABI.json'
 import AvatarContractExtensionAbi from '../../../constants/abi/AvatarContractExtensionABI.json';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { LeaderboardEntry } from '../../../types/leaderboard.type';
@@ -228,9 +229,8 @@ export async function GetCampaignUserFeatures(address: string, campaign: string)
         const dropsData: LuksoDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as LuksoDrop[];
 
         const balancePromises = dropsData.map(async drop => {
-            const contract = new Contract(drop.contract_address, WearableContractAbi, PROVIDER);
+            const contract = new Contract(drop.contract_address, WearableContractABI, PROVIDER);
             if (drop.dropType === DropType.LSP8) {
-                const tokenIds = await contract.tokenIdsOf(address);
                 return contract.tokenIdsOf(address).then(tokenIds => {
                     return { ...drop, tokenId: tokenIds.length > 0 ? Number(BigInt(tokenIds[0])).toString() : undefined } as LuksoDrop;
                 });
@@ -323,34 +323,16 @@ export async function GetFullLeaderboardData(walletAddress: string): Promise<Res
     return { success: true, value: finalLeaderboardData };
 }
 
-export async function SetTokenMetadata(campaign: Campaign, tokenId: string, metadataUri: string): Promise<Result<void>> {
-    const targetContractAddress = LUKSO_CAMPAIGN_WEB3_DATA[campaign].contractAddress;
-    const avatarContract = new ethers.Contract(
-        targetContractAddress,
-        AvatarContractAbi,
-        PROVIDER,
-    );
+async function SignClaimMessageFromAdmin(wearableAddress: string, walletAddress: string) {
+    if(!WEARABLE_ADMIN_SIGNER) throw new Error('Wearable admin signer is not defined');
+    const wearableContract = new Contract(wearableAddress, WearableContractABI, PROVIDER);
+    const nonce = Number(await wearableContract.getUserNonce(walletAddress));
 
-    const metadataUrl = `ipfs://${metadataUri}`;
-    const metadataIpfsData = await GetLuksoIPFSData(metadataUrl.split('//')[1]);
-    const metadataDataKey = AVATAR_ERC725_CONTRACT.encodeKeyName('LSP4Metadata');
-    const metadataDataValue = AVATAR_ERC725_CONTRACT.encodeData([
-        {
-            keyName: 'LSP4Metadata',
-            value: {
-                json: metadataIpfsData,
-                url: metadataUrl,
-            },
-        },
-    ]);
-    const setMetadataDataEncodedFunction = avatarContract.interface.encodeFunctionData('setDataForTokenId', [ToHex64(Number(tokenId)), metadataDataKey, metadataDataValue.values[0]]);
-    const tx = await (UNIVERSAL_PROFILE_CONTRACT.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
-        targetContractAddress, // address zero
-        0, // amount to the fund the contract with when deploying
-        setMetadataDataEncodedFunction
-    );
-    await tx.wait();
-    return { success: true, value: undefined };
+    const message = wearableAddress.toLowerCase() + ':' + walletAddress.toLowerCase() + ':' + nonce.toString();
+
+    const signature = await WEARABLE_ADMIN_SIGNER.signMessage(message);
+
+    return signature;
 }
 
 export async function SetAvatarNewWearings(campaign: Campaign, oldAttributes: LuksoAttribute[], newAttributes: LuksoAttribute[], tokenId: string, metadataUri: string, signer: JsonRpcSigner): Promise<Result<void>> {
@@ -380,10 +362,74 @@ export async function SetAvatarNewWearings(campaign: Campaign, oldAttributes: Lu
     const extensionInterface = new ethers.Interface(AvatarContractExtensionAbi);
     const setAvatarNewWearingsEncodedFunction = extensionInterface.encodeFunctionData('setAvatarNewWearings', [Number(tokenId), wearablesToUnequip, wearablesToEquip, metadataDataValue.values[0]]);
 
-    const nonce = await signer.getNonce();
     const txPromise = (UNIVERSAL_PROFILE_CONTRACT.connect(signer) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         targetContractAddress, // address zero
         0, // amount to the fund the contract with when deploying
+        setAvatarNewWearingsEncodedFunction);
+    const tx = await txPromise;
+    await tx.wait();
+
+    return { success: true, value: undefined };
+}
+
+export async function CheckClaimApprove(drops: ClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
+    const signaturePromises = drops.map(async (drop) => { return await SignClaimMessageFromAdmin(drop.contractAddress, walletAddress) });
+
+    const signatures = await Promise.all(signaturePromises);
+
+    const dropsToClaimPromises = drops.map(async (drop, index) => {
+        const wearableContract = new Contract(drop.contractAddress, WearableContractABI, PROVIDER);
+        const nextTokenId = Number(await wearableContract.totalSupply()) + 1;
+        //TODO: Add the whole relevant flow to check each condition.
+        //Temporarily passing without any checks
+        return {
+            wearableIndex: drop.featureIndex.toString(),
+            wearableType: drop.featureType,
+            wearableAddress: drop.contractAddress,
+            wearablePredictedTokenId: nextTokenId.toString(),
+            signature: signatures[index]
+        } as DropToClaim;
+    });
+
+    const dropsToClaim = await Promise.all(dropsToClaimPromises);
+
+    return { success: true, value: dropsToClaim };
+}
+
+export async function ClaimAndSetAvatarNewWearings(campaign: Campaign, dropsToClaim: DropToClaim[], oldAttributes: LuksoAttribute[], newAttributes: LuksoAttribute[], tokenId: string, metadataUri: string, signer: JsonRpcSigner): Promise<Result<void>> {
+    const targetContractAddress = LUKSO_CAMPAIGN_WEB3_DATA[campaign].contractAddress;
+    const targetContract = new Contract(targetContractAddress, AvatarContractAbi, signer);
+
+    const metadataUrl = `ipfs://${metadataUri}`;
+    const metadataIpfsData = await GetLuksoIPFSData(metadataUrl.split('//')[1]);
+    const metadataDataValue = AVATAR_ERC725_CONTRACT.encodeData([
+        {
+            keyName: 'LSP4Metadata',
+            value: {
+                json: metadataIpfsData,
+                url: metadataUrl,
+            },
+        },
+    ]);
+
+    const wearablesToUnequip = oldAttributes.map((attribute) => ({
+        wearableContract: attribute.wearable_address, wearableTokenId: Number(attribute.wearable_token_id)
+    }));
+
+    const wearablesToEquip = newAttributes.map((attribute) => ({
+        wearableContract: attribute.wearable_address, wearableTokenId: Number(attribute.wearable_token_id)
+    }));
+    const claimSignatures = dropsToClaim.map((drop) => drop.signature);
+    const wearablePredictedTokenIds = dropsToClaim.map((drop) => drop.wearablePredictedTokenId);
+
+    const extensionInterface = new ethers.Interface(AvatarContractExtensionAbi);
+    const setAvatarNewWearingsEncodedFunction = extensionInterface.encodeFunctionData('claimAndSetNewWearings', [Number(tokenId), claimSignatures, wearablePredictedTokenIds, wearablesToUnequip, wearablesToEquip, metadataDataValue.values[0]]);
+
+    const claimPrice = targetContract.getClaimPrice(wearablesToEquip);
+
+    const txPromise = (UNIVERSAL_PROFILE_CONTRACT.connect(signer) as Contract).execute(OPERATION_CALL, // operation type = CREATE
+        targetContractAddress, // address zero
+        claimPrice, // amount to the fund the contract with when deploying
         setAvatarNewWearingsEncodedFunction);
     const tx = await txPromise;
     await tx.wait();
@@ -398,13 +444,26 @@ export async function BurnDrop(from: string, campaign: string, drop: LuksoDrop):
     const dropPair = dropsData.find((dropData) => { return dropData.index === drop.index && dropData.type === drop.type });
     if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError };
 
-    const dropContract = new Contract(dropPair.contract_address, WearableContractAbi, PROVIDER);
+    const dropContract = new Contract(dropPair.contract_address, OldWearableContractABI, PROVIDER);
     const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1]);
     const tx = await (UNIVERSAL_PROFILE_CONTRACT.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         dropPair.contract_address,
         0, // amount to the fund the contract with when deploying
         burnEncondedFunction
     );
+    await tx.wait();
+    return { success: true, value: undefined };
+}
+
+export async function ClaimDrop(drop: LuksoDrop, signer: JsonRpcSigner): Promise<Result<void>> {
+    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${Campaign.Creators}/drops`) as Drop[];
+    if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError };
+
+    const dropPair = dropsData.find((dropData) => { return dropData.index === drop.index && dropData.type === drop.type });
+    if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError };
+
+    const dropContract = new Contract(dropPair.contract_address, WearableContractABI, signer);
+    const tx = await dropContract.claimWearable('0x')
     await tx.wait();
     return { success: true, value: undefined };
 }

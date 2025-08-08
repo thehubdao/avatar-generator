@@ -1,6 +1,6 @@
 import { ERC725 } from "@erc725/erc725.js";
 import { ERC725JSONSchemaKeyType } from "@erc725/erc725.js";
-import { ethers, JsonRpcProvider } from "ethers";
+import { ethers, JsonRpcProvider, Wallet } from "ethers";
 import { Campaign } from "../../enums/citizens/common.enum";
  
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
@@ -9,7 +9,8 @@ const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_EXTENSION_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_EXTENSION_CONTRACT_ADDRESS!;
 const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS;
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
-const PK = process.env.NEXT_PUBLIC_PK!;
+const AVATAR_ADMIN_PK = process.env.AVATAR_ADMIN_PK!;
+const WEARABLE_ADMIN_SIGNER_PK = process.env.WEARABLE_ADMIN_SIGNER_PK!;
 
 const CONFIG = {
     ipfsGateway: 'ipfs://',
@@ -17,7 +18,9 @@ const CONFIG = {
 
 export const PROVIDER = new JsonRpcProvider(RPC_URL);
 
-export const EOA = new ethers.Wallet(PK).connect(PROVIDER);
+export const EOA = new ethers.Wallet(AVATAR_ADMIN_PK).connect(PROVIDER);
+
+export const WEARABLE_ADMIN_SIGNER = WEARABLE_ADMIN_SIGNER_PK ? new Wallet(WEARABLE_ADMIN_SIGNER_PK).connect(PROVIDER) : undefined;
 
 export const OPERATION_CALL = 0;
 

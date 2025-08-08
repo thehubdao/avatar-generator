@@ -11,7 +11,7 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
-import { ClaimableDrop, UserXPData } from "../interfaces/citizens.interface";
+import { ClaimableDrop, DropToClaim, LuksoDrop, UserXPData } from "../interfaces/citizens.interface";
 import { Blockchain } from "../enums/blockchain/common.enum";
 
 //#region Generic
@@ -198,5 +198,35 @@ export async function GetUserXPData(address: string, blockchainType: Blockchain)
   });
   if (!response.ok) return { success: false, errMessage: 'Failed to get user XP data', errCode: CommonErrorCode.GetNoData };
   const data = await response.json();
+  return { success: true, value: data.data };
+}
+
+export async function RequestClaimApprove(drops: ClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
+  const requestResult = await fetch('/api/v1/drops', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ drops, walletAddress }),
+  });
+
+  if (!requestResult.ok) return { success: false, errMessage: 'Failed to request claim approval', errCode: CommonErrorCode.PostNoData };
+
+  const data = await requestResult.json();
+  if (!data.success) return { success: false, errMessage: data.message, errCode: CommonErrorCode.PostNoData };
+
+  return { success: true, value: data.data };
+}
+
+export async function RequestBurnDrops(burnDropsArray: LuksoDrop[], walletAddress: string, campaign: string): Promise<Result<DropToClaim[]>> {
+  const requestResult = await fetch('/api/v1/drops/burnDrops', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ burnDropsArray, walletAddress, campaign }),
+  });
+
+  if (!requestResult.ok) return { success: false, errMessage: 'Failed to request burn drops', errCode: CommonErrorCode.PostNoData };
+
+  const data = await requestResult.json();
+  if (!data.success) return { success: false, errMessage: data.message, errCode: CommonErrorCode.PostNoData };
+
   return { success: true, value: data.data };
 }
