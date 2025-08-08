@@ -22,8 +22,6 @@ import { DropType } from "../../enums/lukso/common.enum";
 import { GetCollectionDocs } from "../../utils/firebase.util";
 import { useBlockchainProvider } from "../../contexts/BlockchainContext";
 import { AppCampaigns, CampaignDrops } from "../../types/citizens.type";
-import { GetCanvasImageUrl } from "../avatar/viewer.component";
-import { Vector3 } from "three";
 import { Result } from "../../types/common.type";
 
 export default function CitizensComponent() {
