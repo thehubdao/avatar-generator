@@ -38,7 +38,7 @@ const universalProfile = new ethers.Contract(
     provider,
 );
 
-const EOA = new ethers.Wallet(PK).connect(provider);
+const EOA ='';
 
 const OPERATION_CALL = 0;
 
@@ -360,7 +360,7 @@ export async function BurnDrop(from: string, campaign: string, drop: BodyPart): 
 
     const dropContract = new Contract(dropPair.contract_address, WerableContractAbi, provider)
     const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1])
-    const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
+    const tx = await (universalProfile.connect(EOA as any) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         dropPair.contract_address,
         0, // amount to the fund the contract with when deploying
         burnEncondedFunction
