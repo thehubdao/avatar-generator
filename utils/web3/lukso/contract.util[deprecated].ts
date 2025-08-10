@@ -15,16 +15,10 @@ import { Campaign, LuksoCampaign } from '../../../enums/citizens/common.enum';
 import { Result } from '../../../types/common.type';
 import { CampaignDrops } from '../../../types/citizens.type';
 
-
-
-/* TODO: 
-- Check and correct campaign types */
-
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL
 const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS;
-const PK = process.env.NEXT_PUBLIC_PK!
 
 const config = {
     ipfsGateway: 'ipfs://',

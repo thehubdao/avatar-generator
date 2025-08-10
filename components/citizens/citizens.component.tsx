@@ -65,7 +65,7 @@ export default function CitizensComponent() {
     exportData.current.attributes.push({ id: addId, val: addValue });
   }
 
-  async function getFeatureList() {
+  async function getFeatureList(combination?:string, basecombination?:string) {
     if (selectedCitizen === null) {
       LogError(Module.Citizens, 'Missing selected citizen to get feature list!');
       return;
@@ -80,8 +80,8 @@ export default function CitizensComponent() {
       return;
     }
 
-    const combinationIndexes = selectedCitizen.combination.split('-');
-    const baseCombinationIndexes = selectedCitizen.baseCombination.split('-');
+    const combinationIndexes = combination ? combination.split('-') : selectedCitizen.combination.split('-');
+    const baseCombinationIndexes = basecombination ? basecombination.split('-') : selectedCitizen.baseCombination.split('-');
     let filteredOptionList: FeatureInterface[] = [];
 
     combinationIndexes.forEach((featureIndex: string, bodyPartIndex: number) => {
@@ -139,7 +139,6 @@ export default function CitizensComponent() {
 
       filteredOptionList = filteredOptionList.concat(featuresWithBalance);
     }
-
     optionList.current = filteredOptionList;
 
     if (!claimableDrops) return LogError(Module.Citizens, 'Missing claimable drops to add!');
@@ -301,14 +300,14 @@ export default function CitizensComponent() {
     return false;
   }
 
-/*   async function generateImage(pos?: Vector3): Promise<string | null> {
-    // @GabCh155: this function is to generate the image from the canvas
-    // you can create a new image when you need update the DB
-    // note that the image in details panel does not update from here, it still use the image from the DB
-    // to update the image in details panel, you need to update the image in the DB 
-    const imageURL = await GetCanvasImageUrl(pos);
-    return imageURL;
-  } */
+  /*   async function generateImage(pos?: Vector3): Promise<string | null> {
+      // @GabCh155: this function is to generate the image from the canvas
+      // you can create a new image when you need update the DB
+      // note that the image in details panel does not update from here, it still use the image from the DB
+      // to update the image in details panel, you need to update the image in the DB 
+      const imageURL = await GetCanvasImageUrl(pos);
+      return imageURL;
+    } */
 
   async function exportImage(): Promise<boolean> { //This function exports the image file
     if (!selectedCitizen) return false;
@@ -410,7 +409,6 @@ export default function CitizensComponent() {
   }
 
   async function saveLuksoCombination(dropsToClaim?: DropToClaim[]) { // Pass in userFeatures in case we need to update just before executing this function
-    console.log(singleInitData, exportData)
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
       .join('-') as string;
@@ -443,12 +441,19 @@ export default function CitizensComponent() {
       return false;
     }
 
+    const oldCitizenMetadata = selectedCitizen.rawMetadata as LuksoMetadata;
+
     const newCitizenMetadata = { //Make a copy of the selected citizen metadata
       ...selectedCitizen,
       combination: newCombination,
+      baseCombination: selectedCitizen.baseCombination,
       rawMetadata: {
-        ...selectedCitizen.rawMetadata,
+        name: oldCitizenMetadata.name,
+        description: oldCitizenMetadata.description,
+        attributes: oldCitizenMetadata.attributes,
+        images: oldCitizenMetadata.images,
         combination: newCombination,
+        baseCombination: selectedCitizen.baseCombination ? selectedCitizen.baseCombination : selectedCitizen.combination, //Some metadatas does not have basecombination, for these cases we set a base combination as combination
         body: {
           ...(selectedCitizen.rawMetadata as LuksoMetadata).body
         }
@@ -476,7 +481,7 @@ export default function CitizensComponent() {
 
       if (!indexType) return undefined;
 
-      const newDrop: LuksoDrop = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)); //Get the old feature to be unequipped and transferred back to wallet if not base feature
+      const newDrop: LuksoDrop = isMarketplaceMode ? allDrops.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) : userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)); //Get the old feature to be unequipped and transferred back to wallet if not base feature
 
       const key = CAMPAIGN_UNIVERSAL_PAGE_LABELS[
         currentCampaign
@@ -494,15 +499,15 @@ export default function CitizensComponent() {
         type: 'string',
       }
 
-      const oldAttribute: LuksoAttribute | undefined = (selectedCitizen.rawMetadata as LuksoMetadata).attributes.find(attr => attr.key === newAttribute.key);
+      const oldAttribute: LuksoAttribute | undefined = oldCitizenMetadata.attributes.find(attr => attr.key === newAttribute.key);
 
       attributes.push(newAttribute);
 
       if (oldIndex === newIndex) return undefined;
-      console.log('newDrop', newDrop);
+
       if (newDrop && newDrop.contract_address) {
-        console.log('newDrop', newDrop);
-        if (newDrop.dropType === DropType.LSP8 && newDrop.tokenId) newAttributes.push(newAttribute);
+        console.log(newDrop, 'newDrop', newAttribute, 'newAttribute');
+        if (newDrop.dropType === DropType.LSP8) newAttributes.push(newAttribute);
         else burnDropArray.push(newDrop);
       } //If the old feature is not base feature, add it to the old features array. We know it's not base feature because it has a token id and contract address
       if (oldAttribute && oldAttribute.wearable_address && oldAttribute.wearable_token_id) {
@@ -548,8 +553,9 @@ export default function CitizensComponent() {
 
     await RequestBurnDrops(burnDropArray, walletAddress, currentCampaign);
 
-    const isMetadataFetchSuccess = await fetchLuksoMetadata(walletAddress)
+    const isMetadataFetchSuccess = await fetchLuksoMetadata(walletAddress);
     const isUserFeaturesFetchSuccess = await fetchLuksoUserFeatures(walletAddress);
+    await getFeatureList(newCitizenMetadata.combination,newCitizenMetadata.baseCombination);
 
     return isMetadataFetchSuccess && isUserFeaturesFetchSuccess.success; // return true in success, false in failure
   }
@@ -692,7 +698,7 @@ export default function CitizensComponent() {
         return false;
       }
 
-      claimableDrops.push(claimableDrop);   
+      claimableDrops.push(claimableDrop);
     }
     const claimResult = await RequestClaimApprove(claimableDrops, signer.address);
     console.log('claimResult', claimResult);

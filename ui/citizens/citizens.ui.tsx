@@ -153,7 +153,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 		if (!didMarketplaceMode) {
 			dispatch(setShoppingCart([]));
 			handleResetCombination();
-			setSelectedOption(undefined);
+			//setSelectedOption(undefined);
 			AGChangeCamPosition(campaignParams?.config.defCam?.pos);
 			AGChangeLookAtPosition(campaignParams?.config.defCam?.lookAt);
 		} else {
