@@ -7,4 +7,5 @@
   Single = '/api/v1/single',
   ReportDistribution = '/api/v1/reportDistribution',
   EnvMaps = '/api/v1/envMaps',
+  Solana = '/api/v1/solana',
 }

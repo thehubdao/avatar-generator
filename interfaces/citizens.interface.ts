@@ -151,6 +151,19 @@ export interface Drop {
 
 export interface LuksoDrop extends Drop {
   tokenId?: string;
+  typeIndex: number;
+}
+export interface LinkableToken {
+  tokenId: string;
+  parentTokenId?: string;
+  parentCollectionId?: string;
+  isLinkable: boolean;
+}
+
+export interface RootDrop extends Drop {
+  schemaPart: string;
+  collectionId: string;
+  linkableTokens: LinkableToken[];
 }
 
 export interface CampaignMetadata extends Record<Campaign, CitizenMetadata[]> { }
@@ -175,9 +188,14 @@ export interface MintingUiData {
   supply?: number;
 }
 
+export interface MintingPriceData {
+  mintPrice?: number;
+  mintingPriceSymbol?: string;
+}
+
 export interface MintingData {
   mintSupply?: number;
-  mintPrice?: number;
+  mintPrice?: MintingPriceData;
   isHolder?: boolean;
 }
 
@@ -186,4 +204,12 @@ export interface TimeLeft {
   hours: number;
   minutes: number;
   seconds: number;
+}
+
+export interface AssetLink {
+  asset: {
+    tokenId: string;
+    collectionId: string;
+    schema: { name: string };
+  };
 }

@@ -9,15 +9,14 @@ import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
-import { SetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
-import { ClaimAndSetAvatarNewWearings, GetCampaignsTokensMetadata, GetUserFeatures, SetAvatarNewWearings } from "../../utils/web3/lukso/contract.util";
-import { CampaignBaseCombination, Campaign, CampaignBaseUrl } from "../../enums/citizens/common.enum";
+import { SetImageUrl,GetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
+import { ClaimAndSetAvatarNewWearings, GetCampaignsTokensMetadata, GetLuksoUserFeatures, SetAvatarNewWearings } from "../../utils/web3/lukso/contract.util";
+import { Campaign, CampaignBaseCombination, CampaignBaseUrl, RootCampaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen, setUserFeatures } from "../../store/citizensMetadataSlice";
-import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
-import { GetRootAssetsMetadata, MintRootAsset } from "../../utils/web3/root/contract.util";
-import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, LuksoDrop, ClaimableDrop, DropToClaim } from "../../interfaces/citizens.interface";
+import { GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
+import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, LuksoDrop, ClaimableDrop, DropToClaim, RootDrop, RootMetadata } from "../../interfaces/citizens.interface";
 import { DropType } from "../../enums/lukso/common.enum";
 import { GetCollectionDocs } from "../../utils/firebase.util";
 import { useBlockchainProvider } from "../../contexts/BlockchainContext";
@@ -25,6 +24,9 @@ import { AppCampaigns, CampaignDrops } from "../../types/citizens.type";
 import { Result } from "../../types/common.type";
 import { Vector3 } from "three";
 import { GetCanvasImageUrl } from "../avatar/viewer.component";
+import { StoreAssetData } from "../../utils/firebase.util";
+import { AssetData } from "../../interfaces/firebase.interface";
+import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -380,7 +382,7 @@ export default function CitizensComponent() {
   }
 
   async function fetchLuksoUserFeatures(walletAddress: string): Promise<Result<CampaignDrops<AppCampaigns>>> {
-    const userFeatures = await GetUserFeatures(walletAddress);
+    const userFeatures = await GetLuksoUserFeatures(walletAddress);
     if (userFeatures.success) {
       dispatch(setUserFeatures(userFeatures.value as CampaignDrops<AppCampaigns>));
       return { success: true, value: userFeatures.value as CampaignDrops<AppCampaigns> };
@@ -409,7 +411,18 @@ export default function CitizensComponent() {
     return false;
   }
 
-  async function saveLuksoCombination(dropsToClaim?: DropToClaim[]) { // Pass in userFeatures in case we need to update just before executing this function
+  async function fetchRootUserFeatureAssets(walletAddress: string, campaign: RootCampaign): Promise<boolean> {
+    const result = await GetRootUserFeatureAssets(walletAddress, campaign);
+
+    if (result.success) {
+      dispatch(setUserFeatures(result.value as CampaignDrops<AppCampaigns>));
+      return true;
+    }
+    LogError(Module.Citizens, 'Failed to fetch root user feature assets', result.errCode);
+    return false;
+  }
+
+ async function saveLuksoCombination(dropsToClaim?: DropToClaim[]) { // Pass in userFeatures in case we need to update just before executing this function
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
       .join('-') as string;
@@ -479,7 +492,7 @@ export default function CitizensComponent() {
 
       if (!indexType) return undefined;
 
-      const newDrop: LuksoDrop = isMarketplaceMode ? allDrops.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) : userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)); //Get the old feature to be unequipped and transferred back to wallet if not base feature
+      const newDrop: LuksoDrop = (isMarketplaceMode ? allDrops.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) : userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex))) as LuksoDrop; //Get the old feature to be unequipped and transferred back to wallet if not base feature
 
       const key = CAMPAIGN_UNIVERSAL_PAGE_LABELS[
         currentCampaign
@@ -649,18 +662,101 @@ export default function CitizensComponent() {
     );
 
     if (!metadataObject.success) {
-      LogError(Module.Citizens, 'Failed to upload metadata on saveSolanaCombination', metadataObject.errCode);
+      LogError(Module.Citizens, 'Failed to upload metadata on saveSolanaCombination', metadataObject.errMessage);
       return false;
     }
 
     newCitizenMetadata.imageUrl = metadataObject.value.imageUrl;
 
-    const result = await SetNewCombination((selectedCitizen.rawMetadata as SolanaMetadata).asset_address, metadataObject.value.uri, newAttributes, oldAttributes);
+    const setNewCombinationResult = await SetNewCombination((selectedCitizen.rawMetadata as SolanaMetadata).asset_address, metadataObject.value.uri, newAttributes, oldAttributes);
+
+    if (!setNewCombinationResult.success) {
+      LogError(Module.Citizens, 'Failed to set new combination on saveSolanaCombination', setNewCombinationResult.errMessage);
+      return false;
+    }
 
     const isFetchSuccess = await fetchSolanaMetadata(walletAddress);
 
-    return isFetchSuccess && result.success;
+    return isFetchSuccess && setNewCombinationResult.value;
 
+  }
+
+  async function saveRootCombination(): Promise<boolean> {
+    const newCombination = singleInitData.current?.features
+      .map((feature) => feature.val.index)
+      .join('-') as string;
+
+    if (!campaignParams) {
+      LogError(Module.Citizens, 'Campaign params is undefined in Root saveCombination');
+      return false;
+    }
+    if (!singleInitData.current) {
+      LogError(Module.Citizens, 'Single init data is undefined in Root saveCombination');
+      return false;
+    }
+    if (!selectedCitizen) {
+      LogError(Module.Citizens, 'Selected citizen is undefined in Root saveCombination');
+      return false;
+    }
+    if (!walletAddress) {
+      LogError(Module.Citizens, 'Wallet address is undefined in Root saveCombination');
+      return false;
+    }
+    if (!citizensMetadata) {
+      LogError(Module.Citizens, 'Citizens metadata is undefined in Root saveCombination');
+      return false;
+    }
+
+    const currentCampaign = selectedCampaign;
+
+    if (!currentCampaign) {
+      LogError(Module.Citizens, 'Current campaign is undefined in Root saveCombination');
+      return false;
+    }
+
+    const newCombinationArray = newCombination.split('-');
+    const oldCombinationArray = selectedCitizen.combination.split('-');
+    const newAttributes: RootDrop[] = [];
+    const oldAttributes: RootDrop[] = [];
+    
+    if (userFeatures && userFeatures[selectedCampaign] != null) newCombinationArray.forEach((newIndex, index) => {
+      const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
+      const oldIndex = oldCombinationArray[index]; //Get the type of the feature
+
+      if (!indexType) return undefined;
+
+      if(oldIndex == newIndex) return undefined;
+
+      const newAttribute = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) as RootDrop; //Get the new feature to be equipped
+      const oldAttribute = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)) as RootDrop; //Get the old feature to be unequipped
+
+      if(newAttribute) newAttributes.push(newAttribute);
+      if(oldAttribute) oldAttributes.push(oldAttribute);
+    });
+
+    const setNewCombinationResult = await SetRootNewCombination(walletAddress, selectedCitizen.tokenId, newAttributes, oldAttributes);
+
+    if(!setNewCombinationResult.success) {
+      LogError(Module.Citizens, 'Failed to set new combination on saveRootCombination', setNewCombinationResult.errMessage);
+      return false;
+    }
+    const newImageUrl = await GetImageUrl(currentCampaign, newCombination);
+    const storeAssetDataResult = await StoreAssetData({
+      imageUrl: newImageUrl,
+      tokenId: selectedCitizen.tokenId,
+      collectionId: (selectedCitizen.rawMetadata as RootMetadata).collectionId,
+      campaign: currentCampaign,
+      combination: newCombination
+    } as AssetData);
+
+    if(!storeAssetDataResult.success) {
+      LogError(Module.Citizens, 'Failed to store asset data on saveRootCombination', storeAssetDataResult.errMessage);
+      return false;
+    }
+    const isMetadataFetchSuccess = await fetchRootMetadata(walletAddress);
+    const isUserFeatureFetchSuccess = await fetchRootUserFeatureAssets(walletAddress, RootCampaign.Based);
+
+    return isMetadataFetchSuccess && isUserFeatureFetchSuccess;
   }
 
   async function handleSaveCombination() {
@@ -669,6 +765,8 @@ export default function CitizensComponent() {
       isSuccess = await saveLuksoCombination();
     } else if (selectedCampaign == Campaign.Kumi) {
       isSuccess = await saveSolanaCombination();
+    } else if (selectedCampaign == Campaign.Based) {
+      isSuccess = await saveRootCombination();
     }
     return isSuccess;
   }

@@ -71,22 +71,22 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     image: '/resources/images/campaings/based_collection.jpg',
     campaign: Campaign.Based,
     blockChain: Blockchain.Root,
-    active: false
+    active: true
   }
 ];
 
 export const LOGIN_NEWS = [
   {
-    img: 'news-01',
-    link: ''
+    img: 'News_1',
+    link: 'https://thehub.io/news/citizens-portal-launch'
   },
   {
-    img: 'news-02',
-    link: ''
+    img: 'News_2',
+    link: 'https://thehub.io/news/kumi-citizens-drop'
   },
   {
-    img: 'news-03',
-    link: ''
+    img: 'News_3',
+    link: 'https://thehub.io/news/root-network-integration'
   }
 ];
 
@@ -232,3 +232,8 @@ export const GAMES: Game[] = [
     ]
   }
 ]
+
+export const MINTING_TARGET_DATE = {
+  [Campaign.Kumi]: new Date('2025-06-03T23:00:00.000Z'),
+  [Campaign.Based]: new Date('2025-08-10T23:00:00.000Z'),
+};

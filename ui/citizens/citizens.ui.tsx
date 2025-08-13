@@ -44,6 +44,18 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
 	const [selectedOption, setSelectedOption] = useState<BasicData>();
+	const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+
+	// Loading text rotation for better UX
+	const loadingTexts = [
+		"Loading Environment",
+		"Initializing 3D Scene",
+		"Loading Avatar Model",
+		"Rendering Textures",
+		"Setting Up Lighting",
+		"Preparing Camera",
+		"Almost Ready..."
+	];
 
 	function updateFeatureCamPosition(
 		index: string,
@@ -75,7 +87,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 		});
 	}
 
-	function onMarketOptionChange (id: string, path: string, name: string) {		
+	function onMarketOptionChange(id: string, path: string, name: string) {
 		handleOptionChange(id, path, name, selectedCategory);
 		onSelectedOptionChange({
 			id: id,
@@ -93,7 +105,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 		dispatch(setShoppingCart(updatedCart));
 	}
 
-	function onMarketOptionRemove (type?: string) {
+	function onMarketOptionRemove(type?: string) {
 		handleResetCombination(type);
 
 		// Remove the item from the shopping cart if it matches the category selected
@@ -162,7 +174,20 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 				...campaignParams?.config.accCamPos,
 			})
 		}
-	}, [didMarketplaceMode])
+	}, [didMarketplaceMode]);
+
+	useEffect(() => {
+		const interval = setInterval(() => {
+			setLoadingTextIndex((prev) => (prev + 1) % loadingTexts.length);
+		}, 1500);
+
+		// Stop rotation when ready
+		if (isReady) {
+			clearInterval(interval);
+		}
+
+		return () => clearInterval(interval);
+	}, [isReady]);
 
 	return (
 		<SnackbarProvider>
@@ -293,7 +318,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 				}
 				{
 					!isReady &&
-					<LoadingUI loadingText="Loading Environment" dataValidate={null} />
+					<LoadingUI loadingText={loadingTexts[loadingTextIndex]} dataValidate={null} />
 				}
 			</div>
 		</SnackbarProvider>

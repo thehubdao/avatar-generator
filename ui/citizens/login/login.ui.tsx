@@ -1,9 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import PrivacyPolicySVG from "../common/SVG/privacyPolicySVG.ui";
 import TermsOfServicesSVG from "../common/SVG/termsOfServicesSVG.ui";
 import SocialButtons from "../common/socialButtons.ui";
 import CampaignList from "./campaignList.ui";
+import CampaignSelectionModal from "./campaignSelectionModal.ui";
 import { LOGIN_COLLECTIONS } from "../../../constants/citizens.constant";
 import NewsUI from "./news.ui";
 import FreshDropsUI from "./freshDrops.ui";
@@ -18,6 +20,15 @@ interface CitizensLoginUIProps {
 }
 
 export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
+	const [isModalOpen, setIsModalOpen] = useState(false);
+
+	const handleGetYourCitizen = () => {
+		setIsModalOpen(true);
+	};
+
+	const handleCloseModal = () => {
+		setIsModalOpen(false);
+	};
 
 	return (
 		<div className="w-full min-h-screen pt-20">
@@ -41,8 +52,8 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 						<p className="text-[15px] lg:text-[34px] 2xl:text-[48px] text-white text-center leading-none">Fully on-chain avatar platform</p>
 						{/* BUTTON */}
 						<div className="w-full flex justify-center pt-6">
-							<button type="button" className="w-fit h-16 bg-white rounded-[28px] px-10 md:px-24 font-light text-2xl" onClick={() => handleLogin(undefined, undefined)}>
-								FIND OUT MORE
+							<button type="button" className="w-fit h-16 bg-white rounded-[28px] px-10 md:px-24 font-light text-2xl hover:bg-white/90 transition-colors duration-200" onClick={handleGetYourCitizen}>
+								GET YOUR CITIZEN
 							</button>
 						</div>
 					</div>
@@ -52,17 +63,6 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 					<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-12 pt-20">CAMPAIGNS</h2>
 					<CampaignList collections={LOGIN_COLLECTIONS} handleClick={handleLogin} />
 				</div>
-				{/* WHATS NEW */}
-				{false && // Temporarily disabled
-					<div className="xl:pt-12 px-6">
-						{/* TABLE */}
-						<div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
-							{/* TABLE TITLE */}
-						<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-8 pt-10 border-b-[1px] border-white/10">WHATS NEW?</h2>
-						{/* NEWS LIST */}
-						<NewsUI />
-					</div>
-				</div>}
 				{/* FRESH DROPS */}
 				{ false && // Temporarily disabled
 					<div className="xl:pt-12 px-6">
@@ -80,6 +80,16 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 					<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-12 pt-20 leading-none">COMMUNITY CONTENT</h2>
 					<CommunityContent />
 				</div>
+				{/* WHATS NEW */}
+				<div className="xl:pt-12 px-6">
+					{/* TABLE */}
+					<div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
+						{/* TABLE TITLE */}
+					<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-8 pt-10 border-b-[1px] border-white/10">WHATS NEW?</h2>
+					{/* NEWS LIST */}
+					<NewsUI />
+				</div>
+			</div>
 				{/* BACKED BY */}
 				<div className="pb-[15vh]">
 					<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-12 pt-48">BACKED BY</h2>
@@ -109,6 +119,14 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 					</div>
 				</footer>
 			</div>
+
+			{/* Campaign Selection Modal */}
+			<CampaignSelectionModal
+				isOpen={isModalOpen}
+				onClose={handleCloseModal}
+				collections={LOGIN_COLLECTIONS}
+				handleLogin={handleLogin}
+			/>
 		</div>
 	)
 }
