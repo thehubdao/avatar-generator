@@ -9,7 +9,7 @@ import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
-import { UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
+import { SetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { ClaimAndSetAvatarNewWearings, GetCampaignsTokensMetadata, GetUserFeatures, SetAvatarNewWearings } from "../../utils/web3/lukso/contract.util";
 import { CampaignBaseCombination, Campaign, CampaignBaseUrl } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen, setUserFeatures } from "../../store/citizensMetadataSlice";
@@ -23,6 +23,8 @@ import { GetCollectionDocs } from "../../utils/firebase.util";
 import { useBlockchainProvider } from "../../contexts/BlockchainContext";
 import { AppCampaigns, CampaignDrops } from "../../types/citizens.type";
 import { Result } from "../../types/common.type";
+import { Vector3 } from "three";
+import { GetCanvasImageUrl } from "../avatar/viewer.component";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -65,7 +67,7 @@ export default function CitizensComponent() {
     exportData.current.attributes.push({ id: addId, val: addValue });
   }
 
-  async function getFeatureList(combination?:string, basecombination?:string) {
+  async function getFeatureList(combination?: string, basecombination?: string) {
     if (selectedCitizen === null) {
       LogError(Module.Citizens, 'Missing selected citizen to get feature list!');
       return;
@@ -300,14 +302,14 @@ export default function CitizensComponent() {
     return false;
   }
 
-  /*   async function generateImage(pos?: Vector3): Promise<string | null> {
-      // @GabCh155: this function is to generate the image from the canvas
-      // you can create a new image when you need update the DB
-      // note that the image in details panel does not update from here, it still use the image from the DB
-      // to update the image in details panel, you need to update the image in the DB 
-      const imageURL = await GetCanvasImageUrl(pos);
-      return imageURL;
-    } */
+  async function generateImage(pos?: Vector3): Promise<string | null> {
+    // @GabCh155: this function is to generate the image from the canvas
+    // you can create a new image when you need update the DB
+    // note that the image in details panel does not update from here, it still use the image from the DB
+    // to update the image in details panel, you need to update the image in the DB 
+    const imageBlob = await GetCanvasImageUrl(pos);
+    return imageBlob;
+  }
 
   async function exportImage(): Promise<boolean> { //This function exports the image file
     if (!selectedCitizen) return false;
@@ -517,11 +519,16 @@ export default function CitizensComponent() {
 
     newCitizenMetadata.rawMetadata.attributes = attributes;
 
+    const newImageUrl = await generateImage()
+
+    if (newImageUrl) await SetImageUrl(selectedCitizen.campaign, newCombination, newImageUrl);
+ 
     const metadataObject = await UploadLuksoMetadata(
       newCitizenMetadata.rawMetadata,
       newCombination,
       selectedCitizen.campaign
     );
+
     if (!metadataObject.success) {
       LogError(
         Module.Citizens,
@@ -555,7 +562,7 @@ export default function CitizensComponent() {
 
     const isMetadataFetchSuccess = await fetchLuksoMetadata(walletAddress);
     const isUserFeaturesFetchSuccess = await fetchLuksoUserFeatures(walletAddress);
-    await getFeatureList(newCitizenMetadata.combination,newCitizenMetadata.baseCombination);
+    await getFeatureList(newCitizenMetadata.combination, newCitizenMetadata.baseCombination);
 
     return isMetadataFetchSuccess && isUserFeaturesFetchSuccess.success; // return true in success, false in failure
   }
