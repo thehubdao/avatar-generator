@@ -233,7 +233,6 @@ export async function GetCampaignUserFeatures(address: string, campaign: string)
             const contract = new Contract(drop.contract_address, WearableContractABI, PROVIDER);
             if (drop.dropType === DropType.LSP8) {
                 return contract.tokenIdsOf(address).then(tokenIds => {
-                    console.log(tokenIds)
                     return { ...drop, tokenId: tokenIds.length > 0 ? Number(BigInt(tokenIds[0])).toString() : undefined } as LuksoDrop;
                 });
             }
@@ -245,8 +244,6 @@ export async function GetCampaignUserFeatures(address: string, campaign: string)
         const results: LuksoDrop[] = await Promise.all(balancePromises);
         const features = results
             .filter(({ balance, tokenId }) => (balance && balance > 0) || tokenId);
-
-            console.log('features', features);
 
         return { success: true, value: features };
     } catch (error) {
@@ -438,7 +435,7 @@ export async function ClaimAndSetAvatarNewWearings(campaign: Campaign, dropsToCl
     const wearablePredictedTokenIds = dropsToClaim.map((drop) => Number(drop.wearablePredictedTokenId));
 
     const extensionInterface = new ethers.Interface(AvatarContractExtensionAbi);
-    console.log([Number(tokenId), claimSignatures, wearablePredictedTokenIds, wearablesToUnequip, wearablesToEquip, metadataDataValue.values[0]])
+
     const setAvatarNewWearingsEncodedFunction = extensionInterface.encodeFunctionData('claimAndSetNewWearings', [Number(tokenId), claimSignatures, wearablePredictedTokenIds, wearablesToUnequip, wearablesToEquip, metadataDataValue.values[0]]);
 
     const claimPrice = await targetContract.getClaimPrice(wearablesToEquip);

@@ -27,7 +27,6 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
   const claimHandler = async () => {
     setIsClaiming(true);
     const isSuccess = await onClaim();
-    console.log('isSuccess', isSuccess);
     if (isSuccess) {
       showSnackbar(
         <p>The item &quot;{drop.featureName}&quot; has been successfully claimed!.</p>

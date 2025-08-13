@@ -11,14 +11,12 @@ import { StorageLocation } from "../enums/firebase.enum";
 
 const pinata = new PinataSDK({ pinataGateway: 'lukso.mypinata.cloud', pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT })
 
-export async function SetImageUrl(campaign:Campaign, combination: string, imageUrl: string){
+export async function SetImageUrl(campaign: Campaign, combination: string, imageUrl: string) {
     const imageFetch = await fetch(imageUrl);
     const imageBlob = await imageFetch.blob();
-    if(imageBlob) {
+    if (imageBlob) {
         const imageFile = new File([imageBlob], `${combination}.png`, { type: "image/png" });
-        console.log(imageFile, 'imageFile');
-        const string = await UploadFile(imageFile, StorageLocation.AvatarImages, '',tempCampaignSwitch[campaign]);
-        console.log(string)
+        await UploadFile(imageFile, StorageLocation.AvatarImages, '', tempCampaignSwitch[campaign]);
     }
 }
 

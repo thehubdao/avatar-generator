@@ -48,7 +48,7 @@ async function ProcessAndGetData(res: NextApiResponse<ApiResponse<SingleInterfac
   const maxCombination = GetMaxCombinationNum(maxIndexValues);
   let combinationNum = ProcessCombination(combination, maxIndexValues);
   let isRandom = false;
-/*   console.log(combinationNum, maxIndexValues,maxCombination, featureValues.featureList, featureValues.featureOptionListData) */
+
   const randomBalance = await GetParameter<Record<RandomTier, number>>(campaign, CampaignParameterName.Random);
 
   // Collection util

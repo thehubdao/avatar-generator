@@ -67,7 +67,7 @@ export default function CitizensComponent() {
     exportData.current.attributes.push({ id: addId, val: addValue });
   }
 
-  async function getFeatureList(combination?: string, basecombination?: string) {
+  async function getFeatureList(combination?: string, basecombination?: string, _userFeatures = userFeatures) {
     if (selectedCitizen === null) {
       LogError(Module.Citizens, 'Missing selected citizen to get feature list!');
       return;
@@ -108,9 +108,9 @@ export default function CitizensComponent() {
       filteredOptionList.push(currentIndexFeature);
     })
 
-    if (!userFeatures) return LogError(Module.Citizens, 'Missing user features to add!');
+    if (!_userFeatures) return LogError(Module.Citizens, 'Missing user features to add!');
 
-    const campaignuserFeatures = userFeatures[selectedCampaign as string];
+    const campaignuserFeatures = _userFeatures[selectedCampaign as string];
 
     if (campaignuserFeatures) {
       const formatteduserWearables = campaignuserFeatures
@@ -135,7 +135,7 @@ export default function CitizensComponent() {
           );
         })
       const featuresWithBalance = formatteduserWearables.map(feature => {
-        feature.balance = userFeatures[selectedCampaign as string].find(w => w.type === feature.type && w.index === feature.index)?.balance;
+        feature.balance = _userFeatures[selectedCampaign as string].find(w => w.type === feature.type && w.index === feature.index)?.balance;
         return feature;
       });
 
@@ -381,7 +381,6 @@ export default function CitizensComponent() {
 
   async function fetchLuksoUserFeatures(walletAddress: string): Promise<Result<CampaignDrops<AppCampaigns>>> {
     const userFeatures = await GetUserFeatures(walletAddress);
-    console.log('userFeatures', userFeatures);
     if (userFeatures.success) {
       dispatch(setUserFeatures(userFeatures.value as CampaignDrops<AppCampaigns>));
       return { success: true, value: userFeatures.value as CampaignDrops<AppCampaigns> };
@@ -414,7 +413,6 @@ export default function CitizensComponent() {
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
       .join('-') as string;
-    console.log(newCombination)
     if (!campaignParams) {
       LogError(Module.Citizens, 'Campaign params is undefined in Lukso saveCombination');
       return false;
@@ -475,8 +473,6 @@ export default function CitizensComponent() {
 
     const allDrops: Drop[] = await GetCollectionDocs(`campaign/${selectedCampaign}/drops`) as Drop[];
 
-    console.log(userFeatures, 'userFeatures[currentCampaign]', currentCampaign, 'selectedCampaign', selectedCampaign, 'allDrops', allDrops);
-
     if (userFeatures && userFeatures[selectedCampaign as string] != null) newCombinationArray.forEach((newIndex, index) => {
       const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
       const oldIndex = oldCombinationArray[index];
@@ -508,7 +504,6 @@ export default function CitizensComponent() {
       if (oldIndex === newIndex) return undefined;
 
       if (newDrop && newDrop.contract_address) {
-        console.log(newDrop, 'newDrop', newAttribute, 'newAttribute');
         if (newDrop.dropType === DropType.LSP8) newAttributes.push(newAttribute);
         else burnDropArray.push(newDrop);
       } //If the old feature is not base feature, add it to the old features array. We know it's not base feature because it has a token id and contract address
@@ -561,10 +556,16 @@ export default function CitizensComponent() {
     await RequestBurnDrops(burnDropArray, walletAddress, currentCampaign);
 
     const isMetadataFetchSuccess = await fetchLuksoMetadata(walletAddress);
-    const isUserFeaturesFetchSuccess = await fetchLuksoUserFeatures(walletAddress);
-    await getFeatureList(newCitizenMetadata.combination, newCitizenMetadata.baseCombination);
+    const userFeaturesResult = await fetchLuksoUserFeatures(walletAddress);
 
-    return isMetadataFetchSuccess && isUserFeaturesFetchSuccess.success; // return true in success, false in failure
+    if(!userFeaturesResult.success) {
+      LogError(Module.Citizens, 'Failed to fetch user features in saveLuksoCombination');
+      return false;
+    }
+
+    await getFeatureList(newCitizenMetadata.combination, newCitizenMetadata.baseCombination, userFeaturesResult.value);
+
+    return isMetadataFetchSuccess; // return true in success, false in failure
   }
 
   async function saveSolanaCombination() {
@@ -691,8 +692,7 @@ export default function CitizensComponent() {
       const basicData = shoppingCart[i];
 
       const claimableDropFound = _claimableDropsList.find(drop => drop.featureName === basicData.val);
-      console.log('claimableDropFound', claimableDropFound);
-      console.log(claimableDropsList)
+
       if (!claimableDropFound) {
         LogError(Module.Citizens, 'Claimable drop not found in claimable drops list in onBuying');
         return false;
@@ -708,7 +708,6 @@ export default function CitizensComponent() {
       claimableDrops.push(claimableDrop);
     }
     const claimResult = await RequestClaimApprove(claimableDrops, signer.address);
-    console.log('claimResult', claimResult);
 
     if (!claimResult.success) {
       LogError(Module.Citizens, 'Failed to claim drop in onBuying', claimResult.errCode);
