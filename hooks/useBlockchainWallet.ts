@@ -126,7 +126,7 @@ export function useBlockchainWallet() {
   async function getRootMintingDataPromise(): Promise<Result<MintingData>> {
     const mintingSupply = await GetRootCollectionSupply();
     const mintingPrice = await GetRootMintingPrice();
-    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined, isHolder: undefined }
+    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined, isHolder: undefined };
 
     if (mintingSupply.success) {
       mintingData.mintSupply = mintingSupply.value;

@@ -59,7 +59,7 @@ export async function GetAssetLinks(collection_id: string, token_id: string): Pr
     const graphqlLinksQuery = JSON.stringify({
         query: "query Asset($tokenId: String!, $collectionId: CollectionId! ) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        childLinks {\n          asset {\n            tokenId\n            collectionId\n            schema {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n}",
         variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}` }
-    })
+    });
 
     const result = await fetch(ROOT_GQL_API_URL, {
         method: 'POST',
@@ -85,7 +85,7 @@ export async function GetLinkableTokenId(collectionId: string, tokenId: string):
     const graphqlParentLinkQuery = JSON.stringify({
         query: "query Query($tokenId: String!, $collectionId: CollectionId!) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        id\n        parentLink {\n          id\n          collectionId\n          tokenId\n        }\n      }\n    }\n  }\n}",
         variables: { "tokenId": tokenId, "collectionId": `${CHAIN_ID}:root:${collectionId}` }
-    })
+    });
 
     const result = await fetch(ROOT_GQL_API_URL, {
         method: 'POST',
@@ -136,7 +136,7 @@ export async function GetRootRegistryAuthToken(PK: string): Promise<Result<strin
         const walletClient = createWalletClient({
             account: privateKeyToAccount(`0x${PK}`),
             transport: http(ROOT_NETWORK_WS_URL)
-        })
+        });
 
         const message = createSiweMessage({
             version: "1",

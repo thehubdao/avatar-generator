@@ -734,7 +734,7 @@ export default function CitizensComponent() {
       if(oldAttribute) oldAttributes.push(oldAttribute);
     });
 
-    const setNewCombinationResult = await SetRootNewCombination(walletAddress, selectedCitizen.tokenId, newAttributes, oldAttributes);
+    const setNewCombinationResult = await SetRootNewCombination(selectedCitizen.tokenId, newAttributes, oldAttributes);
 
     if(!setNewCombinationResult.success) {
       LogError(Module.Citizens, 'Failed to set new combination on saveRootCombination', setNewCombinationResult.errMessage);

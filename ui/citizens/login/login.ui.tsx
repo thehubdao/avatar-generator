@@ -19,7 +19,7 @@ interface CitizensLoginUIProps {
 	handleLogin: (blockChain: Blockchain | undefined, campaign: Campaign | undefined) => void;
 }
 
-export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
+export default function CitizensLoginUI({ handleLogin }: CitizensLoginUIProps) {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 
 	const handleGetYourCitizen = () => {
@@ -64,15 +64,15 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 					<CampaignList collections={LOGIN_COLLECTIONS} handleClick={handleLogin} />
 				</div>
 				{/* FRESH DROPS */}
-				{ false && // Temporarily disabled
+				{false && // Temporarily disabled
 					<div className="xl:pt-12 px-6">
-					{/* TABLE */}
-					<div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
-						{/* TABLE TITLE */}
-						<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-8 pt-10 border-b-[1px] border-white/10">FRESH DROPS</h2>
-						{/* NEWS LIST */}
-						<FreshDropsUI setSelectedCampaign={(blockChain, campaign) => handleLogin(blockChain, campaign)} />
-					</div>
+						{/* TABLE */}
+						<div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
+							{/* TABLE TITLE */}
+							<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-8 pt-10 border-b-[1px] border-white/10">FRESH DROPS</h2>
+							{/* NEWS LIST */}
+							<FreshDropsUI setSelectedCampaign={(blockChain, campaign) => handleLogin(blockChain, campaign)} />
+						</div>
 					</div>
 				}
 				{/* COMMUNITY CONTENT */}
@@ -85,11 +85,11 @@ export default function CitizensLoginUI({handleLogin}: CitizensLoginUIProps) {
 					{/* TABLE */}
 					<div className="shadow-citizens-btn bg-citizens-dark rounded-2xl my-8">
 						{/* TABLE TITLE */}
-					<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-8 pt-10 border-b-[1px] border-white/10">WHATS NEW?</h2>
-					{/* NEWS LIST */}
-					<NewsUI />
+						<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-8 pt-10 border-b-[1px] border-white/10">WHATS NEW?</h2>
+						{/* NEWS LIST */}
+						<NewsUI />
+					</div>
 				</div>
-			</div>
 				{/* BACKED BY */}
 				<div className="pb-[15vh]">
 					<h2 className="font-monument text-3xl md:text-[64px] text-white text-center pb-12 pt-48">BACKED BY</h2>

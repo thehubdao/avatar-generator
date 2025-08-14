@@ -3,7 +3,7 @@ import { getApiOptions } from '@therootnetwork/api';
 import { LogError } from '../../utils/common.util';
 import { Module } from '../../enums/common.enum';
 import { Signer } from '@futureverse/signer';
-import { AssetRegister } from '@futureverse/asset-register/v2'
+import { AssetRegister } from '@futureverse/asset-register/v2';
 import { KeyringPair } from '@polkadot/keyring/types';
 
 export const ROOT_NETWORK_WS_URL = process.env.NEXT_PUBLIC_ROOT_NETWORK_WS_URL;
