@@ -24,7 +24,7 @@ export function GetAdminSigner(): KeyringPair {
   const keyring = new Keyring({ type: "ethereum" });
   const seedU8a = hexToU8a(ROOT_SIGNER_PK);
   const adminSigner = keyring.addFromSeed(seedU8a);
-  return adminSigner
+  return adminSigner;
 }
 
 export async function GetRootAssetTokenIds(address: string, collectionId: string): Promise<Result<number[]>> {
@@ -190,7 +190,7 @@ export async function GetRootCollectionSupply(): Promise<Result<number>> {
       value: collectionIssuance
     };
   } catch (e) {
-    const err = e as Error
+    const err = e as Error;
     void LogError(Module.SolanaContractUtil, "Couldn't get collection supply", e);
     return {
       success: false,
@@ -234,7 +234,7 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
       value: { [campaign]: filteredDrops }
     };
   } catch (e) {
-    const err = e as Error
+    const err = e as Error;
     void LogError(Module.SolanaContractUtil, "Couldn't get user feature assets", e);
     return {
       success: false,
@@ -273,7 +273,7 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
   return { success: true, value: operations };
 }
 
-export async function SetRootNewCombination(address: string, parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
+export async function SetRootNewCombination(parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
   try {
     const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
     const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, newAttributes);
@@ -308,7 +308,7 @@ export async function SetRootNewCombination(address: string, parent_tokenId: str
 
     return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
   } catch (e) {
-    const err = e as Error
+    const err = e as Error;
     void LogError(Module.SolanaContractUtil, "Couldn't set new combination", e);
     return {
       success: false,
@@ -331,8 +331,8 @@ export async function SetRootAssetsTransferable(collectionId: string, tokenId: s
 
     assetOperations.forEach(operation => {
       const [,,,, collectionId, tokenId] = operation.args[2].split(':');
-      if (operation.action === AssetRegistryAction.Create) txs.push(SetAssetTransferableTx(collectionId, tokenId, true))
-      else if (operation.action === AssetRegistryAction.Delete) txs.push(SetAssetTransferableTx(collectionId, tokenId, false))
+      if (operation.action === AssetRegistryAction.Create) txs.push(SetAssetTransferableTx(collectionId, tokenId, true));
+      else if (operation.action === AssetRegistryAction.Delete) txs.push(SetAssetTransferableTx(collectionId, tokenId, false));
   })
 
     if (newCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, true)); //If the new combination is base combination, mark avatar as transferable
@@ -343,7 +343,7 @@ export async function SetRootAssetsTransferable(collectionId: string, tokenId: s
 
     return { success: true, value: true };
   } catch (e) {
-    const err = e as Error
+    const err = e as Error;
     void LogError(Module.RootContractUtil, "Couldn't set root assets transferable", err.message);
     return {
       success: false,
