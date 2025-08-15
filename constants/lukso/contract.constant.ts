@@ -16,7 +16,7 @@ const CONFIG = {
 
 export const PROVIDER = new JsonRpcProvider(RPC_URL);
 
-export const EOA = new ethers.Wallet(PK).connect(PROVIDER);
+/* export const EOA = new ethers.Wallet(PK).connect(PROVIDER); */
 
 export const OPERATION_CALL = 0;
 

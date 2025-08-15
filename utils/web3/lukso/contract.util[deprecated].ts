@@ -39,7 +39,6 @@ const universalProfile = new ethers.Contract(
     provider,
 );
 
-const EOA = new ethers.Wallet(PK).connect(provider);
 
 const OPERATION_CALL = 0;
 
@@ -330,7 +329,7 @@ export async function GetUserFeatures(address: string): Promise<Result<CampaignD
 }
 
 export async function SetTokenMetadata(campaign: Campaign, tokenId: string, metadataUri: string): Promise<Result<void>> {
-    const targetContractAddress = campaignWeb3Data[campaign].contractAddress;
+/*     const targetContractAddress = campaignWeb3Data[campaign].contractAddress;
     const avatarContract = new ethers.Contract(
         targetContractAddress,
         AvatarContractAbi,
@@ -355,12 +354,12 @@ export async function SetTokenMetadata(campaign: Campaign, tokenId: string, meta
         0, // amount to the fund the contract with when deploying
         setMetadataDataEncodedFunction
     )
-    await tx.wait()
+    await tx.wait() */
     return { success: true, value: undefined }
 }
 
 export async function BurnDrop(from: string, campaign: string, drop: BodyPart): Promise<Result<void>> {
-    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
+/*     const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
     if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError }
 
     const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name })
@@ -373,7 +372,7 @@ export async function BurnDrop(from: string, campaign: string, drop: BodyPart): 
         0, // amount to the fund the contract with when deploying
         burnEncondedFunction
     )
-    await tx.wait()
+    await tx.wait() */
     return { success: true, value: undefined }
 }
 
