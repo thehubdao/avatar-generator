@@ -7,15 +7,20 @@ import Modal from "./modal.ui";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 import { useSnackbar } from "../snackbar/snackbar.provider";
 import { ModelExtension } from "../../../enums/export.enum";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { setMarketplaceMode, setShoppingCart } from "../../../store/citizensMetadataSlice";
 
 interface DetailsUIProps {
   data: IndexFeatureInterface[];
   handleDownload: (type: ModelExtension) => Promise<boolean>;
+  onResetCombination: () => void;
   imgUrl: string;
   loading?: boolean;
 }
 
-export default function DetailsUI({ data, handleDownload, imgUrl, loading = false }: DetailsUIProps) {
+export default function DetailsUI({ data, handleDownload, imgUrl, loading = false, onResetCombination }: DetailsUIProps) {
+  const shoppingCart = useAppSelector(state => state.citizensMetadata.shoppingCart);
+  const dispatch = useAppDispatch();
   const { showSnackbar } = useSnackbar();
 
   const [isOpen, setIsOpen] = useState<boolean>();
@@ -98,21 +103,42 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
     {isModalOpen &&
       <Modal handleClose={() => setIsModalOpen(false)}>
         <div className="grid justify-items-center">
-          <div className="text-center text-white grid gap-4">
-            <p className="font-bold text-2xl">Select Download Type</p>
-            <p className="text-lg">and experience the 3D Web</p>
-          </div>
-          <div className="grid gap-4 pt-8">
-            <Button label="Download VRM" light handleClick={() => {
-              handleDownloading(ModelExtension.VRM);
-            }} />
-            <Button label="Download GLB" light handleClick={() => {
-              handleDownloading(ModelExtension.GLB);
-            }} />
-            <Button label="Download PNG" light handleClick={() => {
-              handleDownloading(ModelExtension.PNG);
-            }} />
-          </div>
+          {shoppingCart !== null && shoppingCart.length > 0 ?
+            <>
+              <div className="text-center text-white grid gap-4">
+                <p className="font-bold text-2xl">Shopping Process</p>
+                <p className="text-lg">You have items in the cart, <br />please proceed to checkout.</p>
+              </div>
+              <div className="grid gap-4 pt-8">
+                <Button label="Continue checkout" light handleClick={() => {
+                  dispatch(setMarketplaceMode(true));
+                  setIsModalOpen(false);
+                }} />
+                <Button label="Clean cart" light handleClick={() => {
+                  dispatch(setShoppingCart([]));
+                  onResetCombination();
+                }} />
+              </div>
+            </>
+            :
+            <>
+              <div className="text-center text-white grid gap-4">
+                <p className="font-bold text-2xl">Select Download Type</p>
+                <p className="text-lg">and experience the 3D Web</p>
+              </div>
+              <div className="grid gap-4 pt-8">
+                <Button label="Download VRM" light handleClick={() => {
+                  handleDownloading(ModelExtension.VRM);
+                }} />
+                <Button label="Download GLB" light handleClick={() => {
+                  handleDownloading(ModelExtension.GLB);
+                }} />
+                <Button label="Download PNG" light handleClick={() => {
+                  handleDownloading(ModelExtension.PNG);
+                }} />
+              </div>
+            </>
+          }
         </div>
       </Modal>
     }
