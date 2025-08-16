@@ -75,7 +75,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 		});
 	}
 
-	function onMarketOptionChange (id: string, path: string, name: string) {		
+	function onMarketOptionChange(id: string, path: string, name: string) {
 		handleOptionChange(id, path, name, selectedCategory);
 		onSelectedOptionChange({
 			id: id,
@@ -93,7 +93,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 		dispatch(setShoppingCart(updatedCart));
 	}
 
-	function onMarketOptionRemove (type?: string) {
+	function onMarketOptionRemove(type?: string) {
 		handleResetCombination(type);
 
 		// Remove the item from the shopping cart if it matches the category selected
@@ -151,9 +151,6 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 
 	useEffect(() => {
 		if (!didMarketplaceMode) {
-			dispatch(setShoppingCart([]));
-			handleResetCombination();
-			//setSelectedOption(undefined);
 			AGChangeCamPosition(campaignParams?.config.defCam?.pos);
 			AGChangeLookAtPosition(campaignParams?.config.defCam?.lookAt);
 		} else {
@@ -215,7 +212,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 								<>
 									{/* CITIZEN DETAILS */}
 									{singleInitData && singleInitData.features.length > 0 &&
-										<DetailsUI data={singleInitData.features} handleDownload={(type) => handleExport(type)} imgUrl={selectedCitizen.imageUrl} loading={false} />
+										<DetailsUI data={singleInitData.features} handleDownload={(type) => handleExport(type)} imgUrl={selectedCitizen.imageUrl} loading={false} onResetCombination={handleResetCombination} />
 									}
 									{/* EDIT MODE HUD */}
 									{isReady &&
@@ -254,38 +251,41 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 									}
 									{/* MARKETPLACE MODE HUD */}
 									{isReady &&
-										<div className="fixed w-full z-50 dark">
-											<HudUI
-												HUDTitle="MARKETPLACE"
-												selectedOption={selectedOption}
-												editModeSelected={didMarketplaceMode}
-												selectListCategory={
-													(campaignParams.features &&
-														campaignParams.accessories && [
-															...campaignParams.features,
-															...campaignParams.accessories,
-														]) ||
-													[]
-												}
-												optionList={optionList}
-												selectedCategory={selectedCategory}
-												campaignSkinColorConfig={
-													campaignParams?.config.skin ||
-													{}
-												}
-												skinColor={'#FFFFFF'}
-												hideSkinSelector={true}
-												changeView={() => dispatch(setMarketplaceMode(false))}
-												onOptionChange={(id, path, name) => onMarketOptionChange(id, path, name)}
-												onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
-												onSkinColorChange={() => { }}
-												exportModel={(type) => handleExport(type)}
-												isCustomCampaignHud
-												onClickBackButton={() => dispatch(setMarketplaceMode(false))}
-												isLoading={false}
-											/>
-											{didMarketplaceMode && <ShoppingCartUI onRemoveItem={(type) => onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />}
-										</div>
+										<>
+											{!didEditMode && <ShoppingCartUI onRemoveItem={(type) => onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />}
+											<div className="fixed w-full z-50 dark">
+												<HudUI
+													HUDTitle="MARKETPLACE"
+													selectedOption={selectedOption}
+													editModeSelected={didMarketplaceMode}
+													selectListCategory={
+														(campaignParams.features &&
+															campaignParams.accessories && [
+																...campaignParams.features,
+																...campaignParams.accessories,
+															]) ||
+														[]
+													}
+													optionList={optionList}
+													selectedCategory={selectedCategory}
+													campaignSkinColorConfig={
+														campaignParams?.config.skin ||
+														{}
+													}
+													skinColor={'#FFFFFF'}
+													hideSkinSelector={true}
+													changeView={() => dispatch(setMarketplaceMode(false))}
+													onOptionChange={(id, path, name) => onMarketOptionChange(id, path, name)}
+													onCategoryTypeChange={(newCategory) => { onCategoryChange(newCategory) }}
+													onSkinColorChange={() => { }}
+													exportModel={(type) => handleExport(type)}
+													isCustomCampaignHud
+													onClickBackButton={() => dispatch(setMarketplaceMode(false))}
+													isLoading={false}
+												/>
+											</div> 
+										</>
+
 									}
 								</>
 						}
