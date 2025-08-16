@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { setCheckoutMode, setShoppingCart } from "../../../store/citizensMetadataSlice";
+import { setCheckoutMode, setMarketplaceMode, setShoppingCart } from "../../../store/citizensMetadataSlice";
 import { useAppSelector, useAppDispatch } from "../../../store/hooks";
 import { ClaimableDrop } from "../../../interfaces/citizens.interface";
 import PlusSVG from "../common/SVG/plusSVG.ui";
@@ -20,12 +20,12 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
   const claimableDrops = useAppSelector(state => state.citizensMetadata.claimableDrops);
   const userXP = useAppSelector(state => state.citizensAuth.xpData);
   const didCheckoutMode = useAppSelector(state => state.citizensMetadata.checkoutMode);
+  const marketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
   const dispatch = useAppDispatch();
 
   const { showSnackbar } = useSnackbar();
 
   const [shoppingCartItems, setShoppingCartItems] = useState<ClaimableDrop[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
   const handleRemove = (id: string | number, type: string) => {
@@ -57,6 +57,10 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
       showSnackbar(<p>Ups. We can´t to checkout, try later.</p>);
     }
     dispatch(setCheckoutMode(false));
+  }
+
+  function handleOpen() {
+    dispatch(setMarketplaceMode(!marketplaceMode));
   }
 
   useEffect(() => {
@@ -91,9 +95,9 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
           </div>
         </div>
         :
-        <div className={`fixed top-24 xl:top-auto xl:bottom-4 right-4 rounded-[20px] ${isOpen ? 'w-[calc(100vw_-_2rem)] md:w-[419px] h-auto' : 'w-14 h-14'} overflow-hidden`}>
+        <div className={`fixed top-24 xl:top-auto xl:bottom-4 right-4 rounded-[20px] ${marketplaceMode ? 'w-[calc(100vw_-_2rem)] md:w-[419px] h-auto' : 'w-14 h-14'} overflow-hidden`}>
           <div className={`bg-citizens-dark shadow-citizens-btn w-full pr-2 pl-4 py-4 text-white`}>
-            <div className={`${isOpen ? 'opacity-100' : 'opacity-0'} grid grid-rows-[auto_1fr_auto] gap-4 max-h-[35vh] xl:max-h-[70vh] 2xl:max-h-[90vh]`}>
+            <div className={`${marketplaceMode ? 'opacity-100' : 'opacity-0'} grid grid-rows-[auto_1fr_auto] gap-4 max-h-[35vh] xl:max-h-[70vh] 2xl:max-h-[90vh]`}>
               <h2 className="text-xl font-bold">Shopping cart</h2>
               {shoppingCartItems.length === 0 ? (
                 <div className="text-center text-gray-400">Your cart is empty.</div>
@@ -160,8 +164,8 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
           </div>
           {/* Shopping Cart Toggle Button */}
           <div className="absolute top-2 right-2 w-10 h-10 rounded-xl bg-citizens-yellow">
-            <div className="flex items-center justify-center h-full w-full cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-              {isOpen ?
+            <div className="flex items-center justify-center h-full w-full cursor-pointer" onClick={() => handleOpen()}>
+              {marketplaceMode ?
                 <div className="rotate-45">
                   <PlusSVG className="fill-citizens-dark w-8 h-8 m-auto" />
                 </div>
@@ -171,7 +175,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
             </div>
           </div>
           {/* Shopping Cart close Item Count */}
-          {shoppingCartItems.length > 0 && !isOpen &&
+          {shoppingCartItems.length > 0 && !marketplaceMode &&
             <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-citizens-red flex items-center justify-center">
               <p className="font-bold text-xs text-white">{shoppingCartItems.length}</p>
             </div>
