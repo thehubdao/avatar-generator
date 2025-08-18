@@ -1,0 +1,457 @@
+/* Quest System CSS Custom Properties - Fallback Layer */
+:root {
+  /* Quest Color System */
+  --quest-blue-50: #eff6ff;
+  --quest-blue-100: #dbeafe;
+  --quest-blue-200: #bfdbfe;
+  --quest-blue-400: #60a5fa;
+  --quest-blue-500: #3b82f6;
+  --quest-blue-600: #2563eb;
+  --quest-blue-800: #1e40af;
+  
+  --quest-green-50: #f0fdf4;
+  --quest-green-100: #dcfce7;
+  --quest-green-200: #bbf7d0;
+  --quest-green-400: #4ade80;
+  --quest-green-600: #16a34a;
+  --quest-green-800: #166534;
+  
+  --quest-yellow-50: #fefce8;
+  --quest-yellow-100: #fef3c7;
+  --quest-yellow-200: #fde68a;
+  --quest-yellow-400: #facc15;
+  --quest-yellow-600: #d97706;
+  --quest-yellow-800: #92400e;
+  
+  --quest-purple-50: #faf5ff;
+  --quest-purple-100: #f3e8ff;
+  --quest-purple-200: #e9d5ff;
+  --quest-purple-400: #c084fc;
+  --quest-purple-600: #9333ea;
+  --quest-purple-800: #6b21a8;
+  
+  --quest-orange-100: #fed7aa;
+  --quest-orange-200: #fed7aa;
+  --quest-orange-400: #fb923c;
+  --quest-orange-500: #f97316;
+  --quest-orange-800: #9a3412;
+  
+  --quest-gray-50: #f9fafb;
+  --quest-gray-100: #f3f4f6;
+  --quest-gray-200: #e5e7eb;
+  --quest-gray-300: #d1d5db;
+  --quest-gray-400: #9ca3af;
+  --quest-gray-800: #1f2937;
+  
+  --quest-red-100: #fee2e2;
+  --quest-red-200: #fecaca;
+  --quest-red-800: #991b1b;
+  
+  /* Quest Layout Properties */
+  --quest-shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --quest-shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --quest-border-radius: 0.5rem;
+  --quest-transition: all 0.3s ease-in-out;
+  --quest-transition-fast: all 0.2s ease-in-out;
+}
+
+/* Quest System Animations */
+@keyframes questCardHover {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-2px) scale(1.02); }
+}
+
+@keyframes progressFill {
+  0% { width: 0%; }
+  100% { width: var(--progress-width); }
+}
+
+@keyframes slideInRight {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes questCompleted {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1) rotate(180deg);
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Quest Card Styles - CSS Fallback Implementation */
+.quest-card {
+  transition: var(--quest-transition);
+}
+
+.quest-card:hover {
+  animation: questCardHover 0.3s ease-in-out forwards;
+  box-shadow: var(--quest-shadow-lg);
+  border: 2px solid var(--quest-blue-200);
+}
+
+.quest-card.completed {
+  background-color: var(--quest-green-50);
+  border-color: var(--quest-green-200);
+}
+
+.quest-card.in-progress {
+  background-color: var(--quest-blue-50);
+  border-color: var(--quest-blue-200);
+}
+
+.quest-card.locked {
+  background-color: var(--quest-gray-50);
+  border-color: var(--quest-gray-200);
+  opacity: 0.6;
+}
+
+/* Progress Bar Animations */
+.progress-bar {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--quest-gray-200);
+  border-radius: 9999px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: all 0.5s ease-out;
+  animation: progressFill 1s ease-out;
+}
+
+.progress-fill.daily {
+  background: linear-gradient(to right, var(--quest-blue-400), var(--quest-blue-600));
+}
+
+.progress-fill.weekly {
+  background: linear-gradient(to right, var(--quest-purple-400), var(--quest-purple-600));
+}
+
+.progress-fill.achievement {
+  background: linear-gradient(to right, var(--quest-yellow-400), var(--quest-orange-500));
+}
+
+.progress-fill.story {
+  background: linear-gradient(to right, var(--quest-green-400), var(--quest-green-600));
+}
+
+/* Notification Animations */
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-out;
+}
+
+.animate-slide-in-up {
+  animation: slideInUp 0.3s ease-out;
+}
+
+.animate-pulse-slow {
+  animation: pulse 2s infinite;
+}
+
+/* Difficulty Badges */
+.difficulty-easy {
+  background-color: var(--quest-green-100);
+  color: var(--quest-green-800);
+  border-color: var(--quest-green-200);
+}
+
+.difficulty-medium {
+  background-color: var(--quest-yellow-100);
+  color: var(--quest-yellow-800);
+  border-color: var(--quest-yellow-200);
+}
+
+.difficulty-hard {
+  background-color: var(--quest-orange-100);
+  color: var(--quest-orange-800);
+  border-color: var(--quest-orange-200);
+}
+
+.difficulty-legendary {
+  background-color: var(--quest-purple-100);
+  color: var(--quest-purple-800);
+  border-color: var(--quest-purple-200);
+}
+
+/* Status Badges */
+.status-available {
+  background-color: var(--quest-blue-100);
+  color: var(--quest-blue-800);
+  border-color: var(--quest-blue-200);
+}
+
+.status-in-progress {
+  background-color: var(--quest-yellow-100);
+  color: var(--quest-yellow-800);
+  border-color: var(--quest-yellow-200);
+}
+
+.status-completed {
+  background-color: var(--quest-green-100);
+  color: var(--quest-green-800);
+  border-color: var(--quest-green-200);
+}
+
+.status-locked {
+  background-color: var(--quest-gray-100);
+  color: var(--quest-gray-800);
+  border-color: var(--quest-gray-200);
+}
+
+.status-expired {
+  background-color: var(--quest-red-100);
+  color: var(--quest-red-800);
+  border-color: var(--quest-red-200);
+}
+
+/* Quest Type Icons */
+.quest-type-daily::before {
+  content: '☀️';
+  margin-right: 0.5rem;
+}
+
+.quest-type-weekly::before {
+  content: '📅';
+  margin-right: 0.5rem;
+}
+
+.quest-type-achievement::before {
+  content: '🏆';
+  margin-right: 0.5rem;
+}
+
+.quest-type-story::before {
+  content: '📖';
+  margin-right: 0.5rem;
+}
+
+.quest-type-event::before {
+  content: '🎉';
+  margin-right: 0.5rem;
+}
+
+/* Hover Effects */
+.quest-hover-effect {
+  transition: var(--quest-transition-fast);
+}
+
+.quest-hover-effect:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--quest-shadow-md);
+}
+
+/* Button Animations */
+.quest-button {
+  transition: var(--quest-transition-fast);
+}
+
+.quest-button:hover {
+  transform: scale(1.05);
+}
+
+.quest-button:active {
+  transform: scale(0.95);
+}
+
+/* Completion Effects */
+.quest-completed-animation {
+  animation: questCompleted 0.6s ease-in-out;
+}
+
+.sparkle-effect::after {
+  content: '✨';
+  position: absolute;
+  top: -0.25rem;
+  right: -0.25rem;
+  font-size: 0.75rem;
+  animation: sparkle 2s infinite;
+}
+
+/* Loading States */
+.quest-skeleton {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: var(--quest-gray-200);
+  border-radius: var(--quest-border-radius);
+}
+
+.quest-loading-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--quest-gray-200);
+}
+
+.quest-loading-shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(to right, transparent, white, transparent);
+  animation: shimmer 2s infinite;
+}
+
+/* Filter Panel Animations */
+.filter-panel-enter {
+  opacity: 0;
+  max-height: 0;
+}
+
+.filter-panel-enter-active {
+  opacity: 1;
+  max-height: 24rem;
+  transition: var(--quest-transition);
+}
+
+.filter-panel-exit {
+  opacity: 1;
+  max-height: 24rem;
+}
+
+.filter-panel-exit-active {
+  opacity: 0;
+  max-height: 0;
+  transition: var(--quest-transition);
+}
+
+/* Tab Navigation */
+.quest-tab {
+  position: relative;
+  transition: var(--quest-transition-fast);
+}
+
+.quest-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0.125rem;
+  background-color: var(--quest-blue-600);
+  animation: slideInUp 0.2s ease-out;
+}
+
+/* Responsive Quest Grid */
+.quest-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .quest-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Achievement Unlock Animation */
+.achievement-unlock {
+  position: relative;
+}
+
+.achievement-unlock::before {
+  content: '🎉';
+  position: absolute;
+  top: -0.5rem;
+  right: -0.5rem;
+  font-size: 1.5rem;
+  animation: questCompleted 1s ease-in-out infinite;
+}
+
+/* XP Gain Animation */
+.xp-gain {
+  position: relative;
+}
+
+.xp-gain::after {
+  content: '+' attr(data-xp) ' XP';
+  position: absolute;
+  top: -1.5rem;
+  right: 0;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: var(--quest-yellow-600);
+  background-color: var(--quest-yellow-100);
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  animation: slideInUp 0.5s ease-out;
+}
+
+/* Streak Counter */
+.streak-counter {
+  position: relative;
+}
+
+.streak-counter.active::before {
+  content: '🔥';
+  position: absolute;
+  top: -0.25rem;
+  left: -0.25rem;
+  font-size: 1.125rem;
+  animation: pulse 1.5s infinite;
+}
+
+/* Custom Scrollbar for Quest Lists */
+.quest-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.quest-list::-webkit-scrollbar-track {
+  background-color: var(--quest-gray-100);
+  border-radius: 9999px;
+}
+
+.quest-list::-webkit-scrollbar-thumb {
+  background-color: var(--quest-gray-300);
+  border-radius: 9999px;
+}
+
+.quest-list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--quest-gray-400);
+}

@@ -8,4 +8,11 @@
   ReportDistribution = '/api/v1/reportDistribution',
   EnvMaps = '/api/v1/envMaps',
   Solana = '/api/v1/solana',
+  // Quest API routes
+  QuestsAvailable = '/api/quests/available',
+  QuestsUser = '/api/quests/user',
+  QuestsStats = '/api/quests/stats',
+  QuestsAccept = '/api/quests',
+  QuestsProgress = '/api/quests',
+  QuestsComplete = '/api/quests',
 }

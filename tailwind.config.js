@@ -1,14 +1,63 @@
 ﻿module.exports = {
     darkMode: 'class',
-    plugins: [require('tailwindcss-neumorphism')],
+    plugins: [
+        require('tailwindcss-neumorphism'), // Re-enabled after CSS stabilization
+        require('@tailwindcss/line-clamp') // For text truncation in quest cards
+    ],
     content: [
         './pages/**/*.{js,ts,jsx,tsx}',
         './layouts/**/*.{js,ts,jsx,tsx}',
         './components/**/*.{js,ts,jsx,tsx}',
         './ui/**/*.{js,ts,jsx,tsx}',
         './utils/**/*.{js,ts,jsx,tsx}',
+        './styles/**/*.{css,scss}',
         // For the best performance and to avoid false positives,
         // be as specific as possible with your content configuration.
+    ],
+    safelist: [
+        // Quest System Critical Classes - Never Purge
+        'border-blue-200',
+        'border-blue-100', 
+        'border-blue-300',
+        'border-blue-500',
+        'bg-blue-50',
+        'bg-blue-100',
+        'bg-green-50',
+        'bg-green-100',
+        'bg-yellow-50',
+        'bg-yellow-100',
+        'bg-purple-50',
+        'bg-purple-100',
+        'bg-orange-50',
+        'bg-orange-100',
+        'border-green-200',
+        'border-yellow-200',
+        'border-purple-200',
+        'border-orange-200',
+        'border-gray-200',
+        'border-red-200',
+        'text-blue-800',
+        'text-green-800',
+        'text-yellow-800',
+        'text-purple-800',
+        'text-orange-800',
+        'text-gray-800',
+        'text-red-800',
+        // Quest Animation Classes
+        'transform',
+        'scale-105',
+        'scale-95',
+        '-translate-y-1',
+        'shadow-md',
+        'shadow-lg',
+        // Responsive and State Classes
+        {
+          pattern: /quest-(card|button|hover-effect|skeleton|loading-shimmer)/,
+          variants: ['hover', 'active', 'focus', 'completed', 'in-progress', 'locked']
+        },
+        {
+          pattern: /(difficulty|status)-(easy|medium|hard|legendary|available|in-progress|completed|locked|expired)/
+        }
     ],
     theme: {
       extend: {

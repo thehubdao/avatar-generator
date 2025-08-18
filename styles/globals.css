@@ -5,6 +5,7 @@
 
 @import url('./lukso/spin.css');
 @import url('./citizens/main.css');
+@import url('./quests.css');
 
 body {
   background-color: #F1F5F9;

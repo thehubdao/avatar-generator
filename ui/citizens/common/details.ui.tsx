@@ -51,7 +51,7 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
           <div className="w-full px-7 pb-9 pt-7">
             <div className="relative w-full h-[30vh] md:h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
               <Image
-                src={imgUrl}
+                src={'/resources/images/campaings/polygon-creators-collection.jpg'}
                 alt={'Avatar detail'}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
