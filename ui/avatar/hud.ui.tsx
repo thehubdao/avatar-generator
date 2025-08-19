@@ -154,9 +154,11 @@ export default function HudUI({
                   <AGButton full onClickEvent={() => onClickBackButton()}>
                     <p>GO BACK</p>
                   </AGButton>
-                  <AGButton full onClickEvent={() => setIsSaveModalOpen(true)}>
-                    <p>SAVE</p>
-                  </AGButton>
+                  { handleSaveCombination &&
+                    <AGButton full onClickEvent={() => setIsSaveModalOpen(true)}>
+                      <p>SAVE</p>
+                    </AGButton>
+                  }
                 </div>
               }
 
