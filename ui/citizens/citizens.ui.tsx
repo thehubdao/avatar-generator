@@ -264,7 +264,6 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 										{/* MARKETPLACE MODE HUD */}
 										{isReady &&
 											<>
-												{!didEditMode && <ShoppingCartUI onRemoveItem={(type) => onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />}
 												<div className="fixed w-full z-50 dark">
 													<HudUI
 														HUDTitle="MARKETPLACE"
@@ -296,6 +295,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 														isLoading={false}
 													/>
 												</div>
+												{!didEditMode && <ShoppingCartUI onRemoveItem={(type) => onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />}
 											</>
 
 										}
