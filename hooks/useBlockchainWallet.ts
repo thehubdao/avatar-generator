@@ -1,7 +1,7 @@
 import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setClaimableDrops, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setClaimableDrops, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setNotificationMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } from '../utils/web3/lukso/contract.util';
 import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
 import { CitizenMetadata, ClaimableDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
@@ -175,21 +175,12 @@ export function useBlockchainWallet() {
             dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
             dispatch(setMintingMode(false));
           } else {
-            // MINTING FLOW
-            dispatch(setSelectedCampaign(Campaign.Creators)); // Set the selected campaign to Citizens by default when no campaign is selected
-            dispatch(setSelectedCitizen({
-              baseCombination: '0-0-0-0-0',
-              combination: '0-0-0-0-0',
-              campaign: Campaign.Creators
-            } as CitizenMetadata));
+            // REDIRECT FLOW
+            dispatch(setNotificationMode(true));
           }
         } else if (!citizen) {
-          // MINTING FLOW
-          dispatch(setSelectedCitizen({
-            baseCombination: '0-0-0-0-0',
-            combination: '0-0-0-0-0',
-            campaign: selectedCampaign
-          } as CitizenMetadata));
+          // REDIRECT FLOW
+          dispatch(setNotificationMode(true));
         } else {
           dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
           dispatch(setMintingMode(false));
