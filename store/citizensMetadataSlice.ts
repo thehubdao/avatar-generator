@@ -18,6 +18,7 @@ interface CitizensMetadataState {
   mintingPrice: number | null;
   editMode: boolean;
   marketplaceMode: boolean;
+  notificationMode: boolean;
   mintingMode: boolean;
   savingMode: boolean;
   checkoutMode: boolean;
@@ -36,6 +37,7 @@ const initialState: CitizensMetadataState = {
   shoppingCart: [],
   editMode: false,
   marketplaceMode: false,
+  notificationMode: false,
   mintingMode: true,
   savingMode: false,
   checkoutMode: false,
@@ -70,6 +72,9 @@ export const citizensMetadataSlice = createSlice({
     setMarketplaceMode: (state, action: PayloadAction<boolean>) => {
       state.marketplaceMode = action.payload;
     },
+    setNotificationMode: (state, action: PayloadAction<boolean>) => {
+      state.notificationMode = action.payload;
+    },
     setMintingMode: (state, action: PayloadAction<boolean>) => {
       state.mintingMode = action.payload;
     },
@@ -94,5 +99,5 @@ export const citizensMetadataSlice = createSlice({
   }
 });
 
-export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMarketplaceMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice, setClaimableDrops, setShoppingCart, setCheckoutMode } = citizensMetadataSlice.actions;
+export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMarketplaceMode, setNotificationMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice, setClaimableDrops, setShoppingCart, setCheckoutMode } = citizensMetadataSlice.actions;
 export default citizensMetadataSlice.reducer;
