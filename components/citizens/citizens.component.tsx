@@ -543,8 +543,14 @@ export default function CitizensComponent() {
       return false;
     }
 
-    if (isMarketplaceMode && dropsToClaim) await ClaimAndSetAvatarNewWearings(currentCampaign, dropsToClaim, oldAttributes, newAttributes, selectedCitizen.tokenId, metadataObject.value.uri, signer);
-    else await SetAvatarNewWearings(
+    if (isMarketplaceMode && dropsToClaim){ 
+      const claimResult = await ClaimAndSetAvatarNewWearings(currentCampaign, dropsToClaim, oldAttributes, newAttributes, selectedCitizen.tokenId, metadataObject.value.uri, signer);
+      if (!claimResult.success) {
+        LogError(Module.Citizens, 'Failed to claim and set new wearings', claimResult.errCode);
+        return false;
+      }
+    } else {
+      const setResult = await SetAvatarNewWearings(
       currentCampaign,
       oldAttributes,
       newAttributes,
@@ -552,6 +558,12 @@ export default function CitizensComponent() {
       metadataObject.value.uri,
       signer
     );
+
+    if (!setResult.success) {
+      LogError(Module.Citizens, 'Failed to set new wearings', setResult.errCode);
+      return false;
+    }
+  }
 
     await RequestBurnDrops(burnDropArray, walletAddress, currentCampaign);
 
@@ -714,9 +726,7 @@ export default function CitizensComponent() {
       return false;
     }
 
-    await saveLuksoCombination(claimResult.value);
-
-    return true;
+    return await saveLuksoCombination(claimResult.value);
   }
 
   async function onMinting() {
