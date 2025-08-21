@@ -8,6 +8,7 @@ import { CommonErrorCode, Module } from "../../enums/common.enum";
 import { LogError } from "../common.util";
 import { IPFS_GATEWAY_API_KEY, IPFS_GATEWAY_URL, LSP26_ABI, LSP26_ADDRESS } from "../../constants/citizens.constant";
 import { StorageLocation } from "../../enums/firebase.enum";
+import { GetCollectionDocs } from "../firebase.util";
 
 export async function GetLuksoIPFSData(cid: string): Promise<Result<LuksoMetadata>> {
   try {
@@ -177,4 +178,15 @@ export async function GetFollowStatuses(leaderboardData: LeaderboardEntry[], pro
 export async function GetVrmUrl(campaign: string, combination: string): Promise<string> {
   const vrmStorageUrl = `https://firebasestorage.googleapis.com/v0/b/avatar-generator-e430b.appspot.com/o/${campaign}%2F${StorageLocation.AvatarVrms}%2F${combination}.vrm?alt=media&token=ad2e1e79-6c26-4284-92c3-2e42f5166b42`;
   return vrmStorageUrl;
+}
+
+export async function GetCampaignDrops<T>(campaign: string): Promise<Result<T[]>> {
+  try { 
+    const drops = await GetCollectionDocs(`campaign/${campaign}/drops`) as T[];
+    return { success: true, value: drops };
+  } catch (error) {
+    const err = error as Error;
+    LogError(Module.Citizens, 'Error on getting campaign drops', err.stack);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
+  }
 }

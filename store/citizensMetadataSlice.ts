@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CitizenMetadata, ClaimableDrop} from '../interfaces/citizens.interface';
+import { CitizenMetadata, ClaimableDrop, MintingPriceData } from '../interfaces/citizens.interface';
 import { Campaign, LuksoCampaign } from '../enums/citizens/common.enum';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { LeaderboardEntry } from '../types/leaderboard.type';
@@ -14,7 +14,7 @@ interface CitizensMetadataState {
   userFeatures: CampaignDrops<AppCampaigns> | null;
   claimableDrops: Record<LuksoCampaign, ClaimableDrop[]> | null;
   mintSupply: number | null;
-  mintingPrice: number | null;
+  mintingPrice: MintingPriceData | null;
   editMode: boolean;
   mintingMode: boolean;
   savingMode: boolean;
@@ -70,7 +70,7 @@ export const citizensMetadataSlice = createSlice({
     setMintSupply: (state, action: PayloadAction<number | null>) => {
       state.mintSupply = action.payload;
     },
-    setMintingPrice: (state, action: PayloadAction<number | null>) => {
+    setMintingPrice: (state, action: PayloadAction<MintingPriceData | null>) => {
       state.mintingPrice = action.payload;
     },
     setClaimableDrops: (state, action: PayloadAction<Record<LuksoCampaign, ClaimableDrop[]>>) => {

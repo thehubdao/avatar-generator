@@ -43,7 +43,6 @@ export interface AGParameters {
 }
 
 export interface AssetData {
-  address: string;
   tokenId: string;
   campaign: Campaign;
   collectionId: string;
