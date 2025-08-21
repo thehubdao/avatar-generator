@@ -23,6 +23,9 @@ export async function GetTokensOf(contractAddress: string, address: string): Pro
     try {
         const contract = new Contract(contractAddress, AvatarContractAbi, PROVIDER);
         const tokenIdsResult: string = await contract.tokenIdsOf(address);
+
+        if(tokenIdsResult.length === 0) return { success: true, value: [] };
+
         const tokenIds = tokenIdsResult.toString().split(',');
 
         return { success: true, value: tokenIds };
