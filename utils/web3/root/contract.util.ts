@@ -335,7 +335,7 @@ export async function SetRootAssetsTransferable(collectionId: string, tokenId: s
       else if (operation.action === AssetRegistryAction.Delete) txs.push(SetAssetTransferableTx(collectionId, tokenId, false))
   })
 
-    if (newCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, true)); //If the new combination is base combination, mark avatar as transferable
+    if (newCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, true)) //If the new combination is base combination, mark avatar as transferable
     else if (oldCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, false)); //If the new combination is not base combination, mark avatar as non transferable
 
     const batchTx = API.tx.utility.batch(txs);
