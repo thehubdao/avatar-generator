@@ -22,11 +22,7 @@ import { DropType } from '../../../enums/lukso/common.enum';
 export async function GetTokensOf(contractAddress: string, address: string): Promise<Result<string[]>> {
     try {
         const contract = new Contract(contractAddress, AvatarContractAbi, PROVIDER);
-        const tokenIdsResult: string = await contract.tokenIdsOf(address);
-
-        if(tokenIdsResult.length === 0) return { success: true, value: [] };
-
-        const tokenIds = tokenIdsResult.toString().split(',');
+        const tokenIds: string[] = [...await contract.tokenIdsOf(address)]; //This cast to array is made from Proxy(Result) to array
 
         return { success: true, value: tokenIds };
     } catch (e) {
