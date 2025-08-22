@@ -130,6 +130,7 @@ export async function GetLuksoTokenMetadata(tokenId: TokenId): Promise<Result<Ci
     if (!ipfsDataResult.success || !ipfsDataResult.value) return { success: false, errMessage: 'Error on getting token metadata', errCode: '' };
 
     const luksoMetadata = ipfsDataResult.value;
+    console.log(luksoMetadata)
     const metadata = {
         tokenId: tokenId.tokenId,
         campaign: tokenId.campaign as Campaign,
@@ -203,7 +204,7 @@ export async function GetCampaignTokensMetadata(campaign: Campaign, address: str
     return { success: true, value: tokensMetadataResult.value };
 }
 
-export async function GetCampaignsTokensMetadata(address: string): Promise<Result<CitizenMetadata[]>> { //Fix error handling!!
+export async function GetCampaignsTokensMetadata(address: string): Promise<Result<CitizenMetadata[]>> {
     let hasErrors = false;
     const campaignsMetadatasPromises = Object.keys(LUKSO_CAMPAIGN_WEB3_DATA).map(async (campaign) => {
         const tokensMetadataResult = await GetCampaignTokensMetadata(campaign as Campaign, address);
@@ -346,16 +347,22 @@ export async function SetAvatarNewWearings(campaign: Campaign, oldAttributes: Lu
 
     const metadataUrl = `ipfs://${metadataUri}`;
     const metadataIpfsData = await GetLuksoIPFSData(metadataUrl.split('//')[1]);
+
+    if(!metadataIpfsData.success) {
+        console.error('Error fetching metadata IPFS data:', metadataIpfsData.errMessage);
+        return { success: false, errMessage: metadataIpfsData.errMessage, errCode: metadataIpfsData.errCode };
+    }
+
     const metadataDataValue = AVATAR_ERC725_CONTRACT.encodeData([
         {
             keyName: 'LSP4Metadata',
             value: {
-                json: metadataIpfsData,
+                json: {'LSP4Metadata':metadataIpfsData.value},
                 url: metadataUrl,
             },
         },
     ]);
-
+    console.log(metadataIpfsData, metadataUrl, metadataDataValue.values[0]);
     const wearablesToUnequip = oldAttributes.map((attribute) => ({
         wearableContract: attribute.wearable_address, wearableTokenId: Number(attribute.wearable_token_id)
     }));
@@ -414,11 +421,17 @@ export async function ClaimAndSetAvatarNewWearings(campaign: Campaign, dropsToCl
 
         const metadataUrl = `ipfs://${metadataUri}`;
         const metadataIpfsData = await GetLuksoIPFSData(metadataUrl.split('//')[1]);
+
+        if(!metadataIpfsData.success) {
+            console.error('Error fetching metadata IPFS data:', metadataIpfsData.errMessage);
+            return { success: false, errMessage: metadataIpfsData.errMessage, errCode: metadataIpfsData.errCode };
+        }
+
         const metadataDataValue = AVATAR_ERC725_CONTRACT.encodeData([
             {
                 keyName: 'LSP4Metadata',
                 value: {
-                    json: metadataIpfsData,
+                    json: {'LSP4Metadata':metadataIpfsData.value},
                     url: metadataUrl,
                 },
             },
