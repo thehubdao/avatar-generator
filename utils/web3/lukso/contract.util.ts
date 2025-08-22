@@ -349,7 +349,6 @@ export async function SetAvatarNewWearings(campaign: Campaign, oldAttributes: Lu
     const metadataIpfsData = await GetLuksoIPFSData(metadataUrl.split('//')[1]);
 
     if(!metadataIpfsData.success) {
-        console.error('Error fetching metadata IPFS data:', metadataIpfsData.errMessage);
         return { success: false, errMessage: metadataIpfsData.errMessage, errCode: metadataIpfsData.errCode };
     }
 
@@ -423,7 +422,6 @@ export async function ClaimAndSetAvatarNewWearings(campaign: Campaign, dropsToCl
         const metadataIpfsData = await GetLuksoIPFSData(metadataUrl.split('//')[1]);
 
         if(!metadataIpfsData.success) {
-            console.error('Error fetching metadata IPFS data:', metadataIpfsData.errMessage);
             return { success: false, errMessage: metadataIpfsData.errMessage, errCode: metadataIpfsData.errCode };
         }
 
