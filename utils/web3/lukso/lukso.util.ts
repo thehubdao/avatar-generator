@@ -4,8 +4,9 @@ import { ClaimableDrop } from "../../../interfaces/citizens.interface";
 import { Result } from "../../../types/common.type";
 import { LogError } from "../../common.util";
 import { GetClaimableDrops } from "../../firebase.util";
+import { GetUserWearableClaimedAmount } from "./contract.util";
 
-export async function GetLuksoClaimableDrops(): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
+export async function GetLuksoClaimableDrops(walletAddress: string): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
     try {
         const claimableDropsMap: Record<LuksoCampaign, ClaimableDrop[]> = {
             [LuksoCampaign.Citizens]: [],
@@ -15,7 +16,22 @@ export async function GetLuksoClaimableDrops(): Promise<Result<Record<LuksoCampa
 
         const claimableDropsCampaignsPromises = campaigns.map(async (campaign) => {
             const drops = await GetClaimableDrops(campaign as unknown as Campaign);
-            if (drops.success) claimableDropsMap[campaign] = drops.value;
+            if (drops.success) {
+                const dropswithClaimAmountPromises = drops.value.map(async drop => {
+                    const claimedAmount = await GetUserWearableClaimedAmount(walletAddress, drop);
+
+                    if (!claimedAmount.success) return drop;
+
+                    if (claimedAmount.value >= drop.claimLimit) drop.isClaimable = false;
+                    else drop.isClaimable = true;
+
+                    drop.claimedAmount = claimedAmount.value;
+
+                    return drop;
+                });
+                const dropsWithClaimAmount = await Promise.all(dropswithClaimAmountPromises);
+                claimableDropsMap[campaign] = dropsWithClaimAmount;
+            }
             else void LogError(Module.LuksoUtil, `Error fetching claimable drops: ${drops.errMessage}`);
         });
         await Promise.all(claimableDropsCampaignsPromises);

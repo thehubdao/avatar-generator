@@ -6,7 +6,7 @@ import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetUserFeatures } f
 import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
 import { CitizenMetadata, ClaimableDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
-import { CampaignParameterName, Module } from '../enums/common.enum';
+import { CampaignParameterName, CommonErrorCode, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
@@ -141,7 +141,10 @@ export function useBlockchainWallet() {
   }
 
   async function getClaimableDropsPromise(): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
-    const drops = await GetLuksoClaimableDrops();
+    if(!userAddress) {
+      return { success: false, errMessage: "User address is not defined", errCode: CommonErrorCode.InternalError };
+    }
+    const drops = await GetLuksoClaimableDrops(userAddress);
     if (drops.success) return { success: true, value: drops.value };
     return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
   }

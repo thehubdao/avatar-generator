@@ -28,6 +28,9 @@ export interface ClaimableDrop {
   contractAddress: string;
   holdingCondition?: HoldingCondition; //Condition to be applied to the holdingAddresses
   owned: boolean; //true if the user has already claimed the drop
+  claimLimit: number; //Limit on the number of times the drop can be claimed
+  claimedAmount: number; //Number of times the drop has been claimed by the user
+  isClaimable: boolean; // true if the drop can be claimed by the user
 }
 
 export interface DropToClaim {

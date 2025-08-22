@@ -485,3 +485,14 @@ export async function ClaimDrop(drop: LuksoDrop, signer: JsonRpcSigner): Promise
     await tx.wait();
     return { success: true, value: undefined };
 }
+
+export async function GetUserWearableClaimedAmount(userAddress: string, drop:ClaimableDrop): Promise<Result<number>> {
+    try {
+        const wearableContract = new Contract(drop.contractAddress, WearableContractABI, PROVIDER);
+        const claimedAmount = await wearableContract.getUserClaims(userAddress);
+        return { success: true, value: Number(claimedAmount) };
+    } catch (error) {
+        void LogError(Module.LuksoUtil, `Error fetching user wearable claimed amount: ${error}`);
+        return { success: false, errMessage: "Error fetching user wearable claimed amount", errCode: CommonErrorCode.FetchError };
+    }
+}
