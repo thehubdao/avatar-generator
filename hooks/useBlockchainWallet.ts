@@ -1,12 +1,12 @@
 import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setClaimableDrops, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setClaimableDrops, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setNotificationMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetLuksoUserFeatures } from '../utils/web3/lukso/contract.util';
 import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetSolanaUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
 import { CitizenMetadata, ClaimableDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
-import { CampaignParameterName, Module } from '../enums/common.enum';
+import { CampaignParameterName, CommonErrorCode, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
@@ -162,7 +162,10 @@ export function useBlockchainWallet() {
   }
 
   async function getClaimableDropsPromise(): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
-    const drops = await GetLuksoClaimableDrops();
+    if(!userAddress) {
+      return { success: false, errMessage: "User address is not defined", errCode: CommonErrorCode.InternalError };
+    }
+    const drops = await GetLuksoClaimableDrops(userAddress);
     if (drops.success) return { success: true, value: drops.value };
     return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
   }
@@ -191,26 +194,17 @@ export function useBlockchainWallet() {
         if (selectedCampaign === null) { //This case is handled when user refresh the page and is still logged in
           const userCampaigns = [...new Set(ethereumCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
 
-          if (userCampaigns.length > 0) {
+         if (userCampaigns.length > 0) {
             dispatch(setSelectedCampaign(userCampaigns[0]));
             dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
             dispatch(setMintingMode(false));
           } else {
-            // MINTING FLOW
-            dispatch(setSelectedCampaign(Campaign.Creators)); // Set the selected campaign to Citizens by default when no campaign is selected
-            dispatch(setSelectedCitizen({
-              baseCombination: CampaignBaseCombination.Creators,
-              combination: CampaignBaseCombination.Creators,
-              campaign: Campaign.Creators
-            } as CitizenMetadata));
+            // REDIRECT FLOW
+            dispatch(setNotificationMode(true));
           }
         } else if (!citizen) {
-          // MINTING FLOW
-          dispatch(setSelectedCitizen({
-            baseCombination: CampaignBaseCombination.Creators,
-            combination: CampaignBaseCombination.Creators,
-            campaign: selectedCampaign
-          } as CitizenMetadata));
+          // REDIRECT FLOW
+          dispatch(setNotificationMode(true));
         } else {
           dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
           dispatch(setMintingMode(false));

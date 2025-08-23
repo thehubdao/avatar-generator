@@ -7,7 +7,7 @@ import LoadingUI from "../common/loading.ui";
 export default function CitizensBackpackUI() {
   const loadedTokens = useAppSelector(state => state.citizensMetadata.citizensMetadata);
 
-  const [selectedList, setSelectedList] = useState<CollectionSections>(CollectionSections.CITIZENS)
+  const [selectedList, ] = useState<CollectionSections>(CollectionSections.CITIZENS)
 
   return (
     <div className="relative w-full min-h-screen py-32">
@@ -22,10 +22,11 @@ export default function CitizensBackpackUI() {
           {selectedList === CollectionSections.CITIZENS && 'MY CITIZENS'}
           {selectedList === CollectionSections.WEARABLES && 'WEARABLE DROPS'}
         </h1>
-        <div className="xl:absolute xl:bottom-0 xl:right-6 2xl:right-0 w-fit flex text-white bg-[#2D2D2D] rounded-full px-px mx-auto mt-6">
+        {/* NAVIGATION BUTTON */}
+        {/* <div className="xl:absolute xl:bottom-0 xl:right-6 2xl:right-0 w-fit flex text-white bg-[#2D2D2D] rounded-full px-px mx-auto mt-6">
           <div className={`px-4 py-2 rounded-full ${selectedList === CollectionSections.WEARABLES ? ' select-none' : ' text-white/60 hover:text-white shadow-citizens-btn bg-citizens-dark cursor-pointer '}`} onClick={() => setSelectedList(CollectionSections.WEARABLES)}>WEARABLES</div>
           <div className={`px-4 py-2 rounded-full ${selectedList === CollectionSections.CITIZENS ? ' select-none' : ' text-white/60 hover:text-white shadow-citizens-btn bg-citizens-dark cursor-pointer '}`} onClick={() => setSelectedList(CollectionSections.CITIZENS)}>CITIZENS</div>
-        </div>
+        </div> */}
       </div>
       {/* MY CITIZENS */}
       {selectedList === CollectionSections.CITIZENS && loadedTokens !== null &&

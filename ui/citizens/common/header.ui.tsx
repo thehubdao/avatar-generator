@@ -7,7 +7,7 @@ import Button from "./button.ui";
 import SocialButtons from "./socialButtons.ui";
 import { Campaign, CitizensPageLocation } from "../../../enums/citizens/common.enum";
 import { GoToPage } from "../../../utils/router.util";
-import { setEditMode, setMarketplaceMode } from "../../../store/citizensMetadataSlice";
+import { setEditMode } from "../../../store/citizensMetadataSlice";
 import AboutButton from "./aboutButton.ui";
 import AboutModal from "./aboutModal.ui";
 
@@ -81,9 +81,8 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
                 dispatch(setEditMode(true));
                 handleNavbarClick(CitizensPageLocation.HOME);
               }} />
-              <Button label="Backpack" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
-                dispatch(setMarketplaceMode(true));
-                handleNavbarClick(CitizensPageLocation.HOME);
+              <Button label="Collection" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+                handleNavbarClick(CitizensPageLocation.BACKPACK);
               }} />
               {selectedCampaign !== Campaign.Kumi && selectedCampaign !== Campaign.Based && <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                 handleNavbarClick(CitizensPageLocation.LEADERBOARD);

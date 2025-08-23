@@ -2,7 +2,6 @@ import { Campaign, CitizensSections } from "../../enums/citizens/common.enum";
 import { IndexFeatureInterface } from "../../interfaces/api.interface";
 import { CollectionType } from "../../interfaces/avatar.interface";
 import { CitizenMetadata } from "../../interfaces/citizens.interface";
-import DetailsUI from "./common/details.ui";
 import Notifications from "./common/notifications.ui";
 import Collection from "./sections/collection.ui[deprecated]";
 import LeaderBoard from "./sections/leaderBoard.ui[deprecated]";
@@ -34,7 +33,7 @@ interface CitizensUIProps {
 }
 
 
-export default function CitizensUI({ claimableDrops, currentSection, currentCollection, isSavingCombination, updateCollection, loadedTokens, features, exportModel, address, leaderboardData, provider, handleFollowUser, handleClaim, handleUnfollowUser, mintRedirect }: CitizensUIProps) {
+export default function CitizensUI({ claimableDrops, currentSection, currentCollection, updateCollection, loadedTokens, address, leaderboardData, provider, handleFollowUser, handleClaim, handleUnfollowUser, mintRedirect }: CitizensUIProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [collectionSupply] = useState<number | undefined>(undefined)
 
@@ -63,9 +62,9 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
       {currentSection === CitizensSections.View && (
         <>
           {/* details */}
-          {features &&
+{/*           {features &&
             <DetailsUI data={features} handleDownload={() => exportModel()} imgUrl={currentCollection.citizenMetadata.imageUrl} loading={isSavingCombination} />
-          }
+          } */}
           {/* notifications */}
           <Notifications address={address} />
         </>

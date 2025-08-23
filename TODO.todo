@@ -8,6 +8,8 @@ TODO:
     ✔ Review and adjust z-index layout in whole citizens @done(25-06-01 15:29)
     ✔ Make loading UI with message prop @done(25-06-01 15:30)
     ✔ Put address/name for logged in user in respective place @done(25-06-01 15:30)
+    ✔ Enable 'backpack' section again using backpack button in header changing his name to 'collection' @done
+    ✔ Add lukso link modal when the user access to lukso campaigns but he doesn't have any avatar @done
     ☐ Check double setCampaignParameters in useBlockchainWallet hook when change pages or change selectedCampaign
     ☐ Add ImageUrl and tokenId to Kumi minting metadata
     ☐ Make Save Combination Button be more visible on some screen sizes
@@ -23,32 +25,44 @@ TODO:
     ☐ Change default edit mode body part
     ☐ Fix details page labels for large type names
     ☐ Check undefined value when error in backpack data for loading behavior
+    ☐ The active wearables in wardrobe are not displayed as selected
+    ☐ The active feature in wardrobe should be vertically centered to view
+    
 
 COMPONENTS TO REVIEW:
     ☐ ConnectWeb3Button component
 
 MARKETPLACE:
     FEATURES:
-        ☐ Multiple feature selection
-            - Add to cart
-            - Mark as selected and deselected
-        ☐ Shopping cart features
-            - list of selected features (free, blocked, paid)
-            - Remove feature from cart
-            - Total items and price
-            - Checkout button
-            - Responsive design
-            - cartOpen state
+        Multiple feature selection:
+            ☐ Add to cart
+            ☐ Mark as selected and deselected
+        Shopping cart features:
+            ☐ list of selected features (free, blocked, paid)
+            ☐ Remove feature from cart
+            ☐ Total items and price
+            ☐ Checkout button
+            ☐ Responsive design
+            ☐ open and collapse state
     TODO:
         ✔ remove save combination button from marketplace on desktop @done
-        ☐ remove save combination button from marketplace on mobile
         ✔ don't add blocked features to shopping cart but allow to select them @done
-        ☐ fix error on selected feature when it is removed from cart from different feature category (baseExportData/exportData)
         ✔ Add max items in list to scroll with responsive design @done
-        ☐ Review some features that change the 3d model but don't show in the shopping cart (underwear mask, face)
         ✔ Add empty item in empty category on desktop @done
-        ☐ Add empty item in empty category on mobile
         ✔ Fix decimal price in shopping cart @done
+        ✔ Show shopping cart in homebase @done
+        ✔ Add download verification in details @done
+        ✔ Create clean shopping cart button @done
+        ✔ Remove save combination button from marketplace on mobile @done
+        ☐ Clean shopping cart once user checks out
+        ☐ Reset wearable in 3D model when user remove item from cart
+        ☐ Fix error on selected feature when it is removed from cart from different feature category (baseExportData/exportData)
+        ☐ Review some features that change the 3d model but don't show in the shopping cart (underwear mask, face)
+        ☐ Add empty item in empty category on mobile
+        ☐ The purchased wearables still the price, remove it
+        ☐ Don't show owned wearables in marketplace
+        ☐ Remove items for cart when user removes them from edit mode feature selection
+
     TO CONSIDER:
         ☐ Add feature to save cart for later
 

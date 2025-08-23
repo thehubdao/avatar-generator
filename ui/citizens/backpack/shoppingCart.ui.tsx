@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import { setCheckoutMode, setShoppingCart } from "../../../store/citizensMetadataSlice";
+import { setCheckoutMode, setMarketplaceMode, setShoppingCart } from "../../../store/citizensMetadataSlice";
 import { useAppSelector, useAppDispatch } from "../../../store/hooks";
 import { ClaimableDrop } from "../../../interfaces/citizens.interface";
 import PlusSVG from "../common/SVG/plusSVG.ui";
 import Image from "next/image";
 import BlockSVG from "../common/SVG/blockSVG.ui";
-import { BiCartAlt } from 'react-icons/bi';
+import { BiCartAlt, BiCollapseAlt, BiExpandAlt, BiSolidTrash } from 'react-icons/bi';
 import { useSnackbar } from "../snackbar/snackbar.provider";
 import Modal from "../common/modal.ui";
 import Button from "../common/button.ui";
@@ -20,18 +20,24 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
   const claimableDrops = useAppSelector(state => state.citizensMetadata.claimableDrops);
   const userXP = useAppSelector(state => state.citizensAuth.xpData);
   const didCheckoutMode = useAppSelector(state => state.citizensMetadata.checkoutMode);
+  const isMarketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
   const dispatch = useAppDispatch();
 
   const { showSnackbar } = useSnackbar();
 
   const [shoppingCartItems, setShoppingCartItems] = useState<ClaimableDrop[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
   const handleRemove = (id: string | number, type: string) => {
     const updatedCart = shoppingCart.filter(item => item.val !== id);
     dispatch(setShoppingCart(updatedCart));
     onRemoveItem(type);
+  };
+
+  const handleCleanCart = () => {
+    dispatch(setShoppingCart([]));
+    setShoppingCartItems([]);
   };
 
   const getTotalAvailableItems = () => {
@@ -59,6 +65,11 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
     dispatch(setCheckoutMode(false));
   }
 
+  function handleOpen() {
+    if (isMarketplaceMode) setIsCollapsed(!isCollapsed)
+      else dispatch(setMarketplaceMode(true));
+  }
+
   useEffect(() => {
     if (!claimableDrops) return;
 
@@ -78,7 +89,6 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
 
   return (
     <>
-
       {/* CART OR CHECKOUT LOADING */}
       {didCheckoutMode ?
         <div className="fixed bottom-6 right-6 w-fit bg-black/25 backdrop-blur-sm px-6 py-4 rounded-2xl transition duration-300 ease-in-out animate-slide-in">
@@ -91,16 +101,28 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
           </div>
         </div>
         :
-        <div className={`fixed top-24 xl:top-auto xl:bottom-4 right-4 rounded-[20px] ${isOpen ? 'w-[calc(100vw_-_2rem)] md:w-[419px] h-auto' : 'w-14 h-14'} overflow-hidden`}>
-          <div className={`bg-citizens-dark shadow-citizens-btn w-full pr-2 pl-4 py-4 text-white`}>
-            <div className={`${isOpen ? 'opacity-100' : 'opacity-0'} grid grid-rows-[auto_1fr_auto] gap-4 max-h-[35vh] xl:max-h-[70vh] 2xl:max-h-[90vh]`}>
-              <h2 className="text-xl font-bold">Shopping cart</h2>
+        <div className={`fixed top-24 xl:top-auto xl:bottom-4 right-4 rounded-[20px] ${isMarketplaceMode ? 'w-[calc(100vw_-_2rem)] md:w-[419px] h-auto' : 'w-14 h-14'} overflow-hidden`}>
+          <div className={`bg-citizens-dark/10 xl:bg-citizens-dark/80 backdrop-blur-sm shadow-citizens-btn w-full pr-2 pl-4 py-2 text-white`}>
+            <div className={`${isMarketplaceMode ? 'opacity-100' : 'opacity-0'} grid grid-rows-[auto_1fr_auto] gap-4 max-h-[35vh] xl:max-h-[70vh] 2xl:max-h-[90vh]`}>
+              <div className="flex justify-between items-center pr-12 h-10">
+                {/* TITLE */}
+                <h2 className="text-xl font-bold">Shopping cart</h2>
+                {/* CLEAN BUTTON */}
+                { shoppingCartItems.length > 0 &&
+                  <div className="w-10 h-10 rounded-xl border border-citizens-yellow">
+                    <div className="flex items-center justify-center h-full w-full cursor-pointer" onClick={() => handleCleanCart()}>
+                      <BiSolidTrash className="fill-citizens-yellow w-4 h-4 m-auto" />
+                    </div>
+                  </div>
+                }
+              </div>
               {shoppingCartItems.length === 0 ? (
                 <div className="text-center text-gray-400">Your cart is empty.</div>
               ) :
                 <>
                   <div className={`overflow-y-auto overflow-x-hidden`}>
-                    <ul>
+                    {/* ITEM LIST */}
+                    <ul className={`${isCollapsed ? 'hidden' : 'block'}`}>
                       {shoppingCartItems.map((item, idx) => {
                         const xpRequired = item.requiredXP - (userXP?.xp || 0);
                         return (
@@ -160,10 +182,11 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
           </div>
           {/* Shopping Cart Toggle Button */}
           <div className="absolute top-2 right-2 w-10 h-10 rounded-xl bg-citizens-yellow">
-            <div className="flex items-center justify-center h-full w-full cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
-              {isOpen ?
-                <div className="rotate-45">
-                  <PlusSVG className="fill-citizens-dark w-8 h-8 m-auto" />
+            <div className="flex items-center justify-center h-full w-full cursor-pointer" onClick={() => handleOpen()}>
+              {isMarketplaceMode ?
+                <div>
+                  <BiExpandAlt className={`fill-citizens-dark w-4 h-4 m-auto ${isCollapsed ? 'block' : 'hidden'}`} />
+                  <BiCollapseAlt className={`fill-citizens-dark w-4 h-4 m-auto ${isCollapsed ? 'hidden' : 'block'}`} />
                 </div>
                 :
                 <BiCartAlt className="fill-citizens-dark w-6 h-6 m-auto" />
@@ -171,7 +194,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
             </div>
           </div>
           {/* Shopping Cart close Item Count */}
-          {shoppingCartItems.length > 0 && !isOpen &&
+          {shoppingCartItems.length > 0 && (!isMarketplaceMode || isCollapsed) &&
             <div className="absolute top-1 right-1 w-4 h-4 rounded-full bg-citizens-red flex items-center justify-center">
               <p className="font-bold text-xs text-white">{shoppingCartItems.length}</p>
             </div>
@@ -184,7 +207,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
           <div className="grid justify-items-center">
             <div className="text-center text-white grid gap-4">
               <p className="font-bold text-2xl">Checkout</p>
-              <p className="text-lg">Are you sure that you want to proceed to checkout? If you are using a custom wearable it will be burnt and you will not be able to use it again on a different Citizen.</p>
+              <p className="text-lg">Are you sure that you want to proceed to checkout?<br /><br />If you are using a custom wearable it will be burnt and you will not be able to use it again on a different Citizen.</p>
             </div>
             <div className="w-full grid grid-cols-2 gap-4 pt-8">
               <Button label="Go Back" light className="w-full" textStyles="w-full text-center" handleClick={() => setIsCheckoutModalOpen(false)} />
