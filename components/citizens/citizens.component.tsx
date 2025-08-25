@@ -9,7 +9,7 @@ import { Module } from "../../enums/common.enum";
 import { ExportInterface } from "../../interfaces/common.interface";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
-import { SetImageUrl,GetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
+import { SetImageUrl, GetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { ClaimAndSetAvatarNewWearings, GetCampaignsTokensMetadata, GetLuksoUserFeatures, SetAvatarNewWearings } from "../../utils/web3/lukso/contract.util";
 import { Campaign, CampaignBaseCombination, CampaignBaseUrl, RootCampaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen, setUserFeatures } from "../../store/citizensMetadataSlice";
@@ -422,7 +422,7 @@ export default function CitizensComponent() {
     return false;
   }
 
- async function saveLuksoCombination(dropsToClaim?: DropToClaim[]) { // Pass in userFeatures in case we need to update just before executing this function
+  async function saveLuksoCombination(dropsToClaim?: DropToClaim[]) { // Pass in userFeatures in case we need to update just before executing this function
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
       .join('-') as string;
@@ -530,7 +530,7 @@ export default function CitizensComponent() {
     const newImageUrl = await generateImage()
 
     if (newImageUrl) await SetImageUrl(selectedCitizen.campaign, newCombination, newImageUrl);
- 
+
     const metadataObject = await UploadLuksoMetadata(
       newCitizenMetadata.rawMetadata,
       newCombination,
@@ -556,7 +556,7 @@ export default function CitizensComponent() {
       return false;
     }
 
-    if (isMarketplaceMode && dropsToClaim){ 
+    if (isMarketplaceMode && dropsToClaim) {
       const claimResult = await ClaimAndSetAvatarNewWearings(currentCampaign, dropsToClaim, oldAttributes, newAttributes, selectedCitizen.tokenId, metadataObject.value.uri, signer);
       if (!claimResult.success) {
         LogError(Module.Citizens, 'Failed to claim and set new wearings', claimResult.errCode);
@@ -564,26 +564,26 @@ export default function CitizensComponent() {
       }
     } else {
       const setResult = await SetAvatarNewWearings(
-      currentCampaign,
-      oldAttributes,
-      newAttributes,
-      selectedCitizen.tokenId,
-      metadataObject.value.uri,
-      signer
-    );
+        currentCampaign,
+        oldAttributes,
+        newAttributes,
+        selectedCitizen.tokenId,
+        metadataObject.value.uri,
+        signer
+      );
 
-    if (!setResult.success) {
-      LogError(Module.Citizens, 'Failed to set new wearings', setResult.errCode);
-      return false;
+      if (!setResult.success) {
+        LogError(Module.Citizens, 'Failed to set new wearings', setResult.errCode);
+        return false;
+      }
     }
-  }
 
     await RequestBurnDrops(burnDropArray, walletAddress, currentCampaign);
 
     const isMetadataFetchSuccess = await fetchLuksoMetadata(walletAddress);
     const userFeaturesResult = await fetchLuksoUserFeatures(walletAddress);
 
-    if(!userFeaturesResult.success) {
+    if (!userFeaturesResult.success) {
       LogError(Module.Citizens, 'Failed to fetch user features in saveLuksoCombination');
       return false;
     }
@@ -730,38 +730,54 @@ export default function CitizensComponent() {
     const oldCombinationArray = selectedCitizen.combination.split('-');
     const newAttributes: RootDrop[] = [];
     const oldAttributes: RootDrop[] = [];
-    
+
     if (userFeatures && userFeatures[selectedCampaign] != null) newCombinationArray.forEach((newIndex, index) => {
       const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
       const oldIndex = oldCombinationArray[index]; //Get the type of the feature
 
       if (!indexType) return undefined;
 
-      if(oldIndex == newIndex) return undefined;
+      if (oldIndex == newIndex) return undefined;
 
       const newAttribute = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) as RootDrop; //Get the new feature to be equipped
-      const oldAttribute = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)) as RootDrop; //Get the old feature to be unequipped
+      const oldAttribute = (selectedCitizen.rawMetadata as RootMetadata).attributes?.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)) as RootDrop; //Get the old feature to be unequipped
 
-      if(newAttribute) newAttributes.push(newAttribute);
-      if(oldAttribute) oldAttributes.push(oldAttribute);
+      if (newAttribute) newAttributes.push(newAttribute);
+      if (oldAttribute) oldAttributes.push(oldAttribute);
     });
 
     const setNewCombinationResult = await SetRootNewCombination(selectedCitizen.tokenId, newAttributes, oldAttributes);
 
-    if(!setNewCombinationResult.success) {
+    if (!setNewCombinationResult.success) {
       LogError(Module.Citizens, 'Failed to set new combination on saveRootCombination', setNewCombinationResult.errMessage);
       return false;
     }
     const newImageUrl = await GetImageUrl(currentCampaign, newCombination);
+
+    const attributesUnion = [...(selectedCitizen.rawMetadata as RootMetadata).attributes, ...newAttributes];
+
+    const filteredAttributes = attributesUnion.filter((attr) => !oldAttributes.find((oldAttr) => oldAttr.collectionId === attr.collectionId));
+
+    const castedAttributes = filteredAttributes.map((attr) => {
+      return {
+        collectionId: attr.collectionId,
+        name: attr.name,
+        schemaPart: attr.schemaPart,
+        type: attr.type,
+        index: attr.index,
+      };
+    });
+
     const storeAssetDataResult = await StoreAssetData({
       imageUrl: newImageUrl,
       tokenId: selectedCitizen.tokenId,
       collectionId: (selectedCitizen.rawMetadata as RootMetadata).collectionId,
       campaign: currentCampaign,
-      combination: newCombination
+      combination: newCombination,
+      attributes: castedAttributes,
     } as AssetData);
 
-    if(!storeAssetDataResult.success) {
+    if (!storeAssetDataResult.success) {
       LogError(Module.Citizens, 'Failed to store asset data on saveRootCombination', storeAssetDataResult.errMessage);
       return false;
     }

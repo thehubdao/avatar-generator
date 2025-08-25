@@ -2,6 +2,7 @@
 import {UserRoleValues} from "../enums/firebase.enum";
 import { Campaign } from "../enums/citizens/common.enum";
 import { Blockchain } from "../enums/blockchain/common.enum";
+import { RootDrop } from "./citizens.interface";
 
 export interface AGQueryConstraints {
   campaign?: string;
@@ -52,4 +53,5 @@ export interface AssetData {
   imageUrl: string;
   name: string;
   description: string;
+  attributes: RootDrop[];
 }

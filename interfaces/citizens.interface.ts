@@ -113,6 +113,7 @@ export interface RootMetadata{
   campaign: Campaign;
   collectionId: string;
   tokenId: string;
+  attributes: RootDrop[];
 }
 
 export interface SolanaAttribute {
@@ -166,7 +167,7 @@ export interface LinkableToken {
 export interface RootDrop extends Drop {
   schemaPart: string;
   collectionId: string;
-  linkableTokens: LinkableToken[];
+  linkableTokens?: LinkableToken[];
 }
 
 export interface CampaignMetadata extends Record<Campaign, CitizenMetadata[]> { }
@@ -215,4 +216,8 @@ export interface AssetLink {
     collectionId: string;
     schema: { name: string };
   };
+}
+
+export interface SFTAssetLink {
+  tokenId:string;
 }

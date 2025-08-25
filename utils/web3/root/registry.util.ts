@@ -2,7 +2,7 @@ import { Operation } from "@futureverse/artm";
 import { CHAIN_ID, DOMAIN, ORIGIN, ROOT_GQL_API_URL, ROOT_NETWORK_WS_URL } from "../../../constants/root/contract.constant";
 import { CampaignParameterName, CommonErrorCode, Module } from "../../../enums/common.enum";
 import { Result } from "../../../types/common.type";
-import { AssetLink, LinkableToken, RootDrop } from "../../../interfaces/citizens.interface";
+import { AssetLink, LinkableToken, RootDrop, SFTAssetLink } from "../../../interfaces/citizens.interface";
 import { Campaign } from "../../../enums/citizens/common.enum";
 import { GetCampaignDrops } from "../citizens.util";
 import { GetRootAssetMetadata } from "./contract.util";
@@ -53,6 +53,37 @@ export function DeleteAssetLinkOperationMessage(schemaPart: string, parent_colle
 
     return { success: true, value: createAssetLinkOperation };
 }
+
+export async function GetSFTAssetLinks(collection_id: string, token_id: string, walletAddress: string):Promise<Result<LinkableToken[]>> {
+        try {
+    const graphqlLinksQuery = JSON.stringify({
+        query: "query Asset($tokenId: String!, $collectionId: CollectionId!, $addresses: [ChainAddress!]!) {\r\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\r\n    links {\r\n      ... on SFTAssetLink {\r\n        parentLinks(addresses: $addresses) {\r\n          tokenId\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+        variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}`, "addresses": [walletAddress] }
+    });
+
+    const result = await fetch(ROOT_GQL_API_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: graphqlLinksQuery,
+    });
+    const resultText = await result.text();
+    const resultJson = JSON.parse(resultText);
+    const links = resultJson.data.asset.links.parentLinks.map(link => ({
+        tokenId: token_id,
+        parentTokenId: link.tokenId,
+        parentCollectionId: collection_id
+    })) as LinkableToken[];
+
+    return { success: true, value: links };
+  } catch (error) {
+    const e = error as Error;
+    LogError(Module.RootRegistryUtil, 'Error on getting asset links');
+    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+  }
+}
+
 
 export async function GetAssetLinks(collection_id: string, token_id: string): Promise<Result<AssetLink[]>> {
     try {
@@ -230,7 +261,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
         tokenId: token_id,
         collectionId: collection_id,
         combination: newCombination,
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
     } as AssetData);
 
     if (!setRootAssetMetadataResult.success) return { success: false, errMessage: setRootAssetMetadataResult.errMessage, errCode: setRootAssetMetadataResult.errCode };
