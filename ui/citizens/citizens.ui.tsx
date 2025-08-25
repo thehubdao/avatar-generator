@@ -47,7 +47,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
 	const [selectedOption, setSelectedOption] = useState<BasicData>();
-	const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+	const [, setLoadingTextIndex] = useState(0);
 
 	// Loading text rotation for better UX
 	const loadingTexts = [

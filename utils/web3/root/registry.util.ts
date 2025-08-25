@@ -2,7 +2,7 @@ import { Operation } from "@futureverse/artm";
 import { CHAIN_ID, DOMAIN, ORIGIN, ROOT_GQL_API_URL, ROOT_NETWORK_WS_URL } from "../../../constants/root/contract.constant";
 import { CampaignParameterName, CommonErrorCode, Module } from "../../../enums/common.enum";
 import { Result } from "../../../types/common.type";
-import { AssetLink, LinkableToken, RootDrop, SFTAssetLink } from "../../../interfaces/citizens.interface";
+import { AssetLink, LinkableToken, RootDrop } from "../../../interfaces/citizens.interface";
 import { Campaign } from "../../../enums/citizens/common.enum";
 import { GetCampaignDrops } from "../citizens.util";
 import { GetRootAssetMetadata } from "./contract.util";

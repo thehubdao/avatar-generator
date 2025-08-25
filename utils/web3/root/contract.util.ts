@@ -41,7 +41,7 @@ export async function GetRootAssetTokenIds(address: string, collectionId: string
   }
 }
 
-export async function sftBalance(address: string, sftCollectionId: string, sftTokenId: string): Promise<Result<number>> {
+export async function SftBalance(address: string, sftCollectionId: string, sftTokenId: string): Promise<Result<number>> {
   try {
     const token = await API.query.sft.tokenInfo([
       sftCollectionId,
@@ -218,7 +218,7 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
     console.log(rootDrops.value)
     const dropsCheckPromiseList = rootDrops.value.map(async (drop) => {
       const [collectionId, tokenId] = drop.collectionId.split(':');
-      const balance = await sftBalance(address, collectionId, tokenId);
+      const balance = await SftBalance(address, collectionId, tokenId);
       const linkableTokenIdsResult = await GetSFTAssetLinks(collectionId, tokenId, address); //Get the linkable token ids for the drop
 
       if (!linkableTokenIdsResult.success || !balance.success) return null;
