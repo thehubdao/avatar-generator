@@ -34,11 +34,11 @@ export interface ClaimableDrop {
 }
 
 export interface DropToClaim {
-    wearableIndex:string;
-    wearableType:string;
-    wearableAddress: string;
-    wearablePredictedTokenId: string;
-    signature: string;
+  wearableIndex: string;
+  wearableType: string;
+  wearableAddress: string;
+  wearablePredictedTokenId: string;
+  signature: string;
 }
 
 export interface Game {
@@ -72,7 +72,7 @@ export interface CitizenMetadata {
 export interface LuksoMetadata {
   fallbackImageUrl: string;
   imageUrl: string;
-  combination: string; 
+  combination: string;
   baseCombination: string;
   campaign: Campaign;
   tokenId: string;
@@ -106,7 +106,7 @@ export interface SolanaMetadata {
   asset_address: string;
 }
 
-export interface RootMetadata{
+export interface RootMetadata {
   imageUrl: string;
   combination: string;
   baseCombination: string;
@@ -167,6 +167,7 @@ export interface LinkableToken {
 export interface RootDrop extends Drop {
   schemaPart: string;
   collectionId: string;
+  typeIndex: number;
   linkableTokens?: LinkableToken[];
 }
 
@@ -219,5 +220,5 @@ export interface AssetLink {
 }
 
 export interface SFTAssetLink {
-  tokenId:string;
+  tokenId: string;
 }
