@@ -8,7 +8,7 @@ import { IndexFeatureInterface } from "../../../interfaces/api.interface";
 import { useSnackbar } from "../snackbar/snackbar.provider";
 import { ModelExtension } from "../../../enums/export.enum";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { setMarketplaceMode, setShoppingCart } from "../../../store/citizensMetadataSlice";
+import { setShoppingCart } from "../../../store/citizensMetadataSlice";
 
 interface DetailsUIProps {
   data: IndexFeatureInterface[];
@@ -111,7 +111,6 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
               </div>
               <div className="grid gap-4 pt-8">
                 <Button label="Continue checkout" light handleClick={() => {
-                  dispatch(setMarketplaceMode(true));
                   setIsModalOpen(false);
                 }} />
                 <Button label="Clean cart" light handleClick={() => {
