@@ -79,7 +79,7 @@ export async function GetSFTAssetLinks(collection_id: string, token_id: string, 
         return { success: true, value: links };
     } catch (error) {
         const e = error as Error;
-        LogError(Module.RootRegistryUtil, 'Error on getting asset links');
+        LogError(Module.RootRegistryUtil, 'Error on getting SFT asset links');
         return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
     }
 }
@@ -107,6 +107,7 @@ export async function GetAssetLinks(collection_id: string, token_id: string): Pr
     } catch (error) {
         const e = error as Error;
         LogError(Module.RootRegistryUtil, 'Error on getting asset links');
+        console.log(e)
         return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
     }
 }
