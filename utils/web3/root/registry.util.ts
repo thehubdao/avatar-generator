@@ -261,10 +261,11 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
 
     const combinationArray = newCombination.split('-');
     console.log(rootDropsArray);
-    const attributes = combinationArray.map((attributeIndex, typeIndex) => {
+    const attributesExpectedAmount = combinationArray.filter((index) => index != '0').length;
+    const attributesProcessing = combinationArray.map((attributeIndex, typeIndex) => {
         console.log(attributeIndex, typeIndex)
         const attribute = rootDropsArray.find(drop => drop.index.toString() === attributeIndex && drop.typeIndex.toString() === typeIndex.toString());
-        if (!attribute) throw new Error(`Attribute not found for index: ${attributeIndex}, typeIndex: ${typeIndex}`);
+        if (!attribute) return undefined;
         return {
             collectionId: attribute.collectionId,
             name: attribute.name,
@@ -273,6 +274,9 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
             index: attribute.index,
         };
     });
+    const filteredAttributes = attributesProcessing.filter(attribute => attribute !== undefined) as RootDrop[];
+
+    if(filteredAttributes.length!=attributesExpectedAmount) return { success: false, errMessage: "Attributes processing failed", errCode: "AttributesProcessingError" };
 
     const setRootAssetMetadataResult = await StoreAssetData({
         campaign: Campaign.Based,
@@ -280,7 +284,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
         collectionId: collection_id,
         combination: newCombination,
         imageUrl: imageUrl,
-        attributes
+        attributes: filteredAttributes
     } as AssetData);
 
     if (!setRootAssetMetadataResult.success) return { success: false, errMessage: setRootAssetMetadataResult.errMessage, errCode: setRootAssetMetadataResult.errCode };
