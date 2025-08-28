@@ -87,7 +87,7 @@ export async function GetSFTAssetLinks(collection_id: string, token_id: string, 
 
 export async function GetAssetLinks(collection_id: string, token_id: string): Promise<Result<AssetLink[]>> {
     try {
-        console.log(collection_id, token_id)
+        console.log(collection_id, token_id, CHAIN_ID)
         const graphqlLinksQuery = JSON.stringify({
             query: "query Asset($tokenId: String!, $collectionId: CollectionId! ) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        childLinks {\n          asset {\n            tokenId\n            collectionId\n            schema {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n}",
             variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}` }
@@ -262,6 +262,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     const combinationArray = newCombination.split('-');
 
     const attributes = combinationArray.map((attributeIndex, typeIndex) => {
+        console.log(attributeIndex, typeIndex)
         const attribute = rootDropsArray.find(drop => drop.index.toString() === attributeIndex && drop.typeIndex.toString() === typeIndex.toString());
         if (!attribute) throw new Error(`Attribute not found for index: ${attributeIndex}, typeIndex: ${typeIndex}`);
         return {
