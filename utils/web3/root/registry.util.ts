@@ -146,6 +146,7 @@ export async function GetRootAssetNewCombination(assetLinks: AssetLink[], curren
         const newCombinationArray = assetCurrentCombinationArray.map((_, featureTypeIndex) => {
             const featureType = campaignFeatures[featureTypeIndex];
             const link = assetLinks.find(link => link.asset.schema.name === featureType.meshName); //Find if there's a link for the specfic body part type
+            console.log(assetLinks, featureType.meshName, link?.asset.schema.name)
             if (!link) return 0; // If there's no link, use base feature
 
             const dropCollectionId = link.asset.collectionId.split(':')[2]; //If there's a link, get the collection id of the link
@@ -258,7 +259,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     const imageUrl = await GetImageUrl(Campaign.Based, newCombination);
     const setRootAssetImageUrlResult = await SetRootAssetImageUrl(imageUrl, collection_id, token_id, authToken);
     if (!setRootAssetImageUrlResult.success) return { success: false, errMessage: setRootAssetImageUrlResult.errMessage, errCode: setRootAssetImageUrlResult.errCode };
-
+    console.log(newCombination)
     const combinationArray = newCombination.split('-');
     console.log(rootDropsArray);
     const attributesExpectedAmount = combinationArray.filter((index) => index != '0').length;
