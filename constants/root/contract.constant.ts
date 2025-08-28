@@ -27,7 +27,7 @@ export let ASSET_REGISTER_SDK: AssetRegister;
 export let API: ApiPromise;
 export let SIGNER: Signer;
 export let KEYRING_SIGNER: KeyringPair;
-export let IS_INIT: boolean;
+export let isINIT: boolean;
 
 export async function InitializeContractEssentialData(_signer?: Signer, _keyringSigner?: KeyringPair) {
   if (API) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Api already initialized');
@@ -57,5 +57,5 @@ export async function InitializeContractEssentialData(_signer?: Signer, _keyring
     },
   });
 
-  IS_INIT = true;
+  isINIT = true;
 }

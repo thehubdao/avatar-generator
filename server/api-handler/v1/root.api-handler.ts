@@ -3,7 +3,7 @@ import { ApiResponse } from "../../../interfaces/api.interface";
 import { DefaultApiResponse } from "../../enums/api.enum";
 import { RequestResponse } from "../request.api-handler";
 import { GetRootRegistryAuthToken, UpdateRootAsset } from "../../../utils/web3/root/registry.util";
-import { InitializeContractEssentialData, IS_INIT, ROOT_SIGNER_PK } from "../../../constants/root/contract.constant";
+import { InitializeContractEssentialData, isINIT, ROOT_SIGNER_PK } from "../../../constants/root/contract.constant";
 import { GetAdminSigner } from "../../../utils/web3/root/contract.util";
 
 export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<string[]>>) {
@@ -19,7 +19,7 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
 
   if (!authToken.success) return RequestResponse(res, "ServerError", false, DefaultApiResponse.ErrorProcessingInfo);
 
-  if (!IS_INIT) {
+  if (!isINIT) {
     const adminSigner = GetAdminSigner();
     await InitializeContractEssentialData(undefined, adminSigner);
   }
