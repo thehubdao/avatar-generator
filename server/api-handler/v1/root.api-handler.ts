@@ -11,7 +11,7 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
   const { events } = data;
   const event = events[0];
   const [, , , , collectionId, tokenId] = event.args[1].split(':');
-
+  console.log(event, collectionId, tokenId, event.args[1]);
   if (!data)
     return RequestResponse(res, "BadRequest", false, DefaultApiResponse.MissingInfo);
 

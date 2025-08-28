@@ -87,6 +87,7 @@ export async function GetSFTAssetLinks(collection_id: string, token_id: string, 
 
 export async function GetAssetLinks(collection_id: string, token_id: string): Promise<Result<AssetLink[]>> {
     try {
+        console.log(collection_id, token_id)
         const graphqlLinksQuery = JSON.stringify({
             query: "query Asset($tokenId: String!, $collectionId: CollectionId! ) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        childLinks {\n          asset {\n            tokenId\n            collectionId\n            schema {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n}",
             variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}` }
