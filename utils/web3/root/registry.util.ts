@@ -101,6 +101,7 @@ export async function GetAssetLinks(collection_id: string, token_id: string): Pr
         });
         const resultText = await result.text();
         const resultJson = JSON.parse(resultText);
+        console.log(resultJson)
         const links = resultJson.data.asset.links.childLinks as AssetLink[];
 
         return { success: true, value: links };
