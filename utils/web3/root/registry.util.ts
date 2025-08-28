@@ -277,7 +277,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     const filteredAttributes = attributesProcessing.filter(attribute => attribute !== undefined) as RootDrop[];
 
     if(filteredAttributes.length!=attributesExpectedAmount) return { success: false, errMessage: "Attributes processing failed", errCode: "AttributesProcessingError" };
-
+console.log(filteredAttributes)
     const setRootAssetMetadataResult = await StoreAssetData({
         campaign: Campaign.Based,
         tokenId: token_id,
