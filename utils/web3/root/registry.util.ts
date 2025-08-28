@@ -260,7 +260,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     if (!setRootAssetImageUrlResult.success) return { success: false, errMessage: setRootAssetImageUrlResult.errMessage, errCode: setRootAssetImageUrlResult.errCode };
 
     const combinationArray = newCombination.split('-');
-
+    console.log(rootDropsArray);
     const attributes = combinationArray.map((attributeIndex, typeIndex) => {
         console.log(attributeIndex, typeIndex)
         const attribute = rootDropsArray.find(drop => drop.index.toString() === attributeIndex && drop.typeIndex.toString() === typeIndex.toString());
