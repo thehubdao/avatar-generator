@@ -146,7 +146,7 @@ export async function GetRootAssetNewCombination(assetLinks: AssetLink[], curren
         const newCombinationArray = assetCurrentCombinationArray.map((_, featureTypeIndex) => {
             const featureType = campaignFeatures[featureTypeIndex];
             const link = assetLinks.find(link => link.asset.schema.name === featureType.meshName); //Find if there's a link for the specfic body part type
-            console.log(assetLinks, featureType.meshName, link?.asset.schema.name)
+            console.log(assetLinks, featureType.meshName, link?.asset.schema, link?.asset.schema.name)
             if (!link) return 0; // If there's no link, use base feature
 
             const dropCollectionId = link.asset.collectionId.split(':')[2]; //If there's a link, get the collection id of the link
