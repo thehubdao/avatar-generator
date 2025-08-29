@@ -150,6 +150,7 @@ export async function GetRootAssetNewCombination(assetLinks: AssetLink[], curren
             if (!link) return 0; // If there's no link, use base feature
 
             const dropCollectionId = link.asset.collectionId.split(':')[2]+':' + link.asset.tokenId; //If there's a link, get the collection id of the link
+            console.log(dropCollectionId)
             const newIndex = rootDrops.find(drop => drop.type === link.asset.schema.name && drop.collectionId === dropCollectionId); //Get the index of the new feature from drops array
 
             if (!newIndex) return 0;
