@@ -87,7 +87,6 @@ export async function GetSFTAssetLinks(collection_id: string, token_id: string, 
 
 export async function GetAssetLinks(collection_id: string, token_id: string): Promise<Result<AssetLink[]>> {
     try {
-        console.log(collection_id, token_id, CHAIN_ID)
         const graphqlLinksQuery = JSON.stringify({
             query: "query Asset($tokenId: String!, $collectionId: CollectionId! ) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        childLinks {\n          asset {\n            tokenId\n            collectionId\n            schema {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n}",
             variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}` }
@@ -102,14 +101,12 @@ export async function GetAssetLinks(collection_id: string, token_id: string): Pr
         });
         const resultText = await result.text();
         const resultJson = JSON.parse(resultText);
-        console.log(resultJson)
         const links = resultJson.data.asset.links.childLinks as AssetLink[];
 
         return { success: true, value: links };
     } catch (error) {
         const e = error as Error;
         LogError(Module.RootRegistryUtil, 'Error on getting asset links');
-        console.log(e)
         return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
     }
 }
@@ -146,11 +143,9 @@ export async function GetRootAssetNewCombination(assetLinks: AssetLink[], curren
         const newCombinationArray = assetCurrentCombinationArray.map((_, featureTypeIndex) => {
             const featureType = campaignFeatures[featureTypeIndex];
             const link = assetLinks.find(link => link.asset.schema.name === featureType.meshName); //Find if there's a link for the specfic body part type
-            console.log(assetLinks, featureType.meshName, link?.asset.schema, link?.asset.schema.name)
             if (!link) return 0; // If there's no link, use base feature
 
             const dropCollectionId = link.asset.collectionId.split(':')[2]+':' + link.asset.tokenId; //If there's a link, get the collection id of the link
-            console.log(dropCollectionId)
             const newIndex = rootDrops.find(drop => drop.type === link.asset.schema.name && drop.collectionId === dropCollectionId); //Get the index of the new feature from drops array
 
             if (!newIndex) return 0;
@@ -260,12 +255,9 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     const imageUrl = await GetImageUrl(Campaign.Based, newCombination);
     const setRootAssetImageUrlResult = await SetRootAssetImageUrl(imageUrl, collection_id, token_id, authToken);
     if (!setRootAssetImageUrlResult.success) return { success: false, errMessage: setRootAssetImageUrlResult.errMessage, errCode: setRootAssetImageUrlResult.errCode };
-    console.log(newCombination)
     const combinationArray = newCombination.split('-');
-    console.log(rootDropsArray);
     const attributesExpectedAmount = combinationArray.filter((index) => index != '0').length;
     const attributesProcessing = combinationArray.map((attributeIndex, typeIndex) => {
-        console.log(attributeIndex, typeIndex)
         const attribute = rootDropsArray.find(drop => drop.index.toString() === attributeIndex && drop.typeIndex.toString() === typeIndex.toString());
         if (!attribute) return undefined;
         return {
@@ -279,7 +271,6 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     const filteredAttributes = attributesProcessing.filter(attribute => attribute !== undefined) as RootDrop[];
 
     if(filteredAttributes.length!=attributesExpectedAmount) return { success: false, errMessage: "Attributes processing failed", errCode: "AttributesProcessingError" };
-console.log(filteredAttributes)
     const setRootAssetMetadataResult = await StoreAssetData({
         campaign: Campaign.Based,
         tokenId: token_id,

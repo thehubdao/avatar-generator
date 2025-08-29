@@ -215,7 +215,6 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
       errMessage: "No drops found",
       errCode: CommonErrorCode.GetNoData
     };
-    console.log(rootDrops.value)
     const dropsCheckPromiseList = rootDrops.value.map(async (drop) => {
       const [collectionId, tokenId] = drop.collectionId.split(':');
       const balance = await SftBalance(address, collectionId, tokenId);
@@ -253,9 +252,7 @@ export async function EquipFeaturesOperations(parent_collection_id: string, pare
   const operations: Operation[] = [];
 
   for (const attribute of newAttributes) {
-    console.log(attribute);
     const [collectionId, tokenId] = attribute.collectionId.split(':');
-    console.log(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId)
     const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId);
     if (!createAssetLinkOperation.success) return { success: false, errMessage: createAssetLinkOperation.errMessage, errCode: createAssetLinkOperation.errCode };
     operations.push(createAssetLinkOperation.value);
@@ -285,11 +282,10 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
 export async function SetRootNewCombination(parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
   try {
     const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
-    console.log(newAttributes, oldAttributes);
+
     const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, newAttributes);
     const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, oldAttributes);
 
-    console.log(equipOperations, unequipOperations);
 
     if (!equipOperations.success || !unequipOperations.success) return { success: false, errMessage: 'Error on setting new combination. All operations must be successful', errCode: CommonErrorCode.InternalError };
 
