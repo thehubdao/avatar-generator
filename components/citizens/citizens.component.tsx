@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import CitizensUI from "../../ui/citizens/citizens.ui";
 import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign, RequestBurnDrops, RequestClaimApprove } from "../../utils/api.util";
-import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
+import { EnvMapInterface, FeatureInterface, IndexFeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData, ChangeSkinColor } from "../avatar/editor.component";
 import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
@@ -43,14 +43,14 @@ export default function CitizensComponent() {
   const isMarketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
 
   // Local references
-  const baseExportData = useRef<ExportInterface>({ attributes: [] });
+  const singleInitData = useRef<SingleInterface>();
+  const initialFeaturesData = useRef<IndexFeatureInterface[] | null>(null);
   const exportData = useRef<ExportInterface>({ attributes: [] });
   const featureList = useRef<FeatureInterface[]>([]);
   const optionList = useRef<FeatureInterface[]>([]);
   const claimableDropsList = useRef<ClaimableDrop[]>([]);
   const claimableDropsFeatureList = useRef<FeatureInterface[]>([]);
   const envMapList = useRef<EnvMapInterface[]>();
-  const singleInitData = useRef<SingleInterface>();
 
   const browserProvider = useBlockchainProvider();
 
@@ -227,6 +227,11 @@ export default function CitizensComponent() {
         getSingleInfo(),
         getSingleData(selectedCampaign as string, selectedCitizen?.combination as string),
       ]);
+
+      if (!initialFeaturesData.current && singleInitData.current) {
+        initialFeaturesData.current = structuredClone(singleInitData.current.features);
+      }
+
       await SetFeaturesData(campaignParams?.features ?? []);
 
       const bgMap = envMapList.current?.find(
@@ -871,32 +876,32 @@ export default function CitizensComponent() {
     return { success: false, message: "We can't do the process right now, try again later!" };
   }
 
-  function onResetCombination(type?: string) {
-    loadSingleData(type);
-    // replace type with the base type if it exists
+  async function onResetFeature(type?: string): Promise<boolean> {
+
+    if (!initialFeaturesData.current) {
+      LogError(Module.Citizens, 'Initial export data is undefined in onResetCombination');
+      return false;
+    }
+
     if (type) {
-      console.log('baseExportData on reset:', baseExportData.current.attributes);
-
-      const baseFeature = baseExportData.current.attributes.find(attr => attr.id === type);
-      if (baseFeature) {
-        exportData.current.attributes = exportData.current.attributes.filter(attr => attr.id !== type);
-        exportData.current.attributes.push(baseFeature);
-        console.log(`Reset combination for type ${type}:`, exportData.current.attributes, baseExportData.current.attributes, baseFeature);
-
+      const initialAttribute = initialFeaturesData.current.find(attr => attr.val.type === type);
+      
+      if (initialAttribute) {
+        await ChangeFeature(initialAttribute.val.id, initialAttribute.val.path, initialAttribute.val.name, type, campaignParams?.config.skin?.defColor ?? 'FFFFFF');
+        addReplaceAttribute(initialAttribute.val.type, initialAttribute.val.name);
+        return true;
+      } else {
+        LogError(Module.Citizens, `Initial attribute for type ${type} not found in onResetCombination`);
+        return false;
       }
     } else {
-      // use spread operator
-      exportData.current.attributes = [...baseExportData.current.attributes]; // Reset to base export data
-      console.log(`Reset combination without type:`, exportData.current.attributes);
-
+      for (const initialAttribute of initialFeaturesData.current) {
+        await ChangeFeature(initialAttribute.val.id, initialAttribute.val.path, initialAttribute.val.name, initialAttribute.val.type, campaignParams?.config.skin?.defColor ?? 'FFFFFF');
+        addReplaceAttribute(initialAttribute.val.type, initialAttribute.val.name);
+      }
+      return true;
     }
   }
-
-  useEffect(() => {
-    // Initialize the export data with the base export data
-    console.log(`Change base export data:`, baseExportData.current.attributes);
-
-  }, [baseExportData.current.attributes]);
 
   return <CitizensUI
     singleInitData={singleInitData.current}
@@ -910,6 +915,6 @@ export default function CitizensComponent() {
     handleSaveCombination={() => handleSaveCombination()}
     handleBuying={() => onBuying()}
     handleMinting={() => onMinting()}
-    handleResetCombination={(type) => onResetCombination(type)}
+    handleResetCombination={(type) => onResetFeature(type)}
   />
 }

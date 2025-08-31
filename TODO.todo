@@ -54,14 +54,17 @@ MARKETPLACE:
         ✔ Add download verification in details @done
         ✔ Create clean shopping cart button @done
         ✔ Remove save combination button from marketplace on mobile @done
-        ☐ Clean shopping cart once user checks out
-        ☐ Reset wearable in 3D model when user remove item from cart
+        ✔ Reset wearable in 3D model when user remove item from cart @done
+        ✔ Review some features that change the 3d model but don't show in the shopping cart (underwear mask, face) @done
         ☐ Fix error on selected feature when it is removed from cart from different feature category (baseExportData/exportData)
-        ☐ Review some features that change the 3d model but don't show in the shopping cart (underwear mask, face)
+        ☐ Clean shopping cart once user checks out
         ☐ Add empty item in empty category on mobile
         ☐ The purchased wearables still the price, remove it
         ☐ Don't show owned wearables in marketplace
         ☐ Remove items for cart when user removes them from edit mode feature selection
+        ☐ Add isClaimable behavior to drops
+        ☐ Add 'shop here' text in marketplace button when it is closed
+        ☐ Load cart items (if these exist) when charge the avatar editor
 
     TO CONSIDER:
         ☐ Add feature to save cart for later

@@ -38,6 +38,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
   const handleCleanCart = () => {
     dispatch(setShoppingCart([]));
     setShoppingCartItems([]);
+    onRemoveItem();
   };
 
   const getTotalAvailableItems = () => {

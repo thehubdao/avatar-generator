@@ -5,7 +5,7 @@ import HudUI from "../avatar/hud.ui";
 import { BasicData, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
 import { FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../../components/avatar/viewer.component";
-import { FilterList } from "../../utils/common.util";
+import { FilterList, LogError } from "../../utils/common.util";
 import { setEditMode, setMarketplaceMode, setShoppingCart } from "../../store/citizensMetadataSlice";
 import DetailsUI from "./common/details.ui";
 import SnackbarProvider from "./snackbar/snackbar.provider";
@@ -16,6 +16,8 @@ import LoadingUI from "./common/loading.ui";
 import ShoppingCartUI from "./backpack/shoppingCart.ui";
 import Link from "next/link";
 import Button from "./common/button.ui";
+import { Module } from "../../enums/common.enum";
+import Modal from "./common/modal.ui";
 
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
@@ -29,7 +31,7 @@ interface CitizensUIProps {
 	handleSaveCombination: () => Promise<boolean>;
 	handleBuying: () => Promise<boolean>;
 	handleMinting: () => Promise<boolean>;
-	handleResetCombination: (type?: string) => void;
+	handleResetCombination: (type?: string) => Promise<boolean>;
 }
 
 export default function CitizensUI({ singleInitData, exportData, featureList, marketplaceFeatureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleBuying, handleMinting, handleResetCombination }: CitizensUIProps) {
@@ -108,9 +110,13 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 		dispatch(setShoppingCart(updatedCart));
 	}
 
-	function onMarketOptionRemove(type?: string) {
-		handleResetCombination(type);
+	async function onMarketOptionRemove(type?: string) {
+		const isSuccess = await handleResetCombination(type);
 
+		if (!isSuccess) {
+			LogError(Module.Citizens, 'Error resetting combination in onMarketOptionRemove');
+			return;
+		}
 		// Remove the item from the shopping cart if it matches the category selected
 		if (type && type === selectedCategory) {
 			setSelectedOption(undefined);
@@ -284,6 +290,25 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 													onClickBackButton={() => dispatch(setEditMode(false))}
 													isLoading={false}
 												/>
+												{didEditMode && shoppingCart !== null && shoppingCart.length > 0 &&
+													<Modal handleClose={() => dispatch(setEditMode(false))}>
+														<div className="grid justify-items-center">
+															<div className="text-center text-white grid gap-4">
+																<p className="font-bold text-2xl">Shopping Process</p>
+																<p className="text-lg">You have items in the cart, <br />please proceed to checkout.</p>
+															</div>
+															<div className="grid gap-4 pt-8">
+																<Button label="Continue checkout" light handleClick={() => {
+																	dispatch(setEditMode(false));
+																}} />
+																<Button label="Clean cart" light handleClick={async () => {
+																	await onMarketOptionRemove();
+																	dispatch(setShoppingCart([]));
+																}} />
+															</div>
+														</div>
+													</Modal>
+												}
 											</div>
 										}
 										{/* MARKETPLACE MODE HUD */}
@@ -320,7 +345,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 														isLoading={false}
 													/>
 												</div>
-												{!didEditMode && <ShoppingCartUI onRemoveItem={(type) => onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />}
+												{!didEditMode && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />}
 											</>
 
 										}
