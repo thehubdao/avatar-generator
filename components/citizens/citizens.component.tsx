@@ -6,7 +6,7 @@ import { EnvMapInterface, FeatureInterface, SingleInterface } from "../../interf
 import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData, ChangeSkinColor } from "../avatar/editor.component";
 import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
-import { ExportInterface } from "../../interfaces/common.interface";
+import { ExportInterface, MintUIResult } from "../../interfaces/common.interface";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
 import { SetImageUrl, GetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
@@ -27,6 +27,7 @@ import { GetCanvasImageUrl } from "../avatar/viewer.component";
 import { StoreAssetData } from "../../utils/firebase.util";
 import { AssetData } from "../../interfaces/firebase.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
+import { RootErrorCode } from "../../enums/root/common.enum";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -843,29 +844,31 @@ export default function CitizensComponent() {
     return await saveLuksoCombination(claimResult.value);
   }
 
-  async function onMinting() {
+  async function onMinting(): Promise<MintUIResult> {
     if (!walletAddress) {
       LogError(Module.Citizens, 'Wallet address is undefined in onMinting');
-      return false;
+      return { success: false, message: "We can't do the process right now, try again later!" };
     }
 
     if (selectedCampaign == Campaign.Kumi) {    /* Kumi Minting Function */
       const mintResult = await MintKumiCitizen();
       if (mintResult.success && walletAddress) {
         const isFetchSuccess = await fetchSolanaMetadata(walletAddress);
-        return isFetchSuccess;
+        return { success: isFetchSuccess, message: isFetchSuccess ? 'Your citizen has been claimed!' : "We can't do the process right now, try again later!" };
       }
-      else return false;
+      else return { success: false, message: "We can't do the process right now, try again later!" };
     } else if (selectedCampaign == Campaign.Based) {     /* Based Minting Function */
 
       const mintResult = await MintRootAsset(walletAddress, CampaignBaseCombination.Based, CampaignBaseUrl.Based);
       if (mintResult.success) {
         const isFetchSuccess = await fetchRootMetadata(walletAddress);
-        return isFetchSuccess;
+        return { success: isFetchSuccess, message: isFetchSuccess ? 'Your citizen has been claimed!' : "We can't do the process right now, try again later!" };
+      } else if (mintResult.errCode === RootErrorCode.InsufficientFunds) {
+        return { success: false, message: "Insufficient funds" + mintResult.errMessage };
       }
-      else return false;
+      else return { success: false, message: "We can't do the process right now, try again later!" };
     }
-    return false;
+    return { success: false, message: "We can't do the process right now, try again later!" };
   }
 
   function onResetCombination(type?: string) {

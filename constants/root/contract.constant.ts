@@ -22,6 +22,9 @@ export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID as string;
 
 export const ROOT_SIGNER_PK = process.env.ROOT_SIGNER_PK as string;
 
+export const BASE_ETH_NUMBER = 10;
+export const BASE_DECIMALS_NUMBER = 18;
+
 export let ASSET_REGISTER_SDK: AssetRegister;
 
 export let API: ApiPromise;

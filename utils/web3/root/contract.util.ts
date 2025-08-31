@@ -1,4 +1,4 @@
-import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER } from '../../../constants/root/contract.constant';
+import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER, BASE_ETH_NUMBER, BASE_DECIMALS_NUMBER } from '../../../constants/root/contract.constant';
 import { TransactionBuilder } from '@futureverse/transact';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
@@ -15,10 +15,10 @@ import { RootTransactionStatus } from '../../../enums/web3';
 import { CreateAssetLinkOperationMessage, DeleteAssetLinkOperationMessage, GetLinkableTokenId, GetSFTAssetLinks } from './registry.util';
 import { GetCampaignDrops } from '../citizens.util';
 import { Keyring } from '@polkadot/api';
-import { hexToU8a } from '@polkadot/util';
+import { BN, hexToU8a } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { AssetRegistryAction } from '../../../enums/root/common.enum';
+import { AssetRegistryAction, RootErrorCode } from '../../../enums/root/common.enum';
 
 export function GetAdminSigner(): KeyringPair {
   const keyring = new Keyring({ type: "ethereum" });
@@ -151,6 +151,15 @@ export async function MintRootAsset(
   try {
     const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
     const mintBuilder = TransactionBuilder.nft(API, SIGNER, EOA_ADDRESS, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
+    const mintBigIntFees = await mintBuilder.getGasFees();
+    const mintIntFees = Number(mintBigIntFees.gasFee) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
+    const walletBigIntBalance = await API.rpc.eth.getBalance(EOA_ADDRESS);
+    const walletIntBalance = Number(walletBigIntBalance.div(new BN(BASE_ETH_NUMBER).pow(new BN(BASE_DECIMALS_NUMBER))));
+
+    if (walletIntBalance < mintIntFees) {
+      return { success: false, errMessage: mintIntFees + "XRP are required in wallet balance to mint this asset", errCode: RootErrorCode.InsufficientFunds };
+    }
+
     await mintBuilder.signAndSend();
     const tokenIdsResult = await GetRootAssetTokenIds(address, NFT_COLLECTION_ID);
     if (tokenIdsResult.success) {
