@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import AvatarEditor from "../../components/avatar/editor.component";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import HudUI from "../avatar/hud.ui";
-import { BasicData, ExportInterface, LookAtVectors } from "../../interfaces/common.interface";
+import { BasicData, ExportInterface, LookAtVectors, MintUIResult } from "../../interfaces/common.interface";
 import { FeatureInterface, SingleInterface } from "../../interfaces/api.interface";
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../../components/avatar/viewer.component";
 import { FilterList, LogError } from "../../utils/common.util";
@@ -30,7 +30,7 @@ interface CitizensUIProps {
 	handleOptionChange: (id, path, name, category) => Promise<void>;
 	handleSaveCombination: () => Promise<boolean>;
 	handleBuying: () => Promise<boolean>;
-	handleMinting: () => Promise<boolean>;
+	handleMinting: () => Promise<MintUIResult>;
 	handleResetCombination: (type?: string) => Promise<boolean>;
 }
 
