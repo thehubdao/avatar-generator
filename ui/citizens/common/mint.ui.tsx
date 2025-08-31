@@ -5,7 +5,6 @@ import Button from "./button.ui";
 import ArrowMintSVG from "./SVG/arrowMintSVG.ui";
 import Modal from "./modal.ui";
 import Loader from "../../lukso/common/loader.ui";
-import CheckedSVG from "./SVG/checkedSVG.ui";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { setMintingMode } from "../../../store/citizensMetadataSlice";
 import PlusSVG from "./SVG/plusSVG.ui";
@@ -13,6 +12,9 @@ import { useMediaQuery } from "usehooks-ts";
 import Counter from "./counter.ui";
 import { Campaign } from "../../../enums/citizens/common.enum";
 import { MINTING_TARGET_DATE } from "../../../constants/citizens.constant";
+import { MintUIResult } from "../../../interfaces/common.interface";
+import FaceSMileSVG from "./SVG/faceSmileSVG.ui";
+import FaceSadSVG from "./SVG/faceSadSVG.ui";
 
 interface MintUIProps {
   imgUrl?: string;
@@ -21,7 +23,7 @@ interface MintUIProps {
   campaignDescription?: string;
   price?: number;
   supply?: number;
-  onMinting: () => Promise<boolean>;
+  onMinting: () => Promise<MintUIResult>;
 }
 
 export default function MintUI({
@@ -36,6 +38,7 @@ export default function MintUI({
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isMinting, setIsMinting] = useState<boolean>(false);
   const [isMinted, setIsMinted] = useState<boolean | null>(null);
+  const [mintedMessage, setMintedMessage] = useState<string | null>(null);
 
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false);
   const [isMintOpen, setIsMintOpen] = useState<boolean>(false);
@@ -54,8 +57,9 @@ export default function MintUI({
 
   async function handleMint() {
     setIsMinting(true);
-    const isSuccess = await onMinting();
-    setIsMinted(isSuccess);
+    const result = await onMinting();
+    setIsMinted(result.success);
+    setMintedMessage(result.message);
   }
 
   function handleButtonClick(type: 'info' | 'mint') {
@@ -202,30 +206,14 @@ export default function MintUI({
         </Modal>
       }
       {
-        isMinted &&
-        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => dispatch(setMintingMode(false))}>
+        isMinted !== null &&
+        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[500px]" handleClose={() => dispatch(setMintingMode(false))}>
           <div className="grid justify-items-center">
-            <div className="text-center text-white grid gap-4 pb-4">
-              <p className="font-bold text-2xl">Congratulations!</p>
-              <p className="text-lg">Your citizen has been claimed!</p>
+            {isMinted ? <FaceSMileSVG /> : <FaceSadSVG />}
+            <div className="text-center text-white grid gap-2 py-4 px-2">
+              <p className="font-semibold text-2xl">{isMinted ? 'Congratulations!':'Error!'}</p>
+              <p className="text-xl">{mintedMessage}</p>
             </div>
-            <CheckedSVG />
-          </div>
-        </Modal>
-      }
-      {
-        isModalOpen && isMinted === false &&
-        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => {
-          setIsModalOpen(false);
-          setIsMinting(false);
-          setIsMinted(null);
-        }}>
-          <div className="grid justify-items-center">
-            <div className="text-center text-white grid gap-4 pb-4">
-              <p className="font-bold text-2xl">Ups!</p>
-              <p className="text-lg">We can&apos;t do the process right now, try again later!</p>
-            </div>
-            <CheckedSVG />
           </div>
         </Modal>
       }
