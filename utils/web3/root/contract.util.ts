@@ -157,7 +157,7 @@ export async function MintRootAsset(
     const walletIntBalance = Number(walletBigIntBalance.div(new BN(BASE_ETH_NUMBER).pow(new BN(BASE_DECIMALS_NUMBER))));
 
     if (walletIntBalance < mintIntFees) {
-      return { success: false, errMessage: mintIntFees + "XRP are required in wallet balance to mint this asset", errCode: RootErrorCode.InsufficientFunds };
+      return { success: false, errMessage: mintIntFees + " XRP are required in wallet balance to mint this asset", errCode: RootErrorCode.InsufficientFunds };
     }
 
     await mintBuilder.signAndSend();
