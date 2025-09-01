@@ -110,7 +110,7 @@ export default function CitizensUI({ claimableDrops, currentSection, currentColl
         <Play />
       }
       {currentSection === CitizensSections.Mint &&
-        <MintUI supply={collectionSupply} onMinting={mintRedirect} />
+        <MintUI supply={collectionSupply} onMinting={mintRedirect as any} />
       }
     </>
   );
