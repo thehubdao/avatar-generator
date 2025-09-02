@@ -156,8 +156,14 @@ export async function MintRootAsset(
     const walletBigIntBalance = await API.rpc.eth.getBalance(EOA_ADDRESS);
     const walletIntBalance = Number(walletBigIntBalance.div(new BN(BASE_ETH_NUMBER).pow(new BN(BASE_DECIMALS_NUMBER))));
 
-    if (walletIntBalance < mintIntFees) {
-      return { success: false, errMessage: mintIntFees + " XRP are required in wallet balance to mint this asset", errCode: RootErrorCode.InsufficientFunds };
+    const mintDetails = (await API.query.nft.publicMintInfo(NFT_COLLECTION_ID)).toHuman() as { enabled: boolean, pricingDetails: Array<string> };
+
+    const mintPrice = Number(mintDetails?.pricingDetails[1].split(',').join('')) / Math.pow(10, 6);
+
+    if (!mintDetails?.enabled) { return { success: false, errMessage: "Minting is not enabled", errCode: CommonErrorCode.InternalError }; }
+
+    if (walletIntBalance < mintIntFees + mintPrice) {
+      return { success: false, errMessage: " " + Number(mintIntFees + mintPrice) + " XRP are required in wallet balance to mint this asset", errCode: RootErrorCode.InsufficientFunds };
     }
 
     await mintBuilder.signAndSend();
@@ -211,7 +217,7 @@ export async function GetRootCollectionSupply(): Promise<Result<number>> {
 }
 
 export async function GetRootMintingPrice(): Promise<Result<MintingPriceData>> {
-  return { success: true, value: { mintPrice: 0, mintingPriceSymbol: 'XRP' } };
+  return { success: true, value: { mintPrice: 0.16, mintingPriceSymbol: 'XRP' } };
 }
 
 export async function GetRootUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {

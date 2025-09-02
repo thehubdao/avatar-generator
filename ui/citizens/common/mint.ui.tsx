@@ -133,7 +133,7 @@ export default function MintUI({
                     <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
                   </>
                   :
-                  <Counter onReachZero={() => handleTimeReachedZero()} targetDate={MINTING_TARGET_DATE[selectedCampaign as Campaign]}/>}
+                  <Counter onReachZero={() => handleTimeReachedZero()} targetDate={MINTING_TARGET_DATE[selectedCampaign as Campaign]} />}
               </div >
             </div>
           </div >
@@ -174,7 +174,7 @@ export default function MintUI({
                 <p className="font-medium text-center pt-4 text-white">Current Supply: {supply || mintingSupply}</p>
               </>
               :
-              <Counter onReachZero={() => handleTimeReachedZero()} targetDate={MINTING_TARGET_DATE[selectedCampaign as Campaign]}/>
+              <Counter onReachZero={() => handleTimeReachedZero()} targetDate={MINTING_TARGET_DATE[selectedCampaign as Campaign]} />
             }
           </div >
         </>
@@ -195,7 +195,7 @@ export default function MintUI({
         </Modal>
       }
       {
-        isMinting && isMinted === null &&
+        isModalOpen && isMinting && isMinted === null &&
         <Modal modalStyles="min-h-fit w-[80vw] sm:w-[60vw]" handleClose={() => { }}>
           <div className="grid justify-items-center">
             <Loader size={69} />
@@ -207,11 +207,18 @@ export default function MintUI({
       }
       {
         isMinted !== null &&
-        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[500px]" handleClose={() => dispatch(setMintingMode(false))}>
+        <Modal modalStyles="min-h-fit w-[80vw] sm:w-[500px]" handleClose={() => {
+          if (isMinted) dispatch(setMintingMode(false));
+          else {
+            setIsMinted(null);
+            setIsModalOpen(false);
+            setIsMinting(false);
+          }
+        }}>
           <div className="grid justify-items-center">
             {isMinted ? <FaceSMileSVG /> : <FaceSadSVG />}
             <div className="text-center text-white grid gap-2 py-4 px-2">
-              <p className="font-semibold text-2xl">{isMinted ? 'Congratulations!':'Error!'}</p>
+              <p className="font-semibold text-2xl">{isMinted ? 'Congratulations!' : 'Error!'}</p>
               <p className="text-xl">{mintedMessage}</p>
             </div>
           </div>
