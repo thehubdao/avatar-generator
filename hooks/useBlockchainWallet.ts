@@ -372,6 +372,8 @@ export function useBlockchainWallet() {
     dispatch(setSelectedCampaign(campaign ?? null));
   }
 
+  useEffect(()=>{console.log(userSession, "USER SESSION")}, [userSession]);
+
   const HandleLogout = async () => {
     if (blockchainType === Blockchain.Root) {
       signOutPass({ flow: 'silent', disableConsent: true });
