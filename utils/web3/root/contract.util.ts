@@ -1,4 +1,4 @@
-import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER, BASE_ETH_NUMBER, BASE_DECIMALS_NUMBER, ROOT_TOKEN_ID } from '../../../constants/root/contract.constant';
+import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER, BASE_ETH_NUMBER, ROOT_TOKEN_ID } from '../../../constants/root/contract.constant';
 import { TransactionBuilder } from '@futureverse/transact';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
@@ -15,7 +15,7 @@ import { RootTransactionStatus } from '../../../enums/web3';
 import { CreateAssetLinkOperationMessage, DeleteAssetLinkOperationMessage, GetLinkableTokenId, GetSFTAssetLinks } from './registry.util';
 import { GetCampaignDrops } from '../citizens.util';
 import { Keyring } from '@polkadot/api';
-import { BN, hexToU8a } from '@polkadot/util';
+import {hexToU8a } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { AssetRegistryAction, RootErrorCode } from '../../../enums/root/common.enum';
