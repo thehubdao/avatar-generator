@@ -159,7 +159,7 @@ export async function MintRootAsset(
 
     const mintBigIntFees = await mintBuilder.getGasFees();
     const mintIntFees = Number(mintBigIntFees.gasFee) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
-    const {balance:walletBigIntBalance} = await mintBuilder.checkBalance({ assetId: Number(ROOT_TOKEN_ID) });
+    const {balance:walletBigIntBalance} = await mintBuilder.checkBalance({ assetId: ROOT_TOKEN_ID });
     const walletIntBalance = Number(walletBigIntBalance)/Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
 
     const mintDetails = (await API.query.nft.publicMintInfo(NFT_COLLECTION_ID)).toHuman() as { enabled: boolean, pricingDetails: Array<string> };
