@@ -22,12 +22,17 @@ export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID as string;
 
 export const ROOT_SIGNER_PK = process.env.ROOT_SIGNER_PK as string;
 
+export const BASE_ETH_NUMBER = 10;
+export const BASE_DECIMALS_NUMBER = 18;
+
+export const ROOT_TOKEN_ID = 1;
+
 export let ASSET_REGISTER_SDK: AssetRegister;
 
 export let API: ApiPromise;
 export let SIGNER: Signer;
 export let KEYRING_SIGNER: KeyringPair;
-
+export let isINIT: boolean;
 
 export async function InitializeContractEssentialData(_signer?: Signer, _keyringSigner?: KeyringPair) {
   if (API) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Api already initialized');
@@ -56,4 +61,6 @@ export async function InitializeContractEssentialData(_signer?: Signer, _keyring
       walletAddress: (await SIGNER.getAddress()) as `0x${string}`,
     },
   });
+
+  isINIT = true;
 }

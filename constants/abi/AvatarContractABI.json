@@ -593,6 +593,99 @@
   {
     "inputs": [
       {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "wearableContract",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "wearableTokenId",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct AvatarContractExtension.Linkedwearable[]",
+        "name": "wearablesToEquip",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "getClaimPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "avatarTokenId",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes[]",
+        "name": "claimSignatures",
+        "type": "bytes[]"
+      },
+      {
+        "internalType": "uint256[]",
+        "name": "predictedWearableTokenIds",
+        "type": "uint256[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "wearableContract",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "wearableTokenId",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct AvatarContractExtension.Linkedwearable[]",
+        "name": "wearablesToUnequip",
+        "type": "tuple[]"
+      },
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "wearableContract",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "wearableTokenId",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct AvatarContractExtension.Linkedwearable[]",
+        "name": "wearablesToEquip",
+        "type": "tuple[]"
+      },
+      {
+        "internalType": "bytes",
+        "name": "lsp4MetadataValue",
+        "type": "bytes"
+      }
+    ],
+    "name": "claimAndSetNewWearings",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "bytes32",
         "name": "tokenId",
         "type": "bytes32"

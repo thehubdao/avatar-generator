@@ -1,12 +1,12 @@
 import { useLogin, useLogout, usePrivy, useSolanaWallets, useWallets } from '@privy-io/react-auth';
 import { useEffect, useState } from 'react';
 import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
-import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setClaimableDrops, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
+import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setClaimableDrops, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setNotificationMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetLuksoUserFeatures } from '../utils/web3/lukso/contract.util';
 import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetSolanaUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
 import { CitizenMetadata, ClaimableDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
-import { CampaignParameterName, Module } from '../enums/common.enum';
+import { CampaignParameterName, CommonErrorCode, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
@@ -52,7 +52,7 @@ export function useBlockchainWallet() {
   const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Ethereum Wallets
   const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets
 
-  const signer = useFutureverseSigner(); 
+  const signer = useFutureverseSigner();
 
   const getCampaignParams = async (campaign: Campaign) => {
     const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
@@ -132,9 +132,11 @@ export function useBlockchainWallet() {
       mintingData.mintSupply = mintingSupply.value;
     } else void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
 
-    if(mintingPrice.success){
+    if (mintingPrice.success) {
       mintingData.mintPrice = mintingPrice.value;
     } else void LogError(Module.Citizens, "Couldn't set minting price", mintingPrice.errCode);
+
+    mintingData.isHolder = true;
 
     return { success: true, value: mintingData };
   }
@@ -162,7 +164,10 @@ export function useBlockchainWallet() {
   }
 
   async function getClaimableDropsPromise(): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
-    const drops = await GetLuksoClaimableDrops();
+    if (!userAddress) {
+      return { success: false, errMessage: "User address is not defined", errCode: CommonErrorCode.InternalError };
+    }
+    const drops = await GetLuksoClaimableDrops(userAddress);
     if (drops.success) return { success: true, value: drops.value };
     return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
   }
@@ -194,25 +199,18 @@ export function useBlockchainWallet() {
           if (userCampaigns.length > 0) {
             dispatch(setSelectedCampaign(userCampaigns[0]));
             dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
+
             dispatch(setMintingMode(false));
           } else {
-            // MINTING FLOW
-            dispatch(setSelectedCampaign(Campaign.Creators)); // Set the selected campaign to Citizens by default when no campaign is selected
-            dispatch(setSelectedCitizen({
-              baseCombination: CampaignBaseCombination.Creators,
-              combination: CampaignBaseCombination.Creators,
-              campaign: Campaign.Creators
-            } as CitizenMetadata));
+            // REDIRECT FLOW
+            dispatch(setNotificationMode(true));
           }
         } else if (!citizen) {
-          // MINTING FLOW
-          dispatch(setSelectedCitizen({
-            baseCombination: CampaignBaseCombination.Creators,
-            combination: CampaignBaseCombination.Creators,
-            campaign: selectedCampaign
-          } as CitizenMetadata));
+          // REDIRECT FLOW
+          dispatch(setNotificationMode(true));
         } else {
           dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
+          
           dispatch(setMintingMode(false));
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
@@ -254,6 +252,7 @@ export function useBlockchainWallet() {
           if (userCampaigns.length > 0) {
             dispatch(setSelectedCampaign(userCampaigns[0]));
             dispatch(setSelectedCitizen(solanaCitizensMetadata.value[0]));
+
             dispatch(setMintingMode(false));
           } else {
             // MINTING FLOW
@@ -289,6 +288,7 @@ export function useBlockchainWallet() {
           } as CitizenMetadata));
         } else {
           dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
+          
           dispatch(setMintingMode(false));
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
@@ -316,6 +316,7 @@ export function useBlockchainWallet() {
           if (userCampaigns.length > 0) { //If user has campaigns, set the first one as selected campaign
             dispatch(setSelectedCampaign(userCampaigns[0]));
             dispatch(setSelectedCitizen(rootCitizensMetadata.value[0]));
+
             dispatch(setMintingMode(false));
           } else {//If user has no campaigns, set the based campaign as selected campaign and keep minting mode
 
@@ -323,6 +324,7 @@ export function useBlockchainWallet() {
             if (mintingData.success) {
               dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
               dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+              dispatch(setIsHolder(mintingData.value.isHolder ?? null));
             }
 
             dispatch(setSelectedCampaign(Campaign.Based)); // Set the selected campaign by default when no campaign is selected
@@ -347,6 +349,7 @@ export function useBlockchainWallet() {
           } as CitizenMetadata));
         } else {
           dispatch(setSelectedCitizen(citizen));
+
           dispatch(setMintingMode(false));
         }
       }

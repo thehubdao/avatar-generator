@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CitizenMetadata, ClaimableDrop, MintingPriceData } from '../interfaces/citizens.interface';
 import { Campaign, LuksoCampaign } from '../enums/citizens/common.enum';
-import { CampaignParameters } from '../interfaces/common.interface';
+import { BasicData, CampaignParameters } from '../interfaces/common.interface';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { AppCampaigns, CampaignDrops } from '../types/citizens.type';
 
@@ -13,11 +13,15 @@ interface CitizensMetadataState {
   leaderboardData: LeaderboardEntry[] | null | undefined;
   userFeatures: CampaignDrops<AppCampaigns> | null;
   claimableDrops: Record<LuksoCampaign, ClaimableDrop[]> | null;
+  shoppingCart: BasicData[];
   mintSupply: number | null;
   mintingPrice: MintingPriceData | null;
   editMode: boolean;
+  marketplaceMode: boolean;
+  notificationMode: boolean;
   mintingMode: boolean;
   savingMode: boolean;
+  checkoutMode: boolean;
 }
 
 const initialState: CitizensMetadataState = {
@@ -30,9 +34,13 @@ const initialState: CitizensMetadataState = {
   mintSupply: null,
   mintingPrice: null,
   claimableDrops: null,
+  shoppingCart: [],
   editMode: false,
+  marketplaceMode: false,
+  notificationMode: false,
   mintingMode: true,
-  savingMode: false
+  savingMode: false,
+  checkoutMode: false,
 }
 
 export const citizensMetadataSlice = createSlice({
@@ -61,6 +69,12 @@ export const citizensMetadataSlice = createSlice({
     setEditMode: (state, action: PayloadAction<boolean>) => {
       state.editMode = action.payload;
     },
+    setMarketplaceMode: (state, action: PayloadAction<boolean>) => {
+      state.marketplaceMode = action.payload;
+    },
+    setNotificationMode: (state, action: PayloadAction<boolean>) => {
+      state.notificationMode = action.payload;
+    },
     setMintingMode: (state, action: PayloadAction<boolean>) => {
       state.mintingMode = action.payload;
     },
@@ -75,9 +89,15 @@ export const citizensMetadataSlice = createSlice({
     },
     setClaimableDrops: (state, action: PayloadAction<Record<LuksoCampaign, ClaimableDrop[]>>) => {
       state.claimableDrops = action.payload;
+    },
+    setShoppingCart: (state, action: PayloadAction<BasicData[]>) => {
+      state.shoppingCart = action.payload;
+    },
+    setCheckoutMode: (state, action: PayloadAction<boolean>) => {
+      state.checkoutMode = action.payload;
     }
   }
 });
 
-export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice, setClaimableDrops } = citizensMetadataSlice.actions;
+export const { setCitizensMetadata, resetCitizensMetadata, setSelectedCampaign, setCampaignParameters, setSelectedCitizen, setLeaderboardData, setUserFeatures, setEditMode, setMarketplaceMode, setNotificationMode, setMintingMode, setSavingMode, setMintSupply, setMintingPrice, setClaimableDrops, setShoppingCart, setCheckoutMode } = citizensMetadataSlice.actions;
 export default citizensMetadataSlice.reducer;
