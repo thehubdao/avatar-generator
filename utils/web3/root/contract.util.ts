@@ -167,7 +167,7 @@ export async function MintRootAsset(
     const mintPrice = Number(mintDetails?.pricingDetails[1].split(',').join('')) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
 
     if (!mintDetails?.enabled) { return { success: false, errMessage: "Minting is not enabled", errCode: CommonErrorCode.InternalError }; }
-
+    console.log(walletIntBalance, mintIntFees, mintPrice);
     if (walletIntBalance < mintIntFees + mintPrice) {
       return { success: false, errMessage: " " + Number(mintIntFees + mintPrice) + " ROOT are required in wallet balance to mint this asset", errCode: RootErrorCode.InsufficientFunds };
     }
