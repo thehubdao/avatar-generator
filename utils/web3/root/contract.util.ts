@@ -170,7 +170,7 @@ export async function MintRootAsset(
     if (!mintDetails?.enabled) { return { success: false, errMessage: "Minting is not enabled", errCode: CommonErrorCode.InternalError }; }
     console.log(walletIntBalance, mintIntFees, mintPrice, walletBigIntBalance);
     if (walletIntBalance < mintIntFees + mintPrice) {
-      return { success: false, errMessage: "You need to hold ROOT in the EOA wallet linked to your Future Pass in order to mint this asset. " + Number(mintIntFees + mintPrice) + " ROOT are required in your EOA wallet balance to mint this asset.", errCode: RootErrorCode.InsufficientFunds };
+      return { success: false, errMessage: "You need to hold ROOT in the Root wallet linked to your Future Pass in order to mint this asset. " + Number(mintIntFees + mintPrice) + " ROOT are required in your Future Pass wallet balance to mint this asset.", errCode: RootErrorCode.InsufficientFunds };
     }
 
     await mintBuilder.signAndSend();
