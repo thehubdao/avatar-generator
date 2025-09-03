@@ -5,14 +5,13 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { cookieStorage, createStorage } from 'wagmi';
 import { AuthUiProvider } from '@futureverse/auth-ui';
 import { CLIENT_ID, CUSTOM_THEME_CONFIG, ENVIRONMENT } from '../../constants/root/pass.constant';
-import { ORIGIN } from '../../constants/root/contract.constant';
 
 export default function FutureVerseProvider({ children }: { children: React.ReactNode }) {
 
     const authClient = new FutureverseAuthClient({
         clientId: CLIENT_ID,
         environment: ENVIRONMENT,
-        redirectUri: ORIGIN,
+        redirectUri: 'https://avatar-generator-git-root-minting-dap-frontend.vercel.app',
         signInFlow: 'redirect',
     });
     const queryClient = new QueryClient();
