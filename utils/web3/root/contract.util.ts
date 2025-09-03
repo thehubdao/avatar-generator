@@ -1,4 +1,4 @@
-import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER, BASE_ETH_NUMBER, BASE_DECIMALS_NUMBER } from '../../../constants/root/contract.constant';
+import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER, BASE_ETH_NUMBER, BASE_DECIMALS_NUMBER, ROOT_TOKEN_ID } from '../../../constants/root/contract.constant';
 import { TransactionBuilder } from '@futureverse/transact';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
@@ -151,19 +151,25 @@ export async function MintRootAsset(
   try {
     const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
     const mintBuilder = TransactionBuilder.nft(API, SIGNER, EOA_ADDRESS, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
+
+    await mintBuilder.addFeeProxy({
+      assetId: 1,
+      slippage: 5,
+    });
+
     const mintBigIntFees = await mintBuilder.getGasFees();
     const mintIntFees = Number(mintBigIntFees.gasFee) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
-    const walletBigIntBalance = await API.rpc.eth.getBalance(EOA_ADDRESS);
-    const walletIntBalance = Number(walletBigIntBalance.div(new BN(BASE_ETH_NUMBER).pow(new BN(BASE_DECIMALS_NUMBER))));
+    const {balance:walletBigIntBalance} = await mintBuilder.checkBalance({ assetId: Number(ROOT_TOKEN_ID) });
+    const walletIntBalance = Number(walletBigIntBalance)/Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
 
     const mintDetails = (await API.query.nft.publicMintInfo(NFT_COLLECTION_ID)).toHuman() as { enabled: boolean, pricingDetails: Array<string> };
 
-    const mintPrice = Number(mintDetails?.pricingDetails[1].split(',').join('')) / Math.pow(10, 6);
+    const mintPrice = Number(mintDetails?.pricingDetails[1].split(',').join('')) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
 
     if (!mintDetails?.enabled) { return { success: false, errMessage: "Minting is not enabled", errCode: CommonErrorCode.InternalError }; }
 
     if (walletIntBalance < mintIntFees + mintPrice) {
-      return { success: false, errMessage: " " + Number(mintIntFees + mintPrice) + " XRP are required in wallet balance to mint this asset", errCode: RootErrorCode.InsufficientFunds };
+      return { success: false, errMessage: " " + Number(mintIntFees + mintPrice) + " ROOT are required in wallet balance to mint this asset", errCode: RootErrorCode.InsufficientFunds };
     }
 
     await mintBuilder.signAndSend();
@@ -217,7 +223,7 @@ export async function GetRootCollectionSupply(): Promise<Result<number>> {
 }
 
 export async function GetRootMintingPrice(): Promise<Result<MintingPriceData>> {
-  return { success: true, value: { mintPrice: 0.16, mintingPriceSymbol: 'XRP' } };
+  return { success: true, value: { mintPrice: 112, mintingPriceSymbol: 'ROOT' } };
 }
 
 export async function GetRootUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {
