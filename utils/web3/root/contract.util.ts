@@ -151,8 +151,6 @@ export async function MintRootAsset(
   try {
     const mintBuilder = TransactionBuilder.nft(API, SIGNER, SESSION.eoa, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
 
-    await mintBuilder.addFuturePass(SESSION.futurepass);
-
     await mintBuilder.addFuturePassAndFeeProxy({
       futurePass: SESSION.futurepass,
       assetId: ROOT_TOKEN_ID,
