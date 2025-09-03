@@ -224,7 +224,7 @@ export async function GetRootCollectionSupply(): Promise<Result<number>> {
 }
 
 export async function GetRootMintingPrice(): Promise<Result<MintingPriceData>> {
-  return { success: true, value: { mintPrice: 123, mintingPriceSymbol: 'ROOT' } };
+  return { success: true, value: { mintPrice: 124, mintingPriceSymbol: 'ROOT' } };
 }
 
 export async function GetRootUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {
