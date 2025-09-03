@@ -5,6 +5,7 @@ import { Module } from '../../enums/common.enum';
 import { Signer } from '@futureverse/signer';
 import { AssetRegister } from '@futureverse/asset-register/v2';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { UserSession } from '@futureverse/auth-react/auth';
 
 export const ROOT_NETWORK_WS_URL = process.env.NEXT_PUBLIC_ROOT_NETWORK_WS_URL;
 
@@ -31,14 +32,18 @@ export let ASSET_REGISTER_SDK: AssetRegister;
 
 export let API: ApiPromise;
 export let SIGNER: Signer;
+export let SESSION: UserSession;
 export let KEYRING_SIGNER: KeyringPair;
 export let isINIT: boolean;
 
-export async function InitializeContractEssentialData(_signer?: Signer, _keyringSigner?: KeyringPair) {
+export async function InitializeContractEssentialData(_signer?: Signer, _keyringSigner?: KeyringPair, userSession?: UserSession) {
   if (API) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Api already initialized');
   API = await ApiPromise.create({ ...getApiOptions(), provider: PROVIDER });
   if (KEYRING_SIGNER) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Keyring Signer already initialized');
   if (_keyringSigner) KEYRING_SIGNER = _keyringSigner;
+
+  if (SESSION) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Session already initialized');
+  if (userSession) SESSION = userSession;
 
   if (SIGNER) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Signer already initialized');
   if (_signer) SIGNER = _signer;
