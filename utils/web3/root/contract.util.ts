@@ -170,7 +170,7 @@ export async function MintRootAsset(
     if (!mintDetails?.enabled) { return { success: false, errMessage: "Minting is not enabled", errCode: CommonErrorCode.InternalError }; }
     console.log(walletIntBalance, mintIntFees, mintPrice, walletBigIntBalance);
     if (walletIntBalance < mintIntFees + mintPrice) {
-      return { success: false, errMessage: "Insufficient balance. You need " + Number(mintIntFees + mintPrice) + " ROOT in your Future Pass wallet balance to mint this asset.", errCode: RootErrorCode.InsufficientFunds };
+      return { success: false, errMessage: "Insufficient balance. You need " + Number(mintIntFees + mintPrice) + " ROOT in your Future Pass to mint this asset.", errCode: RootErrorCode.InsufficientFunds };
     }
 
     await mintBuilder.signAndSend();
