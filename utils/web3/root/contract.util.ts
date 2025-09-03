@@ -150,7 +150,7 @@ export async function MintRootAsset(
 ): Promise<Result<boolean>> {
   try {
     const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
-    const mintBuilder = TransactionBuilder.nft(API, SIGNER, EOA_ADDRESS, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: EOA_ADDRESS });
+    const mintBuilder = TransactionBuilder.nft(API, SIGNER, EOA_ADDRESS, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address});
 
     await mintBuilder.addFeeProxy({
       assetId: 1,
@@ -167,7 +167,7 @@ export async function MintRootAsset(
     const mintPrice = Number(mintDetails?.pricingDetails[1].split(',').join('')) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
 
     if (!mintDetails?.enabled) { return { success: false, errMessage: "Minting is not enabled", errCode: CommonErrorCode.InternalError }; }
-    console.log(walletIntBalance, mintIntFees, mintPrice);
+    console.log(walletIntBalance, mintIntFees, mintPrice, walletBigIntBalance);
     if (walletIntBalance < mintIntFees + mintPrice) {
       return { success: false, errMessage: " " + Number(mintIntFees + mintPrice) + " ROOT are required in wallet balance to mint this asset", errCode: RootErrorCode.InsufficientFunds };
     }
@@ -223,7 +223,7 @@ export async function GetRootCollectionSupply(): Promise<Result<number>> {
 }
 
 export async function GetRootMintingPrice(): Promise<Result<MintingPriceData>> {
-  return { success: true, value: { mintPrice: 112, mintingPriceSymbol: 'ROOT' } };
+  return { success: true, value: { mintPrice: 123, mintingPriceSymbol: 'ROOT' } };
 }
 
 export async function GetRootUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {
