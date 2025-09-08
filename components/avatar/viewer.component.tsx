@@ -156,7 +156,7 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
   });
 }
 
-export async function GetCanvasImageUrl(pos?: Vector3): Promise<string | null> {
+export async function GetCanvasImageUrl(pos?: Vector3, target?: Vector3): Promise<string | null> {
   if (_renderer == undefined) {
     void LogError(Module.Viewer, 'Missing scene');
     return null;
@@ -173,7 +173,7 @@ export async function GetCanvasImageUrl(pos?: Vector3): Promise<string | null> {
     const lastPos = new Vector3(_camera?.position.x, _camera?.position.y, _camera?.position.z);
     const lastTarget = new Vector3(_controls?.target.x, _controls?.target.y, _controls?.target.z);
     _camera?.position.set(pos.x, pos.y, pos.z);
-    _controls?.target.set(0, 1.65, 0);
+    _controls?.target.set(target?.x ?? 0, target?.y ?? 1.65, target?.z ?? 0);
     await Delay(100);
     shot = _renderer.domElement.toDataURL();
     _camera.position.set(lastPos.x, lastPos.y, lastPos.z);
