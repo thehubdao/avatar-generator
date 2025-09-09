@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import CitizensUI from "../../ui/citizens/citizens.ui";
 import { FetchBlob, GetAnimationByCampaignAndName, GetAssetsListByCampaign, GetAvatarSingleByCampaignCombinationString, GetEnvMapListByCampaign, RequestBurnDrops, RequestClaimApprove } from "../../utils/api.util";
 import { EnvMapInterface, FeatureInterface, IndexFeatureInterface, SingleInterface } from "../../interfaces/api.interface";
-import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData, ChangeSkinColor } from "../avatar/editor.component";
+import { ChangeFeature, ChangeStartAnimation, GetAvatarGLB, SetEnvironment, SetFeaturesData, ChangeSkinColor, GetAvatarPhoto } from "../avatar/editor.component";
 import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import { ExportInterface, MintUIResult } from "../../interfaces/common.interface";
@@ -12,7 +12,7 @@ import { SaveFile } from "../../utils/exporter.util";
 import { SetImageUrl, GetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { ClaimAndSetAvatarNewWearings, GetCampaignsTokensMetadata, GetLuksoUserFeatures, SetAvatarNewWearings } from "../../utils/web3/lukso/contract.util";
 import { Campaign, CampaignBaseCombination, CampaignBaseUrl, RootCampaign } from "../../enums/citizens/common.enum";
-import { setCitizensMetadata, setSelectedCitizen, setUserFeatures } from "../../store/citizensMetadataSlice";
+import { setCitizensMetadata, setSelectedCitizen, setTakingPhoto, setUserFeatures } from "../../store/citizensMetadataSlice";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
@@ -23,7 +23,6 @@ import { useBlockchainProvider } from "../../contexts/BlockchainContext";
 import { AppCampaigns, CampaignDrops } from "../../types/citizens.type";
 import { Result } from "../../types/common.type";
 import { Vector3 } from "three";
-import { GetCanvasImageUrl } from "../avatar/viewer.component";
 import { StoreAssetData } from "../../utils/firebase.util";
 import { AssetData } from "../../interfaces/firebase.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
@@ -310,12 +309,9 @@ export default function CitizensComponent() {
     return false;
   }
 
-  async function generateImage(pos?: Vector3): Promise<string | null> {
+  async function generateImage(pos?: Vector3, target?: Vector3): Promise<string | null> {
     // @GabCh155: this function is to generate the image from the canvas
-    // you can create a new image when you need update the DB
-    // note that the image in details panel does not update from here, it still use the image from the DB
-    // to update the image in details panel, you need to update the image in the DB 
-    const imageBlob = await GetCanvasImageUrl(pos);
+    const imageBlob = await GetAvatarPhoto(pos, target, selectedCampaign as string, () => dispatch(setTakingPhoto(true)));
     return imageBlob;
   }
 
@@ -533,7 +529,9 @@ export default function CitizensComponent() {
 
     newCitizenMetadata.rawMetadata.attributes = attributes;
 
-    const newImageUrl = await generateImage()
+    const cameraPosition = new Vector3(0, 1.6, 1.3); // Camera position for the lukso campaign
+    const cameraTarget = new Vector3(0, 1.4, 0); // Camera target for the lukso campaign
+    const newImageUrl = await generateImage(cameraPosition, cameraTarget);
 
     if (newImageUrl) await SetImageUrl(selectedCitizen.campaign, newCombination, newImageUrl);
 
