@@ -125,15 +125,20 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 		}
 	}
 
-	function onCategoryChange(value: string) {
-		setSelectedCategory(value);
+	function updateOptionList(value: string) {
 		if (didEditMode) {
 			const filteredList = FilterList(featureList, 'type', value);
+			filteredList && filteredList.forEach(el => el.price = undefined); // remove price in edit mode
 			setOptionList(filteredList);
 		} else if (didMarketplaceMode && marketplaceFeatureList) {
 			const filteredList = FilterList(marketplaceFeatureList, 'type', value);
 			setOptionList(filteredList);
 		}
+	}
+
+	function onCategoryChange(value: string) {
+		setSelectedCategory(value);
+		updateOptionList(value);
 		updateFeatureCamPosition(value, {
 			...campaignParams?.config.featuresCamPos,
 			...campaignParams?.config.accCamPos,
@@ -141,13 +146,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	}
 
 	useEffect(() => {
-		if (didEditMode) {
-			const filteredList = FilterList(featureList, 'type', selectedCategory);
-			setOptionList(filteredList);
-		} else if (didMarketplaceMode && marketplaceFeatureList) {
-			const filteredList = FilterList(marketplaceFeatureList, 'type', selectedCategory);
-			setOptionList(filteredList);
-		}
+		updateOptionList(selectedCategory);
 	}, [featureList, marketplaceFeatureList, didEditMode, didMarketplaceMode])
 
 	useEffect(() => {
