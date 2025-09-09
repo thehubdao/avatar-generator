@@ -22,14 +22,15 @@ export default function FutureVerseProvider({ children }: { children: React.Reac
     const wagmiConfig = createWagmiConfig({
         chains: [root, rootPorcini],
         authClient,
-        /* Type '{ key: string; getItem: <key extends keyof StorageItemMap, value extends StorageItemMap[key], defaultValue extends value | null | undefined>(key: key, defaultValue?: defaultValue | undefined) => (defaultValue extends null ? value | null : value) | Promise<...>; setItem: <key extends keyof StorageItemMap, value exten...' is not assignable to type 'Storage'.
+
+/* Type '{ key: string; getItem: <key extends keyof StorageItemMap, value extends StorageItemMap[key], defaultValue extends value | null | undefined>(key: key, defaultValue?: defaultValue | undefined) => (defaultValue extends null ? value | null : value) | Promise<...>; setItem: <key extends keyof StorageItemMap, value exten...' is not assignable to type 'Storage'.
 Types of property 'getItem' are incompatible.
 Type '<key extends keyof StorageItemMap, value extends StorageItemMap[key], defaultValue extends value | null | undefined>(key: key, defaultValue?: defaultValue | undefined) => (defaultValue extends null ? value | null : value) | Promise<...>' is not assignable to type '<key extends string, value extends (StorageItemMap & Record<string, unknown>)[key], defaultValue extends value | null | undefined>(key: key, defaultValue?: defaultValue | undefined) => (defaultValue extends null ? value | null : value) | Promise<...>'.
   Types of parameters 'key' and 'key' are incompatible.
     Type 'key' is not assignable to type 'keyof StorageItemMap'.
       Type 'string' is not assignable to type 'keyof StorageItemMap'.ts(2322)
-createWagmiConfig.d.ts(20, 5): The expected type comes from property 'storage' which is declared here on type 'IConfigProps' */
-        storage: createStorage({
+createWagmiConfig.d.ts(20, 5): The expected type comes from property 'storage' which is declared here on type 'IConfigProps'  */
+/* → */storage: createStorage({
             storage: cookieStorage,
         }),
         metamaskDappMetadata: {
@@ -42,7 +43,14 @@ createWagmiConfig.d.ts(20, 5): The expected type comes from property 'storage' w
     return (
         <QueryClientProvider client={queryClient}>
             <FutureverseAuthProvider authClient={authClient}>
-                <AuthUiProvider themeConfig={CUSTOM_THEME_CONFIG} authClient={authClient} wagmiConfig={wagmiConfig}>
+{/* Type 'Config<readonly [Chain, ...Chain[]], { [key: number]: HttpTransport; }, (CreateConnectorFn<EthereumProvider, { connect(parameters?: { chainId?: number | undefined; isReconnecting?: boolean | undefined; pairingTopic?: string | undefined; } | undefined): Promise<...>; ... 7 more ...; requestedChainsStorageKey: `${stri...' is not assignable to type 'Config'.
+  Types of property '_internal' are incompatible.
+    Property 'revalidate' is missing in type 'Internal<readonly [Chain, ...Chain[]], { [key: number]: HttpTransport; }>' but required in type 'Internal<readonly [Chain, ...Chain[]], Record<number, Transport<string, Record<string, any>, EIP1193RequestFn>>>'.ts(2322)
+createConfig.d.ts(50, 5): 'revalidate' is declared here.
+WagmiProvider.d.ts(5, 5): The expected type comes from property 'wagmiConfig' which is declared here on type 'IntrinsicAttributes & AuthUiProviderProps & WagmiProviderProps & { children?: ReactNode; }'
+Windsurf: Explain Problem
+(property) wagmiConfig: Config */}
+               {/* → */} <AuthUiProvider themeConfig={CUSTOM_THEME_CONFIG} authClient={authClient} wagmiConfig={wagmiConfig}>
                     {children}
                 </AuthUiProvider>
             </FutureverseAuthProvider>
