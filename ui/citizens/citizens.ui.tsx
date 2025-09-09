@@ -18,6 +18,7 @@ import Link from "next/link";
 import Button from "./common/button.ui";
 import { Module } from "../../enums/common.enum";
 import Modal from "./common/modal.ui";
+import FlashUI from "./common/flash.ui";
 
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
@@ -44,6 +45,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	const didMintingMode = useAppSelector(state => state.citizensMetadata.mintingMode);
 	const didMarketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
 	const didNotificationMode = useAppSelector(state => state.citizensMetadata.notificationMode);
+	const isTakingPhoto = useAppSelector(state => state.citizensMetadata.takingPhoto);
 
 	// Edit mode local State
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
@@ -123,15 +125,20 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 		}
 	}
 
-	function onCategoryChange(value: string) {
-		setSelectedCategory(value);
+	function updateOptionList(value: string) {
 		if (didEditMode) {
 			const filteredList = FilterList(featureList, 'type', value);
+			filteredList && filteredList.forEach(el => el.price = undefined); // remove price in edit mode
 			setOptionList(filteredList);
 		} else if (didMarketplaceMode && marketplaceFeatureList) {
 			const filteredList = FilterList(marketplaceFeatureList, 'type', value);
 			setOptionList(filteredList);
 		}
+	}
+
+	function onCategoryChange(value: string) {
+		setSelectedCategory(value);
+		updateOptionList(value);
 		updateFeatureCamPosition(value, {
 			...campaignParams?.config.featuresCamPos,
 			...campaignParams?.config.accCamPos,
@@ -139,13 +146,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	}
 
 	useEffect(() => {
-		if (didEditMode) {
-			const filteredList = FilterList(featureList, 'type', selectedCategory);
-			setOptionList(filteredList);
-		} else if (didMarketplaceMode && marketplaceFeatureList) {
-			const filteredList = FilterList(marketplaceFeatureList, 'type', selectedCategory);
-			setOptionList(filteredList);
-		}
+		updateOptionList(selectedCategory);
 	}, [featureList, marketplaceFeatureList, didEditMode, didMarketplaceMode])
 
 	useEffect(() => {
@@ -236,6 +237,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 									}
 									}
 								/>
+								{ isTakingPhoto && <FlashUI /> }
 							</div>
 							{
 								didMintingMode ?
