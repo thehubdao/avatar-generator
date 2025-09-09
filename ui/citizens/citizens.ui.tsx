@@ -18,6 +18,7 @@ import Link from "next/link";
 import Button from "./common/button.ui";
 import { Module } from "../../enums/common.enum";
 import Modal from "./common/modal.ui";
+import FlashUI from "./common/flash.ui";
 
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
@@ -44,6 +45,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	const didMintingMode = useAppSelector(state => state.citizensMetadata.mintingMode);
 	const didMarketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
 	const didNotificationMode = useAppSelector(state => state.citizensMetadata.notificationMode);
+	const isTakingPhoto = useAppSelector(state => state.citizensMetadata.takingPhoto);
 
 	// Edit mode local State
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
@@ -236,6 +238,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 									}
 									}
 								/>
+								{ isTakingPhoto && <FlashUI /> }
 							</div>
 							{
 								didMintingMode ?
