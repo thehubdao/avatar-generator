@@ -2,7 +2,9 @@
   "name": "avatar-generator",
   "version": "0.4.0",
   "private": true,
-  "engines": { "node": "22.x" },
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "next dev",
     "dev:prod-env": "dotenv -e .env.production next dev",
@@ -17,9 +19,10 @@
     "@firebase/auth": "^1.9.1",
     "@futureverse/artm": "^2.3.2",
     "@futureverse/asset-register": "^2.79.2",
-    "@futureverse/auth-react": "^4.2.2",
-    "@futureverse/auth-ui": "^0.15.0",
-    "@futureverse/transact": "^0.7.2",
+    "@futureverse/auth-react": "^5.0.2",
+    "@futureverse/auth-ui": "^1.0.4",
+    "@futureverse/transact": "^0.8.0",
+    "@futureverse/wagmi-connectors": "^4.0.2",
     "@helia/car": "^4.0.0",
     "@lukso/lsp-smart-contracts": "^0.12.1",
     "@metaplex-foundation/mpl-candy-machine": "^6.1.0",
@@ -38,7 +41,7 @@
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-wallets": "^0.19.32",
     "@solana/web3.js": "^1.98.2",
-    "@tanstack/react-query": "^5.68.0",
+    "@tanstack/react-query": "^5.85.9",
     "@therootnetwork/api": "^1.0.13",
     "@therootnetwork/api-types": "^1.0.8",
     "@types/react-redux": "^7.1.27",
@@ -67,8 +70,8 @@
     "toastify-js": "^1.12.0",
     "usehooks-ts": "^3.1.0",
     "uuid": "^11.1.0",
-    "viem": "^2.30.6",
-    "wagmi": "^2.14.13"
+    "viem": "^2.37.2",
+    "wagmi": "^2.16.9"
   },
   "devDependencies": {
     "@types/babel__core": "^7.20.5",

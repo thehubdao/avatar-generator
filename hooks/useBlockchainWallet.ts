@@ -45,7 +45,7 @@ export function useBlockchainWallet() {
   const { login } = useLogin(); //Privy Login
   const { logout } = useLogout(); //Privy Logout
 
-  const { openLogin } = useAuthUi(); //Futureverse Login
+  const { openLogin, currentState } = useAuthUi(); //Futureverse Login
 
   /* Signer related hooks */
 
@@ -210,7 +210,7 @@ export function useBlockchainWallet() {
           dispatch(setNotificationMode(true));
         } else {
           dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
-          
+
           dispatch(setMintingMode(false));
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
@@ -288,7 +288,7 @@ export function useBlockchainWallet() {
           } as CitizenMetadata));
         } else {
           dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
-          
+
           dispatch(setMintingMode(false));
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
@@ -372,8 +372,8 @@ export function useBlockchainWallet() {
     dispatch(setSelectedCampaign(campaign ?? null));
   }
 
-  useEffect(()=>{console.log(userSession, "USER SESSION")}, [userSession]);
-
+  useEffect(() => { console.log(userSession, "USER SESSION") }, [userSession]);
+useEffect(() => { console.log(currentState, "CURRENT STATE") }, [currentState]);
   const HandleLogout = async () => {
     if (blockchainType === Blockchain.Root) {
       signOutPass({ flow: 'silent', disableConsent: true });
@@ -489,7 +489,7 @@ export function useBlockchainWallet() {
       if (!isFetchingSession && userSession && signer) {
         const futurePassAddress = userSession.futurepass;
 
-        await InitializeContractEssentialData(signer,undefined, userSession);
+        await InitializeContractEssentialData(signer, undefined, userSession);
 
         dispatch(connect({ address: futurePassAddress, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: true });
