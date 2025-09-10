@@ -46,6 +46,7 @@
     "@therootnetwork/api-types": "^1.0.8",
     "@types/react-redux": "^7.1.27",
     "@types/uuid": "^10.0.0",
+    "@wagmi/core": "^2.18.1",
     "axios": "^1.6.7",
     "bs58": "^6.0.0",
     "ethers": "^6.13.4",
