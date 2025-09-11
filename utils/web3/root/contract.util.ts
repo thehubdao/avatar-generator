@@ -7,7 +7,7 @@ import '@therootnetwork/api-types';
 import { GetAssetData, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { Campaign, CampaignBaseCombination, RootCampaign } from '../../../enums/citizens/common.enum';
-import { CitizenMetadata, LinkableToken, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
+import { CitizenMetadata, ClaimableDrop, LinkableToken, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
@@ -266,6 +266,19 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
       errMessage: err.message,
       errCode: CommonErrorCode.InternalError
     }
+  }
+}
+
+export async function GetRootClaimableDrops(address: string): Promise<Result<Record<RootCampaign, ClaimableDrop[]>>> {
+  try {
+    const drops = await GetCampaignDrops<ClaimableDrop>(RootCampaign.Based);
+    if (!drops.success) return drops;
+
+    return { success: true, value: { [RootCampaign.Based]: drops.value } }; //Check the claims of the user for that token. if the user has claimed the token more times than claimLimit, remove it from the list.
+  } catch (e) {
+    const err = e as Error;
+    void LogError(Module.RootContractUtil, "Couldn't get claimable drops", e);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.InternalError };
   }
 }
 

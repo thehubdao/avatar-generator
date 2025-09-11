@@ -23,7 +23,7 @@ import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
-import { GetRootAssetsMetadata, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
+import { GetRootAssetsMetadata, GetRootClaimableDrops, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
 import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 
 export function useBlockchainWallet() {
@@ -163,11 +163,14 @@ export function useBlockchainWallet() {
     return { success: true, value: mintingData };
   }
 
-  async function getClaimableDropsPromise(): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
-    if (!userAddress) {
-      return { success: false, errMessage: "User address is not defined", errCode: CommonErrorCode.InternalError };
-    }
-    const drops = await GetLuksoClaimableDrops(userAddress);
+  async function getClaimableDropsPromise(walletAddress: string): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
+    const drops = await GetLuksoClaimableDrops(walletAddress);
+    if (drops.success) return { success: true, value: drops.value };
+    return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
+  }
+
+  async function getRootClaimableDropsPromise(walletAddress: string): Promise<Result<Record<RootCampaign, ClaimableDrop[]>>> {
+    const drops = await GetRootClaimableDrops(walletAddress);
     if (drops.success) return { success: true, value: drops.value };
     return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
   }
@@ -184,7 +187,7 @@ export function useBlockchainWallet() {
       const ethereumCitizensMetadataPromise = getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
       const ethereumUserFeaturesPromise = getEthereumUserFeaturesPromise(walletAddress); // Get the user features
       const ethereumLeaderboardDataPromise = getEthereumLeaderboardDataPromise(walletAddress); // Get the leaderboard data
-      const ethereumClaimableDropsPromise = getClaimableDropsPromise(); // Get the claimable drops
+      const ethereumClaimableDropsPromise = getClaimableDropsPromise(walletAddress); // Get the claimable drops
       const [ethereumCitizensMetadata, ethereumUserFeatures, ethereumLeaderboardData, ethereumClaimableDrops] = await Promise.all([ethereumCitizensMetadataPromise, ethereumUserFeaturesPromise, ethereumLeaderboardDataPromise, ethereumClaimableDropsPromise, ethereumClaimableDropsPromise]);
 
       //Ethereum Citizens Metadata dispatch
@@ -304,7 +307,9 @@ export function useBlockchainWallet() {
     } else if (blockchainType === Blockchain.Root) {
       const rootCitizensMetadata = await getRootTokensMetadataPromise(walletAddress);
       const rootUserFeatures = await getRootUserFeaturesPromise(walletAddress);
+      const rootClaimableDrops = await getRootClaimableDropsPromise(walletAddress);
 
+      
       if (rootCitizensMetadata.success) {
         const citizen = rootCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
 
