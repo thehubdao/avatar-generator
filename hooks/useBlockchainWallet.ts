@@ -18,13 +18,13 @@ import { GetClaimableDrops, GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
-import { useAuthUi } from '@futureverse/auth-ui';
-import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
+import { useAuthUi, useConnector, useFutureverseSigner } from '@futureverse/auth-ui';
+import { useAuth } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
 import { GetRootAssetsMetadata, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
-import { InitializeContractEssentialData } from '../constants/root/contract.constant';
+import { CHAIN_ID, InitializeContractEssentialData } from '../constants/root/contract.constant';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -39,7 +39,8 @@ export function useBlockchainWallet() {
 
   /* Fetching related hooks */
   const { ready, user, authenticated, isModalOpen } = usePrivy(); //Privy Auth
-  const { userSession, isFetchingSession, signOutPass } = useAuth(); //Pass Auth
+  const { userSession, isFetchingSession, signOutPass, authClient } = useAuth(); //Pass Auth
+  const {isConnecting} = useConnector(authClient);
 
   /* Login and Logout related hooks */
   const { login } = useLogin(); //Privy Login
@@ -52,7 +53,7 @@ export function useBlockchainWallet() {
   const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Ethereum Wallets
   const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets
 
-  const signer = useFutureverseSigner();
+  const signer = useFutureverseSigner({ chainId: Number(CHAIN_ID) });
 
   const getCampaignParams = async (campaign: Campaign) => {
     const campaignParams = await GetParameter<CampaignParameters>(campaign, CampaignParameterName.All);
@@ -372,8 +373,6 @@ export function useBlockchainWallet() {
     dispatch(setSelectedCampaign(campaign ?? null));
   }
 
-  useEffect(() => { console.log(userSession, "USER SESSION") }, [userSession]);
-useEffect(() => { console.log(currentState, "CURRENT STATE") }, [currentState]);
   const HandleLogout = async () => {
     if (blockchainType === Blockchain.Root) {
       signOutPass({ flow: 'silent', disableConsent: true });
@@ -484,8 +483,8 @@ useEffect(() => { console.log(currentState, "CURRENT STATE") }, [currentState]);
   // Root Logic
   useEffect(() => {
     const connectPromise = async () => {
+      console.log(isFetchingSession, userSession, signer, blockchainType, authClient, isConnecting)
       const loginLibaryflag = GetSdkConnection();
-
       if (!isFetchingSession && userSession && signer) {
         const futurePassAddress = userSession.futurepass;
 
@@ -494,8 +493,16 @@ useEffect(() => { console.log(currentState, "CURRENT STATE") }, [currentState]);
         dispatch(connect({ address: futurePassAddress, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: true });
       }
+
+/*       if (!isFetchingSession && userSession && !signer) {
+        console.log("Signing out", blockchainType)
+        dispatch(disconnect());
+        signOutPass({ flow: 'silent', disableConsent: true });
+        SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: false });
+      } */
       if (!isFetchingSession && !userSession && blockchainType === Blockchain.Root) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
         dispatch(disconnect());
+        signOutPass({ flow: 'silent', disableConsent: true });
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: false });
       }
     }

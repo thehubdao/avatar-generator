@@ -21,6 +21,8 @@ export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN as string;
 export const ORIGIN = process.env.NEXT_PUBLIC_ORIGIN as string;
 export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID as string;
 
+export const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL as string;
+
 export const ROOT_SIGNER_PK = process.env.ROOT_SIGNER_PK as string;
 
 export const BASE_ETH_NUMBER = 10;
