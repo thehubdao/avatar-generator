@@ -89,7 +89,7 @@ export const citizensMetadataSlice = createSlice({
     setMintingPrice: (state, action: PayloadAction<MintingPriceData | null>) => {
       state.mintingPrice = action.payload;
     },
-    setClaimableDrops: (state, action: PayloadAction<Record<LuksoCampaign, ClaimableDrop[]>>) => {
+    setClaimableDrops: (state, action: PayloadAction<Record<Campaign, ClaimableDrop[]>>) => {
       state.claimableDrops = action.payload;
     },
     setShoppingCart: (state, action: PayloadAction<BasicData[]>) => {

@@ -4,7 +4,7 @@ import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { LogError } from '../../common.util';
 import '@therootnetwork/api-types';
-import { GetAssetData, StoreAssetData } from '../../firebase.util';
+import { GetAssetData, GetClaimableDrops, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { Campaign, CampaignBaseCombination, RootCampaign } from '../../../enums/citizens/common.enum';
 import { CitizenMetadata, ClaimableDrop, LinkableToken, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
@@ -271,7 +271,7 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
 
 export async function GetRootClaimableDrops(address: string): Promise<Result<Record<RootCampaign, ClaimableDrop[]>>> {
   try {
-    const drops = await GetCampaignDrops<ClaimableDrop>(RootCampaign.Based);
+    const drops = await GetClaimableDrops(Campaign.Based);
     if (!drops.success) return drops;
 
     return { success: true, value: { [RootCampaign.Based]: drops.value } }; //Check the claims of the user for that token. if the user has claimed the token more times than claimLimit, remove it from the list.

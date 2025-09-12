@@ -236,7 +236,7 @@ export function useBlockchainWallet() {
       }
 
       if (ethereumClaimableDrops.success) {
-        dispatch(setClaimableDrops(ethereumClaimableDrops.value));
+        dispatch(setClaimableDrops(ethereumClaimableDrops.value as Record<Campaign, ClaimableDrop[]>));
       } else {
         LogError(Module.Citizens, ethereumClaimableDrops.errMessage, ethereumClaimableDrops.errCode);
       }
@@ -308,7 +308,6 @@ export function useBlockchainWallet() {
       const rootCitizensMetadata = await getRootTokensMetadataPromise(walletAddress);
       const rootUserFeatures = await getRootUserFeaturesPromise(walletAddress);
       const rootClaimableDrops = await getRootClaimableDropsPromise(walletAddress);
-
       
       if (rootCitizensMetadata.success) {
         const citizen = rootCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
@@ -363,6 +362,12 @@ export function useBlockchainWallet() {
         dispatch(setUserFeatures(rootFeatures));
       } else {
         LogError(Module.Citizens, rootUserFeatures.errMessage, rootUserFeatures.errCode);
+      }
+
+      if(rootClaimableDrops.success) {
+        dispatch(setClaimableDrops(rootClaimableDrops.value as Record<Campaign, ClaimableDrop[]>));
+      } else {
+        LogError(Module.Citizens, rootClaimableDrops.errMessage, rootClaimableDrops.errCode);
       }
     }
   };
