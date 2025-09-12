@@ -802,8 +802,7 @@ export default function CitizensComponent() {
     }
     return isSuccess;
   }
-
-  async function onBuying() {
+  async function onLuksoBuying() {
     const signer = await browserProvider?.ethersProvider?.getSigner();
     if (!signer) {
       LogError(Module.Citizens, 'Signer is undefined in onBuying');
@@ -847,6 +846,21 @@ export default function CitizensComponent() {
     return await saveLuksoCombination(claimResult.value);
   }
 
+  async function onRootBuying() {
+    return false;
+  }
+
+  async function onBuying(): Promise<boolean> {
+    let isSuccess = false;
+    if (selectedCampaign == Campaign.Citizens || selectedCampaign == Campaign.Creators) {
+      isSuccess = await onLuksoBuying();
+    }
+    else if (selectedCampaign == Campaign.Based) {
+      isSuccess = await onRootBuying();
+    }
+    return isSuccess;
+  }
+
   async function onMinting(): Promise<MintUIResult> {
     if (!walletAddress) {
       LogError(Module.Citizens, 'Wallet address is undefined in onMinting');
@@ -883,7 +897,7 @@ export default function CitizensComponent() {
 
     if (type) {
       const initialAttribute = initialFeaturesData.current.find(attr => attr.val.type === type);
-      
+
       if (initialAttribute) {
         await ChangeFeature(initialAttribute.val.id, initialAttribute.val.path, initialAttribute.val.name, type, campaignParams?.config.skin?.defColor ?? 'FFFFFF');
         addReplaceAttribute(initialAttribute.val.type, initialAttribute.val.name);
