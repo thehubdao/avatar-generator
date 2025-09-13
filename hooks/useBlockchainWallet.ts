@@ -502,7 +502,7 @@ export function useBlockchainWallet() {
         dispatch(connect({ address: futurePassAddress, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: true });
       }
-      if (!isFetchingSession && !userSession && blockchainType === Blockchain.Root) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+      if (!isFetchingSession && !userSession && (blockchainType === Blockchain.Root || !blockchainType) && loginLibaryflag[LoginLibrary.Pass]) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
         dispatch(disconnect());
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: false });
       }
