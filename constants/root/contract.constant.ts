@@ -6,7 +6,7 @@ import { Signer } from '@futureverse/signer';
 import { AssetRegister } from '@futureverse/asset-register/v2';
 import { KeyringPair } from '@polkadot/keyring/types';
 
-export const ROOT_NETWORK_WS_URL = process.env.NEXT_PUBLIC_ROOT_NETWORK_WS_URL;
+export const ROOT_NETWORK_WS_URL = 'wss://porcini.rootnet.app/ws';
 
 export const PROVIDER = new WsProvider(ROOT_NETWORK_WS_URL);
 
