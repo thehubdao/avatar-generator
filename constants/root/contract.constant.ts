@@ -12,10 +12,10 @@ export const PROVIDER = new WsProvider(ROOT_NETWORK_WS_URL);
 
 export const MINT_AMOUNT = 1;
 
-export const NFT_COLLECTION_ID = process.env.NEXT_PUBLIC_ROOT_NFT_COLLECTION_ID as string;
+export const NFT_COLLECTION_ID = '2060388' as string;
 export const NFT_COLLECTION_ADDRESS = process.env.NEXT_PUBLIC_NFT_COLLECTION_ADDRESS as string;
 
-export const ROOT_GQL_API_URL = process.env.NEXT_PUBLIC_ROOT_GQL_API_URL as string;
+export const ROOT_GQL_API_URL = 'https://ar-api.futureverse.cloud/graphql' as string;
 export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN as string;
 export const ORIGIN = process.env.NEXT_PUBLIC_ORIGIN as string;
 export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID as string;

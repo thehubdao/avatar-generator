@@ -6,7 +6,7 @@ import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetLuksoUserFeature
 import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetSolanaUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
 import { CitizenMetadata, ClaimableDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
-import { CampaignParameterName, CommonErrorCode, Module } from '../enums/common.enum';
+import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
@@ -23,7 +23,7 @@ import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
 import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
-import { GetRootAssetsMetadata, GetRootClaimableDrops, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
+import { GetRootAssetsMetadata, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
 import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 
 export function useBlockchainWallet() {
@@ -169,12 +169,6 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
   }
 
-  async function getRootClaimableDropsPromise(walletAddress: string): Promise<Result<Record<RootCampaign, ClaimableDrop[]>>> {
-    const drops = await GetRootClaimableDrops(walletAddress);
-    if (drops.success) return { success: true, value: drops.value };
-    return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
-  }
-
   const fetchAppData = async () => {
     const walletAddress = userAddress;
 
@@ -307,7 +301,6 @@ export function useBlockchainWallet() {
     } else if (blockchainType === Blockchain.Root) {
       const rootCitizensMetadata = await getRootTokensMetadataPromise(walletAddress);
       const rootUserFeatures = await getRootUserFeaturesPromise(walletAddress);
-      const rootClaimableDrops = await getRootClaimableDropsPromise(walletAddress);
       
       if (rootCitizensMetadata.success) {
         const citizen = rootCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
@@ -362,12 +355,6 @@ export function useBlockchainWallet() {
         dispatch(setUserFeatures(rootFeatures));
       } else {
         LogError(Module.Citizens, rootUserFeatures.errMessage, rootUserFeatures.errCode);
-      }
-
-      if(rootClaimableDrops.success) {
-        dispatch(setClaimableDrops(rootClaimableDrops.value as Record<Campaign, ClaimableDrop[]>));
-      } else {
-        LogError(Module.Citizens, rootClaimableDrops.errMessage, rootClaimableDrops.errCode);
       }
     }
   };

@@ -4,10 +4,10 @@ import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { LogError } from '../../common.util';
 import '@therootnetwork/api-types';
-import { GetAssetData, GetClaimableDrops, StoreAssetData } from '../../firebase.util';
+import { GetAssetData, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { Campaign, CampaignBaseCombination, RootCampaign } from '../../../enums/citizens/common.enum';
-import { CitizenMetadata, ClaimableDrop, LinkableToken, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
+import { CitizenMetadata, LinkableToken, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
@@ -266,19 +266,6 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
       errMessage: err.message,
       errCode: CommonErrorCode.InternalError
     }
-  }
-}
-
-export async function GetRootClaimableDrops(address: string): Promise<Result<Record<RootCampaign, ClaimableDrop[]>>> {
-  try {
-    const drops = await GetClaimableDrops(Campaign.Based);
-    if (!drops.success) return drops;
-
-    return { success: true, value: { [RootCampaign.Based]: drops.value } }; //Check the claims of the user for that token. if the user has claimed the token more times than claimLimit, remove it from the list.
-  } catch (e) {
-    const err = e as Error;
-    void LogError(Module.RootContractUtil, "Couldn't get claimable drops", e);
-    return { success: false, errMessage: err.message, errCode: CommonErrorCode.InternalError };
   }
 }
 
