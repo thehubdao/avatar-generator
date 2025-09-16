@@ -68,7 +68,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
 
   function handleOpen() {
     if (isMarketplaceMode) setIsCollapsed(!isCollapsed)
-      else dispatch(setMarketplaceMode(true));
+    else dispatch(setMarketplaceMode(true));
   }
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
 
     setShoppingCartItems(items);
   }, [shoppingCart, claimableDrops]);
-
+  return <></>; //HIDE cart while root minting
   return (
     <>
       {/* CART OR CHECKOUT LOADING */}
@@ -109,7 +109,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
                 {/* TITLE */}
                 <h2 className="text-xl font-bold">Shopping cart</h2>
                 {/* CLEAN BUTTON */}
-                { shoppingCartItems.length > 0 &&
+                {shoppingCartItems.length > 0 &&
                   <div className="w-10 h-10 rounded-xl border border-citizens-yellow">
                     <div className="flex items-center justify-center h-full w-full cursor-pointer" onClick={() => handleCleanCart()}>
                       <BiSolidTrash className="fill-citizens-yellow w-4 h-4 m-auto" />

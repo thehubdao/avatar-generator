@@ -369,6 +369,8 @@ export function useBlockchainWallet() {
     dispatch(setSelectedCampaign(campaign ?? null));
   }
 
+  useEffect(()=>{console.log(userSession, "USER SESSION")}, [userSession]);
+
   const HandleLogout = async () => {
     if (blockchainType === Blockchain.Root) {
       signOutPass({ flow: 'silent', disableConsent: true });
@@ -484,7 +486,7 @@ export function useBlockchainWallet() {
       if (!isFetchingSession && userSession && signer) {
         const futurePassAddress = userSession.futurepass;
 
-        await InitializeContractEssentialData(signer);
+        await InitializeContractEssentialData(signer,undefined, userSession);
 
         dispatch(connect({ address: futurePassAddress, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: true });
