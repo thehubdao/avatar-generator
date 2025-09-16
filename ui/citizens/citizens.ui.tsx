@@ -34,7 +34,7 @@ interface CitizensUIProps {
 	handleResetCombination: (type?: string) => Promise<boolean>;
 }
 
-export default function CitizensUI({ singleInitData, exportData, featureList, marketplaceFeatureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleBuying, handleMinting, handleResetCombination }: CitizensUIProps) {
+export default function CitizensUI({ singleInitData, exportData, featureList, marketplaceFeatureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleMinting, handleResetCombination }: CitizensUIProps) {
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const shoppingCart = useAppSelector(state => state.citizensMetadata.shoppingCart);
