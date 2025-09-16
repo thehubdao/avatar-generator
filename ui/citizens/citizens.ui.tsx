@@ -13,7 +13,6 @@ import MintUI from "./common/mint.ui";
 import { MINTING_UI_DATA } from "../../constants/mint.constant";
 import { ModelExtension } from "../../enums/export.enum";
 import LoadingUI from "./common/loading.ui";
-import ShoppingCartUI from "./backpack/shoppingCart.ui";
 import Link from "next/link";
 import Button from "./common/button.ui";
 import { Module } from "../../enums/common.enum";
@@ -347,7 +346,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 														isLoading={false}
 													/>
 												</div>
-												{!didEditMode && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />}
+												{/* {!didEditMode && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />} */}
 											</>
 
 										}
