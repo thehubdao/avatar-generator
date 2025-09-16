@@ -17,6 +17,6 @@ export const CUSTOM_THEME_CONFIG: ThemeConfig = {
     showCloseButton: true,
 };
 
-export const CLIENT_ID = 'ebbK31YxjfhaQ5-IUp5iw' as string;
+export const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID as string;
 
-export const ENVIRONMENT = 'staging' as Environment;
+export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT as Environment;

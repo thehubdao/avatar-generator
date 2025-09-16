@@ -7,18 +7,18 @@ import { AssetRegister } from '@futureverse/asset-register/v2';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { UserSession } from '@futureverse/auth-react/auth';
 
-export const ROOT_NETWORK_WS_URL = 'wss://porcini.rootnet.app/ws';
+export const ROOT_NETWORK_WS_URL = process.env.NEXT_PUBLIC_ROOT_NETWORK_WS_URL as string;
 
 export const PROVIDER = new WsProvider(ROOT_NETWORK_WS_URL);
 
 export const MINT_AMOUNT = 1;
 
-export const NFT_COLLECTION_ID = '2060388' as string;
+export const NFT_COLLECTION_ID = process.env.NEXT_PUBLIC_ROOT_NFT_COLLECTION_ID as string;
 
-export const ROOT_GQL_API_URL = 'https://ar-api.futureverse.cloud/graphql' as string;
-export const DOMAIN = 'avatar-generator-git-pr-root-airdrop-dap-frontend.vercel.app' as string;
-export const ORIGIN = 'https://avatar-generator-git-pr-root-airdrop-dap-frontend.vercel.app' as string;
-export const CHAIN_ID = '7672' as string;
+export const ROOT_GQL_API_URL = process.env.NEXT_PUBLIC_ROOT_GQL_API_URL as string;
+export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN as string;
+export const ORIGIN = process.env.NEXT_PUBLIC_ORIGIN as string;
+export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID as string;
 
 export const ROOT_SIGNER_PK = process.env.ROOT_SIGNER_PK as string;
 
