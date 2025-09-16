@@ -756,7 +756,10 @@ export default function CitizensComponent() {
       LogError(Module.Citizens, 'Failed to set new combination on saveRootCombination', setNewCombinationResult.errMessage);
       return false;
     }
-    const newImageUrl = await GetImageUrl(currentCampaign, newCombination);
+
+    const cameraPosition = new Vector3(0, 1.6, 1.3); 
+    const cameraTarget = new Vector3(0, 1, 0); 
+    const newImageUrl = await generateImage(cameraPosition, cameraTarget);
 
     const attributesUnion = [...(selectedCitizen.rawMetadata as RootMetadata).attributes, ...newAttributes];
 
