@@ -1,6 +1,6 @@
 import { CitizenMetadata, LuksoMetadata, SolanaMetadata } from "../interfaces/citizens.interface";
 import { PinataSDK } from "pinata-web3";
-import { Campaign, CampaignBaseCombination } from "../enums/citizens/common.enum";
+import { Campaign } from "../enums/citizens/common.enum";
 import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { LogError } from "./common.util";
