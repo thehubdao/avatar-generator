@@ -9,7 +9,7 @@ import { Module } from "../../enums/common.enum";
 import { ExportInterface, MintUIResult } from "../../interfaces/common.interface";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/lukso/labels.constant";
 import { SaveFile } from "../../utils/exporter.util";
-import { SetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
+import { GetImageUrl, SetImageUrl, UploadLuksoMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { ClaimAndSetAvatarNewWearings, GetCampaignsTokensMetadata, GetLuksoUserFeatures, SetAvatarNewWearings } from "../../utils/web3/lukso/contract.util";
 import { Campaign, CampaignBaseCombination, CampaignBaseUrl, RootCampaign } from "../../enums/citizens/common.enum";
 import { setCitizensMetadata, setSelectedCitizen, setTakingPhoto, setUserFeatures } from "../../store/citizensMetadataSlice";
@@ -311,8 +311,8 @@ export default function CitizensComponent() {
 
   async function generateImage(pos?: Vector3, target?: Vector3): Promise<string | null> {
     // @GabCh155: this function is to generate the image from the canvas
-    const imageBlob = await GetAvatarPhoto(pos, target, selectedCampaign as string, () => dispatch(setTakingPhoto(true)));
-    return imageBlob;
+    const imageUrl = await GetAvatarPhoto(pos, target, selectedCampaign as string, () => dispatch(setTakingPhoto(true)));
+    return imageUrl;
   }
 
   async function exportImage(): Promise<boolean> { //This function exports the image file
@@ -374,6 +374,7 @@ export default function CitizensComponent() {
 
   async function fetchRootMetadata(walletAddress: string): Promise<boolean> {
     const asset = await GetRootAssetsMetadata(walletAddress);
+
     if (asset.success) {
       dispatch(setCitizensMetadata(asset.value));
       dispatch(setSelectedCitizen(asset.value[0]));
@@ -757,9 +758,11 @@ export default function CitizensComponent() {
       return false;
     }
 
-    const cameraPosition = new Vector3(0, 1.6, 1.3); 
+    const cameraPosition = new Vector3(0, 0.5, 1.3); 
     const cameraTarget = new Vector3(0, 1, 0); 
-    const newImageUrl = await generateImage(cameraPosition, cameraTarget);
+    const generatedImageUrl = await generateImage(cameraPosition, cameraTarget);
+
+    await SetImageUrl(selectedCitizen.campaign, newCombination, generatedImageUrl as string);
 
     const attributesUnion = [...(selectedCitizen.rawMetadata as RootMetadata).attributes, ...newAttributes];
 
@@ -774,9 +777,10 @@ export default function CitizensComponent() {
         index: attr.index,
       };
     });
+    const imageUrl = await GetImageUrl(selectedCitizen.campaign, newCombination);
 
     const storeAssetDataResult = await StoreAssetData({
-      imageUrl: newImageUrl,
+      imageUrl,
       tokenId: selectedCitizen.tokenId,
       collectionId: (selectedCitizen.rawMetadata as RootMetadata).collectionId,
       campaign: currentCampaign,

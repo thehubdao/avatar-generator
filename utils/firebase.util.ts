@@ -1378,6 +1378,7 @@ export async function StoreAssetData(assetData: AssetData): Promise<Result<boole
     const db = await FirebaseUtil.Instance().DB();
     const assetDataCollection = collection(db, `${FirestoreGlobalLocation.Campaign}/${campaign}/${FirestoreLocation.AssetData}`);
     const assetRef = doc(assetDataCollection, `${collectionId}:${tokenId}`);
+
     await setDoc(assetRef, assetData, { merge: true });
     return { success: true, value: true };
   } catch (e) {
