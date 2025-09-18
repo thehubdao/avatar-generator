@@ -608,7 +608,6 @@ export function useBlockchainWallet() {
             if (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators) {
               const provider = await ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
               const browserProvider = new BrowserProvider(provider);
-              const currentChainId = await browserProvider.getNetwork();
 
               setEthersProvider(browserProvider); // Cast to BrowserProvider and set the provider
 
@@ -631,7 +630,6 @@ export function useBlockchainWallet() {
               const [provider, xpData] = await Promise.all([providerPromise, xpDataPromise]);
 
               const browserProvider = new BrowserProvider(provider);
-              const currentChainId = await browserProvider.getNetwork();
 
               // Inicializar el contrato de Polygon (la red ya debería estar correcta)
               await InitializePolygonContractEssentialData(await browserProvider.getSigner());
@@ -672,7 +670,7 @@ export function useBlockchainWallet() {
         connectPromise();
       } // Set the user as logged in
     }
-    if (ready && !authenticated && (blockchainType === Blockchain.Lukso || blockchainType === Blockchain.Solana || blockchainType === Blockchain.Polygon)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+    if (ready && !authenticated && (blockchainType === Blockchain.Lukso || blockchainType === Blockchain.Solana || blockchainType === Blockchain.Polygon || loginLibaryflag[LoginLibrary.Privy])) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
       dispatch(disconnect());
       SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Privy]: false });
     }
