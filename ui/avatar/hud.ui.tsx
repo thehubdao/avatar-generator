@@ -20,6 +20,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { setSavingMode } from "../../store/citizensMetadataSlice";
 
 interface HudUIProps {
+  HUDTitle?: string;
 
   selectListCategory: FeatureBasic[];
   // selectListFeatures: FeatureBasic[];
@@ -55,10 +56,11 @@ interface HudUIProps {
   exportAllow?: ModelExtension[];
   onClickBackButton: () => void
   isLoading: boolean
-  handleSaveCombination: () => Promise<boolean>
+  handleSaveCombination?: () => Promise<boolean>
 }
 
 export default function HudUI({
+  HUDTitle,
   selectListCategory,
   optionList,
   selectedCategory,
@@ -87,6 +89,10 @@ export default function HudUI({
   const { showSnackbar } = useSnackbar();
 
   async function onSaveCombination() {
+    if (!handleSaveCombination) {
+      showSnackbar(<p>Ups. We can´t to save the combination, try later.</p>);
+      return;
+    }
     dispatch(setSavingMode(true));
     const isSuccess = await handleSaveCombination();
     if (isSuccess) {
@@ -148,9 +154,11 @@ export default function HudUI({
                   <AGButton full onClickEvent={() => onClickBackButton()}>
                     <p>GO BACK</p>
                   </AGButton>
-                  <AGButton full onClickEvent={() => setIsSaveModalOpen(true)}>
-                    <p>SAVE</p>
-                  </AGButton>
+                  { handleSaveCombination &&
+                    <AGButton full onClickEvent={() => setIsSaveModalOpen(true)}>
+                      <p>SAVE</p>
+                    </AGButton>
+                  }
                 </div>
               }
 
@@ -163,7 +171,7 @@ export default function HudUI({
                 />
                 <div className="flex text-gray-normal dark:text-gray-light mx-4 items-center h-14">
                   <HudFeatureTitleUI selectedFeature={RemovedAcc(selectedCategory)} size="small" />
-                  { !hideSkinSelector &&
+                  {!hideSkinSelector &&
                     <AGButton nm fit onClickEvent={() => setShouldShowColorSelectorModal(true)}>
                       <div className="w-full flex justify-center items-center gap-3 text-xs font-semibold">
                         <p>SKIN</p>
@@ -234,19 +242,24 @@ export default function HudUI({
 
             {/* TITLE SECTION */}
             <div className="text-gray-normal dark:text-citizens-graylight pt-10 2xl:pt-0">
-              <div className="relative flex justify-end">
-                <div className="absolute z-10 right-0 2xl:pb-6 2xl:pt-12 2xl:relative">
-                  <AGButton onClickEvent={() => onClickBackButton()} nm={isWindowGreaterThan1536}>
-                    <p className="font-poppins text-center 2xl:w-[240px] py-2">GO BACK</p>
-                  </AGButton>
+              {
+                <div className="relative flex justify-end">
+                  <div className="absolute z-10 right-0 2xl:pb-6 2xl:pt-12 2xl:relative">
+                    <AGButton onClickEvent={() => onClickBackButton()} nm={isWindowGreaterThan1536}>
+                      <p className="font-poppins text-center 2xl:w-[240px] py-2">GO BACK</p>
+                    </AGButton>
+                  </div>
+                  { handleSaveCombination &&
+                    <div className="fixed right-0 bottom-0 pb-6 pt-12 2xl:relative">
+                      <AGButton onClickEvent={() => setIsSaveModalOpen(true)} nm={isWindowGreaterThan1536}>
+                        <p className="font-poppins text-center w-[300px] py-2">SAVE COMBINATION</p>
+                      </AGButton>
+                    </div>
+                  }
                 </div>
-                <div className="fixed right-0 bottom-0 pb-6 pt-12 2xl:relative">
-                  <AGButton onClickEvent={() => setIsSaveModalOpen(true)} nm={isWindowGreaterThan1536}>
-                    <p className="font-poppins text-center w-[300px] py-2">SAVE COMBINATION</p>
-                  </AGButton>
-                </div></div>
+              }
               <div className="w-full">
-                <h1 className="font-poppins text-lg">CUSTOMIZATION</h1>
+                {HUDTitle && <h1 className="font-poppins text-lg">{HUDTitle}</h1>}
                 <HudFeatureTitleUI selectedFeature={RemovedAcc(selectedCategory)} />
               </div>
             </div>

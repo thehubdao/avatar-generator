@@ -1,6 +1,6 @@
 import { ERC725 } from "@erc725/erc725.js";
 import { ERC725JSONSchemaKeyType } from "@erc725/erc725.js";
-import { ethers, JsonRpcProvider } from "ethers";
+import { ethers, JsonRpcProvider, Wallet } from "ethers";
 import { Campaign } from "../../enums/citizens/common.enum";
  
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
@@ -9,7 +9,9 @@ import { ThrowError } from "../../utils/common.util";
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS || ThrowError('NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS is required');
 const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS || ThrowError('NEXT_PUBLIC_PROFILE_ADDRESS is required');
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ThrowError('NEXT_PUBLIC_RPC_URL is required');
-const PK = process.env.NEXT_PUBLIC_PK || ThrowError('NEXT_PUBLIC_PK is required');
+
+const AVATAR_ADMIN_PK = process.env.AVATAR_ADMIN_PK || ThrowError('AVATAR_ADMIN_PK is required');
+const WEARABLE_ADMIN_SIGNER_PK = process.env.WEARABLE_ADMIN_SIGNER_PK || ThrowError('WEARABLE_ADMIN_SIGNER_PK is required');
 
 const CONFIG = {
     ipfsGateway: 'ipfs://',
@@ -17,7 +19,9 @@ const CONFIG = {
 
 export const PROVIDER = new JsonRpcProvider(RPC_URL);
 
-export const EOA = new ethers.Wallet(PK).connect(PROVIDER); // TODO: Move to backend
+export const EOA = AVATAR_ADMIN_PK ? new ethers.Wallet(AVATAR_ADMIN_PK).connect(PROVIDER) : undefined;
+
+export const WEARABLE_ADMIN_SIGNER = WEARABLE_ADMIN_SIGNER_PK ? new Wallet(WEARABLE_ADMIN_SIGNER_PK).connect(PROVIDER) : undefined;
 
 export const OPERATION_CALL = 0;
 
@@ -56,3 +60,5 @@ export const UNIVERSAL_PROFILE_CONTRACT = new ethers.Contract(
     UniversalProfileABI,
     PROVIDER,
 );
+
+export const AVATAR_EXTENSION_CONTRACT_ADDRESS_EXPORT = AVATAR_EXTENSION_CONTRACT_ADDRESS;

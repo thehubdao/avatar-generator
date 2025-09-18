@@ -3,10 +3,11 @@ import { getApiOptions } from '@therootnetwork/api';
 import { LogError, ThrowError } from '../../utils/common.util';
 import { Module } from '../../enums/common.enum';
 import { Signer } from '@futureverse/signer';
-import { AssetRegister } from '@futureverse/asset-register/v2'
+import { AssetRegister } from '@futureverse/asset-register/v2';
 import { KeyringPair } from '@polkadot/keyring/types';
+import { UserSession } from '@futureverse/auth-react/auth';
 
-export const ROOT_NETWORK_WS_URL = process.env.NEXT_PUBLIC_ROOT_NETWORK_WS_URL;
+export const ROOT_NETWORK_WS_URL = process.env.NEXT_PUBLIC_ROOT_NETWORK_WS_URL as string;
 
 export const PROVIDER = new WsProvider(ROOT_NETWORK_WS_URL);
 
@@ -21,18 +22,27 @@ export const ROOT_CHAIN_ID = process.env.NEXT_PUBLIC_ROOT_CHAIN_ID || ThrowError
 
 export const ROOT_SIGNER_PK = process.env.ROOT_SIGNER_PK || '';
 
+export const BASE_ETH_NUMBER = 10;
+export const BASE_DECIMALS_NUMBER = 18;
+
+export const ROOT_TOKEN_ID = 1;
+
 export let ASSET_REGISTER_SDK: AssetRegister;
 
 export let API: ApiPromise;
 export let SIGNER: Signer;
+export let SESSION: UserSession;
 export let KEYRING_SIGNER: KeyringPair;
+export let isINIT: boolean;
 
-
-export async function InitializeContractEssentialData(_signer?: Signer, _keyringSigner?: KeyringPair) {
+export async function InitializeContractEssentialData(_signer?: Signer, _keyringSigner?: KeyringPair, userSession?: UserSession) {
   if (API) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Api already initialized');
   API = await ApiPromise.create({ ...getApiOptions(), provider: PROVIDER });
   if (KEYRING_SIGNER) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Keyring Signer already initialized');
   if (_keyringSigner) KEYRING_SIGNER = _keyringSigner;
+
+  if (SESSION) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Session already initialized');
+  if (userSession) SESSION = userSession;
 
   if (SIGNER) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Signer already initialized');
   if (_signer) {
@@ -58,4 +68,6 @@ export async function InitializeContractEssentialData(_signer?: Signer, _keyring
       walletAddress: (await SIGNER.getAddress()) as `0x${string}`,
     },
   });
+
+  isINIT = true;
 }

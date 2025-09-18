@@ -20,7 +20,7 @@ export default function GetImageUI({ imageUrl, alt = 'image' }: GetImageUiProps)
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           alt={alt}
-          className={`${shouldReveal ? 'opacity-100' : 'opacity-0'} transition-opacity duration-500`}
+          className={`${shouldReveal ? 'opacity-100' : 'opacity-0'} object-cover transition-opacity duration-500`}
           onLoadingComplete={() => setReveal(true)}
         />
       }

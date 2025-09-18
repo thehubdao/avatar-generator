@@ -1,5 +1,6 @@
 import { Blockchain } from "../enums/blockchain/common.enum";
 import { Campaign, HoldingCondition, PaymentType } from "../enums/citizens/common.enum";
+import { DropType } from "../enums/lukso/common.enum";
 import { BodyPart } from "./avatar.interface";
 
 export interface CitizensCollection {
@@ -16,7 +17,9 @@ export interface ClaimableDrop {
     tokenName: string; //This is the name of the collection that the user needs to be holding
   }[]; //If this array is not empty, means the user needs to be holding
   id: string;
-  name: string;
+  featureIndex: number; //Index of the feature in the campaign
+  featureType: string; //Type of the feature, e.g. "body", "face", "head", etc.
+  featureName: string; //Name of the feature in the campaign
   description: string;
   imageUrl: string;
   requiredXP: number; //XP required to claim the drop
@@ -25,6 +28,17 @@ export interface ClaimableDrop {
   contractAddress: string;
   holdingCondition?: HoldingCondition; //Condition to be applied to the holdingAddresses
   owned: boolean; //true if the user has already claimed the drop
+  claimLimit: number; //Limit on the number of times the drop can be claimed
+  claimedAmount: number; //Number of times the drop has been claimed by the user
+  isClaimable: boolean; // true if the drop can be claimed by the user
+}
+
+export interface DropToClaim {
+  wearableIndex: string;
+  wearableType: string;
+  wearableAddress: string;
+  wearablePredictedTokenId: string;
+  signature: string;
 }
 
 export interface Game {
@@ -58,7 +72,7 @@ export interface CitizenMetadata {
 export interface LuksoMetadata {
   fallbackImageUrl: string;
   imageUrl: string;
-  combination: string; 
+  combination: string;
   baseCombination: string;
   campaign: Campaign;
   tokenId: string;
@@ -92,13 +106,14 @@ export interface SolanaMetadata {
   asset_address: string;
 }
 
-export interface RootMetadata{
+export interface RootMetadata {
   imageUrl: string;
   combination: string;
   baseCombination: string;
   campaign: Campaign;
   collectionId: string;
   tokenId: string;
+  attributes: RootDrop[];
 }
 
 export interface PolygonTrait {
@@ -124,9 +139,12 @@ export interface SolanaAttribute {
   asset_address?: string;
 }
 
-export interface CitizenAttribute {
-  trait_type: string;
+export interface LuksoAttribute {
+  key: string;
   value: string;
+  type: string;
+  wearable_address?: string; // Optional, used for features that are linked to an asset
+  wearable_token_id?: string;
 }
 
 export interface TokenId {
@@ -144,11 +162,16 @@ export interface CampaignData extends Record<Campaign, CampaignWeb3Data> {
 }
 
 export interface Drop {
-  balance: number;
+  balance?: number;
   contract_address: string;
   index: number;
   type: string;
   name: string;
+  dropType: DropType;
+}
+
+export interface LuksoDrop extends Drop {
+  tokenId?: string;
   typeIndex: number;
 }
 
@@ -166,7 +189,8 @@ export interface PolygonDrop extends Drop {
 export interface RootDrop extends Drop {
   schemaPart: string;
   collectionId: string;
-  linkableTokens: LinkableToken[];
+  typeIndex: number;
+  linkableTokens?: LinkableToken[];
 }
 
 export interface CampaignMetadata extends Record<Campaign, CitizenMetadata[]> { }
@@ -215,4 +239,8 @@ export interface AssetLink {
     collectionId: string;
     schema: { name: string };
   };
+}
+
+export interface SFTAssetLink {
+  tokenId: string;
 }

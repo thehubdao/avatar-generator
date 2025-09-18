@@ -14,6 +14,9 @@ export interface AssetInterface {
   path: string;
   thumb?: string;
   balance?: number;
+  price?: number;
+  paymentType?: string;
+  requiredXP?: number;
 }
 
 export interface FeatureInterface extends AssetInterface {

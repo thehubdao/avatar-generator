@@ -49,7 +49,7 @@ export default function WearablesCollection({
 
   const getFilteredDrops = () => {
     return claimableDrops.filter(drop => {
-      const didMatchSearch = drop.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const didMatchSearch = drop.featureName.toLowerCase().includes(searchTerm.toLowerCase());
       
       const didMatchOwned = !chooseOwnedValue || chooseOwnedValue === 'All' 
         ? true 

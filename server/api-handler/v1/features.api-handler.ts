@@ -6,7 +6,7 @@ import {ApiResponse} from "../../../interfaces/api.interface";
 import {RequestResponse} from "../request.api-handler";
 import {DefaultApiResponse} from "../../enums/api.enum";
 
-export async function  GetApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<string[]>>) {
+export async function GetApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<string[]>>) {
   const {campaign} = req.query;
 
   if (!campaign)

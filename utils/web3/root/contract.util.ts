@@ -1,4 +1,4 @@
-import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER } from '../../../constants/root/contract.constant';
+import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER, BASE_ETH_NUMBER, ROOT_TOKEN_ID, SESSION } from '../../../constants/root/contract.constant';
 import { TransactionBuilder } from '@futureverse/transact';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
@@ -12,19 +12,19 @@ import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
 import { RootTransactionStatus } from '../../../enums/web3';
-import { CreateAssetLinkOperationMessage, DeleteAssetLinkOperationMessage, GetLinkableTokenId } from './registry.util';
+import { CreateAssetLinkOperationMessage, DeleteAssetLinkOperationMessage, GetLinkableTokenId, GetSFTAssetLinks } from './registry.util';
 import { GetCampaignDrops } from '../citizens.util';
 import { Keyring } from '@polkadot/api';
 import { hexToU8a } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { AssetRegistryAction } from '../../../enums/root/common.enum';
+import { AssetRegistryAction, RootErrorCode } from '../../../enums/root/common.enum';
 
 export function GetAdminSigner(): KeyringPair {
   const keyring = new Keyring({ type: "ethereum" });
   const seedU8a = hexToU8a(ROOT_SIGNER_PK);
   const adminSigner = keyring.addFromSeed(seedU8a);
-  return adminSigner
+  return adminSigner;
 }
 
 export async function GetRootAssetTokenIds(address: string, collectionId: string): Promise<Result<number[]>> {
@@ -41,7 +41,7 @@ export async function GetRootAssetTokenIds(address: string, collectionId: string
   }
 }
 
-export async function HasSftBalance(address: string, sftCollectionId: string, sftTokenId: string): Promise<Result<boolean>> {
+export async function SftBalance(address: string, sftCollectionId: string, sftTokenId: string): Promise<Result<number>> {
   try {
     const token = await API.query.sft.tokenInfo([
       sftCollectionId,
@@ -62,9 +62,9 @@ export async function HasSftBalance(address: string, sftCollectionId: string, sf
       );
     });
 
-    const hasBalance = firstOwned ? Number(firstOwned[1].freeBalance) > 0 : false;
+    const balance = firstOwned ? Number(firstOwned[1].freeBalance) : 0;
 
-    return { success: true, value: hasBalance };
+    return { success: true, value: balance };
   } catch (error) {
     const e = error as Error;
     LogError(Module.RootContractUtil, 'Error on getting Root Asset');
@@ -149,8 +149,29 @@ export async function MintRootAsset(
   imageUrl: string
 ): Promise<Result<boolean>> {
   try {
-    const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
-    const mintBuilder = TransactionBuilder.nft(API, SIGNER, EOA_ADDRESS, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
+    const mintBuilder = TransactionBuilder.nft(API, SIGNER, SESSION.eoa, Number(NFT_COLLECTION_ID)).mint({ quantity: MINT_AMOUNT, walletAddress: address });
+
+    await mintBuilder.addFuturePassAndFeeProxy({
+      futurePass: SESSION.futurepass,
+      assetId: ROOT_TOKEN_ID,
+      slippage: 5,
+    });
+
+
+    const mintBigIntFees = await mintBuilder.getGasFees();
+    const mintIntFees = Number(mintBigIntFees.gasFee) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
+    const { balance: walletBigIntBalance } = await mintBuilder.checkBalance({ walletAddress: SESSION.futurepass, assetId: ROOT_TOKEN_ID });
+    const walletIntBalance = Number(walletBigIntBalance) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
+
+    const mintDetails = (await API.query.nft.publicMintInfo(NFT_COLLECTION_ID)).toHuman() as { enabled: boolean, pricingDetails: Array<string> };
+
+    const mintPrice = Number(mintDetails?.pricingDetails[1].split(',').join('')) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
+
+    if (!mintDetails?.enabled) { return { success: false, errMessage: "Minting is not enabled", errCode: CommonErrorCode.InternalError }; }
+    if (walletIntBalance < mintIntFees + mintPrice) {
+      return { success: false, errMessage: "Insufficient balance. You need " + Number(mintIntFees + mintPrice) + " ROOT in your Future Pass to mint this asset.", errCode: RootErrorCode.InsufficientFunds };
+    }
+
     await mintBuilder.signAndSend();
     const tokenIdsResult = await GetRootAssetTokenIds(address, NFT_COLLECTION_ID);
     if (tokenIdsResult.success) {
@@ -165,7 +186,8 @@ export async function MintRootAsset(
         combination: baseCombination,
         imageUrl,
         name: MINTING_UI_DATA.root_citizens?.campaignName || '',
-        description: MINTING_UI_DATA.root_citizens?.avatarDescription || ''
+        description: MINTING_UI_DATA.root_citizens?.avatarDescription || '',
+        attributes: []
       });
     } else {
       void LogError(Module.RootContractUtil, 'Could not get Token ID');
@@ -190,7 +212,7 @@ export async function GetRootCollectionSupply(): Promise<Result<number>> {
       value: collectionIssuance
     };
   } catch (e) {
-    const err = e as Error
+    const err = e as Error;
     void LogError(Module.SolanaContractUtil, "Couldn't get collection supply", e);
     return {
       success: false,
@@ -201,7 +223,7 @@ export async function GetRootCollectionSupply(): Promise<Result<number>> {
 }
 
 export async function GetRootMintingPrice(): Promise<Result<MintingPriceData>> {
-  return { success: true, value: { mintPrice: 0, mintingPriceSymbol: 'XRP' } };
+  return { success: true, value: { mintPrice: 124, mintingPriceSymbol: 'ROOT' } };
 }
 
 export async function GetRootUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {
@@ -214,13 +236,16 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
       errMessage: "No drops found",
       errCode: CommonErrorCode.GetNoData
     };
-
     const dropsCheckPromiseList = rootDrops.value.map(async (drop) => {
-      const linkableTokenIdsResult = await GetLinkableTokenIds(address, drop.collectionId); //Get the linkable token ids for the drop
+      const [collectionId, tokenId] = drop.collectionId.split(':');
+      const balance = await SftBalance(address, collectionId, tokenId);
+      const linkableTokenIdsResult = await GetSFTAssetLinks(collectionId, tokenId, address); //Get the linkable token ids for the drop
 
-      if (!linkableTokenIdsResult.success) return null;
-      if (linkableTokenIdsResult.value.length === 0) return null;
+      if (!linkableTokenIdsResult.success || !balance.success) return null;
 
+      if (linkableTokenIdsResult.value.length === balance.value) return null;
+
+      drop.balance = balance.value - linkableTokenIdsResult.value.length;
       drop.linkableTokens = linkableTokenIdsResult.value;
 
       return drop;
@@ -234,7 +259,7 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
       value: { [campaign]: filteredDrops }
     };
   } catch (e) {
-    const err = e as Error
+    const err = e as Error;
     void LogError(Module.SolanaContractUtil, "Couldn't get user feature assets", e);
     return {
       success: false,
@@ -248,8 +273,8 @@ export async function EquipFeaturesOperations(parent_collection_id: string, pare
   const operations: Operation[] = [];
 
   for (const attribute of newAttributes) {
-    const firstLinkableToken = attribute.linkableTokens[0];
-    const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, attribute.collectionId, firstLinkableToken.tokenId);
+    const [collectionId, tokenId] = attribute.collectionId.split(':');
+    const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId);
     if (!createAssetLinkOperation.success) return { success: false, errMessage: createAssetLinkOperation.errMessage, errCode: createAssetLinkOperation.errCode };
     operations.push(createAssetLinkOperation.value);
   }
@@ -261,11 +286,13 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
   const operations: Operation[] = [];
 
   for (const attribute of oldAttributes) {
-    const linkedToken = attribute.linkableTokens.find(linkableToken => linkableToken.parentTokenId === parent_token_id);
+    const linkedToken = attribute;
 
     if (!linkedToken) return { success: false, errMessage: 'Linked token not found', errCode: CommonErrorCode.InternalError };
 
-    const deleteAssetLinkOperation = DeleteAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, attribute.collectionId, linkedToken.tokenId);
+    const [collectionId, tokenId] = linkedToken.collectionId.split(':');
+
+    const deleteAssetLinkOperation = DeleteAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId);
     if (!deleteAssetLinkOperation.success) return { success: false, errMessage: deleteAssetLinkOperation.errMessage, errCode: deleteAssetLinkOperation.errCode };
     operations.push(deleteAssetLinkOperation.value);
   }
@@ -273,11 +300,13 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
   return { success: true, value: operations };
 }
 
-export async function SetRootNewCombination(address: string, parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
+export async function SetRootNewCombination(parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
   try {
     const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
+
     const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, newAttributes);
     const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, oldAttributes);
+
 
     if (!equipOperations.success || !unequipOperations.success) return { success: false, errMessage: 'Error on setting new combination. All operations must be successful', errCode: CommonErrorCode.InternalError };
 
@@ -308,7 +337,7 @@ export async function SetRootNewCombination(address: string, parent_tokenId: str
 
     return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
   } catch (e) {
-    const err = e as Error
+    const err = e as Error;
     void LogError(Module.SolanaContractUtil, "Couldn't set new combination", e);
     return {
       success: false,
@@ -330,12 +359,12 @@ export async function SetRootAssetsTransferable(collectionId: string, tokenId: s
     const txs: SubmittableExtrinsic<"promise">[] = [];
 
     assetOperations.forEach(operation => {
-      const [,,,, collectionId, tokenId] = operation.args[2].split(':');
+      const [, , , , collectionId, tokenId] = operation.args[2].split(':');
       if (operation.action === AssetRegistryAction.Create) txs.push(SetAssetTransferableTx(collectionId, tokenId, true))
-      else if (operation.action === AssetRegistryAction.Delete) txs.push(SetAssetTransferableTx(collectionId, tokenId, false))
-  })
+      else if (operation.action === AssetRegistryAction.Delete) txs.push(SetAssetTransferableTx(collectionId, tokenId, false));
+    })
 
-    if (newCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, true)); //If the new combination is base combination, mark avatar as transferable
+    if (newCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, true)) //If the new combination is base combination, mark avatar as transferable
     else if (oldCombination === CampaignBaseCombination.Based) txs.push(SetAssetTransferableTx(collectionId, tokenId, false)); //If the new combination is not base combination, mark avatar as non transferable
 
     const batchTx = API.tx.utility.batch(txs);
@@ -343,7 +372,7 @@ export async function SetRootAssetsTransferable(collectionId: string, tokenId: s
 
     return { success: true, value: true };
   } catch (e) {
-    const err = e as Error
+    const err = e as Error;
     void LogError(Module.RootContractUtil, "Couldn't set root assets transferable", err.message);
     return {
       success: false,

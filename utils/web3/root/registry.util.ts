@@ -54,81 +54,112 @@ export function DeleteAssetLinkOperationMessage(schemaPart: string, parent_colle
     return { success: true, value: createAssetLinkOperation };
 }
 
+export async function GetSFTAssetLinks(collection_id: string, token_id: string, walletAddress: string): Promise<Result<LinkableToken[]>> {
+    try {
+        const graphqlLinksQuery = JSON.stringify({
+            query: "query Asset($tokenId: String!, $collectionId: CollectionId!, $addresses: [ChainAddress!]!) {\r\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\r\n    links {\r\n      ... on SFTAssetLink {\r\n        parentLinks(addresses: $addresses) {\r\n          tokenId\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+            variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}`, "addresses": [walletAddress] }
+        });
+
+        const result = await fetch(ROOT_GQL_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: graphqlLinksQuery,
+        });
+        const resultText = await result.text();
+        const resultJson = JSON.parse(resultText);
+        const links = resultJson.data.asset.links.parentLinks.map(link => ({
+            tokenId: token_id,
+            parentTokenId: link.tokenId,
+            parentCollectionId: collection_id
+        })) as LinkableToken[];
+
+        return { success: true, value: links };
+    } catch (error) {
+        const e = error as Error;
+        LogError(Module.RootRegistryUtil, 'Error on getting SFT asset links');
+        return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+    }
+}
+
+
 export async function GetAssetLinks(collection_id: string, token_id: string): Promise<Result<AssetLink[]>> {
     try {
-    const graphqlLinksQuery = JSON.stringify({
-        query: "query Asset($tokenId: String!, $collectionId: CollectionId! ) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        childLinks {\n          asset {\n            tokenId\n            collectionId\n            schema {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n}",
-        variables: { "tokenId": token_id, "collectionId": `${ROOT_CHAIN_ID}:root:${collection_id}` }
-    })
+        const graphqlLinksQuery = JSON.stringify({
+            query: "query Asset($tokenId: String!, $collectionId: CollectionId! ) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        childLinks {\n          asset {\n            tokenId\n            collectionId\n            schema {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n}",
+            variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}` }
+        });
 
-    const result = await fetch(ROOT_GQL_API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: graphqlLinksQuery,
-    });
-    const resultText = await result.text();
-    const resultJson = JSON.parse(resultText);
-    const links = resultJson.data.asset.links.childLinks as AssetLink[];
+        const result = await fetch(ROOT_GQL_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: graphqlLinksQuery,
+        });
+        const resultText = await result.text();
+        const resultJson = JSON.parse(resultText);
+        const links = resultJson.data.asset.links.childLinks as AssetLink[];
 
-    return { success: true, value: links };
-  } catch (error) {
-    const e = error as Error;
-    LogError(Module.RootRegistryUtil, 'Error on getting asset links');
-    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
-  }
+        return { success: true, value: links };
+    } catch (error) {
+        const e = error as Error;
+        LogError(Module.RootRegistryUtil, 'Error on getting asset links');
+        return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+    }
 }
 
 export async function GetLinkableTokenId(collectionId: string, tokenId: string): Promise<Result<LinkableToken>> {
     try {
-    const graphqlParentLinkQuery = JSON.stringify({
-        query: "query Query($tokenId: String!, $collectionId: CollectionId!) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        id\n        parentLink {\n          id\n          collectionId\n          tokenId\n        }\n      }\n    }\n  }\n}",
-        variables: { "tokenId": tokenId, "collectionId": `${ROOT_CHAIN_ID}:root:${collectionId}` }
-    })
+        const graphqlParentLinkQuery = JSON.stringify({
+            query: "query Query($tokenId: String!, $collectionId: CollectionId!) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        id\n        parentLink {\n          id\n          collectionId\n          tokenId\n        }\n      }\n    }\n  }\n}",
+            variables: { "tokenId": tokenId, "collectionId": `${CHAIN_ID}:root:${collectionId}` }
+        });
 
-    const result = await fetch(ROOT_GQL_API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: graphqlParentLinkQuery,
-    });
-    const resultText = await result.text();
-    const resultJson = JSON.parse(resultText);
-    const parentLink = resultJson.data.asset.links.parentLink;
-    const linkableTokenId = parentLink === null ? { tokenId, isLinkable: true } : { tokenId, parentTokenId: parentLink.tokenId, parentCollectionId: parentLink.collectionId, isLinkable: false };
+        const result = await fetch(ROOT_GQL_API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: graphqlParentLinkQuery,
+        });
+        const resultText = await result.text();
+        const resultJson = JSON.parse(resultText);
+        const parentLink = resultJson.data.asset.links.parentLink;
+        const linkableTokenId = parentLink === null ? { tokenId, isLinkable: true } : { tokenId, parentTokenId: parentLink.tokenId, parentCollectionId: parentLink.collectionId, isLinkable: false };
 
-    return { success: true, value: linkableTokenId };
-  } catch (error) {
-    const e = error as Error;
-    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
-  }
-  }
+        return { success: true, value: linkableTokenId };
+    } catch (error) {
+        const e = error as Error;
+        return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+    }
+}
 
 export async function GetRootAssetNewCombination(assetLinks: AssetLink[], currentCombination: string, campaignFeatures: FeatureBasic[], rootDrops: RootDrop[]): Promise<Result<string>> {
     try {
-    const assetCurrentCombinationArray = currentCombination.split('-');
-    const newCombinationArray = assetCurrentCombinationArray.map((_, featureTypeIndex) => {
-        const featureType = campaignFeatures[featureTypeIndex];
-        const link = assetLinks.find(link => link.asset.schema.name === featureType.meshName); //Find if there's a link for the specfic body part type
-        if (!link) return 0; // If there's no link, use base feature
+        const assetCurrentCombinationArray = currentCombination.split('-');
+        const newCombinationArray = assetCurrentCombinationArray.map((_, featureTypeIndex) => {
+            const featureType = campaignFeatures[featureTypeIndex];
+            const link = assetLinks.find(link => link.asset.schema.name === featureType.meshName); //Find if there's a link for the specfic body part type
+            if (!link) return 0; // If there's no link, use base feature
 
-        const dropCollectionId = link.asset.collectionId.split(':')[2]; //If there's a link, get the collection id of the link
-        const newIndex = rootDrops.find(drop => drop.type === link.asset.schema.name && drop.collectionId === dropCollectionId); //Get the index of the new feature from drops array
+            const dropCollectionId = link.asset.collectionId.split(':')[2]+':' + link.asset.tokenId; //If there's a link, get the collection id of the link
+            const newIndex = rootDrops.find(drop => drop.type === link.asset.schema.name && drop.collectionId === dropCollectionId); //Get the index of the new feature from drops array
 
-        if (!newIndex) return 0;
-        return newIndex.index;
-    });
+            if (!newIndex) return 0;
+            return newIndex.index;
+        });
 
-    const newCombination = newCombinationArray.join('-'); //Join the new combination array to get the new combination
+        const newCombination = newCombinationArray.join('-'); //Join the new combination array to get the new combination
 
-    return { success: true, value: newCombination };
-  } catch (error) {
-    const e = error as Error;
-    LogError(Module.RootRegistryUtil, 'Error on getting root asset new combination');
-    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
-  }
+        return { success: true, value: newCombination };
+    } catch (error) {
+        const e = error as Error;
+        LogError(Module.RootRegistryUtil, 'Error on getting root asset new combination');
+        return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
+    }
 }
 
 export async function GetRootRegistryAuthToken(PK: string): Promise<Result<string>> {
@@ -136,7 +167,7 @@ export async function GetRootRegistryAuthToken(PK: string): Promise<Result<strin
         const walletClient = createWalletClient({
             account: privateKeyToAccount(`0x${PK}`),
             transport: http(ROOT_NETWORK_WS_URL)
-        })
+        });
 
         const message = createSiweMessage({
             version: "1",
@@ -221,20 +252,32 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     if (!newCombinationResult.success) return { success: false, errMessage: newCombinationResult.errMessage, errCode: newCombinationResult.errCode };
     const newCombination = newCombinationResult.value;
 
-/*     const setRootAssetsTransferableResult = await SetRootAssetsTransferable(collection_id, token_id, operations, assetCurrentCombination, newCombination); //Commented while we adjust this logic
-
-    if (!setRootAssetsTransferableResult.success) return { success: false, errMessage: setRootAssetsTransferableResult.errMessage, errCode: setRootAssetsTransferableResult.errCode }; */
-
     const imageUrl = await GetImageUrl(Campaign.Based, newCombination);
     const setRootAssetImageUrlResult = await SetRootAssetImageUrl(imageUrl, collection_id, token_id, authToken);
     if (!setRootAssetImageUrlResult.success) return { success: false, errMessage: setRootAssetImageUrlResult.errMessage, errCode: setRootAssetImageUrlResult.errCode };
+    const combinationArray = newCombination.split('-');
+    const attributesExpectedAmount = combinationArray.filter((index) => index != '0').length;
+    const attributesProcessing = combinationArray.map((attributeIndex, typeIndex) => {
+        const attribute = rootDropsArray.find(drop => drop.index.toString() === attributeIndex && drop.typeIndex.toString() === typeIndex.toString());
+        if (!attribute) return undefined;
+        return {
+            collectionId: attribute.collectionId,
+            name: attribute.name,
+            schemaPart: attribute.schemaPart,
+            type: attribute.type,
+            index: attribute.index,
+        };
+    });
+    const filteredAttributes = attributesProcessing.filter(attribute => attribute !== undefined) as RootDrop[];
 
+    if(filteredAttributes.length!=attributesExpectedAmount) return { success: false, errMessage: "Attributes processing failed", errCode: "AttributesProcessingError" };
     const setRootAssetMetadataResult = await StoreAssetData({
         campaign: Campaign.Based,
         tokenId: token_id,
         collectionId: collection_id,
         combination: newCombination,
-        imageUrl: imageUrl
+        imageUrl: imageUrl,
+        attributes: filteredAttributes
     } as AssetData);
 
     if (!setRootAssetMetadataResult.success) return { success: false, errMessage: setRootAssetMetadataResult.errMessage, errCode: setRootAssetMetadataResult.errCode };

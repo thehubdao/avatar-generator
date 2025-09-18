@@ -18,8 +18,8 @@ export const MINTING_UI_DATA: Record<Campaign, MintingUiData | undefined> = {
     },
     [Campaign.Based]: {
         imgUrl: '/resources/images/campaings/based_collection.jpg',
-        avatarDescription: "In a world dominated by adorable animals and quirky characters, Root Citizens emerge as the rebels who dare to be different. They are here to challenge the status quo, bullying the funny-looking creatures and taking over their realm through cunning scams and degenerate tactics.",
+        avatarDescription: "In a world dominated by adorable animals and quirky characters, Root Citizens emerge as the rebels who dare to be different. They are here to challenge the status quo, bullying the funny-looking creatures and taking over their realm through degenerate tactics.",
         campaignName: 'ROOT CITIZENS',
-        campaignDescription: "Mint a Root Citizen and step into the shoes of a rebel in Futureverse. Your avatar is a symbol of your commitment to challenging the norm. With Root Citizen, you can engage in competitive gaming, create and trade unique assets using The Root Network's advanced features, and connect with a community that values risk-taking and degen activities",
+        campaignDescription: "Mint a Root Citizen and step into a new standard of digital identity, one that travels with you wherever you go. Your avatar is a symbol of your commitment to challenging the norm. Built using the Universal Base Framework (UBF), each Root Citizen is game-engine ready and fully portable across 200+ virtual environments like GTA V, Nifty Island, VRChat, and more. Mint your Citizen. Export your identity. Equip your future. Rebel to the status quo!",
     }
 }

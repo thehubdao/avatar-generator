@@ -1,6 +1,6 @@
 ﻿import { Object3D } from "three";
 import { ClientQuestion } from "../enums/campaign.enum";
-import {AdminComponents, RandomTier} from "../enums/common.enum";
+import { AdminComponents, RandomTier } from "../enums/common.enum";
 import { ChangeMaterialOption } from "../enums/model.enum";
 import { ConfigLight } from "./light.interface";
 import { UserInterface } from "./firebase.interface";
@@ -9,7 +9,7 @@ import { ConfigEnvMap } from "./envMap.interface";
 import { ConfigShadow } from "./shadow.interface";
 import { ReactNode } from "react";
 import { ConfigPostProcessing } from "./postProcessing.interface";
-import {ModelExtension} from "../enums/export.enum";
+import { ModelExtension } from "../enums/export.enum";
 import { Campaign } from "../enums/citizens/common.enum";
 
 export interface BasicData {
@@ -95,7 +95,7 @@ export interface CampaignParameters {
   accessories?: FeatureBasic[];
   config: CampaignConfig;
   r_val?: Record<RandomTier, number>;
-  campaign?:Campaign;
+  campaign?: Campaign;
   campaignInfo?: CampaignInfo;
 }
 
@@ -135,4 +135,9 @@ export interface AuthStateInterface {
 export interface SocialMediaDataProps {
   link: string;
   icon: ReactNode;
+}
+
+export interface MintUIResult {
+  success: boolean;
+  message: string;
 }

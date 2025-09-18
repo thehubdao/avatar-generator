@@ -15,16 +15,10 @@ import { Campaign, LuksoCampaign } from '../../../enums/citizens/common.enum';
 import { Result } from '../../../types/common.type';
 import { CampaignDrops } from '../../../types/citizens.type';
 
-
-
-/* TODO: 
-- Check and correct campaign types */
-
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
 const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL
 const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS;
-const PK = process.env.NEXT_PUBLIC_PK!
 
 const config = {
     ipfsGateway: 'ipfs://',
@@ -38,7 +32,7 @@ const universalProfile = new ethers.Contract(
     provider,
 );
 
-const EOA = new ethers.Wallet(PK).connect(provider);
+const EOA ='';
 
 const OPERATION_CALL = 0;
 
@@ -360,7 +354,7 @@ export async function BurnDrop(from: string, campaign: string, drop: BodyPart): 
 
     const dropContract = new Contract(dropPair.contract_address, WerableContractAbi, provider)
     const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1])
-    const tx = await (universalProfile.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
+    const tx = await (universalProfile.connect(EOA as any) as Contract).execute(OPERATION_CALL, // operation type = CREATE
         dropPair.contract_address,
         0, // amount to the fund the contract with when deploying
         burnEncondedFunction

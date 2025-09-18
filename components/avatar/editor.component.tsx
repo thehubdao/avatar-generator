@@ -1,6 +1,6 @@
 import { LogError } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
-import { AnimationMixer } from "three";
+import { AnimationAction, AnimationMixer, Vector3 } from "three";
 import { GLTF } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { GetGltfModel } from "../../utils/importer.util";
 import { CreateAnimationMixer, SetAnimation } from "../../utils/threejs/animation.util";
@@ -20,7 +20,7 @@ import {
   LookAtVectors
 } from "../../interfaces/common.interface";
 import { ExportModelGlb, ExportModelVrm } from "../../utils/exporter.util";
-import AvatarViewer, { AddBackgroundScene, AddComposer, AddLightEnvScene, AddMixer, AddToScene, RemoveFromScene } from "./viewer.component";
+import AvatarViewer, { AddBackgroundScene, AddComposer, AddLightEnvScene, AddMixer, AddToScene, GetCanvasImageUrl, RemoveFromScene } from "./viewer.component";
 import { ChangeMaterialOption } from "../../enums/model.enum";
 import { BoneMatrix } from "../../types/model.type";
 import { ShowModal } from "../../utils/modal.util";
@@ -31,9 +31,9 @@ import { GetShadow } from "../../utils/threejs/shadow.util";
 import { ConfigSkybox } from "../../interfaces/envMap.interface";
 import { GetEnvironmentMap } from "../../utils/threejs/envMap.util";
 import { ConfigShadow } from "../../interfaces/shadow.interface";
-import {GLOBAL_VALUES} from "../../constants/common.constant";
+import { GLOBAL_VALUES } from "../../constants/common.constant";
 import { ConfigPostProcessing } from "../../interfaces/postProcessing.interface";
-
+import { GetAnimationByCampaignAndName } from "../../utils/api.util";
 
 //#region Logic
 
@@ -44,9 +44,10 @@ const _savedModels: Record<string, GLTF> = {};
 const _accessoryListData: Record<string, AccessoryInfoInterface> = {};
 let _featureListData: Record<string, FeatureInfoInterface> | undefined;
 let _startPose: Record<string, BoneMatrix | undefined> | undefined;
+let _currentAction: AnimationAction | null = null;
 
 export async function ChangeSkinColor(newSkinColor: string, skinName?: string) {
-  if (_avatar == undefined) 
+  if (_avatar == undefined)
     return LogError(Module.Editor, "Missing armature for skin color change");
 
   ChangeObjectSkinColor(_avatar.scene, newSkinColor, skinName);
@@ -93,7 +94,7 @@ export async function ChangeAccessory(id: string, path: string, name: string, se
 export async function ChangeStartAnimation(startAnimation: string | undefined) {
   if (_mixer == undefined) return LogError(Module.Editor, "Missing animation mixer!");
 
-  await SetAnimation(_mixer, startAnimation);
+  _currentAction = await SetAnimation(_mixer, startAnimation);
 }
 
 export async function SetStage(path?: string) {
@@ -119,7 +120,7 @@ export async function SetFeaturesData(selectListFeatures: FeatureBasic[]) {
 export async function SetEnvironment(bgMap?: string, lightMap?: string, skyboxConfig?: ConfigSkybox) {
   if (bgMap) {
     const bgTexture = await GetEnvironmentMap(bgMap, skyboxConfig);
-    if (!bgTexture.success) 
+    if (!bgTexture.success)
       void ShowModal("Sorry, An error occurred while creating the background environment!"); // TODO: this modal should be a snackbar without buttons
     else {
       AddBackgroundScene(bgTexture.value.texture);
@@ -130,9 +131,9 @@ export async function SetEnvironment(bgMap?: string, lightMap?: string, skyboxCo
 
   if (lightMap) {
     const result = await GetEnvironmentMap(lightMap);
-    if (!result.success) 
+    if (!result.success)
       void ShowModal("Sorry, An error occurred while creating the light environment!"); // TODO: this modal should be a snackbar without buttons
-    else 
+    else
       AddLightEnvScene(result.value.texture);
   }
 }
@@ -143,6 +144,39 @@ export async function GetAvatarGLB() {
 
 export async function GetAvatarVRM() {
   return ExportModelVrm(_avatar, _startPose);
+}
+
+export async function GetAvatarPhoto(pos?: Vector3, target?: Vector3, campaign?: string, onReady?: () => void): Promise<string | null> {
+  if (_mixer == undefined) {
+    LogError(Module.Editor, "Missing animation mixer!");
+    return null;
+  }
+  
+  if (campaign) {
+    // Set animation from photo Pose
+    const animationResult = await GetAnimationByCampaignAndName(
+      campaign,
+      'photoPose'
+    );
+    if (animationResult.success) {
+      await SetAnimation(_mixer, animationResult.value.at(0)?.path);
+      _currentAction?.stop(); // Stop current action
+    } else {
+      LogError(Module.Citizens, 'No photo pose found in selected campaign, use bind pose instead', animationResult.errCode);
+      _mixer.stopAllAction(); // Set to bind pose
+    }
+  } else {
+    _mixer.stopAllAction(); // Set to bind pose
+  }
+
+
+  onReady && onReady();
+  const avatarPhoto = await GetCanvasImageUrl(pos, target);
+  
+  _mixer.stopAllAction(); // Set to bind pose
+  _currentAction?.reset().play(); // Resume current action
+
+  return avatarPhoto;
 }
 
 //#endregion
@@ -209,7 +243,7 @@ export default function AvatarEditor({ avatarBasePath, onReady, changeMaterial, 
   }
 
   return (
-    <AvatarViewer 
+    <AvatarViewer
       onReady={() => onAvatarEditorReady()}
       defaultCamPos={defaultCamera?.pos}
       defaultCamLookAt={defaultCamera?.lookAt}
