@@ -24,9 +24,9 @@ import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
 import { GetRootAssetsMetadata, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
-import { InitializeContractEssentialData } from '../constants/root/contract.constant';
+import { InitializeContractEssentialData, ROOT_CHAIN_ID } from '../constants/root/contract.constant';
 import { GetCampaignsPolygonTokensMetadata, GetPolygonCollectionSupply, GetPolygonUserFeatureAssets } from '../utils/web3/polygon/contract.util';
-import { InitializePolygonContractEssentialData } from '../constants/polygon/contract.constant';
+import { InitializePolygonContractEssentialData, POLYGON_CHAIN_ID, POLYGON_CHAIN_NAME, POLYGON_EXPLORER_URL, POLYGON_NATIVE_CURRENCY_DECIMALS, POLYGON_NATIVE_CURRENCY_NAME, POLYGON_NATIVE_CURRENCY_SYMBOL, POLYGON_RPC_URL } from '../constants/polygon/contract.constant';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -443,12 +443,93 @@ export function useBlockchainWallet() {
 
   /* Tanto el blockchain como la campaña se seleccionan manualmente en cada boton que llama esta función */
   const HandleLogin = async (blockchain: Blockchain | undefined, campaign: Campaign | undefined) => {
+    // Cambiar la red ANTES de iniciar el proceso de autenticación
+    try {
+      await switchToCorrectNetwork(campaign);
+    } catch (error) {
+      LogError(Module.Citizens, "Error switching network before login", error);
+      // Continuar con el login aunque falle el cambio de red
+    }
+
     if (blockchain === Blockchain.Root) {
       openLogin();
     } else {
       login({ walletChainType: BlockchainToWalletChainType(blockchain) });
     }
     dispatch(setSelectedCampaign(campaign ?? null));
+  }
+
+  const switchToCorrectNetwork = async (campaign: Campaign | undefined) => {
+    const provider = (window as any).ethereum;
+    if (!provider) return;
+
+    // Configuraciones de red predefinidas
+    const networkConfigs = {
+      [Campaign.Polygon]: {
+        expectedChainId: Number(POLYGON_CHAIN_ID),
+        config: {
+          chainId: `0x${Number(POLYGON_CHAIN_ID).toString(16)}`,
+          chainName: POLYGON_CHAIN_NAME,
+          nativeCurrency: {
+            name: POLYGON_NATIVE_CURRENCY_NAME,
+            symbol: POLYGON_NATIVE_CURRENCY_SYMBOL,
+            decimals: Number(POLYGON_NATIVE_CURRENCY_DECIMALS)
+          },
+          rpcUrls: [POLYGON_RPC_URL],
+          blockExplorerUrls: [POLYGON_EXPLORER_URL]
+        }
+      },
+      [Campaign.Based]: {
+        expectedChainId: Number(ROOT_CHAIN_ID),
+        config: {
+          chainId: `0x${Number(ROOT_CHAIN_ID).toString(16)}`,
+          chainName: 'Root Network - Porcini Testnet',
+          nativeCurrency: {
+            name: 'XRP',
+            symbol: 'XRP',
+            decimals: 18
+          },
+          rpcUrls: ['https://porcini.rootnet.app/archive'],
+          blockExplorerUrls: ['https://explorer.rootnet.cloud/']
+        }
+      }
+    };
+
+    // Early return para campañas que no necesitan cambio de red
+    if (!campaign || !networkConfigs[campaign]) return;
+
+    const { expectedChainId, config: networkConfig } = networkConfigs[campaign];
+
+    try {
+      // Verificar red actual
+      const currentChainId = await provider.request({ method: 'eth_chainId' });
+      const currentChainIdDecimal = parseInt(currentChainId, 16);
+
+      // Solo cambiar red si es necesario
+      if (currentChainIdDecimal !== expectedChainId) {
+        console.log(`Switching from chain ${currentChainIdDecimal} to ${expectedChainId}`);
+        
+        try {
+          await provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: networkConfig.chainId }],
+          });
+        } catch (switchError: any) {
+          // Solo agregar red si no existe
+          if (switchError.code === 4902) {
+            await provider.request({
+              method: 'wallet_addEthereumChain',
+              params: [networkConfig],
+            });
+          } else {
+            throw switchError;
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Error switching to ${campaign} network:`, error);
+      throw error;
+    }
   }
 
   const HandleLogout = async () => {
@@ -551,7 +632,8 @@ export function useBlockchainWallet() {
               const browserProvider = new BrowserProvider(provider);
               const currentChainId = await browserProvider.getNetwork();
 
-              InitializePolygonContractEssentialData(await browserProvider.getSigner());
+              // Inicializar el contrato de Polygon (la red ya debería estar correcta)
+              await InitializePolygonContractEssentialData(await browserProvider.getSigner());
 
               setEthersProvider(new BrowserProvider(provider));
 
@@ -603,6 +685,7 @@ export function useBlockchainWallet() {
       if (!isFetchingSession && userSession && signer) {
         const futurePassAddress = userSession.futurepass;
 
+        // Inicializar el contrato de Root (la red ya debería estar correcta)
         await InitializeContractEssentialData(signer);
 
         dispatch(connect({ address: futurePassAddress, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));

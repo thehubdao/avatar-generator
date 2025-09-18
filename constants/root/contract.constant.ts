@@ -17,7 +17,7 @@ export const NFT_COLLECTION_ID = process.env.NEXT_PUBLIC_ROOT_NFT_COLLECTION_ID 
 export const ROOT_GQL_API_URL = process.env.NEXT_PUBLIC_ROOT_GQL_API_URL || ThrowError('NEXT_PUBLIC_ROOT_GQL_API_URL is required');
 export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || ThrowError('NEXT_PUBLIC_DOMAIN is required');
 export const ORIGIN = process.env.NEXT_PUBLIC_ORIGIN || ThrowError('NEXT_PUBLIC_ORIGIN is required');
-export const CHAIN_ID = process.env.NEXT_PUBLIC_CHAIN_ID || ThrowError('NEXT_PUBLIC_CHAIN_ID is required');
+export const ROOT_CHAIN_ID = process.env.NEXT_PUBLIC_ROOT_CHAIN_ID || ThrowError('NEXT_PUBLIC_ROOT_CHAIN_ID is required');
 
 export const ROOT_SIGNER_PK = process.env.ROOT_SIGNER_PK || '';
 
@@ -35,7 +35,10 @@ export async function InitializeContractEssentialData(_signer?: Signer, _keyring
   if (_keyringSigner) KEYRING_SIGNER = _keyringSigner;
 
   if (SIGNER) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Signer already initialized');
-  if (_signer) SIGNER = _signer;
+  if (_signer) {
+    // La red ya debería estar cambiada antes del login, simplemente asignar el signer
+    SIGNER = _signer;
+  }
 
   if (ASSET_REGISTER_SDK) return LogError(Module.RootContractConstant, 'Attempted to initialize in Singleton Pattern. Asset Register SDK already initialized');
 
@@ -51,7 +54,7 @@ export async function InitializeContractEssentialData(_signer?: Signer, _keyring
       },
       domain: DOMAIN,
       origin: ORIGIN,
-      chainId: Number(CHAIN_ID),
+      chainId: Number(ROOT_CHAIN_ID),
       walletAddress: (await SIGNER.getAddress()) as `0x${string}`,
     },
   });

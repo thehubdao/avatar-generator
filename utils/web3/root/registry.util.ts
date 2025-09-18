@@ -1,5 +1,5 @@
 import { Operation } from "@futureverse/artm";
-import { CHAIN_ID, DOMAIN, ORIGIN, ROOT_GQL_API_URL, ROOT_NETWORK_WS_URL } from "../../../constants/root/contract.constant";
+import { ROOT_CHAIN_ID, DOMAIN, ORIGIN, ROOT_GQL_API_URL, ROOT_NETWORK_WS_URL } from "../../../constants/root/contract.constant";
 import { CampaignParameterName, CommonErrorCode, Module } from "../../../enums/common.enum";
 import { Result } from "../../../types/common.type";
 import { AssetLink, LinkableToken, RootDrop } from "../../../interfaces/citizens.interface";
@@ -27,8 +27,8 @@ export function CreateAssetLinkOperationMessage(schemaPart: string, parent_colle
         action: AssetRegistryAction.Create,
         args: [
             `equippedWith_${schemaPart}`,
-            `did:fv-asset:${CHAIN_ID}:root:${parent_collection_id}:${parent_token_id}`,
-            `did:fv-asset:${CHAIN_ID}:root:${child_collection_id}:${child_token_id}`,
+            `did:fv-asset:${ROOT_CHAIN_ID}:root:${parent_collection_id}:${parent_token_id}`,
+            `did:fv-asset:${ROOT_CHAIN_ID}:root:${child_collection_id}:${child_token_id}`,
         ],
     }
 
@@ -46,8 +46,8 @@ export function DeleteAssetLinkOperationMessage(schemaPart: string, parent_colle
         action: AssetRegistryAction.Delete,
         args: [
             `equippedWith_${schemaPart}`,
-            `did:fv-asset:${CHAIN_ID}:root:${parent_collection_id}:${parent_token_id}`,
-            `did:fv-asset:${CHAIN_ID}:root:${child_collection_id}:${child_token_id}`,
+            `did:fv-asset:${ROOT_CHAIN_ID}:root:${parent_collection_id}:${parent_token_id}`,
+            `did:fv-asset:${ROOT_CHAIN_ID}:root:${child_collection_id}:${child_token_id}`,
         ],
     }
 
@@ -58,7 +58,7 @@ export async function GetAssetLinks(collection_id: string, token_id: string): Pr
     try {
     const graphqlLinksQuery = JSON.stringify({
         query: "query Asset($tokenId: String!, $collectionId: CollectionId! ) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        childLinks {\n          asset {\n            tokenId\n            collectionId\n            schema {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n}",
-        variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}` }
+        variables: { "tokenId": token_id, "collectionId": `${ROOT_CHAIN_ID}:root:${collection_id}` }
     })
 
     const result = await fetch(ROOT_GQL_API_URL, {
@@ -84,7 +84,7 @@ export async function GetLinkableTokenId(collectionId: string, tokenId: string):
     try {
     const graphqlParentLinkQuery = JSON.stringify({
         query: "query Query($tokenId: String!, $collectionId: CollectionId!) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        id\n        parentLink {\n          id\n          collectionId\n          tokenId\n        }\n      }\n    }\n  }\n}",
-        variables: { "tokenId": tokenId, "collectionId": `${CHAIN_ID}:root:${collectionId}` }
+        variables: { "tokenId": tokenId, "collectionId": `${ROOT_CHAIN_ID}:root:${collectionId}` }
     })
 
     const result = await fetch(ROOT_GQL_API_URL, {
@@ -146,7 +146,7 @@ export async function GetRootRegistryAuthToken(PK: string): Promise<Result<strin
             domain: DOMAIN,
             issuedAt: new Date(),
             expirationTime: new Date(Date.now() + 1000 * 60 * 60),
-            chainId: Number(CHAIN_ID),
+            chainId: Number(ROOT_CHAIN_ID),
             statement: ""
         });
 
@@ -172,7 +172,7 @@ export async function SetRootAssetImageUrl(imageUrl: string, collection_id: stri
     try {
         const graphqlRegisterAssetImageMutation = JSON.stringify({
             query: "mutation RegisterAssetImage($registerAssetImageInput2: RegisterAssetImageInput!) {\n  registerAssetImage(input: $registerAssetImageInput2) {\n    assetImage {\n      id\n      collectionId\n      tokenId\n      url\n      version\n    }\n  }\n}",
-            variables: { "registerAssetImageInput2": { "url": imageUrl, "collectionId": `${CHAIN_ID}:root:${collection_id}`, "tokenId": token_id } }
+            variables: { "registerAssetImageInput2": { "url": imageUrl, "collectionId": `${ROOT_CHAIN_ID}:root:${collection_id}`, "tokenId": token_id } }
         })
 
         const result = await fetch(ROOT_GQL_API_URL, {
