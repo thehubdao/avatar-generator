@@ -11,7 +11,7 @@ import Modal from "../common/modal.ui";
 import Button from "../common/button.ui";
 
 interface ShoppingCartUIProps {
-  onRemoveItem: (type?: string) => void;
+  onRemoveItem: (type?: string) => Promise<void>;
   onCheckOut: () => Promise<boolean>;
 }
 
@@ -87,7 +87,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
 
     setShoppingCartItems(items);
   }, [shoppingCart, claimableDrops]);
-  return <></>; //HIDE cart while root minting
+
   return (
     <>
       {/* CART OR CHECKOUT LOADING */}
@@ -102,7 +102,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
           </div>
         </div>
         :
-        <div className={`fixed top-24 xl:top-auto xl:bottom-4 right-4 rounded-[20px] ${isMarketplaceMode ? 'w-[calc(100vw_-_2rem)] md:w-[419px] h-auto' : 'w-14 h-14'} overflow-hidden`}>
+        <div className={`fixed top-24 xl:top-auto xl:bottom-4 right-4 rounded-[20px] ${isMarketplaceMode ? 'w-[calc(100vw_-_2rem)] md:w-[419px] h-auto' : 'w-32 h-14'} overflow-hidden`}>
           <div className={`bg-citizens-dark/10 xl:bg-citizens-dark/80 backdrop-blur-sm shadow-citizens-btn w-full pr-2 pl-4 py-2 text-white`}>
             <div className={`${isMarketplaceMode ? 'opacity-100' : 'opacity-0'} grid grid-rows-[auto_1fr_auto] gap-4 max-h-[35vh] xl:max-h-[70vh] 2xl:max-h-[90vh]`}>
               <div className="flex justify-between items-center pr-12 h-10">
@@ -190,7 +190,10 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
                   <BiCollapseAlt className={`fill-citizens-dark w-4 h-4 m-auto ${isCollapsed ? 'hidden' : 'block'}`} />
                 </div>
                 :
-                <BiCartAlt className="fill-citizens-dark w-6 h-6 m-auto" />
+                <div>
+                  <p className="absolute top-1/2 -translate-y-1/2 right-full text-lg font-light text-white pr-3 leading-none">SHOP HERE</p>
+                  <BiCartAlt className="fill-citizens-dark w-6 h-6 m-auto" />
+                </div>
               }
             </div>
           </div>
