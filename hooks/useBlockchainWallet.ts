@@ -508,8 +508,6 @@ export function useBlockchainWallet() {
 
       // Solo cambiar red si es necesario
       if (currentChainIdDecimal !== expectedChainId) {
-        console.log(`Switching from chain ${currentChainIdDecimal} to ${expectedChainId}`);
-        
         try {
           await provider.request({
             method: 'wallet_switchEthereumChain',
