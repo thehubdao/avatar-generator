@@ -58,7 +58,7 @@ export async function GetSFTAssetLinks(collection_id: string, token_id: string, 
     try {
         const graphqlLinksQuery = JSON.stringify({
             query: "query Asset($tokenId: String!, $collectionId: CollectionId!, $addresses: [ChainAddress!]!) {\r\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\r\n    links {\r\n      ... on SFTAssetLink {\r\n        parentLinks(addresses: $addresses) {\r\n          tokenId\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
-            variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}`, "addresses": [walletAddress] }
+            variables: { "tokenId": token_id, "collectionId": `${ROOT_CHAIN_ID}:root:${collection_id}`, "addresses": [walletAddress] }
         });
 
         const result = await fetch(ROOT_GQL_API_URL, {
@@ -89,7 +89,7 @@ export async function GetAssetLinks(collection_id: string, token_id: string): Pr
     try {
         const graphqlLinksQuery = JSON.stringify({
             query: "query Asset($tokenId: String!, $collectionId: CollectionId! ) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        childLinks {\n          asset {\n            tokenId\n            collectionId\n            schema {\n              name\n            }\n          }\n        }\n      }\n    }\n  }\n}",
-            variables: { "tokenId": token_id, "collectionId": `${CHAIN_ID}:root:${collection_id}` }
+            variables: { "tokenId": token_id, "collectionId": `${ROOT_CHAIN_ID}:root:${collection_id}` }
         });
 
         const result = await fetch(ROOT_GQL_API_URL, {
@@ -115,7 +115,7 @@ export async function GetLinkableTokenId(collectionId: string, tokenId: string):
     try {
         const graphqlParentLinkQuery = JSON.stringify({
             query: "query Query($tokenId: String!, $collectionId: CollectionId!) {\n  asset(tokenId: $tokenId, collectionId: $collectionId) {\n    links {\n      ... on NFTAssetLink {\n        id\n        parentLink {\n          id\n          collectionId\n          tokenId\n        }\n      }\n    }\n  }\n}",
-            variables: { "tokenId": tokenId, "collectionId": `${CHAIN_ID}:root:${collectionId}` }
+            variables: { "tokenId": tokenId, "collectionId": `${ROOT_CHAIN_ID}:root:${collectionId}` }
         });
 
         const result = await fetch(ROOT_GQL_API_URL, {

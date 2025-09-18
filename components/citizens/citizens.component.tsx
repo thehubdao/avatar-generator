@@ -405,7 +405,7 @@ export default function CitizensComponent() {
     LogError(Module.Citizens, 'Failed to fetch polygon user feature assets', result.errCode);
     return false;
   }
-  
+
   async function fetchLuksoUserFeatures(walletAddress: string): Promise<Result<CampaignDrops<AppCampaigns>>> {
     const userFeatures = await GetLuksoUserFeatures(walletAddress);
     if (userFeatures.success) {
