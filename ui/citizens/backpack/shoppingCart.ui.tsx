@@ -59,6 +59,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
     dispatch(setCheckoutMode(true));
     const isSuccess = await onCheckOut();
     if (isSuccess) {
+      handleCleanCart();
       showSnackbar(<p>Your purchase was successful!</p>);
     } else {
       showSnackbar(<p>Ups. We can´t to checkout, try later.</p>);
