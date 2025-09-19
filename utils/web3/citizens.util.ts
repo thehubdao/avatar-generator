@@ -2,7 +2,7 @@ import { BrowserProvider, ethers, JsonRpcProvider } from "ethers";
 import LSP3ProfileSchema from '@erc725/erc725.js/schemas/LSP3ProfileMetadata.json';
 import ERC725, { ERC725JSONSchema } from "@erc725/erc725.js";
 import { LeaderboardEntry } from "../../types/leaderboard.type";
-import { CitizenMetadata, FollowUserData, LuksoMetadata, SolanaMetadata } from "../../interfaces/citizens.interface";
+import { CitizenMetadata, FollowUserData, LuksoMetadata, PolygonMetadata, SolanaMetadata } from "../../interfaces/citizens.interface";
 import { Result } from '../../types/common.type';
 import { CommonErrorCode, Module } from "../../enums/common.enum";
 import { LogError } from "../common.util";
@@ -39,6 +39,20 @@ export async function GetSolanaIPFSData(url: string): Promise<Result<SolanaMetad
   }
 }
 
+export async function GetPolygonIpfsData(uri: string): Promise<Result<PolygonMetadata>> {
+  try {
+    const cid = uri.split('//')[1];
+    const ipfsHTTPUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
+    const ipfsRequest = await fetch(ipfsHTTPUrl);
+    const ipfsData = await ipfsRequest.json() as PolygonMetadata;
+    return { success: true, value: ipfsData };
+  } catch (error) {
+    const err = error as Error;
+    LogError(Module.Citizens, 'Error on getting token metadata', err.stack);
+    return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
+  }
+}
+
 export function GetLuksoImageUrl(metadata: CitizenMetadata): Result<string> {
   try {
     const luksoMetadata = metadata.rawMetadata as LuksoMetadata;
@@ -62,6 +76,19 @@ export function GetSolanaImageUrl(metadata: CitizenMetadata): Result<string> {
   } catch (error) {
     const err = error as Error;
     LogError(Module.Citizens, 'Error on getting Solana image url', err.stack);
+    return { success: false, errMessage: err.message, errCode: '' };
+  }
+}
+
+export async function GetPolygonImageUrl(metadata: CitizenMetadata): Promise<Result<string>> {
+  try {
+    const ipfsUrl = (metadata.rawMetadata as PolygonMetadata).image;
+    const cid = ipfsUrl.split('//')[1];
+    const imageUrl = `${IPFS_GATEWAY_URL}/${cid}${IPFS_GATEWAY_API_KEY ? '?pinataGatewayToken=' + IPFS_GATEWAY_API_KEY : ''}`;
+    return { success: true, value: imageUrl };
+  } catch (error) {
+    const err = error as Error;
+    LogError(Module.Citizens, 'Error on getting Polygon image url', err.stack);
     return { success: false, errMessage: err.message, errCode: '' };
   }
 }

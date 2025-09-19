@@ -4,11 +4,12 @@ import { ethers, JsonRpcProvider, Wallet } from "ethers";
 import { Campaign } from "../../enums/citizens/common.enum";
  
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
+import { ThrowError } from "../../utils/common.util";
 
-const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!;
-const AVATAR_EXTENSION_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_EXTENSION_CONTRACT_ADDRESS!;
-const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS;
-const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL;
+const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS || ThrowError('NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS is required');
+const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS || ThrowError('NEXT_PUBLIC_PROFILE_ADDRESS is required');
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL || ThrowError('NEXT_PUBLIC_RPC_URL is required');
+
 const AVATAR_ADMIN_PK = process.env.AVATAR_ADMIN_PK;
 const WEARABLE_ADMIN_SIGNER_PK = process.env.WEARABLE_ADMIN_SIGNER_PK;
 
@@ -25,7 +26,7 @@ export const WEARABLE_ADMIN_SIGNER = WEARABLE_ADMIN_SIGNER_PK ? new Wallet(WEARA
 export const OPERATION_CALL = 0;
 
 
-export const TEMP_CAMPAIGN_SWITCH = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b', 'kumi': 'kumi', 'root_citizens': 'root_citizens' };
+export const TEMP_CAMPAIGN_SWITCH = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso female b', 'kumi': 'kumi', 'root_citizens': 'root_citizens', 'polygon_citizens': 'polygon_citizens' };
 
 //MAINNET
 export const LUKSO_CAMPAIGN_WEB3_DATA = {
@@ -59,5 +60,3 @@ export const UNIVERSAL_PROFILE_CONTRACT = new ethers.Contract(
     UniversalProfileABI,
     PROVIDER,
 );
-
-export const AVATAR_EXTENSION_CONTRACT_ADDRESS_EXPORT = AVATAR_EXTENSION_CONTRACT_ADDRESS;

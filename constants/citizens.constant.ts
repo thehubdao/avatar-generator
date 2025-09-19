@@ -1,9 +1,10 @@
 import { Blockchain } from "../enums/blockchain/common.enum";
 import { BackedByLinks, Campaign } from "../enums/citizens/common.enum";
 import { CitizensCollection, Game } from "../interfaces/citizens.interface";
+import { ThrowError } from "../utils/common.util";
 
-export const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY;
-export const IPFS_GATEWAY_API_KEY = process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY;
+export const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY || ThrowError('NEXT_PUBLIC_IPFS_GATEWAY is required');
+export const IPFS_GATEWAY_API_KEY = process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY || ThrowError('NEXT_PUBLIC_IPFS_GATEWAY_API_KEY is required');
 export const LSP26_ADDRESS = '0xf01103E5a9909Fc0DBe8166dA7085e0285daDDcA';
 
 export const LSP26_ABI = [
@@ -57,6 +58,13 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     image: '/resources/images/campaings/creators_collection.jpg',
     campaign: Campaign.Creators,
     blockChain: Blockchain.Ethereum,
+    active: true
+  },
+  {
+    name:'Polygon Citizens',
+    image: '/resources/images/campaings/polygon-creators-collection.jpg',
+    campaign: Campaign.Polygon,
+    blockChain: Blockchain.Polygon,
     active: true
   },
   {
@@ -236,4 +244,5 @@ export const GAMES: Game[] = [
 export const MINTING_TARGET_DATE = {
   [Campaign.Kumi]: new Date('2025-06-03T23:00:00.000Z'),
   [Campaign.Based]: new Date('2025-09-03T21:00:00.000Z'),
+  [Campaign.Polygon]: new Date('2025-09-03T21:00:00.000Z'),
 };

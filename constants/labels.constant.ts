@@ -1,10 +1,11 @@
-import { Campaign } from "../../enums/citizens/common.enum"
+import { Campaign } from "../enums/citizens/common.enum"
 
 export const FILE_CAMPAIGN_NAME_LABEL: Record<Campaign, string> = {
   vrm_male: 'Lukso_Creator_#',
   vrm_female: 'Lukso_Critizen_#',
   kumi: 'Kumi_Citizen_#',
-  root_citizens: 'Root_Citizen_#'
+  root_citizens: 'Root_Citizen_#',
+  polygon_citizens: 'Polygon_Citizen_#'
 }
 
 export const CAMPAIGN_LABELS = {
@@ -19,7 +20,8 @@ export const CAMPAIGN_LABELS = {
     dropdownName: 'Lukso Citizens'
   }, 'vrm_male': { campaignName: 'vrm_male', nftName: 'Lukso Creator', dropdownName: 'Lukso Creators' },
   'kumi': { campaignName: 'kumi', nftName: 'Kumi Citizen', dropdownName: 'Kumi Citizens' },
-  'root_citizens': { campaignName: 'root_citizens', nftName: 'Root Citizen', dropdownName: 'Root Citizens' }
+  'root_citizens': { campaignName: 'root_citizens', nftName: 'Root Citizen', dropdownName: 'Root Citizens' },
+  'polygon_citizens': { campaignName: 'polygon_citizens', nftName: 'Polygon Citizen', dropdownName: 'Polygon Citizens' }
 }
 
 //NOTE: female campaign has it's types different from the DB

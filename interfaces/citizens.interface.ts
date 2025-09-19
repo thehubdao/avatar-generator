@@ -66,7 +66,7 @@ export interface CitizenMetadata {
   tokenId: string;
   name: string;
   description: string;
-  rawMetadata: SolanaMetadata | LuksoMetadata | RootMetadata;
+  rawMetadata: SolanaMetadata | LuksoMetadata | RootMetadata | PolygonMetadata;
 }
 
 export interface LuksoMetadata {
@@ -116,6 +116,23 @@ export interface RootMetadata {
   attributes: RootDrop[];
 }
 
+export interface PolygonTrait {
+  trait_type: string;
+  value: string;
+  wearableAddress?: string;
+  wearableTokenId?: number;
+}
+
+export interface PolygonMetadata {
+  name: string;
+  baseCombination: string;
+  combination: string;
+  description: string;
+  image: string;
+  traits: PolygonTrait[];
+  vrm_url: string;
+}
+
 export interface SolanaAttribute {
   trait_type: string;
   value: string;
@@ -157,11 +174,16 @@ export interface LuksoDrop extends Drop {
   tokenId?: string;
   typeIndex: number;
 }
+
 export interface LinkableToken {
   tokenId: string;
   parentTokenId?: string;
   parentCollectionId?: string;
   isLinkable: boolean;
+}
+
+export interface PolygonDrop extends Drop {
+  tokenId: number;
 }
 
 export interface RootDrop extends Drop {

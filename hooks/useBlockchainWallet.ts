@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType, GetSdkConnection, SetSdkConnection } from '../utils/web3/web3.util';
-import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination, RootCampaign } from '../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination, RootCampaign, PolygonCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetClaimableDrops, GetParameter } from '../utils/firebase.util';
@@ -24,7 +24,9 @@ import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
 import { GetRootAssetsMetadata, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
-import { InitializeContractEssentialData } from '../constants/root/contract.constant';
+import { InitializeContractEssentialData, ROOT_CHAIN_ID } from '../constants/root/contract.constant';
+import { GetCampaignsPolygonTokensMetadata, GetPolygonCollectionSupply, GetPolygonUserFeatureAssets } from '../utils/web3/polygon/contract.util';
+import { InitializePolygonContractEssentialData, POLYGON_CHAIN_ID, POLYGON_CHAIN_NAME, POLYGON_EXPLORER_URL, POLYGON_NATIVE_CURRENCY_DECIMALS, POLYGON_NATIVE_CURRENCY_NAME, POLYGON_NATIVE_CURRENCY_SYMBOL, POLYGON_RPC_URL } from '../constants/polygon/contract.constant';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -50,7 +52,7 @@ export function useBlockchainWallet() {
   /* Signer related hooks */
 
   const { wallets: ethereumWallets, ready: isEthereumReady } = useWallets(); //Privy Ethereum Wallets
-  const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets
+  const { wallets: solanaWallets, ready: isSolanaReady } = useSolanaWallets(); //Privy Solana Wallets   
 
   const signer = useFutureverseSigner();
 
@@ -69,11 +71,17 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: asset.errMessage, errCode: asset.errCode };
   }
 
-  async function getEthereumTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
+  async function getLuksoTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
     const tokensMetadata = await GetCampaignsTokensMetadata(walletAddress);
 
     if (tokensMetadata.success) return { success: true, value: tokensMetadata.value };
 
+    return { success: false, errMessage: tokensMetadata.errMessage, errCode: tokensMetadata.errCode };
+  }
+
+  async function getPolygonTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
+    const tokensMetadata = await GetCampaignsPolygonTokensMetadata(walletAddress);
+    if (tokensMetadata.success) return { success: true, value: tokensMetadata.value };
     return { success: false, errMessage: tokensMetadata.errMessage, errCode: tokensMetadata.errCode };
   }
 
@@ -84,7 +92,7 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: asset.errMessage, errCode: asset.errCode };
   }
 
-  async function getEthereumUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
+  async function getLuksoUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
     const features = await GetLuksoUserFeatures(walletAddress);
 
     if (features.success) return { success: true, value: features.value };
@@ -100,6 +108,14 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: features.errMessage, errCode: features.errCode };
   }
 
+  async function getPolygonUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<PolygonCampaign>>> {
+    const features = await GetPolygonUserFeatureAssets(walletAddress, PolygonCampaign.Polygon);
+
+    if (features.success) return { success: true, value: features.value };
+
+    return { success: false, errMessage: features.errMessage, errCode: features.errCode };
+  }
+
   async function getRootUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<RootCampaign>>> {
     const features = await GetRootUserFeatureAssets(walletAddress, RootCampaign.Based);
 
@@ -108,7 +124,7 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: features.errMessage, errCode: features.errCode };
   }
 
-  async function getEthereumFollowerCountPromise(walletAddress: string): Promise<Result<FollowUserData>> {
+  async function getLuksoFollowerCountPromise(walletAddress: string): Promise<Result<FollowUserData>> {
     const followerCount = await GetFollowerCounts(walletAddress);
 
     if (followerCount.success) return { success: true, value: followerCount.value };
@@ -116,7 +132,7 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: followerCount.errMessage, errCode: followerCount.errCode };
   }
 
-  async function getEthereumLeaderboardDataPromise(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
+  async function getLuksoLeaderboardDataPromise(walletAddress: string): Promise<Result<LeaderboardEntry[]>> {
     const leaderboardData = await GetFullLeaderboardData(walletAddress);
     if (leaderboardData.success) return { success: true, value: leaderboardData.value };
 
@@ -163,6 +179,21 @@ export function useBlockchainWallet() {
     return { success: true, value: mintingData };
   }
 
+  async function getPolygonMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
+    const mintingSupply = await GetPolygonCollectionSupply();
+    const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined, isHolder: undefined }
+
+    if (mintingSupply.success) {
+      mintingData.mintSupply = mintingSupply.value;
+    } else {
+      void LogError(Module.Citizens, "Couldn't set collection supply", mintingSupply.errCode);
+      return { success: false, errMessage: "Couldn't set collection supply", errCode: '' };
+    }
+
+    return { success: true, value: mintingData };
+  }
+
+
   async function getClaimableDropsPromise(walletAddress: string): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
     const drops = await GetLuksoClaimableDrops(walletAddress);
     if (drops.success) return { success: true, value: drops.value };
@@ -177,25 +208,25 @@ export function useBlockchainWallet() {
       return;
     }
 
-    if (blockchainType === Blockchain.Ethereum) {
-      const ethereumCitizensMetadataPromise = getEthereumTokensMetadataPromise(walletAddress); // Get the citizens Ethereum metadata
-      const ethereumUserFeaturesPromise = getEthereumUserFeaturesPromise(walletAddress); // Get the user features
-      const ethereumLeaderboardDataPromise = getEthereumLeaderboardDataPromise(walletAddress); // Get the leaderboard data
-      const ethereumClaimableDropsPromise = getClaimableDropsPromise(walletAddress); // Get the claimable drops
-      const [ethereumCitizensMetadata, ethereumUserFeatures, ethereumLeaderboardData, ethereumClaimableDrops] = await Promise.all([ethereumCitizensMetadataPromise, ethereumUserFeaturesPromise, ethereumLeaderboardDataPromise, ethereumClaimableDropsPromise, ethereumClaimableDropsPromise]);
+    if (blockchainType === Blockchain.Lukso) {
+      const luksoCitizensMetadataPromise = getLuksoTokensMetadataPromise(walletAddress); // Get the citizens Lukso metadata
+      const luksoUserFeaturesPromise = getLuksoUserFeaturesPromise(walletAddress); // Get the user features
+      const luksoLeaderboardDataPromise = getLuksoLeaderboardDataPromise(walletAddress); // Get the leaderboard data
+      const luksoClaimableDropsPromise = getClaimableDropsPromise(walletAddress); // Get the claimable drops
+      const [luksoCitizensMetadata, luksoUserFeatures, luksoLeaderboardData, luksoClaimableDrops] = await Promise.all([luksoCitizensMetadataPromise, luksoUserFeaturesPromise, luksoLeaderboardDataPromise, luksoClaimableDropsPromise]);
 
-      //Ethereum Citizens Metadata dispatch
-      if (ethereumCitizensMetadata.success) {
-        const citizen = ethereumCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
+      //Lukso Citizens Metadata dispatch
+      if (luksoCitizensMetadata.success) {
+        const citizen = luksoCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
 
-        dispatch(setCitizensMetadata(ethereumCitizensMetadata.value));
+        dispatch(setCitizensMetadata(luksoCitizensMetadata.value));
 
         if (selectedCampaign === null) { //This case is handled when user refresh the page and is still logged in
-          const userCampaigns = [...new Set(ethereumCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
+          const userCampaigns = [...new Set(luksoCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
 
           if (userCampaigns.length > 0) {
             dispatch(setSelectedCampaign(userCampaigns[0]));
-            dispatch(setSelectedCitizen(ethereumCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
+            dispatch(setSelectedCitizen(luksoCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
 
             dispatch(setMintingMode(false));
           } else {
@@ -211,28 +242,80 @@ export function useBlockchainWallet() {
           dispatch(setMintingMode(false));
         }
       } else { // If error, log the error, citizens metadata and selected combination will be null
-        LogError(Module.Citizens, ethereumCitizensMetadata.errMessage, ethereumCitizensMetadata.errCode);
+        LogError(Module.Citizens, luksoCitizensMetadata.errMessage, luksoCitizensMetadata.errCode);
       }
 
-      //Ethereum User Features dispatch
-      if (ethereumUserFeatures.success) {
-        const ethereumFeatures = ethereumUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the ethereum features to the AppCampaigns type, this depends on the wearables got for current campaign
-        dispatch(setUserFeatures(ethereumFeatures));
+      //Lukso User Features dispatch
+      if (luksoUserFeatures.success) {
+        const luksoFeatures = luksoUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the lukso features to the AppCampaigns type, this depends on the wearables got for current campaign
+        dispatch(setUserFeatures(luksoFeatures));
       } else {
-        LogError(Module.Citizens, ethereumUserFeatures.errMessage, ethereumUserFeatures.errCode);
+        LogError(Module.Citizens, luksoUserFeatures.errMessage, luksoUserFeatures.errCode);
       }
 
-      //Ethereum Leaderboard Data dispatch
-      if (ethereumLeaderboardData.success) {
-        dispatch(setLeaderboardData(ethereumLeaderboardData.value));
+      //Lukso Leaderboard Data dispatch
+      if (luksoLeaderboardData.success) {
+        dispatch(setLeaderboardData(luksoLeaderboardData.value));
       } else {
-        LogError(Module.Citizens, ethereumLeaderboardData.errMessage, ethereumLeaderboardData.errCode);
+        LogError(Module.Citizens, luksoLeaderboardData.errMessage, luksoLeaderboardData.errCode);
       }
 
-      if (ethereumClaimableDrops.success) {
-        dispatch(setClaimableDrops(ethereumClaimableDrops.value as Record<Campaign, ClaimableDrop[]>));
+      if (luksoClaimableDrops.success) {
+        dispatch(setClaimableDrops(luksoClaimableDrops.value as Record<Campaign, ClaimableDrop[]>));
       } else {
-        LogError(Module.Citizens, ethereumClaimableDrops.errMessage, ethereumClaimableDrops.errCode);
+        LogError(Module.Citizens, luksoClaimableDrops.errMessage, luksoClaimableDrops.errCode);
+      }
+    } else if (blockchainType === Blockchain.Polygon) {
+      const polygonCitizensMetadata = await getPolygonTokensMetadataPromise(walletAddress);
+      const polygonUserFeatures = await getPolygonUserFeaturesPromise(walletAddress);
+
+      if (polygonCitizensMetadata.success) {
+        const citizen = polygonCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
+
+        dispatch(setCitizensMetadata(polygonCitizensMetadata.value));
+
+        if (selectedCampaign === null) { //Logic when user is logged in and no campaign is selected, refreshing page case
+          const userCampaigns = [...new Set(polygonCitizensMetadata.value.map(item => item.campaign))];
+
+          if (userCampaigns.length > 0) { //If user has campaigns, set the first one as selected campaign
+            dispatch(setSelectedCampaign(userCampaigns[0]));
+            dispatch(setSelectedCitizen(polygonCitizensMetadata.value[0]));
+            dispatch(setMintingMode(false));
+          } else {//If user has no campaigns, set the polygon campaign as selected campaign and keep minting mode
+            const mintingData = await getPolygonMintingDataPromise(walletAddress);
+
+            if (mintingData.success) {
+              dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+            }
+
+            dispatch(setSelectedCampaign(Campaign.Polygon)); // Set the selected campaign by default when no campaign is selected
+            dispatch(setSelectedCitizen({
+              baseCombination: CampaignBaseCombination.Polygon,
+              combination: CampaignBaseCombination.Polygon,
+              campaign: Campaign.Polygon
+            } as CitizenMetadata));
+          }
+        } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
+          const mintingData = await getPolygonMintingDataPromise(walletAddress);
+          if (mintingData.success) {
+            dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+          }
+
+          dispatch(setSelectedCitizen({
+            baseCombination: CampaignBaseCombination.Polygon,
+            combination: CampaignBaseCombination.Polygon,
+            campaign: Campaign.Polygon
+          } as CitizenMetadata));
+        } else {
+          dispatch(setSelectedCitizen(citizen));
+          dispatch(setMintingMode(false));
+        }
+      }
+      if (polygonUserFeatures.success) {
+        const polygonFeatures = polygonUserFeatures.value as CampaignDrops<AppCampaigns>;
+        dispatch(setUserFeatures(polygonFeatures));
+      } else {
+        LogError(Module.Citizens, polygonUserFeatures.errMessage, polygonUserFeatures.errCode);
       }
     } else if (blockchainType === Blockchain.Solana) {
       const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
@@ -361,6 +444,14 @@ export function useBlockchainWallet() {
 
   /* Tanto el blockchain como la campaña se seleccionan manualmente en cada boton que llama esta función */
   const HandleLogin = async (blockchain: Blockchain | undefined, campaign: Campaign | undefined) => {
+    // Cambiar la red ANTES de iniciar el proceso de autenticación
+    try {
+      await switchToCorrectNetwork(campaign);
+    } catch (error) {
+      LogError(Module.Citizens, "Error switching network before login", error);
+      // Continuar con el login aunque falle el cambio de red
+    }
+
     if (blockchain === Blockchain.Root) {
       openLogin();
     } else {
@@ -369,7 +460,76 @@ export function useBlockchainWallet() {
     dispatch(setSelectedCampaign(campaign ?? null));
   }
 
-  useEffect(()=>{console.log(userSession, "USER SESSION")}, [userSession]);
+  const switchToCorrectNetwork = async (campaign: Campaign | undefined) => {
+    const provider = (window as any).ethereum;
+    if (!provider) return;
+
+    // Configuraciones de red predefinidas
+    const networkConfigs = {
+      [Campaign.Polygon]: {
+        expectedChainId: Number(POLYGON_CHAIN_ID),
+        config: {
+          chainId: `0x${Number(POLYGON_CHAIN_ID).toString(16)}`,
+          chainName: POLYGON_CHAIN_NAME,
+          nativeCurrency: {
+            name: POLYGON_NATIVE_CURRENCY_NAME,
+            symbol: POLYGON_NATIVE_CURRENCY_SYMBOL,
+            decimals: Number(POLYGON_NATIVE_CURRENCY_DECIMALS)
+          },
+          rpcUrls: [POLYGON_RPC_URL],
+          blockExplorerUrls: [POLYGON_EXPLORER_URL]
+        }
+      },
+      [Campaign.Based]: {
+        expectedChainId: Number(ROOT_CHAIN_ID),
+        config: {
+          chainId: `0x${Number(ROOT_CHAIN_ID).toString(16)}`,
+          chainName: 'Root Network - Porcini Testnet',
+          nativeCurrency: {
+            name: 'XRP',
+            symbol: 'XRP',
+            decimals: 18
+          },
+          rpcUrls: ['https://porcini.rootnet.app/archive'],
+          blockExplorerUrls: ['https://explorer.rootnet.cloud/']
+        }
+      }
+    };
+
+    // Early return para campañas que no necesitan cambio de red
+    if (!campaign || !networkConfigs[campaign]) return;
+
+    const { expectedChainId, config: networkConfig } = networkConfigs[campaign];
+
+    try {
+      // Verificar red actual
+      const currentChainId = await provider.request({ method: 'eth_chainId' });
+      const currentChainIdDecimal = parseInt(currentChainId, 16);
+
+      // Solo cambiar red si es necesario
+      if (currentChainIdDecimal !== expectedChainId) {
+        try {
+          await provider.request({
+            method: 'wallet_switchEthereumChain',
+            params: [{ chainId: networkConfig.chainId }],
+          });
+        } catch (switchError: any) {
+          // Solo agregar red si no existe
+          if (switchError.code === 4902) {
+            await provider.request({
+              method: 'wallet_addEthereumChain',
+              params: [networkConfig],
+            });
+          } else {
+            throw switchError;
+          }
+        }
+      }
+    } catch (error) {
+      console.error(`Error switching to ${campaign} network:`, error);
+      throw error;
+    }
+  }
 
   const HandleLogout = async () => {
     if (blockchainType === Blockchain.Root) {
@@ -379,7 +539,7 @@ export function useBlockchainWallet() {
     }
   }
 
-  //Remove Phantom from ethereum login methods
+  //Remove Phantom from lukso login methods
   useEffect(() => {
     if (isModalOpen) {
       let tries = 0;
@@ -395,14 +555,22 @@ export function useBlockchainWallet() {
                 const text = spans.map(span => span.textContent?.trim()).join(' ');
                 const isPhantom = text.includes('Phantom');
                 const isBackpack = text.includes('Backpack');
-                const isUniversal = text.includes('universal_profile');
                 const isSolana = text.includes('Solana');
+                const isMetamask = text.includes('MetaMask');
+                const isUniversal = text.includes('universal_profile');
+            
                 if ((isPhantom || isBackpack) && !isSolana) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
                 }
-                if (isUniversal && isSolana) {
+                if ((isUniversal || isPhantom || isBackpack || (isMetamask && isSolana)) && (selectedCampaign === Campaign.Polygon)) {
+                  button.style.display = 'none';
+                  button.setAttribute('disabled', 'true');
+                  button.style.pointerEvents = 'none';
+                }
+                
+                if (isMetamask && (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators)) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
@@ -434,21 +602,49 @@ export function useBlockchainWallet() {
             return; // If the user address is undefined, log the error and return
           }
 
-          if (chainType === Blockchain.Ethereum && isEthereumReady) {
-            const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the ethereum provider
-            const walletNamePromise = GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
-            const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
-            const followerCountPromise = getEthereumFollowerCountPromise(user?.wallet?.address); // Get the follower count
-            const [provider, walletName, xpData, followerCount] = await Promise.all([providerPromise, walletNamePromise, xpDataPromise, followerCountPromise]);
-            setEthersProvider(new BrowserProvider(provider)); // Cast to BrowserProvider and set the provider
+          if ((chainType === Blockchain.Ethereum) && isEthereumReady) { //As Lukso and solana are part of lukso, we need to check if the campaign is citizens or creators
+            if (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators) {
+              const provider = await ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
+              const browserProvider = new BrowserProvider(provider);
 
-            dispatch(connect({
-              address: user?.wallet?.address,
-              walletName: walletName.success ? walletName.value.name : null,
-              blockchainType: chainType, xpData: xpData.success ? xpData.value : null,
-              followUserData: followerCount.success ? followerCount.value : null
-            }));
+              setEthersProvider(browserProvider); // Cast to BrowserProvider and set the provider
 
+              const walletNamePromise = GetUniversalProfileData(user?.wallet?.address); // Get the wallet name
+              const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
+              const followerCountPromise = getLuksoFollowerCountPromise(user?.wallet?.address); // Get the follower count
+              const [walletName, xpData, followerCount] = await Promise.all([walletNamePromise, xpDataPromise, followerCountPromise]);
+
+
+              dispatch(connect({
+                address: user?.wallet?.address,
+                walletName: walletName.success ? walletName.value.name : null,
+                blockchainType: Blockchain.Lukso, xpData: xpData.success ? xpData.value : null,
+                followUserData: followerCount.success ? followerCount.value : null
+              }));
+
+            } else if (selectedCampaign === Campaign.Polygon && isEthereumReady) { //As Polygon is part of lukso, we need to check if the campaign is polygon
+              const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
+              const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
+              const [provider, xpData] = await Promise.all([providerPromise, xpDataPromise]);
+
+              const browserProvider = new BrowserProvider(provider);
+
+              // Inicializar el contrato de Polygon (la red ya debería estar correcta)
+              await InitializePolygonContractEssentialData(await browserProvider.getSigner());
+
+              setEthersProvider(new BrowserProvider(provider));
+
+              dispatch(connect({
+                address: user?.wallet?.address,
+                walletName: null,
+                blockchainType: Blockchain.Polygon,
+                xpData: xpData.success ? xpData.value : null,
+                followUserData: { followerCount: -1, followingCount: -1 }
+              }));
+            } else if (selectedCampaign === null) {
+              dispatch(setSelectedCampaign(Campaign.Polygon));
+
+            }
           } else if (chainType === Blockchain.Solana && isSolanaReady) {
             const solanaWallet = solanaWallets[0];
 
@@ -472,11 +668,11 @@ export function useBlockchainWallet() {
         connectPromise();
       } // Set the user as logged in
     }
-    if (ready && !authenticated && (blockchainType === Blockchain.Ethereum || blockchainType === Blockchain.Solana)) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
+    if (ready && !authenticated && (blockchainType === Blockchain.Lukso || blockchainType === Blockchain.Solana || blockchainType === Blockchain.Polygon || loginLibaryflag[LoginLibrary.Privy])) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
       dispatch(disconnect());
       SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Privy]: false });
     }
-  }, [ready, authenticated, isEthereumReady, isSolanaReady]);
+  }, [ready, authenticated, isEthereumReady, isSolanaReady, selectedCampaign]);
 
   // Root Logic
   useEffect(() => {

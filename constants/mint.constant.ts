@@ -10,6 +10,12 @@ export const MINTING_UI_DATA: Record<Campaign, MintingUiData | undefined> = {
     },
     [Campaign.Citizens]: undefined,
     [Campaign.Creators]: undefined,
+    [Campaign.Polygon]: {
+        imgUrl: '/resources/images/campaings/polygon-creators-collection.jpg',
+        avatarDescription: 'In a world dominated by adorable animals and quirky characters, Polygon Citizens emerge as the rebels who dare to be different. They are here to challenge the status quo, bullying the funny-looking creatures and taking over their realm through degenerate tactics.',
+        campaignName: 'POLYGON CITIZENS',
+        campaignDescription: 'Mint a Polygon Citizen and step into the shoes of a rebel in the Polygon Ecosystem. Your avatar is a symbol of your commitment to challenging the norm. With Polygon Citizens, you can engage in competitive gaming, create and trade unique assets and connect with a community that values risk-taking and degen activities.',
+    },
     [Campaign.Based]: {
         imgUrl: '/resources/images/campaings/based_collection.jpg',
         avatarDescription: "In a world dominated by adorable animals and quirky characters, Root Citizens emerge as the rebels who dare to be different. They are here to challenge the status quo, bullying the funny-looking creatures and taking over their realm through degenerate tactics.",

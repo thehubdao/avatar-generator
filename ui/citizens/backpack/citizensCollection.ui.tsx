@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { CitizenMetadata } from "../../../interfaces/citizens.interface";
 import { LogError } from "../../../utils/common.util";
 import { Module } from "../../../enums/common.enum";
-import { CAMPAIGN_LABELS } from "../../../constants/lukso/labels.constant";
+import { CAMPAIGN_LABELS } from "../../../constants/labels.constant";
 import { CardSize, CitizensPageLocation } from "../../../enums/citizens/common.enum";
 import SearchSVG from "../common/SVG/searchSVG.ui";
 import SelectorUI from "../common/selector.ui";

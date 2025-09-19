@@ -1,6 +1,7 @@
 import { Environment } from "@futureverse/auth-react/auth";
 import { ThemeConfig } from "@futureverse/auth-ui";
 import { DefaultTheme } from "@futureverse/auth-ui";
+import { ThrowError } from "../../utils/common.util";
 
 export const CUSTOM_THEME_CONFIG: ThemeConfig = {
     ...DefaultTheme,
@@ -17,6 +18,5 @@ export const CUSTOM_THEME_CONFIG: ThemeConfig = {
     showCloseButton: true,
 };
 
-export const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID as string;
-
+export const CLIENT_ID = process.env.NEXT_PUBLIC_CLIENT_ID || ThrowError('NEXT_PUBLIC_CLIENT_ID is required');
 export const ENVIRONMENT = process.env.NEXT_PUBLIC_ENVIRONMENT as Environment;
