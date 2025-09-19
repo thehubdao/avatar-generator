@@ -99,5 +99,5 @@ export enum CampaignBaseUrl {
 }
 
 export enum CampaignBaseCombinationUrl{
-  Polygon = "ipfs://bafkreifvy7e553nxby3brepwor7gyx5ehbjyzb3i656sei2oy4f2iuaezq"
+  Polygon = "ipfs://bafkreifk5cgjfb7f4qd5mepbji5kciylocldyktkru2b5ap2hlmgh4k6zy"
 }
