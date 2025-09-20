@@ -283,13 +283,14 @@ export async function GetSolanaUserFeatureAssets(walletAddress: string, campaign
         };
 
         const userFeaturesAssets = userFeatures.map(feature => { // For solana, we set the asset address instead of the collection address as it works different
-            const asset = assetsResult.value.find(asset => asset.updateAuthority.address === feature.contract_address);
+            const assets = assetsResult.value.filter(asset => asset.updateAuthority.address === feature.contract_address);
 
-            if (!asset) return undefined;
+            if (assets.length === 0) return undefined;
 
             return {
                 ...feature,
-                contract_address: asset.publicKey.toString()
+                contract_address: assets[0].publicKey.toString(),
+                balance: assets.length
             };
         })
 

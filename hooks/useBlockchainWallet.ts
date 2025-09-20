@@ -14,7 +14,7 @@ import { BlockchainToWalletChainType, GetSdkConnection, SetSdkConnection } from 
 import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination, RootCampaign, PolygonCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
-import { GetClaimableDrops, GetParameter } from '../utils/firebase.util';
+import { GetParameter } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
@@ -24,9 +24,10 @@ import { GetUserXPData } from '../utils/api.util';
 import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
 import { GetRootAssetsMetadata, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
-import { InitializeContractEssentialData, ROOT_CHAIN_ID } from '../constants/root/contract.constant';
+import { InitializeContractEssentialData } from '../constants/root/contract.constant';
 import { GetCampaignsPolygonTokensMetadata, GetPolygonCollectionSupply, GetPolygonUserFeatureAssets } from '../utils/web3/polygon/contract.util';
-import { InitializePolygonContractEssentialData, POLYGON_CHAIN_ID, POLYGON_CHAIN_NAME, POLYGON_EXPLORER_URL, POLYGON_NATIVE_CURRENCY_DECIMALS, POLYGON_NATIVE_CURRENCY_NAME, POLYGON_NATIVE_CURRENCY_SYMBOL, POLYGON_RPC_URL } from '../constants/polygon/contract.constant';
+import { InitializePolygonContractEssentialData } from '../constants/polygon/contract.constant';
+import { NETWORK_CONFIGS } from '../constants/common.constant';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -464,49 +465,15 @@ export function useBlockchainWallet() {
     const provider = (window as any).ethereum;
     if (!provider) return;
 
-    // Configuraciones de red predefinidas
-    const networkConfigs = {
-      [Campaign.Polygon]: {
-        expectedChainId: Number(POLYGON_CHAIN_ID),
-        config: {
-          chainId: `0x${Number(POLYGON_CHAIN_ID).toString(16)}`,
-          chainName: POLYGON_CHAIN_NAME,
-          nativeCurrency: {
-            name: POLYGON_NATIVE_CURRENCY_NAME,
-            symbol: POLYGON_NATIVE_CURRENCY_SYMBOL,
-            decimals: Number(POLYGON_NATIVE_CURRENCY_DECIMALS)
-          },
-          rpcUrls: [POLYGON_RPC_URL],
-          blockExplorerUrls: [POLYGON_EXPLORER_URL]
-        }
-      },
-      [Campaign.Based]: {
-        expectedChainId: Number(ROOT_CHAIN_ID),
-        config: {
-          chainId: `0x${Number(ROOT_CHAIN_ID).toString(16)}`,
-          chainName: 'Root Network - Porcini Testnet',
-          nativeCurrency: {
-            name: 'XRP',
-            symbol: 'XRP',
-            decimals: 18
-          },
-          rpcUrls: ['https://porcini.rootnet.app/archive'],
-          blockExplorerUrls: ['https://explorer.rootnet.cloud/']
-        }
-      }
-    };
+    if (!campaign || !NETWORK_CONFIGS[campaign]) return;
 
-    // Early return para campañas que no necesitan cambio de red
-    if (!campaign || !networkConfigs[campaign]) return;
-
-    const { expectedChainId, config: networkConfig } = networkConfigs[campaign];
+    const { expectedChainId, config: networkConfig } = NETWORK_CONFIGS[campaign];
 
     try {
-      // Verificar red actual
+
       const currentChainId = await provider.request({ method: 'eth_chainId' });
       const currentChainIdDecimal = parseInt(currentChainId, 16);
 
-      // Solo cambiar red si es necesario
       if (currentChainIdDecimal !== expectedChainId) {
         try {
           await provider.request({

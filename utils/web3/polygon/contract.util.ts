@@ -171,6 +171,7 @@ export async function GetPolygonUserFeatureAssets(address: string, campaign: Pol
 
         if (tokenIds.length === 0) return undefined;
         drop.tokenId = Number(tokenIds[0]);
+        drop.balance = tokenIds.length;
         return drop;
     });
 

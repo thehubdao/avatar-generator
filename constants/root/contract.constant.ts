@@ -19,6 +19,13 @@ export const ROOT_GQL_API_URL = process.env.NEXT_PUBLIC_ROOT_GQL_API_URL || Thro
 export const DOMAIN = process.env.NEXT_PUBLIC_DOMAIN || ThrowError('NEXT_PUBLIC_DOMAIN is required');
 export const ORIGIN = process.env.NEXT_PUBLIC_ORIGIN || ThrowError('NEXT_PUBLIC_ORIGIN is required');
 export const ROOT_CHAIN_ID = process.env.NEXT_PUBLIC_ROOT_CHAIN_ID || ThrowError('NEXT_PUBLIC_ROOT_CHAIN_ID is required');
+export const ROOT_CHAIN_NAME = process.env.NEXT_PUBLIC_ROOT_CHAIN_NAME || ThrowError('NEXT_PUBLIC_ROOT_CHAIN_NAME is required');
+export const ROOT_NATIVE_CURRENCY_NAME = process.env.NEXT_PUBLIC_ROOT_NATIVE_CURRENCY_NAME || ThrowError('NEXT_PUBLIC_ROOT_NATIVE_CURRENCY_NAME is required');
+export const ROOT_NATIVE_CURRENCY_SYMBOL = process.env.NEXT_PUBLIC_ROOT_NATIVE_CURRENCY_SYMBOL || ThrowError('NEXT_PUBLIC_ROOT_NATIVE_CURRENCY_SYMBOL is required');
+export const ROOT_NATIVE_CURRENCY_DECIMALS = process.env.NEXT_PUBLIC_ROOT_NATIVE_CURRENCY_DECIMALS || ThrowError('NEXT_PUBLIC_ROOT_NATIVE_CURRENCY_DECIMALS is required');
+export const ROOT_RPC_URL = process.env.NEXT_PUBLIC_ROOT_RPC_URL || ThrowError('NEXT_PUBLIC_ROOT_RPC_URL is required');
+export const ROOT_EXPLORER_URL = process.env.NEXT_PUBLIC_ROOT_EXPLORER_URL || ThrowError('NEXT_PUBLIC_ROOT_EXPLORER_URL is required');
+
 
 export const ROOT_SIGNER_PK = process.env.ROOT_SIGNER_PK || '';
 
