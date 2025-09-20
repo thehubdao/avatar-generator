@@ -12,9 +12,9 @@ export const MINTING_UI_DATA: Record<Campaign, MintingUiData | undefined> = {
     [Campaign.Creators]: undefined,
     [Campaign.Polygon]: {
         imgUrl: '/resources/images/campaings/polygon-creators-collection.jpg',
-        avatarDescription: 'In a world dominated by adorable animals and quirky characters, Polygon Citizens emerge as the rebels who dare to be different. They are here to challenge the status quo, bullying the funny-looking creatures and taking over their realm through degenerate tactics.',
+        avatarDescription: 'In a chain full of plush mascots and meme skins, Polygon Citizens show up to cut the fluff and run the game. Mint your Citizen, claim wearables from your onchain record, then raid LP farm and flip until your wardrobe is proof and your crew takes the map with pure degen intent.',
         campaignName: 'POLYGON CITIZENS',
-        campaignDescription: 'Mint a Polygon Citizen and step into the shoes of a rebel in the Polygon Ecosystem. Your avatar is a symbol of your commitment to challenging the norm. With Polygon Citizens, you can engage in competitive gaming, create and trade unique assets and connect with a community that values risk-taking and degen activities.',
+        campaignDescription: 'Mint a Polygon Citizen and step into rebel mode in the Polygon ecosystem. Your avatar signals you are here to flip the meta, claim wearables from your onchain record, and turn play and DeFi into a single grind. Queue for raids, stake and LP for yield, craft and trade assets, and squad up with a community that lives for high conviction moves and clean degen fun.',
     },
     [Campaign.Based]: {
         imgUrl: '/resources/images/campaings/based_collection.jpg',
