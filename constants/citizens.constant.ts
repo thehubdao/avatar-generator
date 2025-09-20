@@ -61,6 +61,13 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     active: true
   },
   {
+    name: 'Root Citizens',
+    image: '/resources/images/campaings/based_collection.jpg',
+    campaign: Campaign.Based,
+    blockChain: Blockchain.Root,
+    active: true
+  },
+  {
     name:'Polygon Citizens',
     image: '/resources/images/campaings/polygon-creators-collection.jpg',
     campaign: Campaign.Polygon,
@@ -72,13 +79,6 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
     image: '/resources/images/campaings/kumi_collection.jpg',
     campaign: Campaign.Kumi,
     blockChain: Blockchain.Solana,
-    active: true
-  },
-  {
-    name: 'Root Citizens',
-    image: '/resources/images/campaings/based_collection.jpg',
-    campaign: Campaign.Based,
-    blockChain: Blockchain.Root,
     active: true
   }
 ];
