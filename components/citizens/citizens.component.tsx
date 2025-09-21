@@ -160,7 +160,7 @@ export default function CitizensComponent() {
               drop.featureIndex === option.index
           )
         ))
-        .filter(el => el !== undefined);
+        .filter(el => el !== undefined && el.isClaimable); // Filter only claimable features
 
       const claimableDropsWithMarketData = formattedClaimableDrops.map(feature => {
         feature.price = claimableDrops[selectedCampaign as string].find(w => w.featureType === feature.type && w.featureIndex === feature.index)?.price;
