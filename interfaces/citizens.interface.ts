@@ -167,7 +167,6 @@ export interface Drop {
   index: number;
   type: string;
   name: string;
-  isArtist: boolean;
 }
 
 export interface LuksoDrop extends Drop {

@@ -17,6 +17,7 @@ export interface AssetInterface {
   price?: number;
   paymentType?: string;
   requiredXP?: number;
+  tag?: string;
 }
 
 export interface FeatureInterface extends AssetInterface {
