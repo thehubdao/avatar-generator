@@ -34,7 +34,7 @@ interface CitizensUIProps {
 	handleResetCombination: (type?: string) => Promise<boolean>;
 }
 
-export default function CitizensUI({ singleInitData, exportData, featureList, marketplaceFeatureList, isReady, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleMinting, handleResetCombination }: CitizensUIProps) {
+export default function CitizensUI({ singleInitData, exportData, featureList, marketplaceFeatureList, isReady,handleReady, handleExport, handleOptionChange, handleSaveCombination, handleMinting, handleResetCombination }: CitizensUIProps) {
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const shoppingCart = useAppSelector(state => state.citizensMetadata.shoppingCart);
@@ -50,7 +50,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
 	const [selectedOption, setSelectedOption] = useState<BasicData>();
-	const [, setLoadingTextIndex] = useState(0);
+	const [loadingTextIndex, setLoadingTextIndex] = useState(0);
 
 	// Loading text rotation for better UX
 	const loadingTexts = [
@@ -356,7 +356,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 					}
 					{
 						!isReady &&
-						<LoadingUI loadingText="Loading Environment" dataValidate={null} />
+						<LoadingUI loadingText={loadingTexts[loadingTextIndex]}dataValidate={null} />
 					}
 				</div>
 			}
