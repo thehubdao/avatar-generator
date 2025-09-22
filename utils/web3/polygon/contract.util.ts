@@ -7,6 +7,7 @@ import POLYGON_WEARABLE_CONTRACT_ABI from "../../../constants/abi/polygon/Wearab
 import { LogError } from "../../common.util";
 import { CommonErrorCode, Module } from "../../../enums/common.enum";
 import { Campaign, CampaignBaseCombinationUrl, PolygonCampaign } from "../../../enums/citizens/common.enum";
+import { Web3ErrorCode } from "../../../enums/root/common.enum";
 import { CampaignDrops } from "../../../types/citizens.type";
 import { GetCampaignDrops, GetPolygonImageUrl, GetPolygonIpfsData } from "../citizens.util";
 
@@ -108,6 +109,29 @@ export async function MintPolygonCitizen(walletAddress: string): Promise<Result<
                 txParams.gasPrice = feeData.gasPrice;
             }
 
+            // Calculate estimated transaction cost before attempting
+            let estimatedCost = BigInt(0);
+            if (feeData.maxFeePerGas) {
+                estimatedCost = BigInt(gasLimit) * feeData.maxFeePerGas;
+            } else if (feeData.gasPrice) {
+                estimatedCost = BigInt(gasLimit) * feeData.gasPrice;
+            }
+
+            // Check user balance before attempting transaction
+            const userBalance = await PROVIDER.getBalance(walletAddress);
+            
+            if (userBalance < estimatedCost) {
+                const neededAmount = estimatedCost - userBalance;
+                const neededPOL = Number(neededAmount) / 1e18; // Convert wei to POL
+                const currentPOL = Number(userBalance) / 1e18; // Convert wei to POL
+                
+                return {
+                    success: false,
+                    errMessage: `You have ${currentPOL.toFixed(6)} POL but need ${neededPOL.toFixed(6)} more POL to complete this transaction.`,
+                    errCode: Web3ErrorCode.InsufficientFunds
+                };
+            }
+
             const tx = await avatarContract.mint(walletAddress, CampaignBaseCombinationUrl.Polygon, txParams) as TransactionResponse;
 
             await tx.wait();
@@ -124,13 +148,12 @@ export async function MintPolygonCitizen(walletAddress: string): Promise<Result<
             const errorCode = error?.code || '';
             
             // Don't retry on certain errors
-            if (errorMessage.includes('insufficient funds') || 
-                errorMessage.includes('user rejected') ||
+            if (errorMessage.includes('user rejected') ||
                 errorMessage.includes('user denied') ||
                 errorCode === 'ACTION_REJECTED') {
                 return { 
                     success: false, 
-                    errMessage: 'Transaction rejected or insufficient funds', 
+                    errMessage: 'Transaction rejected by user', 
                     errCode: CommonErrorCode.InternalError 
                 };
             }

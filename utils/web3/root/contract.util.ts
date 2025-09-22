@@ -18,7 +18,7 @@ import { Keyring } from '@polkadot/api';
 import { hexToU8a } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
-import { AssetRegistryAction, RootErrorCode } from '../../../enums/root/common.enum';
+import { AssetRegistryAction, Web3ErrorCode } from '../../../enums/root/common.enum';
 
 export function GetAdminSigner(): KeyringPair {
   const keyring = new Keyring({ type: "ethereum" });
@@ -169,7 +169,7 @@ export async function MintRootAsset(
 
     if (!mintDetails?.enabled) { return { success: false, errMessage: "Minting is not enabled", errCode: CommonErrorCode.InternalError }; }
     if (walletIntBalance < mintIntFees + mintPrice) {
-      return { success: false, errMessage: "Insufficient balance. You need " + Number(mintIntFees + mintPrice) + " ROOT in your Future Pass to mint this asset.", errCode: RootErrorCode.InsufficientFunds };
+      return { success: false, errMessage: "Insufficient balance. You need " + Number(mintIntFees + mintPrice) + " ROOT in your Future Pass to mint this asset.", errCode: Web3ErrorCode.InsufficientFunds };
     }
 
     await mintBuilder.signAndSend();

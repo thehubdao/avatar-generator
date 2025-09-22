@@ -25,7 +25,7 @@ import { Vector3 } from "three";
 import { StoreAssetData } from "../../utils/firebase.util";
 import { AssetData } from "../../interfaces/firebase.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
-import { RootErrorCode } from "../../enums/root/common.enum";
+import { Web3ErrorCode } from "../../enums/root/common.enum";
 import { GetCampaignsPolygonTokensMetadata, GetPolygonUserFeatureAssets, MintPolygonCitizen, SetPolygonNewCombination } from "../../utils/web3/polygon/contract.util";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/labels.constant";
 
@@ -1032,7 +1032,7 @@ export default function CitizensComponent() {
       if (mintResult.success) {
         const isFetchSuccess = await fetchRootMetadata(walletAddress);
         return { success: isFetchSuccess, message: isFetchSuccess ? 'Your citizen has been claimed!' : "We can't do the process right now, try again later!" };
-      } else if (mintResult.errCode === RootErrorCode.InsufficientFunds) {
+      } else if (mintResult.errCode === Web3ErrorCode.InsufficientFunds) {
         return { success: false, message: "Insufficient funds" + mintResult.errMessage };
       }
       else return { success: false, message: "We can't do the process right now, try again later!" };
@@ -1041,6 +1041,8 @@ export default function CitizensComponent() {
       if (mintResult.success) {
         const isFetchSuccess = await fetchPolygonMetadata(walletAddress);
         return { success: isFetchSuccess, message: isFetchSuccess ? 'Your citizen has been claimed!' : "We can't do the process right now, try again later!" };
+      } else if (mintResult.errCode === Web3ErrorCode.InsufficientFunds) {
+        return { success: false, message: "Insufficient funds" + mintResult.errMessage };
       }
       else return { success: false, message: "We can't do the process right now, try again later!" };
     }

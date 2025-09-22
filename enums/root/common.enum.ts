@@ -3,6 +3,8 @@ export enum AssetRegistryAction {
     Delete = 'delete'
 }
 
-export const enum RootErrorCode {
+
+
+export const enum Web3ErrorCode {
   InsufficientFunds = 'IF-1',
 }
