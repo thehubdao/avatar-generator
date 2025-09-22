@@ -1,12 +1,10 @@
 import HeaderUI from "../ui/citizens/common/header.ui"
 import { useBlockchainWallet } from "../hooks/useBlockchainWallet";
 import { useAppSelector } from "../store/hooks";
-import React from "react";
+import React, { useState } from "react";
 import CitizensLoginComponent from "../components/citizens/login/login.component";
 import { BlockchainProvider } from "../contexts/BlockchainContext";
 import LoadingUI from "../ui/citizens/common/loading.ui";
-import { Blockchain } from "../enums/blockchain/common.enum";
-import { Campaign } from "../enums/citizens/common.enum";
 
 export default function CitizensLayout({
   children, // will be a page or nested layout
@@ -15,6 +13,15 @@ export default function CitizensLayout({
 }) {
   const { HandleLogin, HandleLogout, ethersProvider } = useBlockchainWallet();
   const isConnected = useAppSelector(state => state.citizensAuth.connected);
+const [isModalOpen, setIsModalOpen] = useState(false);
+
+const handleGetYourCitizen = () => {
+  setIsModalOpen(true);
+};
+
+ const handleCloseModal = () => {
+  setIsModalOpen(false);
+};
 
   return (
     <section className="w-full min-h-screen bg-gradient-to-b from-[#151515] to-[#0C0C0C] font-work">
@@ -24,7 +31,7 @@ export default function CitizensLayout({
           <LoadingUI loadingText="Loading Citizens Portal" dataValidate={isConnected}/>
           :
           <>
-            <HeaderUI onLogin={() => HandleLogin(Blockchain.Root, Campaign.Based)} onLogout={() => HandleLogout()} />
+            <HeaderUI onLogin={() => handleGetYourCitizen()} onLogout={() => HandleLogout()} />
             <main className="w-full min-h-dvh">
               {
                 isConnected === true ?
@@ -32,7 +39,7 @@ export default function CitizensLayout({
                   {children}
                 </BlockchainProvider>
                 :
-                <CitizensLoginComponent handleLogin={HandleLogin} />
+                <CitizensLoginComponent handleGetYourCitizen={handleGetYourCitizen} isModalOpen={isModalOpen} handleCloseModal={handleCloseModal} handleLogin={HandleLogin} />
               }
             </main>
           </>

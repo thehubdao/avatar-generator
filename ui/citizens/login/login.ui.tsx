@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import PrivacyPolicySVG from "../common/SVG/privacyPolicySVG.ui";
 import TermsOfServicesSVG from "../common/SVG/termsOfServicesSVG.ui";
 import SocialButtons from "../common/socialButtons.ui";
@@ -17,18 +16,12 @@ import { Campaign } from "../../../enums/citizens/common.enum";
 
 interface CitizensLoginUIProps {
 	handleLogin: (blockChain: Blockchain | undefined, campaign: Campaign | undefined) => void;
+	handleGetYourCitizen: () => void;
+	isModalOpen: boolean;
+	handleCloseModal: () => void;
 }
 
-export default function CitizensLoginUI({ handleLogin }: CitizensLoginUIProps) {
-	const [isModalOpen, setIsModalOpen] = useState(false);
-
-	const handleGetYourCitizen = () => {
-		setIsModalOpen(true);
-	};
-
-	const handleCloseModal = () => {
-		setIsModalOpen(false);
-	};
+export default function CitizensLoginUI({ handleLogin, handleGetYourCitizen, isModalOpen, handleCloseModal }: CitizensLoginUIProps) {
 
 	return (
 		<div className="w-full min-h-screen pt-20">
