@@ -10,7 +10,7 @@ import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
-import { BlockchainToWalletChainType, GetSdkConnection, SetSdkConnection } from '../utils/web3/web3.util';
+import { BlockchainToWalletChainType, GetSdkConnection, SetSdkConnection, GetSelectedCampaign, SetSelectedCampaign } from '../utils/web3/web3.util';
 import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination, RootCampaign, PolygonCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
@@ -458,6 +458,9 @@ export function useBlockchainWallet() {
     } else {
       login({ walletChainType: BlockchainToWalletChainType(blockchain) });
     }
+    
+    // Guardar la campaña seleccionada en localStorage para persistencia
+    SetSelectedCampaign(campaign ?? null);
     dispatch(setSelectedCampaign(campaign ?? null));
   }
 
@@ -499,6 +502,9 @@ export function useBlockchainWallet() {
   }
 
   const HandleLogout = async () => {
+    // Limpiar la campaña persistida cuando el usuario se desconecta
+    SetSelectedCampaign(null);
+    
     if (blockchainType === Blockchain.Root) {
       signOutPass({ flow: 'silent', disableConsent: true });
     } else {
@@ -567,6 +573,15 @@ export function useBlockchainWallet() {
           if (user?.wallet?.address === undefined) {
             LogError(Module.Citizens, "User address is undefined, can't connect to blockchain");
             return; // If the user address is undefined, log the error and return
+          }
+
+          // Cargar la campaña persistida si no hay una seleccionada actualmente
+          if (selectedCampaign === null) {
+            const persistedCampaign = GetSelectedCampaign();
+            if (persistedCampaign) {
+              dispatch(setSelectedCampaign(persistedCampaign));
+              return; // Salir para que el useEffect se ejecute nuevamente con la campaña cargada
+            }
           }
 
           if ((chainType === Blockchain.Ethereum) && isEthereumReady) { //As Lukso and solana are part of lukso, we need to check if the campaign is citizens or creators
@@ -638,6 +653,7 @@ export function useBlockchainWallet() {
     if (ready && !authenticated && (blockchainType === Blockchain.Lukso || blockchainType === Blockchain.Solana || blockchainType === Blockchain.Polygon || loginLibaryflag[LoginLibrary.Privy])) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
       dispatch(disconnect());
       SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Privy]: false });
+      SetSelectedCampaign(null); // Limpiar la campaña persistida al desconectarse
     }
   }, [ready, authenticated, isEthereumReady, isSolanaReady, selectedCampaign]);
 
@@ -647,6 +663,15 @@ export function useBlockchainWallet() {
       const loginLibaryflag = GetSdkConnection();
 
       if (!isFetchingSession && userSession && signer) {
+        // Cargar la campaña persistida si no hay una seleccionada actualmente para Root
+        if (selectedCampaign === null) {
+          const persistedCampaign = GetSelectedCampaign();
+          if (persistedCampaign) {
+            dispatch(setSelectedCampaign(persistedCampaign));
+            return; // Salir para que el useEffect se ejecute nuevamente con la campaña cargada
+          }
+        }
+
         const futurePassAddress = userSession.futurepass;
 
         await InitializeContractEssentialData(signer,undefined, userSession);
@@ -657,6 +682,7 @@ export function useBlockchainWallet() {
       if (!isFetchingSession && !userSession && (blockchainType === Blockchain.Root || !blockchainType) && loginLibaryflag[LoginLibrary.Pass]) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
         dispatch(disconnect());
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: false });
+        SetSelectedCampaign(null); // Limpiar la campaña persistida al desconectarse
       }
     }
     connectPromise();
@@ -668,6 +694,7 @@ export function useBlockchainWallet() {
     if (loginLibraryFlag === null) {
       dispatch(disconnect());
       SetSdkConnection({ [LoginLibrary.Privy]: false, [LoginLibrary.Pass]: false });
+      SetSelectedCampaign(null); // Limpiar la campaña persistida al desconectarse
       return;
     }
 
@@ -675,6 +702,7 @@ export function useBlockchainWallet() {
 
     if (loginLibraryFilter.length === 0) {
       dispatch(disconnect());
+      SetSelectedCampaign(null); // Limpiar la campaña persistida al desconectarse
     }
   }, [isFetchingSession]);
 
