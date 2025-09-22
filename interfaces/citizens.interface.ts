@@ -150,12 +150,12 @@ export interface Drop {
   index: number;
   type: string;
   name: string;
-  dropType: DropType;
 }
 
 export interface LuksoDrop extends Drop {
   tokenId?: string;
   typeIndex: number;
+  dropType: DropType;
 }
 export interface LinkableToken {
   tokenId: string;
