@@ -19,15 +19,16 @@ export async function GetLuksoClaimableDrops(walletAddress: string): Promise<Res
             if (drops.success) {
                 const dropswithClaimAmountPromises = drops.value.map(async drop => {
                     const claimedAmount = await GetUserWearableClaimedAmount(walletAddress, drop);
+                    const claimed = claimedAmount.success ? claimedAmount.value : 0;
+                    const isClaimable = claimed < drop.claimLimit;
 
-                    if (!claimedAmount.success) return drop;
+                    const newDrop: ClaimableDrop = {
+                        ...drop,
+                        claimedAmount: claimed,
+                        isClaimable,
+                    };
 
-                    if (claimedAmount.value >= drop.claimLimit) drop.isClaimable = false;
-                    else drop.isClaimable = true;
-
-                    drop.claimedAmount = claimedAmount.value;
-
-                    return drop;
+                    return newDrop;
                 });
                 const dropsWithClaimAmount = await Promise.all(dropswithClaimAmountPromises);
                 claimableDropsMap[campaign] = dropsWithClaimAmount;
@@ -35,7 +36,6 @@ export async function GetLuksoClaimableDrops(walletAddress: string): Promise<Res
             else void LogError(Module.LuksoUtil, `Error fetching claimable drops: ${drops.errMessage}`);
         });
         await Promise.all(claimableDropsCampaignsPromises);
-
         return { success: true, value: claimableDropsMap };
     } catch (error) {
         void LogError(Module.LuksoUtil, `Error fetching claimable drops: ${error}`);
