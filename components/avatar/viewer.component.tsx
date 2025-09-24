@@ -220,83 +220,77 @@ export function TakeCanvasPicture(mimeType = 'image/png') {
 }
 
 export async function GetCanvasImageUrl(pos?: Vector3, target?: Vector3): Promise<string | null> {
-  if (_renderer == undefined) {
-    void LogError(Module.Viewer, 'Missing renderer');
-    return null;
-  }
-
-  if (_scene === undefined) {
-    void LogError(Module.Viewer, 'Missing scene');
-    return null;
-  }
-
-  if (_camera === undefined) {
-    void LogError(Module.Viewer, 'Missing camera');
+  if (_renderer == undefined || _scene === undefined || _camera === undefined) {
     return null;
   }
 
   let shot: string;
 
   if (pos !== undefined) {
-    const lastPos = new Vector3(_camera?.position.x, _camera?.position.y, _camera?.position.z);
+    // Guardar posición actual
+    const lastPos = new Vector3(_camera.position.x, _camera.position.y, _camera.position.z);
     const lastTarget = new Vector3(_controls?.target.x, _controls?.target.y, _controls?.target.z);
-    _camera?.position.set(pos.x, pos.y, pos.z);
+    
+    // Cambiar posición de cámara
+    _camera.position.set(pos.x, pos.y, pos.z);
     _controls?.target.set(target?.x ?? 0, target?.y ?? 1.65, target?.z ?? 0);
 
-    const imageSize = window.innerWidth < 1024 ? 512 : 1024;
+    // Tamaño fijo de 1024px para consistencia
+    const imageSize = 1024;
     const pixelBuffer = new Uint8Array(imageSize * imageSize * 4);
     const renderTarget = new WebGLRenderTarget(imageSize, imageSize);
 
+    // Pausar animación
     cancelAnimationFrame(_animReq);
     await Delay(100);
 
-    if (_composer) {
-      _composer.render(); 
-      _composer.renderTarget1 = renderTarget;
-      const renderFromComposer = _composer.renderTarget1;
-      console.log(_composer.readBuffer);
-      
-      _renderer.readRenderTargetPixels(renderFromComposer, 0, 0, imageSize, imageSize, pixelBuffer);
-    } else {
-      _renderer.setRenderTarget(renderTarget);
-      _renderer.render(_scene, _camera);
-      _renderer.setRenderTarget(null);
-      _renderer.readRenderTargetPixels(renderTarget, 0, 0, imageSize, imageSize, pixelBuffer);
-    }
-
-    // Convert the image data to a base64-encoded PNG
+    // Renderizar al render target
+    _renderer.setRenderTarget(renderTarget);
+    _renderer.render(_scene, _camera);
+    
+    // Leer píxeles del render target
+    _renderer.readRenderTargetPixels(renderTarget, 0, 0, imageSize, imageSize, pixelBuffer);
+    
+    // Restaurar render target
+    _renderer.setRenderTarget(null);
+    
+    // Crear canvas y copiar píxeles correctamente
     const canvas = document.createElement('canvas');
     canvas.width = imageSize;
     canvas.height = imageSize;
-    const context = canvas.getContext('2d');
-    const imageDataObject = context!.createImageData(imageSize, imageSize);
+    const context = canvas.getContext('2d')!;
+    const imageDataObject = context.createImageData(imageSize, imageSize);
 
-    context!.putImageData(imageDataObject, 0, 0);
+    // CORRECCIÓN: Copiar píxeles del buffer al ImageData (flipear verticalmente)
+    for (let y = 0; y < imageSize; y++) {
+      for (let x = 0; x < imageSize; x++) {
+        const srcIndex = ((imageSize - 1 - y) * imageSize + x) * 4; // Flip Y
+        const dstIndex = (y * imageSize + x) * 4;
+        
+        imageDataObject.data[dstIndex] = pixelBuffer[srcIndex];     // R
+        imageDataObject.data[dstIndex + 1] = pixelBuffer[srcIndex + 1]; // G
+        imageDataObject.data[dstIndex + 2] = pixelBuffer[srcIndex + 2]; // B
+        imageDataObject.data[dstIndex + 3] = pixelBuffer[srcIndex + 3]; // A
+      }
+    }
 
-    const finalCanvas = document.createElement('canvas');
-    finalCanvas.width = imageSize;
-    finalCanvas.height = imageSize;
-    const finalContext = finalCanvas.getContext('2d');
-    
-    finalContext!.scale(1, -1); // Flip vertically
-    finalContext!.translate(0, -imageSize); // Move origin back
-    finalContext!.drawImage(canvas, 0, 0);
+    context.putImageData(imageDataObject, 0, 0);
+    shot = canvas.toDataURL('image/png');
 
-    finalContext!.putImageData(imageDataObject, 0, 0);
+    // Limpiar recursos
+    renderTarget.dispose();
 
-    shot = finalCanvas.toDataURL('image/png');
-
-
-    // await Delay(100);
-    // shot = _renderer.domElement.toDataURL();
+    // Restaurar posición de cámara
     _camera.position.set(lastPos.x, lastPos.y, lastPos.z);
     _controls?.target.set(lastTarget.x, lastTarget.y, lastTarget.z);
+    _controls?.update();
   } else {
     shot = _renderer.domElement.toDataURL();
   }
 
-  // Animate();
-  return (shot)
+  // Restaurar animación
+  Animate();
+  return shot;
 }
 
 //#endregion

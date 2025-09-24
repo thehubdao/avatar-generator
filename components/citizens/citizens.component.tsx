@@ -15,19 +15,20 @@ import { setCitizensMetadata, setSelectedCitizen, setTakingPhoto, setUserFeature
 import { GetCampaignDrops, GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
-import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, LuksoDrop, ClaimableDrop, DropToClaim, RootDrop, RootMetadata, PolygonDrop, PolygonMetadata, PolygonTrait } from "../../interfaces/citizens.interface";
 import { DropType } from "../../enums/lukso/common.enum";
 import { GetCollectionDocs } from "../../utils/firebase.util";
 import { useBlockchainProvider } from "../../contexts/BlockchainContext";
 import { AppCampaigns, CampaignDrops } from "../../types/citizens.type";
 import { Result } from "../../types/common.type";
 import { Vector3 } from "three";
-import { StoreAssetData } from "../../utils/firebase.util";
 import { AssetData } from "../../interfaces/firebase.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { Web3ErrorCode } from "../../enums/root/common.enum";
 import { GetCampaignsPolygonTokensMetadata, GetPolygonUserFeatureAssets, MintPolygonCitizen, SetPolygonNewCombination } from "../../utils/web3/polygon/contract.util";
+import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, LuksoDrop, ClaimableDrop, DropToClaim, RootDrop, RootMetadata, PolygonDrop, PolygonMetadata, PolygonTrait } from "../../interfaces/citizens.interface";
+import { StoreAssetData } from "../../utils/firebase.util";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/labels.constant";
+import { PHOTO_CAMERA_CONFIGS } from "../../constants/common.constant";
 import Image from "next/image";
 
 export default function CitizensComponent() {
@@ -313,8 +314,17 @@ export default function CitizensComponent() {
   }
 
   async function generateImage(pos?: Vector3, target?: Vector3): Promise<string | null> {
-    // @GabCh155: this function is to generate the image from the canvas
-    const imageUrl = await GetAvatarPhoto(pos, target, selectedCampaign as string, () => dispatch(setTakingPhoto(true)));
+    if (!selectedCampaign) return null;
+    
+    // Usar configuraciones centralizadas si no se proporcionan parámetros
+    const cameraConfig = PHOTO_CAMERA_CONFIGS[selectedCampaign as keyof typeof PHOTO_CAMERA_CONFIGS];
+    const finalPos = pos || new Vector3(cameraConfig.position.x, cameraConfig.position.y, cameraConfig.position.z);
+    const finalTarget = target || new Vector3(cameraConfig.target.x, cameraConfig.target.y, cameraConfig.target.z);
+    
+    dispatch(setTakingPhoto(true));
+    const imageUrl = await GetAvatarPhoto(finalPos, finalTarget, selectedCampaign as string, () => {});
+    dispatch(setTakingPhoto(false));
+    
     setImageTest(imageUrl);
     return imageUrl;
   }

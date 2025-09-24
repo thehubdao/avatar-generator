@@ -1,4 +1,4 @@
-﻿import { Campaign } from "../enums/citizens/common.enum";
+import { Campaign } from "../enums/citizens/common.enum";
 import { POLYGON_CHAIN_ID, POLYGON_CHAIN_NAME, POLYGON_NATIVE_CURRENCY_NAME, POLYGON_NATIVE_CURRENCY_SYMBOL, POLYGON_NATIVE_CURRENCY_DECIMALS, POLYGON_RPC_URL, POLYGON_EXPLORER_URL } from "./polygon/contract.constant";
 import { ROOT_CHAIN_ID, ROOT_CHAIN_NAME, ROOT_NATIVE_CURRENCY_NAME, ROOT_NATIVE_CURRENCY_SYMBOL, ROOT_NATIVE_CURRENCY_DECIMALS, ROOT_RPC_URL, ROOT_EXPLORER_URL } from "./root/contract.constant";
 
@@ -55,3 +55,32 @@ export const NETWORK_CONFIGS = {
     }
   }
 };
+
+// Configuraciones de cámara para captura de fotos por campaña
+export const PHOTO_CAMERA_CONFIGS = {
+  [Campaign.Citizens]: {
+    position: { x: 0, y: 1.6, z: 1.3 },
+    target: { x: 0, y: 1.4, z: 0 },
+    imageSize: 1024
+  },
+  [Campaign.Creators]: {
+    position: { x: 0, y: 1.6, z: 1.3 },
+    target: { x: 0, y: 1.4, z: 0 },
+    imageSize: 1024
+  },
+  [Campaign.Polygon]: {
+    position: { x: 0, y: 1.6, z: 1.3 },
+    target: { x: 0, y: 1.4, z: 0 },
+    imageSize: 1024
+  },
+  [Campaign.Based]: {
+    position: { x: 0, y: 0.5, z: 1.3 },
+    target: { x: 0, y: 1, z: 0 },
+    imageSize: 1024
+  },
+  [Campaign.Kumi]: {
+    position: { x: 0, y: 0.5, z: 1.3 },
+    target: { x: 0, y: 1, z: 0 },
+    imageSize: 1024
+  }
+} as const;
