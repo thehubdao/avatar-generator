@@ -61,26 +61,36 @@ export const PHOTO_CAMERA_CONFIGS = {
   [Campaign.Citizens]: {
     position: { x: 0, y: 1.6, z: 1.3 },
     target: { x: 0, y: 1.4, z: 0 },
-    imageSize: 1024
+    imageSize: 1024,
+    fov: 50,
+    aspect: 1.0
   },
   [Campaign.Creators]: {
     position: { x: 0, y: 1.6, z: 1.3 },
     target: { x: 0, y: 1.4, z: 0 },
-    imageSize: 1024
+    imageSize: 1024,
+    fov: 50,
+    aspect: 1.0
   },
   [Campaign.Polygon]: {
     position: { x: 0, y: 1.6, z: 1.3 },
     target: { x: 0, y: 1.4, z: 0 },
-    imageSize: 1024
+    imageSize: 1024,
+    fov: 50,
+    aspect: 1.0
   },
   [Campaign.Based]: {
     position: { x: 0, y: 0.5, z: 1.3 },
     target: { x: 0, y: 1, z: 0 },
-    imageSize: 1024
+    imageSize: 1024,
+    fov: 50,
+    aspect: 1.0
   },
   [Campaign.Kumi]: {
     position: { x: 0, y: 0.5, z: 1.3 },
     target: { x: 0, y: 1, z: 0 },
-    imageSize: 1024
+    imageSize: 1024,
+    fov: 50,
+    aspect: 1.0
   }
 } as const;

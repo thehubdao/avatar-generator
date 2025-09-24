@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import {
   AnimationMixer,
   Clock,
@@ -8,9 +7,16 @@ import {
   PerspectiveCamera,
   Scene,
   Texture,
+  Vector2,
   Vector3,
   WebGLRenderer,
-  WebGLRenderTarget
+  WebGLRenderTarget,
+  LinearFilter,
+  RGBAFormat,
+  UnsignedByteType,
+  DirectionalLight,
+  AmbientLight,
+  Color
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { Delay, LogError, LogWarning } from "../../utils/common.util";
@@ -28,6 +34,7 @@ import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer
 import { CreateEffectComposer } from "../../utils/threejs/postProcessing.util";
 import { ConfigPostProcessing } from "../../interfaces/postProcessing.interface";
 import SceneUtil from "../../utils/scene.utils";
+import { useEffect, useRef } from "react";
 
 //#region Logic
 let _canvas: HTMLCanvasElement | undefined;
@@ -227,69 +234,49 @@ export async function GetCanvasImageUrl(pos?: Vector3, target?: Vector3): Promis
   let shot: string;
 
   if (pos !== undefined) {
-    // Guardar posición actual
-    const lastPos = new Vector3(_camera.position.x, _camera.position.y, _camera.position.z);
-    const lastTarget = new Vector3(_controls?.target.x, _controls?.target.y, _controls?.target.z);
+    // NO modificar la cámara principal - usar solo cámara temporal
+
+    // Crear canvas temporal para captura (NO afecta el canvas principal)
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = 1024;
+    tempCanvas.height = 1024;
     
-    // Cambiar posición de cámara
-    _camera.position.set(pos.x, pos.y, pos.z);
-    _controls?.target.set(target?.x ?? 0, target?.y ?? 1.65, target?.z ?? 0);
+    // Crear renderer temporal con preserveDrawingBuffer
+    const tempRenderer = new WebGLRenderer({ 
+      canvas: tempCanvas,
+      alpha: true,
+      antialias: true,
+      preserveDrawingBuffer: true 
+    });
+    tempRenderer.setClearColor(0x000000, 0); // Fondo transparente como el original
+    tempRenderer.setSize(1024, 1024);
 
-    // Tamaño fijo de 1024px para consistencia
-    const imageSize = 1024;
-    const pixelBuffer = new Uint8Array(imageSize * imageSize * 4);
-    const renderTarget = new WebGLRenderTarget(imageSize, imageSize);
+    // Crear cámara temporal con posición FIJA (no usar posición actual del usuario)
+    const tempCamera = new PerspectiveCamera(50, 1.0, 0.1, 1000);
+    tempCamera.position.set(pos.x, pos.y, pos.z);
+    tempCamera.lookAt(target?.x ?? 0, target?.y ?? 1.65, target?.z ?? 0);
+    tempCamera.updateProjectionMatrix();
 
-    // Pausar animación
-    cancelAnimationFrame(_animReq);
-    await Delay(100);
-
-    // Renderizar al render target
-    _renderer.setRenderTarget(renderTarget);
-    _renderer.render(_scene, _camera);
+    // Agregar luz ambiental sutil para la foto
+    const photoLight = new AmbientLight(0xffffff, 0.4);
+    _scene.add(photoLight);
     
-    // Leer píxeles del render target
-    _renderer.readRenderTargetPixels(renderTarget, 0, 0, imageSize, imageSize, pixelBuffer);
+    // Render con renderer temporal - NO afecta el canvas principal
+    tempRenderer.render(_scene, tempCamera);
     
-    // Restaurar render target
-    _renderer.setRenderTarget(null);
+    // Captura directa del canvas temporal
+    shot = tempCanvas.toDataURL('image/png');
+
+    // Limpiar recursos temporales
+    tempRenderer.dispose();
     
-    // Crear canvas y copiar píxeles correctamente
-    const canvas = document.createElement('canvas');
-    canvas.width = imageSize;
-    canvas.height = imageSize;
-    const context = canvas.getContext('2d')!;
-    const imageDataObject = context.createImageData(imageSize, imageSize);
-
-    // CORRECCIÓN: Copiar píxeles del buffer al ImageData (flipear verticalmente)
-    for (let y = 0; y < imageSize; y++) {
-      for (let x = 0; x < imageSize; x++) {
-        const srcIndex = ((imageSize - 1 - y) * imageSize + x) * 4; // Flip Y
-        const dstIndex = (y * imageSize + x) * 4;
-        
-        imageDataObject.data[dstIndex] = pixelBuffer[srcIndex];     // R
-        imageDataObject.data[dstIndex + 1] = pixelBuffer[srcIndex + 1]; // G
-        imageDataObject.data[dstIndex + 2] = pixelBuffer[srcIndex + 2]; // B
-        imageDataObject.data[dstIndex + 3] = pixelBuffer[srcIndex + 3]; // A
-      }
-    }
-
-    context.putImageData(imageDataObject, 0, 0);
-    shot = canvas.toDataURL('image/png');
-
-    // Limpiar recursos
-    renderTarget.dispose();
-
-    // Restaurar posición de cámara
-    _camera.position.set(lastPos.x, lastPos.y, lastPos.z);
-    _controls?.target.set(lastTarget.x, lastTarget.y, lastTarget.z);
-    _controls?.update();
+    // Remover luz temporal
+    _scene.remove(photoLight);
+    photoLight.dispose();
   } else {
     shot = _renderer.domElement.toDataURL();
   }
 
-  // Restaurar animación
-  Animate();
   return shot;
 }
 
