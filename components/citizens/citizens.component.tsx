@@ -313,18 +313,16 @@ export default function CitizensComponent() {
     return false;
   }
 
-  async function generateImage(pos?: Vector3, target?: Vector3): Promise<string | null> {
+  async function generateImage(): Promise<string | null> {
     if (!selectedCampaign) return null;
-    
-    // Usar configuraciones centralizadas si no se proporcionan parámetros
-    const cameraConfig = PHOTO_CAMERA_CONFIGS[selectedCampaign as keyof typeof PHOTO_CAMERA_CONFIGS];
-    const finalPos = pos || new Vector3(cameraConfig.position.x, cameraConfig.position.y, cameraConfig.position.z);
-    const finalTarget = target || new Vector3(cameraConfig.target.x, cameraConfig.target.y, cameraConfig.target.z);
-    
+    const cameraConfig = PHOTO_CAMERA_CONFIGS[selectedCampaign || 'vrm_male'];
+    const finalPos = new Vector3(cameraConfig.position.x, cameraConfig.position.y, cameraConfig.position.z);
+    const finalTarget = new Vector3(cameraConfig.target.x, cameraConfig.target.y, cameraConfig.target.z);
+
     dispatch(setTakingPhoto(true));
-    const imageUrl = await GetAvatarPhoto(finalPos, finalTarget, selectedCampaign as string, () => {});
+    const imageUrl = await GetAvatarPhoto(finalPos, finalTarget, selectedCampaign as string, () => { });
     dispatch(setTakingPhoto(false));
-    
+
     setImageTest(imageUrl);
     return imageUrl;
   }
@@ -565,9 +563,7 @@ export default function CitizensComponent() {
 
     newCitizenMetadata.rawMetadata.attributes = attributes;
 
-    const cameraPosition = new Vector3(0, 1.6, 1.3); // Camera position for the lukso campaign
-    const cameraTarget = new Vector3(0, 1.4, 0); // Camera target for the lukso campaign
-    const newImageUrl = await generateImage(cameraPosition, cameraTarget);
+    const newImageUrl = await generateImage();
 
     if (newImageUrl) await SetImageUrl(selectedCitizen.campaign, newCombination, newImageUrl);
 
@@ -822,9 +818,7 @@ export default function CitizensComponent() {
 
     newCitizenMetadata.rawMetadata.traits = traits;
 
-    const cameraPosition = new Vector3(0, 1.6, 1.3); // Camera position for the polygon campaign
-    const cameraTarget = new Vector3(0, 1.4, 0); // Camera target for the polygon campaign
-    const newImageUrl = await generateImage(cameraPosition, cameraTarget);
+    const newImageUrl = await generateImage();
 
     if (newImageUrl) await SetImageUrl(selectedCitizen.campaign, newCombination, newImageUrl);
 
@@ -913,9 +907,7 @@ export default function CitizensComponent() {
       return false;
     }
 
-    const cameraPosition = new Vector3(0, 0.5, 1.3);
-    const cameraTarget = new Vector3(0, 1, 0);
-    const generatedImageUrl = await generateImage(cameraPosition, cameraTarget);
+    const generatedImageUrl = await generateImage();
 
     await SetImageUrl(selectedCitizen.campaign, newCombination, generatedImageUrl as string);
 
@@ -1089,23 +1081,23 @@ export default function CitizensComponent() {
   }
 
   return <>
-  <CitizensUI
-    singleInitData={singleInitData.current}
-    exportData={exportData.current}
-    featureList={optionList.current}
-    marketplaceFeatureList={claimableDropsFeatureList.current}
-    isReady={isAllReady}
-    handleReady={() => onAvatarBuilderReady()}
-    handleExport={(type) => exportModel(type)}
-    handleOptionChange={(id, path, name, category) => changeFeaturefromHud(id, path, name, category)}
-    handleSaveCombination={() => handleSaveCombination()}
-    handleBuying={() => onBuying()}
-    handleMinting={() => onMinting()}
-    handleResetCombination={(type) => onResetFeature(type)}
-  />
-  <div className="fixed w-fit h-fit bottom-0 right-0 z-50 bg-red text-white p-4 cursor-pointer" >
-    <h1 className="bg-green-600" onClick={() => generateImage(new Vector3(0, 1.6, 1.3), new Vector3(0, 1.4, 0))}>IMAGE GEN</h1>
-    <Image src={imageTest ?? ''} alt="Generated" width={200} height={200} />
-  </div>
+    <CitizensUI
+      singleInitData={singleInitData.current}
+      exportData={exportData.current}
+      featureList={optionList.current}
+      marketplaceFeatureList={claimableDropsFeatureList.current}
+      isReady={isAllReady}
+      handleReady={() => onAvatarBuilderReady()}
+      handleExport={(type) => exportModel(type)}
+      handleOptionChange={(id, path, name, category) => changeFeaturefromHud(id, path, name, category)}
+      handleSaveCombination={() => handleSaveCombination()}
+      handleBuying={() => onBuying()}
+      handleMinting={() => onMinting()}
+      handleResetCombination={(type) => onResetFeature(type)}
+    />
+    <div className="fixed w-fit h-fit bottom-0 right-0 z-50 bg-red text-white p-4 cursor-pointer" >
+      <h1 className="bg-green-600" onClick={() => generateImage()}>IMAGE GEN</h1>
+      <Image src={imageTest ?? ''} alt="Generated" width={200} height={200} />
+    </div>
   </>
 }
