@@ -152,29 +152,49 @@ export async function GetAvatarPhoto(pos?: Vector3, target?: Vector3, campaign?:
     return null;
   }
   
+  // Guardar estado actual para restaurar después
+  const currentAction = _currentAction;
+  
+  onReady && onReady();
+  
+  // Aplicar photoPose, capturar y restaurar de forma ultra-rápida
   if (campaign) {
-    // Set animation from photo Pose
-    const animationResult = await GetAnimationByCampaignAndName(
-      campaign,
-      'photoPose'
-    );
+    const animationResult = await GetAnimationByCampaignAndName(campaign, 'photoPose');
     if (animationResult.success) {
+      console.log(`✅ Quick photoPose application:`, animationResult.value.at(0)?.path);
+      
+      // Aplicar pose instantáneamente
       await SetAnimation(_mixer, animationResult.value.at(0)?.path);
-      _currentAction?.stop(); // Stop current action
+      _currentAction?.stop();
+      
+      // Solo 1 frame mínimo
+      await new Promise(resolve => requestAnimationFrame(resolve));
+      
+      // Captura inmediata
+      const avatarPhoto = await GetCanvasImageUrl(pos, target);
+      
+      // Restaurar inmediatamente
+      _mixer.stopAllAction();
+      if (currentAction) {
+        currentAction.reset().play();
+      }
+      
+      return avatarPhoto;
     } else {
-      LogError(Module.Citizens, 'No photo pose found in selected campaign, use bind pose instead', animationResult.errCode);
-      _mixer.stopAllAction(); // Set to bind pose
+      console.log(`❌ No photoPose found, using bind pose`);
+      _mixer.stopAllAction();
     }
   } else {
-    _mixer.stopAllAction(); // Set to bind pose
+    _mixer.stopAllAction();
   }
 
-
-  onReady && onReady();
+  // Captura con bind pose si no hay photoPose
   const avatarPhoto = await GetCanvasImageUrl(pos, target);
   
-  _mixer.stopAllAction(); // Set to bind pose
-  _currentAction?.reset().play(); // Resume current action
+  // Restaurar si había acción previa
+  if (currentAction) {
+    currentAction.reset().play();
+  }
 
   return avatarPhoto;
 }
@@ -182,7 +202,6 @@ export async function GetAvatarPhoto(pos?: Vector3, target?: Vector3, campaign?:
 //#endregion
 
 //#region Component
-
 interface AvatarEditorProps {
   avatarBasePath: string;
   onReady: () => Promise<void>;
