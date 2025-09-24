@@ -28,6 +28,7 @@ import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from 
 import { Web3ErrorCode } from "../../enums/root/common.enum";
 import { GetCampaignsPolygonTokensMetadata, GetPolygonUserFeatureAssets, MintPolygonCitizen, SetPolygonNewCombination } from "../../utils/web3/polygon/contract.util";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/labels.constant";
+import Image from "next/image";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -56,6 +57,7 @@ export default function CitizensComponent() {
 
   // Local state
   const [isAllReady, setIsAllReady] = useState<boolean>(false);
+  const [imageTest, setImageTest] = useState<string | null>(null);
 
   // functions
   function addReplaceAttribute(addId: string, addValue: string) {
@@ -313,6 +315,7 @@ export default function CitizensComponent() {
   async function generateImage(pos?: Vector3, target?: Vector3): Promise<string | null> {
     // @GabCh155: this function is to generate the image from the canvas
     const imageUrl = await GetAvatarPhoto(pos, target, selectedCampaign as string, () => dispatch(setTakingPhoto(true)));
+    setImageTest(imageUrl);
     return imageUrl;
   }
 
@@ -720,7 +723,6 @@ export default function CitizensComponent() {
 
   }
 
-
   async function savePolygonCombination(): Promise<boolean> {
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
@@ -1076,7 +1078,8 @@ export default function CitizensComponent() {
     }
   }
 
-  return <CitizensUI
+  return <>
+  <CitizensUI
     singleInitData={singleInitData.current}
     exportData={exportData.current}
     featureList={optionList.current}
@@ -1090,4 +1093,9 @@ export default function CitizensComponent() {
     handleMinting={() => onMinting()}
     handleResetCombination={(type) => onResetFeature(type)}
   />
+  <div className="fixed w-fit h-fit bottom-0 right-0 z-50 bg-red text-white p-4 cursor-pointer" >
+    <h1 className="bg-green-600" onClick={() => generateImage(new Vector3(0, 1.6, 1.3), new Vector3(0, 1.4, 0))}>IMAGE GEN</h1>
+    <Image src={imageTest ?? ''} alt="Generated" width={200} height={200} />
+  </div>
+  </>
 }
