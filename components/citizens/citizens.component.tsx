@@ -315,7 +315,7 @@ export default function CitizensComponent() {
 
   async function generateImage(): Promise<string | null> {
     if (!selectedCampaign) return null;
-    const cameraConfig = PHOTO_CAMERA_CONFIGS[selectedCampaign || 'vrm_male'];
+    const cameraConfig = PHOTO_CAMERA_CONFIGS[selectedCampaign];
     const finalPos = new Vector3(cameraConfig.position.x, cameraConfig.position.y, cameraConfig.position.z);
     const finalTarget = new Vector3(cameraConfig.target.x, cameraConfig.target.y, cameraConfig.target.z);
 
