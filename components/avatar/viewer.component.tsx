@@ -7,19 +7,12 @@ import {
   PerspectiveCamera,
   Scene,
   Texture,
-  Vector2,
   Vector3,
   WebGLRenderer,
-  WebGLRenderTarget,
-  LinearFilter,
-  RGBAFormat,
-  UnsignedByteType,
-  DirectionalLight,
   AmbientLight,
-  Color
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import { Delay, LogError, LogWarning } from "../../utils/common.util";
+import { LogError, LogWarning } from "../../utils/common.util";
 import { Module } from "../../enums/common.enum";
 import {
   FrustumCulledFalse,

@@ -29,7 +29,6 @@ import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, L
 import { StoreAssetData } from "../../utils/firebase.util";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/labels.constant";
 import { PHOTO_CAMERA_CONFIGS } from "../../constants/common.constant";
-import Image from "next/image";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -58,7 +57,6 @@ export default function CitizensComponent() {
 
   // Local state
   const [isAllReady, setIsAllReady] = useState<boolean>(false);
-  const [imageTest, setImageTest] = useState<string | null>(null);
 
   // functions
   function addReplaceAttribute(addId: string, addValue: string) {
@@ -323,7 +321,6 @@ export default function CitizensComponent() {
     const imageUrl = await GetAvatarPhoto(finalPos, finalTarget, selectedCampaign as string, () => { });
     dispatch(setTakingPhoto(false));
 
-    setImageTest(imageUrl);
     return imageUrl;
   }
 
@@ -1095,9 +1092,5 @@ export default function CitizensComponent() {
       handleMinting={() => onMinting()}
       handleResetCombination={(type) => onResetFeature(type)}
     />
-    <div className="fixed w-fit h-fit bottom-0 right-0 z-50 bg-red text-white p-4 cursor-pointer" >
-      <h1 className="bg-green-600" onClick={() => generateImage()}>IMAGE GEN</h1>
-      <Image src={imageTest ?? ''} alt="Generated" width={200} height={200} />
-    </div>
   </>
 }
