@@ -14,7 +14,7 @@ import { BlockchainToWalletChainType, GetSdkConnection, SetSdkConnection, GetSel
 import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination, RootCampaign, PolygonCampaign } from '../enums/citizens/common.enum';
 import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
-import { GetParameter } from '../utils/firebase.util';
+import { GetParameter, TrackCampaignUsage, TrackDailyActiveUser } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
 import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
@@ -62,6 +62,42 @@ export function useBlockchainWallet() {
     if (campaignParams.success) {
       dispatch(setCampaignParameters(RemoveUndefinedProperties(campaignParams.value)));
     } else void LogError(Module.Citizens, 'Error on getting campaign parameters');
+  }
+
+  const trackCampaignUsageAsync = async (campaign: Campaign | null) => {
+    if (campaign) {
+      try {
+        const result = await TrackCampaignUsage(campaign.toLowerCase());
+        if (!result.success) {
+          LogError(Module.Citizens, 'Error tracking campaign usage:', result.errMessage);
+        }
+      } catch (error) {
+        LogError(Module.Citizens, 'Error tracking campaign usage:', error);
+      }
+    }
+  }
+
+  const trackCampaignAndSessionAsync = async (campaign: Campaign | null) => {
+    try {
+      // Track campaign usage and daily active user in parallel
+      const dailyActivePromise = TrackDailyActiveUser();
+      const campaignPromise = campaign ? TrackCampaignUsage(campaign.toLowerCase()) : Promise.resolve({ success: true, value: true });
+      
+      const [dailyActiveResult, campaignResult] = await Promise.all([
+        dailyActivePromise, 
+        campaignPromise
+      ]);
+      
+      if (!dailyActiveResult.success) {
+        LogError(Module.Citizens, 'Error tracking daily active user:', dailyActiveResult.errMessage);
+      }
+      
+      if (campaign && !campaignResult.success) {
+        LogError(Module.Citizens, 'Error tracking campaign usage:', (campaignResult as any).errMessage);
+      }
+    } catch (error) {
+      LogError(Module.Citizens, 'Error tracking campaign and session statistics:', error);
+    }
   }
 
   async function getSolanaTokensMetadataPromise(walletAddress: string): Promise<Result<CitizenMetadata[]>> {
@@ -596,7 +632,6 @@ export function useBlockchainWallet() {
               const followerCountPromise = getLuksoFollowerCountPromise(user?.wallet?.address); // Get the follower count
               const [walletName, xpData, followerCount] = await Promise.all([walletNamePromise, xpDataPromise, followerCountPromise]);
 
-
               dispatch(connect({
                 address: user?.wallet?.address,
                 walletName: walletName.success ? walletName.value.name : null,
@@ -604,11 +639,13 @@ export function useBlockchainWallet() {
                 followUserData: followerCount.success ? followerCount.value : null
               }));
 
+              // Track campaign and session statistics after successful connection
+              trackCampaignAndSessionAsync(selectedCampaign);
+
             } else if (selectedCampaign === Campaign.Polygon && isEthereumReady) { //As Polygon is part of lukso, we need to check if the campaign is polygon
               const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
               const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
               const [provider, xpData] = await Promise.all([providerPromise, xpDataPromise]);
-
               const browserProvider = new BrowserProvider(provider);
 
               // Inicializar el contrato de Polygon (la red ya debería estar correcta)
@@ -623,6 +660,9 @@ export function useBlockchainWallet() {
                 xpData: xpData.success ? xpData.value : null,
                 followUserData: { followerCount: -1, followingCount: -1 }
               }));
+
+              // Track campaign and session statistics after successful connection
+              trackCampaignAndSessionAsync(selectedCampaign);
             } else if (selectedCampaign === null) {
               dispatch(setSelectedCampaign(Campaign.Polygon));
 
@@ -644,6 +684,9 @@ export function useBlockchainWallet() {
               xpData: null,
               followUserData: { followerCount: -1, followingCount: -1 }// Set the follow user data to -1, meaning this blockchain does not support follow user data
             }));
+
+            // Track campaign and session statistics after successful connection
+            trackCampaignAndSessionAsync(selectedCampaign);
           }
           SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Privy]: true });
         }
@@ -678,6 +721,9 @@ export function useBlockchainWallet() {
 
         dispatch(connect({ address: futurePassAddress, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: true });
+
+        // Track campaign and session statistics after successful connection
+        trackCampaignAndSessionAsync(selectedCampaign);
       }
       if (!isFetchingSession && !userSession && (blockchainType === Blockchain.Root || !blockchainType) && loginLibaryflag[LoginLibrary.Pass]) { //We don't need the blockchain type as use effect dependency because to be connected, blockchain type must be defined
         dispatch(disconnect());
