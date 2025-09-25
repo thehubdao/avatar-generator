@@ -30,7 +30,6 @@ import SceneUtil from "../../utils/scene.utils";
 import { useEffect, useRef } from "react";
 
 //#region Logic
-let _canvas: HTMLCanvasElement | undefined;
 let _scene: Scene | undefined;
 let _camera: PerspectiveCamera | undefined;
 let _renderer: WebGLRenderer | undefined;
@@ -322,8 +321,6 @@ export default function AvatarViewer({ onReady, defaultCamPos, defaultCamLookAt,
 
     // mount scene
     threeCanvas.current.appendChild(_renderer.domElement);
-
-    _canvas = _renderer.domElement;
 
     _cameraPos = _camera.position.clone();
     _cameraLookAt = _controls.target.clone();
