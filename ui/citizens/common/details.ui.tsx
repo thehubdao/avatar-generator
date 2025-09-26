@@ -54,7 +54,7 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
             </div>
           </div>
           <div className="w-full px-7 pb-9 pt-7">
-            <div className="relative w-full h-[30vh] md:h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
+            <div className="relative w-full max-w-[350px] h-[350px] mx-auto rounded-2xl overflow-hidden shadow-citizens-img">
               <Image
                 src={imgUrl}
                 alt={'Avatar detail'}
