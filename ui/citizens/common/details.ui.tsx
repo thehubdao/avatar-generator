@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Button from "./button.ui";
 import PlusSVG from "./SVG/plusSVG.ui";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import DownloadSVG from "./SVG/downloadSVG.ui";
 import Modal from "./modal.ui";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
@@ -25,19 +25,6 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
 
   const [isOpen, setIsOpen] = useState<boolean>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
-  const [isLoadedImage, setIsLoadedImage] = useState<boolean>(false);
-
-  // Reset image loading state when imgUrl changes or when loading starts
-  useEffect(() => {
-    if (loading) {
-      setIsLoadedImage(false);
-    }
-  }, [loading]);
-
-  useEffect(() => {
-    setIsLoadedImage(false);
-  }, [imgUrl]);
 
   const handleDownloading = async (type: ModelExtension) => {
     showSnackbar(
@@ -71,14 +58,10 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
                 alt={'Avatar detail'}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className={`object-cover ${isLoadedImage ? 'opacity-100' : 'opacity-0'} transition-opacity`}
-                onLoadingComplete={(img) => {
-                  console.log(img, "LOADING COMPLETED")
-                  if (img) setIsLoadedImage(true);
-                }}
+                className={`object-cover ${!loading ? 'opacity-100' : 'opacity-0'} transition-opacity`}
               />
               {
-                !isLoadedImage &&
+                loading &&
                 <div className="absolute w-8 h-8 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                   <div className="w-full h-full rounded-full border-t-2 border-white animate-spin" />
                 </div>
