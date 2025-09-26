@@ -257,7 +257,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 									<>
 										{/* CITIZEN DETAILS */}
 										{singleInitData && singleInitData.features.length > 0 &&
-											<DetailsUI data={singleInitData.features} handleDownload={(type) => handleExport(type)} imgUrl={selectedCitizen.imageUrl} loading={didSavingMode || isTakingPhoto} onResetCombination={handleResetCombination} />
+											<DetailsUI data={singleInitData.features} handleDownload={(type) => handleExport(type)} imgUrl={selectedCitizen.imageUrl} loading={didSavingMode} onResetCombination={handleResetCombination} />
 										}
 										{/* EDIT MODE HUD */}
 										{isReady &&
