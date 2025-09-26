@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Button from "./button.ui";
 import PlusSVG from "./SVG/plusSVG.ui";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DownloadSVG from "./SVG/downloadSVG.ui";
 import Modal from "./modal.ui";
 import { IndexFeatureInterface } from "../../../interfaces/api.interface";
@@ -26,7 +26,18 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
   const [isOpen, setIsOpen] = useState<boolean>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const [isLoadedImage, setIsLoadedImage] = useState<boolean>();
+  const [isLoadedImage, setIsLoadedImage] = useState<boolean>(false);
+
+  // Reset image loading state when imgUrl changes or when loading starts
+  useEffect(() => {
+    if (loading) {
+      setIsLoadedImage(false);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    setIsLoadedImage(false);
+  }, [imgUrl]);
 
   const handleDownloading = async (type: ModelExtension) => {
     showSnackbar(
@@ -62,6 +73,7 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className={`object-cover ${isLoadedImage ? 'opacity-100' : 'opacity-0'} transition-opacity`}
                 onLoadingComplete={(img) => {
+                  console.log(img, "LOADING COMPLETED")
                   if (img) setIsLoadedImage(true);
                 }}
               />
@@ -92,7 +104,13 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
       </div>
     }
     {!isOpen &&
-      <Button label="/// details" withIcon handleClick={() => { setIsOpen(true) }} className="fixed bottom-4 left-4 min-w-fit lg:w-[419px]" textStyles="text-start text-sm lg:text-lg lg:pl-2">
+      <Button 
+        label="/// details" 
+        withIcon 
+        handleClick={loading ? () => {} : () => { setIsOpen(true) }} 
+        className={`fixed bottom-4 left-4 min-w-fit lg:w-[419px] ${loading ? 'cursor-not-allowed opacity-75 pointer-events-none' : 'cursor-pointer'}`} 
+        textStyles="text-start text-sm lg:text-lg lg:pl-2"
+      >
         {loading ?
           <div className="w-3 h-3 rounded-full border-t-[1px] border-white animate-spin" />
           :
