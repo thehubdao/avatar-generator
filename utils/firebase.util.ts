@@ -1401,3 +1401,194 @@ export async function GetAssetData(campaign: string, collectionId: string, token
     return { success: false, errMessage: err.message, errCode: err.code };
   }
 }
+
+// ===== DAILY STATISTICS TRACKING FUNCTIONS =====
+
+
+export async function TrackCampaignUsage(campaign: string): Promise<Result<boolean>> {
+  try {
+    const db = await FirebaseUtil.Instance().DB();
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // Check if we're in browser environment (localStorage available)
+    const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+    
+    let isUniqueUserToday = false;
+    
+    if (isBrowser) {
+      // Check if user already used this campaign today
+      const localStorageKey = `campaign_user_tracked_${campaign}_${today}`;
+      const isAlreadyTrackedToday = localStorage.getItem(localStorageKey) === 'true';
+      
+      // If not tracked today for this campaign, mark as unique user
+      if (!isAlreadyTrackedToday) {
+        localStorage.setItem(localStorageKey, 'true');
+        isUniqueUserToday = true;
+      }
+    } else {
+      // Server-side: always count as unique (we can't deduplicate server-side)
+      isUniqueUserToday = true;
+    }
+    
+    // Track daily campaign usage
+    const campaignDailyRef = doc(db, 'statistics', 'daily_usage', 'campaigns', `${campaign}_${today}`);
+    const updateData: any = {
+      campaign,
+      date: today,
+      count: increment(1),
+      lastUpdated: Timestamp.now()
+    };
+    
+    // Only increment unique users if this is the first time today
+    if (isUniqueUserToday) {
+      updateData.unique_users = increment(1);
+    }
+    
+    await setDoc(campaignDailyRef, updateData, { merge: true });
+
+    // Update historical totals
+    const historicalRef = doc(db, 'statistics', 'totals');
+    const historicalUpdateData: any = {
+      [`total_campaign_usage.${campaign}`]: increment(1),
+      lastUpdated: Timestamp.now()
+    };
+    
+    // Only increment total unique users if this is the first time today
+    if (isUniqueUserToday) {
+      historicalUpdateData[`total_campaign_unique_users.${campaign}`] = increment(1);
+    }
+    
+    await setDoc(historicalRef, historicalUpdateData, { merge: true });
+
+    return { success: true, value: true };
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error tracking campaign usage: ${err.message}`);
+    return { success: false, errMessage: err.message, errCode: err.code };
+  }
+}
+
+export async function TrackDailyActiveUser(): Promise<Result<boolean>> {
+  try {
+    const db = await FirebaseUtil.Instance().DB();
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    // Check if we're in browser environment (localStorage available)
+    const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+    
+    let isUniqueUserToday = false;
+    let isNewUserEver = false;
+    
+    if (isBrowser) {
+      // Check if user already counted today using localStorage
+      const localStorageKey = `daily_user_tracked_${today}`;
+      const isAlreadyTrackedToday = localStorage.getItem(localStorageKey) === 'true';
+      
+      // Check if this is a completely new user (never seen before)
+      const userSeenKey = 'user_ever_tracked';
+      const hasBeenSeenBefore = localStorage.getItem(userSeenKey) === 'true';
+      
+      // If not tracked today, mark as unique user for today
+      if (!isAlreadyTrackedToday) {
+        localStorage.setItem(localStorageKey, 'true');
+        isUniqueUserToday = true;
+        
+        // Clean up old localStorage entries (keep only last 7 days)
+        CleanupOldDailyTracking();
+      }
+      
+      // If never seen before, mark as completely new user
+      if (!hasBeenSeenBefore) {
+        localStorage.setItem(userSeenKey, 'true');
+        isNewUserEver = true;
+      }
+    } else {
+      // Server-side: always count as unique (we can't deduplicate server-side)
+      isUniqueUserToday = true;
+      isNewUserEver = true;
+    }
+    
+    // Track global daily stats
+    const globalDailyRef = doc(db, 'statistics', 'daily_usage', 'global', today);
+    const updateData: any = {
+      date: today,
+      total_sessions: increment(1),
+      lastUpdated: Timestamp.now()
+    };
+    
+    // Only increment unique users if this is the first session today
+    if (isUniqueUserToday) {
+      updateData.unique_users = increment(1);
+    }
+    
+    // Only increment new users if this is completely new user
+    if (isNewUserEver) {
+      updateData.new_users = increment(1);
+    }
+    
+    await setDoc(globalDailyRef, updateData, { merge: true });
+
+    // Update historical totals
+    const historicalRef = doc(db, 'statistics', 'totals');
+    const historicalUpdateData: any = {
+      total_sessions: increment(1),
+      lastUpdated: Timestamp.now()
+    };
+    
+    // Only increment total unique users if this is the first session today
+    if (isUniqueUserToday) {
+      historicalUpdateData.total_unique_users = increment(1);
+    }
+    
+    // Only increment total real users if this is completely new user
+    if (isNewUserEver) {
+      historicalUpdateData.total_real_users = increment(1);
+    }
+    
+    await setDoc(historicalRef, historicalUpdateData, { merge: true });
+
+    return { success: true, value: true };
+  } catch (e) {
+    const err = e as FirebaseError;
+    void LogError(Module.FirebaseUtil, `Error tracking daily active user: ${err.message}`);
+    return { success: false, errMessage: err.message, errCode: err.code };
+  }
+}
+
+// Helper function to clean up old localStorage entries
+function CleanupOldDailyTracking(): void {
+  try {
+    // Only run in browser environment
+    if (typeof window === 'undefined' || typeof localStorage === 'undefined') {
+      return;
+    }
+    
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    
+    // Get all localStorage keys
+    for (let i = localStorage.length - 1; i >= 0; i--) {
+      const key = localStorage.key(i);
+      if (key && (
+        key.startsWith('daily_user_tracked_') || 
+        key.startsWith('campaign_user_tracked_')
+      )) {
+        // Skip permanent keys (don't have dates)
+        if (key === 'user_ever_tracked') continue;
+        
+        // Extract date from key (always the last part after the last underscore)
+        const parts = key.split('_');
+        const dateStr = parts[parts.length - 1];
+        const keyDate = new Date(dateStr);
+        
+        // Remove if older than 7 days
+        if (keyDate < sevenDaysAgo) {
+          localStorage.removeItem(key);
+        }
+      }
+    }
+  } catch (error) {
+    // Silently fail if localStorage cleanup fails
+    void LogError(Module.FirebaseUtil, 'Error cleaning up old daily tracking:', error);
+  }
+}

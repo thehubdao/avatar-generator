@@ -26,8 +26,6 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
   const [isOpen, setIsOpen] = useState<boolean>();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
-  const [isLoadedImage, setIsLoadedImage] = useState<boolean>();
-
   const handleDownloading = async (type: ModelExtension) => {
     showSnackbar(
       <p>Your {type} is being downloaded, please wait...</p>
@@ -54,19 +52,16 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
             </div>
           </div>
           <div className="w-full px-7 pb-9 pt-7">
-            <div className="relative w-full h-[30vh] md:h-[300px] rounded-2xl overflow-hidden shadow-citizens-img">
+            <div className="relative w-full max-w-[350px] h-[350px] mx-auto rounded-2xl overflow-hidden shadow-citizens-img">
               <Image
                 src={imgUrl}
                 alt={'Avatar detail'}
                 fill
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className={`object-cover ${isLoadedImage ? 'opacity-100' : 'opacity-0'} transition-opacity`}
-                onLoadingComplete={(img) => {
-                  if (img) setIsLoadedImage(true);
-                }}
+                className={`object-cover ${!loading ? 'opacity-100' : 'opacity-0'} transition-opacity`}
               />
               {
-                !isLoadedImage &&
+                loading &&
                 <div className="absolute w-8 h-8 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                   <div className="w-full h-full rounded-full border-t-2 border-white animate-spin" />
                 </div>
@@ -92,7 +87,13 @@ export default function DetailsUI({ data, handleDownload, imgUrl, loading = fals
       </div>
     }
     {!isOpen &&
-      <Button label="/// details" withIcon handleClick={() => { setIsOpen(true) }} className="fixed bottom-4 left-4 min-w-fit lg:w-[419px]" textStyles="text-start text-sm lg:text-lg lg:pl-2">
+      <Button 
+        label="/// details" 
+        withIcon 
+        handleClick={loading ? () => {} : () => { setIsOpen(true) }} 
+        className={`fixed bottom-4 left-4 min-w-fit lg:w-[419px] ${loading ? 'cursor-not-allowed opacity-75 pointer-events-none' : 'cursor-pointer'}`} 
+        textStyles="text-start text-sm lg:text-lg lg:pl-2"
+      >
         {loading ?
           <div className="w-3 h-3 rounded-full border-t-[1px] border-white animate-spin" />
           :

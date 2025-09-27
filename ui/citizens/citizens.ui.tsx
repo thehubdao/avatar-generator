@@ -45,6 +45,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	const didMarketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
 	const didNotificationMode = useAppSelector(state => state.citizensMetadata.notificationMode);
 	const isTakingPhoto = useAppSelector(state => state.citizensMetadata.takingPhoto);
+	const didSavingMode = useAppSelector(state => state.citizensMetadata.savingMode);
 
 	// Edit mode local State
 	const [optionList, setOptionList] = useState<FeatureInterface[]>();
@@ -256,7 +257,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 									<>
 										{/* CITIZEN DETAILS */}
 										{singleInitData && singleInitData.features.length > 0 &&
-											<DetailsUI data={singleInitData.features} handleDownload={(type) => handleExport(type)} imgUrl={selectedCitizen.imageUrl} loading={false} onResetCombination={handleResetCombination} />
+											<DetailsUI data={singleInitData.features} handleDownload={(type) => handleExport(type)} imgUrl={selectedCitizen.imageUrl} loading={didSavingMode} onResetCombination={handleResetCombination} />
 										}
 										{/* EDIT MODE HUD */}
 										{isReady &&

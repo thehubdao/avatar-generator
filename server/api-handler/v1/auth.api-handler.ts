@@ -18,7 +18,7 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
   }
 
   try {
-    // Handle login rewards first
+    // Handle login rewards (statistics tracking moved to client-side)
     await HandleXPReward(address, blockchainType);
     
     // Get updated XP data after rewards
@@ -52,3 +52,4 @@ async function HandleXPReward(address: string, blockchainType: Blockchain): Prom
     LogError(Module.ApiUtil, 'Error handling XP reward:', error);
   }
 }
+
