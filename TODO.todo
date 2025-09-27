@@ -58,12 +58,13 @@ MARKETPLACE:
         ✔ Review some features that change the 3d model but don't show in the shopping cart (underwear mask, face) @done
         ✔ Add 'shop here' text in marketplace button when it is closed @done
         ✔ Clean shopping cart once user checks out @done
+        ✔ The purchased wearables still the price, remove it @done
+        ✔ Add Tag behaviors to drops @done
+        ✔ Add empty item in empty category on mobile @done
+        ☐ Add isClaimable behavior to drops
         ☐ Fix error on selected feature when it is removed from cart from different feature category (baseExportData/exportData)
-        ☐ Add empty item in empty category on mobile
-        ☐ The purchased wearables still the price, remove it
         ☐ Don't show owned wearables in marketplace
         ☐ Remove items for cart when user removes them from edit mode feature selection
-        ☐ Add isClaimable behavior to drops
         ☐ Load cart items (if these exist) when charge the avatar editor
 
     TO CONSIDER:
