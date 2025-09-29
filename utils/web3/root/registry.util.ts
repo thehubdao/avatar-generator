@@ -251,19 +251,13 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
 
     if (!newCombinationResult.success) return { success: false, errMessage: newCombinationResult.errMessage, errCode: newCombinationResult.errCode };
     const newCombination = newCombinationResult.value;
-console.log(newCombination)
     const imageUrl = await GetImageUrl(Campaign.Based, newCombination);
-    console.log(imageUrl)
     const setRootAssetImageUrlResult = await SetRootAssetImageUrl(imageUrl, collection_id, token_id, authToken);
-    console.log(setRootAssetImageUrlResult)
     if (!setRootAssetImageUrlResult.success) return { success: false, errMessage: setRootAssetImageUrlResult.errMessage, errCode: setRootAssetImageUrlResult.errCode };
     const combinationArray = newCombination.split('-');
-    console.log(combinationArray)
     const attributesExpectedAmount = combinationArray.filter((index) => index != '0').length;
-    console.log(attributesExpectedAmount)
     const attributesProcessing = combinationArray.map((attributeIndex, typeIndex) => {
         const attribute = rootDropsArray.find(drop => drop.index.toString() === attributeIndex && drop.typeIndex.toString() === typeIndex.toString());
-        console.log(attribute)
         if (!attribute) return undefined;
         return {
             collectionId: attribute.collectionId,
@@ -273,9 +267,7 @@ console.log(newCombination)
             index: attribute.index,
         };
     });
-    console.log(attributesProcessing)
     const filteredAttributes = attributesProcessing.filter(attribute => attribute !== undefined) as RootDrop[];
-    console.log(filteredAttributes)
     if(filteredAttributes.length!=attributesExpectedAmount) return { success: false, errMessage: "Attributes processing failed", errCode: "AttributesProcessingError" };
     const setRootAssetMetadataResult = await StoreAssetData({
         campaign: Campaign.Based,

@@ -152,28 +152,20 @@ export async function GetAvatarPhoto(pos?: Vector3, target?: Vector3, campaign?:
     return null;
   }
   
-  // Guardar estado actual para restaurar después
   const currentAction = _currentAction;
   
   onReady && onReady();
   
-  // Aplicar photoPose, capturar y restaurar de forma ultra-rápida
   if (campaign) {
     const animationResult = await GetAnimationByCampaignAndName(campaign, 'photoPose');
     if (animationResult.success) {
-      console.log(`✅ Quick photoPose application:`, animationResult.value.at(0)?.path);
-      
-      // Aplicar pose instantáneamente
       await SetAnimation(_mixer, animationResult.value.at(0)?.path);
       _currentAction?.stop();
       
-      // Solo 1 frame mínimo
       await new Promise(resolve => requestAnimationFrame(resolve));
       
-      // Captura inmediata
       const avatarPhoto = await GetCanvasImageUrl(pos, target);
       
-      // Restaurar inmediatamente
       _mixer.stopAllAction();
       if (currentAction) {
         currentAction.reset().play();
@@ -181,17 +173,14 @@ export async function GetAvatarPhoto(pos?: Vector3, target?: Vector3, campaign?:
       
       return avatarPhoto;
     } else {
-      console.log(`❌ No photoPose found, using bind pose`);
       _mixer.stopAllAction();
     }
   } else {
     _mixer.stopAllAction();
   }
 
-  // Captura con bind pose si no hay photoPose
   const avatarPhoto = await GetCanvasImageUrl(pos, target);
   
-  // Restaurar si había acción previa
   if (currentAction) {
     currentAction.reset().play();
   }
