@@ -5,7 +5,7 @@ import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { UMI, COLLECTION_ID, KUMI_CANDY_MACHINE_ID, KUMI_CANDY_MACHINE_TREASURY, COLLECTION_GUARD_ID, ADMIN_SIGNER } from '../../../constants/solana/contract.constant';
-import { CitizenMetadata, Drop, MintingPriceData, SolanaAttribute, SolanaMetadata } from '../../../interfaces/citizens.interface';
+import { CitizenMetadata, FeatureDrop, MintingPriceData, SolanaAttribute, SolanaMetadata } from '../../../interfaces/citizens.interface';
 import { GetSolanaImageUrl, GetSolanaIPFSData } from '../citizens.util';
 import { ConnectedSolanaWallet } from '@privy-io/react-auth';
 import { GuardSetMintArgs, mintV1, mplCandyMachine } from '@metaplex-foundation/mpl-core-candy-machine';
@@ -274,7 +274,7 @@ export async function GetCollectionSupply(collectionId: PublicKey = COLLECTION_I
 export async function GetSolanaUserFeatureAssets(walletAddress: string, campaign: SolanaCampaign): Promise<Result<CampaignDrops<SolanaCampaign>>> {
     try {
         const assetsResult = await GetAssetsByOwner(walletAddress);
-        const userFeatures: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
+        const userFeatures: FeatureDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as FeatureDrop[];
 
         if (!assetsResult.success) return {
             success: false,
@@ -283,13 +283,13 @@ export async function GetSolanaUserFeatureAssets(walletAddress: string, campaign
         };
 
         const userFeaturesAssets = userFeatures.map(feature => { // For solana, we set the asset address instead of the collection address as it works different
-            const assets = assetsResult.value.filter(asset => asset.updateAuthority.address === feature.contract_address);
+            const assets = assetsResult.value.filter(asset => asset.updateAuthority.address === feature.contractAddress);
 
             if (assets.length === 0) return undefined;
 
             return {
                 ...feature,
-                contract_address: assets[0].publicKey.toString(),
+                contractAddress: assets[0].publicKey.toString(),
                 balance: assets.length
             };
         })

@@ -25,7 +25,7 @@ import { AssetData } from "../../interfaces/firebase.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { Web3ErrorCode } from "../../enums/root/common.enum";
 import { GetCampaignsPolygonTokensMetadata, GetPolygonUserFeatureAssets, MintPolygonCitizen, SetPolygonNewCombination } from "../../utils/web3/polygon/contract.util";
-import { Drop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, LuksoDrop, ClaimableDrop, DropToClaim, RootDrop, RootMetadata, PolygonDrop, PolygonMetadata, PolygonTrait } from "../../interfaces/citizens.interface";
+import { FeatureDrop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, LuksoDrop, FeatureClaimableDrop, DropToClaim, RootDrop, RootMetadata, PolygonDrop, PolygonMetadata, PolygonTrait } from "../../interfaces/citizens.interface";
 import { StoreAssetData } from "../../utils/firebase.util";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/labels.constant";
 import { PHOTO_CAMERA_CONFIGS } from "../../constants/common.constant";
@@ -49,7 +49,7 @@ export default function CitizensComponent() {
   const exportData = useRef<ExportInterface>({ attributes: [] });
   const featureList = useRef<FeatureInterface[]>([]);
   const optionList = useRef<FeatureInterface[]>([]);
-  const claimableDropsList = useRef<ClaimableDrop[]>([]);
+  const claimableDropsList = useRef<FeatureClaimableDrop[]>([]);
   const claimableDropsFeatureList = useRef<FeatureInterface[]>([]);
   const envMapList = useRef<EnvMapInterface[]>();
 
@@ -142,36 +142,19 @@ export default function CitizensComponent() {
         feature.balance = _userFeatures[selectedCampaign as string].find(w => w.type === feature.type && w.index === feature.index)?.balance;
         return feature;
       });
-
+      
       filteredOptionList = filteredOptionList.concat(featuresWithBalance);
     }
     optionList.current = filteredOptionList;
 
-    if (!claimableDrops) return LogError(Module.Citizens, 'Missing claimable drops to add!');
+    // Claimable drops now come directly from features with isClaimableDrop flag
+    // Filter features that are claimable from the main feature list
+    const claimableFeatures = featureList.current.filter(f => (f as any).isClaimableDrop === true);
+    claimableDropsFeatureList.current = claimableFeatures;
 
-    const campaignClaimableDrops = claimableDrops[selectedCampaign as string];
-    claimableDropsList.current = campaignClaimableDrops;
-
-    if (campaignClaimableDrops) {
-      const formattedClaimableDrops = campaignClaimableDrops
-        .map((drop) => (
-          featureList.current?.find(
-            (option) =>
-              option.type === drop.featureType &&
-              drop.featureIndex === option.index
-          )
-        ))
-        .filter(el => el !== undefined && el.isClaimable); // Filter only claimable features
-
-      const claimableDropsWithMarketData = formattedClaimableDrops.map(feature => {
-        feature.price = claimableDrops[selectedCampaign as string].find(w => w.featureType === feature.type && w.featureIndex === feature.index)?.price;
-        feature.paymentType = claimableDrops[selectedCampaign as string].find(w => w.featureType === feature.type && w.featureIndex === feature.index)?.paymentType;
-        feature.requiredXP = claimableDrops[selectedCampaign as string].find(w => w.featureType === feature.type && w.featureIndex === feature.index)?.requiredXP;
-        feature.thumb = claimableDrops[selectedCampaign as string].find(w => w.featureType === feature.type && w.featureIndex === feature.index)?.imageUrl;
-        return feature;
-      })
-
-      claimableDropsFeatureList.current = claimableDropsWithMarketData;
+    // For backward compatibility with claimableDropsList (if still needed elsewhere)
+    if (claimableDrops && claimableDrops[selectedCampaign as string]) {
+      claimableDropsList.current = claimableDrops[selectedCampaign as string];
     }
   }
 
@@ -517,7 +500,7 @@ export default function CitizensComponent() {
     const oldAttributes: LuksoAttribute[] = []; //This array will contain the attributes to be unequipped
     const newAttributes: LuksoAttribute[] = []; //This array will contain the attributes to be equipped
 
-    const allDrops: Drop[] = await GetCollectionDocs(`campaign/${selectedCampaign}/drops`) as Drop[];
+    const allDrops: FeatureDrop[] = await GetCollectionDocs(`campaign/${selectedCampaign}/drops`) as FeatureDrop[];
 
     if (userFeatures && userFeatures[selectedCampaign as string] != null) newCombinationArray.forEach((newIndex, index) => {
       const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
@@ -535,7 +518,7 @@ export default function CitizensComponent() {
         key,
         value: newDrop?.name,
         type: 'string',
-        wearable_address: dropsToClaim ? dropsToClaim.find(drop => drop.wearableIndex === newIndex && drop.wearableType === indexType)?.wearableAddress : newDrop?.contract_address, //If the user is gonna claim the drop, we use predicted data
+        wearable_address: dropsToClaim ? dropsToClaim.find(drop => drop.wearableIndex === newIndex && drop.wearableType === indexType)?.wearableAddress : newDrop?.contractAddress, //If the user is gonna claim the drop, we use predicted data
         wearable_token_id: dropsToClaim ? dropsToClaim.find(drop => drop.wearableIndex === newIndex && drop.wearableType === indexType)?.wearablePredictedTokenId : newDrop?.tokenId //If the user is gonna claim the drop, we use predicted data
       } : {
         key,
@@ -549,7 +532,7 @@ export default function CitizensComponent() {
 
       if (oldIndex === newIndex) return undefined;
 
-      if (newDrop && newDrop.contract_address) {
+      if (newDrop && newDrop.contractAddress) {
         if (newDrop.dropType === DropType.LSP8) newAttributes.push(newAttribute);
         else burnDropArray.push(newDrop);
       } //If the old feature is not base feature, add it to the old features array. We know it's not base feature because it has a token id and contract address
@@ -672,12 +655,12 @@ export default function CitizensComponent() {
       if (!indexType) return undefined;
 
       const oldAttribute = (selectedCitizen.rawMetadata as SolanaMetadata).attributes[index]; //Get the old feature to be unequipped and transferred back to wallet if not base feature
-      const newAttribute = userFeatures[currentCampaign as string].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newCombinationArray[index])) as Drop; //Get the new feature to be equipped and transferred to source asset in case it's not base feature
+      const newAttribute = userFeatures[currentCampaign as string].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newCombinationArray[index])) as FeatureDrop; //Get the new feature to be equipped and transferred to source asset in case it's not base feature
 
       const attribute = newAttribute ? { //Add asset address to the attribute newAttribute exists
         trait_type: indexType.toUpperCase(),
         value: newAttribute?.name.toUpperCase(),
-        asset_address: newAttribute?.contract_address
+        asset_address: newAttribute?.contractAddress
       } : {
         trait_type: indexType.toUpperCase(),
         value: singleInitData.current?.features[index]?.val.name.toUpperCase() as string, //Set the feature name to the new feature index
@@ -799,7 +782,7 @@ export default function CitizensComponent() {
       const trait = newDrop ? { //Add asset address to the attribute newAttribute exists
         trait_type: indexType.toUpperCase(),
         value: newDrop?.name.toUpperCase(),
-        wearableAddress: newDrop?.contract_address,
+        wearableAddress: newDrop?.contractAddress,
         wearableTokenId: newDrop?.tokenId
       } : {
         trait_type: indexType.toUpperCase(),
@@ -810,7 +793,7 @@ export default function CitizensComponent() {
 
       if (oldIndex == newIndex) return undefined;
       if (newDrop && newDrop.index != 0) newAttributes.push(newDrop);
-      if (oldDrop && oldDrop.index != 0) oldAttributes.push({ ...oldDrop, contract_address: oldTrait.wearableAddress as string, tokenId: oldTrait.wearableTokenId as number });
+      if (oldDrop && oldDrop.index != 0) oldAttributes.push({ ...oldDrop, contractAddress: oldTrait.wearableAddress as string, tokenId: oldTrait.wearableTokenId as number });
     });
 
     newCitizenMetadata.rawMetadata.traits = traits;
@@ -968,19 +951,19 @@ export default function CitizensComponent() {
       return false;
     }
 
-    const claimableDrops: ClaimableDrop[] = []
+    const claimableDrops: FeatureClaimableDrop[] = []
 
     for (let i = 0; i < shoppingCart.length; i++) {
       const basicData = shoppingCart[i];
 
-      const claimableDropFound = _claimableDropsList.find(drop => drop.featureName === basicData.val);
+      const claimableDropFound = _claimableDropsList.find(drop => drop.name === basicData.val);
 
       if (!claimableDropFound) {
         LogError(Module.Citizens, 'Claimable drop not found in claimable drops list in onBuying');
         return false;
       }
 
-      const claimableDrop: ClaimableDrop = claimableDropFound;
+      const claimableDrop: FeatureClaimableDrop = claimableDropFound;
 
       if (!claimableDrop) {
         LogError(Module.Citizens, 'Claimable drop not found in claimable drops list in onBuying');

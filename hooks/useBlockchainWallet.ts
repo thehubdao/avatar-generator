@@ -4,7 +4,7 @@ import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setClaimableDrops, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setNotificationMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetLuksoUserFeatures } from '../utils/web3/lukso/contract.util';
 import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetSolanaUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
-import { CitizenMetadata, ClaimableDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
+import { CitizenMetadata, FeatureClaimableDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
@@ -62,19 +62,6 @@ export function useBlockchainWallet() {
     if (campaignParams.success) {
       dispatch(setCampaignParameters(RemoveUndefinedProperties(campaignParams.value)));
     } else void LogError(Module.Citizens, 'Error on getting campaign parameters');
-  }
-
-  const trackCampaignUsageAsync = async (campaign: Campaign | null) => {
-    if (campaign) {
-      try {
-        const result = await TrackCampaignUsage(campaign.toLowerCase());
-        if (!result.success) {
-          LogError(Module.Citizens, 'Error tracking campaign usage:', result.errMessage);
-        }
-      } catch (error) {
-        LogError(Module.Citizens, 'Error tracking campaign usage:', error);
-      }
-    }
   }
 
   const trackCampaignAndSessionAsync = async (campaign: Campaign | null) => {
@@ -216,7 +203,7 @@ export function useBlockchainWallet() {
     return { success: true, value: mintingData };
   }
 
-  async function getPolygonMintingDataPromise(walletAddress: string): Promise<Result<MintingData>> {
+  async function getPolygonMintingDataPromise(): Promise<Result<MintingData>> {
     const mintingSupply = await GetPolygonCollectionSupply();
     const mintingData: MintingData = { mintSupply: undefined, mintPrice: undefined, isHolder: undefined }
 
@@ -231,7 +218,7 @@ export function useBlockchainWallet() {
   }
 
 
-  async function getClaimableDropsPromise(walletAddress: string): Promise<Result<Record<LuksoCampaign, ClaimableDrop[]>>> {
+  async function getClaimableDropsPromise(walletAddress: string): Promise<Result<Record<LuksoCampaign, FeatureClaimableDrop[]>>> {
     const drops = await GetLuksoClaimableDrops(walletAddress);
     if (drops.success) return { success: true, value: drops.value };
     return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
@@ -298,7 +285,7 @@ export function useBlockchainWallet() {
       }
 
       if (luksoClaimableDrops.success) {
-        dispatch(setClaimableDrops(luksoClaimableDrops.value as Record<Campaign, ClaimableDrop[]>));
+        dispatch(setClaimableDrops(luksoClaimableDrops.value as Record<Campaign, FeatureClaimableDrop[]>));
       } else {
         LogError(Module.Citizens, luksoClaimableDrops.errMessage, luksoClaimableDrops.errCode);
       }
@@ -319,7 +306,7 @@ export function useBlockchainWallet() {
             dispatch(setSelectedCitizen(polygonCitizensMetadata.value[0]));
             dispatch(setMintingMode(false));
           } else {//If user has no campaigns, set the polygon campaign as selected campaign and keep minting mode
-            const mintingData = await getPolygonMintingDataPromise(walletAddress);
+            const mintingData = await getPolygonMintingDataPromise();
 
             if (mintingData.success) {
               dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
@@ -333,7 +320,7 @@ export function useBlockchainWallet() {
             } as CitizenMetadata));
           }
         } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
-          const mintingData = await getPolygonMintingDataPromise(walletAddress);
+          const mintingData = await getPolygonMintingDataPromise();
           if (mintingData.success) {
             dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
           }

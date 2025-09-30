@@ -11,7 +11,7 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
-import { ClaimableDrop, DropToClaim, LuksoDrop, SolanaAttribute, UserXPData } from "../interfaces/citizens.interface";
+import { FeatureClaimableDrop, DropToClaim, LuksoDrop, SolanaAttribute, UserXPData } from "../interfaces/citizens.interface";
 import { Blockchain } from "../enums/blockchain/common.enum";
 
 //#region Generic
@@ -182,7 +182,7 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
   return data.data.approved;
 }
 
-export async function FetchClaimableDrops(dropId?: string): Promise<ClaimableDrop[]> {
+export async function FetchClaimableDrops(dropId?: string): Promise<FeatureClaimableDrop[]> {
   const url = dropId ? `/api/v1/drops?id=${dropId}` : '/api/v1/drops';
   const response = await fetch(url);
   if (!response.ok) throw new Error('Failed to fetch claimable drops');
@@ -201,7 +201,7 @@ export async function GetUserXPData(address: string, blockchainType: Blockchain)
   return { success: true, value: data.data };
 }
 
-export async function RequestClaimApprove(drops: ClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
+export async function RequestClaimApprove(drops: FeatureClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
   const requestResult = await fetch('/api/v1/drops', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

@@ -1,4 +1,4 @@
-﻿import {DefaultApiResponse} from "../server/enums/api.enum";
+import {DefaultApiResponse} from "../server/enums/api.enum";
 import {RandomTier} from "../enums/common.enum";
 
 export interface ApiResponse<T> {
@@ -12,17 +12,14 @@ export interface AssetInterface {
   name: string;
   type: string;
   path: string;
-  thumb?: string;
-  balance?: number;
-  price?: number;
-  paymentType?: string;
-  requiredXP?: number;
-  tag?: string;
+  thumb: string;
 }
 
 export interface FeatureInterface extends AssetInterface {
   id: string;
   tier: RandomTier;
+  isDrop?: boolean; // true if this feature has onchain representation
+  tag?: string;
 }
 
 export interface AccessoryInterface extends AssetInterface {

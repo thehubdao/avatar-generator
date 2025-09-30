@@ -1,5 +1,5 @@
 import { JsonRpcProvider } from "ethers";
-import { ClaimableDrop } from "../../../interfaces/citizens.interface";
+import { FeatureClaimableDrop } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
 import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
 import {  useState } from "react";
@@ -8,7 +8,7 @@ import Button from "./button.ui";
 import { useSnackbar } from "../snackbar/snackbar.provider";
 
 interface DropItemCardProps {
-  drop: ClaimableDrop;
+  drop: FeatureClaimableDrop;
   userXP: number;
   userAddress: string;
   provider: JsonRpcProvider;

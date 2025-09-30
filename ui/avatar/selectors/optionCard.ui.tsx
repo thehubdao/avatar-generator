@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import GetImage from "../../../components/commons/getImage.component"
-import { FeatureInterface } from "../../../interfaces/api.interface"
 import { useAppSelector } from "../../../store/hooks";
 import MedalSVG from "../../citizens/common/SVG/medalSVG.ui"
 import LockSVG from "../../citizens/common/SVG/lockSVG.ui";
+import { FeatureClaimableDrop } from "../../../interfaces/citizens.interface";
 
 interface OptionCardUIProps {
-  option: FeatureInterface,
+  option: FeatureClaimableDrop,
   isActive?: boolean
 }
 

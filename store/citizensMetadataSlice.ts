@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CitizenMetadata, ClaimableDrop, MintingPriceData } from '../interfaces/citizens.interface';
+import { CitizenMetadata, FeatureClaimableDrop, MintingPriceData } from '../interfaces/citizens.interface';
 import { Campaign, LuksoCampaign } from '../enums/citizens/common.enum';
 import { BasicData, CampaignParameters } from '../interfaces/common.interface';
 import { LeaderboardEntry } from '../types/leaderboard.type';
@@ -12,7 +12,7 @@ interface CitizensMetadataState {
   selectedCitizen: CitizenMetadata | null;
   leaderboardData: LeaderboardEntry[] | null | undefined;
   userFeatures: CampaignDrops<AppCampaigns> | null;
-  claimableDrops: Record<LuksoCampaign, ClaimableDrop[]> | null;
+  claimableDrops: Record<LuksoCampaign, FeatureClaimableDrop[]> | null;
   shoppingCart: BasicData[];
   mintSupply: number | null;
   mintingPrice: MintingPriceData | null;
@@ -89,7 +89,7 @@ export const citizensMetadataSlice = createSlice({
     setMintingPrice: (state, action: PayloadAction<MintingPriceData | null>) => {
       state.mintingPrice = action.payload;
     },
-    setClaimableDrops: (state, action: PayloadAction<Record<Campaign, ClaimableDrop[]>>) => {
+    setClaimableDrops: (state, action: PayloadAction<Record<Campaign, FeatureClaimableDrop[]>>) => {
       state.claimableDrops = action.payload;
     },
     setShoppingCart: (state, action: PayloadAction<BasicData[]>) => {

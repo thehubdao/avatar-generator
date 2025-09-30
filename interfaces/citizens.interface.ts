@@ -2,6 +2,8 @@ import { Blockchain } from "../enums/blockchain/common.enum";
 import { Campaign, HoldingCondition, PaymentType } from "../enums/citizens/common.enum";
 import { DropType } from "../enums/lukso/common.enum";
 import { BodyPart } from "./avatar.interface";
+import { FeatureInterface } from './api.interface';
+import { RandomTier } from '../enums/common.enum';
 
 export interface CitizensCollection {
   name: string;
@@ -9,28 +11,6 @@ export interface CitizensCollection {
   campaign: Campaign;
   blockChain: Blockchain;
   active: boolean;
-}
-
-export interface ClaimableDrop {
-  holdingAddresses: {
-    contractAddress: string;
-    tokenName: string; //This is the name of the collection that the user needs to be holding
-  }[]; //If this array is not empty, means the user needs to be holding
-  id: string;
-  featureIndex: number; //Index of the feature in the campaign
-  featureType: string; //Type of the feature, e.g. "body", "face", "head", etc.
-  featureName: string; //Name of the feature in the campaign
-  description: string;
-  imageUrl: string;
-  requiredXP: number; //XP required to claim the drop
-  paymentType: PaymentType; //Type of payment required to claim the drop
-  price: number; //Price of the drop in the payment type
-  contractAddress: string;
-  holdingCondition?: HoldingCondition; //Condition to be applied to the holdingAddresses
-  owned: boolean; //true if the user has already claimed the drop
-  claimLimit: number; //Limit on the number of times the drop can be claimed
-  claimedAmount: number; //Number of times the drop has been claimed by the user
-  isClaimable: boolean; // true if the drop can be claimed by the user
 }
 
 export interface DropToClaim {
@@ -161,15 +141,30 @@ export interface CampaignWeb3Data {
 export interface CampaignData extends Record<Campaign, CampaignWeb3Data> {
 }
 
-export interface Drop {
-  balance?: number;
-  contract_address: string;
-  index: number;
-  type: string;
-  name: string;
+export interface FeatureDrop extends FeatureInterface {
+  contractAddress: string;
+  isClaimableDrop: boolean;
+  balance?: number; //Property set after type declaration
 }
 
-export interface LuksoDrop extends Drop {
+export interface FeatureClaimableDrop extends FeatureDrop {
+  holdingAddresses: {
+    contractAddress: string;
+    tokenName: string; //This is the name of the collection that the user needs to be holding
+  }[]; //If this array is not empty, means the user needs to be holding
+  description: string;
+  imageUrl: string;
+  holdingCondition?: HoldingCondition;
+  owned?: boolean;//Property set after type declaration
+  claimLimit: number;
+  claimedAmount?: number; //Property set after type declaration
+  paymentType: string;
+  requiredXP: number;
+  price: number;
+}
+
+
+export interface LuksoDrop extends FeatureDrop {
   tokenId?: string;
   typeIndex: number;
   dropType: DropType;
@@ -182,11 +177,11 @@ export interface LinkableToken {
   isLinkable: boolean;
 }
 
-export interface PolygonDrop extends Drop {
+export interface PolygonDrop extends FeatureDrop {
   tokenId: number;
 }
 
-export interface RootDrop extends Drop {
+export interface RootDrop extends FeatureDrop {
   schemaPart: string;
   collectionId: string;
   typeIndex: number;

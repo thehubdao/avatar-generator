@@ -1,6 +1,6 @@
 import { Contract, ethers, JsonRpcSigner } from 'ethers';
 import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json';
-import { ClaimableDrop, Drop, DropToClaim, LuksoAttribute, LuksoDrop, TokenId } from '../../../interfaces/citizens.interface';
+import { FeatureClaimableDrop, FeatureDrop, DropToClaim, LuksoAttribute, LuksoDrop, TokenId } from '../../../interfaces/citizens.interface';
 import { GetLuksoImageUrl, GetFollowStatuses, GetLuksoIPFSData, GetUniversalProfileData } from '../citizens.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json';
 import { CitizenMetadata } from '../../../interfaces/citizens.interface';
@@ -230,7 +230,7 @@ export async function GetCampaignUserFeatures(address: string, campaign: string)
         const dropsData: LuksoDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as LuksoDrop[];
 
         const balancePromises = dropsData.map(async drop => {
-            const contract = new Contract(drop.contract_address, WearableContractABI, PROVIDER);
+            const contract = new Contract(drop.contractAddress, WearableContractABI, PROVIDER);
             if (drop.dropType === DropType.LSP8) {
                 return contract.tokenIdsOf(address).then(tokenIds => {
                     return { ...drop, tokenId: tokenIds.length > 0 ? Number(BigInt(tokenIds[0])).toString() : undefined } as LuksoDrop;
@@ -382,7 +382,7 @@ export async function SetAvatarNewWearings(campaign: Campaign, oldAttributes: Lu
     return { success: true, value: undefined };
 }
 
-export async function CheckClaimApprove(drops: ClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
+export async function CheckClaimApprove(drops: FeatureClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
     const signaturePromises = drops.map(async (drop) => { return await SignClaimMessageFromAdmin(drop.contractAddress, walletAddress) });
 
     const signatures = await Promise.all(signaturePromises);
@@ -465,17 +465,17 @@ export async function ClaimAndSetAvatarNewWearings(campaign: Campaign, dropsToCl
 }
 
 export async function BurnDrop(from: string, campaign: string, drop: LuksoDrop): Promise<Result<void>> {
-    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
+    const dropsData: FeatureDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as FeatureDrop[];
     if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError };
 
     const dropPair = dropsData.find((dropData) => { return dropData.index === drop.index && dropData.type === drop.type });
     if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError };
 
     if (!EOA) return { success: false, errMessage: 'No EOA found', errCode: CommonErrorCode.FetchError };
-    const dropContract = new Contract(dropPair.contract_address, OldWearableContractABI, PROVIDER);
+    const dropContract = new Contract(dropPair.contractAddress, OldWearableContractABI, PROVIDER);
     const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1]);
     const tx = await (UNIVERSAL_PROFILE_CONTRACT.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
-        dropPair.contract_address,
+        dropPair.contractAddress,
         0, // amount to the fund the contract with when deploying
         burnEncondedFunction
     );
@@ -484,19 +484,19 @@ export async function BurnDrop(from: string, campaign: string, drop: LuksoDrop):
 }
 
 export async function ClaimDrop(drop: LuksoDrop, signer: JsonRpcSigner): Promise<Result<void>> {
-    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${Campaign.Creators}/drops`) as Drop[];
+    const dropsData: FeatureDrop[] = await GetCollectionDocs(`campaign/${Campaign.Creators}/drops`) as FeatureDrop[];
     if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError };
 
     const dropPair = dropsData.find((dropData) => { return dropData.index === drop.index && dropData.type === drop.type });
     if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError };
 
-    const dropContract = new Contract(dropPair.contract_address, WearableContractABI, signer);
+    const dropContract = new Contract(dropPair.contractAddress, WearableContractABI, signer);
     const tx = await dropContract.claimWearable('0x')
     await tx.wait();
     return { success: true, value: undefined };
 }
 
-export async function GetUserWearableClaimedAmount(userAddress: string, drop:ClaimableDrop): Promise<Result<number>> {
+export async function GetUserWearableClaimedAmount(userAddress: string, drop:FeatureClaimableDrop): Promise<Result<number>> {
     try {
         const wearableContract = new Contract(drop.contractAddress, WearableContractABI, PROVIDER);
         const claimedAmount = await wearableContract.getUserClaims(userAddress);

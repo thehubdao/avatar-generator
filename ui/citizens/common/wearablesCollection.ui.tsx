@@ -5,12 +5,12 @@ import { GetUserXPAndLevel } from '../../../utils/firebase.util'
 import SelectorUI from './selector.ui'
 import DropItemCard from './dropItemCard.ui'
 import SearchSVG from './SVG/searchSVG.ui'
-import { ClaimableDrop } from '../../../interfaces/citizens.interface'
+import { FeatureClaimableDrop } from '../../../interfaces/citizens.interface'
 
 interface WearablesCollectionProps {
   provider: JsonRpcProvider | null
-  claimableDrops: ClaimableDrop[]
-  handleClaim: (drop: ClaimableDrop) => Promise<boolean>
+  claimableDrops: FeatureClaimableDrop[]
+  handleClaim: (drop: FeatureClaimableDrop) => Promise<boolean>
 }
 
 export default function WearablesCollection({ 
@@ -29,7 +29,7 @@ export default function WearablesCollection({
 
   const [searchTerm, setSearchTerm] = useState<string>('');
 
-  const handleClaimWithPopup = async (drop: ClaimableDrop) => {
+  const handleClaimWithPopup = async (drop: FeatureClaimableDrop) => {
     setIsPopupOpen(true);
      await handleClaim(drop);
     setIsPopupOpen(false);

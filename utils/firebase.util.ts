@@ -34,7 +34,7 @@ import { deleteDoc, doc, getDoc, increment, orderBy, Timestamp } from 'firebase/
 import jwt from 'jsonwebtoken';
 import { GetFollowerCounts } from "./web3/citizens.util";
 import { XPReward } from "../constants/lukso/xp.constant";
-import { ClaimableDrop } from "../interfaces/citizens.interface";
+import { FeatureClaimableDrop } from "../interfaces/citizens.interface";
 import { LeaderboardEntry } from "../types/leaderboard.type";
 import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/lukso/contract.util[deprecated]";
 import { AVATAR_DOWNLOADED_STATUS, AVATAR_STATUS } from "../constants/firebase.constant";
@@ -1189,13 +1189,18 @@ function GenerateLoginMessage(xpGained: number, streakBonusXP: number, levelInfo
   return message;
 }
 
-export async function GetClaimableDrops(campaign: Campaign): Promise<Result<ClaimableDrop[]>> {
+export async function GetClaimableDrops(campaign: Campaign): Promise<Result<FeatureClaimableDrop[]>> {
   try {
     const db = await FirebaseUtil.Instance().DB();
-    const dropsCollection = collection(db, `campaign/${campaign}/claimableDrops`);
+    // Now reads from unified features collection with isClaimableDrop filter
+    const featuresPath = `campaign/${campaign}/features`;
+    const dropsQuery = query(
+      collection(db, featuresPath),
+      where('isClaimableDrop', '==', true)
+    );
 
-    const querySnapshot = await getDocs(dropsCollection);
-    return { success: true, value: querySnapshot.docs.map(doc => doc.data() as ClaimableDrop) };
+    const querySnapshot = await getDocs(dropsQuery);
+    return { success: true, value: querySnapshot.docs.map(doc => doc.data() as FeatureClaimableDrop) };
   } catch (error) {
     void LogError(Module.FirebaseUtil, `Error fetching claimable drops: ${error}`);
     return { success: false, errMessage: "Error fetching claimable drops", errCode: CommonErrorCode.FetchError };
@@ -1226,8 +1231,8 @@ export async function GetDropsContractAddresses(): Promise<string[]> {
     const contractAddressesPromise = vrmTypes.map(async (vrmType) => {
       const dropsData = await GetCollectionDocs(`campaign/${vrmType}/drops`);
       const filteredAddresses = dropsData
-        .filter(drop => drop.contract_address)
-        .map(drop => drop.contract_address);
+        .filter(drop => drop.contractAddress)
+        .map(drop => drop.contractAddress);
       return filteredAddresses;
     });
 

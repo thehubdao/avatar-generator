@@ -3,7 +3,7 @@ import AvatarContractAbi from '../../../constants/abi/AvatarContractABI.json'
 import ProxyContractAbi from '../../../constants/abi/AvatarProxyContractABI.json'
 import WerableContractAbi from '../../../constants/abi/WearableContractABI.json'
 import { ERC725, ERC725JSONSchemaKeyType } from '@erc725/erc725.js';
-import { CampaignData, Drop, TokenId, CitizenMetadata, ClaimableDrop } from '../../../interfaces/citizens.interface';
+import { CampaignData, FeatureDrop, TokenId, CitizenMetadata, FeatureClaimableDrop } from '../../../interfaces/citizens.interface';
 import { GetCollectionDocs } from '../../firebase.util';
 import noMetadataTokens from '../../../constants/lukso/NoMetadataTokens.json'
 import UniversalProfileABI from '../../../constants/abi/UniversalProfileABI.json'
@@ -280,15 +280,15 @@ export async function GetTokensOf(contractAddress: string, address: string): Pro
 }
 
 
-export async function GetCampaignUserFeatures(address: string, campaign: string): Promise<Result<Drop[]>> {
+export async function GetCampaignUserFeatures(address: string, campaign: string): Promise<Result<FeatureDrop[]>> {
     try {
-        const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
-        const features: Drop[] = []
+        const dropsData: FeatureDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as FeatureDrop[]
+        const features: FeatureDrop[] = []
         for (let i = 0; i < dropsData.length; i++) {
         const drop = dropsData[i];
-        const { contract_address } = drop
+        const { contractAddress } = drop
 
-        const contract = new Contract(contract_address, WerableContractAbi, provider)
+        const contract = new Contract(contractAddress, WerableContractAbi, provider)
         const tokenBalance = await contract.balanceOf(address)
         if (Number(tokenBalance) > 0) {
             drop.balance = Number(tokenBalance) // Asigna el balance al campo opcional
@@ -346,16 +346,16 @@ export async function SetTokenMetadata(campaign: Campaign, tokenId: string, meta
 }
 
 export async function BurnDrop(from: string, campaign: string, drop: BodyPart): Promise<Result<void>> {
-    const dropsData: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[]
+    const dropsData: FeatureDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as FeatureDrop[]
     if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError }
 
     const dropPair = dropsData.find((dropData) => { return dropData.name === drop.name })
     if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError }
 
-    const dropContract = new Contract(dropPair.contract_address, WerableContractAbi, provider)
+    const dropContract = new Contract(dropPair.contractAddress, WerableContractAbi, provider)
     const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1])
     const tx = await (universalProfile.connect(EOA as any) as Contract).execute(OPERATION_CALL, // operation type = CREATE
-        dropPair.contract_address,
+        dropPair.contractAddress,
         0, // amount to the fund the contract with when deploying
         burnEncondedFunction
     )
@@ -387,7 +387,7 @@ export async function GetWearablesHoldings(address: string, contractAddresses: s
 }
 
 
-export async function CheckClaimStatus(drop: ClaimableDrop, provider: JsonRpcProvider, address: string): Promise<Result<boolean>> {
+export async function CheckClaimStatus(drop: FeatureClaimableDrop, provider: JsonRpcProvider, address: string): Promise<Result<boolean>> {
     try {
         const signer = await provider.getSigner();
         const contract = new ethers.Contract(drop.contractAddress, ClaimableDropABI, signer);
@@ -401,7 +401,7 @@ export async function CheckClaimStatus(drop: ClaimableDrop, provider: JsonRpcPro
 }
 
 export async function ClaimDrop(
-    drop: ClaimableDrop,
+    drop: FeatureClaimableDrop,
     provider: JsonRpcProvider,
     userAddress: string
 ): Promise<Result<boolean>> {

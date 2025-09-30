@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { setCheckoutMode, setMarketplaceMode, setShoppingCart } from "../../../store/citizensMetadataSlice";
 import { useAppSelector, useAppDispatch } from "../../../store/hooks";
-import { ClaimableDrop } from "../../../interfaces/citizens.interface";
+import { FeatureClaimableDrop } from "../../../interfaces/citizens.interface";
 import PlusSVG from "../common/SVG/plusSVG.ui";
 import Image from "next/image";
 import BlockSVG from "../common/SVG/blockSVG.ui";
@@ -25,7 +25,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
 
   const { showSnackbar } = useSnackbar();
 
-  const [shoppingCartItems, setShoppingCartItems] = useState<ClaimableDrop[]>([]);
+  const [shoppingCartItems, setShoppingCartItems] = useState<FeatureClaimableDrop[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
@@ -81,8 +81,8 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
     // Filter the claimable drops based on the shopping cart, excluding blocked items
     const items = allDrops.filter(drop =>
       shoppingCart.some(cartItem =>
-        cartItem.detail === drop.featureType &&
-        cartItem.val === drop.featureName
+        cartItem.detail === drop.type &&
+        cartItem.val === drop.name
       ) && (drop.requiredXP - (userXP?.xp || 0)) <= 0
     );
 
@@ -135,18 +135,18 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
                             {/* DESCRIPTION */}
                             <div className="flex items-center gap-2">
                               <div className="rounded-xl overflow-hidden">
-                                <Image src={item.imageUrl} alt={item.featureName} width={50} height={50} />
+                                <Image src={item.imageUrl} alt={item.name} width={50} height={50} />
                               </div>
                               <div>
-                                <div className="font-semibold text-xs">{item.featureName}</div>
-                                <div className="text-gray-400 text-xs">{item.featureType}</div>
+                                <div className="font-semibold text-xs">{item.name}</div>
+                                <div className="text-gray-400 text-xs">{item.type}</div>
                               </div>
                             </div>
                             {/* PRICE */}
                             {xpRequired <= 0 ?
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-xl text-citizens-gray">{item.price > 0 ? (`${item.price} ${item.paymentType}`) : "Free"}</span>
-                                <div className="rotate-45 cursor-pointer" onClick={() => handleRemove(item.featureName || idx, item.featureType)}>
+                                <span className="font-bold text-xl text-citizens-gray">{item.price && item.price > 0 ? (`${item.price} ${item.paymentType}`) : "Free"}</span>
+                                <div className="rotate-45 cursor-pointer" onClick={() => handleRemove(item.name || idx, item.type)}>
                                   <PlusSVG className="fill-citizens-red" />
                                 </div>
                               </div>
@@ -158,7 +158,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
                                     <BlockSVG />
                                   </div>
                                 </div>
-                                <div className="rotate-45 cursor-pointer" onClick={() => handleRemove(item.featureName || idx, item.featureType)}>
+                                <div className="rotate-45 cursor-pointer" onClick={() => handleRemove(item.name || idx, item.type)}>
                                   <PlusSVG className="fill-citizens-red" />
                                 </div>
                               </div>

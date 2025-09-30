@@ -189,7 +189,7 @@ export async function GetPolygonUserFeatureAssets(address: string, campaign: Pol
     };
 
     const dropsCheckPromiseList = polygonDropsResult.value.map(async (drop) => {
-        const wearableContract = new Contract(drop.contract_address, POLYGON_WEARABLE_CONTRACT_ABI, PROVIDER); //We use avatar contract ABI as we only need the balance function from ERC721
+        const wearableContract = new Contract(drop.contractAddress, POLYGON_WEARABLE_CONTRACT_ABI, PROVIDER); //We use avatar contract ABI as we only need the balance function from ERC721
         const tokenIds = await wearableContract.getTokenIdsByOwner(address);
 
         if (tokenIds.length === 0) return undefined;
@@ -211,8 +211,8 @@ export async function GetPolygonUserFeatureAssets(address: string, campaign: Pol
 export async function SetPolygonNewCombination(tokenId: string, uri: string, oldDrops: PolygonDrop[], newDrops: PolygonDrop[]): Promise<Result<boolean>> {
     try {
         const avatarContract = new Contract(POLYGON_AVATAR_CONTRACT_ADDRESS, POLYGON_CONTRACT_ABI, SIGNER);
-        const wearablesToUnequip: { wearableContract: string; wearableTokenId: number; }[] = oldDrops.map((drop) => ({ wearableContract: drop.contract_address, wearableTokenId: Number(drop.tokenId) }));
-        const wearablesToEquip: { wearableContract: string; wearableTokenId: number; }[] = newDrops.map((drop) => ({ wearableContract: drop.contract_address, wearableTokenId: Number(drop.tokenId) }));
+        const wearablesToUnequip: { wearableContract: string; wearableTokenId: number; }[] = oldDrops.map((drop) => ({ wearableContract: drop.contractAddress, wearableTokenId: Number(drop.tokenId) }));
+        const wearablesToEquip: { wearableContract: string; wearableTokenId: number; }[] = newDrops.map((drop) => ({ wearableContract: drop.contractAddress, wearableTokenId: Number(drop.tokenId) }));
 
         // Estimate gas first
         const gasEstimate = await avatarContract.setAvatarNewWearings.estimateGas(tokenId, wearablesToUnequip, wearablesToEquip, uri);
