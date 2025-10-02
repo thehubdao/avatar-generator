@@ -1,5 +1,6 @@
 import './../styles/globals.css'
 import { Work_Sans, Poppins } from '@next/font/google'
+import { useEffect } from 'react'
 import Humane from '@next/font/local'
 import MonumentFont from '@next/font/local'
 import FeaturesIcons from '@next/font/local'
@@ -9,7 +10,6 @@ import "toastify-js/src/toastify.css"
 import { Provider } from 'react-redux'
 import store from '../store/store'
 import FutureVerseProvider from '../components/providers/FutureVerseProvider'
-
 
 const workSans = Work_Sans({ subsets: ['latin'], display: 'block' })
 const poppins = Poppins({
@@ -31,6 +31,7 @@ const featuresIcons = FeaturesIcons({
 })
 
 export default function App({ Component, pageProps }: AppProps) {
+
     return (
         <>
             <style jsx global>{`
