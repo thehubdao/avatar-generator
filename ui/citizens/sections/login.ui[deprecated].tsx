@@ -3,7 +3,6 @@ import { CitizensCollection } from "../../../interfaces/citizens.interface";
 import ConnectWeb3Button from "../../../components/web3/connectWeb3.component";
 // import CampaignList from "../login/campaignList.ui";
 import Link from "next/link";
-import { BackedByLinks, CardSize } from "../../../enums/citizens/common.enum";
 import SocialButtons from "../common/socialButtons.ui";
 import PrivacyPolicySVG from "../common/SVG/privacyPolicySVG.ui";
 import TermsOfServicesSVG from "../common/SVG/termsOfServicesSVG.ui";
@@ -13,7 +12,9 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import { Autoplay } from "swiper/modules";
 import CampaignCard from "../common/campaignCard.ui";
-import { Campaign } from "../../../enums/citizens/common.enum";
+import { Campaign } from "../../../types/citizens.type";
+import React from "react";
+import { BackedByLinks, CardSize } from "../../../enums/citizens/common.enum";
 
 const BACKEDBY = [
   {

@@ -11,7 +11,7 @@ import { BodyPart } from '../../../interfaces/avatar.interface';
 import ClaimableDropABI from '../../../constants/abi/ClaimableDropABI.json'
 import { LogError } from '../../common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
-import { Campaign, LuksoCampaign } from '../../../enums/citizens/common.enum';
+import { Campaign, LuksoCampaign } from '../../../types/citizens.type';
 import { Result } from '../../../types/common.type';
 import { CampaignDrops } from '../../../types/citizens.type';
 
@@ -310,7 +310,7 @@ export async function GetUserFeatures(address: string): Promise<Result<CampaignD
     for (const campaign of Object.keys(campaignWeb3Data)) {
         const campaignUserFeatures = await GetCampaignUserFeatures(address, campaign)
         if (!campaignUserFeatures.success) continue
-        features[campaign as keyof typeof campaignWeb3Data] = campaignUserFeatures.value
+        features[campaign as any] = campaignUserFeatures.value as any
     }
     return { success: true, value: features }
 }

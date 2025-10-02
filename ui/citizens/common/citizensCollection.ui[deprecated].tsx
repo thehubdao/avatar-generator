@@ -6,8 +6,10 @@ import { Module } from "../../../enums/common.enum";
 import SelectorUI from "./selector.ui";
 import CampaignCard from "./campaignCard.ui";
 import { CAMPAIGN_LABELS } from "../../../constants/labels.constant";
-import { Campaign, CardSize } from "../../../enums/citizens/common.enum";
+import { Campaign } from "../../../types/citizens.type";
 import { CollectionType } from "../../../interfaces/avatar.interface";
+import React from "react";
+import { CardSize } from "../../../enums/citizens/common.enum";
 
 interface CitizensCollectionProps {
   tokenList?: CitizenMetadata[];
