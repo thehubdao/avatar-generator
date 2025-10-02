@@ -56,18 +56,22 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
 
   async function handleCheckout() {
     if (!onCheckOut) {
-      showSnackbar(<p>Ups. We can´t to checkout, try later.</p>);
+      showSnackbar(<p>Ups. We can't checkout right now, please try again later.</p>);
       return;
     }
     dispatch(setCheckoutMode(true));
     const isSuccess = await onCheckOut();
+    dispatch(setCheckoutMode(false));
+    
     if (isSuccess) {
-      handleCleanCart();
+      // Clear cart directly without triggering reset functionality
+      dispatch(setShoppingCart([]));
+      // Exit marketplace mode and return to homebase
+      dispatch(setMarketplaceMode(false));
       showSnackbar(<p>Your purchase was successful!</p>);
     } else {
-      showSnackbar(<p>Ups. We can´t to checkout, try later.</p>);
+      showSnackbar(<p>Ups. We can't process your checkout right now, please try again later.</p>);
     }
-    dispatch(setCheckoutMode(false));
   }
 
   function handleOpen() {
