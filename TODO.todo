@@ -66,6 +66,7 @@ MARKETPLACE:
         ☐ Don't show owned wearables in marketplace
         ☐ Remove items for cart when user removes them from edit mode feature selection
         ☐ Load cart items (if these exist) when charge the avatar editor
+        ☐ Remove isClaimable from dummies and old LSP7 drops on DB once marketplace feature is ready
 
     TO CONSIDER:
         ☐ Add feature to save cart for later
