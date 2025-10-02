@@ -19,16 +19,18 @@ import { Module } from "../../enums/common.enum";
 import Modal from "./common/modal.ui";
 import FlashUI from "./common/flash.ui";
 import ShoppingCartUI from "./backpack/shoppingCart.ui";
+import { FeatureClaimableDrop } from "../../interfaces/citizens.interface";
+import { AnyFeature } from "../../types/citizens.type";
 
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
 	exportData: ExportInterface;
-	featureList: FeatureInterface[];
-	marketplaceFeatureList?: FeatureInterface[];
+	featureList: AnyFeature[];
+	marketplaceFeatureList?: FeatureClaimableDrop[];
 	isReady: boolean;
 	handleReady: () => Promise<void>;
 	handleExport: (type?: ModelExtension) => Promise<boolean>;
-	handleOptionChange: (id, path, name, category) => Promise<void>;
+	handleOptionChange: (id: string, path: string, name: string, category: string) => Promise<void>;
 	handleSaveCombination: () => Promise<boolean>;
 	handleBuying: () => Promise<boolean>;
 	handleMinting: () => Promise<MintUIResult>;
@@ -49,7 +51,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	const didSavingMode = useAppSelector(state => state.citizensMetadata.savingMode);
 
 	// Edit mode local State
-	const [optionList, setOptionList] = useState<FeatureInterface[]>();
+	const [optionList, setOptionList] = useState<AnyFeature[]>();
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
 	const [selectedOption, setSelectedOption] = useState<BasicData>();
 	const [loadingTextIndex, setLoadingTextIndex] = useState(0);
@@ -110,6 +112,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 				detail: selectedCategory
 			}
 		];
+		console.log(updatedCart)
 		dispatch(setShoppingCart(updatedCart));
 	}
 
@@ -138,7 +141,6 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	function updateOptionList(value: string) {
 		if (didEditMode) {
 			const filteredList = FilterList(featureList, 'type', value);
-			filteredList && filteredList.forEach(el => el.price = undefined); // remove price in edit mode
 			setOptionList(filteredList);
 		} else if (didMarketplaceMode && marketplaceFeatureList) {
 			const filteredList = FilterList(marketplaceFeatureList, 'type', value);

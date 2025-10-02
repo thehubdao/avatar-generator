@@ -13,12 +13,13 @@ import {
     fromWeb3JsTransaction,
     toWeb3JsTransaction
 } from '@metaplex-foundation/umi-web3js-adapters';
-import { Campaign, CandyMachineGroup, SolanaCampaign } from '../../../enums/citizens/common.enum';
+import { Campaign, SolanaCampaign } from '../../../types/citizens.type';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { findAssetSignerPda } from '@metaplex-foundation/mpl-core';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { GetCollectionDocs } from '../../firebase.util';
 import { GetSolanaSetNewCombinationSerializedTransaction } from '../../api.util';
+import { CandyMachineGroup } from '../../../enums/citizens/common.enum';
 
 
 export async function InitializeUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
@@ -298,7 +299,7 @@ export async function GetSolanaUserFeatureAssets(walletAddress: string, campaign
 
         return {
             success: true,
-            value: { [campaign]: filteredUserFeaturesAssets }
+            value: { [campaign]: filteredUserFeaturesAssets } as CampaignDrops<SolanaCampaign>
         };
     } catch (e) {
         const err = e as Error

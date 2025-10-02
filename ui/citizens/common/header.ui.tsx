@@ -5,11 +5,12 @@ import LogoTheHub from "./SVG/logoTheHubSVG.ui";
 import Image from "next/image";
 import Button from "./button.ui";
 import SocialButtons from "./socialButtons.ui";
-import { Campaign, CitizensPageLocation } from "../../../enums/citizens/common.enum";
 import { GoToPage } from "../../../utils/router.util";
 import { setEditMode } from "../../../store/citizensMetadataSlice";
 import AboutButton from "./aboutButton.ui";
 import AboutModal from "./aboutModal.ui";
+import { Campaign } from "../../../types/citizens.type";
+import { CitizensPageLocation } from "../../../enums/citizens/common.enum";
 
 interface HeaderUIProps {
   onLogin?: () => void;

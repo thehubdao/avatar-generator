@@ -8,7 +8,8 @@ import { CommonErrorCode, Module } from "../../enums/common.enum";
 import { LogError } from "../common.util";
 import { IPFS_GATEWAY_API_KEY, IPFS_GATEWAY_URL, LSP26_ABI, LSP26_ADDRESS } from "../../constants/citizens.constant";
 import { StorageLocation } from "../../enums/firebase.enum";
-import { GetCollectionDocs, FirebaseUtil } from "../firebase.util";
+import { FirebaseUtil } from "../firebase.util";
+import { FeatureKind } from "../../enums/citizens/common.enum";
 
 export async function GetLuksoIPFSData(cid: string): Promise<Result<LuksoMetadata>> {
   try {
@@ -216,7 +217,7 @@ export async function GetCampaignDrops<T>(campaign: string): Promise<Result<T[]>
     
     const dropsQuery = query(
       collection(db, featuresPath),
-      where('isDrop', '==', true)
+      where('kind', 'in', [FeatureKind.Drop, FeatureKind.ClaimableDrop]),
     );
     
     const snapshot = await getDocs(dropsQuery);

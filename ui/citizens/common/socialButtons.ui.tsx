@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { TheHubSocialLinks } from "../../../enums/citizens/common.enum";
 import SocialXSVG from "./SVG/socialXSVG.ui";
 import SocialInstagramSVG from "./SVG/socialInstagramSVG.ui";
 import SocialDiscordSVG from "./SVG/socialDiscordSVG.ui";
 import SocialTelegramSVG from "./SVG/socialTelegramSVG.ui";
 import SocialCommonGroundSVG from "./SVG/socialCommonGroundSVG.ui";
+import { TheHubSocialLinks } from "../../../enums/citizens/common.enum";
 
 interface SocialButtonsProps {
   className?: string;

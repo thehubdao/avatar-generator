@@ -1,5 +1,6 @@
 import {DefaultApiResponse} from "../server/enums/api.enum";
 import {RandomTier} from "../enums/common.enum";
+import { FeatureKind } from "../enums/citizens/common.enum";
 
 export interface ApiResponse<T> {
   success: boolean,
@@ -16,10 +17,12 @@ export interface AssetInterface {
 }
 
 export interface FeatureInterface extends AssetInterface {
+  kind: FeatureKind;
   id: string;
   tier: RandomTier;
   isDrop?: boolean; // true if this feature has onchain representation
   tag?: string;
+
 }
 
 export interface AccessoryInterface extends AssetInterface {

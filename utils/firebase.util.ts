@@ -40,6 +40,7 @@ import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/lukso/contract
 import { AVATAR_DOWNLOADED_STATUS, AVATAR_STATUS } from "../constants/firebase.constant";
 import { Blockchain } from "../enums/blockchain/common.enum";
 import { Campaign } from "../types/citizens.type";
+import { FeatureKind } from "../enums/citizens/common.enum";
 
 export type LogInStructure = {
   user: string;
@@ -1195,7 +1196,7 @@ export async function GetClaimableDrops(campaign: Campaign): Promise<Result<Feat
     const featuresPath = `campaign/${campaign}/features`;
     const dropsQuery = query(
       collection(db, featuresPath),
-      where('isClaimableDrop', '==', true)
+      where('kind', '==', FeatureKind.ClaimableDrop)
     );
 
     const querySnapshot = await getDocs(dropsQuery);

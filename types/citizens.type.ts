@@ -1,4 +1,6 @@
+import { FeatureKind } from "../enums/citizens/common.enum";
 import { FeatureInterface } from "../interfaces/api.interface";
+import { FeatureClaimableDrop, FeatureDrop } from "../interfaces/citizens.interface";
 
 export const Campaign = {
   Citizens: "vrm_female",
@@ -35,4 +37,9 @@ export const PolygonCampaign = {
 
 export type PolygonCampaign = typeof PolygonCampaign[keyof typeof PolygonCampaign]
 
-export type CampaignDrops<T extends Campaign> = Record<T, FeatureInterface[]>;
+export type AnyFeature =
+  | (FeatureInterface & { kind: FeatureKind.Feature })
+  | (FeatureDrop & { kind: FeatureKind.Drop })
+  | (FeatureClaimableDrop & { kind: FeatureKind.ClaimableDrop });
+
+export type CampaignDrops<T extends Campaign> = Record<T, AnyFeature[]>;

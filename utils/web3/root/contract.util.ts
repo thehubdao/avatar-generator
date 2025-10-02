@@ -6,8 +6,8 @@ import { LogError } from '../../common.util';
 import '@therootnetwork/api-types';
 import { GetAssetData, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
-import { Campaign, CampaignBaseCombination, RootCampaign } from '../../../enums/citizens/common.enum';
-import { CitizenMetadata, LinkableToken, MintingPriceData, RootDrop, RootMetadata } from '../../../interfaces/citizens.interface';
+import { Campaign, RootCampaign } from '../../../types/citizens.type';
+import { CitizenMetadata, FeatureRootDrop, LinkableToken, MintingPriceData, RootMetadata } from '../../../interfaces/citizens.interface';
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
@@ -19,6 +19,7 @@ import { hexToU8a } from '@polkadot/util';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { AssetRegistryAction, Web3ErrorCode } from '../../../enums/root/common.enum';
+import { CampaignBaseCombination } from '../../../enums/citizens/common.enum';
 
 export function GetAdminSigner(): KeyringPair {
   const keyring = new Keyring({ type: "ethereum" });
@@ -228,15 +229,15 @@ export async function GetRootMintingPrice(): Promise<Result<MintingPriceData>> {
 
 export async function GetRootUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {
   try {
-    const rootDrops = await GetCampaignDrops<RootDrop>(campaign);
-    if (!rootDrops.success) return rootDrops;
+    const FeatureRootDrops = await GetCampaignDrops<FeatureRootDrop>(campaign);
+    if (!FeatureRootDrops.success) return FeatureRootDrops;
 
-    if (rootDrops.value.length === 0) return {
+    if (FeatureRootDrops.value.length === 0) return {
       success: false,
       errMessage: "No drops found",
       errCode: CommonErrorCode.GetNoData
     };
-    const dropsCheckPromiseList = rootDrops.value.map(async (drop) => {
+    const dropsCheckPromiseList = FeatureRootDrops.value.map(async (drop) => {
       const [collectionId, tokenId] = drop.collectionId.split(':');
       const balance = await SftBalance(address, collectionId, tokenId);
       const linkableTokenIdsResult = await GetSFTAssetLinks(collectionId, tokenId, address); //Get the linkable token ids for the drop
@@ -256,7 +257,7 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
 
     return {
       success: true,
-      value: { [campaign]: filteredDrops }
+      value: { [campaign]: filteredDrops } as CampaignDrops<RootCampaign>
     };
   } catch (e) {
     const err = e as Error;
@@ -269,7 +270,7 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
   }
 }
 
-export async function EquipFeaturesOperations(parent_collection_id: string, parent_token_id: string, newAttributes: RootDrop[]): Promise<Result<Operation[]>> {
+export async function EquipFeaturesOperations(parent_collection_id: string, parent_token_id: string, newAttributes: FeatureRootDrop[]): Promise<Result<Operation[]>> {
   const operations: Operation[] = [];
 
   for (const attribute of newAttributes) {
@@ -282,7 +283,7 @@ export async function EquipFeaturesOperations(parent_collection_id: string, pare
   return { success: true, value: operations };
 }
 
-export async function UnequipFeaturesOperations(parent_collection_id: string, parent_token_id: string, oldAttributes: RootDrop[]): Promise<Result<Operation[]>> {
+export async function UnequipFeaturesOperations(parent_collection_id: string, parent_token_id: string, oldAttributes: FeatureRootDrop[]): Promise<Result<Operation[]>> {
   const operations: Operation[] = [];
 
   for (const attribute of oldAttributes) {
@@ -300,7 +301,7 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
   return { success: true, value: operations };
 }
 
-export async function SetRootNewCombination(parent_tokenId: string, newAttributes: RootDrop[], oldAttributes: RootDrop[]): Promise<Result<boolean>> {
+export async function SetRootNewCombination(parent_tokenId: string, newAttributes: FeatureRootDrop[], oldAttributes: FeatureRootDrop[]): Promise<Result<boolean>> {
   try {
     const EOA_ADDRESS = (await SIGNER.getAddress()) as `0x${string}`;
 

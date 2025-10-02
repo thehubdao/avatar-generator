@@ -93,7 +93,7 @@ export interface RootMetadata {
   campaign: Campaign;
   collectionId: string;
   tokenId: string;
-  attributes: RootDrop[];
+  attributes: FeatureRootDrop[];
 }
 
 export interface PolygonTrait {
@@ -165,7 +165,7 @@ export interface FeatureClaimableDrop extends FeatureDrop {
 }
 
 
-export interface LuksoDrop extends FeatureDrop {
+export interface FeatureLuksoDrop extends FeatureDrop {
   tokenId?: string;
   typeIndex: number;
   dropType: DropType;
@@ -178,11 +178,14 @@ export interface LinkableToken {
   isLinkable: boolean;
 }
 
-export interface PolygonDrop extends FeatureDrop {
+export interface FeatureSolanaDrop extends FeatureDrop {
+}
+
+export interface FeaturePolygonDrop extends FeatureDrop {
   tokenId: number;
 }
 
-export interface RootDrop extends FeatureDrop {
+export interface FeatureRootDrop extends FeatureDrop {
   schemaPart: string;
   collectionId: string;
   typeIndex: number;

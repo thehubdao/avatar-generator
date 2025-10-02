@@ -4,19 +4,19 @@ import { Blockchain, LoginLibrary } from '../enums/blockchain/common.enum';
 import { resetCitizensMetadata, setCampaignParameters, setCitizensMetadata, setClaimableDrops, setLeaderboardData, setMintingMode, setMintingPrice, setMintSupply, setNotificationMode, setSelectedCampaign, setSelectedCitizen, setUserFeatures } from '../store/citizensMetadataSlice';
 import { GetCampaignsTokensMetadata, GetFullLeaderboardData, GetLuksoUserFeatures } from '../utils/web3/lukso/contract.util';
 import { GetCampaignCitizensMetadata, GetCollectionSupply, GetMintingPrice, GetSolanaUserFeatureAssets, InitializeUmi } from '../utils/web3/solana/contract.util';
-import { CitizenMetadata, FeatureClaimableDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
+import { CitizenMetadata, FeatureClaimableDrop, FeatureLuksoDrop, FeaturePolygonDrop, FeatureRootDrop, FeatureSolanaDrop, FollowUserData, MintingData } from '../interfaces/citizens.interface';
 import { LogError, RemoveUndefinedProperties } from '../utils/common.util';
 import { CampaignParameterName, Module } from '../enums/common.enum';
 import { useDispatch } from 'react-redux';
 import { Result } from '../types/common.type';
 import { GetFollowerCounts, GetUniversalProfileData } from '../utils/web3/citizens.util';
 import { BlockchainToWalletChainType, GetSdkConnection, SetSdkConnection, GetSelectedCampaign, SetSelectedCampaign } from '../utils/web3/web3.util';
-import { Campaign, LuksoCampaign, SolanaCampaign, CampaignBaseCombination, RootCampaign, PolygonCampaign } from '../enums/citizens/common.enum';
+import { CampaignBaseCombination } from '../enums/citizens/common.enum';
 import { connect, disconnect, setIsHolder } from '../store/citizensAuthSlice';
 import { useAppSelector } from '../store/hooks';
 import { GetParameter, TrackCampaignUsage, TrackDailyActiveUser } from '../utils/firebase.util';
 import { CampaignParameters } from '../interfaces/common.interface';
-import { CampaignDrops, AppCampaigns } from '../types/citizens.type';
+import { Campaign, LuksoCampaign, SolanaCampaign, RootCampaign, PolygonCampaign, CampaignDrops } from '../types/citizens.type';
 import { BrowserProvider } from 'ethers';
 import { useAuthUi } from '@futureverse/auth-ui';
 import { useAuth, useFutureverseSigner } from '@futureverse/auth-react';
@@ -69,18 +69,18 @@ export function useBlockchainWallet() {
       // Track campaign usage and daily active user in parallel
       const dailyActivePromise = TrackDailyActiveUser();
       const campaignPromise = campaign ? TrackCampaignUsage(campaign.toLowerCase()) : Promise.resolve({ success: true, value: true });
-      
+
       const [dailyActiveResult, campaignResult] = await Promise.all([
-        dailyActivePromise, 
+        dailyActivePromise,
         campaignPromise
       ]);
-      
+
       if (!dailyActiveResult.success) {
         LogError(Module.Citizens, 'Error tracking daily active user:', dailyActiveResult.errMessage);
       }
-      
-      if (campaign && !campaignResult.success) {
-        LogError(Module.Citizens, 'Error tracking campaign usage:', (campaignResult as any).errMessage);
+
+      if (campaign && campaignResult.success == false && 'errMessage' in campaignResult) {
+        LogError(Module.Citizens, 'Error tracking campaign usage:', campaignResult.errMessage);
       }
     } catch (error) {
       LogError(Module.Citizens, 'Error tracking campaign and session statistics:', error);
@@ -232,133 +232,150 @@ export function useBlockchainWallet() {
       return;
     }
 
-    if (blockchainType === Blockchain.Lukso) {
-      const luksoCitizensMetadataPromise = getLuksoTokensMetadataPromise(walletAddress); // Get the citizens Lukso metadata
-      const luksoUserFeaturesPromise = getLuksoUserFeaturesPromise(walletAddress); // Get the user features
-      const luksoLeaderboardDataPromise = getLuksoLeaderboardDataPromise(walletAddress); // Get the leaderboard data
-      const luksoClaimableDropsPromise = getClaimableDropsPromise(walletAddress); // Get the claimable drops
-      const [luksoCitizensMetadata, luksoUserFeatures, luksoLeaderboardData, luksoClaimableDrops] = await Promise.all([luksoCitizensMetadataPromise, luksoUserFeaturesPromise, luksoLeaderboardDataPromise, luksoClaimableDropsPromise]);
+      if (blockchainType === Blockchain.Lukso) {
+        const luksoCitizensMetadataPromise = getLuksoTokensMetadataPromise(walletAddress); // Get the citizens Lukso metadata
+        const luksoUserFeaturesPromise = getLuksoUserFeaturesPromise(walletAddress); // Get the user features
+        const luksoLeaderboardDataPromise = getLuksoLeaderboardDataPromise(walletAddress); // Get the leaderboard data
+        const luksoClaimableDropsPromise = getClaimableDropsPromise(walletAddress); // Get the claimable drops
+        const [luksoCitizensMetadata, luksoUserFeatures, luksoLeaderboardData, luksoClaimableDrops] = await Promise.all([luksoCitizensMetadataPromise, luksoUserFeaturesPromise, luksoLeaderboardDataPromise, luksoClaimableDropsPromise]);
 
-      //Lukso Citizens Metadata dispatch
-      if (luksoCitizensMetadata.success) {
-        const citizen = luksoCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
+        //Lukso Citizens Metadata dispatch
+        if (luksoCitizensMetadata.success) {
+          const citizen = luksoCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
 
-        dispatch(setCitizensMetadata(luksoCitizensMetadata.value));
+          dispatch(setCitizensMetadata(luksoCitizensMetadata.value));
 
-        if (selectedCampaign === null) { //This case is handled when user refresh the page and is still logged in
-          const userCampaigns = [...new Set(luksoCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
+          if (selectedCampaign === null) { //This case is handled when user refresh the page and is still logged in
+            const userCampaigns = [...new Set(luksoCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
 
-          if (userCampaigns.length > 0) {
-            dispatch(setSelectedCampaign(userCampaigns[0]));
-            dispatch(setSelectedCitizen(luksoCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
+            if (userCampaigns.length > 0) {
+              dispatch(setSelectedCampaign(userCampaigns[0]));
+              dispatch(setSelectedCitizen(luksoCitizensMetadata.value[0])); // Set the selected citizen to the first one in the list
 
-            dispatch(setMintingMode(false));
-          } else {
+              dispatch(setMintingMode(false));
+            } else {
+              // REDIRECT FLOW
+              dispatch(setNotificationMode(true));
+            }
+          } else if (!citizen) {
             // REDIRECT FLOW
             dispatch(setNotificationMode(true));
-          }
-        } else if (!citizen) {
-          // REDIRECT FLOW
-          dispatch(setNotificationMode(true));
-        } else {
-          dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
-          
-          dispatch(setMintingMode(false));
-        }
-      } else { // If error, log the error, citizens metadata and selected combination will be null
-        LogError(Module.Citizens, luksoCitizensMetadata.errMessage, luksoCitizensMetadata.errCode);
-      }
+          } else {
+            dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
 
-      //Lukso User Features dispatch
-      if (luksoUserFeatures.success) {
-        const luksoFeatures = luksoUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the lukso features to the AppCampaigns type, this depends on the wearables got for current campaign
-        dispatch(setUserFeatures(luksoFeatures));
-      } else {
-        LogError(Module.Citizens, luksoUserFeatures.errMessage, luksoUserFeatures.errCode);
-      }
-
-      //Lukso Leaderboard Data dispatch
-      if (luksoLeaderboardData.success) {
-        dispatch(setLeaderboardData(luksoLeaderboardData.value));
-      } else {
-        LogError(Module.Citizens, luksoLeaderboardData.errMessage, luksoLeaderboardData.errCode);
-      }
-
-      if (luksoClaimableDrops.success) {
-        dispatch(setClaimableDrops(luksoClaimableDrops.value as Record<Campaign, FeatureClaimableDrop[]>));
-      } else {
-        LogError(Module.Citizens, luksoClaimableDrops.errMessage, luksoClaimableDrops.errCode);
-      }
-    } else if (blockchainType === Blockchain.Polygon) {
-      const polygonCitizensMetadata = await getPolygonTokensMetadataPromise(walletAddress);
-      const polygonUserFeatures = await getPolygonUserFeaturesPromise(walletAddress);
-
-      if (polygonCitizensMetadata.success) {
-        const citizen = polygonCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
-
-        dispatch(setCitizensMetadata(polygonCitizensMetadata.value));
-
-        if (selectedCampaign === null) { //Logic when user is logged in and no campaign is selected, refreshing page case
-          const userCampaigns = [...new Set(polygonCitizensMetadata.value.map(item => item.campaign))];
-
-          if (userCampaigns.length > 0) { //If user has campaigns, set the first one as selected campaign
-            dispatch(setSelectedCampaign(userCampaigns[0]));
-            dispatch(setSelectedCitizen(polygonCitizensMetadata.value[0]));
             dispatch(setMintingMode(false));
-          } else {//If user has no campaigns, set the polygon campaign as selected campaign and keep minting mode
-            const mintingData = await getPolygonMintingDataPromise();
+          }
+        } else { // If error, log the error, citizens metadata and selected combination will be null
+          LogError(Module.Citizens, luksoCitizensMetadata.errMessage, luksoCitizensMetadata.errCode);
+        }
 
+        //Lukso User Features dispatch
+        if (luksoUserFeatures.success) {
+          const luksoFeatures = luksoUserFeatures.value as CampaignDrops<LuksoCampaign>; // Cast the lukso features to the Campaign type, this depends on the wearables got for current campaign
+          dispatch(setUserFeatures(luksoFeatures));
+        } else {
+          LogError(Module.Citizens, luksoUserFeatures.errMessage, luksoUserFeatures.errCode);
+        }
+
+        //Lukso Leaderboard Data dispatch
+        if (luksoLeaderboardData.success) {
+          dispatch(setLeaderboardData(luksoLeaderboardData.value));
+        } else {
+          LogError(Module.Citizens, luksoLeaderboardData.errMessage, luksoLeaderboardData.errCode);
+        }
+
+        if (luksoClaimableDrops.success) {
+          dispatch(setClaimableDrops(luksoClaimableDrops.value as Record<Campaign, FeatureClaimableDrop[]>));
+        } else {
+          LogError(Module.Citizens, luksoClaimableDrops.errMessage, luksoClaimableDrops.errCode);
+        }
+      } else if (blockchainType === Blockchain.Polygon) {
+        const polygonCitizensMetadata = await getPolygonTokensMetadataPromise(walletAddress);
+        const polygonUserFeatures = await getPolygonUserFeaturesPromise(walletAddress);
+
+        if (polygonCitizensMetadata.success) {
+          const citizen = polygonCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
+
+          dispatch(setCitizensMetadata(polygonCitizensMetadata.value));
+
+          if (selectedCampaign === null) { //Logic when user is logged in and no campaign is selected, refreshing page case
+            const userCampaigns = [...new Set(polygonCitizensMetadata.value.map(item => item.campaign))];
+
+            if (userCampaigns.length > 0) { //If user has campaigns, set the first one as selected campaign
+              dispatch(setSelectedCampaign(userCampaigns[0]));
+              dispatch(setSelectedCitizen(polygonCitizensMetadata.value[0]));
+              dispatch(setMintingMode(false));
+            } else {//If user has no campaigns, set the polygon campaign as selected campaign and keep minting mode
+              const mintingData = await getPolygonMintingDataPromise();
+
+              if (mintingData.success) {
+                dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+              }
+
+              dispatch(setSelectedCampaign(Campaign.Polygon)); // Set the selected campaign by default when no campaign is selected
+              dispatch(setSelectedCitizen({
+                baseCombination: CampaignBaseCombination.Polygon,
+                combination: CampaignBaseCombination.Polygon,
+                campaign: Campaign.Polygon
+              } as CitizenMetadata));
+            }
+          } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
+            const mintingData = await getPolygonMintingDataPromise();
             if (mintingData.success) {
               dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
             }
 
-            dispatch(setSelectedCampaign(Campaign.Polygon)); // Set the selected campaign by default when no campaign is selected
             dispatch(setSelectedCitizen({
               baseCombination: CampaignBaseCombination.Polygon,
               combination: CampaignBaseCombination.Polygon,
               campaign: Campaign.Polygon
             } as CitizenMetadata));
-          }
-        } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
-          const mintingData = await getPolygonMintingDataPromise();
-          if (mintingData.success) {
-            dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
-          }
-
-          dispatch(setSelectedCitizen({
-            baseCombination: CampaignBaseCombination.Polygon,
-            combination: CampaignBaseCombination.Polygon,
-            campaign: Campaign.Polygon
-          } as CitizenMetadata));
-        } else {
-          dispatch(setSelectedCitizen(citizen));
-          dispatch(setMintingMode(false));
-        }
-      }
-      if (polygonUserFeatures.success) {
-        const polygonFeatures = polygonUserFeatures.value as CampaignDrops<AppCampaigns>;
-        dispatch(setUserFeatures(polygonFeatures));
-      } else {
-        LogError(Module.Citizens, polygonUserFeatures.errMessage, polygonUserFeatures.errCode);
-      }
-    } else if (blockchainType === Blockchain.Solana) {
-      const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
-      const solanaUserFeatures = await getSolanaUserFeaturesPromise(walletAddress); // Get the user features
-
-      if (solanaCitizensMetadata.success) {
-        const citizen = solanaCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
-
-        dispatch(setCitizensMetadata(solanaCitizensMetadata.value));
-        if (selectedCampaign === null) { //This case is handled when user refresh the page and is still logged in
-
-          const userCampaigns = [...new Set(solanaCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
-
-          if (userCampaigns.length > 0) {
-            dispatch(setSelectedCampaign(userCampaigns[0]));
-            dispatch(setSelectedCitizen(solanaCitizensMetadata.value[0]));
-
-            dispatch(setMintingMode(false));
           } else {
+            dispatch(setSelectedCitizen(citizen));
+            dispatch(setMintingMode(false));
+          }
+        }
+        if (polygonUserFeatures.success) {
+          const polygonFeatures = polygonUserFeatures.value as CampaignDrops<PolygonCampaign>;
+          dispatch(setUserFeatures(polygonFeatures));
+        } else {
+          LogError(Module.Citizens, polygonUserFeatures.errMessage, polygonUserFeatures.errCode);
+        }
+      } else if (blockchainType === Blockchain.Solana) {
+        const solanaCitizensMetadata = await getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
+        const solanaUserFeatures = await getSolanaUserFeaturesPromise(walletAddress); // Get the user features
+
+        if (solanaCitizensMetadata.success) {
+          const citizen = solanaCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign); // Find the citizen with the selected campaign
+
+          dispatch(setCitizensMetadata(solanaCitizensMetadata.value));
+          if (selectedCampaign === null) { //This case is handled when user refresh the page and is still logged in
+
+            const userCampaigns = [...new Set(solanaCitizensMetadata.value.map(item => item.campaign))]; // Get the unique campaigns from the metadata
+
+            if (userCampaigns.length > 0) {
+              dispatch(setSelectedCampaign(userCampaigns[0]));
+              dispatch(setSelectedCitizen(solanaCitizensMetadata.value[0]));
+
+              dispatch(setMintingMode(false));
+            } else {
+              // MINTING FLOW
+
+              const mintingData = await getSolanaMintingDataPromise(walletAddress);
+              if (mintingData.success) {
+                dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
+                dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+                dispatch(setIsHolder(mintingData.value.isHolder ?? null));
+              }
+
+              dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
+              dispatch(setSelectedCitizen({
+                baseCombination: CampaignBaseCombination.Kumi,
+                combination: CampaignBaseCombination.Kumi,
+                campaign: Campaign.Kumi
+              } as CitizenMetadata));
+            }
+          } else if (!citizen) {
             // MINTING FLOW
 
             const mintingData = await getSolanaMintingDataPromise(walletAddress);
@@ -368,103 +385,87 @@ export function useBlockchainWallet() {
               dispatch(setIsHolder(mintingData.value.isHolder ?? null));
             }
 
-            dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
             dispatch(setSelectedCitizen({
               baseCombination: CampaignBaseCombination.Kumi,
               combination: CampaignBaseCombination.Kumi,
-              campaign: Campaign.Kumi
+              campaign: selectedCampaign
             } as CitizenMetadata));
-          }
-        } else if (!citizen) {
-          // MINTING FLOW
-
-          const mintingData = await getSolanaMintingDataPromise(walletAddress);
-          if (mintingData.success) {
-            dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
-            dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
-            dispatch(setIsHolder(mintingData.value.isHolder ?? null));
-          }
-
-          dispatch(setSelectedCitizen({
-            baseCombination: CampaignBaseCombination.Kumi,
-            combination: CampaignBaseCombination.Kumi,
-            campaign: selectedCampaign
-          } as CitizenMetadata));
-        } else {
-          dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
-          
-          dispatch(setMintingMode(false));
-        }
-      } else { // If error, log the error, citizens metadata and selected combination will be null
-        LogError(Module.Citizens, solanaCitizensMetadata.errMessage, solanaCitizensMetadata.errCode);
-      }
-
-      if (solanaUserFeatures.success) {
-        const solanaFeatures = solanaUserFeatures.value as CampaignDrops<AppCampaigns>; // Cast the solana features to the AppCampaigns type, this depends on the wearables got for current campaign
-        dispatch(setUserFeatures(solanaFeatures));
-      } else {
-        LogError(Module.Citizens, solanaUserFeatures.errMessage, solanaUserFeatures.errCode);
-      }
-    } else if (blockchainType === Blockchain.Root) {
-      const rootCitizensMetadata = await getRootTokensMetadataPromise(walletAddress);
-      const rootUserFeatures = await getRootUserFeaturesPromise(walletAddress);
-      
-      if (rootCitizensMetadata.success) {
-        const citizen = rootCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
-
-        dispatch(setCitizensMetadata(rootCitizensMetadata.value));
-
-        if (selectedCampaign === null) { //Logic when user is logged in and no campaign is selected, refreshing page case
-          const userCampaigns = [...new Set(rootCitizensMetadata.value.map(item => item.campaign))];
-
-          if (userCampaigns.length > 0) { //If user has campaigns, set the first one as selected campaign
-            dispatch(setSelectedCampaign(userCampaigns[0]));
-            dispatch(setSelectedCitizen(rootCitizensMetadata.value[0]));
+          } else {
+            dispatch(setSelectedCitizen(citizen)); // Set the selected citizen to the one with the selected campaign
 
             dispatch(setMintingMode(false));
-          } else {//If user has no campaigns, set the based campaign as selected campaign and keep minting mode
+          }
+        } else { // If error, log the error, citizens metadata and selected combination will be null
+          LogError(Module.Citizens, solanaCitizensMetadata.errMessage, solanaCitizensMetadata.errCode);
+        }
+
+        if (solanaUserFeatures.success) {
+          const solanaFeatures = solanaUserFeatures.value as CampaignDrops<SolanaCampaign>; // Cast the solana features to the Campaign type, this depends on the wearables got for current campaign
+          dispatch(setUserFeatures(solanaFeatures));
+        } else {
+          LogError(Module.Citizens, solanaUserFeatures.errMessage, solanaUserFeatures.errCode);
+        }
+      } else if (blockchainType === Blockchain.Root) {
+        const rootCitizensMetadata = await getRootTokensMetadataPromise(walletAddress);
+        const rootUserFeatures = await getRootUserFeaturesPromise(walletAddress);
+
+        if (rootCitizensMetadata.success) {
+          const citizen = rootCitizensMetadata.value.find(citizen => citizen.campaign === selectedCampaign);
+
+          dispatch(setCitizensMetadata(rootCitizensMetadata.value));
+
+          if (selectedCampaign === null) { //Logic when user is logged in and no campaign is selected, refreshing page case
+            const userCampaigns = [...new Set(rootCitizensMetadata.value.map(item => item.campaign))];
+
+            if (userCampaigns.length > 0) { //If user has campaigns, set the first one as selected campaign
+              dispatch(setSelectedCampaign(userCampaigns[0]));
+              dispatch(setSelectedCitizen(rootCitizensMetadata.value[0]));
+
+              dispatch(setMintingMode(false));
+            } else {//If user has no campaigns, set the based campaign as selected campaign and keep minting mode
+
+              const mintingData = await getRootMintingDataPromise();
+              if (mintingData.success) {
+                dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
+                dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+                dispatch(setIsHolder(mintingData.value.isHolder ?? null));
+              }
+
+              dispatch(setSelectedCampaign(Campaign.Based)); // Set the selected campaign by default when no campaign is selected
+              dispatch(setSelectedCitizen({
+                baseCombination: CampaignBaseCombination.Based,
+                combination: CampaignBaseCombination.Based,
+                campaign: Campaign.Based
+              } as CitizenMetadata));
+            }
+          } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
 
             const mintingData = await getRootMintingDataPromise();
             if (mintingData.success) {
               dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
               dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
-              dispatch(setIsHolder(mintingData.value.isHolder ?? null));
             }
 
-            dispatch(setSelectedCampaign(Campaign.Based)); // Set the selected campaign by default when no campaign is selected
             dispatch(setSelectedCitizen({
               baseCombination: CampaignBaseCombination.Based,
               combination: CampaignBaseCombination.Based,
               campaign: Campaign.Based
             } as CitizenMetadata));
-          }
-        } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
+          } else {
+            dispatch(setSelectedCitizen(citizen));
 
-          const mintingData = await getRootMintingDataPromise();
-          if (mintingData.success) {
-            dispatch(setMintingPrice(mintingData.value.mintPrice ?? null));
-            dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
+            dispatch(setMintingMode(false));
           }
-
-          dispatch(setSelectedCitizen({
-            baseCombination: CampaignBaseCombination.Based,
-            combination: CampaignBaseCombination.Based,
-            campaign: Campaign.Based
-          } as CitizenMetadata));
+        }
+        if (rootUserFeatures.success) {
+          const rootFeatures = rootUserFeatures.value as CampaignDrops<RootCampaign>;
+          dispatch(setUserFeatures(rootFeatures));
         } else {
-          dispatch(setSelectedCitizen(citizen));
-
-          dispatch(setMintingMode(false));
+          LogError(Module.Citizens, rootUserFeatures.errMessage, rootUserFeatures.errCode);
         }
       }
-      if (rootUserFeatures.success) {
-        const rootFeatures = rootUserFeatures.value as CampaignDrops<AppCampaigns>;
-        dispatch(setUserFeatures(rootFeatures));
-      } else {
-        LogError(Module.Citizens, rootUserFeatures.errMessage, rootUserFeatures.errCode);
-      }
     }
-  };
+  
 
   /* Tanto el blockchain como la campaña se seleccionan manualmente en cada boton que llama esta función */
   const HandleLogin = async (blockchain: Blockchain | undefined, campaign: Campaign | undefined) => {
@@ -481,7 +482,7 @@ export function useBlockchainWallet() {
     } else {
       login({ walletChainType: BlockchainToWalletChainType(blockchain) });
     }
-    
+
     // Guardar la campaña seleccionada en localStorage para persistencia
     SetSelectedCampaign(campaign ?? null);
     dispatch(setSelectedCampaign(campaign ?? null));
@@ -527,7 +528,7 @@ export function useBlockchainWallet() {
   const HandleLogout = async () => {
     // Limpiar la campaña persistida cuando el usuario se desconecta
     SetSelectedCampaign(null);
-    
+
     if (blockchainType === Blockchain.Root) {
       signOutPass({ flow: 'silent', disableConsent: true });
     } else {
@@ -554,7 +555,7 @@ export function useBlockchainWallet() {
                 const isSolana = text.includes('Solana');
                 const isMetamask = text.includes('MetaMask');
                 const isUniversal = text.includes('universal_profile');
-            
+
                 if ((isPhantom || isBackpack) && !isSolana) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
@@ -565,7 +566,7 @@ export function useBlockchainWallet() {
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
                 }
-                
+
                 if (isMetamask && (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators)) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
@@ -704,7 +705,7 @@ export function useBlockchainWallet() {
 
         const futurePassAddress = userSession.futurepass;
 
-        await InitializeContractEssentialData(signer,undefined, userSession);
+        await InitializeContractEssentialData(signer, undefined, userSession);
 
         dispatch(connect({ address: futurePassAddress, walletName: null, blockchainType: Blockchain.Root, xpData: null, followUserData: { followerCount: -1, followingCount: -1 } }));
         SetSdkConnection({ ...loginLibaryflag, [LoginLibrary.Pass]: true });

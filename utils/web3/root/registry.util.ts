@@ -2,8 +2,8 @@ import { Operation } from "@futureverse/artm";
 import { ROOT_CHAIN_ID, DOMAIN, ORIGIN, ROOT_GQL_API_URL, ROOT_NETWORK_WS_URL } from "../../../constants/root/contract.constant";
 import { CampaignParameterName, CommonErrorCode, Module } from "../../../enums/common.enum";
 import { Result } from "../../../types/common.type";
-import { AssetLink, LinkableToken, RootDrop } from "../../../interfaces/citizens.interface";
-import { Campaign } from "../../../enums/citizens/common.enum";
+import { AssetLink, LinkableToken, FeatureRootDrop } from "../../../interfaces/citizens.interface";
+import { Campaign } from "../../../types/citizens.type";
 import { GetCampaignDrops } from "../citizens.util";
 import { GetRootAssetMetadata } from "./contract.util";
 import { GetParameter, StoreAssetData } from "../../firebase.util";
@@ -137,7 +137,7 @@ export async function GetLinkableTokenId(collectionId: string, tokenId: string):
     }
 }
 
-export async function GetRootAssetNewCombination(assetLinks: AssetLink[], currentCombination: string, campaignFeatures: FeatureBasic[], rootDrops: RootDrop[]): Promise<Result<string>> {
+export async function GetRootAssetNewCombination(assetLinks: AssetLink[], currentCombination: string, campaignFeatures: FeatureBasic[], FeatureRootDrops: FeatureRootDrop[]): Promise<Result<string>> {
     try {
         const assetCurrentCombinationArray = currentCombination.split('-');
         const newCombinationArray = assetCurrentCombinationArray.map((_, featureTypeIndex) => {
@@ -146,7 +146,7 @@ export async function GetRootAssetNewCombination(assetLinks: AssetLink[], curren
             if (!link) return 0; // If there's no link, use base feature
 
             const dropCollectionId = link.asset.collectionId.split(':')[2]+':' + link.asset.tokenId; //If there's a link, get the collection id of the link
-            const newIndex = rootDrops.find(drop => drop.type === link.asset.schema.name && drop.collectionId === dropCollectionId); //Get the index of the new feature from drops array
+            const newIndex = FeatureRootDrops.find(drop => drop.type === link.asset.schema.name && drop.collectionId === dropCollectionId); //Get the index of the new feature from drops array
 
             if (!newIndex) return 0;
             return newIndex.index;
@@ -237,17 +237,17 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     if (!campaignFeaturesResult.success) return { success: false, errMessage: campaignFeaturesResult.errMessage, errCode: campaignFeaturesResult.errCode };
     const campaignFeatures = campaignFeaturesResult.value;
 
-    const rootDrops = await GetCampaignDrops<RootDrop>(Campaign.Based);
+    const FeatureRootDrops = await GetCampaignDrops<FeatureRootDrop>(Campaign.Based);
 
-    if (!rootDrops.success) return { success: false, errMessage: rootDrops.errMessage, errCode: rootDrops.errCode };
-    const rootDropsArray = rootDrops.value;
+    if (!FeatureRootDrops.success) return { success: false, errMessage: FeatureRootDrops.errMessage, errCode: FeatureRootDrops.errCode };
+    const FeatureRootDropsArray = FeatureRootDrops.value;
 
     const assetLinksResult = await GetAssetLinks(collection_id, token_id);
 
     if (!assetLinksResult.success) return { success: false, errMessage: assetLinksResult.errMessage, errCode: assetLinksResult.errCode };
     const assetLinks = assetLinksResult.value;
 
-    const newCombinationResult = await GetRootAssetNewCombination(assetLinks, assetCurrentCombination, campaignFeatures, rootDropsArray);
+    const newCombinationResult = await GetRootAssetNewCombination(assetLinks, assetCurrentCombination, campaignFeatures, FeatureRootDropsArray);
 
     if (!newCombinationResult.success) return { success: false, errMessage: newCombinationResult.errMessage, errCode: newCombinationResult.errCode };
     const newCombination = newCombinationResult.value;
@@ -257,7 +257,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     const combinationArray = newCombination.split('-');
     const attributesExpectedAmount = combinationArray.filter((index) => index != '0').length;
     const attributesProcessing = combinationArray.map((attributeIndex, typeIndex) => {
-        const attribute = rootDropsArray.find(drop => drop.index.toString() === attributeIndex && drop.typeIndex.toString() === typeIndex.toString());
+        const attribute = FeatureRootDropsArray.find(drop => drop.index.toString() === attributeIndex && drop.typeIndex.toString() === typeIndex.toString());
         if (!attribute) return undefined;
         return {
             collectionId: attribute.collectionId,
@@ -267,7 +267,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
             index: attribute.index,
         };
     });
-    const filteredAttributes = attributesProcessing.filter(attribute => attribute !== undefined) as RootDrop[];
+    const filteredAttributes = attributesProcessing.filter(attribute => attribute !== undefined) as FeatureRootDrop[];
     if(filteredAttributes.length!=attributesExpectedAmount) return { success: false, errMessage: "Attributes processing failed", errCode: "AttributesProcessingError" };
     const setRootAssetMetadataResult = await StoreAssetData({
         campaign: Campaign.Based,

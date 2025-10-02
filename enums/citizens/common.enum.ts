@@ -76,3 +76,9 @@ export enum CampaignBaseUrl {
 export enum CampaignBaseCombinationUrl{
   Polygon = "ipfs://bafkreibz25o26ro2ycffi5zpjmnlxiqfs2cmhdo7qvejyrrqmbgvu7dtqy"
 }
+
+export enum FeatureKind{
+  Feature = "feature",
+  Drop = "featureDrop",
+  ClaimableDrop = "featureClaimableDrop"
+}

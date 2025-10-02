@@ -9,6 +9,8 @@ import { BiCartAlt, BiCollapseAlt, BiExpandAlt, BiSolidTrash } from 'react-icons
 import { useSnackbar } from "../snackbar/snackbar.provider";
 import Modal from "../common/modal.ui";
 import Button from "../common/button.ui";
+import GetImage from "../../../components/commons/getImage.component";
+import { FeatureKind } from "../../../enums/citizens/common.enum";
 
 interface ShoppingCartUIProps {
   onRemoveItem: (type?: string) => Promise<void>;
@@ -21,6 +23,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
   const userXP = useAppSelector(state => state.citizensAuth.xpData);
   const didCheckoutMode = useAppSelector(state => state.citizensMetadata.checkoutMode);
   const isMarketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
+  const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const dispatch = useAppDispatch();
 
   const { showSnackbar } = useSnackbar();
@@ -73,18 +76,18 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
   }
 
   useEffect(() => {
-    if (!claimableDrops) return;
+    if (!claimableDrops || !selectedCampaign) return;
 
     // Flatten the claimableDrops object to an array
-    const allDrops = Object.values(claimableDrops).flat();
+    const selectedCampaignDrops = claimableDrops[selectedCampaign];
 
     // Filter the claimable drops based on the shopping cart, excluding blocked items
-    const items = allDrops.filter(drop =>
+    const items = selectedCampaignDrops.filter(drop =>
       shoppingCart.some(cartItem =>
         cartItem.detail === drop.type &&
         cartItem.val === drop.name
-      ) && (drop.requiredXP - (userXP?.xp || 0)) <= 0
-    );
+      ) && drop.kind === FeatureKind.ClaimableDrop && (drop.requiredXP - (userXP?.xp || 0)) <= 0
+    ) as FeatureClaimableDrop[];
 
     setShoppingCartItems(items);
   }, [shoppingCart, claimableDrops]);
@@ -135,7 +138,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
                             {/* DESCRIPTION */}
                             <div className="flex items-center gap-2">
                               <div className="rounded-xl overflow-hidden">
-                                <Image src={item.imageUrl} alt={item.name} width={50} height={50} />
+                                <div className="w-[50px] h-[50px] relative"><GetImage url={item.thumb} alt={item.name} /></div>
                               </div>
                               <div>
                                 <div className="font-semibold text-xs">{item.name}</div>

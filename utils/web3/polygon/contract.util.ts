@@ -1,15 +1,16 @@
 import { Contract, TransactionResponse } from "ethers";
-import { CitizenMetadata, PolygonDrop } from "../../../interfaces/citizens.interface";
+import { CitizenMetadata, FeaturePolygonDrop } from "../../../interfaces/citizens.interface";
 import { Result } from "../../../types/common.type";
 import { POLYGON_AVATAR_CONTRACT_ADDRESS, PROVIDER, SIGNER } from "../../../constants/polygon/contract.constant";
 import POLYGON_CONTRACT_ABI from "../../../constants/abi/polygon/PolygonContractABI.json";
 import POLYGON_WEARABLE_CONTRACT_ABI from "../../../constants/abi/polygon/WearableContractABI.json";
 import { LogError } from "../../common.util";
 import { CommonErrorCode, Module } from "../../../enums/common.enum";
-import { Campaign, CampaignBaseCombinationUrl, PolygonCampaign } from "../../../enums/citizens/common.enum";
+import { Campaign, PolygonCampaign } from "../../../types/citizens.type";
 import { Web3ErrorCode } from "../../../enums/root/common.enum";
 import { CampaignDrops } from "../../../types/citizens.type";
 import { GetCampaignDrops, GetPolygonImageUrl, GetPolygonIpfsData } from "../citizens.util";
+import { CampaignBaseCombinationUrl } from "../../../enums/citizens/common.enum";
 
 export async function GetPolygonTokenIds(address: string): Promise<Result<number[]>> {
     try {
@@ -178,17 +179,17 @@ export async function MintPolygonCitizen(walletAddress: string): Promise<Result<
 
 export async function GetPolygonUserFeatureAssets(address: string, campaign: PolygonCampaign): Promise<Result<CampaignDrops<PolygonCampaign>>> {
     try {
-    const polygonDropsResult = await GetCampaignDrops<PolygonDrop>(campaign);
+    const FeaturePolygonDropsResult = await GetCampaignDrops<FeaturePolygonDrop>(campaign);
 
-    if (!polygonDropsResult.success) return polygonDropsResult;
+    if (!FeaturePolygonDropsResult.success) return FeaturePolygonDropsResult;
 
-    if (polygonDropsResult.value.length === 0) return {
+    if (FeaturePolygonDropsResult.value.length === 0) return {
         success: false,
         errMessage: "No drops found",
         errCode: CommonErrorCode.GetNoData
     };
 
-    const dropsCheckPromiseList = polygonDropsResult.value.map(async (drop) => {
+    const dropsCheckPromiseList = FeaturePolygonDropsResult.value.map(async (drop) => {
         const wearableContract = new Contract(drop.contractAddress, POLYGON_WEARABLE_CONTRACT_ABI, PROVIDER); //We use avatar contract ABI as we only need the balance function from ERC721
         const tokenIds = await wearableContract.getTokenIdsByOwner(address);
 
@@ -199,16 +200,16 @@ export async function GetPolygonUserFeatureAssets(address: string, campaign: Pol
     });
 
     const dropsCheck = await Promise.all(dropsCheckPromiseList);
-    const filteredDrops = dropsCheck.filter((dropCheck): dropCheck is PolygonDrop => dropCheck !== undefined);
+    const filteredDrops = dropsCheck.filter((dropCheck): dropCheck is FeaturePolygonDrop => dropCheck !== undefined);
 
-        return { success: true, value: { [campaign]: filteredDrops } };
+        return { success: true, value: { [campaign]: filteredDrops } as CampaignDrops<PolygonCampaign> };
     } catch (error) {
         LogError(Module.PolygonContractUtil, 'Error getting Polygon user feature assets', error);
         return { success: false, errMessage: 'Error getting Polygon user feature assets', errCode: CommonErrorCode.InternalError };
     }
 }
 
-export async function SetPolygonNewCombination(tokenId: string, uri: string, oldDrops: PolygonDrop[], newDrops: PolygonDrop[]): Promise<Result<boolean>> {
+export async function SetPolygonNewCombination(tokenId: string, uri: string, oldDrops: FeaturePolygonDrop[], newDrops: FeaturePolygonDrop[]): Promise<Result<boolean>> {
     try {
         const avatarContract = new Contract(POLYGON_AVATAR_CONTRACT_ADDRESS, POLYGON_CONTRACT_ABI, SIGNER);
         const wearablesToUnequip: { wearableContract: string; wearableTokenId: number; }[] = oldDrops.map((drop) => ({ wearableContract: drop.contractAddress, wearableTokenId: Number(drop.tokenId) }));

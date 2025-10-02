@@ -3,6 +3,7 @@ import { GLOBAL_VALUES } from "../constants/common.constant";
 import { Result } from "../types/common.type";
 import { FeatureInterface } from "../interfaces/api.interface";
 import { FeatureClaimableDrop } from "../interfaces/citizens.interface";
+import { FeatureKind } from "../enums/citizens/common.enum";
 
 export function RandomArrayElement<T>(array: T[]) {
   return array[Math.floor((Math.random() * array.length))];
@@ -161,9 +162,9 @@ export function ThrowError(message: string): never {
 }
 
 export function GetFeatureDropsFromFeatureInterfaceArray(featureInterfaceArray: FeatureInterface[]) {
-    return featureInterfaceArray.filter(feature => feature.isDrop);
+    return featureInterfaceArray.filter(feature => feature.kind === FeatureKind.Drop);
 }
 
 export function GetClaimableFeatureDropsFromClaimableFeatureInterfaceArray(featureInterfaceArray: FeatureClaimableDrop[]) {
-    return featureInterfaceArray.filter(feature => feature.isDrop && feature.isClaimableDrop);
+    return featureInterfaceArray.filter(feature => feature.kind === FeatureKind.ClaimableDrop);
 }

@@ -11,10 +11,9 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
-import { FeatureClaimableDrop, DropToClaim, LuksoDrop, SolanaAttribute, UserXPData } from "../interfaces/citizens.interface";
+import { FeatureClaimableDrop, DropToClaim, FeatureLuksoDrop, SolanaAttribute, UserXPData } from "../interfaces/citizens.interface";
 import { Blockchain } from "../enums/blockchain/common.enum";
-import { Campaign } from "../types/citizens.type";
-import { CampaignDrops } from "../types/citizens.type";
+import { AnyFeature } from "../types/citizens.type";
 
 //#region Generic
 type QueryParams = { [p: string]: string | number | undefined | null };
@@ -124,34 +123,11 @@ export async function PostRequestThumbnailProcessFile(VRMFile: Blob): Promise<Bl
 //#endregion
 
 export async function GetAssetsListByCampaign(campaign?: string | null) {
-  return GetRequest<FeatureInterface[]>(ApiRoutesV1.FeatureOptions, undefined, { campaign });
-}
-
-export async function GetAssetsListByCampaigns(campaigns?: Campaign[]): Promise<Result<CampaignDrops<Campaign>>> {
-  const campaignsAssetListPromises = campaigns?.map(campaign => GetAssetsListByCampaign(campaign));
-  const campaignsAssetLists = await Promise.all(campaignsAssetListPromises ?? []);
-
-  if (campaignsAssetLists.find(feature => feature.success === false)) return { success: false, errMessage: 'Error on getting campaign features', errCode: 'Error on getting campaign features' };
-
-  const featuresByCampaignSuccess = campaignsAssetLists.map(featureList => featureList.success === true ? featureList.value : null);
-  const featuresByCampaignRaw = featuresByCampaignSuccess.filter(featureList => featureList !== null);
-  const featuresByCampaign: CampaignDrops<Campaign> = {
-    [Campaign.Citizens]: [],
-    [Campaign.Creators]: [],
-    [Campaign.Kumi]: [],
-    [Campaign.Based]: [],
-    [Campaign.Polygon]: []
-  };
-
-  campaigns?.forEach((campaign, index) => {
-    featuresByCampaign[campaign] = featuresByCampaignRaw[index] ?? [];
-  });
-
-  return { success: true, value: featuresByCampaign };
+  return GetRequest<AnyFeature[]>(ApiRoutesV1.FeatureOptions, undefined, { campaign });
 }
 
 export async function GetAccessoryListByCampaign(campaign?: string | null) {
-  return GetRequest<FeatureInterface[]>(ApiRoutesV1.AccessoryOptions, undefined, { campaign });
+  return GetRequest<AnyFeature[]>(ApiRoutesV1.AccessoryOptions, undefined, { campaign });
 }
 
 export async function GetAnimationListByCampaign(campaign?: string | null) {
@@ -241,7 +217,7 @@ export async function RequestClaimApprove(drops: FeatureClaimableDrop[], walletA
   return { success: true, value: data.data };
 }
 
-export async function RequestBurnDrops(burnDropsArray: LuksoDrop[], walletAddress: string, campaign: string): Promise<Result<DropToClaim[]>> {
+export async function RequestBurnDrops(burnDropsArray: FeatureLuksoDrop[], walletAddress: string, campaign: string): Promise<Result<DropToClaim[]>> {
   const requestResult = await fetch('/api/v1/drops/burnDrops', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
