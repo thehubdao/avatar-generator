@@ -248,7 +248,6 @@ export async function GetCampaignUserFeatures(address: string, campaign: LuksoCa
 
         return { success: true, value: features };
     } catch (error) {
-        console.log(error)
         return {
             success: false,
             errMessage: 'Error getting campaign user features',
@@ -262,7 +261,6 @@ export async function GetLuksoUserFeatures(address: string): Promise<Result<Camp
         const campaigns = Object.values(LuksoCampaign);
         const campaignPromises = campaigns.map(campaign => GetCampaignUserFeatures(address, campaign));
         const results = await Promise.all(campaignPromises);
-console.log(results)
         const features = campaigns.reduce((acc, campaign, index) => {
             const result = results[index];
             if (result.success) {

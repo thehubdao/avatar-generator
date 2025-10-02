@@ -12,7 +12,7 @@ export default function FutureVerseProvider({ children }: { children: React.Reac
     const authClient = new FutureverseAuthClient({
         clientId: CLIENT_ID,
         environment: ENVIRONMENT,
-        redirectUri: 'https://avatar-generator-git-pr-type-fix-dap-frontend.vercel.app/citizens',
+        redirectUri: ORIGIN,
         signInFlow: 'redirect',
     });
     const queryClient = new QueryClient();

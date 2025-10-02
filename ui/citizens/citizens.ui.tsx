@@ -112,7 +112,6 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 				detail: selectedCategory
 			}
 		];
-		console.log(updatedCart)
 		dispatch(setShoppingCart(updatedCart));
 	}
 
