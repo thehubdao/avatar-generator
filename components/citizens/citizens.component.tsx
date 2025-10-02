@@ -11,7 +11,7 @@ import { SaveFile } from "../../utils/exporter.util";
 import { GetImageUrl, SetImageUrl, UploadLuksoMetadata, UploadPolygonMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { ClaimAndSetAvatarNewWearings, GetCampaignsTokensMetadata, GetLuksoUserFeatures, SetAvatarNewWearings } from "../../utils/web3/lukso/contract.util";
 import { setCitizensMetadata, setSelectedCitizen, setTakingPhoto, setUserFeatures } from "../../store/citizensMetadataSlice";
-import { GetCampaignDrops, GetVrmUrl } from "../../utils/web3/citizens.util";
+import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
 import { DropType } from "../../enums/lukso/common.enum";
@@ -556,12 +556,14 @@ export default function CitizensComponent() {
     }
 
     if (isMarketplaceMode && dropsToClaim) {
+      console.log('Claiming and setting new wearings', dropsToClaim, oldAttributes, newAttributes, selectedCitizen.tokenId, metadataObject.value.uri, signer);
       const claimResult = await ClaimAndSetAvatarNewWearings(currentCampaign, dropsToClaim, oldAttributes, newAttributes, selectedCitizen.tokenId, metadataObject.value.uri, signer);
       if (!claimResult.success) {
         LogError(Module.Citizens, 'Failed to claim and set new wearings', claimResult.errCode);
         return false;
       }
     } else {
+      console.log('Setting new wearings', oldAttributes, newAttributes, selectedCitizen.tokenId, metadataObject.value.uri, signer);
       const setResult = await SetAvatarNewWearings(
         currentCampaign,
         oldAttributes,
