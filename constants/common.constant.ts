@@ -1,4 +1,4 @@
-import { Campaign } from "../enums/citizens/common.enum";
+import { Campaign } from "../types/citizens.type";
 import { POLYGON_CHAIN_ID, POLYGON_CHAIN_NAME, POLYGON_NATIVE_CURRENCY_NAME, POLYGON_NATIVE_CURRENCY_SYMBOL, POLYGON_NATIVE_CURRENCY_DECIMALS, POLYGON_RPC_URL, POLYGON_EXPLORER_URL } from "./polygon/contract.constant";
 import { ROOT_CHAIN_ID, ROOT_CHAIN_NAME, ROOT_NATIVE_CURRENCY_NAME, ROOT_NATIVE_CURRENCY_SYMBOL, ROOT_NATIVE_CURRENCY_DECIMALS, ROOT_RPC_URL, ROOT_EXPLORER_URL } from "./root/contract.constant";
 

@@ -1,6 +1,7 @@
 import { Blockchain } from "../enums/blockchain/common.enum";
-import { BackedByLinks, Campaign } from "../enums/citizens/common.enum";
+import { BackedByLinks } from "../enums/citizens/common.enum";
 import { CitizensCollection, Game } from "../interfaces/citizens.interface";
+import { Campaign } from "../types/citizens.type";
 import { ThrowError } from "../utils/common.util";
 
 export const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY || ThrowError('NEXT_PUBLIC_IPFS_GATEWAY is required');
@@ -246,3 +247,4 @@ export const MINTING_TARGET_DATE = {
   [Campaign.Based]: new Date('2025-09-03T21:00:00.000Z'),
   [Campaign.Polygon]: new Date('2025-09-03T21:00:00.000Z'),
 };
+

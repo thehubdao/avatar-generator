@@ -39,7 +39,7 @@ import { LeaderboardEntry } from "../types/leaderboard.type";
 import { GetCitizensHoldings, GetWearablesHoldings } from "./web3/lukso/contract.util[deprecated]";
 import { AVATAR_DOWNLOADED_STATUS, AVATAR_STATUS } from "../constants/firebase.constant";
 import { Blockchain } from "../enums/blockchain/common.enum";
-import { Campaign } from "../enums/citizens/common.enum";
+import { Campaign } from "../types/citizens.type";
 
 export type LogInStructure = {
   user: string;
@@ -1192,7 +1192,6 @@ function GenerateLoginMessage(xpGained: number, streakBonusXP: number, levelInfo
 export async function GetClaimableDrops(campaign: Campaign): Promise<Result<FeatureClaimableDrop[]>> {
   try {
     const db = await FirebaseUtil.Instance().DB();
-    // Now reads from unified features collection with isClaimableDrop filter
     const featuresPath = `campaign/${campaign}/features`;
     const dropsQuery = query(
       collection(db, featuresPath),

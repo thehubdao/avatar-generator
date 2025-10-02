@@ -10,7 +10,7 @@ import { ConfigShadow } from "./shadow.interface";
 import { ReactNode } from "react";
 import { ConfigPostProcessing } from "./postProcessing.interface";
 import { ModelExtension } from "../enums/export.enum";
-import { Campaign } from "../enums/citizens/common.enum";
+import { Campaign } from "../types/citizens.type";
 
 export interface BasicData {
   id: string;

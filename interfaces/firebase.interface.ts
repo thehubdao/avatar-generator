@@ -1,8 +1,8 @@
 ﻿import { Timestamp } from "firebase/firestore";
 import {UserRoleValues} from "../enums/firebase.enum";
-import { Campaign } from "../enums/citizens/common.enum";
+import { Campaign } from "../types/citizens.type";
 import { Blockchain } from "../enums/blockchain/common.enum";
-import { RootDrop } from "./citizens.interface";
+import { FeatureRootDrop } from "./citizens.interface";
 
 export interface AGQueryConstraints {
   campaign?: string;
@@ -53,5 +53,5 @@ export interface AssetData {
   imageUrl: string;
   name: string;
   description: string;
-  attributes: RootDrop[];
+  attributes: FeatureRootDrop[];
 }

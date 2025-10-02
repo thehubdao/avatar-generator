@@ -1,4 +1,4 @@
-import { Campaign } from "../enums/citizens/common.enum"
+import { Campaign } from "../types/citizens.type"
 
 export const FILE_CAMPAIGN_NAME_LABEL: Record<Campaign, string> = {
   vrm_male: 'Lukso_Creator_#',

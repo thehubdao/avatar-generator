@@ -1,8 +1,8 @@
 import React from 'react';
 import Image from 'next/image';
-import { CitizensCollection } from '../../../interfaces/citizens.interface';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
-import { Campaign } from '../../../enums/citizens/common.enum';
+import { Campaign } from '../../../types/citizens.type';
+import { CitizensCollection } from '../../../interfaces/citizens.interface';
 
 interface CampaignSelectionModalProps {
   isOpen: boolean;

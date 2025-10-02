@@ -1,10 +1,10 @@
-import { Campaign, LuksoCampaign } from "../../../enums/citizens/common.enum";
 import { CommonErrorCode, Module } from "../../../enums/common.enum";
 import { FeatureClaimableDrop } from "../../../interfaces/citizens.interface";
 import { Result } from "../../../types/common.type";
 import { LogError } from "../../common.util";
 import { GetClaimableDrops } from "../../firebase.util";
 import { GetUserWearableClaimedAmount } from "./contract.util";
+import { LuksoCampaign } from "../../../types/citizens.type";
 
 export async function GetLuksoClaimableDrops(walletAddress: string): Promise<Result<Record<LuksoCampaign, FeatureClaimableDrop[]>>> {
     try {
@@ -15,7 +15,7 @@ export async function GetLuksoClaimableDrops(walletAddress: string): Promise<Res
         const campaigns = Object.values(LuksoCampaign);
 
         const claimableDropsCampaignsPromises = campaigns.map(async (campaign) => {
-            const drops = await GetClaimableDrops(campaign as unknown as Campaign);
+            const drops = await GetClaimableDrops(campaign);
             if (drops.success) {
                 const dropswithClaimAmountPromises = drops.value.map(async drop => {
                     const claimedAmount = await GetUserWearableClaimedAmount(walletAddress, drop);

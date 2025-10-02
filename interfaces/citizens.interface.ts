@@ -1,9 +1,9 @@
 import { Blockchain } from "../enums/blockchain/common.enum";
-import { Campaign, HoldingCondition, PaymentType } from "../enums/citizens/common.enum";
+import { HoldingCondition, PaymentType } from "../enums/citizens/common.enum";
 import { DropType } from "../enums/lukso/common.enum";
 import { BodyPart } from "./avatar.interface";
 import { FeatureInterface } from './api.interface';
-import { RandomTier } from '../enums/common.enum';
+import { Campaign } from "../types/citizens.type";
 
 export interface CitizensCollection {
   name: string;
@@ -158,9 +158,10 @@ export interface FeatureClaimableDrop extends FeatureDrop {
   owned?: boolean;//Property set after type declaration
   claimLimit: number;
   claimedAmount?: number; //Property set after type declaration
-  paymentType: string;
+  paymentType: PaymentType;
   requiredXP: number;
   price: number;
+  isClaimable?: boolean;
 }
 
 

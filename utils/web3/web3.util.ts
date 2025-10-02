@@ -1,6 +1,6 @@
 import { PrivyClientConfig } from "@privy-io/react-auth";
 import { Blockchain, LoginLibrary } from "../../enums/blockchain/common.enum";
-import { Campaign } from "../../enums/citizens/common.enum";
+import { Campaign } from "../../types/citizens.type";
 
 export function BlockchainToWalletChainType(blockchain?: Blockchain): NonNullable<PrivyClientConfig['appearance']>['walletChainType'] {
     switch (blockchain) {

@@ -1,10 +1,9 @@
 import { ERC725 } from "@erc725/erc725.js";
 import { ERC725JSONSchemaKeyType } from "@erc725/erc725.js";
 import { ethers, JsonRpcProvider, Wallet } from "ethers";
-import { Campaign } from "../../enums/citizens/common.enum";
- 
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
 import { ThrowError } from "../../utils/common.util";
+import { Campaign } from "../../types/citizens.type";
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS || ThrowError('NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS is required');
 const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS || ThrowError('NEXT_PUBLIC_PROFILE_ADDRESS is required');

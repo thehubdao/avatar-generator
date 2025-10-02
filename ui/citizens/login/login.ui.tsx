@@ -11,7 +11,7 @@ import FreshDropsUI from "./freshDrops.ui";
 import CommunityContent from "./communityContent.ui";
 import BackedBy from "./backedBy.ui";
 import { Blockchain } from "../../../enums/blockchain/common.enum";
-import { Campaign } from "../../../enums/citizens/common.enum";
+import { Campaign } from "../../../types/citizens.type";
 
 
 interface CitizensLoginUIProps {

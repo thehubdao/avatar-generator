@@ -1,4 +1,4 @@
-import { Campaign } from "../enums/citizens/common.enum";
+import { Campaign } from "../types/citizens.type";
 import { CitizenMetadata } from "./citizens.interface";
 
 export interface BodyPart {

@@ -1,4 +1,4 @@
-import { Campaign } from "../enums/citizens/common.enum";
+import { Campaign } from "../types/citizens.type";
 import { MintingUiData } from "../interfaces/citizens.interface";
 
 export const MINTING_UI_DATA: Record<Campaign, MintingUiData | undefined> = {
