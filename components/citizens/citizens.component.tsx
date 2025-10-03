@@ -128,7 +128,6 @@ export default function CitizensComponent() {
       
       currentCombinationBaseFeatures = Array.from(mergedMap.values());
     }
-    console.log(currentCombinationBaseFeatures, campaignUserFeatures);
 
     optionList.current = currentCombinationBaseFeatures;
 
