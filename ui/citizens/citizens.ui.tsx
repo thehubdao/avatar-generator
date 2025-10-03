@@ -18,23 +18,26 @@ import Button from "./common/button.ui";
 import { Module } from "../../enums/common.enum";
 import Modal from "./common/modal.ui";
 import FlashUI from "./common/flash.ui";
+import ShoppingCartUI from "./backpack/shoppingCart.ui";
+import { FeatureClaimableDrop } from "../../interfaces/citizens.interface";
+import { AnyFeature } from "../../types/citizens.type";
 
 interface CitizensUIProps {
 	singleInitData?: SingleInterface;
 	exportData: ExportInterface;
-	featureList: FeatureInterface[];
-	marketplaceFeatureList?: FeatureInterface[];
+	featureList: AnyFeature[];
+	marketplaceFeatureList?: FeatureClaimableDrop[];
 	isReady: boolean;
 	handleReady: () => Promise<void>;
 	handleExport: (type?: ModelExtension) => Promise<boolean>;
-	handleOptionChange: (id, path, name, category) => Promise<void>;
+	handleOptionChange: (id: string, path: string, name: string, category: string) => Promise<void>;
 	handleSaveCombination: () => Promise<boolean>;
 	handleBuying: () => Promise<boolean>;
 	handleMinting: () => Promise<MintUIResult>;
 	handleResetCombination: (type?: string) => Promise<boolean>;
 }
 
-export default function CitizensUI({ singleInitData, exportData, featureList, marketplaceFeatureList, isReady,handleReady, handleExport, handleOptionChange, handleSaveCombination, handleMinting, handleResetCombination }: CitizensUIProps) {
+export default function CitizensUI({ singleInitData, exportData, featureList, marketplaceFeatureList, isReady,   handleBuying,handleReady, handleExport, handleOptionChange, handleSaveCombination, handleMinting, handleResetCombination }: CitizensUIProps) {
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const shoppingCart = useAppSelector(state => state.citizensMetadata.shoppingCart);
@@ -48,7 +51,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	const didSavingMode = useAppSelector(state => state.citizensMetadata.savingMode);
 
 	// Edit mode local State
-	const [optionList, setOptionList] = useState<FeatureInterface[]>();
+	const [optionList, setOptionList] = useState<AnyFeature[]>();
 	const [selectedCategory, setSelectedCategory] = useState<string>('');
 	const [selectedOption, setSelectedOption] = useState<BasicData>();
 	const [loadingTextIndex, setLoadingTextIndex] = useState(0);
@@ -119,16 +122,24 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 			LogError(Module.Citizens, 'Error resetting combination in onMarketOptionRemove');
 			return;
 		}
-		// Remove the item from the shopping cart if it matches the category selected
-		if (type && type === selectedCategory) {
-			setSelectedOption(undefined);
+		
+		// Update selectedOption to reflect the current feature after reset
+		if (type) {
+			// Find the base/original feature that was restored
+			const restoredFeature = exportData.attributes.find(attr => attr.id === type);
+			if (restoredFeature && type === selectedCategory) {
+				setSelectedOption(restoredFeature);
+			}
+		} else {
+			// If no type specified, reset all - update to current category's feature
+			const currentFeature = exportData.attributes.find(attr => attr.id === selectedCategory);
+			setSelectedOption(currentFeature);
 		}
 	}
 
 	function updateOptionList(value: string) {
 		if (didEditMode) {
 			const filteredList = FilterList(featureList, 'type', value);
-			filteredList && filteredList.forEach(el => el.price = undefined); // remove price in edit mode
 			setOptionList(filteredList);
 		} else if (didMarketplaceMode && marketplaceFeatureList) {
 			const filteredList = FilterList(marketplaceFeatureList, 'type', value);
@@ -147,7 +158,14 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 
 	useEffect(() => {
 		updateOptionList(selectedCategory);
-	}, [featureList, marketplaceFeatureList, didEditMode, didMarketplaceMode])
+		// Also update selectedOption to match current feature when lists change
+		if (selectedCategory) {
+			const currentFeature = exportData.attributes.find(attr => attr.id === selectedCategory);
+			if (currentFeature) {
+				setSelectedOption(currentFeature);
+			}
+		}
+	}, [featureList, marketplaceFeatureList, didEditMode, didMarketplaceMode, exportData.attributes])
 
 	useEffect(() => {
 		if (isReady) {
@@ -158,6 +176,17 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 			}
 		}
 	}, [isReady, selectedCategory])
+
+	// Update selectedOption when switching between edit/marketplace modes
+	useEffect(() => {
+		if (isReady && selectedCategory) {
+			// Sync selectedOption with current exportData when mode changes
+			const currentFeature = exportData.attributes.find(attr => attr.id === selectedCategory);
+			if (currentFeature) {
+				setSelectedOption(currentFeature);
+			}
+		}
+	}, [didEditMode, didMarketplaceMode, isReady])
 
 	useEffect(() => {
 		if (!didEditMode) {
@@ -347,7 +376,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 														isLoading={false}
 													/>
 												</div>
-												{/* {!didEditMode && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />} #Marketplace button*/}
+												{!didEditMode && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />} {/* #Marketplace button */}
 											</>
 
 										}

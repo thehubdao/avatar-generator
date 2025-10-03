@@ -1,7 +1,8 @@
 import { Blockchain } from "../enums/blockchain/common.enum";
-import { BackedByLinks, Campaign } from "../enums/citizens/common.enum";
+import { BackedByLinks } from "../enums/citizens/common.enum";
 import { CitizensCollection, Game } from "../interfaces/citizens.interface";
 import { ThrowError } from "../utils/common.util";
+import { CampaignConstant } from "./campaign.constant";
 
 export const IPFS_GATEWAY_URL = process.env.NEXT_PUBLIC_IPFS_GATEWAY || ThrowError('NEXT_PUBLIC_IPFS_GATEWAY is required');
 export const IPFS_GATEWAY_API_KEY = process.env.NEXT_PUBLIC_IPFS_GATEWAY_API_KEY || ThrowError('NEXT_PUBLIC_IPFS_GATEWAY_API_KEY is required');
@@ -49,35 +50,35 @@ export const LOGIN_COLLECTIONS: CitizensCollection[] = [
   {
     name: 'Lukso Citizens',
     image: '/resources/images/campaings/citizens_collection.jpg',
-    campaign: Campaign.Citizens,
+    campaign: CampaignConstant.Citizens,
     blockChain: Blockchain.Ethereum,
     active: true
   },
   {
     name: 'Lukso Creators',
     image: '/resources/images/campaings/creators_collection.jpg',
-    campaign: Campaign.Creators,
+    campaign: CampaignConstant.Creators,
     blockChain: Blockchain.Ethereum,
     active: true
   },
   {
     name: 'Root Citizens',
     image: '/resources/images/campaings/based_collection.jpg',
-    campaign: Campaign.Based,
+    campaign: CampaignConstant.Based,
     blockChain: Blockchain.Root,
     active: true
   },
   {
     name:'Polygon Citizens',
     image: '/resources/images/campaings/polygon-creators-collection.jpg',
-    campaign: Campaign.Polygon,
+    campaign: CampaignConstant.Polygon,
     blockChain: Blockchain.Polygon,
     active: true
   },
   {
     name: 'Kumi',
     image: '/resources/images/campaings/kumi_collection.jpg',
-    campaign: Campaign.Kumi,
+    campaign: CampaignConstant.Kumi,
     blockChain: Blockchain.Solana,
     active: true
   }
@@ -102,37 +103,37 @@ export const LOGIN_FRESHDROPS = [
   {
     img: '01',
     text: 'Lukso Citizen #1218',
-    campaign: Campaign.Citizens,
+    campaign: CampaignConstant.Citizens,
     blockChain: Blockchain.Ethereum
   },
   {
     img: '02',
     text: 'Lukso Citizen #1218',
-    campaign: Campaign.Citizens,
+    campaign: CampaignConstant.Citizens,
     blockChain: Blockchain.Ethereum
   },
   {
     img: '03',
     text: 'Lukso Citizen #1218',
-    campaign: Campaign.Citizens,
+    campaign: CampaignConstant.Citizens,
     blockChain: Blockchain.Ethereum
   },
   {
     img: '04',
     text: 'Lukso Citizen #1218',
-    campaign: Campaign.Citizens,
+    campaign: CampaignConstant.Citizens,
     blockChain: Blockchain.Ethereum
   },
   {
     img: '05',
     text: 'Lukso Citizen #1218',
-    campaign: Campaign.Citizens,
+    campaign: CampaignConstant.Citizens,
     blockChain: Blockchain.Ethereum
   },
   {
     img: '06',
     text: 'Lukso Citizen #1218',
-    campaign: Campaign.Citizens,
+    campaign: CampaignConstant.Citizens,
     blockChain: Blockchain.Ethereum
   }
 ];
@@ -242,7 +243,8 @@ export const GAMES: Game[] = [
 ]
 
 export const MINTING_TARGET_DATE = {
-  [Campaign.Kumi]: new Date('2025-06-03T23:00:00.000Z'),
-  [Campaign.Based]: new Date('2025-09-03T21:00:00.000Z'),
-  [Campaign.Polygon]: new Date('2025-09-03T21:00:00.000Z'),
+  [CampaignConstant.Kumi]: new Date('2025-06-03T23:00:00.000Z'),
+  [CampaignConstant.Based]: new Date('2025-09-03T21:00:00.000Z'),
+  [CampaignConstant.Polygon]: new Date('2025-09-03T21:00:00.000Z'),
 };
+

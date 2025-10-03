@@ -21,14 +21,14 @@ export async function PostApiHandler(req: NextApiRequest, res: NextApiResponse<A
 }
 
 export async function PostBurnDropsApiHandler(req: NextApiRequest, res: NextApiResponse<ApiResponse<boolean>>) {
-  const { burnDropsArray, campaign, walletAddress } = req.body;
+  const { burnDropsArray, walletAddress } = req.body;
 
   if (!burnDropsArray) {
     return RequestResponse(res, "BadRequest", false, "Missing or invalid burn drops array");
   }
 
   for (const drop of burnDropsArray) {
-    await BurnDrop(walletAddress, campaign, drop);
+    await BurnDrop(walletAddress, drop);
   }
 
   return RequestResponse(res, "Successful", true, "Drops fetched successfully", true);

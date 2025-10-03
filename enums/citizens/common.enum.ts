@@ -53,31 +53,6 @@ export enum HoldingCondition {
   HAS_ALL = "&" //Means the user needs to be holding all the tokens
 }
 
-export enum Campaign {
-  Citizens = "vrm_female",
-  Creators = "vrm_male",
-  Kumi = "kumi",
-  Based = "root_citizens",
-  Polygon = "polygon_citizens"
-}
-
-export enum LuksoCampaign {
-  Citizens = Campaign.Citizens,
-  Creators = Campaign.Creators,
-}
-
-export enum SolanaCampaign {
-  Kumi = Campaign.Kumi,
-}
-
-export enum RootCampaign {
-  Based = Campaign.Based,
-}
-
-export enum PolygonCampaign {
-  Polygon = Campaign.Polygon,
-}
-
 export enum CandyMachineGroup {
   Holder = "holder",
   Public = "public",
@@ -100,4 +75,10 @@ export enum CampaignBaseUrl {
 
 export enum CampaignBaseCombinationUrl{
   Polygon = "ipfs://bafkreibz25o26ro2ycffi5zpjmnlxiqfs2cmhdo7qvejyrrqmbgvu7dtqy"
+}
+
+export enum FeatureKind{
+  Feature = "feature",
+  Drop = "featureDrop",
+  ClaimableDrop = "featureClaimableDrop"
 }

@@ -1,14 +1,15 @@
 import { JsonRpcProvider } from "ethers";
-import { ClaimableDrop } from "../../../interfaces/citizens.interface";
+import { FeatureClaimableDrop } from "../../../interfaces/citizens.interface";
 import CampaignCard from "./campaignCard.ui";
-import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
+
 import {  useState } from "react";
 import Modal from "./modal.ui";
 import Button from "./button.ui";
 import { useSnackbar } from "../snackbar/snackbar.provider";
+import { CardSize, PaymentType } from "../../../enums/citizens/common.enum";
 
 interface DropItemCardProps {
-  drop: ClaimableDrop;
+  drop: FeatureClaimableDrop;
   userXP: number;
   userAddress: string;
   provider: JsonRpcProvider;
@@ -29,7 +30,7 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
     const isSuccess = await onClaim();
     if (isSuccess) {
       showSnackbar(
-        <p>The item &quot;{drop.featureName}&quot; has been successfully claimed!.</p>
+        <p>The item &quot;{drop.name}&quot; has been successfully claimed!.</p>
       )
     } else {
       showSnackbar(
@@ -51,13 +52,13 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
   return <>
     <CampaignCard
       key={drop.id}
-      title={drop.featureName}
+      title={drop.name}
       tokenID={drop.owned ? 'Claimed' : undefined}
       price={drop.owned ? undefined : isLock ? `UNLOCK: ${drop.requiredXP} XP` : drop.paymentType === PaymentType.ETH ? `TOKEN-GATED` : `PRICE: ${drop.price} ${drop.paymentType}`}
       chipColor={drop.owned ? undefined : isLock ? 'bg-citizens-yellow' : drop.paymentType === PaymentType.LYX ? 'bg-citizens-red' : 'bg-citizens-blue'}
       blocked={isLock}
       imgSrc={drop.imageUrl}
-      imgAlt={drop.featureName}
+      imgAlt={drop.name}
       size={CardSize.Small}
       light
       overlayText={drop.owned || isLock ? undefined : "CLICK TO CLAIM"}
@@ -71,7 +72,7 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
           <div className="text-center text-white grid gap-4">
             {isClaiming ?
               <>
-                <p className="font-bold text-2xl">Claiming<br />{drop.featureName}</p>
+                <p className="font-bold text-2xl">Claiming<br />{drop.name}</p>
                 {
                   popupOpen ?
                     <>
@@ -87,7 +88,7 @@ export default function DropItemCard({ drop, popupOpen = false, onClaim, isLock 
               </>
               :
               <>
-                <p className="font-bold text-2xl">Claim Item:<br />{drop.featureName}</p>
+                <p className="font-bold text-2xl">Claim Item:<br />{drop.name}</p>
                 <p className="text-lg">
                   {drop.paymentType === PaymentType.LYX 
                     ? `To claim this item you need to pay ${drop.price} ${drop.paymentType}`

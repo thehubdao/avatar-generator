@@ -5,7 +5,7 @@ import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { UMI, COLLECTION_ID, KUMI_CANDY_MACHINE_ID, KUMI_CANDY_MACHINE_TREASURY, COLLECTION_GUARD_ID, ADMIN_SIGNER } from '../../../constants/solana/contract.constant';
-import { CitizenMetadata, Drop, MintingPriceData, SolanaAttribute, SolanaMetadata } from '../../../interfaces/citizens.interface';
+import { CitizenMetadata, FeatureDrop, MintingPriceData, SolanaAttribute, SolanaMetadata } from '../../../interfaces/citizens.interface';
 import { GetSolanaImageUrl, GetSolanaIPFSData } from '../citizens.util';
 import { ConnectedSolanaWallet } from '@privy-io/react-auth';
 import { GuardSetMintArgs, mintV1, mplCandyMachine } from '@metaplex-foundation/mpl-core-candy-machine';
@@ -13,12 +13,14 @@ import {
     fromWeb3JsTransaction,
     toWeb3JsTransaction
 } from '@metaplex-foundation/umi-web3js-adapters';
-import { Campaign, CandyMachineGroup, SolanaCampaign } from '../../../enums/citizens/common.enum';
+import { Campaign, SolanaCampaign } from '../../../types/citizens.type';
 import { setComputeUnitLimit } from '@metaplex-foundation/mpl-toolbox';
 import { findAssetSignerPda } from '@metaplex-foundation/mpl-core';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { GetCollectionDocs } from '../../firebase.util';
 import { GetSolanaSetNewCombinationSerializedTransaction } from '../../api.util';
+import { CandyMachineGroup } from '../../../enums/citizens/common.enum';
+import { SolanaCampaignConstant } from '../../../constants/campaign.constant';
 
 
 export async function InitializeUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
@@ -117,7 +119,7 @@ export async function GetSolanaCitizenMetadata(assetAddress: AssetV1): Promise<R
         imageUrl: '',
         combination: ipfsDataResult.value.combination,
         baseCombination: ipfsDataResult.value.baseCombination,
-        campaign: Campaign.Kumi,
+        campaign: SolanaCampaignConstant.Kumi,
         tokenId: assetAddress.name.split('#')[1],
         name: ipfsDataResult.value.name,
         description: ipfsDataResult.value.description,
@@ -274,7 +276,7 @@ export async function GetCollectionSupply(collectionId: PublicKey = COLLECTION_I
 export async function GetSolanaUserFeatureAssets(walletAddress: string, campaign: SolanaCampaign): Promise<Result<CampaignDrops<SolanaCampaign>>> {
     try {
         const assetsResult = await GetAssetsByOwner(walletAddress);
-        const userFeatures: Drop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as Drop[];
+        const userFeatures: FeatureDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as FeatureDrop[];
 
         if (!assetsResult.success) return {
             success: false,
@@ -283,13 +285,13 @@ export async function GetSolanaUserFeatureAssets(walletAddress: string, campaign
         };
 
         const userFeaturesAssets = userFeatures.map(feature => { // For solana, we set the asset address instead of the collection address as it works different
-            const assets = assetsResult.value.filter(asset => asset.updateAuthority.address === feature.contract_address);
+            const assets = assetsResult.value.filter(asset => asset.updateAuthority.address === feature.contractAddress);
 
             if (assets.length === 0) return undefined;
 
             return {
                 ...feature,
-                contract_address: assets[0].publicKey.toString(),
+                contractAddress: assets[0].publicKey.toString(),
                 balance: assets.length
             };
         })
@@ -298,7 +300,7 @@ export async function GetSolanaUserFeatureAssets(walletAddress: string, campaign
 
         return {
             success: true,
-            value: { [campaign]: filteredUserFeaturesAssets }
+            value: { [campaign]: filteredUserFeaturesAssets } as CampaignDrops<SolanaCampaign>
         };
     } catch (e) {
         const err = e as Error

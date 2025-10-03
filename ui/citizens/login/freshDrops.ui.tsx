@@ -1,10 +1,11 @@
 import CampaignCard from "../common/campaignCard.ui";
 import { LOGIN_FRESHDROPS } from "../../../constants/citizens.constant";
-import { Campaign, CardSize } from "../../../enums/citizens/common.enum";
+import { Campaign } from "../../../types/citizens.type";
 import { Blockchain } from "../../../enums/blockchain/common.enum";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import 'swiper/css';
+import { CardSize } from "../../../enums/citizens/common.enum";
 
 interface FreshDropsUIProps {
   setSelectedCampaign: (blockchain: Blockchain | undefined, campaign: Campaign | undefined) => void;

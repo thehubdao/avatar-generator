@@ -1,8 +1,9 @@
 import React from 'react';
 import Image from 'next/image';
-import { CitizensCollection } from '../../../interfaces/citizens.interface';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
-import { Campaign } from '../../../enums/citizens/common.enum';
+import { Campaign } from '../../../types/citizens.type';
+import { CitizensCollection } from '../../../interfaces/citizens.interface';
+import { CampaignConstant } from '../../../constants/campaign.constant';
 
 interface CampaignSelectionModalProps {
   isOpen: boolean;
@@ -20,7 +21,7 @@ export default function CampaignSelectionModal({
   if (!isOpen) return null;
 
   const getNetworkDisplayName = (blockchain: Blockchain, campaign: Campaign) => {
-    if (blockchain === Blockchain.Ethereum && (campaign === Campaign.Citizens || campaign === Campaign.Creators)) {
+    if (blockchain === Blockchain.Ethereum && (campaign === CampaignConstant.Citizens || campaign === CampaignConstant.Creators)) {
       return 'Lukso';
     }
     return blockchain.charAt(0).toUpperCase() + blockchain.slice(1);

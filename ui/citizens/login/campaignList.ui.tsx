@@ -1,11 +1,11 @@
 import React from 'react';
 import { CitizensCollection } from "../../../interfaces/citizens.interface";
 import CampaignCard from "../common/campaignCard.ui";
-import { Campaign } from '../../../enums/citizens/common.enum';
+import { Campaign } from '../../../types/citizens.type';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
-import { CardSize } from '../../../enums/citizens/common.enum';
 import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
+import { CardSize } from '../../../enums/citizens/common.enum';
 
 interface CampaignListProps {
   collections: CitizensCollection[];

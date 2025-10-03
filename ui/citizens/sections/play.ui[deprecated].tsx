@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { CardSize } from "../../../enums/citizens/common.enum";
+import { CardSize } from "../../../types/citizens.type";
 import { Game } from "../../../interfaces/citizens.interface";
 import CampaignCard from "../common/campaignCard.ui";
 import Modal from "../common/modal.ui";

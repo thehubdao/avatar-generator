@@ -3,13 +3,13 @@ import { CitizenMetadata } from "../../../interfaces/citizens.interface";
 import { LogError } from "../../../utils/common.util";
 import { Module } from "../../../enums/common.enum";
 import { CAMPAIGN_LABELS } from "../../../constants/labels.constant";
-import { CardSize, CitizensPageLocation } from "../../../enums/citizens/common.enum";
 import SearchSVG from "../common/SVG/searchSVG.ui";
 import SelectorUI from "../common/selector.ui";
 import CampaignCard from "../common/campaignCard.ui";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { setCampaignParameters, setSelectedCampaign, setSelectedCitizen } from "../../../store/citizensMetadataSlice";
 import { GoToPage } from "../../../utils/router.util";
+import { CardSize, CitizensPageLocation } from "../../../enums/citizens/common.enum";
 
 export default function CitizensCollection() {
   const dispatch = useAppDispatch();

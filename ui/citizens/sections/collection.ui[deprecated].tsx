@@ -3,16 +3,18 @@ import { CollectionType } from "../../../interfaces/avatar.interface";
 import CitizensCollection from "../common/citizensCollection.ui[deprecated]";
 import WearablesCollection from "../common/wearablesCollection.ui";
 import { useState } from "react";
-import { Campaign, CollectionSections } from "../../../enums/citizens/common.enum";
 import { JsonRpcProvider } from "ethers";
-import { ClaimableDrop } from "../../../interfaces/citizens.interface";
+import { FeatureClaimableDrop } from "../../../interfaces/citizens.interface";
+import React from "react";
+import { CollectionSections } from "../../../enums/citizens/common.enum";
+
 interface CollectionProps {
   loadedTokens?: CitizenMetadata[];
   currentCollection: CollectionType
-  updateCollection: (newCampaign: Campaign, newCombination: string, tokenMetadata: CitizenMetadata) => void;
+  updateCollection: (newCampaign: string, newCombination: string, tokenMetadata: CitizenMetadata) => void;
   provider: JsonRpcProvider | null;
-  claimableDrops: ClaimableDrop[]
-  handleClaim: (drop: ClaimableDrop) => Promise<boolean>
+  claimableDrops: FeatureClaimableDrop[]
+  handleClaim: (drop: FeatureClaimableDrop) => Promise<boolean>
 }
 
 

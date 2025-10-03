@@ -18,6 +18,7 @@ import Button from "../citizens/common/button.ui";
 import { useSnackbar } from "../citizens/snackbar/snackbar.provider";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { setSavingMode } from "../../store/citizensMetadataSlice";
+import { AnyFeature } from "../../types/citizens.type";
 
 interface HudUIProps {
   HUDTitle?: string;
@@ -26,7 +27,7 @@ interface HudUIProps {
   // selectListFeatures: FeatureBasic[];
   // selectListAccessories: FeatureBasic[];
 
-  optionList: FeatureInterface[] | undefined;
+  optionList: AnyFeature[] | undefined;
   // featureList: FeatureInterface[] | undefined;
   // accessoryList: AccessoryInterface[] | undefined;
 

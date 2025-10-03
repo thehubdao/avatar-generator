@@ -11,8 +11,9 @@ import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { ApiRoutesV1 } from "../enums/api.enum";
 import { VRM_PROCESS_SERVICE_URL } from "../constants/common.constant";
-import { ClaimableDrop, DropToClaim, LuksoDrop, SolanaAttribute, UserXPData } from "../interfaces/citizens.interface";
+import { FeatureClaimableDrop, DropToClaim, FeatureLuksoDrop, SolanaAttribute, UserXPData } from "../interfaces/citizens.interface";
 import { Blockchain } from "../enums/blockchain/common.enum";
+import { AnyFeature } from "../types/citizens.type";
 
 //#region Generic
 type QueryParams = { [p: string]: string | number | undefined | null };
@@ -122,11 +123,11 @@ export async function PostRequestThumbnailProcessFile(VRMFile: Blob): Promise<Bl
 //#endregion
 
 export async function GetAssetsListByCampaign(campaign?: string | null) {
-  return GetRequest<FeatureInterface[]>(ApiRoutesV1.FeatureOptions, undefined, { campaign });
+  return GetRequest<AnyFeature[]>(ApiRoutesV1.FeatureOptions, undefined, { campaign });
 }
 
 export async function GetAccessoryListByCampaign(campaign?: string | null) {
-  return GetRequest<FeatureInterface[]>(ApiRoutesV1.AccessoryOptions, undefined, { campaign });
+  return GetRequest<AnyFeature[]>(ApiRoutesV1.AccessoryOptions, undefined, { campaign });
 }
 
 export async function GetAnimationListByCampaign(campaign?: string | null) {
@@ -182,7 +183,7 @@ export async function ApproveClaimForUser(address: string, dropId: string): Prom
   return data.data.approved;
 }
 
-export async function FetchClaimableDrops(dropId?: string): Promise<ClaimableDrop[]> {
+export async function FetchClaimableDrops(dropId?: string): Promise<FeatureClaimableDrop[]> {
   const url = dropId ? `/api/v1/drops?id=${dropId}` : '/api/v1/drops';
   const response = await fetch(url);
   if (!response.ok) throw new Error('Failed to fetch claimable drops');
@@ -201,7 +202,7 @@ export async function GetUserXPData(address: string, blockchainType: Blockchain)
   return { success: true, value: data.data };
 }
 
-export async function RequestClaimApprove(drops: ClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
+export async function RequestClaimApprove(drops: FeatureClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
   const requestResult = await fetch('/api/v1/drops', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -216,7 +217,7 @@ export async function RequestClaimApprove(drops: ClaimableDrop[], walletAddress:
   return { success: true, value: data.data };
 }
 
-export async function RequestBurnDrops(burnDropsArray: LuksoDrop[], walletAddress: string, campaign: string): Promise<Result<DropToClaim[]>> {
+export async function RequestBurnDrops(burnDropsArray: FeatureLuksoDrop[], walletAddress: string, campaign: string): Promise<Result<DropToClaim[]>> {
   const requestResult = await fetch('/api/v1/drops/burnDrops', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

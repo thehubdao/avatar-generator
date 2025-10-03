@@ -1,12 +1,12 @@
 import { CitizenMetadata, LuksoMetadata, PolygonMetadata, SolanaMetadata } from "../interfaces/citizens.interface";
 import { PinataSDK } from "pinata-web3";
-import { Campaign } from "../enums/citizens/common.enum";
 import { Result } from "../types/common.type";
 import { CommonErrorCode, Module } from "../enums/common.enum";
 import { LogError } from "./common.util";
 import { UploadFile } from "./firebase.util";
 import { StorageLocation } from "../enums/firebase.enum";
 import { TEMP_CAMPAIGN_SWITCH } from "../constants/lukso/contract.constant";
+import { Campaign } from "../types/citizens.type";
 
 
 const pinata = new PinataSDK({ pinataGateway: 'lukso.mypinata.cloud', pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT })

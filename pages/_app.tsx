@@ -10,7 +10,6 @@ import { Provider } from 'react-redux'
 import store from '../store/store'
 import FutureVerseProvider from '../components/providers/FutureVerseProvider'
 
-
 const workSans = Work_Sans({ subsets: ['latin'], display: 'block' })
 const poppins = Poppins({
     subsets: ['latin'],
@@ -31,6 +30,7 @@ const featuresIcons = FeaturesIcons({
 })
 
 export default function App({ Component, pageProps }: AppProps) {
+
     return (
         <>
             <style jsx global>{`

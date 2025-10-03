@@ -8,7 +8,8 @@ import { CommonErrorCode, Module } from "../../enums/common.enum";
 import { LogError } from "../common.util";
 import { IPFS_GATEWAY_API_KEY, IPFS_GATEWAY_URL, LSP26_ABI, LSP26_ADDRESS } from "../../constants/citizens.constant";
 import { StorageLocation } from "../../enums/firebase.enum";
-import { GetCollectionDocs } from "../firebase.util";
+import { FirebaseUtil } from "../firebase.util";
+import { FeatureKind } from "../../enums/citizens/common.enum";
 
 export async function GetLuksoIPFSData(cid: string): Promise<Result<LuksoMetadata>> {
   try {
@@ -208,8 +209,20 @@ export async function GetVrmUrl(campaign: string, combination: string): Promise<
 }
 
 export async function GetCampaignDrops<T>(campaign: string): Promise<Result<T[]>> {
-  try { 
-    const drops = await GetCollectionDocs(`campaign/${campaign}/drops`) as T[];
+  try {
+    // Now reads from unified features collection with isDrop filter
+    const db = await FirebaseUtil.Instance().DB();
+    const featuresPath = `campaign/${campaign}/features`;
+    const { collection, query, where, getDocs } = await import('@firebase/firestore');
+    
+    const dropsQuery = query(
+      collection(db, featuresPath),
+      where('kind', 'in', [FeatureKind.Drop, FeatureKind.ClaimableDrop]),
+    );
+    
+    const snapshot = await getDocs(dropsQuery);
+    const drops = snapshot.docs.map(doc => doc.data() as T);
+    
     return { success: true, value: drops };
   } catch (error) {
     const err = error as Error;
@@ -217,3 +230,4 @@ export async function GetCampaignDrops<T>(campaign: string): Promise<Result<T[]>
     return { success: false, errMessage: err.message, errCode: CommonErrorCode.FetchError };
   }
 }
+

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { setCheckoutMode, setMarketplaceMode, setShoppingCart } from "../../../store/citizensMetadataSlice";
 import { useAppSelector, useAppDispatch } from "../../../store/hooks";
-import { ClaimableDrop } from "../../../interfaces/citizens.interface";
+import { FeatureClaimableDrop } from "../../../interfaces/citizens.interface";
 import PlusSVG from "../common/SVG/plusSVG.ui";
 import Image from "next/image";
 import BlockSVG from "../common/SVG/blockSVG.ui";
@@ -9,6 +9,8 @@ import { BiCartAlt, BiCollapseAlt, BiExpandAlt, BiSolidTrash } from 'react-icons
 import { useSnackbar } from "../snackbar/snackbar.provider";
 import Modal from "../common/modal.ui";
 import Button from "../common/button.ui";
+import GetImage from "../../../components/commons/getImage.component";
+import { FeatureKind } from "../../../enums/citizens/common.enum";
 
 interface ShoppingCartUIProps {
   onRemoveItem: (type?: string) => Promise<void>;
@@ -21,11 +23,12 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
   const userXP = useAppSelector(state => state.citizensAuth.xpData);
   const didCheckoutMode = useAppSelector(state => state.citizensMetadata.checkoutMode);
   const isMarketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
+  const selectedCampaign = useAppSelector(state => state.citizensMetadata.selectedCampaign);
   const dispatch = useAppDispatch();
 
   const { showSnackbar } = useSnackbar();
 
-  const [shoppingCartItems, setShoppingCartItems] = useState<ClaimableDrop[]>([]);
+  const [shoppingCartItems, setShoppingCartItems] = useState<FeatureClaimableDrop[]>([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
 
@@ -53,18 +56,22 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
 
   async function handleCheckout() {
     if (!onCheckOut) {
-      showSnackbar(<p>Ups. We can´t to checkout, try later.</p>);
+      showSnackbar(<p>Ups. We can't checkout right now, please try again later.</p>);
       return;
     }
     dispatch(setCheckoutMode(true));
     const isSuccess = await onCheckOut();
+    dispatch(setCheckoutMode(false));
+    
     if (isSuccess) {
-      handleCleanCart();
+      // Clear cart directly without triggering reset functionality
+      dispatch(setShoppingCart([]));
+      // Exit marketplace mode and return to homebase
+      dispatch(setMarketplaceMode(false));
       showSnackbar(<p>Your purchase was successful!</p>);
     } else {
-      showSnackbar(<p>Ups. We can´t to checkout, try later.</p>);
+      showSnackbar(<p>Ups. We can't process your checkout right now, please try again later.</p>);
     }
-    dispatch(setCheckoutMode(false));
   }
 
   function handleOpen() {
@@ -73,18 +80,18 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
   }
 
   useEffect(() => {
-    if (!claimableDrops) return;
+    if (!claimableDrops || !selectedCampaign) return;
 
     // Flatten the claimableDrops object to an array
-    const allDrops = Object.values(claimableDrops).flat();
+    const selectedCampaignDrops = claimableDrops[selectedCampaign];
 
     // Filter the claimable drops based on the shopping cart, excluding blocked items
-    const items = allDrops.filter(drop =>
+    const items = selectedCampaignDrops.filter(drop =>
       shoppingCart.some(cartItem =>
-        cartItem.detail === drop.featureType &&
-        cartItem.val === drop.featureName
-      ) && (drop.requiredXP - (userXP?.xp || 0)) <= 0
-    );
+        cartItem.detail === drop.type &&
+        cartItem.val === drop.name
+      ) && drop.kind === FeatureKind.ClaimableDrop && (drop.requiredXP - (userXP?.xp || 0)) <= 0
+    ) as FeatureClaimableDrop[];
 
     setShoppingCartItems(items);
   }, [shoppingCart, claimableDrops]);
@@ -135,18 +142,18 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
                             {/* DESCRIPTION */}
                             <div className="flex items-center gap-2">
                               <div className="rounded-xl overflow-hidden">
-                                <Image src={item.imageUrl} alt={item.featureName} width={50} height={50} />
+                                <div className="w-[50px] h-[50px] relative"><GetImage url={item.thumb} alt={item.name} /></div>
                               </div>
                               <div>
-                                <div className="font-semibold text-xs">{item.featureName}</div>
-                                <div className="text-gray-400 text-xs">{item.featureType}</div>
+                                <div className="font-semibold text-xs">{item.name}</div>
+                                <div className="text-gray-400 text-xs">{item.type}</div>
                               </div>
                             </div>
                             {/* PRICE */}
                             {xpRequired <= 0 ?
                               <div className="flex items-center gap-2">
-                                <span className="font-bold text-xl text-citizens-gray">{item.price > 0 ? (`${item.price} ${item.paymentType}`) : "Free"}</span>
-                                <div className="rotate-45 cursor-pointer" onClick={() => handleRemove(item.featureName || idx, item.featureType)}>
+                                <span className="font-bold text-xl text-citizens-gray">{item.price && item.price > 0 ? (`${item.price} ${item.paymentType}`) : "Free"}</span>
+                                <div className="rotate-45 cursor-pointer" onClick={() => handleRemove(item.name || idx, item.type)}>
                                   <PlusSVG className="fill-citizens-red" />
                                 </div>
                               </div>
@@ -158,7 +165,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
                                     <BlockSVG />
                                   </div>
                                 </div>
-                                <div className="rotate-45 cursor-pointer" onClick={() => handleRemove(item.featureName || idx, item.featureType)}>
+                                <div className="rotate-45 cursor-pointer" onClick={() => handleRemove(item.name || idx, item.type)}>
                                   <PlusSVG className="fill-citizens-red" />
                                 </div>
                               </div>

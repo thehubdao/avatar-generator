@@ -48,6 +48,7 @@ import { AGChangeCamPosition, AGChangeLookAtPosition, TakeCanvasPicture } from "
 import {Result} from "../../types/common.type";
 import {EXPORT_ATTRIBUTE, GLOBAL_VALUES} from "../../constants/common.constant";
 import {GenerateVrmMetaData} from "../../utils/threejs/vrm.util";
+import { AnyFeature } from "../../types/citizens.type";
 
 interface AvatarBuilderProps {
   campaign: string;
@@ -61,9 +62,9 @@ interface AvatarBuilderProps {
   enablePan?: boolean;
 }
 
-let optionList: FeatureInterface[] | undefined;
-let featureList: FeatureInterface[] | undefined;
-let accessoryList: FeatureInterface[] | undefined;
+let optionList: AnyFeature[] | undefined;
+let featureList: AnyFeature[] | undefined;
+let accessoryList: AnyFeature[] | undefined;
 let animationList: AnimationInterface[] | undefined;
 let stageList: StageInterface[] | undefined;
 let envMapList: EnvMapInterface[] | undefined;
@@ -96,7 +97,7 @@ export default function AvatarBuilder({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   // const [featureListShow, setFeatureListShow] = useState<FeatureInterface[]>();
   // const [accessoryListShow, setAccessoryListShow] = useState<FeatureInterface[]>();
-  const [optionListShow, setOptionListShow] = useState<FeatureInterface[]>();
+  const [optionListShow, setOptionListShow] = useState<AnyFeature[]>();
   const [selectedOpc, setSelectedOpc] = useState<BasicData[]>(exportData.attributes);
 
   const startPromises = useRef<Promise<unknown>>();

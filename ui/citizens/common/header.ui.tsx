@@ -5,11 +5,12 @@ import LogoTheHub from "./SVG/logoTheHubSVG.ui";
 import Image from "next/image";
 import Button from "./button.ui";
 import SocialButtons from "./socialButtons.ui";
-import { Campaign, CitizensPageLocation } from "../../../enums/citizens/common.enum";
 import { GoToPage } from "../../../utils/router.util";
 import { setEditMode } from "../../../store/citizensMetadataSlice";
 import AboutButton from "./aboutButton.ui";
 import AboutModal from "./aboutModal.ui";
+import { CitizensPageLocation } from "../../../enums/citizens/common.enum";
+import { CampaignConstant } from "../../../constants/campaign.constant";
 
 interface HeaderUIProps {
   onLogin?: () => void;
@@ -84,7 +85,7 @@ export default function HeaderUI({onLogin, onLogout}: HeaderUIProps) {
               <Button label="Collection" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                 handleNavbarClick(CitizensPageLocation.BACKPACK);
               }} />
-              {selectedCampaign !== Campaign.Kumi && selectedCampaign !== Campaign.Based && selectedCampaign !== Campaign.Polygon && <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
+              {selectedCampaign !== CampaignConstant.Kumi && selectedCampaign !== CampaignConstant.Based && selectedCampaign !== CampaignConstant.Polygon && <Button label="leaderboard" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {
                 handleNavbarClick(CitizensPageLocation.LEADERBOARD);
               }} />}
               <Button label="play" withIcon className="w-full xl:min-w-min h-fit px-4 !shadow-none xl:!shadow-citizens-btn" textStyles="text-[32px] xl:!text-base 2xl:!text-lg text-start xl:text-center" handleClick={() => {

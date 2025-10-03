@@ -1,6 +1,6 @@
-import { Campaign } from "../enums/citizens/common.enum";
 import { POLYGON_CHAIN_ID, POLYGON_CHAIN_NAME, POLYGON_NATIVE_CURRENCY_NAME, POLYGON_NATIVE_CURRENCY_SYMBOL, POLYGON_NATIVE_CURRENCY_DECIMALS, POLYGON_RPC_URL, POLYGON_EXPLORER_URL } from "./polygon/contract.constant";
 import { ROOT_CHAIN_ID, ROOT_CHAIN_NAME, ROOT_NATIVE_CURRENCY_NAME, ROOT_NATIVE_CURRENCY_SYMBOL, ROOT_NATIVE_CURRENCY_DECIMALS, ROOT_RPC_URL, ROOT_EXPLORER_URL } from "./root/contract.constant";
+import { CampaignConstant } from "./campaign.constant";
 
 export const GLOBAL_VALUES = {
   BaseCampaign: "citizens",
@@ -26,7 +26,7 @@ export const VRM_PROCESS_SERVICE_URL = process.env.NEXT_PUBLIC_VRM_PROCESS_SERVI
 export const AVATAR_MAX_SUPPLY = 1764;
 
 export const NETWORK_CONFIGS = {
-  [Campaign.Polygon]: {
+  [CampaignConstant.Polygon]: {
     expectedChainId: Number(POLYGON_CHAIN_ID),
     config: {
       chainId: `0x${Number(POLYGON_CHAIN_ID).toString(16)}`,
@@ -40,7 +40,7 @@ export const NETWORK_CONFIGS = {
       blockExplorerUrls: [POLYGON_EXPLORER_URL]
     }
   },
-  [Campaign.Based]: {
+  [CampaignConstant.Based]: {
     expectedChainId: Number(ROOT_CHAIN_ID),
     config: {
       chainId: `0x${Number(ROOT_CHAIN_ID).toString(16)}`,
@@ -58,35 +58,35 @@ export const NETWORK_CONFIGS = {
 
 // Configuraciones de cámara para captura de fotos por campaña
 export const PHOTO_CAMERA_CONFIGS = {
-  [Campaign.Citizens]: {
+  [CampaignConstant.Citizens]: {
     position: { x: 0, y: 1.6, z: 1 },
     target: { x: 0, y: 1.4, z: 0 },
     imageSize: 1024,
     fov: 50,
     aspect: 1.0
   },
-  [Campaign.Creators]: {
+  [CampaignConstant.Creators]: {
     position: { x: 0, y: 1.6, z: 1 },
     target: { x: 0, y: 1.4, z: 0 },
     imageSize: 1024,
     fov: 50,
     aspect: 1.0
   },
-  [Campaign.Polygon]: {
+  [CampaignConstant.Polygon]: {
     position: { x: 0, y: 1.6, z: 0.95 },
     target: { x: 0, y: 1.4, z: 0 },
     imageSize: 1024,
     fov: 50,
     aspect: 1.0
   },
-  [Campaign.Based]: {
+  [CampaignConstant.Based]: {
     position: { x: 0, y: 1, z: 1.2 },
     target: { x: 0, y: 0.88, z: 0 },
     imageSize: 1024,
     fov: 50,
     aspect: 1.0
   },
-  [Campaign.Kumi]: {
+  [CampaignConstant.Kumi]: {
     position: { x: 0, y: 0.5, z: 1.3 },
     target: { x: 0, y: 1, z: 0 },
     imageSize: 1024,

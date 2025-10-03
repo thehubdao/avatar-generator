@@ -1,22 +1,24 @@
 import { useEffect, useState } from "react";
 import GetImage from "../../../components/commons/getImage.component"
-import { FeatureInterface } from "../../../interfaces/api.interface"
 import { useAppSelector } from "../../../store/hooks";
 import MedalSVG from "../../citizens/common/SVG/medalSVG.ui"
 import LockSVG from "../../citizens/common/SVG/lockSVG.ui";
+import { AnyFeature } from "../../../types/citizens.type";
+import { FeatureKind } from "../../../enums/citizens/common.enum";
 
 interface OptionCardUIProps {
-  option: FeatureInterface,
+  option: AnyFeature,
   isActive?: boolean
 }
 
 export default function OptionCardUI({ option, isActive }: OptionCardUIProps) {
   const userXP = useAppSelector(state => state.citizensAuth.xpData);
+  const didMarketplaceMode = useAppSelector(state => state.citizensMetadata.marketplaceMode);
 
   const [hasRequiredXP, setHasRequiredXP] = useState<boolean>(false);
 
   useEffect(() => {
-    if (option.requiredXP && userXP) {
+    if (option.kind === FeatureKind.ClaimableDrop && option.requiredXP && userXP) {
       setHasRequiredXP(userXP.xp > option.requiredXP);
     }
   }, [option, userXP]);
@@ -26,10 +28,10 @@ export default function OptionCardUI({ option, isActive }: OptionCardUIProps) {
       <div className="relative bg-[#3d3d3d] w-full h-28 xl:h-[132px] dark:xl:h-[164px] flex justify-center items-center font-semibold">
         <GetImage url={option.thumb} alt={option.path} />
         {
-          option.price != undefined ?
+          option.kind === FeatureKind.ClaimableDrop && option.price != undefined && didMarketplaceMode ?
             <>
               <div className="absolute inset-2 flex gap-2">
-                <div className={`${(!hasRequiredXP && option.requiredXP) ? 'hidden':''} bg-citizens-red w-fit h-fit text-[10px] px-2 py-1 rounded-full`}>
+                <div className={`${(!hasRequiredXP && option.requiredXP) ? 'hidden' : ''} bg-citizens-red w-fit h-fit text-[10px] px-2 py-1 rounded-full`}>
                   {option.price <= 0 ? 'FREE' : (option.price + ' ' + option.paymentType)}
                 </div>
                 {!hasRequiredXP && option.requiredXP ?
@@ -47,7 +49,7 @@ export default function OptionCardUI({ option, isActive }: OptionCardUIProps) {
             :
             <>
               <div className="absolute inset-1 xl:inset-2 bg-citizens-bluedark w-fit h-fit text-[10px] xl:text-xs text-white px-2 py-1 rounded-full">
-                {option.balance ? `${option.balance} ${option.balance === 1 ? 'unit' : 'units'}` : 'BASE'}
+                {option.kind === FeatureKind.Drop || option.kind === FeatureKind.ClaimableDrop ? `${option.balance} ${option.balance === 1 ? 'unit' : 'units'}` : 'BASE'}
               </div>
               <div className="absolute right-1 xl:right-2 top-1 xl:top-2">
                 <MedalSVG withCircle={isActive} />

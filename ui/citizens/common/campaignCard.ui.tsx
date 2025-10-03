@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { CardSize } from "../../../enums/citizens/common.enum";
 import BlockSVG from "./SVG/blockSVG.ui";
+import { CardSize } from "../../../enums/citizens/common.enum";
 
 interface CampaignCardProps {
   title: string;

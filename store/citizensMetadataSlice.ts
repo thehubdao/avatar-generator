@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CitizenMetadata, ClaimableDrop, MintingPriceData } from '../interfaces/citizens.interface';
-import { Campaign, LuksoCampaign } from '../enums/citizens/common.enum';
+import { CitizenMetadata, MintingPriceData } from '../interfaces/citizens.interface';
 import { BasicData, CampaignParameters } from '../interfaces/common.interface';
 import { LeaderboardEntry } from '../types/leaderboard.type';
-import { AppCampaigns, CampaignDrops } from '../types/citizens.type';
+import { CampaignDrops } from '../types/citizens.type';
+import { Campaign } from '../types/citizens.type';
 
 interface CitizensMetadataState {
   citizensMetadata: CitizenMetadata[] | null;
@@ -11,8 +11,8 @@ interface CitizensMetadataState {
   campaignParameters: CampaignParameters | null;
   selectedCitizen: CitizenMetadata | null;
   leaderboardData: LeaderboardEntry[] | null | undefined;
-  userFeatures: CampaignDrops<AppCampaigns> | null;
-  claimableDrops: Record<LuksoCampaign, ClaimableDrop[]> | null;
+  userFeatures: CampaignDrops<Campaign> | null;
+  claimableDrops: CampaignDrops<Campaign> | null;
   shoppingCart: BasicData[];
   mintSupply: number | null;
   mintingPrice: MintingPriceData | null;
@@ -65,7 +65,7 @@ export const citizensMetadataSlice = createSlice({
     setLeaderboardData: (state, action: PayloadAction<LeaderboardEntry[] | undefined>) => {
       state.leaderboardData = action.payload;
     },
-    setUserFeatures: (state, action: PayloadAction<CampaignDrops<AppCampaigns>>) => {
+    setUserFeatures: (state, action: PayloadAction<CampaignDrops<Campaign>>) => {
       state.userFeatures = action.payload;
     },
     setEditMode: (state, action: PayloadAction<boolean>) => {
@@ -89,7 +89,7 @@ export const citizensMetadataSlice = createSlice({
     setMintingPrice: (state, action: PayloadAction<MintingPriceData | null>) => {
       state.mintingPrice = action.payload;
     },
-    setClaimableDrops: (state, action: PayloadAction<Record<Campaign, ClaimableDrop[]>>) => {
+    setClaimableDrops: (state, action: PayloadAction<CampaignDrops<Campaign>>) => {
       state.claimableDrops = action.payload;
     },
     setShoppingCart: (state, action: PayloadAction<BasicData[]>) => {

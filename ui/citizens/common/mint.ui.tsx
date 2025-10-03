@@ -10,11 +10,11 @@ import { setMintingMode } from "../../../store/citizensMetadataSlice";
 import PlusSVG from "./SVG/plusSVG.ui";
 import { useMediaQuery } from "usehooks-ts";
 import Counter from "./counter.ui";
-import { Campaign } from "../../../enums/citizens/common.enum";
 import { MINTING_TARGET_DATE } from "../../../constants/citizens.constant";
 import { MintUIResult } from "../../../interfaces/common.interface";
 import FaceSMileSVG from "./SVG/faceSmileSVG.ui";
 import FaceSadSVG from "./SVG/faceSadSVG.ui";
+import { Campaign } from "../../../types/citizens.type";
 
 interface MintUIProps {
   imgUrl?: string;

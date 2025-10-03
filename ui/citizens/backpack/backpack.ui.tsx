@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { CollectionSections } from "../../../enums/citizens/common.enum";
 import CitizensCollection from "./citizensCollection.ui";
 import { useAppSelector } from "../../../store/hooks";
 import LoadingUI from "../common/loading.ui";
+import { CollectionSections } from "../../../enums/citizens/common.enum";
 
 export default function CitizensBackpackUI() {
   const loadedTokens = useAppSelector(state => state.citizensMetadata.citizensMetadata);

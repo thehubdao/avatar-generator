@@ -1,12 +1,12 @@
 import Image from "next/image";
 import { GAMES } from "../../../constants/citizens.constant";
-import { CardSize } from "../../../enums/citizens/common.enum";
 import CampaignCard from "../common/campaignCard.ui";
 import { useState } from "react";
 import { Game } from "../../../interfaces/citizens.interface";
 import Link from "next/link";
 import Button from "../common/button.ui";
 import Modal from "../common/modal.ui";
+import { CardSize } from "../../../enums/citizens/common.enum";
 
 export default function CitizensPlayUI() {
   const [isOpenInstructions, setIsOpenInstructions] = useState<boolean>(false);

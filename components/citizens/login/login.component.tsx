@@ -1,5 +1,5 @@
 import { Blockchain } from "../../../enums/blockchain/common.enum";
-import { Campaign } from "../../../enums/citizens/common.enum";
+import { Campaign } from "../../../types/citizens.type";
 import LoginUI from "../../../ui/citizens/login/login.ui";
 
 interface CitizensLoginComponentProps {

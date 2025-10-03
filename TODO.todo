@@ -61,11 +61,12 @@ MARKETPLACE:
         ✔ The purchased wearables still the price, remove it @done
         ✔ Add Tag behaviors to drops @done
         ✔ Add empty item in empty category on mobile @done
-        ☐ Add isClaimable behavior to drops
-        ☐ Fix error on selected feature when it is removed from cart from different feature category (baseExportData/exportData)
+        ☐ Add isLimitReached behavior to drops
+        ✔ Fix error on selected feature when it is removed from cart from different feature category (baseExportData/exportData)
         ☐ Don't show owned wearables in marketplace
-        ☐ Remove items for cart when user removes them from edit mode feature selection
+        ✔ Remove items for cart when user removes them from edit mode feature selection
         ☐ Load cart items (if these exist) when charge the avatar editor
+        ☐ Remove kind claimableDrop from dummies and old LSP7 drops on DB once marketplace feature is ready
 
     TO CONSIDER:
         ☐ Add feature to save cart for later

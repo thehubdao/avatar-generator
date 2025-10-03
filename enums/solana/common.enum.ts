@@ -13,5 +13,6 @@ export enum SolanaCollectionSections {
 
 export enum PaymentType {
   SOL = "SOL",
-  TOKEN = "TOKEN"
+  TOKEN = "TOKEN",
+  ETH = "ETH"
 } 

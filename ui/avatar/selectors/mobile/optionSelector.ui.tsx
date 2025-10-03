@@ -1,18 +1,18 @@
-import { FeatureInterface } from "../../../../interfaces/api.interface";
 import 'swiper/css';
 import { BasicData } from '../../../../interfaces/common.interface';
 import { MouseEvent } from "react";
 import OptionCardUI from "../optionCard.ui";
 import { RandomTier } from "../../../../enums/common.enum";
+import { AnyFeature } from "../../../../types/citizens.type";
 
 interface OptionSelectorUIProps {
-  list: FeatureInterface[];
+  list: AnyFeature[];
   activeOption?: BasicData;
   handleClick: (id: string, path: string, name: string) => void;
 }
 
 export default function OptionSelectorUI({ list, activeOption, handleClick }: OptionSelectorUIProps) {
-  const selectFeature = (e: MouseEvent<HTMLDivElement>, opt: FeatureInterface) => {
+  const selectFeature = (e: MouseEvent<HTMLDivElement>, opt: AnyFeature) => {
     e.preventDefault();
     handleClick(opt.id, opt.path, opt.name);
   }
@@ -32,7 +32,7 @@ export default function OptionSelectorUI({ list, activeOption, handleClick }: Op
           type: 'empty',
           tier: RandomTier.Common,
           path: '',
-        }} />
+        } as AnyFeature} />
       }
     </div>
   </>
