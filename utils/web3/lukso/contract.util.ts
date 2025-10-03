@@ -8,15 +8,16 @@ import { Result } from '../../../types/common.type';
 import { LogError } from '../../../utils/common.util';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { LUKSO_CAMPAIGN_WEB3_DATA, AVATAR_ERC725_CONTRACT, PROVIDER, TEMP_CAMPAIGN_SWITCH, UNIVERSAL_PROFILE_CONTRACT, OPERATION_CALL, EOA, WEARABLE_ADMIN_SIGNER } from '../../../constants/lukso/contract.constant';
-import { GetCollectionDocs, GetLeaderboardData } from '../../firebase.util';
+import { GetLeaderboardData } from '../../firebase.util';
 import WearableContractABI from '../../../constants/abi/WearableContractABI.json'
 import OldWearableContractABI from '../../../constants/abi/OldWearableContractABI.json'
 import AvatarContractExtensionAbi from '../../../constants/abi/AvatarContractExtensionABI.json';
 import UniversalProfileABI from '../../../constants/abi/UniversalProfileABI.json'
-import { AnyFeature, Campaign, CampaignDrops, LuksoCampaign } from '../../../types/citizens.type';
+import { Campaign, CampaignDrops, LuksoCampaign } from '../../../types/citizens.type';
 import { LeaderboardEntry } from '../../../types/leaderboard.type';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { DropType } from '../../../enums/lukso/common.enum';
+import { LuksoCampaignConstant } from '../../../constants/campaign.constant';
 
 export async function GetTokensOf(contractAddress: string, address: string): Promise<Result<string[]>> {
     try {
@@ -258,7 +259,7 @@ export async function GetCampaignUserFeatures(address: string, campaign: LuksoCa
 
 export async function GetLuksoUserFeatures(address: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
     try {
-        const campaigns = Object.values(LuksoCampaign);
+        const campaigns = Object.values(LuksoCampaignConstant);
         const campaignPromises = campaigns.map(campaign => GetCampaignUserFeatures(address, campaign));
         const results = await Promise.all(campaignPromises);
         const features = campaigns.reduce((acc, campaign, index) => {
@@ -460,18 +461,12 @@ export async function ClaimAndSetAvatarNewWearings(campaign: Campaign, dropsToCl
     }
 }
 
-export async function BurnDrop(from: string, campaign: string, drop: FeatureLuksoDrop): Promise<Result<void>> {
-    const dropsData: FeatureDrop[] = await GetCollectionDocs(`campaign/${campaign}/drops`) as FeatureDrop[];
-    if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError };
-
-    const dropPair = dropsData.find((dropData) => { return dropData.index === drop.index && dropData.type === drop.type });
-    if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError };
-
+export async function BurnDrop(from: string, drop: FeatureDrop): Promise<Result<void>> {
     if (!EOA) return { success: false, errMessage: 'No EOA found', errCode: CommonErrorCode.FetchError };
-    const dropContract = new Contract(dropPair.contractAddress, OldWearableContractABI, PROVIDER);
+    const dropContract = new Contract(drop.contractAddress, OldWearableContractABI, PROVIDER);
     const burnEncondedFunction = dropContract.interface.encodeFunctionData('burn', [from, 1]);
     const tx = await (UNIVERSAL_PROFILE_CONTRACT.connect(EOA) as Contract).execute(OPERATION_CALL, // operation type = CREATE
-        dropPair.contractAddress,
+        drop.contractAddress,
         0, // amount to the fund the contract with when deploying
         burnEncondedFunction
     );
@@ -479,22 +474,9 @@ export async function BurnDrop(from: string, campaign: string, drop: FeatureLuks
     return { success: true, value: undefined };
 }
 
-export async function ClaimDrop(drop: FeatureLuksoDrop, signer: JsonRpcSigner): Promise<Result<void>> {
-    const dropsData: FeatureDrop[] = await GetCollectionDocs(`campaign/${Campaign.Creators}/drops`) as FeatureDrop[];
-    if (!dropsData) return { success: false, errMessage: 'No drops data found', errCode: CommonErrorCode.FetchError };
-
-    const dropPair = dropsData.find((dropData) => { return dropData.index === drop.index && dropData.type === drop.type });
-    if (!dropPair) return { success: false, errMessage: 'No drop pair found', errCode: CommonErrorCode.FetchError };
-
-    const dropContract = new Contract(dropPair.contractAddress, WearableContractABI, signer);
-    const tx = await dropContract.claimWearable('0x')
-    await tx.wait();
-    return { success: true, value: undefined };
-}
-
 export async function GetUserWearableClaimedAmount(userAddress: string, drop: FeatureClaimableDrop): Promise<Result<number>> {
     try {
-        const wearableContract = new Contract(drop.contractAddress, WearableContractABI, PROVIDER)
+        const wearableContract = new Contract(drop.contractAddress, WearableContractABI, PROVIDER);
         const claimedAmount = await wearableContract.getUserClaims(userAddress);
         return { success: true, value: Number(claimedAmount) };
     } catch (error) {

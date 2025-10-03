@@ -161,7 +161,7 @@ export interface FeatureClaimableDrop extends FeatureDrop {
   paymentType: PaymentType;
   requiredXP: number;
   price: number;
-  isClaimable?: boolean;
+  isLimitReached?: boolean;
 }
 
 

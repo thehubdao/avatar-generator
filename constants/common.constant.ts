@@ -14,7 +14,7 @@ export const GLOBAL_VALUES = {
 } as const;
 
 export const EXPORT_ATTRIBUTE = {
-  CampaignConstant: "campaign",
+  Campaign: "campaign",
 } as const;
 
 export const IFRAME_VALUES = {
