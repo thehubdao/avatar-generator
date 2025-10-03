@@ -241,14 +241,10 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
     const dropsCheckPromiseList = FeatureRootDrops.value.map(async (drop) => {
       const [collectionId, tokenId] = drop.collectionId.split(':');
       const balance = await SftBalance(address, collectionId, tokenId);
-      const linkableTokenIdsResult = await GetSFTAssetLinks(collectionId, tokenId, address); //Get the linkable token ids for the drop
 
-      if (!linkableTokenIdsResult.success || !balance.success) return null;
+      if (!balance.success || balance.value===0) return null;
 
-      if (linkableTokenIdsResult.value.length === balance.value) return null;
-
-      drop.balance = balance.value - linkableTokenIdsResult.value.length;
-      drop.linkableTokens = linkableTokenIdsResult.value;
+      drop.balance = balance.value;
 
       return drop;
     });

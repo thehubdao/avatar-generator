@@ -116,18 +116,19 @@ export default function CitizensComponent() {
 
     if (!selectedCampaign) return LogError(Module.Citizens, 'Missing selected campaign to get user features!');
 
-    const campaignuserFeatures = _userFeatures[selectedCampaign] as AnyFeature[];
+    const campaignUserFeatures = _userFeatures[selectedCampaign] as AnyFeature[];
 
-    if (campaignuserFeatures) {
+    if (campaignUserFeatures) {
       const mergedMap = new Map<string, AnyFeature>();
 
-      for (const feature of [...currentCombinationBaseFeatures, ...campaignuserFeatures]) { // Merge features from current combination and campaign user features. If duplicates, prioritize campaign user features
+      for (const feature of [...currentCombinationBaseFeatures, ...campaignUserFeatures]) { // Merge features from current combination and campaign user features. If duplicates, prioritize campaign user features
         const key = `${feature.index}-${feature.type}`;
         mergedMap.set(key, feature);
       }
       
       currentCombinationBaseFeatures = Array.from(mergedMap.values());
     }
+    console.log(currentCombinationBaseFeatures, campaignUserFeatures);
 
     optionList.current = currentCombinationBaseFeatures;
 
@@ -851,7 +852,7 @@ export default function CitizensComponent() {
       if (oldIndex == newIndex) return undefined;
 
       const newAttribute = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) as FeatureRootDrop; //Get the new feature to be equipped
-      const oldAttribute = (selectedCitizen.rawMetadata as RootMetadata).attributes?.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)) as FeatureRootDrop; //Get the old feature to be unequipped
+      const oldAttribute = (selectedCitizen.rawMetadata as RootMetadata).attributes?.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)); //Get the old feature to be unequipped
 
       if (newAttribute) newAttributes.push(newAttribute);
       if (oldAttribute) oldAttributes.push(oldAttribute);
