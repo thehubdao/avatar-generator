@@ -11,6 +11,7 @@ import { Web3ErrorCode } from "../../../enums/root/common.enum";
 import { CampaignDrops } from "../../../types/citizens.type";
 import { GetCampaignDrops, GetPolygonImageUrl, GetPolygonIpfsData } from "../citizens.util";
 import { CampaignBaseCombinationUrl } from "../../../enums/citizens/common.enum";
+import { PolygonCampaignConstant } from "../../../constants/campaign.constant";
 
 export async function GetPolygonTokenIds(address: string): Promise<Result<number[]>> {
     try {
@@ -45,7 +46,7 @@ export async function GetCampaignsPolygonTokensMetadata(address: string): Promis
 
                 const metadata: CitizenMetadata = {
                     tokenId: tokenId.toString(),
-                    campaign: Campaign.Polygon,
+                    campaign: PolygonCampaignConstant.Polygon,
                     baseCombination: metadataJson.baseCombination,
                     combination: metadataJson.combination,
                     fallbackImageUrl: metadataJson.image,

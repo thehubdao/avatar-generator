@@ -3,7 +3,7 @@ import { ERC725JSONSchemaKeyType } from "@erc725/erc725.js";
 import { ethers, JsonRpcProvider, Wallet } from "ethers";
 import UniversalProfileABI from '../../constants/abi/UniversalProfileABI.json'
 import { ThrowError } from "../../utils/common.util";
-import { Campaign } from "../../types/citizens.type";
+import { CampaignConstant } from "../campaign.constant";
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS || ThrowError('NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS is required');
 const UNIVERSAL_PROFILE_ADDRESS = process.env.NEXT_PUBLIC_PROFILE_ADDRESS || ThrowError('NEXT_PUBLIC_PROFILE_ADDRESS is required');
@@ -29,10 +29,10 @@ export const TEMP_CAMPAIGN_SWITCH = { 'vrm_male': 'lukso2', 'vrm_female': 'lukso
 
 //MAINNET
 export const LUKSO_CAMPAIGN_WEB3_DATA = {
-    [Campaign.Creators]: {
+    [CampaignConstant.Creators]: {
         contractAddress: '0x74654920356257981f6b63a65ad72d4d9bc21929',
         baseCid: 'bafybeibtakbvx57vz2pz4vhacroncfk4cbra7utj2baoee2w43nhk626ju'
-    }, [Campaign.Citizens]: { contractAddress: '0x754a5d007d5f1188ef0db892ee115a7c01b38fa3', baseCid: '' },
+    }, [CampaignConstant.Citizens]: { contractAddress: '0x754a5d007d5f1188ef0db892ee115a7c01b38fa3', baseCid: '' },
 };
 
 const SCHEMAS = [

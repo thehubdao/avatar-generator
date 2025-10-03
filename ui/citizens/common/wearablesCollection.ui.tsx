@@ -1,16 +1,16 @@
-import { usePrivy } from '@privy-io/react-auth'
-import { JsonRpcProvider } from 'ethers'
-import { useEffect, useState } from 'react'
-import { GetUserXPAndLevel } from '../../../utils/firebase.util'
-import SelectorUI from './selector.ui'
-import DropItemCard from './dropItemCard.ui'
-import SearchSVG from './SVG/searchSVG.ui'
-import { FeatureClaimableDrop } from '../../../interfaces/citizens.interface'
+import { usePrivy } from '@privy-io/react-auth';
+import { JsonRpcProvider } from 'ethers';
+import { useEffect, useState } from 'react';
+import { GetUserXPAndLevel } from '../../../utils/firebase.util';
+import SelectorUI from './selector.ui';
+import DropItemCard from './dropItemCard.ui';
+import SearchSVG from './SVG/searchSVG.ui';
+import { FeatureClaimableDrop } from '../../../interfaces/citizens.interface';
 
 interface WearablesCollectionProps {
-  provider: JsonRpcProvider | null
-  claimableDrops: FeatureClaimableDrop[]
-  handleClaim: (drop: FeatureClaimableDrop) => Promise<boolean>
+  provider: JsonRpcProvider | null;
+  claimableDrops: FeatureClaimableDrop[];
+  handleClaim: (drop: FeatureClaimableDrop) => Promise<boolean>;
 }
 
 export default function WearablesCollection({ 
@@ -39,12 +39,12 @@ export default function WearablesCollection({
   useEffect(() => {
     if (user?.wallet?.address) {
       const fetchXPData = async () => {
-        const xpData = await GetUserXPAndLevel(user?.wallet?.address || '')
-        setUserXP(xpData.xp)
+        const xpData = await GetUserXPAndLevel(user?.wallet?.address || '');
+        setUserXP(xpData.xp);
       }
-      fetchXPData()
+      fetchXPData();
     }
-  }, [user?.wallet?.address])
+  }, [user?.wallet?.address]);
 
 
   const getFilteredDrops = () => {

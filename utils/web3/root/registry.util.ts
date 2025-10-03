@@ -15,6 +15,7 @@ import { GetImageUrl } from "../../metadata.util";
 import { AssetData } from "../../../interfaces/firebase.interface";
 import { LogError } from "../../common.util";
 import { AssetRegistryAction } from "../../../enums/root/common.enum";
+import { RootCampaignConstant } from "../../../constants/campaign.constant";
 
 export function CreateAssetLinkOperationMessage(schemaPart: string, parent_collection_id: string, parent_token_id: string, child_collection_id: string, child_token_id: string): Result<Operation> {
 
@@ -232,12 +233,12 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     if (!assetCurrentCombinationResult.success) return { success: false, errMessage: assetCurrentCombinationResult.errMessage, errCode: assetCurrentCombinationResult.errCode };
     const assetCurrentCombination = assetCurrentCombinationResult.value.combination;
 
-    const campaignFeaturesResult = await GetParameter<FeatureBasic[]>(Campaign.Based, CampaignParameterName.Features);
+    const campaignFeaturesResult = await GetParameter<FeatureBasic[]>(RootCampaignConstant.Based, CampaignParameterName.Features);
 
     if (!campaignFeaturesResult.success) return { success: false, errMessage: campaignFeaturesResult.errMessage, errCode: campaignFeaturesResult.errCode };
     const campaignFeatures = campaignFeaturesResult.value;
 
-    const FeatureRootDrops = await GetCampaignDrops<FeatureRootDrop>(Campaign.Based);
+    const FeatureRootDrops = await GetCampaignDrops<FeatureRootDrop>(RootCampaignConstant.Based);
 
     if (!FeatureRootDrops.success) return { success: false, errMessage: FeatureRootDrops.errMessage, errCode: FeatureRootDrops.errCode };
     const FeatureRootDropsArray = FeatureRootDrops.value;
@@ -251,7 +252,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
 
     if (!newCombinationResult.success) return { success: false, errMessage: newCombinationResult.errMessage, errCode: newCombinationResult.errCode };
     const newCombination = newCombinationResult.value;
-    const imageUrl = await GetImageUrl(Campaign.Based, newCombination);
+    const imageUrl = await GetImageUrl(RootCampaignConstant.Based, newCombination);
     const setRootAssetImageUrlResult = await SetRootAssetImageUrl(imageUrl, collection_id, token_id, authToken);
     if (!setRootAssetImageUrlResult.success) return { success: false, errMessage: setRootAssetImageUrlResult.errMessage, errCode: setRootAssetImageUrlResult.errCode };
     const combinationArray = newCombination.split('-');
@@ -270,7 +271,7 @@ export async function UpdateRootAsset(collection_id: string, token_id: string, a
     const filteredAttributes = attributesProcessing.filter(attribute => attribute !== undefined) as FeatureRootDrop[];
     if(filteredAttributes.length!=attributesExpectedAmount) return { success: false, errMessage: "Attributes processing failed", errCode: "AttributesProcessingError" };
     const setRootAssetMetadataResult = await StoreAssetData({
-        campaign: Campaign.Based,
+        campaign: RootCampaignConstant.Based,
         tokenId: token_id,
         collectionId: collection_id,
         combination: newCombination,

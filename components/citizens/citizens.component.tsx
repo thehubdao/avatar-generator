@@ -29,6 +29,7 @@ import { StoreAssetData } from "../../utils/firebase.util";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/labels.constant";
 import { PHOTO_CAMERA_CONFIGS } from "../../constants/common.constant";
 import { CampaignBaseCombination, CampaignBaseUrl, FeatureKind } from "../../enums/citizens/common.enum";
+import { CampaignConstant, PolygonCampaignConstant } from "../../constants/campaign.constant";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -556,14 +557,12 @@ export default function CitizensComponent() {
     }
 
     if (isMarketplaceMode && dropsToClaim) {
-      console.log('Claiming and setting new wearings', dropsToClaim, oldAttributes, newAttributes, selectedCitizen.tokenId, metadataObject.value.uri, signer);
       const claimResult = await ClaimAndSetAvatarNewWearings(currentCampaign, dropsToClaim, oldAttributes, newAttributes, selectedCitizen.tokenId, metadataObject.value.uri, signer);
       if (!claimResult.success) {
         LogError(Module.Citizens, 'Failed to claim and set new wearings', claimResult.errCode);
         return false;
       }
     } else {
-      console.log('Setting new wearings', oldAttributes, newAttributes, selectedCitizen.tokenId, metadataObject.value.uri, signer);
       const setResult = await SetAvatarNewWearings(
         currentCampaign,
         oldAttributes,
@@ -800,7 +799,7 @@ export default function CitizensComponent() {
       return false;
     }
     const isMetadataFetchSuccess = await fetchPolygonMetadata(walletAddress);
-    const isUserFeatureFetchSuccess = await fetchPolygonUserFeatureAssets(walletAddress, PolygonCampaign.Polygon);
+    const isUserFeatureFetchSuccess = await fetchPolygonUserFeatureAssets(walletAddress, PolygonCampaignConstant.Polygon);
 
     return isMetadataFetchSuccess && isUserFeatureFetchSuccess;
   }
@@ -898,20 +897,20 @@ export default function CitizensComponent() {
       return false;
     }
     const isMetadataFetchSuccess = await fetchRootMetadata(walletAddress);
-    const isUserFeatureFetchSuccess = await fetchRootUserFeatureAssets(walletAddress, RootCampaign.Based);
+    const isUserFeatureFetchSuccess = await fetchRootUserFeatureAssets(walletAddress, CampaignConstant.Based);
 
     return isMetadataFetchSuccess && isUserFeatureFetchSuccess;
   }
 
   async function handleSaveCombination() {
     let isSuccess = false;
-    if (selectedCampaign == Campaign.Citizens || selectedCampaign == Campaign.Creators) {
+    if (selectedCampaign == CampaignConstant.Citizens || selectedCampaign == CampaignConstant.Creators) {
       isSuccess = await saveLuksoCombination();
-    } else if (selectedCampaign == Campaign.Kumi) {
+    } else if (selectedCampaign == CampaignConstant.Kumi) {
       isSuccess = await saveSolanaCombination();
-    } else if (selectedCampaign == Campaign.Based) {
+    } else if (selectedCampaign == CampaignConstant.Based) {
       isSuccess = await saveRootCombination();
-    } else if (selectedCampaign == Campaign.Polygon) {
+    } else if (selectedCampaign == CampaignConstant.Polygon) {
       isSuccess = await savePolygonCombination();
     }
     return isSuccess;
@@ -966,10 +965,10 @@ export default function CitizensComponent() {
 
   async function onBuying(): Promise<boolean> {
     let isSuccess = false;
-    if (selectedCampaign == Campaign.Citizens || selectedCampaign == Campaign.Creators) {
+    if (selectedCampaign == CampaignConstant.Citizens || selectedCampaign == CampaignConstant.Creators) {
       isSuccess = await onLuksoBuying();
     }
-    else if (selectedCampaign == Campaign.Based) {
+    else if (selectedCampaign == CampaignConstant.Based) {
       isSuccess = await onRootBuying();
     }
     return isSuccess;
@@ -981,14 +980,14 @@ export default function CitizensComponent() {
       return { success: false, message: "We can't do the process right now, try again later!" };
     }
 
-    if (selectedCampaign == Campaign.Kumi) {
+    if (selectedCampaign == CampaignConstant.Kumi) {
       const mintResult = await MintKumiCitizen();
       if (mintResult.success && walletAddress) {
         const isFetchSuccess = await fetchSolanaMetadata(walletAddress);
         return { success: isFetchSuccess, message: isFetchSuccess ? 'Your citizen has been claimed!' : "We can't do the process right now, try again later!" };
       }
       else return { success: false, message: "We can't do the process right now, try again later!" };
-    } else if (selectedCampaign == Campaign.Based) {
+    } else if (selectedCampaign == CampaignConstant.Based) {
 
       const mintResult = await MintRootAsset(walletAddress, CampaignBaseCombination.Based, CampaignBaseUrl.Based);
       if (mintResult.success) {
@@ -998,7 +997,7 @@ export default function CitizensComponent() {
         return { success: false, message: "Insufficient funds" + mintResult.errMessage };
       }
       else return { success: false, message: "We can't do the process right now, try again later!" };
-    } else if (selectedCampaign == Campaign.Polygon) {
+    } else if (selectedCampaign == CampaignConstant.Polygon) {
       const mintResult = await MintPolygonCitizen(walletAddress);
       if (mintResult.success) {
         const isFetchSuccess = await fetchPolygonMetadata(walletAddress);

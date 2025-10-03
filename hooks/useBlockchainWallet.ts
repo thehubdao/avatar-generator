@@ -28,6 +28,7 @@ import { InitializeContractEssentialData } from '../constants/root/contract.cons
 import { GetCampaignsPolygonTokensMetadata, GetPolygonCollectionSupply, GetPolygonUserFeatureAssets } from '../utils/web3/polygon/contract.util';
 import { InitializePolygonContractEssentialData } from '../constants/polygon/contract.constant';
 import { NETWORK_CONFIGS } from '../constants/common.constant';
+import { CampaignConstant, PolygonCampaignConstant, RootCampaignConstant, SolanaCampaignConstant } from '../constants/campaign.constant';
 
 export function useBlockchainWallet() {
   const dispatch = useDispatch();
@@ -125,7 +126,7 @@ export function useBlockchainWallet() {
   }
 
   async function getSolanaUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<SolanaCampaign>>> {
-    const features = await GetSolanaUserFeatureAssets(walletAddress, SolanaCampaign.Kumi);
+    const features = await GetSolanaUserFeatureAssets(walletAddress, SolanaCampaignConstant.Kumi);
 
     if (features.success) return { success: true, value: features.value };
 
@@ -133,7 +134,7 @@ export function useBlockchainWallet() {
   }
 
   async function getPolygonUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<PolygonCampaign>>> {
-    const features = await GetPolygonUserFeatureAssets(walletAddress, PolygonCampaign.Polygon);
+    const features = await GetPolygonUserFeatureAssets(walletAddress, PolygonCampaignConstant.Polygon);
 
     if (features.success) return { success: true, value: features.value };
 
@@ -141,7 +142,7 @@ export function useBlockchainWallet() {
   }
 
   async function getRootUserFeaturesPromise(walletAddress: string): Promise<Result<CampaignDrops<RootCampaign>>> {
-    const features = await GetRootUserFeatureAssets(walletAddress, RootCampaign.Based);
+    const features = await GetRootUserFeatureAssets(walletAddress, RootCampaignConstant.Based);
 
     if (features.success) return { success: true, value: features.value };
 
@@ -312,11 +313,11 @@ export function useBlockchainWallet() {
                 dispatch(setMintSupply(mintingData.value.mintSupply ?? null));
               }
 
-              dispatch(setSelectedCampaign(Campaign.Polygon)); // Set the selected campaign by default when no campaign is selected
+              dispatch(setSelectedCampaign(PolygonCampaignConstant.Polygon)); // Set the selected campaign by default when no campaign is selected
               dispatch(setSelectedCitizen({
                 baseCombination: CampaignBaseCombination.Polygon,
                 combination: CampaignBaseCombination.Polygon,
-                campaign: Campaign.Polygon
+                campaign: PolygonCampaignConstant.Polygon
               } as CitizenMetadata));
             }
           } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
@@ -328,7 +329,7 @@ export function useBlockchainWallet() {
             dispatch(setSelectedCitizen({
               baseCombination: CampaignBaseCombination.Polygon,
               combination: CampaignBaseCombination.Polygon,
-              campaign: Campaign.Polygon
+              campaign: PolygonCampaignConstant.Polygon
             } as CitizenMetadata));
           } else {
             dispatch(setSelectedCitizen(citizen));
@@ -368,11 +369,11 @@ export function useBlockchainWallet() {
                 dispatch(setIsHolder(mintingData.value.isHolder ?? null));
               }
 
-              dispatch(setSelectedCampaign(Campaign.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
+              dispatch(setSelectedCampaign(SolanaCampaignConstant.Kumi)); // Set the selected campaign to Citizens by default when no campaign is selected
               dispatch(setSelectedCitizen({
                 baseCombination: CampaignBaseCombination.Kumi,
                 combination: CampaignBaseCombination.Kumi,
-                campaign: Campaign.Kumi
+                campaign: SolanaCampaignConstant.Kumi
               } as CitizenMetadata));
             }
           } else if (!citizen) {
@@ -431,11 +432,11 @@ export function useBlockchainWallet() {
                 dispatch(setIsHolder(mintingData.value.isHolder ?? null));
               }
 
-              dispatch(setSelectedCampaign(Campaign.Based)); // Set the selected campaign by default when no campaign is selected
+              dispatch(setSelectedCampaign(RootCampaignConstant.Based)); // Set the selected campaign by default when no campaign is selected
               dispatch(setSelectedCitizen({
                 baseCombination: CampaignBaseCombination.Based,
                 combination: CampaignBaseCombination.Based,
-                campaign: Campaign.Based
+                campaign: RootCampaignConstant.Based
               } as CitizenMetadata));
             }
           } else if (!citizen) { //Logic when user is logged in and a campaign is selected, but there's no citizen in list for that campaign
@@ -449,7 +450,7 @@ export function useBlockchainWallet() {
             dispatch(setSelectedCitizen({
               baseCombination: CampaignBaseCombination.Based,
               combination: CampaignBaseCombination.Based,
-              campaign: Campaign.Based
+              campaign: RootCampaignConstant.Based
             } as CitizenMetadata));
           } else {
             dispatch(setSelectedCitizen(citizen));
@@ -561,13 +562,13 @@ export function useBlockchainWallet() {
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
                 }
-                if ((isUniversal || isPhantom || isBackpack || (isMetamask && isSolana)) && (selectedCampaign === Campaign.Polygon)) {
+                if ((isUniversal || isPhantom || isBackpack || (isMetamask && isSolana)) && (selectedCampaign === CampaignConstant.Polygon)) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
                 }
 
-                if (isMetamask && (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators)) {
+                if (isMetamask && (selectedCampaign === CampaignConstant.Citizens || selectedCampaign === CampaignConstant.Creators)) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
@@ -609,7 +610,7 @@ export function useBlockchainWallet() {
           }
 
           if ((chainType === Blockchain.Ethereum) && isEthereumReady) { //As Lukso and solana are part of lukso, we need to check if the campaign is citizens or creators
-            if (selectedCampaign === Campaign.Citizens || selectedCampaign === Campaign.Creators) {
+            if (selectedCampaign === CampaignConstant.Citizens || selectedCampaign === CampaignConstant.Creators) {
               const provider = await ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
               const browserProvider = new BrowserProvider(provider);
 
@@ -630,7 +631,7 @@ export function useBlockchainWallet() {
               // Track campaign and session statistics after successful connection
               trackCampaignAndSessionAsync(selectedCampaign);
 
-            } else if (selectedCampaign === Campaign.Polygon && isEthereumReady) { //As Polygon is part of lukso, we need to check if the campaign is polygon
+            } else if (selectedCampaign === CampaignConstant.Polygon && isEthereumReady) { //As Polygon is part of lukso, we need to check if the campaign is polygon
               const providerPromise = ethereumWallets[0].getEthereumProvider(); // Get the lukso provider
               const xpDataPromise = GetUserXPData(user?.wallet?.address, chainType); // Get the user XP data
               const [provider, xpData] = await Promise.all([providerPromise, xpDataPromise]);
@@ -652,7 +653,7 @@ export function useBlockchainWallet() {
               // Track campaign and session statistics after successful connection
               trackCampaignAndSessionAsync(selectedCampaign);
             } else if (selectedCampaign === null) {
-              dispatch(setSelectedCampaign(Campaign.Polygon));
+              dispatch(setSelectedCampaign(CampaignConstant.Polygon));
 
             }
           } else if (chainType === Blockchain.Solana && isSolanaReady) {

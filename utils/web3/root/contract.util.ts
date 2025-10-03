@@ -20,6 +20,7 @@ import { KeyringPair } from '@polkadot/keyring/types';
 import { SubmittableExtrinsic } from '@polkadot/api/types';
 import { AssetRegistryAction, Web3ErrorCode } from '../../../enums/root/common.enum';
 import { CampaignBaseCombination } from '../../../enums/citizens/common.enum';
+import { RootCampaignConstant } from '../../../constants/campaign.constant';
 
 export function GetAdminSigner(): KeyringPair {
   const keyring = new Keyring({ type: "ethereum" });
@@ -103,7 +104,7 @@ export async function GetLinkableTokenIds(address: string, collectionId: string)
 
 export async function GetRootAssetMetadata(tokenId: string): Promise<Result<CitizenMetadata>> {
   try {
-    const assetDataResult = await GetAssetData(Campaign.Based, NFT_COLLECTION_ID as string, tokenId);
+    const assetDataResult = await GetAssetData(RootCampaignConstant.Based, NFT_COLLECTION_ID as string, tokenId);
 
     if (!assetDataResult.success) return { success: false, errMessage: assetDataResult.errMessage, errCode: assetDataResult.errCode };
 
@@ -180,7 +181,7 @@ export async function MintRootAsset(
       const tokenId = tokenIds[tokenIds.length - 1].toString();
       await StoreAssetData({
         tokenId,
-        campaign: Campaign.Based,
+        campaign: RootCampaignConstant.Based,
         collectionId: NFT_COLLECTION_ID as string,
         blockchainType: Blockchain.Root,
         baseCombination,

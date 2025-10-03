@@ -20,6 +20,7 @@ import { CampaignDrops } from '../../../types/citizens.type';
 import { GetCollectionDocs } from '../../firebase.util';
 import { GetSolanaSetNewCombinationSerializedTransaction } from '../../api.util';
 import { CandyMachineGroup } from '../../../enums/citizens/common.enum';
+import { SolanaCampaignConstant } from '../../../constants/campaign.constant';
 
 
 export async function InitializeUmi(wallet: ConnectedSolanaWallet): Promise<Result<boolean>> {
@@ -118,7 +119,7 @@ export async function GetSolanaCitizenMetadata(assetAddress: AssetV1): Promise<R
         imageUrl: '',
         combination: ipfsDataResult.value.combination,
         baseCombination: ipfsDataResult.value.baseCombination,
-        campaign: Campaign.Kumi,
+        campaign: SolanaCampaignConstant.Kumi,
         tokenId: assetAddress.name.split('#')[1],
         name: ipfsDataResult.value.name,
         description: ipfsDataResult.value.description,

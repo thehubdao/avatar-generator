@@ -14,6 +14,8 @@ import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { Campaign, LuksoCampaign } from '../../../types/citizens.type';
 import { Result } from '../../../types/common.type';
 import { CampaignDrops } from '../../../types/citizens.type';
+import { LuksoCampaignConstant } from '../../../constants/campaign.constant';
+import { features } from 'process';
 
 const AVATAR_CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_CONTRACT_ADDRESS!
 const AVATAR_PROXY_ADDRESS = process.env.NEXT_PUBLIC_AVATAR_PROXY_ADDRESS!
@@ -304,8 +306,8 @@ export async function GetCampaignUserFeatures(address: string, campaign: string)
 
 export async function GetUserFeatures(address: string): Promise<Result<CampaignDrops<LuksoCampaign>>> {
     const features: CampaignDrops<LuksoCampaign> = {
-        [LuksoCampaign.Creators]: [],
-        [LuksoCampaign.Citizens]: [],
+        [LuksoCampaignConstant.Creators]: [],
+        [LuksoCampaignConstant.Citizens]: [],
     }
     for (const campaign of Object.keys(campaignWeb3Data)) {
         const campaignUserFeatures = await GetCampaignUserFeatures(address, campaign)

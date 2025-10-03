@@ -4,15 +4,16 @@ import { Result } from "../../../types/common.type";
 import { LogError } from "../../common.util";
 import { GetClaimableDrops } from "../../firebase.util";
 import { GetUserWearableClaimedAmount } from "./contract.util";
+import { LuksoCampaignConstant } from "../../../constants/campaign.constant";
 import { LuksoCampaign } from "../../../types/citizens.type";
 
 export async function GetLuksoClaimableDrops(walletAddress: string): Promise<Result<Record<LuksoCampaign, FeatureClaimableDrop[]>>> {
     try {
         const claimableDropsMap: Record<LuksoCampaign, FeatureClaimableDrop[]> = {
-            [LuksoCampaign.Citizens]: [],
-            [LuksoCampaign.Creators]: []
+            [LuksoCampaignConstant.Citizens]: [],
+            [LuksoCampaignConstant.Creators]: []
         };
-        const campaigns = Object.values(LuksoCampaign);
+        const campaigns = Object.values(LuksoCampaignConstant);
 
         const claimableDropsCampaignsPromises = campaigns.map(async (campaign) => {
             const drops = await GetClaimableDrops(campaign);
@@ -20,12 +21,12 @@ export async function GetLuksoClaimableDrops(walletAddress: string): Promise<Res
                 const dropswithClaimAmountPromises = drops.value.map(async drop => {
                     const claimedAmount = await GetUserWearableClaimedAmount(walletAddress, drop);
                     const claimed = claimedAmount.success ? claimedAmount.value : 0;
-                    const isClaimable = claimed < drop.claimLimit;
+                    const isLimitReached  = claimed < drop.claimLimit;
 
                     const newDrop: FeatureClaimableDrop = {
                         ...drop,
                         claimedAmount: claimed,
-                        isClaimable,
+                        isLimitReached ,
                     };
 
                     return newDrop;

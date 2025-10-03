@@ -1,6 +1,5 @@
 import './../styles/globals.css'
 import { Work_Sans, Poppins } from '@next/font/google'
-import { useEffect } from 'react'
 import Humane from '@next/font/local'
 import MonumentFont from '@next/font/local'
 import FeaturesIcons from '@next/font/local'

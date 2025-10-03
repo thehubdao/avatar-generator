@@ -1,41 +1,17 @@
+import { CampaignConstant, LuksoCampaignConstant, RootCampaignConstant, SolanaCampaignConstant, PolygonCampaignConstant } from "../constants/campaign.constant";
 import { FeatureKind } from "../enums/citizens/common.enum";
 import { FeatureInterface } from "../interfaces/api.interface";
 import { FeatureClaimableDrop, FeatureDrop } from "../interfaces/citizens.interface";
 
-export const Campaign = {
-  Citizens: "vrm_female",
-  Creators: "vrm_male",
-  Kumi: "kumi",
-  Based: "root_citizens",
-  Polygon: "polygon_citizens",
-}
+export type Campaign = typeof CampaignConstant[keyof typeof CampaignConstant]
 
-export type Campaign = typeof Campaign[keyof typeof Campaign]
+export type LuksoCampaign = typeof LuksoCampaignConstant[keyof typeof LuksoCampaignConstant]
 
-export const LuksoCampaign = {
-  Citizens: Campaign.Citizens,
-  Creators: Campaign.Creators,
-}
+export type SolanaCampaign = typeof SolanaCampaignConstant[keyof typeof SolanaCampaignConstant]
 
-export type LuksoCampaign = typeof LuksoCampaign[keyof typeof LuksoCampaign]
+export type RootCampaign = typeof RootCampaignConstant[keyof typeof RootCampaignConstant]
 
-export const SolanaCampaign = {
-  Kumi: Campaign.Kumi,
-}
-
-export type SolanaCampaign = typeof SolanaCampaign[keyof typeof SolanaCampaign]
-
-export const RootCampaign = {
-  Based: Campaign.Based,
-}
-
-export type RootCampaign = typeof RootCampaign[keyof typeof RootCampaign]
-
-export const PolygonCampaign = {
-  Polygon: Campaign.Polygon,
-}
-
-export type PolygonCampaign = typeof PolygonCampaign[keyof typeof PolygonCampaign]
+export type PolygonCampaign = typeof PolygonCampaignConstant[keyof typeof PolygonCampaignConstant]
 
 export type AnyFeature =
   | (FeatureInterface & { kind: FeatureKind.Feature })
