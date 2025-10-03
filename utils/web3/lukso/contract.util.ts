@@ -333,50 +333,57 @@ async function SignClaimMessageFromAdmin(wearableAddress: string, walletAddress:
     return signature;
 }
 
-export async function SetAvatarNewWearings(campaign: Campaign, oldAttributes: LuksoAttribute[], newAttributes: LuksoAttribute[], tokenId: string, metadataUri: string, signer: JsonRpcSigner): Promise<Result<void>> {
-    const targetContractAddress = LUKSO_CAMPAIGN_WEB3_DATA[campaign].contractAddress;
+export async function SetAvatarNewWearings(campaign: Campaign, oldAttributes: LuksoAttribute[], newAttributes: LuksoAttribute[], tokenId: string, metadataUri: string, signer: JsonRpcSigner): Promise<Result<boolean>> {
+    try {
+        const targetContractAddress = LUKSO_CAMPAIGN_WEB3_DATA[campaign].contractAddress;
 
-    const UPContract = new ethers.Contract(
-        signer.address as string,
-        UniversalProfileABI,
-        PROVIDER,
-    );
+        const UPContract = new ethers.Contract(
+            signer.address as string,
+            UniversalProfileABI,
+            PROVIDER,
+        );
 
-    const metadataUrl = `ipfs://${metadataUri}`;
-    const metadataIpfsData = await GetLuksoIPFSData(metadataUrl.split('//')[1]);
+        const metadataUrl = `ipfs://${metadataUri}`;
+        const metadataIpfsData = await GetLuksoIPFSData(metadataUrl.split('//')[1]);
 
-    if (!metadataIpfsData.success) {
-        return { success: false, errMessage: metadataIpfsData.errMessage, errCode: metadataIpfsData.errCode };
+        if (!metadataIpfsData.success) {
+            return { success: false, errMessage: metadataIpfsData.errMessage, errCode: metadataIpfsData.errCode };
+        }
+
+        const metadataDataValue = AVATAR_ERC725_CONTRACT.encodeData([
+            {
+                keyName: 'LSP4Metadata',
+                value: {
+                    json: { 'LSP4Metadata': metadataIpfsData.value },
+                    url: metadataUrl,
+                },
+            },
+        ]);
+        const wearablesToUnequip = oldAttributes.map((attribute) => ({
+            wearableContract: attribute.wearable_address, wearableTokenId: Number(attribute.wearable_token_id)
+        }));
+
+        const wearablesToEquip = newAttributes.map((attribute) => ({
+            wearableContract: attribute.wearable_address, wearableTokenId: Number(attribute.wearable_token_id)
+        }));
+
+        const extensionInterface = new ethers.Interface(AvatarContractExtensionAbi);
+        const setAvatarNewWearingsEncodedFunction = extensionInterface.encodeFunctionData('setAvatarNewWearings', [Number(tokenId), wearablesToUnequip, wearablesToEquip, metadataDataValue.values[0]]);
+
+        const txPromise = (UPContract.connect(signer) as Contract).execute(OPERATION_CALL, // operation type = CREATE
+            targetContractAddress, // address zero
+            0, // amount to the fund the contract with when deploying
+            setAvatarNewWearingsEncodedFunction);
+        const tx = await txPromise;
+        await tx.wait();
+        return { success: true, value: true };
+    } catch (error) {
+        const e = error as Error;
+        LogError(Module.LuksoContractUtil, 'Error on setting new wearings');
+        return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
     }
 
-    const metadataDataValue = AVATAR_ERC725_CONTRACT.encodeData([
-        {
-            keyName: 'LSP4Metadata',
-            value: {
-                json: { 'LSP4Metadata': metadataIpfsData.value },
-                url: metadataUrl,
-            },
-        },
-    ]);
-    const wearablesToUnequip = oldAttributes.map((attribute) => ({
-        wearableContract: attribute.wearable_address, wearableTokenId: Number(attribute.wearable_token_id)
-    }));
 
-    const wearablesToEquip = newAttributes.map((attribute) => ({
-        wearableContract: attribute.wearable_address, wearableTokenId: Number(attribute.wearable_token_id)
-    }));
-
-    const extensionInterface = new ethers.Interface(AvatarContractExtensionAbi);
-    const setAvatarNewWearingsEncodedFunction = extensionInterface.encodeFunctionData('setAvatarNewWearings', [Number(tokenId), wearablesToUnequip, wearablesToEquip, metadataDataValue.values[0]]);
-
-    const txPromise = (UPContract.connect(signer) as Contract).execute(OPERATION_CALL, // operation type = CREATE
-        targetContractAddress, // address zero
-        0, // amount to the fund the contract with when deploying
-        setAvatarNewWearingsEncodedFunction);
-    const tx = await txPromise;
-    await tx.wait();
-
-    return { success: true, value: undefined };
 }
 
 export async function CheckClaimApprove(drops: FeatureClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
