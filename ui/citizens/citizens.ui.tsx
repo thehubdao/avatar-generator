@@ -180,8 +180,10 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 	// Update selectedOption when switching between edit/marketplace modes
 	useEffect(() => {
 		if (isReady && selectedCategory) {
+			const initialCategory = exportData.attributes[0].id;
+			setSelectedCategory(initialCategory);
 			// Sync selectedOption with current exportData when mode changes
-			const currentFeature = exportData.attributes.find(attr => attr.id === selectedCategory);
+			const currentFeature = exportData.attributes.find(attr => attr.id === initialCategory);
 			if (currentFeature) {
 				setSelectedOption(currentFeature);
 			}

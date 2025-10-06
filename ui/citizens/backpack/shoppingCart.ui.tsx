@@ -90,7 +90,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
       shoppingCart.some(cartItem =>
         cartItem.detail === drop.type &&
         cartItem.val === drop.name
-      ) && drop.kind === FeatureKind.ClaimableDrop && (drop.requiredXP - (userXP?.xp || 0)) <= 0
+      ) && drop.kind === FeatureKind.ClaimableDrop && (drop.requiredXP - (userXP?.xp || 0)) <= 0 && !drop.isLimitReached
     ) as FeatureClaimableDrop[];
 
     setShoppingCartItems(items);

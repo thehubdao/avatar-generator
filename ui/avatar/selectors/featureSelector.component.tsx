@@ -1,6 +1,6 @@
 import { Swiper, SwiperRef, SwiperSlide, useSwiper } from 'swiper/react';
 import { FeatureBasic } from "../../../interfaces/common.interface";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import FeatureItemSelectorUI from "./featureItemSelector.ui";
 import { MouseEvent } from "react";
 import {Mousewheel} from "swiper/modules";
@@ -54,6 +54,12 @@ export default function FeatureSelector({ list, activeOpc, onCategoryChange }: F
     }
   };
 
+  useEffect(() => {
+    if (swiperRef.current && swiperRef.current.swiper) {
+      swiperRef.current.swiper.slideTo(0, 1000);
+    }
+  }, [activeOpc])
+
   return (
     <div className="relative h-fit">
       <Swiper
@@ -64,7 +70,7 @@ export default function FeatureSelector({ list, activeOpc, onCategoryChange }: F
         modules={[Mousewheel]}
         mousewheel={true}
         ref={swiperRef}
-        initialSlide={Math.floor(listLenght / 2)}
+        initialSlide={0}
         className='!pb-2 !pt-3 h-screen'
       >
         {
