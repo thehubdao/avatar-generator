@@ -28,19 +28,32 @@ export default function OptionCardUI({ option, isActive }: OptionCardUIProps) {
       <div className="relative bg-[#3d3d3d] w-full h-28 xl:h-[132px] dark:xl:h-[164px] flex justify-center items-center font-semibold">
         <GetImage url={option.thumb} alt={option.path} />
         {
-          option.kind === FeatureKind.ClaimableDrop && option.price != undefined && didMarketplaceMode ?
+          didMarketplaceMode && option.kind === FeatureKind.ClaimableDrop && option.price != undefined ?
             <>
               <div className="absolute inset-2 flex gap-2">
-                <div className={`${(!hasRequiredXP && option.requiredXP) ? 'hidden' : ''} bg-citizens-red w-fit h-fit text-[10px] px-2 py-1 rounded-full`}>
+                {/* PRICE */}
+                <div className={`${((!hasRequiredXP && option.requiredXP) || option.isLimitReached) ? 'hidden' : ''} bg-citizens-red w-fit h-fit text-[10px] px-2 py-1 rounded-full`}>
                   {option.price <= 0 ? 'FREE' : (option.price + ' ' + option.paymentType)}
                 </div>
-                {!hasRequiredXP && option.requiredXP ?
+                {option.isLimitReached ?
+                  // LIMIT REACHED
                   <div className="bg-citizens-yellow w-fit h-fit text-[10px] px-2 py-1 rounded-full text-citizens-dark">
-                    {option.requiredXP} XP
-                  </div> : null
+                    Limit is reached
+                  </div>
+                  :
+                  <>
+                  {/* REQUIRED EXPERIENCE */}
+                    {
+                      !hasRequiredXP && option.requiredXP ?
+                        <div className="bg-citizens-yellow w-fit h-fit text-[10px] px-2 py-1 rounded-full text-citizens-dark">
+                          {option.requiredXP} XP
+                        </div> : null
+                    }
+                  </>
                 }
               </div>
-              {!hasRequiredXP && option.requiredXP ?
+              {/* BLOCK ICON */}
+              {(!hasRequiredXP && option.requiredXP) || option.isLimitReached ?
                 <div className="absolute right-2 bottom-6 xl:bottom-2 w-5 h-5 bg-citizens-yellow flex justify-center pt-[2px] rounded-full">
                   <LockSVG />
                 </div> : null
@@ -58,6 +71,7 @@ export default function OptionCardUI({ option, isActive }: OptionCardUIProps) {
         }
       </div>
       <div className={`absolute bottom-0 xl:relative w-full h-4 xl:h-[38px] dark:xl:h-[42px] flex justify-center items-center ${isActive ? 'bg-accent' : 'bg-white'}`}>
+        {/* NAME */}
         <p className={`font-poppins font-medium text-[10px] xl:text-sm uppercase w-full px-2 text-center truncate ${isActive ? 'text-white' : 'text-gray-normal'}`}>{option.name}</p>
         {/* TAG */}
         {option.tag &&
