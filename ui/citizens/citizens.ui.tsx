@@ -378,7 +378,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 														isLoading={false}
 													/>
 												</div>
-												{!didEditMode && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />} {/* #Marketplace button */}
+												{/* !didEditMode && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} /> */} {/* #Marketplace button */}
 											</>
 
 										}
