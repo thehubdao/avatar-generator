@@ -21,7 +21,7 @@ export async function GetLuksoClaimableDrops(walletAddress: string): Promise<Res
                 const dropswithClaimAmountPromises = drops.value.map(async drop => {
                     const claimedAmount = await GetUserWearableClaimedAmount(walletAddress, drop);
                     const claimed = claimedAmount.success ? claimedAmount.value : 0;
-                    const isLimitReached  = claimed < drop.claimLimit;
+                    const isLimitReached  = claimed >= drop.claimLimit;
 
                     const newDrop: FeatureClaimableDrop = {
                         ...drop,
