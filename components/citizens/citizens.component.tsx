@@ -15,7 +15,6 @@ import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
 import { DropType } from "../../enums/lukso/common.enum";
-import { GetCollectionDocs } from "../../utils/firebase.util";
 import { useBlockchainProvider } from "../../contexts/BlockchainContext";
 import { AnyFeature, Campaign, CampaignDrops, PolygonCampaign, RootCampaign } from "../../types/citizens.type";
 import { Result } from "../../types/common.type";
@@ -391,7 +390,7 @@ export default function CitizensComponent() {
     }
 
     const claimableDropsResult = await GetLuksoClaimableDrops(walletAddress);
-    
+
     if (claimableDropsResult.success) {
       dispatch(setClaimableDrops(claimableDropsResult.value as CampaignDrops<Campaign>));
     }
