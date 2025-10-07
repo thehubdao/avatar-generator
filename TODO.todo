@@ -62,8 +62,8 @@ MARKETPLACE:
         ✔ Add empty item in empty category on mobile @done
         ✔ Add isLimitReached behavior to drops @done
         ✔ Fix error on selected feature when it is removed from cart from different feature category (baseExportData/exportData) @done
-        ✔ Remove items for cart when user removes them from edit mode feature selection
-        ✔ Remove kind claimableDrop from dummies and old LSP7 drops on DB once marketplace feature is ready
+        ✔ Remove items for cart when user removes them from edit mode feature selection @done
+        ✔ Remove kind claimableDrop from dummies and old LSP7 drops on DB once marketplace feature is ready @done
 
     TO CONSIDER:
         ☐ Add feature to save cart for later
