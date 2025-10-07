@@ -10,7 +10,7 @@ import { ExportInterface, MintUIResult } from "../../interfaces/common.interface
 import { SaveFile } from "../../utils/exporter.util";
 import { GetImageUrl, SetImageUrl, UploadLuksoMetadata, UploadPolygonMetadata, UploadSolanaMetadata } from "../../utils/metadata.util";
 import { ClaimAndSetAvatarNewWearings, GetCampaignsTokensMetadata, GetLuksoUserFeatures, SetAvatarNewWearings } from "../../utils/web3/lukso/contract.util";
-import { setCitizensMetadata, setSelectedCitizen, setTakingPhoto, setUserFeatures } from "../../store/citizensMetadataSlice";
+import { setCitizensMetadata, setSelectedCitizen, setTakingPhoto, setUserFeatures, setClaimableDrops } from "../../store/citizensMetadataSlice";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
@@ -30,6 +30,7 @@ import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../
 import { PHOTO_CAMERA_CONFIGS } from "../../constants/common.constant";
 import { CampaignBaseCombination, CampaignBaseUrl, FeatureKind } from "../../enums/citizens/common.enum";
 import { CampaignConstant, PolygonCampaignConstant } from "../../constants/campaign.constant";
+import { GetLuksoClaimableDrops } from "../../utils/web3/lukso/lukso.util";
 
 export default function CitizensComponent() {
   const dispatch = useAppDispatch();
@@ -383,10 +384,18 @@ export default function CitizensComponent() {
 
   async function fetchLuksoUserFeatures(walletAddress: string): Promise<Result<CampaignDrops<Campaign>>> {
     const userFeatures = await GetLuksoUserFeatures(walletAddress);
+    
     if (userFeatures.success) {
       dispatch(setUserFeatures(userFeatures.value));
       return { success: true, value: userFeatures.value };
     }
+
+    const claimableDropsResult = await GetLuksoClaimableDrops(walletAddress);
+    
+    if (claimableDropsResult.success) {
+      dispatch(setClaimableDrops(claimableDropsResult.value as CampaignDrops<Campaign>));
+    }
+
     LogError(Module.Citizens, 'Failed to fetch user features', userFeatures.errCode);
     return { success: false, errMessage: userFeatures.errMessage, errCode: userFeatures.errCode };
   }
