@@ -123,15 +123,22 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 			return;
 		}
 		
-		// Update selectedOption to reflect the current feature after reset
+		// Update shopping cart based on what was removed
 		if (type) {
+			// Remove only the specific item from cart
+			const updatedCart = shoppingCart.filter(item => item.detail !== type);
+			dispatch(setShoppingCart(updatedCart));
+			
 			// Find the base/original feature that was restored
 			const restoredFeature = exportData.attributes.find(attr => attr.id === type);
 			if (restoredFeature && type === selectedCategory) {
 				setSelectedOption(restoredFeature);
 			}
 		} else {
-			// If no type specified, reset all - update to current category's feature
+			// If no type specified, reset all - clear entire cart
+			dispatch(setShoppingCart([]));
+			
+			// Update to current category's feature
 			const currentFeature = exportData.attributes.find(attr => attr.id === selectedCategory);
 			setSelectedOption(currentFeature);
 		}
@@ -336,7 +343,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 																}} />
 																<Button label="Clean cart" light handleClick={async () => {
 																	await onMarketOptionRemove();
-																	dispatch(setShoppingCart([]));
+																	dispatch(setEditMode(false));
 																}} />
 															</div>
 														</div>
@@ -378,7 +385,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 														isLoading={false}
 													/>
 												</div>
-												{/* !didEditMode && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} /> */} {/* #Marketplace button */}
+												{!didEditMode && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />} {/* #Marketplace button */}
 											</>
 
 										}

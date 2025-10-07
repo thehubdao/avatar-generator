@@ -484,15 +484,13 @@ export default function CitizensComponent() {
     const oldAttributes: LuksoAttribute[] = []; //This array will contain the attributes to be unequipped
     const newAttributes: LuksoAttribute[] = []; //This array will contain the attributes to be equipped
 
-    const allDrops: FeatureDrop[] = await GetCollectionDocs(`campaign/${selectedCampaign}/drops`) as FeatureDrop[];
-
-    if (userFeatures && userFeatures[selectedCampaign as string] != null) newCombinationArray.forEach((newIndex, index) => {
+    if (userFeatures && userFeatures[selectedCampaign as string] != null || isMarketplaceMode) newCombinationArray.forEach((newIndex, index) => {
       const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
       const oldIndex = oldCombinationArray[index];
 
       if (!indexType) return undefined;
 
-      const newDrop: FeatureLuksoDrop = (isMarketplaceMode ? allDrops.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) : userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex))) as FeatureLuksoDrop; //Get the old feature to be unequipped and transferred back to wallet if not base feature
+      const newDrop: FeatureLuksoDrop = (isMarketplaceMode ? claimableDropsFeatureList.current.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) : userFeatures && userFeatures[currentCampaign] ? userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) : undefined) as FeatureLuksoDrop; //Get the old feature to be unequipped and transferred back to wallet if not base feature
 
       const key = CAMPAIGN_UNIVERSAL_PAGE_LABELS[
         currentCampaign
@@ -1005,7 +1003,6 @@ export default function CitizensComponent() {
       } else if (mintResult.errCode === Web3ErrorCode.InsufficientFunds) {
         return { success: false, message: "Insufficient funds" + mintResult.errMessage };
       }
-      else return { success: false, message: "We can't do the process right now, try again later!" };
     }
     return { success: false, message: "We can't do the process right now, try again later!" };
   }
@@ -1017,10 +1014,24 @@ export default function CitizensComponent() {
       return false;
     }
 
+    if (!singleInitData.current) {
+      LogError(Module.Citizens, 'Single init data is undefined in onResetCombination');
+      return false;
+    }
+
     if (type) {
       const initialAttribute = initialFeaturesData.current.find(attr => attr.val.type === type);
 
       if (initialAttribute) {
+        // Update singleInitData.current to reflect the reset
+        const currentFeaturesTypeIndex = singleInitData.current.features.findIndex(
+          (feature) => feature.val.type === type
+        );
+        
+        if (currentFeaturesTypeIndex !== -1) {
+          singleInitData.current.features[currentFeaturesTypeIndex].val = initialAttribute.val;
+        }
+
         await ChangeFeature(initialAttribute.val.id, initialAttribute.val.path, initialAttribute.val.name, type, campaignParams?.config.skin?.defColor ?? 'FFFFFF');
         addReplaceAttribute(initialAttribute.val.type, initialAttribute.val.name);
         return true;
@@ -1029,7 +1040,15 @@ export default function CitizensComponent() {
         return false;
       }
     } else {
-      for (const initialAttribute of initialFeaturesData.current) {
+      // Reset all features
+      for (let i = 0; i < initialFeaturesData.current.length; i++) {
+        const initialAttribute = initialFeaturesData.current[i];
+        
+        // Update singleInitData.current for each feature
+        if (singleInitData.current.features[i]) {
+          singleInitData.current.features[i].val = initialAttribute.val;
+        }
+        
         await ChangeFeature(initialAttribute.val.id, initialAttribute.val.path, initialAttribute.val.name, initialAttribute.val.type, campaignParams?.config.skin?.defColor ?? 'FFFFFF');
         addReplaceAttribute(initialAttribute.val.type, initialAttribute.val.name);
       }
