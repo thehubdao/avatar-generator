@@ -97,22 +97,37 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 		});
 	}
 
-	function onMarketOptionChange(id: string, path: string, name: string) {
+	async function onMarketOptionChange(id: string, path: string, name: string) {
+		// Check if clicking on the already selected option (deselect behavior)
+		if (selectedOption && selectedOption.id === id && selectedOption.val === name) {
+			// Deselect: Reset to base feature
+			await onMarketOptionRemove(selectedCategory);
+			return;
+		}
+
+		// Normal selection behavior
 		handleOptionChange(id, path, name, selectedCategory);
 		onSelectedOptionChange({
 			id: id,
 			val: name
 		});
-		// Always replace the item in the shopping cart if another exists with the same category
-		const updatedCart = [
-			...shoppingCart.filter(item => item.detail !== selectedCategory),
-			{
-				id,
-				val: name,
-				detail: selectedCategory
-			}
-		];
-		dispatch(setShoppingCart(updatedCart));
+
+		// Find the clicked feature to check if it's limited
+		const clickedFeature = marketplaceFeatureList?.find(f => f.id === id && f.name === name);
+		
+		// Only add to cart if it's not limit reached (preview mode)
+		if (!clickedFeature?.isLimitReached) {
+			// Always replace the item in the shopping cart if another exists with the same category
+			const updatedCart = [
+				...shoppingCart.filter(item => item.detail !== selectedCategory),
+				{
+					id,
+					val: name,
+					detail: selectedCategory
+				}
+			];
+			dispatch(setShoppingCart(updatedCart));
+		}
 	}
 
 	async function onMarketOptionRemove(type?: string) {

@@ -35,7 +35,7 @@ interface HudUIProps {
   // selectedFeature: string;
   // selectedAcc: string;
 
-  onOptionChange: (id: string, path: string, name: string) => void;
+  onOptionChange: (id: string, path: string, name: string) => void | Promise<void>;
   // changeFeature: (id: string, path: string, name: string) => void;
   // changeAccessory: (id: string, path: string, name: string) => void;
 
