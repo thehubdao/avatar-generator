@@ -62,7 +62,7 @@ export default function OptionCardUI({ option, isActive }: OptionCardUIProps) {
             :
             <>
               <div className="absolute inset-1 xl:inset-2 bg-citizens-bluedark w-fit h-fit text-[10px] xl:text-xs text-white px-2 py-1 rounded-full">
-                {option.kind === FeatureKind.Drop || option.kind === FeatureKind.ClaimableDrop ? `${option.balance} ${option.balance === 1 ? 'unit' : 'units'}` : 'BASE'}
+                {option.kind === FeatureKind.Drop || option.kind === FeatureKind.ClaimableDrop ? `${option.balance && option.balance > 0 ? option.balance : '0'} ${option.balance === 1 ? 'unit' : 'units'}` : 'BASE'}
               </div>
               <div className="absolute right-1 xl:right-2 top-1 xl:top-2">
                 <MedalSVG withCircle={isActive} />
