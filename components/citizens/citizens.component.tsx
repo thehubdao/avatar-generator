@@ -15,6 +15,7 @@ import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
 import { GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
 import { DropType } from "../../enums/lukso/common.enum";
+import { GetCollectionDocs } from "../../utils/firebase.util";
 import { useBlockchainProvider } from "../../contexts/BlockchainContext";
 import { AnyFeature, Campaign, CampaignDrops, PolygonCampaign, RootCampaign } from "../../types/citizens.type";
 import { Result } from "../../types/common.type";
@@ -71,7 +72,7 @@ export default function CitizensComponent() {
     exportData.current.attributes.push({ id: addId, val: addValue });
   }
 
-  async function getFeatureList(combination?: string, basecombination?: string, _userFeatures = userFeatures) {
+  async function getFeatureList(combination?: string, basecombination?: string, _userFeatures = userFeatures, _claimableDrops = claimableDrops) {
     if (selectedCitizen === null) {
       LogError(Module.Citizens, 'Missing selected citizen to get feature list!');
       return;
@@ -133,9 +134,9 @@ export default function CitizensComponent() {
 
     // Claimable drops now come directly from features with isClaimableDrop flag
     // Filter features that are claimable from the main feature list
-    if (!claimableDrops) return LogError(Module.Citizens, 'Missing claimable drops to get!');
+    if (!_claimableDrops) return LogError(Module.Citizens, 'Missing claimable drops to get!');
 
-    const claimableFeatures = claimableDrops[selectedCampaign].filter(
+    const claimableFeatures = _claimableDrops[selectedCampaign].filter(
       (f): f is Extract<AnyFeature, { kind: FeatureKind.ClaimableDrop }> =>
         f.kind === FeatureKind.ClaimableDrop
     );
@@ -383,20 +384,22 @@ export default function CitizensComponent() {
 
   async function fetchLuksoUserFeatures(walletAddress: string): Promise<Result<CampaignDrops<Campaign>>> {
     const userFeatures = await GetLuksoUserFeatures(walletAddress);
-    
     if (userFeatures.success) {
       dispatch(setUserFeatures(userFeatures.value));
       return { success: true, value: userFeatures.value };
     }
-
-    const claimableDropsResult = await GetLuksoClaimableDrops(walletAddress);
-
-    if (claimableDropsResult.success) {
-      dispatch(setClaimableDrops(claimableDropsResult.value as CampaignDrops<Campaign>));
-    }
-
     LogError(Module.Citizens, 'Failed to fetch user features', userFeatures.errCode);
     return { success: false, errMessage: userFeatures.errMessage, errCode: userFeatures.errCode };
+  }
+
+  async function fetchLuksoClaimableDrops(walletAddress: string): Promise<Result<CampaignDrops<Campaign>>> {
+    const claimableDropsResult = await GetLuksoClaimableDrops(walletAddress);
+    if (claimableDropsResult.success) {
+      dispatch(setClaimableDrops(claimableDropsResult.value as CampaignDrops<Campaign>));
+      return { success: true, value: claimableDropsResult.value };
+    }
+    LogError(Module.Citizens, 'Failed to fetch claimable drops', claimableDropsResult.errCode);
+    return { success: false, errMessage: claimableDropsResult.errMessage, errCode: claimableDropsResult.errCode };
   }
 
   async function fetchLuksoMetadata(walletAddress: string): Promise<boolean> {
@@ -588,13 +591,14 @@ export default function CitizensComponent() {
 
     const isMetadataFetchSuccess = await fetchLuksoMetadata(walletAddress);
     const userFeaturesResult = await fetchLuksoUserFeatures(walletAddress);
+    const claimableDropsResult = await fetchLuksoClaimableDrops(walletAddress);
 
-    if (!userFeaturesResult.success) {
-      LogError(Module.Citizens, 'Failed to fetch user features in saveLuksoCombination');
+    if (!userFeaturesResult.success || !claimableDropsResult.success) {
+      LogError(Module.Citizens, 'Failed to fetch user features or claimable drops in saveLuksoCombination');
       return false;
     }
 
-    await getFeatureList(newCitizenMetadata.combination, newCitizenMetadata.baseCombination, userFeaturesResult.value);
+    await getFeatureList(newCitizenMetadata.combination, newCitizenMetadata.baseCombination, userFeaturesResult.value, claimableDropsResult.value);
 
     return isMetadataFetchSuccess; // return true in success, false in failure
   }
