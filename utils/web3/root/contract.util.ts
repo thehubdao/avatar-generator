@@ -432,11 +432,15 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
     const builder = TransactionBuilder.sft(API, SIGNER, SESSION.eoa, Number(collectionId))
       .mint({
         serialNumbers: [{ tokenId: Number(tokenId), quantity: 1 }],
-        walletAddress: SESSION.futurepass
+        walletAddress: SESSION.eoa
       });
 
-    // Agregar FuturePass (pagando fees en ROOT)
-    await builder.addFuturePass(SESSION.futurepass);
+    // Agregar FuturePass y fee proxy (pagando fees en ROOT)
+    await builder.addFuturePassAndFeeProxy({
+      futurePass: SESSION.futurepass,
+      assetId: ROOT_TOKEN_ID, // Pagar fees en ROOT
+      slippage: 5,
+    });
 
     // Calcular gas fees
     const mintBigIntFees = await builder.getGasFees();
@@ -445,7 +449,7 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
     // Los fees vienen en ROOT (18 decimals)
     const feesInRoot = Number(mintBigIntFees.gasFee) / Math.pow(10, ROOT_DECIMALS);
 
-    // Verificar balance en ROOT
+    // Verificar balance en ROOT del FuturePass
     const { balance: walletBigIntBalance } = await builder.checkBalance({
       walletAddress: SESSION.futurepass,
       assetId: ROOT_TOKEN_ID // ROOT nativo
@@ -454,7 +458,7 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
 
     console.log('=== Fee Debug ===');
     console.log('Fees in ROOT:', feesInRoot);
-    console.log('ROOT Balance:', walletIntBalance);
+    console.log('ROOT Balance (FuturePass):', walletIntBalance);
 
     if (walletIntBalance < feesInRoot) {
       return {
