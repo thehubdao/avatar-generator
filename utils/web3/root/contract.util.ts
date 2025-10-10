@@ -60,6 +60,8 @@ export async function GetRootSftBalance(address: string, sftCollectionId: string
       ][];
     };
 
+    console.log(info)
+
     const firstOwned = info.ownedTokens.find(owned => {
       const owner = owned[0].toLowerCase();
       return (
@@ -245,7 +247,7 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
     const dropsCheckPromiseList = featureRootClaimableDrops.value.map(async (drop) => {
       if (!drop.collectionId) return null;
       const [collectionId, tokenId] = drop.collectionId.split(':');
-      const linkedBalanceResult = await GetSFTAssetLinks(collectionId, tokenId, address); 
+      const linkedBalanceResult = await GetSFTAssetLinks(collectionId, tokenId, address);
       console.log(linkedBalanceResult)
 
       if (!linkedBalanceResult.success) return null;
@@ -253,14 +255,14 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
       const linkedBalance = linkedBalanceResult.value.length;
 
       const onchainBalanceResult = await GetRootSftBalance(address, collectionId, tokenId);
-console.log(onchainBalanceResult)
+      console.log(onchainBalanceResult)
       if (!onchainBalanceResult.success) return null;
 
       const onchainBalance = onchainBalanceResult.value;
 
       drop.balance = onchainBalance - linkedBalance;
 
-      if(drop.balance === 0) return null;
+      if (drop.balance === 0) return null;
 
       return drop;
     });
@@ -295,11 +297,11 @@ export async function GetRootClaimableDrops(address: string): Promise<Result<Rec
     };
     const dropsCheckPromiseList = featureRootDrops.value.map(async (drop) => {
       console.log(drop);
-      if(!drop.collectionId) return null;
+      if (!drop.collectionId) return null;
       const [collectionId, tokenId] = drop.collectionId.split(':');
       const balance = await GetRootSftBalance(address, collectionId, tokenId);
 
-      if(!balance.success) return null;
+      if (!balance.success) return null;
 
       drop.isLimitReached = balance.value >= drop.claimLimit;
 
@@ -328,7 +330,7 @@ export async function EquipFeaturesOperations(parent_collection_id: string, pare
   const operations: Operation[] = [];
 
   for (const attribute of newAttributes) {
-    if(!attribute.collectionId) return { success: false, errMessage: 'Linked token collection ID not found', errCode: CommonErrorCode.InternalError };
+    if (!attribute.collectionId) return { success: false, errMessage: 'Linked token collection ID not found', errCode: CommonErrorCode.InternalError };
     const [collectionId, tokenId] = attribute.collectionId.split(':');
     const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId);
     if (!createAssetLinkOperation.success) return { success: false, errMessage: createAssetLinkOperation.errMessage, errCode: createAssetLinkOperation.errCode };
@@ -347,7 +349,7 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
     if (!linkedToken) return { success: false, errMessage: 'Linked token not found', errCode: CommonErrorCode.InternalError };
 
 
-    if(!linkedToken.collectionId) return { success: false, errMessage: 'Linked token collection ID not found', errCode: CommonErrorCode.InternalError };
+    if (!linkedToken.collectionId) return { success: false, errMessage: 'Linked token collection ID not found', errCode: CommonErrorCode.InternalError };
 
     const [collectionId, tokenId] = linkedToken.collectionId.split(':');
 
@@ -418,7 +420,7 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
     }
 
     const drop = dropsToClaim[0];
-    
+
     if (!drop.collectionId) {
       return { success: false, errMessage: 'Drop collection ID not found', errCode: CommonErrorCode.InternalError };
     }
@@ -427,9 +429,9 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
 
     // Crear builder para el SFT mint
     const builder = TransactionBuilder.sft(API, SIGNER, SESSION.eoa, Number(collectionId))
-      .mint({ 
-        serialNumbers: [{ tokenId: Number(tokenId), quantity: 1 }], 
-        walletAddress: SESSION.eoa 
+      .mint({
+        serialNumbers: [{ tokenId: Number(tokenId), quantity: 1 }],
+        walletAddress: SESSION.eoa
       });
 
     // Agregar FuturePass (pagando fees en ROOT)
@@ -438,26 +440,26 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
     // Calcular gas fees
     const mintBigIntFees = await builder.getGasFees();
     const ROOT_DECIMALS = 18;
-    
+
     // Los fees vienen en ROOT (18 decimals)
     const feesInRoot = Number(mintBigIntFees.gasFee) / Math.pow(10, ROOT_DECIMALS);
-    
+
     // Verificar balance en ROOT
-    const { balance: walletBigIntBalance } = await builder.checkBalance({ 
+    const { balance: walletBigIntBalance } = await builder.checkBalance({
       walletAddress: SESSION.futurepass,
       assetId: ROOT_TOKEN_ID // ROOT nativo
     });
     const walletIntBalance = Number(walletBigIntBalance) / Math.pow(10, ROOT_DECIMALS);
-    
+
     console.log('=== Fee Debug ===');
     console.log('Fees in ROOT:', feesInRoot);
     console.log('ROOT Balance:', walletIntBalance);
-    
+
     if (walletIntBalance < feesInRoot) {
-      return { 
-        success: false, 
-        errMessage: `Insufficient ROOT balance. You need approximately ${feesInRoot.toFixed(4)} ROOT in your FuturePass to claim this drop. Current balance: ${walletIntBalance.toFixed(4)} ROOT`, 
-        errCode: Web3ErrorCode.InsufficientFunds 
+      return {
+        success: false,
+        errMessage: `Insufficient ROOT balance. You need approximately ${feesInRoot.toFixed(4)} ROOT in your FuturePass to claim this drop. Current balance: ${walletIntBalance.toFixed(4)} ROOT`,
+        errCode: Web3ErrorCode.InsufficientFunds
       };
     }
 
