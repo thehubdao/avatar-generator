@@ -428,7 +428,7 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
     const [collectionId, tokenId] = drop.collectionId.split(':');
 
     // Crear builder para el SFT mint
-    const builder = TransactionBuilder.sft(API, SIGNER, SESSION.futurepass, Number(collectionId))
+    const builder = TransactionBuilder.sft(API, SIGNER, SESSION.eoa, Number(collectionId))
       .mint({
         serialNumbers: [{ tokenId: Number(tokenId), quantity: 1 }],
         walletAddress: SESSION.futurepass
