@@ -1,13 +1,13 @@
-import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER, BASE_ETH_NUMBER, ROOT_TOKEN_ID, SESSION } from '../../../constants/root/contract.constant';
+import { MINT_AMOUNT, NFT_COLLECTION_ID, API, SIGNER, ASSET_REGISTER_SDK, ROOT_SIGNER_PK, KEYRING_SIGNER, BASE_ETH_NUMBER, ROOT_TOKEN_ID, SESSION, XRP_ASSET_ID } from '../../../constants/root/contract.constant';
 import { TransactionBuilder } from '@futureverse/transact';
 import { Result } from '../../../types/common.type';
 import { CommonErrorCode, Module } from '../../../enums/common.enum';
 import { LogError } from '../../common.util';
 import '@therootnetwork/api-types';
-import { GetAssetData, StoreAssetData } from '../../firebase.util';
+import { GetAssetData, GetClaimableDrops, StoreAssetData } from '../../firebase.util';
 import { Blockchain } from '../../../enums/blockchain/common.enum';
 import { Campaign, RootCampaign } from '../../../types/citizens.type';
-import { CitizenMetadata, FeatureRootDrop, LinkableToken, MintingPriceData, RootMetadata } from '../../../interfaces/citizens.interface';
+import { CitizenMetadata, FeatureClaimableDrop, FeatureDrop, FeatureRootDrop, LinkableToken, MintingPriceData, RootMetadata } from '../../../interfaces/citizens.interface';
 import { MINTING_UI_DATA } from '../../../constants/mint.constant';
 import { CampaignDrops } from '../../../types/citizens.type';
 import { ARTM, Operation, STATEMENTS } from '@futureverse/artm';
@@ -43,12 +43,15 @@ export async function GetRootAssetTokenIds(address: string, collectionId: string
   }
 }
 
-export async function SftBalance(address: string, sftCollectionId: string, sftTokenId: string): Promise<Result<number>> {
+export async function GetRootSftBalance(address: string, sftCollectionId: string, sftTokenId: string): Promise<Result<number>> {
   try {
     const token = await API.query.sft.tokenInfo([
       sftCollectionId,
       sftTokenId,
     ]);
+
+    console.log(sftCollectionId, sftTokenId)
+
     const info = token.toHuman() as {
       tokenName: string;
       ownedTokens: [
@@ -230,21 +233,32 @@ export async function GetRootMintingPrice(): Promise<Result<MintingPriceData>> {
 
 export async function GetRootUserFeatureAssets(address: string, campaign: RootCampaign): Promise<Result<CampaignDrops<RootCampaign>>> {
   try {
-    const FeatureRootDrops = await GetCampaignDrops<FeatureRootDrop>(campaign);
-    if (!FeatureRootDrops.success) return FeatureRootDrops;
+    const featureRootClaimableDrops = await GetCampaignDrops<FeatureRootDrop>(campaign);
+    if (!featureRootClaimableDrops.success) return featureRootClaimableDrops;
 
-    if (FeatureRootDrops.value.length === 0) return {
+    if (featureRootClaimableDrops.value.length === 0) return {
       success: false,
       errMessage: "No drops found",
       errCode: CommonErrorCode.GetNoData
     };
-    const dropsCheckPromiseList = FeatureRootDrops.value.map(async (drop) => {
+    const dropsCheckPromiseList = featureRootClaimableDrops.value.map(async (drop) => {
+      if (!drop.collectionId) return null;
       const [collectionId, tokenId] = drop.collectionId.split(':');
-      const balance = await SftBalance(address, collectionId, tokenId);
+      const linkedBalanceResult = await GetSFTAssetLinks(collectionId, tokenId, address); 
 
-      if (!balance.success || balance.value===0) return null;
+      if (!linkedBalanceResult.success) return null;
 
-      drop.balance = balance.value;
+      const linkedBalance = linkedBalanceResult.value.length;
+
+      const onchainBalanceResult = await GetRootSftBalance(address, collectionId, tokenId);
+
+      if (!onchainBalanceResult.success) return null;
+
+      const onchainBalance = onchainBalanceResult.value;
+
+      drop.balance = onchainBalance - linkedBalance;
+
+      if(drop.balance === 0) return null;
 
       return drop;
     });
@@ -267,10 +281,52 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
   }
 }
 
+export async function GetRootClaimableDrops(address: string): Promise<Result<Record<RootCampaign, FeatureClaimableDrop[]>>> {
+  try {
+    const featureRootDrops = await GetClaimableDrops(RootCampaignConstant.Based);
+    if (!featureRootDrops.success) return featureRootDrops;
+
+    if (featureRootDrops.value.length === 0) return {
+      success: false,
+      errMessage: "No drops found",
+      errCode: CommonErrorCode.GetNoData
+    };
+    const dropsCheckPromiseList = featureRootDrops.value.map(async (drop) => {
+      console.log(drop);
+      if(!drop.collectionId) return null;
+      const [collectionId, tokenId] = drop.collectionId.split(':');
+      const balance = await GetRootSftBalance(address, collectionId, tokenId);
+
+      if(!balance.success) return null;
+
+      drop.isLimitReached = balance.value >= drop.claimLimit;
+
+      return drop;
+    });
+
+    const dropsCheck = await Promise.all(dropsCheckPromiseList);
+    const filteredDrops = dropsCheck.filter((dropCheck) => dropCheck !== null); //Filter out the drops that are null
+
+    return {
+      success: true,
+      value: { [RootCampaignConstant.Based]: filteredDrops as FeatureDrop[] as FeatureClaimableDrop[] }
+    };
+  } catch (e) {
+    const err = e as Error;
+    void LogError(Module.SolanaContractUtil, "Couldn't get user feature assets", e);
+    return {
+      success: false,
+      errMessage: err.message,
+      errCode: CommonErrorCode.InternalError
+    }
+  }
+}
+
 export async function EquipFeaturesOperations(parent_collection_id: string, parent_token_id: string, newAttributes: FeatureRootDrop[]): Promise<Result<Operation[]>> {
   const operations: Operation[] = [];
 
   for (const attribute of newAttributes) {
+    if(!attribute.collectionId) return { success: false, errMessage: 'Linked token collection ID not found', errCode: CommonErrorCode.InternalError };
     const [collectionId, tokenId] = attribute.collectionId.split(':');
     const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId);
     if (!createAssetLinkOperation.success) return { success: false, errMessage: createAssetLinkOperation.errMessage, errCode: createAssetLinkOperation.errCode };
@@ -287,6 +343,9 @@ export async function UnequipFeaturesOperations(parent_collection_id: string, pa
     const linkedToken = attribute;
 
     if (!linkedToken) return { success: false, errMessage: 'Linked token not found', errCode: CommonErrorCode.InternalError };
+
+
+    if(!linkedToken.collectionId) return { success: false, errMessage: 'Linked token collection ID not found', errCode: CommonErrorCode.InternalError };
 
     const [collectionId, tokenId] = linkedToken.collectionId.split(':');
 
@@ -342,6 +401,81 @@ export async function SetRootNewCombination(parent_tokenId: string, newAttribute
       errMessage: err.message,
       errCode: CommonErrorCode.InternalError
     }
+  }
+}
+
+export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Promise<Result<boolean>> {
+  try {
+    // Root Network: Solo permite 1 drop a la vez
+    if (dropsToClaim.length === 0) {
+      return { success: false, errMessage: 'No drops to claim', errCode: CommonErrorCode.InternalError };
+    }
+
+    if (dropsToClaim.length > 1) {
+      return { success: false, errMessage: 'Root Network only allows claiming 1 drop at a time', errCode: CommonErrorCode.InternalError };
+    }
+
+    const drop = dropsToClaim[0];
+    
+    if (!drop.collectionId) {
+      return { success: false, errMessage: 'Drop collection ID not found', errCode: CommonErrorCode.InternalError };
+    }
+
+    const [collectionId, tokenId] = drop.collectionId.split(':');
+
+    // Crear builder para el SFT mint
+    const builder = TransactionBuilder.sft(API, SIGNER, SESSION.eoa, Number(collectionId))
+      .mint({ 
+        serialNumbers: [{ tokenId: Number(tokenId), quantity: 1 }], 
+        walletAddress: SESSION.eoa 
+      });
+
+    // Agregar FuturePass y fee proxy (pagando fees en XRP)
+    await builder.addFuturePassAndFeeProxy({
+      futurePass: SESSION.futurepass,
+      assetId: XRP_ASSET_ID, // Pagar fees en XRP
+      slippage: 50, // Aumentar slippage para permitir mayor variación en el precio XRP/ROOT
+    });
+
+    // Calcular gas fees
+    const mintBigIntFees = await builder.getGasFees();
+    const XRP_DECIMALS = 6;
+    
+    // Los fees vienen en ROOT (18 decimals), necesitamos convertir a XRP
+    const feesInRoot = Number(mintBigIntFees.gasFee) / Math.pow(10, 18);
+    
+    // Estimar cuánto XRP se necesita (con el slippage del 50%)
+    const estimatedXrpNeeded = feesInRoot * 1.5; // Agregar 50% extra por slippage
+    
+    // Verificar balance en XRP
+    const { balance: walletBigIntBalance } = await builder.checkBalance({ 
+      walletAddress: SESSION.futurepass, 
+      assetId: XRP_ASSET_ID
+    });
+    const walletIntBalance = Number(walletBigIntBalance) / Math.pow(10, XRP_DECIMALS);
+    
+    console.log('=== Fee Proxy Debug ===');
+    console.log('Fees in ROOT:', feesInRoot);
+    console.log('Estimated XRP needed (with slippage):', estimatedXrpNeeded);
+    console.log('XRP Balance:', walletIntBalance);
+    
+    if (walletIntBalance < estimatedXrpNeeded) {
+      return { 
+        success: false, 
+        errMessage: `Insufficient XRP balance. You need approximately ${estimatedXrpNeeded.toFixed(4)} XRP in your FuturePass to claim this drop. Current balance: ${walletIntBalance.toFixed(4)} XRP`, 
+        errCode: Web3ErrorCode.InsufficientFunds 
+      };
+    }
+
+    // Firmar y enviar (el builder espera la confirmación automáticamente)
+    await builder.signAndSend();
+
+    return { success: true, value: true };
+  } catch (error) {
+    const e = error as Error;
+    throw e;
+    LogError(Module.RootContractUtil, 'Error claiming Root drop', e.message);
+    return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
   }
 }
 

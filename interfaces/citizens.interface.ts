@@ -142,6 +142,7 @@ export interface CampaignData extends Record<Campaign, CampaignWeb3Data> {
 }
 
 export interface FeatureDrop extends FeatureInterface {
+  collectionId?: string; //this is for Root
   contractAddress: string;
   isClaimableDrop: boolean;
   balance?: number; //Property set after type declaration
@@ -187,7 +188,6 @@ export interface FeaturePolygonDrop extends FeatureDrop {
 
 export interface FeatureRootDrop extends FeatureDrop {
   schemaPart: string;
-  collectionId: string;
   typeIndex: number;
   linkableTokens?: LinkableToken[];
 }

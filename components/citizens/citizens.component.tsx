@@ -13,7 +13,7 @@ import { ClaimAndSetAvatarNewWearings, GetCampaignsTokensMetadata, GetLuksoUserF
 import { setCitizensMetadata, setSelectedCitizen, setTakingPhoto, setUserFeatures, setClaimableDrops } from "../../store/citizensMetadataSlice";
 import { GetVrmUrl } from "../../utils/web3/citizens.util";
 import { ModelExtension } from "../../enums/export.enum";
-import { GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
+import { ClaimRootDrops, GetRootAssetsMetadata, GetRootUserFeatureAssets, MintRootAsset, SetRootNewCombination } from "../../utils/web3/root/contract.util";
 import { DropType } from "../../enums/lukso/common.enum";
 import { GetCollectionDocs } from "../../utils/firebase.util";
 import { useBlockchainProvider } from "../../contexts/BlockchainContext";
@@ -126,7 +126,7 @@ export default function CitizensComponent() {
         const key = `${feature.index}-${feature.type}`;
         mergedMap.set(key, feature);
       }
-      
+
       currentCombinationBaseFeatures = Array.from(mergedMap.values());
     }
 
@@ -814,7 +814,7 @@ export default function CitizensComponent() {
     return isMetadataFetchSuccess && isUserFeatureFetchSuccess;
   }
 
-  async function saveRootCombination(): Promise<boolean> {
+  async function saveRootCombination(dropsToClaim?: FeatureClaimableDrop[]): Promise<boolean> {
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
       .join('-') as string;
@@ -849,8 +849,8 @@ export default function CitizensComponent() {
 
     const newCombinationArray = newCombination.split('-');
     const oldCombinationArray = selectedCitizen.combination.split('-');
-    const newAttributes: FeatureRootDrop[] = [];
-    const oldAttributes: FeatureRootDrop[] = [];
+    const newAttributes: FeatureDrop[] = [];
+    const oldAttributes: FeatureDrop[] = [];
 
     if (userFeatures && userFeatures[selectedCampaign] != null) newCombinationArray.forEach((newIndex, index) => {
       const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
@@ -860,14 +860,22 @@ export default function CitizensComponent() {
 
       if (oldIndex == newIndex) return undefined;
 
-      const newAttribute = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) as FeatureRootDrop; //Get the new feature to be equipped
+      const newAttribute = dropsToClaim ? dropsToClaim.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) as FeatureDrop : userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) as FeatureRootDrop; //Get the new feature to be equipped
       const oldAttribute = (selectedCitizen.rawMetadata as RootMetadata).attributes?.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)); //Get the old feature to be unequipped
 
       if (newAttribute) newAttributes.push(newAttribute);
       if (oldAttribute) oldAttributes.push(oldAttribute);
     });
 
-    const setNewCombinationResult = await SetRootNewCombination(selectedCitizen.tokenId, newAttributes, oldAttributes);
+    if (isMarketplaceMode && dropsToClaim) {
+      const claimResult = await ClaimRootDrops(dropsToClaim);
+      if (!claimResult.success) {
+        LogError(Module.Citizens, 'Failed to claim drops on saveRootCombination', claimResult.errMessage);
+        return false;
+      }
+    }
+
+    const setNewCombinationResult = await SetRootNewCombination(selectedCitizen.tokenId, newAttributes as FeatureRootDrop[], oldAttributes as FeatureRootDrop[]);
 
     if (!setNewCombinationResult.success) {
       LogError(Module.Citizens, 'Failed to set new combination on saveRootCombination', setNewCombinationResult.errMessage);
@@ -880,7 +888,7 @@ export default function CitizensComponent() {
 
     const attributesUnion = [...(selectedCitizen.rawMetadata as RootMetadata).attributes, ...newAttributes];
 
-    const filteredAttributes = attributesUnion.filter((attr) => !oldAttributes.find((oldAttr) => oldAttr.collectionId === attr.collectionId));
+    const filteredAttributes = attributesUnion.filter((attr) => !oldAttributes.find((oldAttr) => oldAttr.collectionId === attr.collectionId)) as FeatureRootDrop[];
 
     const castedAttributes = filteredAttributes.map((attr) => {
       return {
@@ -926,9 +934,8 @@ export default function CitizensComponent() {
     return isSuccess;
   }
   async function onLuksoBuying() {
-    const signer = await browserProvider?.ethersProvider?.getSigner();
-    if (!signer) {
-      LogError(Module.Citizens, 'Signer is undefined in onBuying');
+    if (!walletAddress) {
+      LogError(Module.Citizens, 'Wallet address is undefined in onBuying');
       return false;
     }
     const _claimableDropsFeatureList = claimableDropsFeatureList.current;
@@ -959,7 +966,7 @@ export default function CitizensComponent() {
 
       claimableDrops.push(claimableDrop);
     }
-    const claimResult = await RequestClaimApprove(claimableDrops, signer.address);
+    const claimResult = await RequestClaimApprove(claimableDrops, walletAddress);
 
     if (!claimResult.success) {
       LogError(Module.Citizens, 'Failed to claim drop in onBuying', claimResult.errCode);
@@ -970,7 +977,36 @@ export default function CitizensComponent() {
   }
 
   async function onRootBuying() {
-    return false;
+    if (!walletAddress) {
+      LogError(Module.Citizens, 'Wallet address is undefined in onBuying');
+      return false;
+    }
+
+    const _claimableDropsFeatureList = claimableDropsFeatureList.current;
+
+    const claimableDrops: FeatureClaimableDrop[] = [];
+
+    for (let i = 0; i < shoppingCart.length; i++) {
+      const basicData = shoppingCart[i];
+
+      const claimableDropFound = _claimableDropsFeatureList.find(drop => drop.name === basicData.val);
+
+      if (!claimableDropFound) {
+        LogError(Module.Citizens, 'Claimable drop not found in claimable drops list in onBuying');
+        return false;
+      }
+
+      const claimableDrop: FeatureClaimableDrop = claimableDropFound;
+
+      if (!claimableDrop) {
+        LogError(Module.Citizens, 'Claimable drop not found in claimable drops list in onBuying');
+        return false;
+      }
+
+      claimableDrops.push(claimableDrop);
+    }
+
+    return saveRootCombination(claimableDrops);
   }
 
   async function onBuying(): Promise<boolean> {
@@ -1039,7 +1075,7 @@ export default function CitizensComponent() {
         const currentFeaturesTypeIndex = singleInitData.current.features.findIndex(
           (feature) => feature.val.type === type
         );
-        
+
         if (currentFeaturesTypeIndex !== -1) {
           singleInitData.current.features[currentFeaturesTypeIndex].val = initialAttribute.val;
         }
@@ -1055,12 +1091,12 @@ export default function CitizensComponent() {
       // Reset all features
       for (let i = 0; i < initialFeaturesData.current.length; i++) {
         const initialAttribute = initialFeaturesData.current[i];
-        
+
         // Update singleInitData.current for each feature
         if (singleInitData.current.features[i]) {
           singleInitData.current.features[i].val = initialAttribute.val;
         }
-        
+
         await ChangeFeature(initialAttribute.val.id, initialAttribute.val.path, initialAttribute.val.name, initialAttribute.val.type, campaignParams?.config.skin?.defColor ?? 'FFFFFF');
         addReplaceAttribute(initialAttribute.val.type, initialAttribute.val.name);
       }

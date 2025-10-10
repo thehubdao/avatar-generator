@@ -33,6 +33,7 @@ export const BASE_ETH_NUMBER = 10;
 export const BASE_DECIMALS_NUMBER = 18;
 
 export const ROOT_TOKEN_ID = 1;
+export const XRP_ASSET_ID = 2; // XRP asset ID on Root Network
 
 export let ASSET_REGISTER_SDK: AssetRegister;
 
