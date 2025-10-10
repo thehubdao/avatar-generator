@@ -399,6 +399,7 @@ export async function SetRootNewCombination(parent_tokenId: string, newAttribute
     return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
   } catch (e) {
     const err = e as Error;
+    console.log(err, "COULD NOT SAVE NEW COMBINATION")
     void LogError(Module.SolanaContractUtil, "Couldn't set new combination", e);
     return {
       success: false,
