@@ -246,13 +246,14 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
       if (!drop.collectionId) return null;
       const [collectionId, tokenId] = drop.collectionId.split(':');
       const linkedBalanceResult = await GetSFTAssetLinks(collectionId, tokenId, address); 
+      console.log(linkedBalanceResult)
 
       if (!linkedBalanceResult.success) return null;
 
       const linkedBalance = linkedBalanceResult.value.length;
 
       const onchainBalanceResult = await GetRootSftBalance(address, collectionId, tokenId);
-
+console.log(onchainBalanceResult)
       if (!onchainBalanceResult.success) return null;
 
       const onchainBalance = onchainBalanceResult.value;
