@@ -333,6 +333,7 @@ export async function EquipFeaturesOperations(parent_collection_id: string, pare
     if (!attribute.collectionId) return { success: false, errMessage: 'Linked token collection ID not found', errCode: CommonErrorCode.InternalError };
     const [collectionId, tokenId] = attribute.collectionId.split(':');
     const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId);
+    console.log(createAssetLinkOperation)
     if (!createAssetLinkOperation.success) return { success: false, errMessage: createAssetLinkOperation.errMessage, errCode: createAssetLinkOperation.errCode };
     operations.push(createAssetLinkOperation.value);
   }
@@ -367,7 +368,7 @@ export async function SetRootNewCombination(parent_tokenId: string, newAttribute
 
     const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, newAttributes);
     const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, oldAttributes);
-
+console.log(equipOperations, unequipOperations)
 
     if (!equipOperations.success || !unequipOperations.success) return { success: false, errMessage: 'Error on setting new combination. All operations must be successful', errCode: CommonErrorCode.InternalError };
 
