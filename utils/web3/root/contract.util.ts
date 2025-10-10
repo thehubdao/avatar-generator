@@ -430,39 +430,31 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
         walletAddress: SESSION.eoa 
       });
 
-    // Agregar FuturePass y fee proxy (pagando fees en XRP)
-    await builder.addFuturePassAndFeeProxy({
-      futurePass: SESSION.futurepass,
-      assetId: XRP_ASSET_ID, // Pagar fees en XRP
-      slippage: 50, // Aumentar slippage para permitir mayor variación en el precio XRP/ROOT
-    });
+    // Agregar FuturePass (pagando fees en ROOT)
+    await builder.addFuturePass(SESSION.futurepass);
 
     // Calcular gas fees
     const mintBigIntFees = await builder.getGasFees();
-    const XRP_DECIMALS = 6;
+    const ROOT_DECIMALS = 18;
     
-    // Los fees vienen en ROOT (18 decimals), necesitamos convertir a XRP
-    const feesInRoot = Number(mintBigIntFees.gasFee) / Math.pow(10, 18);
+    // Los fees vienen en ROOT (18 decimals)
+    const feesInRoot = Number(mintBigIntFees.gasFee) / Math.pow(10, ROOT_DECIMALS);
     
-    // Estimar cuánto XRP se necesita (con el slippage del 50%)
-    const estimatedXrpNeeded = feesInRoot * 1.5; // Agregar 50% extra por slippage
-    
-    // Verificar balance en XRP
+    // Verificar balance en ROOT
     const { balance: walletBigIntBalance } = await builder.checkBalance({ 
-      walletAddress: SESSION.futurepass, 
-      assetId: XRP_ASSET_ID
+      walletAddress: SESSION.futurepass,
+      assetId: ROOT_TOKEN_ID // ROOT nativo
     });
-    const walletIntBalance = Number(walletBigIntBalance) / Math.pow(10, XRP_DECIMALS);
+    const walletIntBalance = Number(walletBigIntBalance) / Math.pow(10, ROOT_DECIMALS);
     
-    console.log('=== Fee Proxy Debug ===');
+    console.log('=== Fee Debug ===');
     console.log('Fees in ROOT:', feesInRoot);
-    console.log('Estimated XRP needed (with slippage):', estimatedXrpNeeded);
-    console.log('XRP Balance:', walletIntBalance);
+    console.log('ROOT Balance:', walletIntBalance);
     
-    if (walletIntBalance < estimatedXrpNeeded) {
+    if (walletIntBalance < feesInRoot) {
       return { 
         success: false, 
-        errMessage: `Insufficient XRP balance. You need approximately ${estimatedXrpNeeded.toFixed(4)} XRP in your FuturePass to claim this drop. Current balance: ${walletIntBalance.toFixed(4)} XRP`, 
+        errMessage: `Insufficient ROOT balance. You need approximately ${feesInRoot.toFixed(4)} ROOT in your FuturePass to claim this drop. Current balance: ${walletIntBalance.toFixed(4)} ROOT`, 
         errCode: Web3ErrorCode.InsufficientFunds 
       };
     }
