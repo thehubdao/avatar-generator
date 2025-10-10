@@ -72,6 +72,7 @@ export async function GetRootSftBalance(address: string, sftCollectionId: string
     return { success: true, value: balance };
   } catch (error) {
     const e = error as Error;
+    console.log(e)
     LogError(Module.RootContractUtil, 'Error on getting Root Asset');
     return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
   }
