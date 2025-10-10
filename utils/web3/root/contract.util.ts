@@ -332,8 +332,8 @@ export async function EquipFeaturesOperations(parent_collection_id: string, pare
   for (const attribute of newAttributes) {
     if (!attribute.collectionId) return { success: false, errMessage: 'Linked token collection ID not found', errCode: CommonErrorCode.InternalError };
     const [collectionId, tokenId] = attribute.collectionId.split(':');
+    console.log(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId);
     const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId);
-    console.log(createAssetLinkOperation)
     if (!createAssetLinkOperation.success) return { success: false, errMessage: createAssetLinkOperation.errMessage, errCode: createAssetLinkOperation.errCode };
     operations.push(createAssetLinkOperation.value);
   }
@@ -368,7 +368,7 @@ export async function SetRootNewCombination(parent_tokenId: string, newAttribute
 
     const equipOperations = await EquipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, newAttributes);
     const unequipOperations = await UnequipFeaturesOperations(NFT_COLLECTION_ID, parent_tokenId, oldAttributes);
-console.log(equipOperations, unequipOperations)
+
 
     if (!equipOperations.success || !unequipOperations.success) return { success: false, errMessage: 'Error on setting new combination. All operations must be successful', errCode: CommonErrorCode.InternalError };
 
@@ -400,7 +400,6 @@ console.log(equipOperations, unequipOperations)
     return { success: false, errMessage: 'Transaction failed', errCode: CommonErrorCode.InternalError };
   } catch (e) {
     const err = e as Error;
-    console.log(err, "COULD NOT SAVE NEW COMBINATION")
     void LogError(Module.SolanaContractUtil, "Couldn't set new combination", e);
     return {
       success: false,
