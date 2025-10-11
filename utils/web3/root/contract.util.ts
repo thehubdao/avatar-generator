@@ -50,8 +50,6 @@ export async function GetRootSftBalance(address: string, sftCollectionId: string
       sftTokenId,
     ]);
 
-    console.log(sftCollectionId, sftTokenId)
-
     const info = token.toHuman() as {
       tokenName: string;
       ownedTokens: [
@@ -411,7 +409,6 @@ export async function SetRootNewCombination(parent_tokenId: string, newAttribute
 
 export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Promise<Result<boolean>> {
   try {
-    // Root Network: Solo permite 1 drop a la vez
     if (dropsToClaim.length === 0) {
       return { success: false, errMessage: 'No drops to claim', errCode: CommonErrorCode.InternalError };
     }
@@ -427,11 +424,11 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
     }
 
     const [collectionId, tokenId] = drop.collectionId.split(':');
-    
+
     const builder = TransactionBuilder.sft(API, SIGNER, SESSION.eoa, Number(collectionId))
       .mint({
         serialNumbers: [{ tokenId: Number(tokenId), quantity: 1 }],
-        walletAddress: SESSION.eoa
+        walletAddress: SESSION.futurepass
       });
 
     await builder.addFuturePassAndFeeProxy({
