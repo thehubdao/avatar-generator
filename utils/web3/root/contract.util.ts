@@ -58,8 +58,6 @@ export async function GetRootSftBalance(address: string, sftCollectionId: string
       ][];
     };
 
-    console.log(info)
-
     const firstOwned = info.ownedTokens.find(owned => {
       const owner = owned[0].toLowerCase();
       return (
@@ -72,7 +70,6 @@ export async function GetRootSftBalance(address: string, sftCollectionId: string
     return { success: true, value: balance };
   } catch (error) {
     const e = error as Error;
-    console.log(e)
     LogError(Module.RootContractUtil, 'Error on getting Root Asset');
     return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
   }
@@ -246,14 +243,12 @@ export async function GetRootUserFeatureAssets(address: string, campaign: RootCa
       if (!drop.collectionId) return null;
       const [collectionId, tokenId] = drop.collectionId.split(':');
       const linkedBalanceResult = await GetSFTAssetLinks(collectionId, tokenId, address);
-      console.log(linkedBalanceResult)
 
       if (!linkedBalanceResult.success) return null;
 
       const linkedBalance = linkedBalanceResult.value.length;
 
       const onchainBalanceResult = await GetRootSftBalance(address, collectionId, tokenId);
-      console.log(onchainBalanceResult)
       if (!onchainBalanceResult.success) return null;
 
       const onchainBalance = onchainBalanceResult.value;
@@ -294,7 +289,6 @@ export async function GetRootClaimableDrops(address: string): Promise<Result<Rec
       errCode: CommonErrorCode.GetNoData
     };
     const dropsCheckPromiseList = featureRootDrops.value.map(async (drop) => {
-      console.log(drop);
       if (!drop.collectionId) return null;
       const [collectionId, tokenId] = drop.collectionId.split(':');
       const balance = await GetRootSftBalance(address, collectionId, tokenId);
@@ -330,7 +324,6 @@ export async function EquipFeaturesOperations(parent_collection_id: string, pare
   for (const attribute of newAttributes) {
     if (!attribute.collectionId) return { success: false, errMessage: 'Linked token collection ID not found', errCode: CommonErrorCode.InternalError };
     const [collectionId, tokenId] = attribute.collectionId.split(':');
-    console.log(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId);
     const createAssetLinkOperation = CreateAssetLinkOperationMessage(attribute.schemaPart, parent_collection_id, parent_token_id, collectionId, tokenId);
     if (!createAssetLinkOperation.success) return { success: false, errMessage: createAssetLinkOperation.errMessage, errCode: createAssetLinkOperation.errCode };
     operations.push(createAssetLinkOperation.value);
@@ -445,7 +438,6 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
     if (walletIntBalance < mintIntFees) {
       return { success: false, errMessage: "Insufficient balance. You need " + Number(mintIntFees) + " ROOT in your Future Pass to claim this drop.", errCode: Web3ErrorCode.InsufficientFunds };
     }
-
 
     await builder.signAndSend();
 

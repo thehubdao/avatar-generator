@@ -80,7 +80,6 @@ export async function GetSFTAssetLinks(collection_id: string, token_id: string, 
         return { success: true, value: links };
     } catch (error) {
         const e = error as Error;
-        console.log(e, collection_id, token_id, walletAddress)
         LogError(Module.RootRegistryUtil, 'Error on getting SFT asset links');
         return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
     }
