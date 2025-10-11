@@ -427,54 +427,34 @@ export async function ClaimRootDrops(dropsToClaim: FeatureClaimableDrop[]): Prom
     }
 
     const [collectionId, tokenId] = drop.collectionId.split(':');
-
-    // Crear builder para el SFT mint
+    
     const builder = TransactionBuilder.sft(API, SIGNER, SESSION.eoa, Number(collectionId))
       .mint({
         serialNumbers: [{ tokenId: Number(tokenId), quantity: 1 }],
         walletAddress: SESSION.eoa
       });
 
-    // Agregar FuturePass y fee proxy (pagando fees en ROOT)
     await builder.addFuturePassAndFeeProxy({
       futurePass: SESSION.futurepass,
-      assetId: ROOT_TOKEN_ID, // Pagar fees en ROOT
+      assetId: ROOT_TOKEN_ID,
       slippage: 5,
     });
 
-    // Calcular gas fees
     const mintBigIntFees = await builder.getGasFees();
-    const ROOT_DECIMALS = 18;
+    const mintIntFees = Number(mintBigIntFees.gasFee) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
+    const { balance: walletBigIntBalance } = await builder.checkBalance({ walletAddress: SESSION.futurepass, assetId: ROOT_TOKEN_ID });
+    const walletIntBalance = Number(walletBigIntBalance) / Math.pow(BASE_ETH_NUMBER, mintBigIntFees.tokenDecimals);
 
-    // Los fees vienen en ROOT (18 decimals)
-    const feesInRoot = Number(mintBigIntFees.gasFee) / Math.pow(10, ROOT_DECIMALS);
-
-    // Verificar balance en ROOT del FuturePass
-    const { balance: walletBigIntBalance } = await builder.checkBalance({
-      walletAddress: SESSION.futurepass,
-      assetId: ROOT_TOKEN_ID // ROOT nativo
-    });
-    const walletIntBalance = Number(walletBigIntBalance) / Math.pow(10, ROOT_DECIMALS);
-
-    console.log('=== Fee Debug ===');
-    console.log('Fees in ROOT:', feesInRoot);
-    console.log('ROOT Balance (FuturePass):', walletIntBalance);
-
-    if (walletIntBalance < feesInRoot) {
-      return {
-        success: false,
-        errMessage: `Insufficient ROOT balance. You need approximately ${feesInRoot.toFixed(4)} ROOT in your FuturePass to claim this drop. Current balance: ${walletIntBalance.toFixed(4)} ROOT`,
-        errCode: Web3ErrorCode.InsufficientFunds
-      };
+    if (walletIntBalance < mintIntFees) {
+      return { success: false, errMessage: "Insufficient balance. You need " + Number(mintIntFees) + " ROOT in your Future Pass to claim this drop.", errCode: Web3ErrorCode.InsufficientFunds };
     }
 
-    // Firmar y enviar (el builder espera la confirmación automáticamente)
+
     await builder.signAndSend();
 
     return { success: true, value: true };
   } catch (error) {
     const e = error as Error;
-    throw e;
     LogError(Module.RootContractUtil, 'Error claiming Root drop', e.message);
     return { success: false, errMessage: e.message, errCode: CommonErrorCode.InternalError };
   }
