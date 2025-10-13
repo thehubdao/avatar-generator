@@ -7,7 +7,7 @@ import { FeatureInterface, SingleInterface } from "../../interfaces/api.interfac
 import { AGChangeCamPosition, AGChangeLookAtPosition } from "../../components/avatar/viewer.component";
 import { FilterList, LogError } from "../../utils/common.util";
 import { setEditMode, setMarketplaceMode, setShoppingCart } from "../../store/citizensMetadataSlice";
-import { RootCampaignConstant } from "../../constants/campaign.constant";
+import { CampaignConstant, RootCampaignConstant } from "../../constants/campaign.constant";
 import DetailsUI from "./common/details.ui";
 import SnackbarProvider from "./snackbar/snackbar.provider";
 import MintUI from "./common/mint.ui";
@@ -38,7 +38,7 @@ interface CitizensUIProps {
 	handleResetCombination: (type?: string) => Promise<boolean>;
 }
 
-export default function CitizensUI({ singleInitData, exportData, featureList, marketplaceFeatureList, isReady,   handleBuying,handleReady, handleExport, handleOptionChange, handleSaveCombination, handleMinting, handleResetCombination }: CitizensUIProps) {
+export default function CitizensUI({ singleInitData, exportData, featureList, marketplaceFeatureList, isReady, handleBuying, handleReady, handleExport, handleOptionChange, handleSaveCombination, handleMinting, handleResetCombination }: CitizensUIProps) {
 	const dispatch = useAppDispatch();
 	const campaignParams = useAppSelector(state => state.citizensMetadata.campaignParameters);
 	const shoppingCart = useAppSelector(state => state.citizensMetadata.shoppingCart);
@@ -108,7 +108,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 
 		// Find the clicked feature to check if it's limited
 		const clickedFeature = marketplaceFeatureList?.find(f => f.id === id && f.name === name);
-		
+
 		// For Root Network: Block selection if limit is reached
 		const isRootNetwork = selectedCampaign === RootCampaignConstant.Based;
 		if (isRootNetwork && clickedFeature?.isLimitReached) {
@@ -165,13 +165,13 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 			LogError(Module.Citizens, 'Error resetting combination in onMarketOptionRemove');
 			return;
 		}
-		
+
 		// Update shopping cart based on what was removed
 		if (type) {
 			// Remove only the specific item from cart
 			const updatedCart = shoppingCart.filter(item => item.detail !== type);
 			dispatch(setShoppingCart(updatedCart));
-			
+
 			// Find the base/original feature that was restored
 			const restoredFeature = exportData.attributes.find(attr => attr.id === type);
 			if (restoredFeature && type === selectedCategory) {
@@ -180,7 +180,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 		} else {
 			// If no type specified, reset all - clear entire cart
 			dispatch(setShoppingCart([]));
-			
+
 			// Update to current category's feature
 			const currentFeature = exportData.attributes.find(attr => attr.id === selectedCategory);
 			setSelectedOption(currentFeature);
@@ -318,7 +318,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 									}
 									}
 								/>
-								{ isTakingPhoto && <FlashUI /> }
+								{isTakingPhoto && <FlashUI />}
 							</div>
 							{
 								didMintingMode ?
@@ -428,7 +428,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 														isLoading={false}
 													/>
 												</div>
-												{!didEditMode && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />} {/* #Marketplace button */}
+												{!didEditMode && (selectedCampaign == CampaignConstant.Citizens || selectedCampaign == CampaignConstant.Creators) && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />} {/* #Marketplace button */}
 											</>
 
 										}
@@ -438,7 +438,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 					}
 					{
 						!isReady &&
-						<LoadingUI loadingText={loadingTexts[loadingTextIndex]}dataValidate={null} />
+						<LoadingUI loadingText={loadingTexts[loadingTextIndex]} dataValidate={null} />
 					}
 				</div>
 			}

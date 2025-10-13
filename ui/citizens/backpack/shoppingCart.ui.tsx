@@ -11,6 +11,8 @@ import Modal from "../common/modal.ui";
 import Button from "../common/button.ui";
 import GetImage from "../../../components/commons/getImage.component";
 import { FeatureKind } from "../../../enums/citizens/common.enum";
+import { Blockchain } from "../../../enums/blockchain/common.enum";
+import { CampaignConstant } from "../../../constants/campaign.constant";
 
 interface ShoppingCartUIProps {
   onRemoveItem: (type?: string) => Promise<void>;

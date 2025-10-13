@@ -568,13 +568,14 @@ export function useBlockchainWallet() {
     }
   }
 
-  //Remove Phantom from lukso login methods
   useEffect(() => {
     if (isModalOpen) {
       let tries = 0;
-      const maxTries = 200; // Más intentos para cubrir más tiempo
+      const maxTries = 300;
       const interval = setInterval(() => {
         try {
+          const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+          
           const containers = document.querySelectorAll('[class*="LoginMethodContainer"], [class*="WalletListContainer"]');
           containers.forEach(container => {
             const buttons = container.querySelectorAll('button');
@@ -586,14 +587,16 @@ export function useBlockchainWallet() {
                 const isBackpack = text.includes('Backpack');
                 const isSolana = text.includes('Solana');
                 const isMetamask = text.includes('MetaMask');
-                const isUniversal = text.includes('universal_profile');
+                const isUniversal = text.includes('universal_profile') || text.includes('Universal Profile');
+                const isWalletConnect = text.includes('WalletConnect') || text.includes('Wallet Connect');
 
                 if ((isPhantom || isBackpack) && !isSolana) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
                 }
-                if ((isUniversal || isPhantom || isBackpack || (isMetamask && isSolana)) && (selectedCampaign === CampaignConstant.Polygon)) {
+
+                if ((isUniversal || isPhantom || isBackpack || (isMetamask && isSolana) || isWalletConnect) && (selectedCampaign === CampaignConstant.Polygon)) {
                   button.style.display = 'none';
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
@@ -604,6 +607,14 @@ export function useBlockchainWallet() {
                   button.setAttribute('disabled', 'true');
                   button.style.pointerEvents = 'none';
                 }
+
+                if (isWalletConnect && (selectedCampaign === CampaignConstant.Citizens || selectedCampaign === CampaignConstant.Creators)) {
+                  if (!isMobile) {
+                    button.style.display = 'none';
+                    button.setAttribute('disabled', 'true');
+                    button.style.pointerEvents = 'none';
+                  }
+                }
               }
             });
           });
@@ -613,10 +624,10 @@ export function useBlockchainWallet() {
         }
         tries++;
         if (tries > maxTries) clearInterval(interval);
-      }, 100);
+      }, 50);
       return () => clearInterval(interval);
     }
-  }, [isModalOpen]);
+  }, [isModalOpen, selectedCampaign]);
 
   //Privy Logic
   useEffect(() => {
