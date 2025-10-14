@@ -68,6 +68,7 @@ export default function ShoppingCartUI({ onRemoveItem, onCheckOut }: ShoppingCar
     if (isSuccess) {
       // Clear cart directly without triggering reset functionality
       dispatch(setShoppingCart([]));
+      
       // Exit marketplace mode and return to homebase
       dispatch(setMarketplaceMode(false));
       showSnackbar(<p>Your purchase was successful!</p>);
