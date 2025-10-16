@@ -428,7 +428,7 @@ export default function CitizensUI({ singleInitData, exportData, featureList, ma
 														isLoading={false}
 													/>
 												</div>
-												{!didEditMode && (selectedCampaign == CampaignConstant.Citizens || selectedCampaign == CampaignConstant.Creators) && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />} {/* #Marketplace button */}
+												{!didEditMode && (selectedCampaign == CampaignConstant.Citizens || selectedCampaign == CampaignConstant.Creators || selectedCampaign == CampaignConstant.Polygon) && <ShoppingCartUI onRemoveItem={async (type) => await onMarketOptionRemove(type)} onCheckOut={() => handleBuying()} />} {/* #Marketplace button */}
 											</>
 
 										}

@@ -1,7 +1,7 @@
-import { Contract, TransactionResponse } from "ethers";
-import { CitizenMetadata, FeatureClaimableDrop, FeaturePolygonDrop } from "../../../interfaces/citizens.interface";
+import { Contract, TransactionResponse, JsonRpcSigner } from "ethers";
+import { CitizenMetadata, DropToClaim, FeatureClaimableDrop, FeaturePolygonDrop } from "../../../interfaces/citizens.interface";
 import { Result } from "../../../types/common.type";
-import { POLYGON_AVATAR_CONTRACT_ADDRESS, PROVIDER, SIGNER } from "../../../constants/polygon/contract.constant";
+import { POLYGON_AVATAR_CONTRACT_ADDRESS, PROVIDER, SIGNER, WEARABLE_ADMIN_SIGNER } from "../../../constants/polygon/contract.constant";
 import POLYGON_CONTRACT_ABI from "../../../constants/abi/polygon/PolygonContractABI.json";
 import POLYGON_WEARABLE_CONTRACT_ABI from "../../../constants/abi/polygon/WearableContractABI.json";
 import { LogError } from "../../common.util";
@@ -194,7 +194,7 @@ export async function GetPolygonUserFeatureAssets(address: string, campaign: Pol
         const dropsCheckPromiseList = FeaturePolygonDropsResult.value.map(async (drop) => {
             const wearableContract = new Contract(drop.contractAddress, POLYGON_WEARABLE_CONTRACT_ABI, PROVIDER); //We use avatar contract ABI as we only need the balance function from ERC721
             const tokenIds = await wearableContract.getTokenIdsByOwner(address);
-
+            console.log(tokenIds, drop.contractAddress);
             if (tokenIds.length === 0) return undefined;
             drop.tokenId = Number(tokenIds[0]);
             drop.balance = tokenIds.length;
@@ -294,5 +294,115 @@ export async function GetPolygonCollectionSupply(): Promise<Result<number>> {
     } catch (error) {
         LogError(Module.PolygonContractUtil, 'Error getting Polygon collection supply', error);
         return { success: false, errMessage: 'Error getting Polygon collection supply', errCode: CommonErrorCode.InternalError };
+    }
+}
+
+async function SignClaimMessageFromAdmin(wearableAddress: string, walletAddress: string): Promise<string> {
+    if (!WEARABLE_ADMIN_SIGNER) throw new Error('Wearable admin signer is not defined');
+    const wearableContract = new Contract(wearableAddress, POLYGON_WEARABLE_CONTRACT_ABI, PROVIDER);
+    const nonce = Number(await wearableContract.getUserNonce(walletAddress));
+
+    const message = wearableAddress.toLowerCase() + ':' + walletAddress.toLowerCase() + ':' + nonce.toString();
+
+    const signature = await WEARABLE_ADMIN_SIGNER.signMessage(message);
+
+    return signature;
+}
+
+export async function CheckPolygonClaimApprove(drops: FeatureClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
+    try {
+        const signaturePromises = drops.map(async (drop) => { return await SignClaimMessageFromAdmin(drop.contractAddress, walletAddress) });
+
+        const signatures = await Promise.all(signaturePromises);
+
+        const dropsToClaimPromises = drops.map(async (drop, index) => {
+            const wearableContract = new Contract(drop.contractAddress, POLYGON_WEARABLE_CONTRACT_ABI, PROVIDER);
+            const nextTokenId = Number(await wearableContract.totalSupply()) + 1;
+            
+            return {
+                wearableIndex: drop.index.toString(),
+                wearableType: drop.type,
+                wearableAddress: drop.contractAddress,
+                wearablePredictedTokenId: nextTokenId.toString(),
+                signature: signatures[index]
+            } as DropToClaim;
+        });
+
+        const dropsToClaim = await Promise.all(dropsToClaimPromises);
+
+        return { success: true, value: dropsToClaim };
+    } catch (error) {
+        LogError(Module.PolygonContractUtil, 'Error checking Polygon claim approve', error);
+        return { success: false, errMessage: 'Error checking Polygon claim approve', errCode: CommonErrorCode.InternalError };
+    }
+}
+
+export async function ClaimAndSetPolygonNewWearings(
+    dropsToClaim: DropToClaim[],
+    wearablesToUnequip: { wearableContract: string; wearableTokenId: number }[],
+    wearablesToEquip: { wearableContract: string; wearableTokenId: number }[],
+    tokenId: string,
+    newUri: string,
+    signer: JsonRpcSigner
+): Promise<Result<void>> {
+    try {
+        const avatarContract = new Contract(POLYGON_AVATAR_CONTRACT_ADDRESS, POLYGON_CONTRACT_ABI, signer);
+
+        const claimSignatures = dropsToClaim.map((drop) => drop.signature);
+        const predictedWearableTokenIds = dropsToClaim.map((drop) => {
+            const tokenId = Number(drop.wearablePredictedTokenId);
+            if (isNaN(tokenId)) {
+                throw new Error(`Invalid wearablePredictedTokenId: ${drop.wearablePredictedTokenId}`);
+            }
+            return tokenId;
+        });
+
+        const totalClaimPrice = await avatarContract.getClaimPrice(wearablesToEquip);
+
+        // Estimate gas first
+        const gasEstimate = await avatarContract.claimAndSetNewWearings.estimateGas(
+            tokenId,
+            claimSignatures,
+            predictedWearableTokenIds,
+            wearablesToUnequip,
+            wearablesToEquip,
+            newUri,
+            { value: totalClaimPrice }
+        );
+
+        // Add 20% buffer to gas estimate
+        const gasLimit = Math.ceil(Number(gasEstimate) * 1.2);
+
+        // Get current fee data
+        const feeData = await PROVIDER.getFeeData();
+
+        // Use EIP-1559 parameters if available, otherwise fallback to legacy gasPrice
+        const txParams: any = { gasLimit, value: totalClaimPrice };
+
+        if (feeData.maxFeePerGas && feeData.maxPriorityFeePerGas) {
+            // Use EIP-1559 gas parameters
+            txParams.maxFeePerGas = feeData.maxFeePerGas;
+            txParams.maxPriorityFeePerGas = feeData.maxPriorityFeePerGas;
+        } else if (feeData.gasPrice) {
+            // Fallback to legacy gas pricing
+            txParams.gasPrice = feeData.gasPrice;
+        }
+
+        const tx = await avatarContract.claimAndSetNewWearings(
+            tokenId,
+            claimSignatures,
+            predictedWearableTokenIds,
+            wearablesToUnequip,
+            wearablesToEquip,
+            newUri,
+            txParams
+        ) as TransactionResponse;
+
+        await tx.wait();
+
+        return { success: true, value: undefined };
+    } catch (error) {
+        LogError(Module.PolygonContractUtil, 'Failed to claim and set Polygon new wearings', error);
+        return { success: false, errMessage: 'Failed to claim and set Polygon new wearings', errCode: CommonErrorCode.InternalError };
     }
 }

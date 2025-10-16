@@ -23,7 +23,8 @@ import { Vector3 } from "three";
 import { AssetData } from "../../interfaces/firebase.interface";
 import { GetCampaignCitizensMetadata, MintKumiCitizen, SetNewCombination } from "../../utils/web3/solana/contract.util";
 import { Web3ErrorCode } from "../../enums/root/common.enum";
-import { GetCampaignsPolygonTokensMetadata, GetPolygonUserFeatureAssets, MintPolygonCitizen, SetPolygonNewCombination } from "../../utils/web3/polygon/contract.util";
+import { Blockchain } from "../../enums/blockchain/common.enum";
+import { ClaimAndSetPolygonNewWearings, GetCampaignsPolygonTokensMetadata, GetPolygonClaimableDrops, GetPolygonUserFeatureAssets, MintPolygonCitizen, SetPolygonNewCombination } from "../../utils/web3/polygon/contract.util";
 import { FeatureDrop, LuksoMetadata, SolanaAttribute, SolanaMetadata, LuksoAttribute, FeatureLuksoDrop, FeatureClaimableDrop, DropToClaim, PolygonMetadata, PolygonTrait, FeaturePolygonDrop, FeatureRootDrop, RootMetadata } from "../../interfaces/citizens.interface";
 import { StoreAssetData } from "../../utils/firebase.util";
 import { CAMPAIGN_UNIVERSAL_PAGE_LABELS, FILE_CAMPAIGN_NAME_LABEL } from "../../constants/labels.constant";
@@ -372,14 +373,14 @@ export default function CitizensComponent() {
     return false;
   }
 
-  async function fetchPolygonUserFeatureAssets(walletAddress: string, campaign: PolygonCampaign): Promise<boolean> {
+  async function fetchPolygonUserFeatureAssets(walletAddress: string, campaign: PolygonCampaign): Promise<Result<CampaignDrops<Campaign>>> {
     const result = await GetPolygonUserFeatureAssets(walletAddress, campaign);
     if (result.success) {
       dispatch(setUserFeatures(result.value));
-      return true;
+      return result;
     }
     LogError(Module.Citizens, 'Failed to fetch polygon user feature assets', result.errCode);
-    return false;
+    return result;
   }
 
   async function fetchLuksoUserFeatures(walletAddress: string): Promise<Result<CampaignDrops<Campaign>>> {
@@ -399,6 +400,16 @@ export default function CitizensComponent() {
       return { success: true, value: claimableDropsResult.value };
     }
     LogError(Module.Citizens, 'Failed to fetch claimable drops', claimableDropsResult.errCode);
+    return { success: false, errMessage: claimableDropsResult.errMessage, errCode: claimableDropsResult.errCode };
+  }
+
+  async function fetchPolygonClaimableDrops(walletAddress: string): Promise<Result<CampaignDrops<Campaign>>> {
+    const claimableDropsResult = await GetPolygonClaimableDrops(walletAddress);
+    if (claimableDropsResult.success) {
+      dispatch(setClaimableDrops(claimableDropsResult.value as CampaignDrops<Campaign>));
+      return { success: true, value: claimableDropsResult.value };
+    }
+    LogError(Module.Citizens, 'Failed to fetch Polygon claimable drops', claimableDropsResult.errCode);
     return { success: false, errMessage: claimableDropsResult.errMessage, errCode: claimableDropsResult.errCode };
   }
 
@@ -703,7 +714,7 @@ export default function CitizensComponent() {
 
   }
 
-  async function savePolygonCombination(): Promise<boolean> {
+  async function savePolygonCombination(dropsToClaim?: DropToClaim[]): Promise<boolean> {
     const newCombination = singleInitData.current?.features
       .map((feature) => feature.val.index)
       .join('-') as string;
@@ -736,51 +747,70 @@ export default function CitizensComponent() {
       return false;
     }
 
+    const oldCitizenMetadata = selectedCitizen.rawMetadata as PolygonMetadata;
+
     const newCitizenMetadata = { //Make a copy of the selected citizen metadata
       ...selectedCitizen,
       combination: newCombination,
       rawMetadata: {
-        ...selectedCitizen.rawMetadata,
+        ...oldCitizenMetadata,
         combination: newCombination,
+        traits: [] // Will be rebuilt
       } as PolygonMetadata
     }
 
-    const newCombinationArray = newCombination.split('-');
-    const oldCombinationArray = selectedCitizen.combination.split('-');
-    const newAttributes: FeaturePolygonDrop[] = [];
-    const oldAttributes: FeaturePolygonDrop[] = [];
-
-    const allDrops = featureList.current.filter((feature) => feature.kind === FeatureKind.Drop);
-
     const traits: PolygonTrait[] = [];
+    const oldCombinationArray = selectedCitizen.combination.split('-');
+    const newCombinationArray = newCombination.split('-');
+    const oldAttributes: FeaturePolygonDrop[] = [];
+    const newAttributes: FeaturePolygonDrop[] = [];
 
-    if (userFeatures && userFeatures[selectedCampaign] != null) newCombinationArray.forEach((newIndex, index) => {
-      const indexType = campaignParams?.features?.[index]?.displayName; //Get the type of the feature
-      const oldIndex = oldCombinationArray[index]; //Get the type of the feature
+    if (userFeatures && userFeatures[selectedCampaign] != null || isMarketplaceMode) newCombinationArray.forEach((newIndex, index) => {
+      const indexType = campaignParams?.features?.[index]?.displayName;
+      const oldIndex = oldCombinationArray[index];
 
       if (!indexType) return undefined;
 
-      const newDrop = userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) as FeaturePolygonDrop; //Get the new feature to be equipped
-      const oldDrop = allDrops.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(oldIndex)); //Get the old feature to be unequipped
+      const newDrop: FeaturePolygonDrop = (isMarketplaceMode 
+        ? claimableDropsFeatureList.current.find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) 
+        : userFeatures && userFeatures[currentCampaign] 
+          ? userFeatures[currentCampaign].find((feature: { type: string; index: number; }) => feature.type === indexType && feature.index === parseInt(newIndex)) 
+          : undefined) as FeaturePolygonDrop;
 
-      const traitIndex = newCitizenMetadata.rawMetadata.traits.findIndex((trait) => trait.trait_type.toLowerCase() === indexType.toLowerCase());
-      const oldTrait = newCitizenMetadata.rawMetadata.traits[traitIndex];
-
-      const trait = newDrop ? { //Add asset address to the attribute newAttribute exists
+      const newTrait: PolygonTrait = newDrop && newDrop.contractAddress ? {
         trait_type: indexType.toUpperCase(),
         value: newDrop.name.toUpperCase(),
-        wearableAddress: newDrop.contractAddress,
-        wearableTokenId: newDrop.tokenId
+        wearableAddress: dropsToClaim 
+          ? dropsToClaim.find(drop => drop.wearableIndex === newIndex && drop.wearableType === indexType)?.wearableAddress 
+          : newDrop.contractAddress,
+        wearableTokenId: dropsToClaim 
+          ? Number(dropsToClaim.find(drop => drop.wearableIndex === newIndex && drop.wearableType === indexType)?.wearablePredictedTokenId) 
+          : newDrop.tokenId
       } : {
         trait_type: indexType.toUpperCase(),
-        value: singleInitData.current?.features[index]?.val.name.toUpperCase() as string, //Set the feature name to the new feature index
+        value: singleInitData.current?.features[index]?.val.name.toUpperCase() as string,
       }
 
-      traits.push(trait);
+      const oldTrait: PolygonTrait | undefined = oldCitizenMetadata.traits.find(trait => trait.trait_type.toLowerCase() === indexType.toLowerCase());
 
-      if (oldIndex == newIndex) return undefined;
-      if (newDrop && newDrop.index != 0) newAttributes.push(newDrop);
-      if (oldDrop && oldDrop.index != 0) oldAttributes.push({ ...oldDrop, contractAddress: oldTrait.wearableAddress as string, tokenId: oldTrait.wearableTokenId as number });
+      traits.push(newTrait);
+
+      if (oldIndex === newIndex) return undefined;
+
+      if (newDrop && newDrop.contractAddress) {
+        newAttributes.push(newDrop);
+      }
+      
+      if (oldTrait && oldTrait.wearableAddress && oldTrait.wearableTokenId) {
+        oldAttributes.push({
+          index: parseInt(oldIndex),
+          type: indexType,
+          name: oldTrait.value,
+          contractAddress: oldTrait.wearableAddress as string,
+          tokenId: oldTrait.wearableTokenId as number,
+          kind: FeatureKind.Drop
+        } as FeaturePolygonDrop);
+      }
     });
 
     newCitizenMetadata.rawMetadata.traits = traits;
@@ -802,16 +832,68 @@ export default function CitizensComponent() {
 
     newCitizenMetadata.imageUrl = metadataObject.value.imageUrl;
 
-    const setNewCombinationResult = await SetPolygonNewCombination(selectedCitizen.tokenId, metadataObject.value.uri, oldAttributes, newAttributes);
+    const signer = await browserProvider?.ethersProvider?.getSigner();
 
-    if (!setNewCombinationResult.success) {
-      LogError(Module.Citizens, 'Failed to set new combination on savePolygonCombination', setNewCombinationResult.errMessage);
+    if (!signer) {
+      LogError(Module.Citizens, 'Signer is undefined in savePolygonCombination');
       return false;
     }
-    const isMetadataFetchSuccess = await fetchPolygonMetadata(walletAddress);
-    const isUserFeatureFetchSuccess = await fetchPolygonUserFeatureAssets(walletAddress, PolygonCampaignConstant.Polygon);
 
-    return isMetadataFetchSuccess && isUserFeatureFetchSuccess;
+    // Prepare wearables for contract call
+    const wearablesToUnequip = oldAttributes.map((attr) => ({
+      wearableContract: attr.contractAddress,
+      wearableTokenId: Number(attr.tokenId)
+    }));
+
+    // When claiming, we need to use the predicted token IDs
+    const wearablesToEquip = isMarketplaceMode && dropsToClaim 
+      ? dropsToClaim.map((drop) => ({
+          wearableContract: drop.wearableAddress,
+          wearableTokenId: Number(drop.wearablePredictedTokenId)
+        }))
+      : newAttributes.map((attr) => ({
+          wearableContract: attr.contractAddress,
+          wearableTokenId: Number(attr.tokenId)
+        }));
+
+    if (isMarketplaceMode && dropsToClaim) {
+      const claimResult = await ClaimAndSetPolygonNewWearings(
+        dropsToClaim,
+        wearablesToUnequip,
+        wearablesToEquip,
+        selectedCitizen.tokenId,
+        metadataObject.value.uri,
+        signer
+      );
+      if (!claimResult.success) {
+        LogError(Module.Citizens, 'Failed to claim and set Polygon new wearings', claimResult.errCode);
+        return false;
+      }
+    } else {
+      const setNewCombinationResult = await SetPolygonNewCombination(
+        selectedCitizen.tokenId,
+        metadataObject.value.uri,
+        oldAttributes,
+        newAttributes
+      );
+
+      if (!setNewCombinationResult.success) {
+        LogError(Module.Citizens, 'Failed to set new combination on savePolygonCombination', setNewCombinationResult.errMessage);
+        return false;
+      }
+    }
+    const isMetadataFetchSuccess = await fetchPolygonMetadata(walletAddress);
+    const userFeaturesResult = await fetchPolygonUserFeatureAssets(walletAddress, PolygonCampaignConstant.Polygon);
+    const claimableDropsResult = await fetchPolygonClaimableDrops(walletAddress);
+
+    if (!userFeaturesResult.success || !claimableDropsResult.success) {
+      LogError(Module.Citizens, 'Failed to fetch user features or claimable drops in savePolygonCombination');
+      return false;
+    }
+
+    await getFeatureList(newCitizenMetadata.combination, newCitizenMetadata.rawMetadata.baseCombination, userFeaturesResult.value, claimableDropsResult.value);
+
+    return isMetadataFetchSuccess;
   }
 
   async function saveRootCombination(dropsToClaim?: FeatureClaimableDrop[]): Promise<boolean> {
@@ -1009,6 +1091,49 @@ export default function CitizensComponent() {
     return saveRootCombination(claimableDrops);
   }
 
+  async function onPolygonBuying() {
+    if (!walletAddress) {
+      LogError(Module.Citizens, 'Wallet address is undefined in onPolygonBuying');
+      return false;
+    }
+    const _claimableDropsFeatureList = claimableDropsFeatureList.current;
+
+    if (!_claimableDropsFeatureList) {
+      LogError(Module.Citizens, 'Claimable drops are undefined in onPolygonBuying');
+      return false;
+    }
+
+    const claimableDrops: FeatureClaimableDrop[] = []
+
+    for (let i = 0; i < shoppingCart.length; i++) {
+      const basicData = shoppingCart[i];
+
+      const claimableDropFound = _claimableDropsFeatureList.find(drop => drop.name === basicData.val);
+
+      if (!claimableDropFound) {
+        LogError(Module.Citizens, 'Claimable drop not found in claimable drops list in onPolygonBuying');
+        return false;
+      }
+
+      const claimableDrop: FeatureClaimableDrop = claimableDropFound;
+
+      if (!claimableDrop) {
+        LogError(Module.Citizens, 'Claimable drop not found in claimable drops list in onPolygonBuying');
+        return false;
+      }
+
+      claimableDrops.push(claimableDrop);
+    }
+    const claimResult = await RequestClaimApprove(claimableDrops, walletAddress, Blockchain.Polygon);
+
+    if (!claimResult.success) {
+      LogError(Module.Citizens, 'Failed to claim drop in onPolygonBuying', claimResult.errCode);
+      return false;
+    }
+
+    return await savePolygonCombination(claimResult.value);
+  }
+
   async function onBuying(): Promise<boolean> {
     let isSuccess = false;
     if (selectedCampaign == CampaignConstant.Citizens || selectedCampaign == CampaignConstant.Creators) {
@@ -1016,6 +1141,9 @@ export default function CitizensComponent() {
     }
     else if (selectedCampaign == CampaignConstant.Based) {
       isSuccess = await onRootBuying();
+    }
+    else if (selectedCampaign == CampaignConstant.Polygon) {
+      isSuccess = await onPolygonBuying();
     }
     return isSuccess;
   }
