@@ -247,4 +247,3 @@ export const MINTING_TARGET_DATE = {
   [CampaignConstant.Based]: new Date('2025-09-03T21:00:00.000Z'),
   [CampaignConstant.Polygon]: new Date('2025-09-03T21:00:00.000Z'),
 };
-
