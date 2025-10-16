@@ -25,7 +25,7 @@ import { LeaderboardEntry } from '../types/leaderboard.type';
 import { GetLuksoClaimableDrops } from '../utils/web3/lukso/lukso.util';
 import { GetRootAssetsMetadata, GetRootClaimableDrops, GetRootCollectionSupply, GetRootMintingPrice, GetRootUserFeatureAssets } from '../utils/web3/root/contract.util';
 import { InitializeContractEssentialData } from '../constants/root/contract.constant';
-import { GetCampaignsPolygonTokensMetadata, GetPolygonCollectionSupply, GetPolygonUserFeatureAssets } from '../utils/web3/polygon/contract.util';
+import { GetCampaignsPolygonTokensMetadata, GetPolygonClaimableDrops, GetPolygonCollectionSupply, GetPolygonUserFeatureAssets } from '../utils/web3/polygon/contract.util';
 import { InitializePolygonContractEssentialData } from '../constants/polygon/contract.constant';
 import { NETWORK_CONFIGS } from '../constants/common.constant';
 import { CampaignConstant, PolygonCampaignConstant, RootCampaignConstant, SolanaCampaignConstant } from '../constants/campaign.constant';
@@ -231,6 +231,12 @@ export function useBlockchainWallet() {
     return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
   }
 
+  async function getPolygonClaimableDropsPromise(walletAddress: string): Promise<Result<Record<PolygonCampaign, FeatureClaimableDrop[]>>> {
+    const drops = await GetPolygonClaimableDrops(walletAddress);
+    if (drops.success) return { success: true, value: drops.value };
+    return { success: false, errMessage: drops.errMessage, errCode: drops.errCode };
+  }
+
   const fetchAppData = async () => {
     const walletAddress = userAddress;
 
@@ -300,9 +306,11 @@ export function useBlockchainWallet() {
     } else if (blockchainType === Blockchain.Polygon) {
       const polygonCitizensMetadataPromise = getPolygonTokensMetadataPromise(walletAddress);
       const polygonUserFeaturesPromise = getPolygonUserFeaturesPromise(walletAddress);
-      const [polygonCitizensMetadata, polygonUserFeatures] = await Promise.all([
+      const polygonClaimableDropsPromise = getPolygonClaimableDropsPromise(walletAddress);
+      const [polygonCitizensMetadata, polygonUserFeatures, polygonClaimableDrops] = await Promise.all([
         polygonCitizensMetadataPromise,
-        polygonUserFeaturesPromise
+        polygonUserFeaturesPromise,
+        polygonClaimableDropsPromise
       ]);
 
       if (polygonCitizensMetadata.success) {
@@ -352,6 +360,12 @@ export function useBlockchainWallet() {
         dispatch(setUserFeatures(polygonFeatures));
       } else {
         LogError(Module.Citizens, polygonUserFeatures.errMessage, polygonUserFeatures.errCode);
+      }
+
+      if (polygonClaimableDrops.success) {
+        dispatch(setClaimableDrops(polygonClaimableDrops.value as Record<Campaign, FeatureClaimableDrop[]>));
+      } else {
+        LogError(Module.Citizens, polygonClaimableDrops.errMessage, polygonClaimableDrops.errCode);
       }
     } else if (blockchainType === Blockchain.Solana) {
       const solanaCitizensMetadataPromise = getSolanaTokensMetadataPromise(walletAddress); // Get the citizens Solana metadata
