@@ -214,7 +214,7 @@ export default function CitizensComponent() {
     if (modelVRMPromise.success && modelGLBPromise.success) {
       const refinedModelVRM = await PostRequestVRMProcessFile(modelVRM as Blob)
       await UploadFile(new File([refinedModelVRM], `${combination}.vrm`), StorageLocation.AvatarVrms, undefined, selectedCampaign as string)
-      await SaveFile(refinedModelVRM, `${combination}.vrm`)
+/*       await SaveFile(refinedModelVRM, `${combination}.vrm`) */
     }
   }
 
