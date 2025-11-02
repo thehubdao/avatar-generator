@@ -59,14 +59,14 @@ export const NETWORK_CONFIGS = {
 // Configuraciones de cámara para captura de fotos por campaña
 export const PHOTO_CAMERA_CONFIGS = {
   [CampaignConstant.Citizens]: {
-    position: { x: 0, y: 1.6, z: 1 },
+    position: { x: 0, y: 1.6, z: 1.2 },
     target: { x: 0, y: 1.4, z: 0 },
     imageSize: 1024,
     fov: 50,
     aspect: 1.0
   },
   [CampaignConstant.Creators]: {
-    position: { x: 0, y: 1.6, z: 1 },
+    position: { x: 0, y: 1.6, z: 1.2 },
     target: { x: 0, y: 1.4, z: 0 },
     imageSize: 1024,
     fov: 50,
