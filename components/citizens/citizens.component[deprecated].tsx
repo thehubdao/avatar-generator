@@ -32,7 +32,6 @@ import Image from 'next/image';
 import SocialButtons from '../../ui/citizens/common/socialButtons.ui';
 import { Blockchain } from '../../enums/blockchain/common.enum';
 
-
 const COLLECTIONS: CitizensCollection[] = [
   {
     name: 'Lukso Citizens',
