@@ -26,7 +26,7 @@ export async function GetLuksoClaimableDrops(walletAddress: string): Promise<Res
                     const newDrop: FeatureClaimableDrop = {
                         ...drop,
                         claimedAmount: claimed,
-                        isLimitReached ,
+                        isLimitReached
                     };
 
                     return newDrop;

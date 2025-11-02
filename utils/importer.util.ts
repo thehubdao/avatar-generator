@@ -37,7 +37,6 @@ class ImporterUtil {
     loader.setKTX2Loader(ktx2Loader)
   }
 
-
   public GetGltfLoaderInstance(): GLTFLoader {
     if (this._gltfLoader == undefined) {
       this._gltfLoader = new GLTFLoader();

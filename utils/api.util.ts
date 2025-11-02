@@ -202,11 +202,11 @@ export async function GetUserXPData(address: string, blockchainType: Blockchain)
   return { success: true, value: data.data };
 }
 
-export async function RequestClaimApprove(drops: FeatureClaimableDrop[], walletAddress: string): Promise<Result<DropToClaim[]>> {
+export async function RequestClaimApprove(drops: FeatureClaimableDrop[], walletAddress: string, blockchain?: string): Promise<Result<DropToClaim[]>> {
   const requestResult = await fetch('/api/v1/drops', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ drops, walletAddress }),
+    body: JSON.stringify({ drops, walletAddress, blockchain }),
   });
 
   if (!requestResult.ok) return { success: false, errMessage: 'Failed to request claim approval', errCode: CommonErrorCode.PostNoData };

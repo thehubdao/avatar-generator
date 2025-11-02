@@ -156,6 +156,26 @@
       "type": "error"
     },
     {
+      "inputs": [],
+      "name": "InvalidPriceSent",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "InvalidSignature",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "MaxSupplyReached",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NoFundsToWithdraw",
+      "type": "error"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -191,6 +211,11 @@
         }
       ],
       "name": "StringsInsufficientHexLength",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "WearableContractNotApproved",
       "type": "error"
     },
     {
@@ -388,10 +413,21 @@
           "internalType": "bytes",
           "name": "signature",
           "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
         }
       ],
       "name": "claimWearable",
-      "outputs": [],
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
       "stateMutability": "payable",
       "type": "function"
     },
@@ -433,6 +469,32 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "getClaimPrice",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMaxSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "address",
@@ -454,6 +516,25 @@
     {
       "inputs": [],
       "name": "getTotalSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "getUserClaims",
       "outputs": [
         {
           "internalType": "uint256",
@@ -502,6 +583,19 @@
           "internalType": "bool",
           "name": "",
           "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "maxSupply",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -683,6 +777,19 @@
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "_maxSupply",
+          "type": "uint256"
+        }
+      ],
+      "name": "setMaxSupply",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "bytes4",
           "name": "interfaceId",
           "type": "bytes4"
@@ -788,7 +895,7 @@
           "type": "address"
         }
       ],
-      "name": "userNonces",
+      "name": "userClaims",
       "outputs": [
         {
           "internalType": "uint256",
@@ -797,6 +904,32 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "userNonce",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "withdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     }
   ]
