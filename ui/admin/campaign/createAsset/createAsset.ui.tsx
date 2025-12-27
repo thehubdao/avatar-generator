@@ -1,13 +1,15 @@
 import { MdKeyboardArrowDown } from "react-icons/md";
 import { CampaignParameters, FeatureBasic } from "../../../../interfaces/common.interface";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { useEffect, useRef, useState } from "react";
+import { Dispatch, useCallback, useEffect, useRef, useState } from "react";
 import { FirestoreLocation } from "../../../../enums/firebase.enum";
 import { setLocation, setType, setName, setReady } from "../../../../store/addAssetSlice";
 import AGButton from "../../../common/ag-button.component";
 import CreateAsset from "../../../../components/admin/assets/createAsset.component";
 import { AiOutlineCheckCircle, AiOutlineCloudUpload } from "react-icons/ai";
 import { IoImageOutline } from "react-icons/io5";
+import { MAXIMUM_FILE_SIZE, megabytes } from "../../../../constants/inputValues.constant";
+import { CheckFileSize } from "../../../../utils/input.util";
 
 export default function AddAssetUI() {
   const currentCampaignParams = useAppSelector(state => state.currentCampaign.parameters);
@@ -21,6 +23,10 @@ export default function AddAssetUI() {
   const [hasAssetFile, setHasAssetFile] = useState<boolean>(false);
   const [hasThumbFile, setHasThumbFile] = useState<boolean>(false);
   const [shouldShowCreateBtn, setShouldShowCreateBtn] = useState<boolean>(false);
+
+  // force re render
+  const [, updateState] = useState({});
+  const forceUpdate = useCallback(() => updateState({}), []);
 
   const dispatch = useAppDispatch();
 
@@ -57,21 +63,35 @@ export default function AddAssetUI() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasAssetFile, hasThumbFile, assetType, assetName, dbLocation])
 
-  function checkAssetFile() {
-    const fileLength = assetFile.current?.files?.length;
-    if (!fileLength || fileLength < 1) {
-      setHasAssetFile(false);
-    } else {
-      setHasAssetFile(true);
+  function checkFile(
+    refFile: HTMLInputElement | null,
+    maxFileSize: number,
+    maxFileScale: string,
+    fileScaleOnBytes: number,
+    setHasFileState: Dispatch<boolean>,
+  ) {
+    if (!refFile?.files) {
+      setHasFileState(false);
+      return;
     }
-  }
 
-  function checkThumbFile() {
-    const fileLength = thumbFile.current?.files?.length;
-    if (!fileLength || fileLength < 1) {
-      setHasThumbFile(false);
+    const fileLength = refFile.files.length;
+    const fileSize = refFile.files.item(0)?.size ?? 0;
+
+    if (fileLength < 1) {
+      setHasFileState(false);
     } else {
-      setHasThumbFile(true);
+      CheckFileSize(
+        fileSize,
+        maxFileSize,
+        {
+          label: maxFileScale,
+          bytes: fileScaleOnBytes,
+        },
+        setHasFileState,
+        refFile,
+        forceUpdate
+      );
     }
   }
 
@@ -147,7 +167,9 @@ export default function AddAssetUI() {
                 className="hidden"
                 accept=".glb"
                 ref={assetFile}
-                onChange={checkAssetFile}
+                onChange={() => {
+                  checkFile(assetFile.current, MAXIMUM_FILE_SIZE.model.sizeOnMb, MAXIMUM_FILE_SIZE.model.scale, megabytes, setHasAssetFile);
+                }}
               />
               {hasAssetFile && <div className="absolute w-11/12 flex gap-2 mt-3 whitespace-nowrap">
                 <p>File updated:</p>
@@ -159,7 +181,9 @@ export default function AddAssetUI() {
               {hasThumbFile
                 ? <AiOutlineCheckCircle className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none text-green-600" />
                 : <IoImageOutline className="absolute top-2/4 right-4 -translate-y-2/4 pointer-events-none" />}
-              <input type="file" id="createNewImageAsset" name="createNewImageAsset" className="hidden" accept="image/png, image/jpeg" ref={thumbFile} onChange={checkThumbFile} />
+              <input type="file" id="createNewImageAsset" name="createNewImageAsset" className="hidden" accept="image/png, image/jpeg" ref={thumbFile} onChange={() => {
+                checkFile(thumbFile.current, MAXIMUM_FILE_SIZE.image.sizeOnMb, MAXIMUM_FILE_SIZE.image.scale, megabytes, setHasThumbFile);
+              }} />
               {hasThumbFile && <div className="absolute w-11/12 flex gap-2 mt-3 whitespace-nowrap">
                 <p>File updated:</p>
                 <p className="truncate">{thumbFile.current?.files?.item(0)?.name}</p>

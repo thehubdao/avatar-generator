@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { Dispatch, useRef, useState } from "react";
 import GetImage from "../../../../components/commons/getImage.component";
 import UpdateAsset from "../../../../components/admin/assets/updateAsset.component";
 import AGButton from "../../../common/ag-button.component";
@@ -10,6 +10,8 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { fetchData } from "../../../../store/currentCampaignSlice";
 import { ShowModal } from "../../../../utils/modal.util";
 import { CampaignConfig } from "../../../../interfaces/common.interface";
+import { CheckFileSize } from "../../../../utils/input.util";
+import { MAXIMUM_FILE_SIZE, megabytes } from "../../../../constants/inputValues.constant";
 
 interface AssetCardProps {
   id: string;
@@ -43,19 +45,34 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
 
   const dispatch = useAppDispatch();
 
-  const checkAssetFile = () => {
-    const fileLength = currentFile.current?.files?.length;
-    const thumbLength = currentThumb.current?.files?.length;
-    if (!fileLength || fileLength < 1) {
-      setHasFile(false);
-    } else {
-      setHasFile(true);
+  function checkFile(
+    refFile: HTMLInputElement | null,
+    maxFileSize: number,
+    maxFileScale: string,
+    fileScaleOnBytes: number,
+    setHasFileState: Dispatch<boolean>,
+  ) {
+    if (!refFile?.files) {
+      setHasFileState(false);
+      return;
     }
 
-    if (!thumbLength || thumbLength < 1) {
-      setHasThumb(false);
+    const fileLength = refFile.files.length;
+    const fileSize = refFile.files.item(0)?.size ?? 0;
+
+    if (fileLength < 1) {
+      setHasFileState(false);
     } else {
-      setHasThumb(true);
+      CheckFileSize(
+        fileSize,
+        maxFileSize,
+        {
+          label: maxFileScale,
+          bytes: fileScaleOnBytes,
+        },
+        setHasFileState,
+        refFile,
+      );
     }
   }
 
@@ -115,17 +132,30 @@ export default function AssetCard({ id, name, thumb, location, updateDefaultAsse
                           className={`flex justify-center items-center my-2 w-9 shadow-flat-soft hover:shadow-flat-medium rounded-lg cursor-pointer transition-all duration-200 ${hasFile ? 'bg-green-400 text-white' : ''}`}
                           htmlFor={`editGLBAsset-${id}`}>
                           <AiOutlineCloudUpload />
-                          <input type="file" id={`editGLBAsset-${id}`} name={`editGLBAsset-${id}`} className="hidden" accept=".glb" ref={currentFile} onChange={() => {
-                            checkAssetFile();
-                          }} />
+                          <input
+                            type="file"
+                            id={`editGLBAsset-${id}`}
+                            name={`editGLBAsset-${id}`}
+                            className="hidden"
+                            accept=".glb"
+                            ref={currentFile}
+                            onChange={() => {
+                              checkFile(currentFile.current, MAXIMUM_FILE_SIZE.model.sizeOnMb, MAXIMUM_FILE_SIZE.model.scale, megabytes, setHasFile);
+                            }}
+                          />
                         </label>
                         <label
                           className={`flex justify-center items-center my-2 w-9 shadow-flat-soft hover:shadow-flat-medium rounded-lg cursor-pointer transition-all duration-200 ${hasThumb ? 'bg-green-400 text-white' : ''}`}
                           htmlFor={`editThumbAsset-${id}`}>
                           <IoImageOutline />
-                          <input type="file" id={`editThumbAsset-${id}`} name={`editThumbAsset-${id}`} className="hidden" accept="image/png, image/jpeg" ref={currentThumb} onChange={() => {
-                            checkAssetFile();
-                          }} />
+                          <input
+                            type="file"
+                            id={`editThumbAsset-${id}`}
+                            name={`editThumbAsset-${id}`}
+                            className="hidden" accept="image/png, image/jpeg"
+                            ref={currentThumb} onChange={() => {
+                              checkFile(currentThumb.current, MAXIMUM_FILE_SIZE.image.sizeOnMb, MAXIMUM_FILE_SIZE.image.scale, megabytes, setHasThumb);
+                            }} />
                         </label>
                       </form>
                       <div className="flex">

@@ -1,4 +1,4 @@
-import { MouseEvent, useRef, useState } from "react";
+import { Dispatch, MouseEvent, useRef, useState } from "react";
 import { RxAvatar } from "react-icons/rx";
 import AGButton from "../../../../common/ag-button.component";
 import {
@@ -15,6 +15,8 @@ import { BsLightbulb } from "react-icons/bs";
 import { CampaignConfig, ColorConfig, FeatureBasic, LookAtVectors } from "../../../../../interfaces/common.interface";
 import { CameraConfigOption, CampaignConfigOption } from "../../../../../enums/campaign.enum";
 import CameraConfigUI from "./cameraConfig.ui";
+import { CheckFileSize } from "../../../../../utils/input.util";
+import { MAXIMUM_FILE_SIZE, megabytes } from "../../../../../constants/inputValues.constant";
 
 interface ConfigCampaignProps {
   configData?: CampaignConfig;
@@ -62,6 +64,37 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
     setCamOption(camConfig.current?.value ?? '');
   }
 
+  function checkFile(
+    refFile: HTMLInputElement | null,
+    maxFileSize: number,
+    maxFileScale: string,
+    fileScaleOnBytes: number,
+    setHasFileState: Dispatch<boolean>,
+  ) {
+    if (!refFile?.files) {
+      setHasFileState(false);
+      return;
+    }
+
+    const fileLength = refFile.files.length;
+    const fileSize = refFile.files.item(0)?.size ?? 0;
+
+    if (fileLength < 1) {
+      setHasFileState(false);
+    } else {
+      CheckFileSize(
+        fileSize,
+        maxFileSize,
+        {
+          label: maxFileScale,
+          bytes: fileScaleOnBytes,
+        },
+        setHasFileState,
+        refFile,
+      );
+    }
+  }
+
   return (
     <>
       {/* AVATAR GENERAL INFO */}
@@ -104,7 +137,15 @@ export default function ConfigCampaignUI({ configData, featuresList, downloadAva
                         <p className="my-1 pr-2">Update Base</p>
                         <input type="file" id="avatarBaseFile" name="avatarBaseFile" className="hidden" accept=".glb"
                           ref={avatarBaseFile}
-                          onChange={() => setHasNewAvatarBase(!!avatarBaseFile.current?.files?.length)} />
+                          onChange={() => {
+                            checkFile(
+                              avatarBaseFile.current,
+                              MAXIMUM_FILE_SIZE.model.sizeOnMb,
+                              MAXIMUM_FILE_SIZE.model.scale,
+                              megabytes,
+                              setHasNewAvatarBase
+                            );
+                          }} />
                       </label>
                       {hasNewAvatarBase &&
                         <AGButton nm fit onClickEvent={() => uploadAvatarBase(avatarBaseFile.current?.files?.item(0) ?? undefined)}>
